@@ -15,6 +15,9 @@ import os
 from grid import MyGrid, MyContextGrid
 from matplotlib import mlab
 
+import wx.aui
+import wx.lib.agw.aui as aui
+
 # import wx # getting ready for the new namespace
 import wx.lib.wxpTag
 # import system modules
@@ -25,7 +28,7 @@ import numpy, math
 # and for plots!
 #from wxPython.lib.wxPlotCanvas import *
 #from wxPython.lib import wxPlotCanvas
-import wxPyPlot
+import wx.lib.plot as pyplot
 # set ip the xml modules
 from xml.dom import minidom
 #---------------------------------------------------------------------------
@@ -151,24 +154,24 @@ class History:
 class SaveDialog(wx.Dialog):
     def __init__(self, parent, id):
         wx.Dialog.__init__(self, parent, id, "Save Data?", \
-                                    size=(270+wind,100+wind), style = wxDIALOG_MODAL)
+                                    size=(270+wind,100+wind), style = wx.DIALOG_EX_METAL)
         icon = images.getIconIcon()
         self.SetIcon(icon)
         self.Choice = 'none'
-        vbox = wxBoxSizer(wxVERTICAL)
+        vbox = wxBoxSizer(wx.VERTICAL)
         l1 = wxStaticText(self, -1, 'You have unsaved Data')
         l2 = wxStaticText(self, -1, 'Do you wish to save it?')
-        vbox.Add(l1,1, wxALIGN_CENTER)
-        vbox.Add(l2,1, wxALIGN_CENTER)
-        hbox = wxBoxSizer(wxHORIZONTAL)
+        vbox.Add(l1,1, wx.ALIGN_CENTER)
+        vbox.Add(l2,1, wx.ALIGN_CENTER)
+        hbox = wxBoxSizer(wx.ALIGN_CENTER_HORIZONTAL)
         saveButton = wxButton(self, 331, "Save...", size=(BWidth, BHeight))
         discardButton = wxButton(self, 332, "Discard", size=(BWidth, BHeight))
         CancelButton = wxButton(self, 333, "Cancel", size=(BWidth, BHeight))
-        hbox.Add(saveButton, 0, wxALL, 5)
-        hbox.Add(discardButton, 0, wxALL, 5)
-        hbox.Add(CancelButton, 0, wxALL, 5)
+        hbox.Add(saveButton, 0, wx.ALL, 5)
+        hbox.Add(discardButton, 0, wx.ALL, 5)
+        hbox.Add(CancelButton, 0, wx.ALL, 5)
         vbox.Add(hbox,1)
-        self.SetAutoLayout(true)
+        self.SetAutoLayout(True)
         self.SetSizer(vbox)
         self.Layout()
         EVT_BUTTON(self, 331, self.SaveData)
@@ -178,17 +181,17 @@ class SaveDialog(wx.Dialog):
     def SaveData(self, event):
         frame.grid.Saved = True
         frame.grid.SaveAsDataASCII(self) # will it be ASCII or XML?
-        output.Close(true)
-        frame.Close(true)
-        self.Close(true)
+        output.Close(True)
+        frame.Close(True)
+        self.Close(True)
 
     def DiscardData(self, event):
-        output.Close(true)
-        frame.Close(true)
-        self.Close(true)
+        output.Close(True)
+        frame.Close(True)
+        self.Close(True)
 
     def CancelDialog(self, event):
-        self.Close(true)
+        self.Close(True)
 
 #---------------------------------------------------------------------------
 # creates an init file in the home directory of the user
@@ -420,17 +423,18 @@ class SimpleGrid(MyGrid):# wxGrid
         MyGrid.__init__(self, parent, -1)
         self.Saved = True
         self.moveTo = None
-        self.m_grid.SetGridLineColour(wx.Color(0,0,0))
+        ##self.m_grid.SetGridLineColour(wx.Color(0,0,0))
         #self.m_grid.CreateGrid(int(inits.get("gridcellsy")), \
         #                            int(inits.get("gridcellsx")))
         self.m_grid.SetColLabelAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
         for i in range(20):
             self.m_grid.SetColFormatFloat(i, 8, 4)
-        sel.m_grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE,self.AlterSaveStatus)
-        sel.m_grid.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
+        self.m_grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.AlterSaveStatus)
+        self.m_grid.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
         self.m_grid.wildcard = "Any File (*.*)|*.*|" \
                         "ASCII data format (*.dat)|*.dat|" \
                         "SalStat Format (*.xml)|*.xml"
+        pass
 
     def RangeSelected(self, event):
         if event.Selecting():
@@ -844,11 +848,11 @@ class DescChoiceBox(wx.CheckBox): # CheckListBox
 
     def SelectAllDescriptives(self, event):
         for i in range(len(DescList)):
-            self.Check(i, true)
+            self.Check(i, True)
 
     def SelectNoDescriptives(self, event):
         for i in range(len(DescList)):
-            self.Check(i, false)
+            self.Check(i, False)
 
 #---------------------------------------------------------------------------
 # base class for getting number of columns/rows to add
@@ -877,10 +881,10 @@ class EditGridFrame(wx.Dialog):
         colswanted = self.numnewcols.GetValue()
         rowswanted = self.numnewRows.GetValue()
         frame.grid.AddNCells(colswanted, rowswanted)
-        self.Close(true)
+        self.Close(True)
 
     def CancelButtonPressed(self, event):
-        self.Close(true)
+        self.Close(True)
 
 #---------------------------------------------------------------------------
 # grid preferences - set row & col sizes
@@ -906,13 +910,13 @@ class GridPrefs(wx.Dialog):
         EVT_BUTTON(self, 322, self.OnCloseGridPrefs)
 
     def OkayButtonPressed(self, event):
-        frame.grid.m_grid.SetDefaultColSize(self.colwidth.GetValue(), TRUE)
-        frame.grid.m_grid.SetDefaultRowSize(self.rowheight.GetValue(), TRUE)
+        frame.grid.m_grid.SetDefaultColSize(self.colwidth.GetValue(), True)
+        frame.grid.m_grid.SetDefaultRowSize(self.rowheight.GetValue(), True)
         frame.grid.m_grid.ForceRefresh()
-        self.Close(true)
+        self.Close(True)
 
     def OnCloseGridPrefs(self, event):
-        self.Close(true)
+        self.Close(True)
 
 #---------------------------------------------------------------------------
 # shows the scripting window for entering Python syntax commands
@@ -937,7 +941,7 @@ class ScriptFrame(wx.Frame):
         CopyIcon = images.getCopyBitmap()
         PasteIcon = images.getPasteBitmap()
         HelpIcon = images.getHelpBitmap()
-        toolBar = self.CreateToolBar(wxTB_HORIZONTAL|wxNO_BORDER| \
+        toolBar = self.CreateToolBar(wx.TB_HORIZONTAL|wxNO_BORDER| \
                                     wxTB_3DBUTTONS)
         toolBar.AddSimpleTool(710, GoIcon,"Run Script","Run the Script")
         toolBar.AddSimpleTool(711, OpenIcon,"Open","Open Script from a File")
@@ -978,7 +982,7 @@ class ScriptFrame(wx.Frame):
 
     def ShowHelp(self, event):
         win = AboutFrame(frame, -1, 2)
-        win.Show(true)
+        win.Show(True)
 
     # the open script method needs work
     def OpenScript(self, event):
@@ -1022,15 +1026,15 @@ class AboutFrame(wx.Frame):
         BackIcon = images.getLeftBitmap()
         ForeIcon = images.getRightBitmap()
         HomeIcon = images.getHomeBitmap()
-        toolBar = self.CreateToolBar(wxTB_HORIZONTAL|wxNO_BORDER| \
-                                    wxTB_3DBUTTONS)
+        toolBar = self.CreateToolBar(wx.TB_HORIZONTAL | \
+                                    wx.TB_3DBUTTONS)
         toolBar.AddSimpleTool(210, BackIcon, "Back","")
         toolBar.AddSimpleTool(211, ForeIcon, "Forward","")
         toolBar.AddSimpleTool(212, HomeIcon, "Home","")
         toolBar.SetToolBitmapSize((24,24))
         toolBar.Realize()
         self.SetToolBar(toolBar)
-        self.tabs = wxNotebook(self, -1)
+        self.tabs = wx.Notebook(self, -1)
         self.wizard = MyHtmlWindow(self.tabs, -1)
         self.topics = MyHtmlWindow(self.tabs, -1)
         self.scripting = MyHtmlWindow(self.tabs, -1)
@@ -1045,9 +1049,9 @@ class AboutFrame(wx.Frame):
         self.tabs.AddPage(peeps, "Peeps")
         peeps.LoadPage('help/about.html')
         self.tabs.SetSelection(tabnumber)
-        EVT_TOOL(self, 210, self.GoBackPressed)
-        EVT_TOOL(self, 211, self.GoForwardPressed)
-        EVT_TOOL(self, 212, self.GoHomePressed)
+        self.Bind(wx.EVT_TOOL, self.GoBackPressed, id =  210)
+        self.Bind(wx.EVT_TOOL, self.GoForwardPressed, id =  211)
+        self.Bind(wx.EVT_TOOL, self.GoHomePressed, id =212)
 
     def GoBackPressed(self, event):
         pagenum = self.tabs.GetSelection()
@@ -1071,7 +1075,7 @@ class AboutFrame(wx.Frame):
             self.topics.LoadPage('help/index.html')
 
     def OnCloseAbout(self, event):
-        self.Close(true)
+        self.Close(True)
 
     def OnCloseWindow(self, event):
         self.Destroy()
@@ -1094,7 +1098,7 @@ class VariablesFrame(wx.Dialog):
                                     wxSize(BWidth, BHeight))
         self.vargrid = wxGrid(self,-1,size=(480,130),pos=(10,10))
         self.vargrid.SetRowLabelSize(120)
-        self.vargrid.SetDefaultRowSize(27, true)
+        self.vargrid.SetDefaultRowSize(27, True)
         maxcols = frame.grid.m_grid.GetNumberCols()
         self.vargrid.CreateGrid(3,maxcols)
         for i in range(maxcols):
@@ -1119,17 +1123,17 @@ class VariablesFrame(wx.Dialog):
                 except ZeroDivisionError:
                     pass
         frame.grid.m_grid.ForceRefresh()
-        self.Close(true)
+        self.Close(True)
 
     def OnCloseVariables(self, event):
-        self.Close(true)
+        self.Close(True)
 
 #---------------------------------------------------------------------------
 # base html window class
-class MyHtmlWindow(wx.HtmlListBox):
+class MyHtmlWindow(wx.html.HtmlWindow):
     def __init__(self, parent, id):
-        wxHtmlWindow.__init__(self, parent, id)
-        wxImage_AddHandler(wxJPEGHandler()) # just in case!
+        wx.html.HtmlWindow.__init__(self, parent, id)
+        ##wx.Image_AddHandler(wxJPEGHandler()) # just in case!
         self.WholeOutString = ''
         self.Saved = True
 
@@ -1203,11 +1207,11 @@ class OutputSheet(wx.Frame):
         #set icon for frame (needs x-platform separator!
         icon = images.getIconIcon()
         self.SetIcon(icon)
-        file_menu = wxMenu()
-        edit_menu = wxMenu()
-        pref_menu = wxMenu()
-        help_menu = wxMenu()
-        file_menu.Append(ID_OFILE_NEW, '&New')
+        file_menu = wx.Menu()
+        edit_menu = wx.Menu()
+        pref_menu = wx.Menu()
+        help_menu = wx.Menu()
+        file_menu.Append(ID_FILE_NEW, '&New')
         file_menu.Append(ID_OFILE_OPEN, '&Open...')
         file_menu.Append(ID_OFILE_SAVE, '&Save')
         file_menu.Append(ID_OFILE_SAVEAS, 'Save &As...')
@@ -1221,7 +1225,7 @@ class OutputSheet(wx.Frame):
         help_menu.Append(ID_HELP_TOPICS, '&Topics...')
         help_menu.Append(ID_HELP_LICENCE, '&Licence...')
         help_menu.Append(ID_HELP_ABOUT, '&About...')
-        omenuBar = wxMenuBar()
+        omenuBar = wx.MenuBar()
         omenuBar.Append(file_menu, '&File')
         omenuBar.Append(edit_menu, '&Edit')
         omenuBar.Append(pref_menu, '&Pref')
@@ -1233,8 +1237,8 @@ class OutputSheet(wx.Frame):
         SaveAsIcon = images.getSaveAsBitmap()
         PrintIcon = images.getPrintBitmap()
         HelpIcon = images.getHelpBitmap()
-        toolBar = self.CreateToolBar(wxTB_HORIZONTAL|wxNO_BORDER| \
-                                    wxTB_3DBUTTONS)
+        toolBar = self.CreateToolBar(wx.TB_HORZ_LAYOUT| \
+                                    wx.TB_3DBUTTONS)
         toolBar.AddSimpleTool(401, NewIcon,"New","New Data Sheet in \
                                     separate window")
         toolBar.AddSimpleTool(402, OpenIcon,"Open","Open Data from a File")
@@ -1251,27 +1255,27 @@ class OutputSheet(wx.Frame):
         self.SetStatusText('SalStat Statistics')
         self.htmlpage = MyHtmlWindow(self, -1)
         self.htmlpage.Addhtml('<P><B>SalStat Statistics</B></P>')
-        self.printer = wxHtmlEasyPrinting()
-        EVT_MENU(self, ID_OFILE_SAVEAS, self.htmlpage.SaveHtmlPage)
-        EVT_CLOSE(self, self.DoNothing)
-        EVT_MENU(self, ID_OFILE_NEW, self.ClearAll)
-        EVT_MENU(self, ID_OFILE_PRINT, self.PrintOutput)
-        EVT_MENU(self, ID_OFILE_OPEN, self.htmlpage.LoadHtmlPage)
-        EVT_MENU(self, ID_HELP_ABOUT, frame.GoHelpAboutFrame)
-        EVT_MENU(self, ID_HELP_WIZARD, frame.GoHelpWizardFrame)
-        EVT_MENU(self, ID_HELP_TOPICS, frame.GoHelpTopicsFrame)
-        EVT_MENU(self, ID_HELP_LICENCE, frame.GoHelpLicenceFrame)
-        EVT_TOOL(self, 401, self.ClearAll)
-        EVT_TOOL(self, 402, self.htmlpage.LoadHtmlPage)
-        EVT_TOOL(self, 403, self.htmlpage.SaveHtmlPage)
-        EVT_TOOL(self, 404, self.PrintOutput)
-        EVT_TOOL(self, 405, frame.GoHelpTopicsFrame)
+        ##self.printer = wx.html.html()
+        self.Bind(wx.EVT_MENU, self.htmlpage.SaveHtmlPage, id = ID_FILE_SAVEAS)
+        ##EVT_CLOSE(self, self.DoNothing)
+        self.Bind(wx.EVT_MENU, self.ClearAll, id = ID_FILE_NEW, )
+        self.Bind(wx.EVT_MENU, self.PrintOutput, id = ID_OFILE_PRINT)
+        self.Bind(wx.EVT_MENU,  self.htmlpage.LoadHtmlPage, id = ID_FILE_OPEN)
+        self.Bind(wx.EVT_MENU, frame.GoHelpAboutFrame, id = ID_HELP_ABOUT)
+        self.Bind(wx.EVT_MENU, frame.GoHelpWizardFrame, id =  ID_HELP_WIZARD)
+        self.Bind(wx.EVT_MENU, frame.GoHelpTopicsFrame, id = ID_HELP_TOPICS)
+        self.Bind(wx.EVT_MENU, frame.GoHelpLicenceFrame, id  = ID_HELP_LICENCE)
+        self.Bind(wx.EVT_TOOL_ENTER, self.ClearAll,  id = 401)
+        self.Bind(wx.EVT_TOOL_ENTER, self.htmlpage.LoadHtmlPage, id = 402)
+        self.Bind(wx.EVT_TOOL_ENTER, self.htmlpage.SaveHtmlPage, id =  403)
+        self.Bind(wx.EVT_TOOL_ENTER, self.PrintOutput, id = 404)
+        self.Bind(wx.EVT_TOOL_ENTER,  frame.GoHelpTopicsFrame, id= 405)
 
     def PrintOutput(self, event):
         data = wxPrintDialogData()
-        data.EnablePrintToFile(true)
-        data.EnablePageNumbers(true)
-        data.EnableSelection(true)
+        data.EnablePrintToFile(True)
+        data.EnablePageNumbers(True)
+        data.EnableSelection(True)
         dlg = wxPrintDialog(output, data)
         if dlg.ShowModal() == wxID_OK:
             #print out html
@@ -1333,10 +1337,10 @@ class DescriptivesFrame(wx.Dialog):
                                     frame.grid.CleanData(i), name, \
                                     frame.grid.missing))
         ManyDescriptives(self, descs)
-        self.Close(true)
+        self.Close(True)
 
     def OnCloseContDesc(self, event):
-        self.Close(true)
+        self.Close(True)
 
 #---------------------------------------------------------------------------
 # Same as DescriptivesContinuousFrame, but for nominal descriptives
@@ -1379,7 +1383,7 @@ class OneConditionTestFrame(wx.Dialog):
         self.hypchoice.SetSelection(1)
         self.okaybutton = wxButton(self,103,"Okay",wxPoint(10,winheight-35),\
                                     wxSize(BWidth, BHeight))
-        #self.okaybutton.Enable(false)
+        #self.okaybutton.Enable(False)
         cancelbutton = wxButton(self,104,"Cancel",wxPoint(100,winheight-35),\
                                     wxSize(BWidth, BHeight))
         self.DescChoice = DescChoiceBox(self, 104)
@@ -1398,14 +1402,14 @@ class OneConditionTestFrame(wx.Dialog):
         x1 = self.ColBox.GetSelection()
         name = frame.grid.GetColLabelValue(x1)
         if (x1 < 0): # add top limits of grid to this
-            self.Close(true)
+            self.Close(True)
             return
         try:
             umean = float(self.UserMean.GetValue())
         except:
             output.htmlpage.Addhtml('<p>Cannot do test - no user \
                                     hypothesised mean specified')
-            self.Close(true)
+            self.Close(True)
             return
         x = frame.grid.CleanData(x1)
         TBase = salstat_stats.OneSampleTests(frame.grid.CleanData(x1), name, \
@@ -1457,10 +1461,10 @@ class OneConditionTestFrame(wx.Dialog):
                 TBase.prob = 1.0
             output.htmlpage.Addhtml('<br>Chi square (%d) = %5.3f, p = %1.6f'%\
                                     (TBase.df, TBase.chisquare, TBase.prob))
-        self.Close(true)
+        self.Close(True)
             
     def OnCloseOneCond(self, event):
-        self.Close(true)
+        self.Close(True)
 
 #---------------------------------------------------------------------------
 #dialog for 2 sample tests
@@ -1565,7 +1569,7 @@ class TwoConditionTestFrame(wx.Dialog):
         name1 = frame.grid.GetColLabelValue(x1)
         name2 = frame.grid.GetColLabelValue(y1)
         if (x1 < 0) or (y1 < 0):
-            self.Close(true)
+            self.Close(True)
             return
         x = frame.grid.CleanData(x1)
         xmiss = frame.grid.missing
@@ -1720,10 +1724,10 @@ class TwoConditionTestFrame(wx.Dialog):
                     TBase.prob = TBase.prob / 2
                 output.htmlpage.Addhtml('<BR>z = %5.3f, t = %5.3f, p = %1.6f'%\
                                     (TBase.z, TBase.wt, TBase.prob))
-        self.Close(true)
+        self.Close(True)
 
     def OnCloseTwoCond(self, event):
-        self.Close(true)
+        self.Close(True)
 
 #---------------------------------------------------------------------------
 # dialog for single factor tests with 3+ conditions
@@ -1762,7 +1766,7 @@ class ThreeConditionTestFrame(wx.Dialog):
         self.ColChoice = wxCheckListBox(self,511, wxPoint(10,30), \
                                     wxSize(230,130), ColumnList)
         for i in range(len(self.colnums)):
-            self.ColChoice.Check(i, true)
+            self.ColChoice.Check(i, True)
         self.DescChoice = DescChoiceBox(self, 512)
         okaybutton = wxButton(self,516,"Okay",wxPoint(10,winheight-35), \
                                     wxSize(BWidth, BHeight))
@@ -1800,7 +1804,7 @@ class ThreeConditionTestFrame(wx.Dialog):
         if (len(biglist) < 2):
             output.htmlpage.Addhtml('<p><b>Not enough columns selected for \
                                     test!</b>')
-            self.Close(true)
+            self.Close(True)
             return
         TBase = salstat_stats.ThreeSampleTests()
         #single factor between subjects anova
@@ -1913,10 +1917,10 @@ class ThreeConditionTestFrame(wx.Dialog):
                 TBase.prob = TBase.prob / 2
             output.htmlpage.Addhtml('<br>Q (%d) = %5.3f, p = %1.6f'% \
                                     (TBase.df, TBase.q, TBase.prob))
-        self.Close(true)
+        self.Close(True)
 
     def OnCloseThreeCond(self, event):
-        self.Close(true)
+        self.Close(True)
 
 #---------------------------------------------------------------------------
 class CorrelationTestFrame(wx.Dialog):
@@ -2004,7 +2008,7 @@ class CorrelationTestFrame(wx.Dialog):
         name1 = frame.grid.GetColLabelValue(x1)
         name2 = frame.grid.GetColLabelValue(y1)
         if (x1 < 0) or (y1 < 0):
-            self.Close(true)
+            self.Close(True)
             return
         x = frame.grid.CleanData(x1)
         xmiss = frame.grid.missing
@@ -2049,10 +2053,10 @@ class CorrelationTestFrame(wx.Dialog):
                 output.htmlpage.Addhtml('<BR>rho(%d) = %5.3f, p = %1.6f'% \
                                     (TBase.df, TBase.rho, TBase.prob))
 
-        self.Close(true)
+        self.Close(True)
 
     def OnCloseTwoCond(self, event):
-        self.Close(true)
+        self.Close(True)
 
 #---------------------------------------------------------------------------
 class MFanovaFrame(wx.Dialog):
@@ -2099,10 +2103,10 @@ class MFanovaFrame(wx.Dialog):
         #EVT_CHECKLISTBOX(self.DVbox,414,self.CheckforDVbox)
 
     def OnOkayButton(self, event):
-        self.Close(true)
+        self.Close(True)
 
     def OnCloseTwoCond(self, event):
-        self.Close(true)
+        self.Close(True)
 
 #---------------------------------------------------------------------------
 # instance of the tool window that contains the test buttons
@@ -2220,10 +2224,10 @@ class TransformFrame(wx.Dialog):
                 oldHead = oldHead + self.transformName
                 frame.grid.SetColLabelValue(emptyCols[i], oldHead)
                 emptyCols.pop(emptyCols[i])
-        self.Close(true)
+        self.Close(True)
 
     def OnCloseFrame(self, event):
-        self.Close(true)
+        self.Close(True)
 
 #---------------------------------------------------------------------------
 # Plot Window
@@ -2232,9 +2236,9 @@ class PlotFrame(wx.Frame):
     def __init__(self, parent, log):
         wx.Frame.__init__(self, parent, -1,"SalStat Plot (Basic!)", \
                                     size=(500,400))
-        file_menu = wxMenu()
-        edit_menu = wxMenu()
-        title_menu = wxMenu()
+        file_menu = wx.Menu()
+        edit_menu = wx.Menu()
+        title_menu = wx.Menu()
         file_menu.Append(ID_FILE_GSAVEAS, 'Save &As...')
         file_menu.Append(ID_FILE_GPRINTSETUP, 'Page Setup...')
         file_menu.Append(ID_FILE_GPRINTPREVIEW, 'Print Preview...')
@@ -2245,22 +2249,22 @@ class PlotFrame(wx.Frame):
         title_menu.Append(ID_TITLE_GYAXIS, '&Y Axis Label...')
         title_menu.Append(ID_TITLE_LEGEND, '&Enable Legend', kind=wx.wxITEM_CHECK)
         title_menu.Append(ID_TITLE_GRID, 'Enable &Grid', kind=wx.wxITEM_CHECK)
-        gmenuBar = wxMenuBar()
+        gmenuBar = wx.Menur()
         gmenuBar.Append(file_menu, '&File')
         gmenuBar.Append(edit_menu, '&Edit')
         gmenuBar.Append(title_menu, '&Plot')
-        EVT_MENU(self, ID_FILE_GSAVEAS, self.SaveAs)
-        EVT_MENU(self, ID_FILE_GPRINTSETUP, self.PrintSetup)
-        EVT_MENU(self, ID_FILE_GPRINTPREVIEW, self.PrintPreview)
-        EVT_MENU(self, ID_FILE_GPRINT, self.PrintGraph)
-        EVT_MENU(self, ID_FILE_GCLOSE, self.CloseWindow)
-        EVT_MENU(self, ID_TITLE_GTITLE, self.SetTitle)
-        EVT_MENU(self, ID_TITLE_GXAXIS, self.SetXAxis)
-        EVT_MENU(self, ID_TITLE_GYAXIS, self.SetYAxis)
-        EVT_MENU(self, ID_TITLE_LEGEND, self.EnableLegend)
-        EVT_MENU(self, ID_TITLE_GRID, self.EnableGrid)
+        self.Bind(wx.EVT_MENU, ID_FILE_GSAVEAS, self.SaveAs)
+        self.Bind(wx.EVT_MENU, ID_FILE_GPRINTSETUP, self.PrintSetup)
+        self.Bind(wx.EVT_MENU, ID_FILE_GPRINTPREVIEW, self.PrintPreview)
+        self.Bind(wx.EVT_MENU, ID_FILE_GPRINT, self.PrintGraph)
+        self.Bind(wx.EVT_MENU, ID_FILE_GCLOSE, self.CloseWindow)
+        self.Bind(wx.EVT_MENU, ID_TITLE_GTITLE, self.SetTitle)
+        self.Bind(wx.EVT_MENU, ID_TITLE_GXAXIS, self.SetXAxis)
+        self.Bind(wx.EVT_MENU, ID_TITLE_GYAXIS, self.SetYAxis)
+        self.Bind(wx.EVT_MENU, ID_TITLE_LEGEND, self.EnableLegend)
+        self.Bind(wx.EVT_MENU, ID_TITLE_GRID, self.EnableGrid)
         self.SetMenuBar(gmenuBar)
-        self.client = wxPyPlot.PlotCanvas(self)
+        self.client = pyplot.PlotCanvas(self)
 
     def EnableGrid(self, event):
         self.client.SetEnableGrid(event.IsChecked())
@@ -2294,7 +2298,7 @@ class PlotFrame(wx.Frame):
         self.client.SaveFile()
 
     def CloseWindow(self, event):
-        self.Close(true)
+        self.Close(True)
 
 #---------------------------------------------------------------------------
 # call instance of DataGrid
@@ -2308,9 +2312,15 @@ class DataFrame(wx.Frame):
         posy = int(inits.get('gridposy'))
         wx.Frame.__init__(self,parent,-1,"SalStat Statistics", size=(dimx,\
                                     dimy), pos=(posx,posy))
+        self.m_mgr = wx.aui.AuiManager()
+        self.m_mgr.SetManagedWindow( self )
+        
         #set icon for frame (needs x-platform separator!
         icon = images.getIconIcon()
         self.SetIcon(icon)
+        
+        #-----------------------
+        # Se crea el menubar
         #set up menus
         file_menu = wx.Menu()
         edit_menu = wx.Menu()
@@ -2370,95 +2380,112 @@ class DataFrame(wx.Frame):
         menuBar.Append(analyse_menu, '&Analyse')
         menuBar.Append(chart_menu, '&Graph')
         menuBar.Append(help_menu, '&Help')
-        #call menu bar (show it on the frame
         self.SetMenuBar(menuBar)
+        #------------------------
+        
         #create small status bar
         self.CreateStatusBar()
         self.SetStatusText('SalStat Statistics')
-        #Get icons for toolbar
-        NewIcon = images.getNewBitmap()
+        
+        #----------------------
+        # se crea una barra de herramientas
+        # Get icons for toolbar
+        NewIcon =  images.getNewBitmap()
         OpenIcon = images.getOpenBitmap()
-        SaveIcon = images.getSaveBitmap()
+        SaveIcon =   images.getSaveBitmap()
         SaveAsIcon = images.getSaveAsBitmap()
-        PrintIcon = images.getPrintBitmap()
-        CutIcon = images.getCutBitmap()
-        CopyIcon = images.getCopyBitmap()
-        PasteIcon = images.getPasteBitmap()
-        PrefsIcon = images.getPreferencesBitmap()
-        HelpIcon = images.getHelpBitmap()
+        PrintIcon =  images.getPrintBitmap()
+        CutIcon =    images.getCutBitmap()
+        CopyIcon =   images.getCopyBitmap()
+        PasteIcon =  images.getPasteBitmap()
+        PrefsIcon =  images.getPreferencesBitmap()
+        HelpIcon =   images.getHelpBitmap()
         #create toolbar (nothing to add yet!)
-        toolBar = self.CreateToolBar(wx.TB_HORZ_LAYOUT |\
-                                    wx.TB_FLAT)
-        toolBar.AddSimpleTool(10, NewIcon,"New")
-        toolBar.AddSimpleTool(20, OpenIcon,"Open")
-        toolBar.AddSimpleTool(30, SaveIcon,"Save")
-        toolBar.AddSimpleTool(40, SaveAsIcon,"Save As")
-        toolBar.AddSimpleTool(50, PrintIcon,"Print")
-        toolBar.AddSimpleTool(60, CutIcon, "Cut")
-        toolBar.AddSimpleTool(70, CopyIcon, "Copy")
-        toolBar.AddSimpleTool(80, PasteIcon, "Paste")
-        toolBar.AddSimpleTool(85, PrefsIcon, "Preferences")
-        toolBar.AddSimpleTool(90, HelpIcon, "Help")
-        toolBar.SetToolBitmapSize((24,24))
+        tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
+                             agwStyle=  aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_OVERFLOW)
+        
+        tb1.AddSimpleTool(10, "New",NewIcon,"New")
+        tb1.AddSimpleTool(20, "Open",OpenIcon,"Open")
+        tb1.AddSimpleTool(30, "Save",SaveIcon,"Save")
+        tb1.AddSimpleTool(40, "Save As",SaveAsIcon,"Save As")
+        tb1.AddSimpleTool(50, "Print",PrintIcon,"Print")
+        tb1.AddSimpleTool(60, "Cut",CutIcon, "Cut")
+        tb1.AddSimpleTool(70, "Copy",CopyIcon, "Copy")
+        tb1.AddSimpleTool(80, "Paste",PasteIcon, "Paste")
+        tb1.AddSimpleTool(85, "Preferences",PrefsIcon, "Preferences")
+        tb1.AddSimpleTool(90, "Help",HelpIcon, "Help")
+        tb1.SetToolBitmapSize((24,24))
         # more toolbuttons are needed: New Output, Save, Print, Cut, \
         # Variables, and Wizard creates the toolbar
-        toolBar.Realize()
-        self.SetToolBar(toolBar)
+        tb1.Realize()
+        self.m_mgr.AddPane( tb1, wx.aui.AuiPaneInfo().Top().Dock().
+                            Resizable(False).FloatingSize( wx.DefaultSize ).
+                            DockFixed( False ).Layer(1).ToolbarPane().
+                            LeftDockable( False ).RightDockable(False).
+                            CloseButton(False ) )
+        #--------------------
+        
         #still need to define event handlers
         #set up the datagrid
         
         self.grid = SimpleGrid(self, log)
-        self.grid.m_grid.SetDefaultColSize(60, true)
+        self.grid.m_grid.SetDefaultColSize(60, True)
         self.grid.m_grid.SetRowLabelSize(40)
+        
+        self.m_mgr.AddPane(self.grid, 
+                           wx.aui.AuiPaneInfo().CenterPane().
+                           CloseButton( False ).MinSize( wx.Size( 240,-1 )))
+        self.m_mgr.Update()
+        
         #win2 = TestFrame(self, 'Tests')
         #win2.Show(True)
 
         #...and some events!
-        EVT_MENU(self, ID_FILE_NEW, self.GoClearData)
-        EVT_TOOL(self, 10, self.GoClearData)
-        #EVT_MENU(self, ID_FILE_NEWOUTPUT, self.GoNewOutputSheet)
+        self.Bind(wx.EVT_MENU , self.GoClearData, id=ID_FILE_NEW)
+        self.Bind(wx.EVT_TOOL_ENTER, self.GoClearData, id=10) ### VERUIFICAr
+        #self.Bind(wx.EVT_MENU, ID_FILE_NEWOUTPUT, self.GoNewOutputSheet)
         # unsure if I want this - maybe restrict user to just one?
-        EVT_MENU(self, ID_FILE_SAVE, self.grid.SaveDataASCII)
-        EVT_TOOL(self, 30, self.grid.SaveDataASCII)
-        EVT_MENU(self, ID_FILE_SAVEAS, self.grid.SaveAsDataASCII)
-        EVT_TOOL(self, 40, self.grid.SaveAsDataASCII)
-        EVT_MENU(self, ID_FILE_OPEN, self.grid.LoadDataASCII)
-        #EVT_MENU(self, ID_FILE_OPEN, self.grid.LoadNumericData)
-        EVT_TOOL(self, 20, self.grid.LoadDataASCII)
+        self.Bind(wx.EVT_MENU, self.grid.SaveDataASCII, id= ID_FILE_SAVE)
+        self.Bind(wx.EVT_TOOL_ENTER, self.grid.SaveDataASCII, id =  30)
+        self.Bind(wx.EVT_MENU,  self.grid.SaveAsDataASCII, id=ID_FILE_SAVEAS)
+        self.Bind(wx.EVT_TOOL_ENTER, self.grid.SaveAsDataASCII, id= 40)
+        self.Bind(wx.EVT_MENU, self.grid.LoadDataASCII, id= ID_FILE_OPEN)
+        #self.Bind(wx.EVT_MENU, ID_FILE_OPEN, self.grid.LoadNumericData)
+        self.Bind(wx.EVT_TOOL_ENTER, self.grid.LoadDataASCII, id = 20)
         #EVT_TOOL(self, 20, self.grid.LoadNumericData)
-        EVT_MENU(self, ID_EDIT_CUT, self.grid.CutData)
-        EVT_TOOL(self, 60, self.grid.CutData)
-        EVT_MENU(self, ID_EDIT_COPY, self.grid.CopyData)
-        EVT_TOOL(self, 70, self.grid.CopyData)
-        EVT_MENU(self, ID_EDIT_PASTE, self.grid.PasteData)
-        EVT_TOOL(self, 80, self.grid.PasteData)
-        EVT_MENU(self, ID_EDIT_SELECTALL, self.grid.SelectAllCells)
-        EVT_MENU(self, ID_EDIT_FIND, self.GoFindDialog)
-        EVT_MENU(self, ID_EDIT_DELETECOL, self.grid.DeleteCurrentCol)
-        EVT_MENU(self, ID_EDIT_DELETEROW, self.grid.DeleteCurrentRow)
-        EVT_MENU(self, ID_PREF_VARIABLES, self.GoVariablesFrame)
-        EVT_TOOL(self, 85, self.GoVariablesFrame)
-        EVT_MENU(self, ID_PREF_GRID, self.GoEditGrid)
-        EVT_MENU(self, ID_PREF_CELLS, self.GoGridPrefFrame)
-        EVT_MENU(self, ID_PREF_FONTS, self.GoFontPrefsDialog)
-        EVT_MENU(self, ID_PREPARATION_DESCRIPTIVES, self.GoContinuousDescriptives)
-        EVT_MENU(self, ID_PREPARATION_TRANSFORM, self.GoTransformData)
-        EVT_MENU(self, ID_PREPARATION_OUTLIERS, self.GoCheckOutliers)
-        EVT_MENU(self, ID_ANALYSE_1COND, self.GoOneConditionTest)
-        EVT_MENU(self, ID_ANALYSE_2COND, self.GoTwoConditionTest)
-        EVT_MENU(self, ID_ANALYSE_3COND, self.GetThreeConditionTest)
-        EVT_MENU(self, ID_ANALYSE_CORRELATION, self.GetCorrelationsTest)
-        #EVT_MENU(self, ID_ANALYSE_2FACT, self.GoMFanovaFrame)
-        EVT_MENU(self, ID_ANALYSE_SCRIPT, self.GoScriptWindow)
-        EVT_MENU(self, ID_CHART_DRAW, self.GoChartWindow)
-        EVT_MENU(self, ID_BARCHART_DRAW, self.GoBarChartWindow)
-        EVT_MENU(self, ID_HELP_ABOUT, self.GoHelpAboutFrame)
-        EVT_MENU(self, ID_HELP_WIZARD, self.GoHelpWizardFrame)
-        EVT_MENU(self, ID_HELP_TOPICS, self.GoHelpTopicsFrame)
-        EVT_TOOL(self, 90, self.GoHelpAboutFrame)
-        EVT_MENU(self, ID_HELP_LICENCE, self.GoHelpLicenceFrame)
-        EVT_MENU(self, ID_FILE_EXIT, self.EndApplication)
-        EVT_CLOSE(self, self.EndApplication)
+        self.Bind(wx.EVT_MENU, self.grid.CutData, id=ID_EDIT_CUT)
+        self.Bind(wx.EVT_TOOL_ENTER, self.grid.CutData, id= 60)
+        self.Bind(wx.EVT_MENU, self.grid.CopyData, id=ID_EDIT_COPY)
+        self.Bind(wx.EVT_TOOL_ENTER, self.grid.CopyData, id = 70)
+        self.Bind(wx.EVT_MENU, self.grid.PasteData, id=ID_EDIT_PASTE)
+        self.Bind(wx.EVT_TOOL_ENTER,  self.grid.PasteData, id = 80)
+        self.Bind(wx.EVT_MENU, self.grid.SelectAllCells, id=ID_EDIT_SELECTALL)
+        self.Bind(wx.EVT_MENU, self.GoFindDialog, id = ID_EDIT_FIND)
+        self.Bind(wx.EVT_MENU, self.grid.DeleteCurrentCol, id=ID_EDIT_DELETECOL)
+        self.Bind(wx.EVT_MENU, self.grid.DeleteCurrentRow, id=ID_EDIT_DELETEROW)
+        self.Bind(wx.EVT_MENU, self.GoVariablesFrame, id=ID_PREF_VARIABLES)
+        self.Bind(wx.EVT_TOOL_ENTER, self.GoVariablesFrame, id = 85)
+        self.Bind(wx.EVT_MENU, self.GoEditGrid, id=ID_PREF_GRID)
+        self.Bind(wx.EVT_MENU, self.GoGridPrefFrame, id=ID_PREF_CELLS)
+        self.Bind(wx.EVT_MENU, self.GoFontPrefsDialog, id=ID_PREF_FONTS)
+        self.Bind(wx.EVT_MENU, self.GoContinuousDescriptives, id=ID_PREPARATION_DESCRIPTIVES)
+        self.Bind(wx.EVT_MENU, self.GoTransformData, id=ID_PREPARATION_TRANSFORM)
+        self.Bind(wx.EVT_MENU, self.GoCheckOutliers, id=ID_PREPARATION_OUTLIERS)
+        self.Bind(wx.EVT_MENU, self.GoOneConditionTest, id=ID_ANALYSE_1COND)
+        self.Bind(wx.EVT_MENU, self.GoTwoConditionTest, id=ID_ANALYSE_2COND)
+        self.Bind(wx.EVT_MENU, self.GetThreeConditionTest, id=ID_ANALYSE_3COND)
+        self.Bind(wx.EVT_MENU, self.GetCorrelationsTest, id=ID_ANALYSE_CORRELATION)
+        #self.Bind(wx.EVT_MENU, ID_ANALYSE_2FACT, self.GoMFanovaFrame)
+        self.Bind(wx.EVT_MENU, self.GoScriptWindow, id=ID_ANALYSE_SCRIPT)
+        self.Bind(wx.EVT_MENU, self.GoChartWindow, id=ID_CHART_DRAW)
+        self.Bind(wx.EVT_MENU, self.GoBarChartWindow, id=ID_BARCHART_DRAW)
+        self.Bind(wx.EVT_MENU, self.GoHelpAboutFrame, id=ID_HELP_ABOUT)
+        self.Bind(wx.EVT_MENU, self.GoHelpWizardFrame, id=ID_HELP_WIZARD)
+        self.Bind(wx.EVT_MENU, self.GoHelpTopicsFrame, id=ID_HELP_TOPICS)
+        self.Bind(wx.EVT_TOOL_ENTER,self.GoHelpAboutFrame, id = 90)
+        self.Bind(wx.EVT_MENU, self.GoHelpLicenceFrame, id=ID_HELP_LICENCE)
+        self.Bind(wx.EVT_MENU, self.EndApplication, id=ID_FILE_EXIT)
+        ##self.Bind(EVT_CLOSE, self, self.EndApplication)
 
     def GoClearData(self, evt):
         #shows a new data entry frame
@@ -2467,7 +2494,7 @@ class DataFrame(wx.Frame):
     def GoNewOutputSheet(self, evt):
         #shows a new output frame
         SheetWin = OutputSheet(frame, -1)
-        SheetWin.Show(true)
+        SheetWin.Show(True)
 
     def GoFindDialog(self, event):
         # Shows the find & replace dialog
@@ -2476,22 +2503,22 @@ class DataFrame(wx.Frame):
         dlg = wxFindReplaceDialog(self.grid, data, 'Find and Replace', \
                                     wxFR_REPLACEDIALOG)
         dlg.data = data
-        dlg.Show(true)
+        dlg.Show(True)
 
     def GoEditGrid(self, event):
         #shows dialog for editing the data grid
         win = EditGridFrame(frame, -1)
-        win.Show(true)
+        win.Show(True)
 
     def GoVariablesFrame(self, evt):
         # shows Variables dialog
         win = VariablesFrame(frame, -1)
-        win.Show(true)
+        win.Show(True)
 
     def GoGridPrefFrame(self, evt):
         # shows Grid Preferences form
         win = GridPrefs(frame, -1)
-        win.Show(true)
+        win.Show(True)
 
     def GoFontPrefsDialog(self, evt):
         # shows Font dialog for the data grid (output window has its own)
@@ -2507,11 +2534,11 @@ class DataFrame(wx.Frame):
     def GoContinuousDescriptives(self, evt):
         # shows the continuous descriptives dialog
         win = DescriptivesFrame(frame, -1)
-        win.Show(true)
+        win.Show(True)
 
     def GoTransformData(self, event):
         win = TransformFrame(frame, -1)
-        win.Show(true)
+        win.Show(True)
 
     def GoCheckOutliers(self, event):
         pass
@@ -2521,7 +2548,7 @@ class DataFrame(wx.Frame):
         ColumnList, waste = self.grid.GetUsedCols()
         if (len(ColumnList) > 0):
             win = OneConditionTestFrame(frame, -1, ColumnList)
-            win.Show(true)
+            win.Show(True)
         else:
             self.SetStatusText('You need to enter 1 data column for this!')
 
@@ -2530,7 +2557,7 @@ class DataFrame(wx.Frame):
         ColumnList, waste = self.grid.GetUsedCols()
         if (len(ColumnList) > 1):
             win = TwoConditionTestFrame(frame, -1, ColumnList)
-            win.Show(true)
+            win.Show(True)
         else:
             self.SetStatusText('You need 2 data columns for that!')
 
@@ -2539,7 +2566,7 @@ class DataFrame(wx.Frame):
         ColumnList, waste = self.grid.GetUsedCols()
         if (len(ColumnList) > 1):
             win = ThreeConditionTestFrame(frame, -1, ColumnList)
-            win.Show(true)
+            win.Show(True)
         else:
             self.SetStatusText('You need some data for that!')
 
@@ -2548,18 +2575,18 @@ class DataFrame(wx.Frame):
         ColumnList, waste = self.grid.GetUsedCols()
         if (len(ColumnList) > 1):
             win = CorrelationTestFrame(frame, -1, ColumnList)
-            win.Show(true)
+            win.Show(True)
         else:
             self.SetStatusText('You need 2 data columns for that!')
 
     def GoMFanovaFrame(self, event):
         win = MFanovaFrame(frame, -1)
-        win.Show(true)
+        win.Show(True)
 
     def GoScriptWindow(self, event):
         # Shows the scripting window
         win = ScriptFrame(frame, -1)
-        win.Show(true)
+        win.Show(True)
 
     def GoChartWindow(self, event):
         # Draws a line chart based on the means
@@ -2573,11 +2600,11 @@ class DataFrame(wx.Frame):
                 meanlist[i,1] = d.mean
                 nameslist[i] = frame.grid.GetColLabelValue(i)
             meanlist[:,0] = numpy.arange(len(colnums))
-            lines = wxPyPlot.PolyLine(meanlist, legend="Red Line", colour='red')
-            #lines2 = wxPyPlot.PolyBars(meanlist)
+            lines = pyplot.PolyLine(meanlist, legend="Red Line", colour='red')
+            #lines2 = pyplot.PolyBars(meanlist)
             self.win = PlotFrame(self, -1)
-            self.win.Show(TRUE)
-            self.win.client.Draw(wxPyPlot.PlotGraphics([lines],"Graph","X","Y"))
+            self.win.Show(True)
+            self.win.client.Draw(pyplot.PlotGraphics([lines],"Graph","X","Y"))
             #self.win.client.draw(lines2,'automatic','automatic',None, nameslist)
         else:
             self.SetStatusText('You need some data to draw a graph!')
@@ -2596,7 +2623,7 @@ class DataFrame(wx.Frame):
             meanlist[:,0] = numpy.arange(len(colnums))
             lines = PolyBars(meanlist)
             self.win = PlotFrame(self, -1)
-            self.win.Show(TRUE)
+            self.win.Show(True)
             self.win.client.draw(lines,'automatic','automatic',None, nameslist)
         else:
             self.SetStatusText('You need some data to draw a graph!')
@@ -2604,22 +2631,22 @@ class DataFrame(wx.Frame):
     def GoHelpWizardFrame(self, event):
         # shows the "wizard" in the help box
         win = AboutFrame(frame, -1, 0)
-        win.Show(true)
+        win.Show(True)
 
     def GoHelpTopicsFrame(self, event):
         # shows the help topics in the help box
         win = AboutFrame(frame, -1, 1)
-        win.Show(true)
+        win.Show(True)
 
     def GoHelpLicenceFrame(self, evt):
         # shows the licence in the help box
         win = AboutFrame(frame, -1, 2)
-        win.Show(true)
+        win.Show(True)
 
     def GoHelpAboutFrame(self, evt):
         # Shows the "About" thing in the help box
         win = AboutFrame(frame, -1, 3)
-        win.Show(true)
+        win.Show(True)
 
     def EndApplication(self, evt):
         # close the application (need to check for new data since last save)
@@ -2645,7 +2672,7 @@ class DataFrame(wx.Frame):
         fout.close()
         if self.grid.Saved == False:
             win = SaveDialog(self, -1)
-            win.Show(true)
+            win.Show(True)
             self.grid.Saved = True
         else:
             frame.Destroy()
@@ -3086,12 +3113,12 @@ if __name__ == '__main__':
     ini = GetInits()
     historyClass = History()
     hist = historyClass
-    app = wx.PyApp()
+    app = wx.App()
     frame = DataFrame(None, sys.stdout)
     frame.grid.SetFocus()
     output = OutputSheet(frame, -1)
-    output.Show(true)
-    frame.Show(true)
+    frame.Show(True)
+    output.Show(True)
     app.MainLoop()
 
 #---------------------------------------------------------------------------
