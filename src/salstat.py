@@ -2436,10 +2436,9 @@ class DataFrame(wx.Frame):
                            wx.aui.AuiPaneInfo().CenterPane().
                            CloseButton( False ).MinSize( wx.Size( 240,-1 )))
         self.m_mgr.Update()
-        
-        #win2 = TestFrame(self, 'Tests')
-        #win2.Show(True)
-
+        self.BindEvents()
+ 
+    def BindEvents(self):
         #...and some events!
         self.Bind(wx.EVT_MENU , self.GoClearData, id=ID_FILE_NEW)
         self.Bind(wx.EVT_TOOL_ENTER, self.GoClearData, id=10) ### VERUIFICAr
