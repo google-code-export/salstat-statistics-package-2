@@ -11,11 +11,12 @@ details of this license. """
 #from wxPython.html import *
 #from wxPython.lib.editor import wxEditor
 import wx
+import os
 from grid import MyGrid, MyContextGrid
 from matplotlib import mlab
 
 # import wx # getting ready for the new namespace
-import wxPython.lib.wxpTag
+import wx.lib.wxpTag
 # import system modules
 import string, os, os.path, pickle
 # import SalStat specific modules
@@ -118,7 +119,7 @@ BWidth = 80
 BHeight = 25
 HOME = os.getcwd()
 
-if wxPlatform == '__WXMSW__':
+if os.name == 'nt':
     face1 = 'Courier New'
     face2 = 'Times New Roman'
     face3 = 'Courier New'
