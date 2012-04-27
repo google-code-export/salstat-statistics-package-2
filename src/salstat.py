@@ -426,8 +426,8 @@ class SimpleGrid(MyGrid):# wxGrid
         self.m_grid.SetColLabelAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
         for i in range(20):
             self.m_grid.SetColFormatFloat(i, 8, 4)
-        EVT_GRID_CELL_CHANGE(self.m_grid, self.AlterSaveStatus)
-        EVT_GRID_RANGE_SELECT(self.m_grid, self.RangeSelected)
+        sel.m_grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE,self.AlterSaveStatus)
+        sel.m_grid.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
         self.m_grid.wildcard = "Any File (*.*)|*.*|" \
                         "ASCII data format (*.dat)|*.dat|" \
                         "SalStat Format (*.xml)|*.xml"
