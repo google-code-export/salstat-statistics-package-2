@@ -420,10 +420,10 @@ class SimpleGrid(MyGrid):# wxGrid
         MyGrid.__init__(self, parent, -1)
         self.Saved = True
         self.moveTo = None
-        self.m_grid.SetGridLineColour(wxBLACK)
+        self.m_grid.SetGridLineColour(wx.Color(0,0,0))
         #self.m_grid.CreateGrid(int(inits.get("gridcellsy")), \
         #                            int(inits.get("gridcellsx")))
-        self.m_grid.SetColLabelAlignment(wxALIGN_LEFT, wxALIGN_BOTTOM)
+        self.m_grid.SetColLabelAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
         for i in range(20):
             self.m_grid.SetColFormatFloat(i, 8, 4)
         EVT_GRID_CELL_CHANGE(self.m_grid, self.AlterSaveStatus)
@@ -837,7 +837,7 @@ class SimpleGrid(MyGrid):# wxGrid
 
 #---------------------------------------------------------------------------
 # DescChoice-wxCheckListBox with list of descriptive stats in it
-class DescChoiceBox(wxCheckListBox):
+class DescChoiceBox(wx.CheckBox): # CheckListBox
     def __init__(self, parent, id):
         wxCheckListBox.__init__(self, parent, -1, pos=(250,30), \
                                     size=(240,310), choices=DescList)
@@ -1126,7 +1126,7 @@ class VariablesFrame(wx.Dialog):
 
 #---------------------------------------------------------------------------
 # base html window class
-class MyHtmlWindow(wxHtmlWindow):
+class MyHtmlWindow(wx.HtmlListBox):
     def __init__(self, parent, id):
         wxHtmlWindow.__init__(self, parent, id)
         wxImage_AddHandler(wxJPEGHandler()) # just in case!
@@ -2312,15 +2312,15 @@ class DataFrame(wx.Frame):
         icon = images.getIconIcon()
         self.SetIcon(icon)
         #set up menus
-        file_menu = wxMenu()
-        edit_menu = wxMenu()
-        prefs_menu = wxMenu()
-        describe_menu = wxMenu()
-        analyse_menu = wxMenu()
-        #analyse2_menu = wxMenu()
-        preparation_menu = wxMenu()
-        chart_menu = wxMenu()
-        help_menu = wxMenu()
+        file_menu = wx.Menu()
+        edit_menu = wx.Menu()
+        prefs_menu = wx.Menu()
+        describe_menu = wx.Menu()
+        analyse_menu = wx.Menu()
+        #analyse2_menu = wx.Menu()
+        preparation_menu = wx.Menu()
+        chart_menu = wx.Menu()
+        help_menu = wx.Menu()
         #add contents of menu
         file_menu.Append(ID_FILE_NEW,'&New Data')
         #file_menu.Append(ID_FILE_NEWOUTPUT, 'New &Output Sheet')
@@ -2362,7 +2362,7 @@ class DataFrame(wx.Frame):
         help_menu.Append(ID_HELP_LICENCE, '&Licence...')
         help_menu.Append(ID_HELP_ABOUT, '&About...')
         #set up menu bar
-        menuBar = wxMenuBar()
+        menuBar = wx.MenuBar()
         menuBar.Append(file_menu, '&File')
         menuBar.Append(edit_menu, '&Edit')
         menuBar.Append(prefs_menu, '&Preferences')
@@ -2387,8 +2387,8 @@ class DataFrame(wx.Frame):
         PrefsIcon = images.getPreferencesBitmap()
         HelpIcon = images.getHelpBitmap()
         #create toolbar (nothing to add yet!)
-        toolBar = self.CreateToolBar(wxTB_HORIZONTAL|wxNO_BORDER| \
-                                    wxTB_3DBUTTONS)
+        toolBar = self.CreateToolBar(wx.TB_HORZ_LAYOUT |\
+                                    wx.TB_FLAT)
         toolBar.AddSimpleTool(10, NewIcon,"New")
         toolBar.AddSimpleTool(20, OpenIcon,"Open")
         toolBar.AddSimpleTool(30, SaveIcon,"Save")
@@ -3086,7 +3086,7 @@ if __name__ == '__main__':
     ini = GetInits()
     historyClass = History()
     hist = historyClass
-    app = wxPySimpleApp()
+    app = wx.PyApp()
     frame = DataFrame(None, sys.stdout)
     frame.grid.SetFocus()
     output = OutputSheet(frame, -1)
