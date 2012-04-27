@@ -158,15 +158,15 @@ class SaveDialog(wx.Dialog):
         icon = images.getIconIcon()
         self.SetIcon(icon)
         self.Choice = 'none'
-        vbox = wxBoxSizer(wx.VERTICAL)
-        l1 = wxStaticText(self, -1, 'You have unsaved Data')
-        l2 = wxStaticText(self, -1, 'Do you wish to save it?')
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        l1 = wx.StaticText(self, -1, 'You have unsaved Data')
+        l2 = wx.StaticText(self, -1, 'Do you wish to save it?')
         vbox.Add(l1,1, wx.ALIGN_CENTER)
         vbox.Add(l2,1, wx.ALIGN_CENTER)
-        hbox = wxBoxSizer(wx.ALIGN_CENTER_HORIZONTAL)
-        saveButton = wxButton(self, 331, "Save...", size=(BWidth, BHeight))
-        discardButton = wxButton(self, 332, "Discard", size=(BWidth, BHeight))
-        CancelButton = wxButton(self, 333, "Cancel", size=(BWidth, BHeight))
+        hbox = wx.BoxSizer(wx.ALIGN_CENTER_HORIZONTAL)
+        saveButton = wx.Button(self, 331, "Save...", size=(BWidth, BHeight))
+        discardButton = wx.Button(self, 332, "Discard", size=(BWidth, BHeight))
+        CancelButton = wx.Button(self, 333, "Cancel", size=(BWidth, BHeight))
         hbox.Add(saveButton, 0, wx.ALL, 5)
         hbox.Add(discardButton, 0, wx.ALL, 5)
         hbox.Add(CancelButton, 0, wx.ALL, 5)
@@ -174,9 +174,9 @@ class SaveDialog(wx.Dialog):
         self.SetAutoLayout(True)
         self.SetSizer(vbox)
         self.Layout()
-        EVT_BUTTON(self, 331, self.SaveData)
-        EVT_BUTTON(self, 332, self.DiscardData)
-        EVT_BUTTON(self, 333, self.CancelDialog)
+        self.Bind(wx.EVT_BUTTON, self.SaveData, id = 331)
+        self.Bind(wx.EVT_BUTTON, self.DiscardData, id = 332)
+        self.Bind(wx.EVT_BUTTON, self.CancelDialog, id = 333)
 
     def SaveData(self, event):
         frame.grid.Saved = True
@@ -453,66 +453,66 @@ class SimpleGrid(MyGrid):# wxGrid
         print hist.history
 
     def CutData(self, event):
-        buffer = wxTextDataObject()
-        currentcol = self.GetGridCursorCol()
-        currentrow = self.GetGridCursorRow()
-        if self.IsSelection():
+        buffer = wx.TextDataObject()
+        currentcol = self.m_grid.GetGridCursorCol()
+        currentrow = self.m_grid.GetGridCursorRow()
+        if self.m_grid.IsSelection():
             data = 'range' # change this to coords self.tl self.br
         else:
-            data = self.GetCellValue(currentrow, currentcol)
-        if (wxTheClipboard.Open()):
+            data = self.m_grid.GetCellValue(currentrow, currentcol)
+        if (wx.TheClipboard.Open()):
             buffer.SetText(data)
-            wxTheClipboard.SetData(buffer)
-            wxTheClipboard.Close()
-            self.SetCellValue(currentrow, currentcol, '')
+            wx.TheClipboard.SetData(buffer)
+            wx.TheClipboard.Close()
+            self.m_grid.SetCellValue(currentrow, currentcol, '')
 
     def CopyData(self, event):
-        buffer = wxTextDataObject()
-        currentcol = self.GetGridCursorCol()
-        currentrow = self.GetGridCursorRow()
+        buffer = wx.TextDataObject()
+        currentcol = self.m_grid.GetGridCursorCol()
+        currentrow = self.m_grid.GetGridCursorRow()
         #if self.IsSelection(): # extend this only if SalStat can paste lists
         #    data = [2,3,4,5]
         #else:
-        data = self.GetCellValue(currentrow, currentcol)
-        if (wxTheClipboard.Open()):
+        data = self.m_grid.GetCellValue(currentrow, currentcol)
+        if (wx.TheClipboard.Open()):
             buffer.SetText(data)
-            wxTheClipboard.SetData(buffer)
-            wxTheClipboard.Close()
+            wx.TheClipboard.SetData(buffer)
+            wx.TheClipboard.Close()
 
     def PasteData(self, event):
-        buffer = wxTextDataObject()
-        currentcol = self.GetGridCursorCol()
-        currentrow = self.GetGridCursorRow()
-        res = wxTheClipboard.Open()
+        buffer = wx.TextDataObject()
+        currentcol = self.m_grid.GetGridCursorCol()
+        currentrow = self.m_grid.GetGridCursorRow()
+        res = wx.TheClipboard.Open()
         if res:
-            res = wxTheClipboard.GetData(buffer)
-            wxTheClipboard.Close()
+            res = wx.TheClipboard.GetData(buffer)
+            wx.TheClipboard.Close()
             if res:
                 self.Saved = False
                 if type(buffer.GetText()) != list:
-                    self.SetCellValue(currentrow, currentcol, buffer.GetText())
+                    self.m_grid.SetCellValue(currentrow, currentcol, buffer.GetText())
                 else:
-                    self.SetCellValue(currentrow, currentcol, 'list!')
+                    self.m_grid.SetCellValue(currentrow, currentcol, 'list!')
 
     def EditGrid(self, event, numrows):
         insert = self.AppendRows(numrows)
 
     def DeleteCurrentCol(self, event):
-        currentcol = self.GetGridCursorCol()
-        self.DeleteCols(currentcol, 1)
-        self.AdjustScrollbars()
+        currentcol = self.m_grid.GetGridCursorCol()
+        self.m_grid.DeleteCols(currentcol, 1)
+        self.m_grid.AdjustScrollbars()
         xmlevt = '<deleteColumn>'+str(currentcol)+'</deleteColumn>\n'
         hist.AppendEvent(xmlevt)
 
     def DeleteCurrentRow(self, event):
-        currentrow = self.GetGridCursorRow()
-        self.DeleteRows(currentrow, 1)
-        self.AdjustScrollbars()
+        currentrow = self.m_grid.GetGridCursorRow()
+        self.m_grid.DeleteRows(currentrow, 1)
+        self.m_grid.AdjustScrollbars()
         xmlevt = '<deleteRow>'+str(currentrow)+'</deleteRow>\n'
         hist.AppendEvent(xmlevt)
 
     def SelectAllCells(self, event):
-        self.SelectAll()
+        self.m_grid.SelectAll()
 
     # adds columns and rows to the grid
     def AddNCells(self, numcols, numrows):
@@ -562,12 +562,12 @@ class SimpleGrid(MyGrid):# wxGrid
 
     def SaveAsDataASCII(self, event):
         default = inits.get('savedir')
-        dlg = wxFileDialog(self, "Save Data File", default,"",\
-                                    "ASCII Text (*.dat)|*.dat", wxSAVE)
+        dlg = wx.FileDialog(self, "Save Data File", default,"",\
+                                    "ASCII Text (*.dat)|*.dat", wx.SAVE)
                                     #"ASCII Text (*.dat)|*.dat|SalStat File (*.xml)|*.xml|", wxSAVE)
         icon = images.getIconIcon()
         dlg.SetIcon(icon)
-        if dlg.ShowModal() == wxID_OK:
+        if dlg.ShowModal() == wx.ID_OK:
             inits.update({'savedir': dlg.GetDirectory()})
             filename = dlg.GetPath()
             fout = open(filename, "w")
@@ -633,12 +633,13 @@ class SimpleGrid(MyGrid):# wxGrid
     # also does csv values as well
     def LoadDataASCII(self, event):
         default = inits.get('opendir')
-        dlg = wxFileDialog(self, "Load Data File", default,"",\
-                                    self.wildcard, wxOPEN)
-                #SalStat Native (*.xml)|*.xml|", wxOPEN)
+        dlg = wx.FileDialog(self, "Load Data File", default,"",
+                                    wildcard= "SalStat Native (*.xml)|*.xml|",
+                                    style = wx.OPEN)
+                #, wxOPEN)
         icon = images.getIconIcon()
         dlg.SetIcon(icon)
-        if dlg.ShowModal() == wxID_OK:
+        if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetPath()
             if filename[-3:] == 'xml':
                 self.LoadNativeXML(filename)
@@ -1089,14 +1090,33 @@ class VariablesFrame(wx.Dialog):
     def __init__(self,parent,id):
         wx.Dialog.__init__(self, parent,id,"SalStat - Variables", \
                                     size=(500,185+wind))
-        #set icon for frame (needs x-platform separator!
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
-        okaybutton = wxButton(self, 2001, "Okay",wxPoint(10,170),\
-                                    wxSize(BWidth, BHeight))
-        cancelbutton = wxButton(self, 2002, "Cancel",wxPoint(100,170),\
-                                    wxSize(BWidth, BHeight))
-        self.vargrid = wxGrid(self,-1,size=(480,130),pos=(10,10))
+	
+	self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
+	self.m_mgr = wx.aui.AuiManager()
+	self.m_mgr.SetManagedWindow( self )
+	
+	self.m_panel1 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+	
+	bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
+		
+	okaybutton = wx.Button(self.m_panel1 , 2001, "Okay", wx.DefaultPosition, wx.DefaultSize, 0 )
+        cancelbutton = wx.Button(self.m_panel1 , 2002, "Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
+	
+	bSizer2.Add( okaybutton, 0, wx.ALL, 5 )
+	bSizer2.Add( cancelbutton , 0, wx.ALL, 5 )
+	
+	self.m_panel1.SetSizer( bSizer2 )
+	self.m_panel1.Layout()
+	bSizer2.Fit( self.m_panel1 )
+	self.m_mgr.AddPane( self.m_panel1, wx.aui.AuiPaneInfo().Bottom().
+	                    CaptionVisible( False ).CloseButton( False ).PaneBorder( False ).
+	                    Dock().Resizable().FloatingSize( wx.Size( 170,54 ) ).
+	                    DockFixed( False ).LeftDockable( False ).RightDockable( False ).
+	                    MinSize( wx.Size( -1,30 ) ).Layer( 10 ) )
+	
+	
+	self.m_grid1 = wx.grid.Grid( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
+	self.vargrid = wx.grid.Grid(self,-1,) #
         self.vargrid.SetRowLabelSize(120)
         self.vargrid.SetDefaultRowSize(27, True)
         maxcols = frame.grid.m_grid.GetNumberCols()
@@ -1107,8 +1127,14 @@ class VariablesFrame(wx.Dialog):
         self.vargrid.SetRowLabelValue(0,"Variable Name")
         self.vargrid.SetRowLabelValue(1,"Decimal Places")
         self.vargrid.SetRowLabelValue(2,"Missing Value")
-        EVT_BUTTON(self, 2001, self.OnOkayVariables)
-        EVT_BUTTON(self, 2002, self.OnCloseVariables)
+	
+	self.m_mgr.AddPane( self.vargrid, wx.aui.AuiPaneInfo() .Left() .CaptionVisible( False ).PaneBorder( False ).Dock().Resizable().FloatingSize( wx.DefaultSize ).DockFixed( False ).CentrePane() )
+
+	self.m_mgr.Update()
+	self.Centre( wx.BOTH )
+	
+        self.Bind(wx.EVT_BUTTON, self.OnOkayVariables, id= 2001)
+        self.Bind(wx.EVT_BUTTON, self.OnCloseVariables, id =  2002)
 
     # this method needs to work out the other variables too
     def OnOkayVariables(self, event):
@@ -1265,6 +1291,8 @@ class OutputSheet(wx.Frame):
         self.Bind(wx.EVT_MENU, frame.GoHelpWizardFrame, id =  ID_HELP_WIZARD)
         self.Bind(wx.EVT_MENU, frame.GoHelpTopicsFrame, id = ID_HELP_TOPICS)
         self.Bind(wx.EVT_MENU, frame.GoHelpLicenceFrame, id  = ID_HELP_LICENCE)
+        
+        
         self.Bind(wx.EVT_TOOL_ENTER, self.ClearAll,  id = 401)
         self.Bind(wx.EVT_TOOL_ENTER, self.htmlpage.LoadHtmlPage, id = 402)
         self.Bind(wx.EVT_TOOL_ENTER, self.htmlpage.SaveHtmlPage, id =  403)
@@ -2390,8 +2418,8 @@ class DataFrame(wx.Frame):
         #----------------------
         # se crea una barra de herramientas
         # Get icons for toolbar
-        NewIcon =  images.getNewBitmap()
-        OpenIcon = images.getOpenBitmap()
+        NewIcon =    images.getNewBitmap()
+        OpenIcon =   images.getOpenBitmap()
         SaveIcon =   images.getSaveBitmap()
         SaveAsIcon = images.getSaveAsBitmap()
         PrintIcon =  images.getPrintBitmap()
@@ -2404,16 +2432,16 @@ class DataFrame(wx.Frame):
         tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
                              agwStyle=  aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_OVERFLOW)
         
-        tb1.AddSimpleTool(10, "New",NewIcon,"New")
-        tb1.AddSimpleTool(20, "Open",OpenIcon,"Open")
-        tb1.AddSimpleTool(30, "Save",SaveIcon,"Save")
-        tb1.AddSimpleTool(40, "Save As",SaveAsIcon,"Save As")
-        tb1.AddSimpleTool(50, "Print",PrintIcon,"Print")
-        tb1.AddSimpleTool(60, "Cut",CutIcon, "Cut")
-        tb1.AddSimpleTool(70, "Copy",CopyIcon, "Copy")
-        tb1.AddSimpleTool(80, "Paste",PasteIcon, "Paste")
-        tb1.AddSimpleTool(85, "Preferences",PrefsIcon, "Preferences")
-        tb1.AddSimpleTool(90, "Help",HelpIcon, "Help")
+        self.bt1 = tb1.AddSimpleTool(10, "New",  NewIcon,"New")
+        self.bt2 = tb1.AddSimpleTool(20, "Open", OpenIcon,"Open")
+        self.bt3 = tb1.AddSimpleTool(30, "Save", SaveIcon,"Save")
+        self.bt4 = tb1.AddSimpleTool(40, "Save As",SaveAsIcon,"Save As")
+        self.bt5 = tb1.AddSimpleTool(50, "Print",PrintIcon,"Print")
+        self.bt6 = tb1.AddSimpleTool(60, "Cut",  CutIcon, "Cut")
+        self.bt7 = tb1.AddSimpleTool(70, "Copy", CopyIcon, "Copy")
+        self.bt8 = tb1.AddSimpleTool(80, "Paste",PasteIcon, "Paste")
+        self.bt9 = tb1.AddSimpleTool(85, "Preferences",PrefsIcon, "Preferences")
+        self.bt10= tb1.AddSimpleTool(90, "Help", HelpIcon, "Help")
         tb1.SetToolBitmapSize((24,24))
         # more toolbuttons are needed: New Output, Save, Print, Cut, \
         # Variables, and Wizard creates the toolbar
@@ -2439,56 +2467,56 @@ class DataFrame(wx.Frame):
         self.BindEvents()
  
     def BindEvents(self):
-        #...and some events!
-        self.Bind(wx.EVT_MENU , self.GoClearData, id=ID_FILE_NEW)
-        self.Bind(wx.EVT_TOOL_ENTER, self.GoClearData, id=10) ### VERUIFICAr
-        #self.Bind(wx.EVT_MENU, ID_FILE_NEWOUTPUT, self.GoNewOutputSheet)
-        # unsure if I want this - maybe restrict user to just one?
-        self.Bind(wx.EVT_MENU, self.grid.SaveDataASCII, id= ID_FILE_SAVE)
-        self.Bind(wx.EVT_TOOL_ENTER, self.grid.SaveDataASCII, id =  30)
-        self.Bind(wx.EVT_MENU,  self.grid.SaveAsDataASCII, id=ID_FILE_SAVEAS)
-        self.Bind(wx.EVT_TOOL_ENTER, self.grid.SaveAsDataASCII, id= 40)
-        self.Bind(wx.EVT_MENU, self.grid.LoadDataASCII, id= ID_FILE_OPEN)
-        #self.Bind(wx.EVT_MENU, ID_FILE_OPEN, self.grid.LoadNumericData)
-        self.Bind(wx.EVT_TOOL_ENTER, self.grid.LoadDataASCII, id = 20)
-        #EVT_TOOL(self, 20, self.grid.LoadNumericData)
-        self.Bind(wx.EVT_MENU, self.grid.CutData, id=ID_EDIT_CUT)
-        self.Bind(wx.EVT_TOOL_ENTER, self.grid.CutData, id= 60)
-        self.Bind(wx.EVT_MENU, self.grid.CopyData, id=ID_EDIT_COPY)
-        self.Bind(wx.EVT_TOOL_ENTER, self.grid.CopyData, id = 70)
-        self.Bind(wx.EVT_MENU, self.grid.PasteData, id=ID_EDIT_PASTE)
-        self.Bind(wx.EVT_TOOL_ENTER,  self.grid.PasteData, id = 80)
-        self.Bind(wx.EVT_MENU, self.grid.SelectAllCells, id=ID_EDIT_SELECTALL)
-        self.Bind(wx.EVT_MENU, self.GoFindDialog, id = ID_EDIT_FIND)
-        self.Bind(wx.EVT_MENU, self.grid.DeleteCurrentCol, id=ID_EDIT_DELETECOL)
-        self.Bind(wx.EVT_MENU, self.grid.DeleteCurrentRow, id=ID_EDIT_DELETEROW)
-        self.Bind(wx.EVT_MENU, self.GoVariablesFrame, id=ID_PREF_VARIABLES)
-        self.Bind(wx.EVT_TOOL_ENTER, self.GoVariablesFrame, id = 85)
-        self.Bind(wx.EVT_MENU, self.GoEditGrid, id=ID_PREF_GRID)
-        self.Bind(wx.EVT_MENU, self.GoGridPrefFrame, id=ID_PREF_CELLS)
-        self.Bind(wx.EVT_MENU, self.GoFontPrefsDialog, id=ID_PREF_FONTS)
+        self.Bind(wx.EVT_MENU, self.GoClearData,        id = self.bt1.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.SaveDataASCII, id = self.bt3.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.SaveAsDataASCII,id= self.bt4.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.LoadDataASCII, id = self.bt2.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.CutData,       id = self.bt6.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.CopyData,      id = self.bt7.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.PasteData,     id = self.bt8.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.SelectAllCells,id = ID_EDIT_SELECTALL)
+        self.Bind(wx.EVT_MENU, self.GoFindDialog,       id = ID_EDIT_FIND)
+        self.Bind(wx.EVT_MENU, self.grid.DeleteCurrentCol,id=ID_EDIT_DELETECOL)
+        self.Bind(wx.EVT_MENU, self.grid.DeleteCurrentRow,id=ID_EDIT_DELETEROW)
+        self.Bind(wx.EVT_MENU, self.GoVariablesFrame,   id = ID_PREF_VARIABLES)
+        self.Bind(wx.EVT_MENU, self.GoEditGrid,         id = ID_PREF_GRID)
+        self.Bind(wx.EVT_MENU, self.GoGridPrefFrame,    id = ID_PREF_CELLS)
+        self.Bind(wx.EVT_MENU, self.GoFontPrefsDialog,  id = ID_PREF_FONTS)
         self.Bind(wx.EVT_MENU, self.GoContinuousDescriptives, id=ID_PREPARATION_DESCRIPTIVES)
-        self.Bind(wx.EVT_MENU, self.GoTransformData, id=ID_PREPARATION_TRANSFORM)
-        self.Bind(wx.EVT_MENU, self.GoCheckOutliers, id=ID_PREPARATION_OUTLIERS)
-        self.Bind(wx.EVT_MENU, self.GoOneConditionTest, id=ID_ANALYSE_1COND)
-        self.Bind(wx.EVT_MENU, self.GoTwoConditionTest, id=ID_ANALYSE_2COND)
-        self.Bind(wx.EVT_MENU, self.GetThreeConditionTest, id=ID_ANALYSE_3COND)
-        self.Bind(wx.EVT_MENU, self.GetCorrelationsTest, id=ID_ANALYSE_CORRELATION)
+        self.Bind(wx.EVT_MENU, self.GoTransformData,    id = ID_PREPARATION_TRANSFORM)
+        self.Bind(wx.EVT_MENU, self.GoCheckOutliers,    id = ID_PREPARATION_OUTLIERS)
+        self.Bind(wx.EVT_MENU, self.GoOneConditionTest, id = ID_ANALYSE_1COND)
+        self.Bind(wx.EVT_MENU, self.GoTwoConditionTest, id = ID_ANALYSE_2COND)
+        self.Bind(wx.EVT_MENU, self.GetThreeConditionTest,id=ID_ANALYSE_3COND)
+        self.Bind(wx.EVT_MENU, self.GetCorrelationsTest,id = ID_ANALYSE_CORRELATION)
         #self.Bind(wx.EVT_MENU, ID_ANALYSE_2FACT, self.GoMFanovaFrame)
-        self.Bind(wx.EVT_MENU, self.GoScriptWindow, id=ID_ANALYSE_SCRIPT)
-        self.Bind(wx.EVT_MENU, self.GoChartWindow, id=ID_CHART_DRAW)
-        self.Bind(wx.EVT_MENU, self.GoBarChartWindow, id=ID_BARCHART_DRAW)
-        self.Bind(wx.EVT_MENU, self.GoHelpAboutFrame, id=ID_HELP_ABOUT)
-        self.Bind(wx.EVT_MENU, self.GoHelpWizardFrame, id=ID_HELP_WIZARD)
-        self.Bind(wx.EVT_MENU, self.GoHelpTopicsFrame, id=ID_HELP_TOPICS)
-        self.Bind(wx.EVT_TOOL_ENTER,self.GoHelpAboutFrame, id = 90)
-        self.Bind(wx.EVT_MENU, self.GoHelpLicenceFrame, id=ID_HELP_LICENCE)
-        self.Bind(wx.EVT_MENU, self.EndApplication, id=ID_FILE_EXIT)
+        self.Bind(wx.EVT_MENU, self.GoScriptWindow,     id = ID_ANALYSE_SCRIPT)
+        self.Bind(wx.EVT_MENU, self.GoChartWindow,      id = ID_CHART_DRAW)
+        self.Bind(wx.EVT_MENU, self.GoBarChartWindow,   id = ID_BARCHART_DRAW)
+        self.Bind(wx.EVT_MENU, self.GoHelpAboutFrame,   id = ID_HELP_ABOUT)
+        self.Bind(wx.EVT_MENU, self.GoHelpWizardFrame,  id = ID_HELP_WIZARD)
+        self.Bind(wx.EVT_MENU, self.GoHelpTopicsFrame,  id = ID_HELP_TOPICS)
+        self.Bind(wx.EVT_MENU, self.GoHelpLicenceFrame, id = ID_HELP_LICENCE)
+        self.Bind(wx.EVT_MENU, self.EndApplication,     id = ID_FILE_EXIT)
+        
+        self.Bind(wx.EVT_MENU, self.GoClearData, id=10) ### VERUIFICAr
+        # self.Bind(wx.EVT_MENU, ID_FILE_NEWOUTPUT, self.GoNewOutputSheet)
+        # unsure if I want this - maybe restrict user to just one?
+        self.Bind(wx.EVT_MENU, self.grid.SaveDataASCII, id =  30)
+        self.Bind(wx.EVT_MENU, self.grid.SaveAsDataASCII, id= 40)
+        #self.Bind(wx.EVT_MENU, ID_FILE_OPEN, self.grid.LoadNumericData)
+        self.Bind(wx.EVT_MENU, self.grid.LoadDataASCII, id = 20)
+        #EVT_TOOL(self, 20, self.grid.LoadNumericData)
+        self.Bind(wx.EVT_MENU, self.grid.CutData, id= 60)
+        self.Bind(wx.EVT_MENU, self.grid.CopyData, id = 70)
+        self.Bind(wx.EVT_MENU,  self.grid.PasteData, id = 80)
+        self.Bind(wx.EVT_MENU, self.GoVariablesFrame, id = 85)
+        self.Bind(wx.EVT_MENU,self.GoHelpAboutFrame, id = 90)
         ##self.Bind(EVT_CLOSE, self, self.EndApplication)
 
     def GoClearData(self, evt):
         #shows a new data entry frame
-        self.grid.ClearGrid()
+        self.grid.m_grid.ClearGrid()
 
     def GoNewOutputSheet(self, evt):
         #shows a new output frame
