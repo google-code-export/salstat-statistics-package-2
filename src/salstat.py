@@ -15,6 +15,7 @@ import os
 from grid import MyGrid, MyContextGrid
 from matplotlib import mlab
 
+import wx.html
 import wx.aui
 import wx.lib.agw.aui as aui
 
@@ -163,7 +164,7 @@ class SaveDialog(wx.Dialog):
         l2 = wx.StaticText(self, -1, 'Do you wish to save it?')
         vbox.Add(l1,1, wx.ALIGN_CENTER)
         vbox.Add(l2,1, wx.ALIGN_CENTER)
-        hbox = wx.BoxSizer(wx.ALIGN_CENTER_HORIZONTAL)
+        hbox = wx.BoxSizer(wx.VERTICAL)
         saveButton = wx.Button(self, 331, "Save...", size=(BWidth, BHeight))
         discardButton = wx.Button(self, 332, "Discard", size=(BWidth, BHeight))
         CancelButton = wx.Button(self, 333, "Cancel", size=(BWidth, BHeight))
@@ -542,9 +543,9 @@ class SimpleGrid(MyGrid):# wxGrid
 
     def GetColsUsedList(self):
         colsusedlist = []
-        for i in range(self.GetNumberCols()):
+        for i in range(self.m_grid.GetNumberCols()):
             try:
-                tmp = float(self.GetCellValue(0,i))
+                tmp = float(self.m_grid.GetCellValue(0,i))
                 colsusedlist.append(i)
             except ValueError:
                 colsusedlist.append(0)
@@ -552,10 +553,10 @@ class SimpleGrid(MyGrid):# wxGrid
 
     def GetUsedRows(self):
         RowsUsed = []
-        for i in range(self.GetNumberCols()):
-            if (self.GetCellValue(0, i) != ''):
-                for j in range(self.GetNumberRows()):
-                    if (self.GetCellValue(j,i) == ''):
+        for i in range(self.m_grid.GetNumberCols()):
+            if (self.m_grid.GetCellValue(0, i) != ''):
+                for j in range(self.m_grid.GetNumberRows()):
+                    if (self.m_grid.GetCellValue(j,i) == ''):
                         RowsUsed.append(j)
                         break
         return RowsUsed
@@ -1281,7 +1282,7 @@ class OutputSheet(wx.Frame):
         self.SetStatusText('SalStat Statistics')
         self.htmlpage = MyHtmlWindow(self, -1)
         self.htmlpage.Addhtml('<P><B>SalStat Statistics</B></P>')
-        ##self.printer = wx.html.html()
+        self.printer = wx.html
         self.Bind(wx.EVT_MENU, self.htmlpage.SaveHtmlPage, id = ID_FILE_SAVEAS)
         ##EVT_CLOSE(self, self.DoNothing)
         self.Bind(wx.EVT_MENU, self.ClearAll, id = ID_FILE_NEW, )
@@ -2360,45 +2361,45 @@ class DataFrame(wx.Frame):
         chart_menu = wx.Menu()
         help_menu = wx.Menu()
         #add contents of menu
-        file_menu.Append(ID_FILE_NEW,'&New Data')
+        self.mn1= file_menu.Append(ID_FILE_NEW,'&New Data')
         #file_menu.Append(ID_FILE_NEWOUTPUT, 'New &Output Sheet')
-        file_menu.Append(ID_FILE_OPEN, '&Open...')
-        file_menu.Append(ID_FILE_SAVE, '&Save')
-        file_menu.Append(ID_FILE_SAVEAS, 'Save &As...')
+        self.mn2=file_menu.Append(ID_FILE_OPEN, '&Open...')
+        self.mn3=file_menu.Append(ID_FILE_SAVE, '&Save')
+        self.mn4=file_menu.Append(ID_FILE_SAVEAS, 'Save &As...')
+        self.mn5=file_menu.AppendSeparator()
+        self.mn6=file_menu.Append(ID_FILE_PRINT, '&Print...')
         file_menu.AppendSeparator()
-        file_menu.Append(ID_FILE_PRINT, '&Print...')
-        file_menu.AppendSeparator()
-        file_menu.Append(ID_FILE_EXIT, 'E&xit')
-        edit_menu.Append(ID_EDIT_CUT, 'Cu&t')
-        edit_menu.Append(ID_EDIT_COPY, '&Copy')
-        edit_menu.Append(ID_EDIT_PASTE, '&Paste')
-        edit_menu.Append(ID_EDIT_SELECTALL, 'Select &All')
-        edit_menu.Append(ID_EDIT_FIND, '&Find and Replace...')
+        self.mn7=file_menu.Append(ID_FILE_EXIT, 'E&xit')
+        self.mn8=edit_menu.Append(ID_EDIT_CUT, 'Cu&t')
+        self.mn9=edit_menu.Append(ID_EDIT_COPY, '&Copy')
+        self.mn10=edit_menu.Append(ID_EDIT_PASTE, '&Paste')
+        self.mn11=edit_menu.Append(ID_EDIT_SELECTALL, 'Select &All')
+        self.mn12=edit_menu.Append(ID_EDIT_FIND, '&Find and Replace...')
         edit_menu.AppendSeparator()
-        edit_menu.Append(ID_EDIT_DELETECOL, 'Delete Current Column')
-        edit_menu.Append(ID_EDIT_DELETEROW, 'Delete Current Row')
-        prefs_menu.Append(ID_PREF_VARIABLES, 'Variables...')
-        prefs_menu.Append(ID_PREF_GRID, 'Add Columns and Rows...')
-        prefs_menu.Append(ID_PREF_CELLS, 'Change Cell Size...')
-        prefs_menu.Append(ID_PREF_FONTS, 'Change the Font...')
-        preparation_menu.Append(ID_PREPARATION_DESCRIPTIVES, 'Descriptive Statistics...')
-        preparation_menu.Append(ID_PREPARATION_TRANSFORM, 'Transform Data...')
+        self.mn13=edit_menu.Append(ID_EDIT_DELETECOL, 'Delete Current Column')
+        self.mn14=edit_menu.Append(ID_EDIT_DELETEROW, 'Delete Current Row')
+        self.mn15=prefs_menu.Append(ID_PREF_VARIABLES, 'Variables...')
+        self.mn16=prefs_menu.Append(ID_PREF_GRID, 'Add Columns and Rows...')
+        self.mn17=prefs_menu.Append(ID_PREF_CELLS, 'Change Cell Size...')
+        self.mn18=prefs_menu.Append(ID_PREF_FONTS, 'Change the Font...')
+        self.mn19=preparation_menu.Append(ID_PREPARATION_DESCRIPTIVES, 'Descriptive Statistics...')
+        self.mn20=preparation_menu.Append(ID_PREPARATION_TRANSFORM, 'Transform Data...')
         #preparation_menu.Append(ID_PREPARATION_OUTLIERS, 'Check for Outliers...')
         #preparation_menu.Append(ID_PREPARATION_NORMALITY, 'Check for Normal Distribution...')
-        analyse_menu.Append(ID_ANALYSE_1COND, '&1 Condition Tests...')
-        analyse_menu.Append(ID_ANALYSE_2COND, '&2 Condition Tests...')
-        analyse_menu.Append(ID_ANALYSE_3COND, '&3+ Condition Tests...')
-        analyse_menu.Append(ID_ANALYSE_CORRELATION,'&Correlations...')
+        self.mn21=analyse_menu.Append(ID_ANALYSE_1COND, '&1 Condition Tests...')
+        self.mn22=analyse_menu.Append(ID_ANALYSE_2COND, '&2 Condition Tests...')
+        self.mn23=analyse_menu.Append(ID_ANALYSE_3COND, '&3+ Condition Tests...')
+        self.mn24=analyse_menu.Append(ID_ANALYSE_CORRELATION,'&Correlations...')
         #analyse_menu.Append(ID_ANALYSE_2FACT, '2+ &Factor Tests...')
         analyse_menu.AppendSeparator()
-        analyse_menu.Append(ID_ANALYSE_SCRIPT, 'Scripting Window...')
-        chart_menu.Append(ID_CHART_DRAW, 'Line Chart of All Means...')
+        self.mn25=analyse_menu.Append(ID_ANALYSE_SCRIPT, 'Scripting Window...')
+        self.mn26=chart_menu.Append(ID_CHART_DRAW, 'Line Chart of All Means...')
         # the bar chart is *not* ready yet!
-        chart_menu.Append(ID_BARCHART_DRAW, 'Bar Chart of All Means...')
-        help_menu.Append(ID_HELP_WIZARD, '&What Test Should I Use...')
-        help_menu.Append(ID_HELP_TOPICS, '&Topics...')
-        help_menu.Append(ID_HELP_LICENCE, '&Licence...')
-        help_menu.Append(ID_HELP_ABOUT, '&About...')
+        self.mn27=chart_menu.Append(ID_BARCHART_DRAW, 'Bar Chart of All Means...')
+        self.mn28=help_menu.Append(ID_HELP_WIZARD, '&What Test Should I Use...')
+        self.mn29=help_menu.Append(ID_HELP_TOPICS, '&Topics...')
+        self.mn30=help_menu.Append(ID_HELP_LICENCE, '&Licence...')
+        self.mn31=help_menu.Append(ID_HELP_ABOUT, '&About...')
         #set up menu bar
         menuBar = wx.MenuBar()
         menuBar.Append(file_menu, '&File')
@@ -2467,52 +2468,84 @@ class DataFrame(wx.Frame):
         self.BindEvents()
 
     def BindEvents(self):
+        #-----------------
+        # para el toolbar
         self.Bind(wx.EVT_MENU, self.GoClearData,        id = self.bt1.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.LoadDataASCII, id = self.bt2.GetId())
         self.Bind(wx.EVT_MENU, self.grid.SaveDataASCII, id = self.bt3.GetId())
         self.Bind(wx.EVT_MENU, self.grid.SaveAsDataASCII,id= self.bt4.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.LoadDataASCII, id = self.bt2.GetId())
+        ##self.Bind(wx.EVT_MENU, self.grid.PrintPage, id = self.bt5.GetId())
         self.Bind(wx.EVT_MENU, self.grid.CutData,       id = self.bt6.GetId())
         self.Bind(wx.EVT_MENU, self.grid.CopyData,      id = self.bt7.GetId())
         self.Bind(wx.EVT_MENU, self.grid.PasteData,     id = self.bt8.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.SelectAllCells,id = ID_EDIT_SELECTALL)
-        self.Bind(wx.EVT_MENU, self.GoFindDialog,       id = ID_EDIT_FIND)
-        self.Bind(wx.EVT_MENU, self.grid.DeleteCurrentCol,id=ID_EDIT_DELETECOL)
-        self.Bind(wx.EVT_MENU, self.grid.DeleteCurrentRow,id=ID_EDIT_DELETEROW)
-        self.Bind(wx.EVT_MENU, self.GoVariablesFrame,   id = ID_PREF_VARIABLES)
-        self.Bind(wx.EVT_MENU, self.GoEditGrid,         id = ID_PREF_GRID)
-        self.Bind(wx.EVT_MENU, self.GoGridPrefFrame,    id = ID_PREF_CELLS)
-        self.Bind(wx.EVT_MENU, self.GoFontPrefsDialog,  id = ID_PREF_FONTS)
-        self.Bind(wx.EVT_MENU, self.GoContinuousDescriptives, id=ID_PREPARATION_DESCRIPTIVES)
-        self.Bind(wx.EVT_MENU, self.GoTransformData,    id = ID_PREPARATION_TRANSFORM)
-        self.Bind(wx.EVT_MENU, self.GoCheckOutliers,    id = ID_PREPARATION_OUTLIERS)
-        self.Bind(wx.EVT_MENU, self.GoOneConditionTest, id = ID_ANALYSE_1COND)
-        self.Bind(wx.EVT_MENU, self.GoTwoConditionTest, id = ID_ANALYSE_2COND)
-        self.Bind(wx.EVT_MENU, self.GetThreeConditionTest,id=ID_ANALYSE_3COND)
-        self.Bind(wx.EVT_MENU, self.GetCorrelationsTest,id = ID_ANALYSE_CORRELATION)
-        #self.Bind(wx.EVT_MENU, ID_ANALYSE_2FACT, self.GoMFanovaFrame)
-        self.Bind(wx.EVT_MENU, self.GoScriptWindow,     id = ID_ANALYSE_SCRIPT)
-        self.Bind(wx.EVT_MENU, self.GoChartWindow,      id = ID_CHART_DRAW)
-        self.Bind(wx.EVT_MENU, self.GoBarChartWindow,   id = ID_BARCHART_DRAW)
-        self.Bind(wx.EVT_MENU, self.GoHelpAboutFrame,   id = ID_HELP_ABOUT)
-        self.Bind(wx.EVT_MENU, self.GoHelpWizardFrame,  id = ID_HELP_WIZARD)
-        self.Bind(wx.EVT_MENU, self.GoHelpTopicsFrame,  id = ID_HELP_TOPICS)
-        self.Bind(wx.EVT_MENU, self.GoHelpLicenceFrame, id = ID_HELP_LICENCE)
-        self.Bind(wx.EVT_MENU, self.EndApplication,     id = ID_FILE_EXIT)
-
-        self.Bind(wx.EVT_MENU, self.GoClearData, id=10) ### VERUIFICAr
-        # self.Bind(wx.EVT_MENU, ID_FILE_NEWOUTPUT, self.GoNewOutputSheet)
-        # unsure if I want this - maybe restrict user to just one?
-        self.Bind(wx.EVT_MENU, self.grid.SaveDataASCII, id =  30)
-        self.Bind(wx.EVT_MENU, self.grid.SaveAsDataASCII, id= 40)
-        #self.Bind(wx.EVT_MENU, ID_FILE_OPEN, self.grid.LoadNumericData)
-        self.Bind(wx.EVT_MENU, self.grid.LoadDataASCII, id = 20)
-        #EVT_TOOL(self, 20, self.grid.LoadNumericData)
-        self.Bind(wx.EVT_MENU, self.grid.CutData, id= 60)
-        self.Bind(wx.EVT_MENU, self.grid.CopyData, id = 70)
-        self.Bind(wx.EVT_MENU,  self.grid.PasteData, id = 80)
-        self.Bind(wx.EVT_MENU, self.GoVariablesFrame, id = 85)
-        self.Bind(wx.EVT_MENU,self.GoHelpAboutFrame, id = 90)
-        ##self.Bind(EVT_CLOSE, self, self.EndApplication)
+        self.Bind(wx.EVT_MENU, self.GoVariablesFrame,   id = self.bt9.GetId())# 85
+        self.Bind(wx.EVT_MENU, self.GoHelpAboutFrame,   id = self.bt10.GetId())# 90
+        #-----------------
+        # Menu 
+        self.Bind(wx.EVT_MENU, self.GoClearData,id = self.mn1.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.LoadDataASCII,id = self.mn2.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.SaveDataASCII,id = self.mn3.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.SaveAsDataASCII,id = self.mn4.GetId())
+        ##self.Bind(wx.EVT_MENU, seelf.grid.SaveAsDataASCII,id = ID_FILE_PRINT)
+        self.Bind(wx.EVT_MENU, self.EndApplication,id = self.mn7.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.CutData,id = self.mn8.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.CopyData,id = self.mn9.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.PasteData,id = self.mn10.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.SelectAllCells,id = self.mn11.GetId())
+        self.Bind(wx.EVT_MENU, self.GoFindDialog,id = self.mn12.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.DeleteCurrentCol,id = self.mn13.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.DeleteCurrentRow,id = self.mn14.GetId())
+        self.Bind(wx.EVT_MENU, self.GoVariablesFrame,id = self.mn15.GetId())
+        self.Bind(wx.EVT_MENU, self.GoEditGrid,id = self.mn16.GetId())
+        self.Bind(wx.EVT_MENU, self.GoGridPrefFrame,id = self.mn17.GetId())
+        self.Bind(wx.EVT_MENU, self.GoFontPrefsDialog,id = self.mn18.GetId())
+        self.Bind(wx.EVT_MENU, self.GoContinuousDescriptives,id = self.mn19.GetId())
+        self.Bind(wx.EVT_MENU, self.GoTransformData,id = self.mn20.GetId())
+        self.Bind(wx.EVT_MENU, self.GoOneConditionTest,id = self.mn21.GetId())
+        self.Bind(wx.EVT_MENU, self.GoTwoConditionTest,id = self.mn22.GetId())
+        self.Bind(wx.EVT_MENU, self.GetThreeConditionTest,id = self.mn23.GetId())
+        self.Bind(wx.EVT_MENU, self.GetCorrelationsTest,id = self.mn24.GetId())
+        if 0:
+            self.Bind(wx.EVT_MENU, self.grid.SelectAllCells,id = ID_EDIT_SELECTALL)
+            self.Bind(wx.EVT_MENU, self.GoFindDialog,       id = ID_EDIT_FIND)
+            self.Bind(wx.EVT_MENU, self.grid.DeleteCurrentCol,id=ID_EDIT_DELETECOL)
+            self.Bind(wx.EVT_MENU, self.grid.DeleteCurrentRow,id=ID_EDIT_DELETEROW)
+            self.Bind(wx.EVT_MENU, self.GoVariablesFrame,   id = ID_PREF_VARIABLES)
+            self.Bind(wx.EVT_MENU, self.GoEditGrid,         id = ID_PREF_GRID)
+            self.Bind(wx.EVT_MENU, self.GoGridPrefFrame,    id = ID_PREF_CELLS)
+            self.Bind(wx.EVT_MENU, self.GoFontPrefsDialog,  id = ID_PREF_FONTS)
+            self.Bind(wx.EVT_MENU, self.GoContinuousDescriptives, id=ID_PREPARATION_DESCRIPTIVES)
+            self.Bind(wx.EVT_MENU, self.GoTransformData,    id = ID_PREPARATION_TRANSFORM)
+            self.Bind(wx.EVT_MENU, self.GoCheckOutliers,    id = ID_PREPARATION_OUTLIERS)
+            self.Bind(wx.EVT_MENU, self.GoOneConditionTest, id = ID_ANALYSE_1COND)
+            self.Bind(wx.EVT_MENU, self.GoTwoConditionTest, id = ID_ANALYSE_2COND)
+            self.Bind(wx.EVT_MENU, self.GetThreeConditionTest,id=ID_ANALYSE_3COND)
+            self.Bind(wx.EVT_MENU, self.GetCorrelationsTest,id = ID_ANALYSE_CORRELATION)
+            #self.Bind(wx.EVT_MENU, ID_ANALYSE_2FACT, self.GoMFanovaFrame)
+            self.Bind(wx.EVT_MENU, self.GoScriptWindow,     id = ID_ANALYSE_SCRIPT)
+            self.Bind(wx.EVT_MENU, self.GoChartWindow,      id = ID_CHART_DRAW)
+            self.Bind(wx.EVT_MENU, self.GoBarChartWindow,   id = ID_BARCHART_DRAW)
+            self.Bind(wx.EVT_MENU, self.GoHelpAboutFrame,   id = ID_HELP_ABOUT)
+            self.Bind(wx.EVT_MENU, self.GoHelpWizardFrame,  id = ID_HELP_WIZARD)
+            self.Bind(wx.EVT_MENU, self.GoHelpTopicsFrame,  id = ID_HELP_TOPICS)
+            self.Bind(wx.EVT_MENU, self.GoHelpLicenceFrame, id = ID_HELP_LICENCE)
+            self.Bind(wx.EVT_MENU, self.EndApplication,     id = ID_FILE_EXIT)
+            
+            
+            self.Bind(wx.EVT_MENU, self.GoClearData, id=10) ### VERIFICAR
+            # self.Bind(wx.EVT_MENU, ID_FILE_NEWOUTPUT, self.GoNewOutputSheet)
+            # unsure if I want this - maybe restrict user to just one?
+            self.Bind(wx.EVT_MENU, self.grid.SaveDataASCII, id =  30)
+            self.Bind(wx.EVT_MENU, self.grid.SaveAsDataASCII, id= 40)
+            #self.Bind(wx.EVT_MENU, ID_FILE_OPEN, self.grid.LoadNumericData)
+            self.Bind(wx.EVT_MENU, self.grid.LoadDataASCII, id = 20)
+            #EVT_TOOL(self, 20, self.grid.LoadNumericData)
+            self.Bind(wx.EVT_MENU, self.grid.CutData, id= 60)
+            self.Bind(wx.EVT_MENU, self.grid.CopyData, id = 70)
+            self.Bind(wx.EVT_MENU,  self.grid.PasteData, id = 80)
+            
+            
+            ##self.Bind(EVT_CLOSE, self, self.EndApplication)
 
     def GoClearData(self, evt):
         #shows a new data entry frame
