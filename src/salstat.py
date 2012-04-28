@@ -645,7 +645,7 @@ class SimpleGrid(MyGrid):# wxGrid
                 #, wxOPEN)
         icon = images.getIconIcon()
         dlg.SetIcon(icon)
-        if dlg.ShowModal() == wx.ID_OK:
+        if dlg.ShowModal() == wx.ID_OK: # ShowModal
             filename = dlg.GetPath()
             if filename[-3:] == 'xml':
                 self.LoadNativeXML(filename)
@@ -848,10 +848,10 @@ class SimpleGrid(MyGrid):# wxGrid
 
 #---------------------------------------------------------------------------
 # DescChoice-wxCheckListBox with list of descriptive stats in it
-class DescChoiceBox(wx.CheckBox): # CheckListBox
+class DescChoiceBox(wx.CheckListBox): # CheckListBox
     def __init__(self, parent, id):
-        wxCheckListBox.__init__(self, parent, -1, pos=(250,30), \
-                                size=(240,310), choices=DescList)
+        wx.CheckListBox.__init__( self, parent, -1,
+                        wx.DefaultPosition, wx.DefaultSize, DescList)
 
     def SelectAllDescriptives(self, event):
         for i in range(len(DescList)):
@@ -869,20 +869,20 @@ class EditGridFrame(wx.Dialog):
                            size=(205, 100+wind))
         icon = images.getIconIcon()
         self.SetIcon(icon)
-        l1 = wxStaticText(self, -1, 'Add Columns',pos=(10,15))
-        l2 = wxStaticText(self, -1, 'Add Rows',pos=(10,55))
-        self.numnewcols = wxSpinCtrl(self, -1, "", wxPoint(110,10), wxSize(80,25))
+        l1 = wx.StaticText(self, -1, 'Add Columns',pos=(10,15))
+        l2 = wx.StaticText(self, -1, 'Add Rows',pos=(10,55))
+        self.numnewcols = wx.SpinCtrl(self, -1, "", wx.Point(110,10), wx.Size(80,25))
         self.numnewcols.SetRange(0, 100)
         self.numnewcols.SetValue(0)
-        self.numnewRows = wxSpinCtrl(self, -1, "", wxPoint(110, 50), wxSize(80,25))
+        self.numnewRows = wx.SpinCtrl(self, -1, "", wx.Point(110, 50), wx.Size(80,25))
         self.numnewRows.SetRange(0, 100)
         self.numnewRows.SetValue(0)
-        okaybutton = wxButton(self, 421, "Okay", wxPoint(10, 90),\
-                              wxSize(BWidth, BHeight))
-        cancelbutton = wxButton(self, 422, "Cancel", wxPoint(110,90), \
-                                wxSize(BWidth, BHeight))
-        EVT_BUTTON(self, 421, self.OkayButtonPressed)
-        EVT_BUTTON(self, 422, self.CancelButtonPressed)
+        okaybutton = wx.Button(self, 421, "Okay", wx.Point(10, 90),\
+                              wx.Size(BWidth, BHeight))
+        cancelbutton = wx.Button(self, 422, "Cancel", wx.Point(110,90), \
+                                wx.Size(BWidth, BHeight))
+        self.Bind(wx.EVT_BUTTON, self.OkayButtonPressed, id = 421)
+        self.Bind(wx.EVT_BUTTON, self.CancelButtonPressed, id= 422)
 
     def OkayButtonPressed(self, event):
         colswanted = self.numnewcols.GetValue()
@@ -1327,40 +1327,55 @@ class OutputSheet(wx.Frame):
 #---------------------------------------------------------------------------
 # user selects which cols to analyse, and what stats to have
 class DescriptivesFrame(wx.Dialog):
-    def __init__(self, parent, id):
-        wx.Dialog.__init__(self, parent, id, \
-                           "Descriptive Statistics", \
-                           size=(500,400+wind))
-        x = self.GetClientSize()
-        winheight = x[1]
-        icon = images.getIconIcon()
+    def __init__( self, parent, id ):
+	wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY,
+	           title = "Descriptive Statistics",
+	           pos = wx.DefaultPosition, size = wx.Size( 375,326 ), 
+	           style = wx.DEFAULT_DIALOG_STYLE )
+	
+	self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
+	icon = images.getIconIcon()
         self.SetIcon(icon)
-        ColumnList, self.colnums  = frame.grid.GetUsedCols()
-        # ColumnList is the col headings, colnums is the column numbers
-        l0 = wxStaticText(self,-1,"Select Column(s) to Analyse",pos=(10,10))
-        l4 = wxStaticText(self,-1,"Select Descriptive Statistics",pos=(250,10))
-        self.DescChoice = DescChoiceBox(self, 1107)
-        self.ColChoice = wxCheckListBox(self,1102, wxPoint(10,30), \
-                                        wxSize(230,(winheight * 0.8)), ColumnList)
-        okaybutton = wxButton(self,1103,"Okay",wxPoint(10,winheight-35),\
-                              wxSize(BWidth, BHeight))
-        cancelbutton = wxButton(self,1104,"Cancel",wxPoint(100,winheight-35),\
-                                wxSize(BWidth, BHeight))
-        if wxPlatform == '__WXMSW__': 
-            # Darn! Some cross-platform voodoo needed...
-            allbutton = wxButton(self, 105, "Select All", wxPoint(250,winheight-70),\
-                                 wxSize(BWidth, BHeight))
-            nonebutton = wxButton(self, 106, "Select None", wxPoint(360,winheight-70),\
-                                  wxSize(BWidth, BHeight))
-        else:
-            allbutton = wxButton(self, 105, "Select All", wxPoint(250,winheight-50),\
-                                 wxSize(BWidth, BHeight))
-            nonebutton = wxButton(self, 106, "Select None", wxPoint(360,winheight-50),\
-                                  wxSize(BWidth, BHeight))
-        EVT_BUTTON(okaybutton, 1103, self.OnOkayButton)
-        EVT_BUTTON(cancelbutton, 1104, self.OnCloseContDesc)
-        EVT_BUTTON(allbutton, 105, self.DescChoice.SelectAllDescriptives)
-        EVT_BUTTON(nonebutton, 106, self.DescChoice.SelectNoDescriptives)
+	ColumnList, self.colnums  = frame.grid.GetUsedCols()
+
+	self.m_mgr = wx.aui.AuiManager()
+	self.m_mgr.SetManagedWindow( self )
+	
+	self.DescChoice = DescChoiceBox(self, 1107)
+	self.m_checkList5 = self.DescChoice 
+	self.m_mgr.AddPane( self.m_checkList5, wx.aui.AuiPaneInfo() .Center() .Caption( u"Select Descriptive Statistics" ).CloseButton( False ).PaneBorder( False ).Dock().Resizable().FloatingSize( wx.DefaultSize ).DockFixed( False ).BottomDockable( False ).TopDockable( False ) )
+	
+	self.ColChoice = wx.CheckListBox( self, 1102, wx.DefaultPosition, wx.DefaultSize, ColumnList, 0 )
+	self.m_mgr.AddPane( self.ColChoice, wx.aui.AuiPaneInfo() .Center() .Caption( u"Select Column(s) to Analize" ).CloseButton( False ).PaneBorder( False ).Dock().Resizable().FloatingSize( wx.Size( 161,93 ) ).DockFixed( False ).BottomDockable( False ).TopDockable( False ).Row( 1 ).Layer( 0 ) )
+	
+	self.m_panel1 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+	self.m_mgr.AddPane( self.m_panel1, wx.aui.AuiPaneInfo() .Bottom() .CaptionVisible( False ).CloseButton( False ).PaneBorder( False ).Dock().Resizable().FloatingSize( wx.DefaultSize ).DockFixed( False ).LeftDockable( False ).RightDockable( False ).MinSize( wx.Size( -1,30 ) ) )
+	
+	bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
+	
+	okaybutton = wx.Button( self.m_panel1, 1103, u"Ok", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
+	bSizer2.Add( okaybutton, 0, wx.ALL, 5 )
+	
+	cancelbutton = wx.Button( self.m_panel1, 1104, u"Cancel", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
+	bSizer2.Add( cancelbutton, 0, wx.ALL, 5 )
+	
+	allbutton = wx.Button( self.m_panel1,105, u"Select All", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
+	bSizer2.Add( allbutton, 0, wx.ALL, 5 )
+	
+	nonebutton = wx.Button( self.m_panel1, 106, u"Select None", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
+	bSizer2.Add( nonebutton, 0, wx.ALL, 5 )
+			
+	self.m_panel1.SetSizer( bSizer2 )
+	self.m_panel1.Layout()
+	bSizer2.Fit( self.m_panel1 )
+	
+	self.m_mgr.Update()
+	self.Centre( wx.BOTH )
+
+        self.Bind(wx.EVT_BUTTON, self.OnOkayButton,          id = okaybutton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnCloseContDesc,       id = cancelbutton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.DescChoice.SelectAllDescriptives, id = allbutton.GetId())
+        self.Bind(wx.EVT_BUTTON,  self.DescChoice.SelectNoDescriptives, id = nonebutton.GetId())
 
     def OnOkayButton(self, event):
         descs = []
@@ -2564,9 +2579,9 @@ class DataFrame(wx.Frame):
     def GoFindDialog(self, event):
         # Shows the find & replace dialog
         # NOTE - this doesn't appear to work on the grid, so I might be missing something...
-        data = wxFindReplaceData()
-        dlg = wxFindReplaceDialog(self.grid, data, 'Find and Replace', \
-                                  wxFR_REPLACEDIALOG)
+        data = wx.FindReplaceData()
+        dlg = wx.FindReplaceDialog(self.grid, data, 'Find and Replace', \
+                                  wx.FR_REPLACEDIALOG)
         dlg.data = data
         dlg.Show(True)
 
@@ -2587,11 +2602,11 @@ class DataFrame(wx.Frame):
 
     def GoFontPrefsDialog(self, evt):
         # shows Font dialog for the data grid (output window has its own)
-        data = wxFontData()
-        dlg = wxFontDialog(frame, data)
+        data = wx.FontData()
+        dlg = wx.FontDialog(frame, data)
         icon = images.getIconIcon()
         self.SetIcon(icon)
-        if dlg.ShowModal() == wxID_OK:
+        if dlg.ShowModal() == wx.ID_OK:
             data = dlg.GetFontData()
             #data2 = data.GetChosenFont()
             self.grid.SetDefaultCellFont(data.GetChosenFont())
