@@ -573,7 +573,9 @@ class SimpleGrid(MyGrid):# wxGrid
             filename = dlg.GetPath()
             fout = open(filename, "w")
             cols,waste = self.GetUsedCols()
-            if (dlg.GetFilterIndex() == 0):
+            if len(cols)== 0:
+                pass
+            elif (dlg.GetFilterIndex() == 0):
                 #save as plain text
                 rows = self.GetUsedRows()
                 maxrows = max(rows) 
@@ -615,18 +617,21 @@ class SimpleGrid(MyGrid):# wxGrid
                 return"""
         fout = open(filename, "w")
         cols, waste = self.GetUsedCols()
-        rows = self.GetUsedRows()
-        maxrows = max(rows) + 1
-        for i in range(maxrows):
-            datapoint=[]
-            for j in range(len(cols)):
-                try:
-                    datapoint.append(self.GetCellValue(i, j))
-                except:
-                    datapoint.append("0")
-            line = string.join(datapoint)
-            fout.write(line)
-            fout.write('\n')
+        if len(cols) == 0:
+            pass
+        else:
+            rows = self.GetUsedRows()
+            maxrows = max(rows) + 1
+            for i in range(maxrows):
+                datapoint=[]
+                for j in range(len(cols)):
+                    try:
+                        datapoint.append(self.GetCellValue(i, j))
+                    except:
+                        datapoint.append("0")
+                line = string.join(datapoint)
+                fout.write(line)
+                fout.write('\n')
         fout.close
         self.Saved = True
 
@@ -2482,27 +2487,27 @@ class DataFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.GoHelpAboutFrame,   id = self.bt10.GetId())# 90
         #-----------------
         # Menu 
-        self.Bind(wx.EVT_MENU, self.GoClearData,id = self.mn1.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.LoadDataASCII,id = self.mn2.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.SaveDataASCII,id = self.mn3.GetId())
+        self.Bind(wx.EVT_MENU, self.GoClearData,        id = self.mn1.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.LoadDataASCII, id = self.mn2.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.SaveDataASCII, id = self.mn3.GetId())
         self.Bind(wx.EVT_MENU, self.grid.SaveAsDataASCII,id = self.mn4.GetId())
         ##self.Bind(wx.EVT_MENU, seelf.grid.SaveAsDataASCII,id = ID_FILE_PRINT)
-        self.Bind(wx.EVT_MENU, self.EndApplication,id = self.mn7.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.CutData,id = self.mn8.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.CopyData,id = self.mn9.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.PasteData,id = self.mn10.GetId())
+        self.Bind(wx.EVT_MENU, self.EndApplication,     id = self.mn7.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.CutData,       id = self.mn8.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.CopyData,      id = self.mn9.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.PasteData,     id = self.mn10.GetId())
         self.Bind(wx.EVT_MENU, self.grid.SelectAllCells,id = self.mn11.GetId())
-        self.Bind(wx.EVT_MENU, self.GoFindDialog,id = self.mn12.GetId())
+        self.Bind(wx.EVT_MENU, self.GoFindDialog,       id = self.mn12.GetId())
         self.Bind(wx.EVT_MENU, self.grid.DeleteCurrentCol,id = self.mn13.GetId())
         self.Bind(wx.EVT_MENU, self.grid.DeleteCurrentRow,id = self.mn14.GetId())
-        self.Bind(wx.EVT_MENU, self.GoVariablesFrame,id = self.mn15.GetId())
-        self.Bind(wx.EVT_MENU, self.GoEditGrid,id = self.mn16.GetId())
-        self.Bind(wx.EVT_MENU, self.GoGridPrefFrame,id = self.mn17.GetId())
-        self.Bind(wx.EVT_MENU, self.GoFontPrefsDialog,id = self.mn18.GetId())
+        self.Bind(wx.EVT_MENU, self.GoVariablesFrame,   id = self.mn15.GetId())
+        self.Bind(wx.EVT_MENU, self.GoEditGrid,         id = self.mn16.GetId())
+        self.Bind(wx.EVT_MENU, self.GoGridPrefFrame,    id = self.mn17.GetId())
+        self.Bind(wx.EVT_MENU, self.GoFontPrefsDialog,  id = self.mn18.GetId())
         self.Bind(wx.EVT_MENU, self.GoContinuousDescriptives,id = self.mn19.GetId())
-        self.Bind(wx.EVT_MENU, self.GoTransformData,id = self.mn20.GetId())
-        self.Bind(wx.EVT_MENU, self.GoOneConditionTest,id = self.mn21.GetId())
-        self.Bind(wx.EVT_MENU, self.GoTwoConditionTest,id = self.mn22.GetId())
+        self.Bind(wx.EVT_MENU, self.GoTransformData,    id = self.mn20.GetId())
+        self.Bind(wx.EVT_MENU, self.GoOneConditionTest, id = self.mn21.GetId())
+        self.Bind(wx.EVT_MENU, self.GoTwoConditionTest, id = self.mn22.GetId())
         self.Bind(wx.EVT_MENU, self.GetThreeConditionTest,id = self.mn23.GetId())
         self.Bind(wx.EVT_MENU, self.GetCorrelationsTest,id = self.mn24.GetId())
         if 0:
