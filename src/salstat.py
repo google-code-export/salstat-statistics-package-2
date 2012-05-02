@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""SalStat Statistics Package. Copyright 2002 Alan James Salmoni. Licensed 
+"""SalStat Statistics Package. Copyright 2002 Alan James Salmoni. Licensed
 under the GNU General Public License (GPL). See the file COPYING for full
 details of this license. """
 
@@ -25,7 +25,7 @@ import wx.lib.wxpTag
 import string, os, os.path, pickle
 # import SalStat specific modules
 import salstat_stats, images
-import numpy, math  
+import numpy, math
 # and for plots!
 #from wxPython.lib.wxPlotCanvas import *
 #from wxPython.lib import wxPlotCanvas
@@ -578,7 +578,7 @@ class SimpleGrid(MyGrid):# wxGrid
             elif (dlg.GetFilterIndex() == 0):
                 #save as plain text
                 rows = self.GetUsedRows()
-                maxrows = max(rows) 
+                maxrows = max(rows)
                 for i in range(len(cols)):
                     for j in range(maxrows):
                         if (self.GetCellValue(j,i) == ''):
@@ -847,11 +847,11 @@ class SimpleGrid(MyGrid):# wxGrid
         return numpy.array((biglist), numpy.float)
 
 #---------------------------------------------------------------------------
-# DescChoice-wxCheckListBox with list of descriptive stats in it
+# DescChoice-wx.CheckListBox with list of descriptive stats in it
 class DescChoiceBox(wx.CheckListBox): # CheckListBox
     def __init__(self, parent, id):
         wx.CheckListBox.__init__( self, parent, -1,
-                        wx.DefaultPosition, wx.DefaultSize, DescList)
+                                  wx.DefaultPosition, wx.DefaultSize, DescList)
 
     def SelectAllDescriptives(self, event):
         for i in range(len(DescList)):
@@ -878,9 +878,9 @@ class EditGridFrame(wx.Dialog):
         self.numnewRows.SetRange(0, 100)
         self.numnewRows.SetValue(0)
         okaybutton = wx.Button(self, 421, "Okay", wx.Point(10, 90),\
-                              wx.Size(BWidth, BHeight))
+                               wx.Size(BWidth, BHeight))
         cancelbutton = wx.Button(self, 422, "Cancel", wx.Point(110,90), \
-                                wx.Size(BWidth, BHeight))
+                                 wx.Size(BWidth, BHeight))
         self.Bind(wx.EVT_BUTTON, self.OkayButtonPressed, id = 421)
         self.Bind(wx.EVT_BUTTON, self.CancelButtonPressed, id= 422)
 
@@ -901,20 +901,20 @@ class GridPrefs(wx.Dialog):
                            size=(205,100+wind))
         icon = images.getIconIcon()
         self.SetIcon(icon)
-        self.colwidth = wxSpinCtrl(self, -1, "", wxPoint(110,10), wxSize(80,25))
+        self.colwidth = wx.SpinCtrl(self, -1, "", wx.Point(110,10), wx.Size(80,25))
         self.colwidth.SetRange(1,200)
         self.colwidth.SetValue(frame.grid.m_grid.GetDefaultColSize())
-        self.rowheight= wxSpinCtrl(self, -1, "", wxPoint(110,50), wxSize(80,25))
+        self.rowheight= wx.SpinCtrl(self, -1, "", wx.Point(110,50), wx.Size(80,25))
         self.rowheight.SetRange(1,100)
         self.rowheight.SetValue(frame.grid.m_grid.GetDefaultRowSize())
-        l1 = wxStaticText(self, -1, 'Column Width:',pos=(10,15))
-        l2 = wxStaticText(self, -1, 'Row Height:',pos=(10,55))
-        okaybutton = wxButton(self, 321, "Okay", wxPoint(10, 90), \
-                              wxSize(BWidth, BHeight))
-        cancelbutton = wxButton(self, 322, "Cancel", wxPoint(110,90),\
-                                wxSize(BWidth, BHeight))
-        EVT_BUTTON(self, 321, self.OkayButtonPressed)
-        EVT_BUTTON(self, 322, self.OnCloseGridPrefs)
+        l1 = wx.StaticText(self, -1, 'Column Width:',pos=(10,15))
+        l2 = wx.StaticText(self, -1, 'Row Height:',pos=(10,55))
+        self.okaybutton = wx.Button(self, 321, "Okay", wx.Point(10, 90), \
+                                    wx.Size(BWidth, BHeight))
+        self.cancelbutton = wx.Button(self, 322, "Cancel", wx.Point(110,90),\
+                                      wx.Size(BWidth, BHeight))
+        self.Bind(wx.EVT_BUTTON, self.OkayButtonPressed, id = self.okaybutton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnCloseGridPrefs, id = self.cancelbutton.GetId())
 
     def OkayButtonPressed(self, event):
         frame.grid.m_grid.SetDefaultColSize(self.colwidth.GetValue(), True)
@@ -1230,12 +1230,10 @@ class MyHtmlWindow(wx.html.HtmlWindow):
 # in new frame
 class OutputSheet(wx.Frame):
     def __init__(self, parent, id):
-        dimx = int(inits.get('outputsizex'))
-        dimy = int(inits.get('outputsizey'))
         posx = int(inits.get('outputposx'))
         posy = int(inits.get('outputposy'))
         wx.Frame.__init__(self, parent, -1, "SalStat Statistics - Output", \
-                          size=(dimx, dimy), pos=(posx, posy))
+                          size=wx.DefaultSize )#pos=(posx, posy))
         #set icon for frame (needs x-platform separator!
         icon = images.getIconIcon()
         self.SetIcon(icon)
@@ -1328,49 +1326,58 @@ class OutputSheet(wx.Frame):
 # user selects which cols to analyse, and what stats to have
 class DescriptivesFrame(wx.Dialog):
     def __init__( self, parent, id ):
-	wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY,
-	           title = "Descriptive Statistics",
-	           pos = wx.DefaultPosition, size = wx.Size( 375,326 ), 
-	           style = wx.DEFAULT_DIALOG_STYLE )
-	
-	self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
-	icon = images.getIconIcon()
-        self.SetIcon(icon)
-	ColumnList, self.colnums  = frame.grid.GetUsedCols()
+        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY,
+                             title = "Descriptive Statistics",
+                             pos = wx.DefaultPosition, size = wx.Size( 375,326 ),
+                             style = wx.DEFAULT_DIALOG_STYLE )
 
-	self.m_mgr = wx.aui.AuiManager()
-	self.m_mgr.SetManagedWindow( self )
-	
-	self.DescChoice = DescChoiceBox(self, 1107)
-	self.m_checkList5 = self.DescChoice 
-	self.m_mgr.AddPane( self.m_checkList5, wx.aui.AuiPaneInfo() .Center() .Caption( u"Select Descriptive Statistics" ).CloseButton( False ).PaneBorder( False ).Dock().Resizable().FloatingSize( wx.DefaultSize ).DockFixed( False ).BottomDockable( False ).TopDockable( False ) )
-	
-	self.ColChoice = wx.CheckListBox( self, 1102, wx.DefaultPosition, wx.DefaultSize, ColumnList, 0 )
-	self.m_mgr.AddPane( self.ColChoice, wx.aui.AuiPaneInfo() .Center() .Caption( u"Select Column(s) to Analize" ).CloseButton( False ).PaneBorder( False ).Dock().Resizable().FloatingSize( wx.Size( 161,93 ) ).DockFixed( False ).BottomDockable( False ).TopDockable( False ).Row( 1 ).Layer( 0 ) )
-	
-	self.m_panel1 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-	self.m_mgr.AddPane( self.m_panel1, wx.aui.AuiPaneInfo() .Bottom() .CaptionVisible( False ).CloseButton( False ).PaneBorder( False ).Dock().Resizable().FloatingSize( wx.DefaultSize ).DockFixed( False ).LeftDockable( False ).RightDockable( False ).MinSize( wx.Size( -1,30 ) ) )
-	
-	bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
-	
-	okaybutton = wx.Button( self.m_panel1, 1103, u"Ok", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
-	bSizer2.Add( okaybutton, 0, wx.ALL, 5 )
-	
-	cancelbutton = wx.Button( self.m_panel1, 1104, u"Cancel", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
-	bSizer2.Add( cancelbutton, 0, wx.ALL, 5 )
-	
-	allbutton = wx.Button( self.m_panel1,105, u"Select All", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
-	bSizer2.Add( allbutton, 0, wx.ALL, 5 )
-	
-	nonebutton = wx.Button( self.m_panel1, 106, u"Select None", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
-	bSizer2.Add( nonebutton, 0, wx.ALL, 5 )
-			
-	self.m_panel1.SetSizer( bSizer2 )
-	self.m_panel1.Layout()
-	bSizer2.Fit( self.m_panel1 )
-	
-	self.m_mgr.Update()
-	self.Centre( wx.BOTH )
+        self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
+        icon = images.getIconIcon()
+        self.SetIcon(icon)
+        ColumnList, self.colnums  = frame.grid.GetUsedCols()
+
+        self.m_mgr = wx.aui.AuiManager()
+        self.m_mgr.SetManagedWindow( self )
+
+        self.DescChoice = DescChoiceBox(self, 1107)
+        self.m_checkList5 = self.DescChoice
+        self.m_mgr.AddPane( self.m_checkList5, wx.aui.AuiPaneInfo() .Center() .
+                            Caption( u"Select Descriptive Statistics" ).CloseButton( False ).
+                            PaneBorder( False ).Dock().Resizable().FloatingSize( wx.DefaultSize ).
+                            DockFixed( False ).BottomDockable( False ).TopDockable( False ) )
+
+        self.ColChoice = wx.CheckListBox( self, 1102, wx.DefaultPosition, wx.DefaultSize, ColumnList, 0 )
+        self.m_mgr.AddPane( self.ColChoice, wx.aui.AuiPaneInfo() .Center() .Caption( u"Select Column(s) to Analize" ).
+                            CloseButton( False ).PaneBorder( False ).Dock().Resizable().
+                            FloatingSize( wx.Size( 161,93 ) ).DockFixed( False ).BottomDockable( False ).
+                            TopDockable( False ).Row( 1 ).Layer( 0 ) )
+
+        self.m_panel1 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.m_mgr.AddPane( self.m_panel1, wx.aui.AuiPaneInfo() .Bottom() .CaptionVisible( False ).
+                            CloseButton( False ).PaneBorder( False ).Dock().Resizable().
+                            FloatingSize( wx.DefaultSize ).DockFixed( False ).LeftDockable( False ).
+                            RightDockable( False ).MinSize( wx.Size( -1,30 ) ) )
+
+        bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
+
+        okaybutton = wx.Button( self.m_panel1, 1103, u"Ok", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
+        bSizer2.Add( okaybutton, 0, wx.ALL, 5 )
+
+        cancelbutton = wx.Button( self.m_panel1, 1104, u"Cancel", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
+        bSizer2.Add( cancelbutton, 0, wx.ALL, 5 )
+
+        allbutton = wx.Button( self.m_panel1,105, u"Select All", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
+        bSizer2.Add( allbutton, 0, wx.ALL, 5 )
+
+        nonebutton = wx.Button( self.m_panel1, 106, u"Select None", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
+        bSizer2.Add( nonebutton, 0, wx.ALL, 5 )
+
+        self.m_panel1.SetSizer( bSizer2 )
+        self.m_panel1.Layout()
+        bSizer2.Fit( self.m_panel1 )
+
+        self.m_mgr.Update()
+        self.Centre( wx.BOTH )
 
         self.Bind(wx.EVT_BUTTON, self.OnOkayButton,          id = okaybutton.GetId())
         self.Bind(wx.EVT_BUTTON, self.OnCloseContDesc,       id = cancelbutton.GetId())
@@ -1381,9 +1388,10 @@ class DescriptivesFrame(wx.Dialog):
         descs = []
         for i in range(len(self.colnums)):
             if self.ColChoice.IsChecked(i):
-                name = frame.grid.m_grid.GetColLabelValue(i)
+                realColi = self.colnums[i]
+                name = frame.grid.m_grid.GetColLabelValue(realColi)
                 descs.append(salstat_stats.FullDescriptives( \
-                    frame.grid.CleanData(i), name, \
+                    frame.grid.CleanData(realColi), name, \
                     frame.grid.missing))
         ManyDescriptives(self, descs)
         self.Close(True)
@@ -1394,62 +1402,130 @@ class DescriptivesFrame(wx.Dialog):
 #---------------------------------------------------------------------------
 # Same as DescriptivesContinuousFrame, but for nominal descriptives
 class OneConditionTestFrame(wx.Dialog):
-    def __init__(self, parent, id, ColumnList):
-        wx.Dialog.__init__(self, parent, id, "One Condition Tests", \
-                           size=(500,400+wind))
-        x = self.GetClientSize()
-        winheight = x[1]
+    def __init__( self, parent, id, ColumnList ):
+        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = "One Condition Tests",
+                             pos = wx.DefaultPosition, size = wx.Size( 500,400+wind ),
+                             style = wx.DEFAULT_DIALOG_STYLE )
+
+        self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
+        self.m_mgr = wx.aui.AuiManager()
+        self.m_mgr.SetManagedWindow( self )
+
         icon = images.getIconIcon()
         self.SetIcon(icon)
         ColumnList, self.colnums = frame.grid.GetUsedCols()
-        self.ColBox = wxChoice(self, 101,(10,30), (110,20), choices = ColumnList)
-        self.ColBox.SetSelection(0)
-        cID = wx.ID_ANY
-        l0 = wxStaticText(self,-1,"Select Column to Analyse",pos=(10,10))
-        l1 = wxStaticText(self,-1,"Choose Test(s):", pos=(10,60))
-        if wxPlatform == '__WXMSW__':
-            l3a = wxStaticText(self,-1,'User Hypothesised', pos=(10,335))
-            l3b = wxStaticText(self,-1,'Mean:',pos=(10,352))
-            self.UserMean = wxTextCtrl(self,219,pos=(140,345),size=(70,20))
-            allbutton = wxButton(self, 105, "Select All", wxPoint(250,winheight-70),\
-                                 wxSize(BWidth, BHeight))
-            nonebutton = wxButton(self, 106, "Select None", wxPoint(360,winheight-70),\
-                                  wxSize(BWidth, BHeight))
-        else:
-            l3a = wxStaticText(self,-1,'User Hypothesised', pos=(10,325))
-            l3b = wxStaticText(self,-1,'Mean:',pos=(10,342))
-            self.UserMean = wxTextCtrl(self,219,pos=(140,335),size=(70,20))
-            allbutton = wxButton(self, 105, "Select All", wxPoint(250,winheight-50),\
-                                 wxSize(BWidth, BHeight))
-            nonebutton = wxButton(self, 106, "Select None", wxPoint(360,winheight-50),\
-                                  wxSize(BWidth, BHeight))
-        l4 = wxStaticText(self,-1,"Select Descriptive Statistics",pos=(250,10))
+
+        m_checkList5Choices = DescList
+        # self.ColBox = wx.Choice(self, 101,(10,30), (110,20), choices = ColumnList)
+        self.DescChoice = DescChoiceBox( self, wx.ID_ANY )
+
+        self.m_mgr.AddPane( self.DescChoice, wx.aui.AuiPaneInfo().Center().
+                            Caption(u"Select Descriptive Statistics").CaptionVisible(True).
+                            CloseButton(False).
+                            PaneBorder(False).Dock().Resizable().FloatingSize(wx.DefaultSize).
+                            DockFixed(False).BottomDockable(False).TopDockable(False).
+                            Row(0).Layer(0))
+
         Tests = ['t-test','Sign test','Chi square test for variance']
-        self.TestChoice = wxCheckListBox(self,213,wxPoint(10,80),\
-                                         wxSize(230,180),Tests)
-        self.hypchoice=wxRadioBox(self, 205,"Select Hypothesis",\
-                                  wxPoint(10,270),wxDefaultSize,HypList)
-        self.hypchoice.SetSelection(1)
-        self.okaybutton = wxButton(self,103,"Okay",wxPoint(10,winheight-35),\
-                                   wxSize(BWidth, BHeight))
-        #self.okaybutton.Enable(False)
-        cancelbutton = wxButton(self,104,"Cancel",wxPoint(100,winheight-35),\
-                                wxSize(BWidth, BHeight))
-        self.DescChoice = DescChoiceBox(self, 104)
-        EVT_BUTTON(self.okaybutton, 103, self.OnOkayButton)
-        EVT_BUTTON(cancelbutton, 104, self.OnCloseOneCond)
-        EVT_BUTTON(allbutton, 105, self.DescChoice.SelectAllDescriptives)
-        EVT_BUTTON(nonebutton, 106, self.DescChoice.SelectNoDescriptives)
-        # enable the okay button if something is entered as a hyp mean.
-        # Can the wxTextCtrl allow only numbers to be entered?
-        #EVT_TEXT(self.UserMean, 107, self.EnteredText) # doesn't work on Windows!
+        m_checkList6Choices = Tests
+        self.TestChoice= wx.CheckListBox( self, wx.ID_ANY, wx.DefaultPosition,
+                                          wx.DefaultSize, m_checkList6Choices, 0 )
+        self.m_mgr.AddPane( self.TestChoice, wx.aui.AuiPaneInfo() .Center() .
+                            Caption( u"Select the kind of Test" ).CloseButton( False ).
+                            PaneBorder( False ).Dock().Resizable().FloatingSize( wx.Size( 161,93 ) ).
+                            DockFixed( False ).BottomDockable( False ).TopDockable( False ).
+                            Row( 1 ).Layer( 0 ) )
+
+        self.m_panel2 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.m_mgr.AddPane( self.m_panel2, wx.aui.AuiPaneInfo().Left().CaptionVisible( False ).
+                            CloseButton( False ).PaneBorder( False ).Dock().Resizable().
+                            FloatingSize( wx.DefaultSize ).DockFixed( False ).Row( 1 ).CentrePane() )
+
+        bSizer21 = wx.BoxSizer( wx.VERTICAL )
+
+        sbSizer1 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel2, wx.ID_ANY, u"Columna para analizar" ), wx.VERTICAL )
+
+        m_comboBox1Choices = ColumnList
+        self.DescList2 = wx.ComboBox( self.m_panel2, wx.ID_ANY, m_comboBox1Choices[0],
+                                      wx.DefaultPosition, wx.DefaultSize, m_comboBox1Choices, 0 )
+        if len(ColumnList) > 0 :
+            self.DescList2.SetSelection(0)
+
+        sbSizer1.Add( self.DescList2, 0, wx.ALL|wx.EXPAND, 5 )
+
+        bSizer21.Add( sbSizer1, 1, wx.EXPAND, 5 )
+
+        sbSizer2 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel2, wx.ID_ANY, u"Seleccione Hypotesis" ), wx.HORIZONTAL )
+        self.m_radioBtn1 = wx.RadioButton( self.m_panel2, wx.ID_ANY, u"One Tailed", wx.DefaultPosition, wx.DefaultSize, 0 )
+        sbSizer2.Add( self.m_radioBtn1, 0, wx.ALL, 5 )
+
+        self.m_radioBtn2 = wx.RadioButton( self.m_panel2, wx.ID_ANY, u"Two Tailed", wx.DefaultPosition, wx.DefaultSize, 0 )
+        sbSizer2.Add( self.m_radioBtn2, 0, wx.ALL, 5 )
+        bSizer21.Add( sbSizer2, 1, wx.EXPAND, 5 )
+        sbSizer4 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel2, wx.ID_ANY, u"User hypotesis test" ), wx.VERTICAL )
+
+        self.UserMean = wx.TextCtrl( self.m_panel2, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        sbSizer4.Add( self.UserMean, 0, wx.ALL|wx.EXPAND, 5 )
+        bSizer21.Add( sbSizer4, 1, wx.EXPAND, 5 )
+        self.m_panel2.SetSizer( bSizer21 )
+        self.m_panel2.Layout()
+        bSizer21.Fit( self.m_panel2 )
+        self.m_panel1 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+
+        self.m_mgr.AddPane( self.m_panel1, wx.aui.AuiPaneInfo() .Bottom() .CaptionVisible( False ).
+                            CloseButton( False ).PaneBorder( False ).Dock().Resizable().
+                            FloatingSize( wx.DefaultSize ).DockFixed( False ).LeftDockable( False ).
+                            RightDockable( False ).MinSize( wx.Size( -1,30 ) ) )
+        bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
+
+        self.okaybutton = wx.Button( self.m_panel1, wx.ID_ANY, u"Ok", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.okaybutton.Enable(False)
+        bSizer2.Add( self.okaybutton, 0, wx.ALL, 5 )
+
+        self.cancelbutton = wx.Button( self.m_panel1, wx.ID_ANY, u"Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer2.Add( self.cancelbutton, 0, wx.ALL, 5 )
+
+        self.allbutton= wx.Button( self.m_panel1, wx.ID_ANY, u"Select All", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer2.Add( self.allbutton, 0, wx.ALL, 5 )
+
+        self.nonebutton  = wx.Button( self.m_panel1, wx.ID_ANY, u"Select None", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer2.Add( self.nonebutton, 0, wx.ALL, 5 )
+
+
+        self.m_panel1.SetSizer( bSizer2 )
+        self.m_panel1.Layout()
+        bSizer2.Fit( self.m_panel1 )
+
+        self.m_radioBtn1.SetValue(True)
+        self.m_mgr.Update()
+        self.Centre( wx.BOTH )
+
+        self.Bind(wx.EVT_BUTTON, self.OnOkayButton, id = self.okaybutton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnCloseOneCond, id = self.cancelbutton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.DescChoice.SelectAllDescriptives, id = self.allbutton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.DescChoice.SelectNoDescriptives, id = self.nonebutton.GetId())
+        self.UserMean.Bind( wx.EVT_TEXT, self.usermeanControl )
+
+    def usermeanControl( self, event ):
+        allowValues= [u'0',u'1',u'2',u'3',u'4',u'5',u'6',u'7',u'8',u'9',u'.']
+        resultado = [val for val in self.UserMean.GetValue() if val in allowValues]
+        newres = u""
+        for val in resultado:
+            newres+= val
+        if self.UserMean.GetValue() != newres:
+            self.UserMean.SetValue(newres)
+        if len(newres) > 0 :
+            # se habilita el control ok para calcular
+            self.okaybutton.Enable(True)
+        else:
+            self.okaybutton.Enable(False)
+        event.Skip()
 
     def EnteredText(self, event):
         self.okaybutton.Enable(True)
 
     def OnOkayButton(self, event):
-        x1 = self.ColBox.GetSelection()
-        name = frame.grid.GetColLabelValue(x1)
+        x1 = self.DescList2.GetSelection()
         if (x1 < 0): # add top limits of grid to this
             self.Close(True)
             return
@@ -1460,8 +1536,10 @@ class OneConditionTestFrame(wx.Dialog):
                                     hypothesised mean specified')
             self.Close(True)
             return
-        x = frame.grid.CleanData(x1)
-        TBase = salstat_stats.OneSampleTests(frame.grid.CleanData(x1), name, \
+        name = frame.grid.m_grid.GetColLabelValue(x1)
+        realColx1 = self.colnums[x1]
+        x = frame.grid.CleanData(realColx1)
+        TBase = salstat_stats.OneSampleTests(frame.grid.CleanData(realColx1), name, \
                                              frame.grid.missing)
         d=[0]
         d[0] = TBase.d1
@@ -1474,14 +1552,14 @@ class OneConditionTestFrame(wx.Dialog):
                 output.htmlpage.Addhtml('<br>All elements are the same, \
                                     test not possible')
             else:
-                if (self.hypchoice.GetSelection() == 0):
+                if self.m_radioBtn1.GetValue():  # (self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
                 output.htmlpage.Addhtml('<br>t(%d) = %5.3f, p (approx) = \
                                     %1.6f'%(TBase.df, TBase.t, TBase.prob))
                 #now draw up the xml history stuff
                 xmlevt = '<analyse test="one sample t-test" column = "'+str(x1)
                 xmlevt = xmlevt+' hyp_value = "'+str(umean)+'" tail="'
-                if (self.hypchoice.GetSelection() == 0):
+                if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
                     xmlevt = xmlevt+'1">'
                 else:
                     xmlevt = xmlevt+'2">'
@@ -1496,7 +1574,7 @@ class OneConditionTestFrame(wx.Dialog):
                 output.htmlpage.Addhtml('<br>All data are the same - no \
                                     analysis is possible')
             else:
-                if (self.hypchoice.GetSelection() == 0):
+                if self.m_radioBtn1.GetValue(): #(self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
                 output.htmlpage.Addhtml('<br>N = %5.0f, z = %5.3f, p = %1.6f'%\
                                         (TBase.ntotal, TBase.z, TBase.prob))
@@ -1504,7 +1582,7 @@ class OneConditionTestFrame(wx.Dialog):
         if self.TestChoice.IsChecked(2):
             output.htmlpage.Addhtml('<p><b>One sample chi square</b>')
             TBase.ChiSquareVariance(umean)
-            if (self.hypchoice.GetSelection() == 0):
+            if self.m_radioBtn1.GetValue():  #(self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
             if (TBase.prob == None):
                 TBase.prob = 1.0
@@ -1521,92 +1599,175 @@ class TwoConditionTestFrame(wx.Dialog):
     def __init__(self, parent, id, ColumnList):
         wx.Dialog.__init__(self, parent, id, "Two Condition Tests", \
                            size=(500,400+wind))
-        #set icon for frame (needs x-platform separator!
-        x = self.GetClientSize()
-        winheight = x[1]
-        x = self.GetClientSize()
         icon = images.getIconIcon()
         self.SetIcon(icon)
+        
+        self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
+        self.m_mgr = wx.aui.AuiManager()
+        self.m_mgr.SetManagedWindow( self )
+        
+        ColumnList, self.colnums = frame.grid.GetUsedCols()
+        
         colsselected =  frame.grid.GetColsUsedList()
-        l0 = wxStaticText(self,-1,"Select Columns to Analyse",pos=(10,10))
-        l1 = wxStaticText(self, -1, "Select Test(s) to Perform:", pos=(10,60))
-        if wxPlatform == '__WXMSW__':
-            l3a = wxStaticText(self,-1,'User Hypothesised', pos=(10,335))
-            l3b = wxStaticText(self,-1,'Mean:',pos=(10,352))
-            self.UserMean = wxTextCtrl(self,219,pos=(140,345),size=(70,20))
-            allbutton = wxButton(self, 218, "Select All", wxPoint(250,winheight-70),\
-                                 wxSize(BWidth, BHeight))
-            nonebutton = wxButton(self, 220, "Select None", wxPoint(360,winheight-70),\
-                                  wxSize(BWidth, BHeight))
-        else:
-            l3a = wxStaticText(self,-1,'User Hypothesised', pos=(10,325))
-            l3b = wxStaticText(self,-1,'Mean:',pos=(10,342))
-            self.UserMean = wxTextCtrl(self,219,pos=(140,335),size=(70,20))
-            allbutton = wxButton(self, 218, "Select All", wxPoint(250,winheight-50),\
-                                 wxSize(BWidth, BHeight))
-            nonebutton = wxButton(self, 220, "Select None", wxPoint(360,winheight-50),\
-                                  wxSize(BWidth, BHeight))
-        l4 = wxStaticText(self,-1,"Select Descriptive Statistics",pos=(250,10))
-        self.ColBox1 = wxChoice(self,211, (10,30), (110,20), ColumnList)
-        self.ColBox2 = wxChoice(self,212, (130,30), (110,20), ColumnList)
-        x1 = 0
-        x2 = 1
-        self.ColBox1.SetSelection(x1)
-        self.ColBox2.SetSelection(x2)
-        x1len = len(frame.grid.CleanData(x1))
-        x2len = len(frame.grid.CleanData(x2))
-        if (x1len != x2len):
-            self.equallists = False
-        else:
-            self.equallists = True
+        
+        m_checkList5Choices = []
+        self.DescChoice = DescChoiceBox( self, wx.ID_ANY )
+        self.m_mgr.AddPane( self.DescChoice, wx.aui.AuiPaneInfo() .Center() .
+                            Caption( u"Select Descriptive Statistics" ).CloseButton( False ).
+                            PaneBorder( False ).Dock().Resizable().FloatingSize( wx.DefaultSize ).
+                            DockFixed( False ).BottomDockable( False ).TopDockable( False ).
+                            Row(0).Layer(0) )
+
         # list of tests in alphabetical order
         Tests = ['chi square','F test','Kolmogorov-Smirnov', \
                  'Linear Regression', 'Mann-Whitney U', \
                  'Paired Sign', 't-test paired','t-test unpaired', \
                  'Wald-Wolfowitz Runs', 'Wilcoxon Rank Sums', \
                  'Wilcoxon Signed Ranks'] # nb, paired permutation test missing
-        self.paratests = wxCheckListBox(self,213,wxPoint(10,80),\
-                                        wxSize(230,180),Tests)
-        self.hypchoice=wxRadioBox(self, 205,"Select Hypothesis",\
-                                  wxPoint(10,270),wxDefaultSize,HypList)
-        self.hypchoice.SetSelection(1)
-        self.DescChoice = DescChoiceBox(self, 215)
-        okaybutton = wxButton(self,216,"Okay",wxPoint(10,winheight-35), \
-                              wxSize(BWidth, BHeight))
-        cancelbutton = wxButton(self,217,"Cancel",wxPoint(100,winheight-35), \
-                                wxSize(BWidth, BHeight))
-        self.UserMean = wxTextCtrl(self,219,pos=(140,345),size=(70,20))
+        m_checkList6Choices = Tests
+        self.paratests = wx.CheckListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_checkList6Choices, 0 )
+        self.m_mgr.AddPane( self.paratests , wx.aui.AuiPaneInfo() .Center() .
+                            Caption( u"Select Test(s) to Perform:" ).CloseButton( False ).
+                            PaneBorder( False ).Dock().Resizable().FloatingSize( wx.Size( 161,93 ) ).
+                            DockFixed( False ).BottomDockable( False ).TopDockable( False ).
+                            Row( 1 ).Layer( 0 ) )
+
+        self.m_panel2 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.m_mgr.AddPane( self.m_panel2, wx.aui.AuiPaneInfo() .Left() .CaptionVisible( False ).
+                            CloseButton( False ).PaneBorder( False ).Dock().Resizable().
+                            FloatingSize( wx.DefaultSize ).DockFixed( False ).Row( 1 ).
+                            CentrePane() )
+
+        bSizer21 = wx.BoxSizer( wx.VERTICAL )
+
+        self.m_staticText1 = wx.StaticText( self.m_panel2, wx.ID_ANY, u"Select Columns", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText1.Wrap( -1 )
+        bSizer21.Add( self.m_staticText1, 0, wx.LEFT, 5 )
+
+        m_choice1Choices = ColumnList
+        self.ColBox1 = wx.Choice( self.m_panel2, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choice1Choices, 0 )
+        bSizer21.Add( self.ColBox1, 0, wx.ALL|wx.EXPAND, 5 )
+
+        m_choice2Choices = ColumnList
+        self.ColBox2 = wx.Choice( self.m_panel2, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choice2Choices, 0 )
+        bSizer21.Add( self.ColBox2, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        x1 = 0
+        x2 = 1
+        self.ColBox1.SetSelection(x1)
+        self.ColBox2.SetSelection(x2)
+        realColx1 = x1
+        realColx2 = x2
+        x1len = len(frame.grid.CleanData(realColx1))
+        x2len = len(frame.grid.CleanData(realColx2))
+        if (x1len != x2len):
+            self.equallists = False
+        else:
+            self.equallists = True
+
+        sbSizer2 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel2, wx.ID_ANY, u"Seleccione Hypotesis" ), wx.HORIZONTAL )
+
+        self.m_radioBtn1 = wx.RadioButton( self.m_panel2, wx.ID_ANY, u"One Tailed", wx.DefaultPosition, wx.DefaultSize, 0 )
+        sbSizer2.Add( self.m_radioBtn1, 0, wx.ALL, 5 )
+
+        self.m_radioBtn2 = wx.RadioButton( self.m_panel2, wx.ID_ANY, u"Two Tailed", wx.DefaultPosition, wx.DefaultSize, 0 )
+        sbSizer2.Add( self.m_radioBtn2, 0, wx.ALL, 5 )
+        self.m_radioBtn1.SetValue(True)
+
+        bSizer21.Add( sbSizer2, 1, wx.EXPAND, 5 )
+
+        sbSizer4 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel2, wx.ID_ANY, u"User hypotesis test" ), wx.VERTICAL )
+
+        self.UserMean = wx.TextCtrl( self.m_panel2, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        sbSizer4.Add( self.UserMean, 0, wx.EXPAND, 5 )
+
+
+        bSizer21.Add( sbSizer4, 1, wx.EXPAND, 5 )
+
+
+        self.m_panel2.SetSizer( bSizer21 )
+        self.m_panel2.Layout()
+        bSizer21.Fit( self.m_panel2 )
+        self.m_panel1 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.m_mgr.AddPane( self.m_panel1, wx.aui.AuiPaneInfo() .Bottom() .CaptionVisible( False ).
+                            CloseButton( False ).PaneBorder( False ).Dock().Resizable().
+                            FloatingSize( wx.DefaultSize ).DockFixed( False ).LeftDockable( False ).
+                            RightDockable( False ).MinSize( wx.Size( -1,30 ) ) )
+
+        bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
+
+        self.okaybutton = wx.Button( self.m_panel1, wx.ID_ANY, u"Ok", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer2.Add( self.okaybutton, 0, wx.ALL, 5 )
+        self.okaybutton.Enable(False)
+
+        cancelbutton  = wx.Button( self.m_panel1, wx.ID_ANY, u"Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer2.Add( cancelbutton , 0, wx.ALL, 5 )
+
+        self.allbutton = wx.Button( self.m_panel1, wx.ID_ANY, u"Select All", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer2.Add( self.allbutton, 0, wx.ALL, 5 )
+
+        self.nonebutton= wx.Button( self.m_panel1, wx.ID_ANY, u"Select None", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer2.Add( self.nonebutton, 0, wx.ALL, 5 )
+
+
+        self.m_panel1.SetSizer( bSizer2 )
+        self.m_panel1.Layout()
+        bSizer2.Fit( self.m_panel1 )
+
+        self.m_mgr.Update()
+        self.Centre( wx.BOTH )
+
         # using self.equallists, if True, enable all items in the checklist \
         # box, otherwise set the within subs and correlations to be
         # disabled as they cannot be used with unequal list lengths!
         # Also disble the f-test unless something is entered into the
         # user hyp variance box
-        EVT_BUTTON(okaybutton, 216, self.OnOkayButton)
-        EVT_BUTTON(cancelbutton, 217, self.OnCloseTwoCond)
-        EVT_BUTTON(allbutton, 218, self.DescChoice.SelectAllDescriptives)
-        EVT_BUTTON(nonebutton, 220, self.DescChoice.SelectNoDescriptives)
-        #EVT_CHOICE(self.ColBox1, 211, self.ChangeCol1)
-        #EVT_CHOICE(self.ColBox2, 212, self.ChangeCol1)
-        EVT_TEXT(self.UserMean, 219, self.ChangeText)
-
-    def ChangeText(self, event):
-        pass
+        self.Bind(wx.EVT_BUTTON, self.OnOkayButton, id = self.okaybutton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnCloseTwoCond, id = cancelbutton .GetId())
+        self.Bind(wx.EVT_BUTTON, self.DescChoice.SelectAllDescriptives, id = self.allbutton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.DescChoice.SelectNoDescriptives, id = self.nonebutton.GetId())
+        self.UserMean.Bind( wx.EVT_TEXT, self.usermeanControl )
+        self.Bind(wx.EVT_CHOICE, self.ChangeCol1, id = self.ColBox1.GetId())
+        self.Bind(wx.EVT_CHOICE, self.ChangeCol1, id = self.ColBox2.GetId())
+        
+    def usermeanControl( self, event ):
+        allowValues= [u'0',u'1',u'2',u'3',u'4',u'5',u'6',u'7',u'8',u'9',u'.']
+        resultado = [val for val in self.UserMean.GetValue() if val in allowValues]
+        newres = u""
+        for val in resultado:
+            newres+= val
+        if self.UserMean.GetValue() != newres:
+            self.UserMean.SetValue(newres)
+        if len(newres) > 0 :
+            # se habilita el control ok para calcular
+            self.okaybutton.Enable(True)
+        else:
+            self.okaybutton.Enable(False)
+        event.Skip()
 
     def ChangeCol1(self, event):
         # check that len of 2 cols is equal, if not disable choices of test
-        x1 = len(frame.grid.CleanData(self.ColBox1.GetSelection()))
-        x2 = len(frame.grid.CleanData(self.ColBox2.GetSelection()))
+        colx1 = self.ColBox1.GetSelection()
+        colx2 = self.ColBox2.GetSelection()
+        realColx1 = self.colnums[colx1]
+        realColx2 = self.colnums[colx2]
+        x1 = len(frame.grid.CleanData(realColx1))
+        x2 = len(frame.grid.CleanData(realColx2))
         if (x1 != x2):
             # disable some tests in the listbox
-            self.paratests.Check(0,FALSE)
+            self.paratests.Check(0,False)
         else:
             pass
             # enable all tests in the listbox
 
     def ChangeCol2(self, event):
         # check that len of 2 cols is equal, if not disable choices of test
-        x1 = len(frame.grid.CleanData(self.ColBox1.GetSelection()))
-        x2 = len(frame.grid.CleanData(self.ColBox2.GetSelection()))
+        colx1 = self.ColBox1.GetSelection()
+        colx2 = self.ColBox2.GetSelection()
+        realColx1 = self.colnums[colx1]
+        realColx2 = self.colnums[colx2]
+        x1 = len(frame.grid.CleanData(realColx1))
+        x2 = len(frame.grid.CleanData(realColx2))
         if (x1 != x2):
             pass
         else:
@@ -1615,14 +1776,16 @@ class TwoConditionTestFrame(wx.Dialog):
     def OnOkayButton(self, event):
         x1 = self.ColBox1.GetSelection()
         y1 = self.ColBox2.GetSelection()
-        name1 = frame.grid.GetColLabelValue(x1)
-        name2 = frame.grid.GetColLabelValue(y1)
+        realColx1 = self.colnums[x1]
+        realColy1 = self.colnums[y1]
+        name1 = frame.grid.m_grid.GetColLabelValue(realColx1)
+        name2 = frame.grid.m_grid.GetColLabelValue(realColy1)
         if (x1 < 0) or (y1 < 0):
             self.Close(True)
             return
-        x = frame.grid.CleanData(x1)
+        x = frame.grid.CleanData(realColx1)
         xmiss = frame.grid.missing
-        y = frame.grid.CleanData(y1)
+        y = frame.grid.CleanData(realColy1)
         ymiss = frame.grid.missing
         TBase = salstat_stats.TwoSampleTests(x, y, name1, name2,xmiss,ymiss)
         d = [0,0]
@@ -1651,7 +1814,7 @@ class TwoConditionTestFrame(wx.Dialog):
                                     hypothesised mean specified')
             else:
                 TBase.FTest(umean)
-                if (self.hypchoice.GetSelection() == 0):
+                if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
                 output.htmlpage.Addhtml('<BR>f(%d, %d) = %5.3f, p = %1.6f'% \
                                         (TBase.df1,TBase.df2, TBase.f, TBase.prob))
@@ -1661,7 +1824,7 @@ class TwoConditionTestFrame(wx.Dialog):
             output.htmlpage.Addhtml('<P><B>Kolmogorov-Smirnov test \
                                     (unpaired)</B>')
             TBase.KolmogorovSmirnov()
-            if (self.hypchoice.GetSelection() == 0):
+            if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
             output.htmlpage.Addhtml('<BR>D = %5.3f, p = %1.6f'%(TBase.d, \
                                                                 TBase.prob))
@@ -1670,19 +1833,19 @@ class TwoConditionTestFrame(wx.Dialog):
         if self.paratests.IsChecked(3):
             output.htmlpage.Addhtml('<p><b>Linear Regression</b>')
             TBase.LinearRegression(x,y)
-            #s, i, r, prob, st = salstat_stats.llinregress(x, y)
+            #s, i, r, prob, st = salstat_stats.LinearRegression(x, y)
             if (TBase.prob == -1.0):
                 output.htmlpage.Addhtml('<BR>Cannot do linear regression - \
                                     unequal data sizes')
             else:
-                if (self.hypchoice.GetSelection() == 0):
-                    self.prob = self.prob / 2
+                if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
+                    TBase.prob = TBase.prob / 2
                 output.htmlpage.Addhtml('<BR>Slope = %5.3f, Intercept = %5.3f,\
                                     r = %5.3f, Estimated Standard Error = \
                                     %5.3f' %(TBase.slope, TBase.intercept, \
                                              TBase.r, TBase.sterrest))
                 output.htmlpage.Addhtml('<br>t (%d) = %5.3f, p = %1.6f' \
-                                        %(TBase.df, TBase.t, TBase.prob))
+                                        %(TBase.df, TBase.t, TBase.prob ))
         # Mann-Whitney U
         if self.paratests.IsChecked(4):
             output.htmlpage.Addhtml('<P><B>Mann-Whitney U test (unpaired \
@@ -1692,7 +1855,7 @@ class TwoConditionTestFrame(wx.Dialog):
                 output.htmlpage.Addhtml('<BR>Cannot do Mann-Whitney U test \
                                     - all numbers are identical')
             else:
-                if (self.hypchoice.GetSelection() == 0):
+                if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
                 output.htmlpage.Addhtml('<BR>z = %5.3f, small U = %5.3f, \
                                     big U = %5.3f, p = %1.6f'%(TBase.z, \
@@ -1720,7 +1883,7 @@ class TwoConditionTestFrame(wx.Dialog):
                 output.htmlpage.Addhtml('<BR>Cannot do test - not paired \
                                     samples')
             else:
-                if (self.hypchoice.GetSelection() == 0):
+                if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
                 output.htmlpage.Addhtml('<BR>N = %5.0f, z = %5.3f, p = %1.6f'\
                                         %(TBase.ntotal, TBase.z, TBase.prob))
@@ -1733,7 +1896,7 @@ class TwoConditionTestFrame(wx.Dialog):
                 output.htmlpage.Addhtml('<br>Cannot do paired t test - \
                                     unequal data sizes')
             else:
-                if self.hypchoice.GetSelection() == 0:
+                if self.m_radioBtn1.GetValue():#self.hypchoice.GetSelection() == 0:
                     TBase.prob = TBase.prob / 2
                 output.htmlpage.Addhtml('<BR>t(%d) = %5.3f, p = %1.6f'% \
                                         (TBase.df, TBase.t, TBase.prob))
@@ -1742,7 +1905,7 @@ class TwoConditionTestFrame(wx.Dialog):
         if self.paratests.IsChecked(7):
             output.htmlpage.Addhtml('<p><b>t-test unpaired</b>')
             TBase.TTestUnpaired()
-            if (self.hypchoice.GetSelection() == 0):
+            if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
             output.htmlpage.Addhtml('<BR>t(%d) = %5.3f, p =  %1.6f'% \
                                     (TBase.df, TBase.t, TBase.prob))
@@ -1756,7 +1919,7 @@ class TwoConditionTestFrame(wx.Dialog):
             output.htmlpage.Addhtml('<P><B>Rank Sums test (unpaired \
                                     samples)</B>')
             TBase.RankSums(x, y)
-            if (self.hypchoice.GetSelection() == 0):
+            if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
             output.htmlpage.Addhtml('<BR>t = %5.3f, p = %1.6f'%(TBase.z, \
                                                                 TBase.prob))
@@ -1769,7 +1932,7 @@ class TwoConditionTestFrame(wx.Dialog):
                 output.htmlpage.Addhtml('<BR>Cannot do Wilcoxon t test - \
                                     unequal data sizes')
             else:
-                if (self.hypchoice.GetSelection() == 0):
+                if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
                 output.htmlpage.Addhtml('<BR>z = %5.3f, t = %5.3f, p = %1.6f'%\
                                         (TBase.z, TBase.wt, TBase.prob))
@@ -1792,39 +1955,39 @@ class ThreeConditionTestFrame(wx.Dialog):
                     'Kruskall Wallis','Friedman test',\
                     'Cochranes Q']
         ColumnList, self.colnums = frame.grid.GetUsedCols()
-        l0 = wxStaticText(self,-1,"Select Columns to Analyse",pos=(10,10))
-        #l1 = wxStaticText(self, -1, "Select IV:", pos=(10,60))
-        l2 = wxStaticText(self, -1, "Select Data", pos=(10,170))
-        l4 = wxStaticText(self,-1,"Select Descriptive Statistics",pos=(250,10))
-        if wxPlatform == '__WXMSW__':
-            allbutton = wxButton(self, 518, "Select All", wxPoint(250,winheight-70),\
-                                 wxSize(BWidth, BHeight))
-            nonebutton = wxButton(self, 520, "Select None", wxPoint(360,winheight-70),\
-                                  wxSize(BWidth, BHeight))
+        l0 = wx.StaticText(self,-1,"Select Columns to Analyse",pos=(10,10))
+        #l1 = wx.StaticText(self, -1, "Select IV:", pos=(10,60))
+        l2 = wx.StaticText(self, -1, "Select Data", pos=(10,170))
+        l4 = wx.StaticText(self,-1,"Select Descriptive Statistics",pos=(250,10))
+        if os.name == 'nt':
+            allbutton = wx.Button(self, 518, "Select All", wx.Point(250,winheight-70),\
+                                  wx.Size(BWidth, BHeight))
+            nonebutton = wx.Button(self, 520, "Select None", wx.Point(360,winheight-70),\
+                                   wx.Size(BWidth, BHeight))
         else:
-            allbutton = wxButton(self, 518, "Select All", wxPoint(250,winheight-50),\
-                                 wxSize(BWidth, BHeight))
-            nonebutton = wxButton(self, 520, "Select None", wxPoint(360,winheight-50),\
-                                  wxSize(BWidth, BHeight))
+            allbutton = wx.Button(self, 518, "Select All", wx.Point(250,winheight-50),\
+                                  wx.Size(BWidth, BHeight))
+            nonebutton = wx.Button(self, 520, "Select None", wx.Point(360,winheight-50),\
+                                   wx.Size(BWidth, BHeight))
 
-        self.TestChoice = wxCheckListBox(self, 514,wxPoint(10,190), \
-                                         wxSize(230,120),alltests)
-        self.hypchoice=wxRadioBox(self, 205,"Select Hypothesis",\
-                                  wxPoint(10,320),wxDefaultSize,HypList)
+        self.TestChoice = wx.CheckListBox(self, 514,wx.Point(10,190), \
+                                          wx.Size(230,120),alltests)
+        self.hypchoice=wx.RadioBox(self, 205,"Select Hypothesis",\
+                                   wx.Point(10,320),wx.DefaultSize,HypList)
         self.hypchoice.SetSelection(1)
-        self.ColChoice = wxCheckListBox(self,511, wxPoint(10,30), \
-                                        wxSize(230,130), ColumnList)
+        self.ColChoice = wx.CheckListBox(self,511, wx.Point(10,30), \
+                                         wx.Size(230,130), ColumnList)
         for i in range(len(self.colnums)):
             self.ColChoice.Check(i, True)
         self.DescChoice = DescChoiceBox(self, 512)
-        okaybutton = wxButton(self,516,"Okay",wxPoint(10,winheight-35), \
-                              wxSize(BWidth, BHeight))
-        cancelbutton = wxButton(self,517,"Cancel",wxPoint(100,winheight-35), \
-                                wxSize(BWidth, BHeight))
-        EVT_BUTTON(okaybutton, 516, self.OnOkayButton)
-        EVT_BUTTON(cancelbutton, 517, self.OnCloseThreeCond)
-        EVT_BUTTON(allbutton, 518, self.DescChoice.SelectAllDescriptives)
-        EVT_BUTTON(nonebutton, 520, self.DescChoice.SelectNoDescriptives)
+        okaybutton = wx.Button(self,516,"Okay",wx.Point(10,winheight-35), \
+                               wx.Size(BWidth, BHeight))
+        cancelbutton = wx.Button(self,517,"Cancel",wx.Point(100,winheight-35), \
+                                 wx.Size(BWidth, BHeight))
+        self.Bind(wx.EVT_BUTTON, self.OnOkayButton, id = okaybutton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnCloseThreeCond, id = cancelbutton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.DescChoice.SelectAllDescriptives, id = allbutton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.DescChoice.SelectNoDescriptives, id = nonebutton.GetId())
 
     def OnOkayButton(self, event):
         biglist = []
@@ -1840,7 +2003,7 @@ class ThreeConditionTestFrame(wx.Dialog):
                 tmplist = frame.grid.CleanData(self.colnums[i])
                 miss.append(frame.grid.missing)
                 biglist.append(tmplist)
-                names.append(frame.grid.GetColLabelValue(i))
+                names.append(frame.grid.m_grid.GetColLabelValue(i))
         k = len(biglist)
         d = []
         for i in range(k):
@@ -1871,7 +2034,7 @@ class ThreeConditionTestFrame(wx.Dialog):
             output.htmlpage.Addhtml('<P>3) The observations are statistically \
                                     independent')
             TBase.anovaBetween(d)
-            if (self.hypchoice.GetSelection() == 0):
+            if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
             output.htmlpage.Addhtml('<table border="1"><tr><td></td><td>SS \
                                     </td><td>df</td><td>MS</td><td>F</td>  \
@@ -1905,7 +2068,7 @@ class ThreeConditionTestFrame(wx.Dialog):
                                     are equal across groups (homogeneity of \
                                     covariance)')
             TBase.anovaWithin(biglist, ns, sums, means)
-            if (self.hypchoice.GetSelection() == 0):
+            if self.m_radioBtn1.GetValue():#self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
             output.htmlpage.Addhtml('<table border="1"><tr><td></td><td>SS \
                                     </td><td>df</td><td>MS</td><td>F</td>  \
@@ -1932,7 +2095,7 @@ class ThreeConditionTestFrame(wx.Dialog):
         if self.TestChoice.IsChecked(2):
             output.htmlpage.Addhtml('<p><b>Kruskal Wallis H Test</b>')
             TBase.KruskalWallisH(biglist)
-            if (self.hypchoice.GetSelection() == 0):
+            if self.m_radioBtn1.GetValue():#self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
             output.htmlpage.Addhtml('<br>H(%d) = %5.3f, p = %1.6f'% \
                                     (TBase.df, TBase.h, TBase.prob))
@@ -1941,7 +2104,7 @@ class ThreeConditionTestFrame(wx.Dialog):
         if self.TestChoice.IsChecked(3):
             output.htmlpage.Addhtml('<p><b>Friedman Chi Square</b>')
             TBase.FriedmanChiSquare(biglist)
-            if (self.hypchoice.GetSelection() == 0):
+            if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
                 alpha = 0.10
             else:
@@ -1962,7 +2125,7 @@ class ThreeConditionTestFrame(wx.Dialog):
         if self.TestChoice.IsChecked(4):
             output.htmlpage.Addhtml('<p><b>Cochranes Q</b>')
             TBase.CochranesQ(biglist)
-            if (self.hypchoice.GetSelection() == 0):
+            if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
             output.htmlpage.Addhtml('<br>Q (%d) = %5.3f, p = %1.6f'% \
                                     (TBase.df, TBase.q, TBase.prob))
@@ -1982,31 +2145,35 @@ class CorrelationTestFrame(wx.Dialog):
         winheight = x[1]
         icon = images.getIconIcon()
         self.SetIcon(icon)
+        
+        ColumnList, self.colnums = frame.grid.GetUsedCols()
         colsselected =  frame.grid.GetColsUsedList()
-        l0 = wxStaticText(self,-1,"Select Columns to Analyse",pos=(10,10))
-        l1 = wxStaticText(self, -1, "Select Test(s) to Perform:", pos=(10,60))
+        l0 = wx.StaticText(self,-1,"Select Columns to Analyse",pos=(10,10))
+        l1 = wx.StaticText(self, -1, "Select Test(s) to Perform:", pos=(10,60))
         # No user hypothesised mean / variance needed here!
-        if wxPlatform == '__WXMSW__':
-            allbutton = wxButton(self, 218, "Select All", wxPoint(250,winheight-70),\
-                                 wxSize(BWidth, BHeight))
-            nonebutton = wxButton(self, 220, "Select None", wxPoint(360,winheight-70),\
-                                  wxSize(BWidth, BHeight))
+        if os.name == 'nt':
+            self.allbutton = wx.Button(self, 218, "Select All", wx.Point(250,winheight-70),\
+                                       wx.Size(BWidth, BHeight))
+            self.nonebutton = wx.Button(self, 220, "Select None", wx.Point(360,winheight-70),\
+                                        wx.Size(BWidth, BHeight))
         else:
-            allbutton = wxButton(self, 218, "Select All", wxPoint(250,winheight-50),\
-                                 wxSize(BWidth, BHeight))
-            nonebutton = wxButton(self, 220, "Select None", wxPoint(360,winheight-50),\
-                                  wxSize(BWidth, BHeight))
-        l4 = wxStaticText(self,-1,"Select Descriptive Statistics",pos=(250,10))
-        self.ColBox1 = wxComboBox(self,211,"Select Column", wxPoint(10,30),\
-                                  wxSize(110,20),ColumnList)
-        self.ColBox2 = wxComboBox(self,212,"Select Column",wxPoint(130,30),\
-                                  wxSize(110,20),ColumnList)
+            self.allbutton = wx.Button(self, 218, "Select All", wx.Point(250,winheight-50),\
+                                       wx.Size(BWidth, BHeight))
+            self.nonebutton = wx.Button(self, 220, "Select None", wx.Point(360,winheight-50),\
+                                        wx.Size(BWidth, BHeight))
+        l4 = wx.StaticText(self,-1,"Select Descriptive Statistics",pos=(250,10))
+        self.ColBox1 = wx.ComboBox(self,211,"Select Column", wx.Point(10,30),\
+                                   wx.Size(110,20),ColumnList)
+        self.ColBox2 = wx.ComboBox(self,212,"Select Column",wx.Point(130,30),\
+                                   wx.Size(110,20),ColumnList)
         x1 = 0
         x2 = 1
         self.ColBox1.SetSelection(x1)
         self.ColBox2.SetSelection(x2)
-        x1len = len(frame.grid.CleanData(x1))
-        x2len = len(frame.grid.CleanData(x2))
+        realColx1 = self.colnums[x1]
+        realColx2 = self.colnums[x2]
+        x1len = len(frame.grid.CleanData(realColx1))
+        x2len = len(frame.grid.CleanData(realColx2))
         if (x1len != x2len):
             self.equallists = False
         else:
@@ -2014,27 +2181,29 @@ class CorrelationTestFrame(wx.Dialog):
         # list of tests in alphabetical order
         Tests = ['Kendalls tau','Pearsons correlation','Point Biserial r', \
                  'Spearmans rho']
-        self.paratests = wxCheckListBox(self,213,wxPoint(10,80),\
-                                        wxSize(230,180),Tests)
-        self.hypchoice=wxRadioBox(self, 205,"Select Hypothesis",\
-                                  wxPoint(10,270),wxDefaultSize,HypList)
+        self.paratests = wx.CheckListBox(self,213,wx.Point(10,80),\
+                                         wx.Size(230,180),Tests)
+        self.hypchoice=wx.RadioBox(self, 205,"Select Hypothesis",\
+                                   wx.Point(10,270),wx.DefaultSize,HypList)
         self.hypchoice.SetSelection(1)
         self.DescChoice = DescChoiceBox(self, 215)
-        okaybutton = wxButton(self,216,"Okay",wxPoint(10,winheight-35), \
-                              wxSize(BWidth, BHeight))
-        cancelbutton = wxButton(self,217,"Cancel",wxPoint(100,winheight-35), \
-                                wxSize(BWidth, BHeight))
-        EVT_BUTTON(okaybutton, 216, self.OnOkayButton)
-        EVT_BUTTON(cancelbutton, 217, self.OnCloseTwoCond)
-        EVT_BUTTON(allbutton, 218, self.DescChoice.SelectAllDescriptives)
-        EVT_BUTTON(nonebutton, 220, self.DescChoice.SelectNoDescriptives)
-        EVT_COMBOBOX(self.ColBox1, 211, self.ChangeCol1)
-        EVT_COMBOBOX(self.ColBox2, 212, self.ChangeCol1)
+        self.okaybutton = wx.Button(self,216,"Okay",wx.Point(10,winheight-35), \
+                                    wx.Size(BWidth, BHeight))
+        self.cancelbutton = wx.Button(self,217,"Cancel",wx.Point(100,winheight-35), \
+                                      wx.Size(BWidth, BHeight))
+        self.Bind(wx.EVT_BUTTON, self.OnOkayButton, id = self.okaybutton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnCloseTwoCond, id = self.cancelbutton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.DescChoice.SelectAllDescriptives, id = self.allbutton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.DescChoice.SelectNoDescriptives, id = self.allbutton.GetId())
+        self.Bind(wx.EVT_COMBOBOX, self.ChangeCol1, id = self.ColBox1.GetId())
+        self.Bind(wx.EVT_COMBOBOX, self.ChangeCol1, id = self.ColBox2.GetId())
 
     def ChangeCol1(self, event):
         # check that len of 2 cols is equal, if not disable choices of test
-        x1 = len(frame.grid.CleanData(self.ColBox1.GetSelection()))
-        x2 = len(frame.grid.CleanData(self.ColBox2.GetSelection()))
+        realColx1 = self.colnums[self.ColBox1.GetSelection()]
+        realColx2 = self.colnums[self.ColBox2.GetSelection()] 
+        x1 = len(frame.grid.CleanData(realColx1))
+        x2 = len(frame.grid.CleanData(realColx2))
         if (x1 != x2):
             print "unequal"
             # disable some tests in the listbox
@@ -2044,8 +2213,10 @@ class CorrelationTestFrame(wx.Dialog):
 
     def ChangeCol2(self, event):
         # check that len of 2 cols is equal, if not disable choices of test
-        x1 = len(frame.grid.CleanData(self.ColBox1.GetSelection()))
-        x2 = len(frame.grid.CleanData(self.ColBox2.GetSelection()))
+        realColx1 = self.colnums[self.ColBox1.GetSelection()]
+        realColx2 = self.colnums[self.ColBox2.GetSelection()] 
+        x1 = len(frame.grid.CleanData(realColx1))
+        x2 = len(frame.grid.CleanData(realColx2))
         if (x1 != x2):
             print "unequal"
         else:
@@ -2054,14 +2225,18 @@ class CorrelationTestFrame(wx.Dialog):
     def OnOkayButton(self, event):
         x1 = self.ColBox1.GetSelection()
         y1 = self.ColBox2.GetSelection()
-        name1 = frame.grid.GetColLabelValue(x1)
-        name2 = frame.grid.GetColLabelValue(y1)
+        realColx1 = self.colnums[self.ColBox1.GetSelection()]
+        realColy1 = self.colnums[self.ColBox2.GetSelection()] 
+        x1 = len(frame.grid.CleanData(realColx1))
+        y1 = len(frame.grid.CleanData(realColy1))
+        name1 = frame.grid.m_grid.GetColLabelValue(x1)
+        name2 = frame.grid.m_grid.GetColLabelValue(y1)
         if (x1 < 0) or (y1 < 0):
             self.Close(True)
             return
-        x = frame.grid.CleanData(x1)
+        x = frame.grid.CleanData(realColx1)
         xmiss = frame.grid.missing
-        y = frame.grid.CleanData(y1)
+        y = frame.grid.CleanData(realColy1)
         ymiss = frame.grid.missing
         TBase = salstat_stats.TwoSampleTests(x, y, name1, name2,xmiss,ymiss)
         d = [0,0]
@@ -2118,35 +2293,35 @@ class MFanovaFrame(wx.Dialog):
         icon = images.getIconIcon()
         self.SetIcon(icon)
         ColumnList, self.colnums = frame.grid.GetUsedCols()
-        l0 = wxStaticText(self,-1,"Select Columns to Analyse",pos=(10,10))
-        l1 = wxStaticText(self, -1, "Select IV:", pos=(10,60))
-        l2 = wxStaticText(self, -1, "Select DV", pos=(10,170))
-        l4 = wxStaticText(self,-1,"Select Descriptive Statistics",pos=(250,10))
-        self.IVbox = wxCheckListBox(self, 413,wxPoint(10,30),\
-                                    wxSize(230,130),ColumnList)
-        self.DVbox = wxCheckListBox(self, 414,wxPoint(10,190), \
-                                    wxSize(230,120),ColumnList)
-        self.hypchoice=wxRadioBox(self, 205,"Select Hypothesis",\
-                                  wxPoint(10,320),wxDefaultSize,HypList)
+        l0 = wx.StaticText(self,-1,"Select Columns to Analyse",pos=(10,10))
+        l1 = wx.StaticText(self, -1, "Select IV:", pos=(10,60))
+        l2 = wx.StaticText(self, -1, "Select DV", pos=(10,170))
+        l4 = wx.StaticText(self,-1,"Select Descriptive Statistics",pos=(250,10))
+        self.IVbox = wx.CheckListBox(self, 413,wx.Point(10,30),\
+                                     wx.Size(230,130),ColumnList)
+        self.DVbox = wx.CheckListBox(self, 414,wx.Point(10,190), \
+                                     wx.Size(230,120),ColumnList)
+        self.hypchoice=wx.RadioBox(self, 205,"Select Hypothesis",\
+                                   wx.Point(10,320),wx.DefaultSize,HypList)
         self.hypchoice.SetSelection(1)
         #self.DescChoice = DescChoiceBox(self, 215)
         # I might leave the descriptives out and implement a feedback box
-        # that tells the user about the analysis (eg, how many factors, # 
+        # that tells the user about the analysis (eg, how many factors, #
         # levels per factor, # interactions etc which might be useful. It
         # would be updated whenever the user changes a selection.
-        okaybutton = wxButton(self,216,"Okay",wxPoint(10,winheight-35), \
-                              wxSize(BWidth, BHeight))
-        cancelbutton = wxButton(self,217,"Cancel",wxPoint(100,winheight-35), \
-                                wxSize(BWidth, BHeight))
-        allbutton = wxButton(self, 218,"Select All",wxPoint(250,winheight-70),\
-                             wxSize(BWidth, BHeight))
-        nonebutton = wxButton(self, 220, "Select None", wxPoint(360, \
-                                                                winheight-70),wxSize(BWidth, BHeight))
+        okaybutton = wx.Button(self,216,"Okay",wx.Point(10,winheight-35), \
+                               wx.Size(BWidth, BHeight))
+        cancelbutton = wx.Button(self,217,"Cancel",wx.Point(100,winheight-35), \
+                                 wx.Size(BWidth, BHeight))
+        allbutton = wx.Button(self, 218,"Select All",wx.Point(250,winheight-70),\
+                              wx.Size(BWidth, BHeight))
+        nonebutton = wx.Button(self, 220, "Select None", wx.Point(360, \
+                                                                  winheight-70),wx.Size(BWidth, BHeight))
         self.DescChoice = DescChoiceBox(self, 104)
-        EVT_BUTTON(okaybutton, 216, self.OnOkayButton)
-        EVT_BUTTON(cancelbutton, 217, self.OnCloseTwoCond)
-        EVT_BUTTON(allbutton, 218, self.DescChoice.SelectAllDescriptives)
-        EVT_BUTTON(nonebutton, 220, self.DescChoice.SelectNoDescriptives)
+        self.Bind(wx.EVT_BUTTON,okaybutton, 216, self.OnOkayButton)
+        self.Bind(wx.EVT_BUTTON,cancelbutton, 217, self.OnCloseTwoCond)
+        self.Bind(wx.EVT_BUTTON,allbutton, 218, self.DescChoice.SelectAllDescriptives)
+        self.Bind(wx.EVT_BUTTON,nonebutton, 220, self.DescChoice.SelectNoDescriptives)
         # Need to check that a col ticked in one box is not ticked in the other
         #EVT_CHECKLISTBOX(self.IVbox, 413, self.CheckforIXbox)
         #EVT_CHECKLISTBOX(self.DVbox,414,self.CheckforDVbox)
@@ -2164,25 +2339,25 @@ class TestFrame(wx.MiniFrame):
     def __init__(self, parent, title):
         self.parent = parent
         wx.MiniFrame.__init__(self, parent, -1, 'Tests', size=(120,400), pos=(5,5))
-        descButton = wxButton(self, 151,'Descriptives (F1)',wxPoint(0,0),wxSize(115,40))
-        sign1Button=wxButton(self,153,'sign test 1 sample',wxPoint(0,40),wxSize(115,40))
-        ttestpairedButton=wxButton(self,154,'t-test paired <F2>',wxPoint(0,80),wxSize(115,40))
-        ttestunpairedButton = wxButton(self, 155, 't-test unpaired <F3>',wxPoint(0,120),wxSize(115,40))
-        chisquareButton = wxButton(self,156,'Chi square <F4>',wxPoint(0,160),wxSize(155,40))
-        mannwhitneyButton=wxButton(self,157,'Mann-Whitney U',wxPoint(0,200),wxSize(115,40))
-        kolmogorovButton=wxButton(self,158,'Kolmogorov-Smirnov',wxPoint(0,240),wxSize(115,40))
-        anovaButton=wxButton(self,159,'anova between',wxPoint(0,280),wxSize(115,40))
-        anovaWButton=wxButton(self,160,'anova within',wxPoint(0,320),wxSize(115,40))
+        descButton = wx.Button(self, 151,'Descriptives (F1)',wx.Point(0,0),wx.Size(115,40))
+        sign1Button=wx.Button(self,153,'sign test 1 sample',wx.Point(0,40),wx.Size(115,40))
+        ttestpairedButton=wx.Button(self,154,'t-test paired <F2>',wx.Point(0,80),wx.Size(115,40))
+        ttestunpairedButton = wx.Button(self, 155, 't-test unpaired <F3>',wx.Point(0,120),wx.Size(115,40))
+        chisquareButton = wx.Button(self,156,'Chi square <F4>',wx.Point(0,160),wx.Size(155,40))
+        mannwhitneyButton=wx.Button(self,157,'Mann-Whitney U',wx.Point(0,200),wx.Size(115,40))
+        kolmogorovButton=wx.Button(self,158,'Kolmogorov-Smirnov',wx.Point(0,240),wx.Size(115,40))
+        anovaButton=wx.Button(self,159,'anova between',wx.Point(0,280),wx.Size(115,40))
+        anovaWButton=wx.Button(self,160,'anova within',wx.Point(0,320),wx.Size(115,40))
         # and so on...
         # only put keyboard shortcuts for the most required ones. DONT allow the user to change this
         EVT_CLOSE(self, self.DoNothing)
-        EVT_BUTTON(descButton, 151, self.GetDescriptives)
+        self.Bind(wx.EVT_BUTTON,descButton, 151, self.GetDescriptives)
 
     def DoNothing(self, event):
         pass
 
     def GetDescriptives(self, event):
-        print self.parent.grid.GetSelectedCols()
+        print self.parent.grid.m_grid.GetSelectedCols()
 
 #---------------------------------------------------------------------------
 class TransformFrame(wx.Dialog):
@@ -2197,32 +2372,32 @@ class TransformFrame(wx.Dialog):
         self.transform = ""
         self.transformName = ""
         self.ColumnList, self.colnums = frame.grid.GetUsedCols()
-        self.cols = frame.grid.GetNumberCols()
-        l0 = wxStaticText(self,-1,"Select Columns to Transform",pos=(10,10))
-        self.ColChoice = wxCheckListBox(self,1102, wxPoint(10,30), \
-                                        wxSize(230,(winheight * 0.8)), self.ColumnList)
-        okaybutton = wxButton(self,1105,"Okay",wxPoint(10,winheight-35),\
-                              wxSize(BWidth, BHeight))
-        cancelbutton = wxButton(self,1106,"Cancel",wxPoint(100,winheight-35),\
-                                wxSize(BWidth, BHeight))
+        self.cols = frame.grid.m_grid.GetNumberCols()
+        l0 = wx.StaticText(self,-1,"Select Columns to Transform",pos=(10,10))
+        self.ColChoice = wx.CheckListBox(self,1102, wx.Point(10,30), \
+                                         wx.Size(230,(winheight * 0.8)), self.ColumnList)
+        self.okaybutton = wx.Button(self, wx.ID_ANY, "Okay",wx.Point(10,winheight-35),\
+                                    wx.Size(BWidth, BHeight))
+        self.cancelbutton = wx.Button(self, wx.ID_ANY, "Cancel",wx.Point(100,winheight-35),\
+                                      wx.Size(BWidth, BHeight))
         # common transformations:
-        l1 = wxStaticText(self, -1, "Common Transformations:", pos=(250,30))
-        squareRootButton = wxButton(self, 1110, "Square Root", wxPoint(250, 60), \
-                                    wxSize(BWidth, BHeight))
-        logButton = wxButton(self, 1111, "Logarithmic",wxPoint(250, 100), \
-                             wxSize(BWidth, BHeight))
-        reciprocalButton = wxButton(self, 1112, "Reciprocal", wxPoint(250,140), \
-                                    wxSize(BWidth, BHeight))
-        squareButton = wxButton(self, 1113, "Square", wxPoint(250,180), \
-                                wxSize(BWidth, BHeight))
-        l2 = wxStaticText(self, -1, "Function :", wxPoint(250, 315)) 
-        self.transformEdit = wxTextCtrl(self,1114,pos=(250,335),size=(150,20))
-        EVT_BUTTON(okaybutton, 1105, self.OnOkayButton)
-        EVT_BUTTON(cancelbutton, 1106, self.OnCloseFrame)
-        EVT_BUTTON(squareRootButton, 1110, self.squareRootTransform)
-        EVT_BUTTON(logButton , 1111, self.logTransform)
-        EVT_BUTTON(reciprocalButton, 1112, self.reciprocalTransform)
-        EVT_BUTTON(squareButton, 1113, self.squareTransform)
+        l1 = wx.StaticText(self, -1, "Common Transformations:", pos=(250,30))
+        self.squareRootButton = wx.Button(self, wx.ID_ANY, "Square Root", wx.Point(250, 60), \
+                                          wx.Size(BWidth, BHeight))
+        self.logButton = wx.Button(self, wx.ID_ANY, "Logarithmic",wx.Point(250, 100), \
+                                   wx.Size(BWidth, BHeight))
+        self.reciprocalButton = wx.Button(self, wx.ID_ANY, "Reciprocal", wx.Point(250,140), \
+                                          wx.Size(BWidth, BHeight))
+        self.squareButton = wx.Button(self, wx.ID_ANY, "Square", wx.Point(250,180), \
+                                      wx.Size(BWidth, BHeight))
+        l2 = wx.StaticText(self, -1, "Function :", wx.Point(250, 315))
+        self.transformEdit = wx.TextCtrl(self, 1114,pos=(250,335),size=(150,20))
+        self.Bind(wx.EVT_BUTTON, self.OnOkayButton,        id = self.okaybutton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnCloseFrame,        id = self.cancelbutton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.squareRootTransform, id = self.squareRootButton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.logTransform,        id = self.logButton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.reciprocalTransform, id = self.reciprocalButton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.squareTransform,     id = self.squareButton.GetId())
 
     def squareRootTransform(self, event):
         self.transform = "math.sqrt(x)"
@@ -2247,7 +2422,7 @@ class TransformFrame(wx.Dialog):
     def OnOkayButton(self, event):
         pass # start transforming!
         # process: collect each selected column, then pass the contents through the self.transform function
-        # then put the resulting column into a new column, and retitle it with the original variable 
+        # then put the resulting column into a new column, and retitle it with the original variable
         # name plus the function.
         self.transform = self.transformEdit.GetValue()
         cols = range(self.cols)
@@ -2267,11 +2442,11 @@ class TransformFrame(wx.Dialog):
                         pass # need to do something here.
                 PutData(emptyCols[i], newcol)
                 # put in a nice new heading
-                oldHead = frame.grid.GetColLabelValue(self.colnums[i])
+                oldHead = frame.grid.m_grid.GetColLabelValue(self.colnums[i])
                 if self.transformName == "":
                     self.transformName = ' ' + self.transform
                 oldHead = oldHead + self.transformName
-                frame.grid.SetColLabelValue(emptyCols[i], oldHead)
+                frame.grid.m_grid.SetColLabelValue(emptyCols[i], oldHead)
                 emptyCols.pop(emptyCols[i])
         self.Close(True)
 
@@ -2409,6 +2584,7 @@ class DataFrame(wx.Frame):
         self.mn21=analyse_menu.Append(ID_ANALYSE_1COND, '&1 Condition Tests...')
         self.mn22=analyse_menu.Append(ID_ANALYSE_2COND, '&2 Condition Tests...')
         self.mn23=analyse_menu.Append(ID_ANALYSE_3COND, '&3+ Condition Tests...')
+        self.mn23.Enable(False)
         self.mn24=analyse_menu.Append(ID_ANALYSE_CORRELATION,'&Correlations...')
         #analyse_menu.Append(ID_ANALYSE_2FACT, '2+ &Factor Tests...')
         analyse_menu.AppendSeparator()
@@ -2481,7 +2657,7 @@ class DataFrame(wx.Frame):
         self.grid.m_grid.SetDefaultColSize(60, True)
         self.grid.m_grid.SetRowLabelSize(40)
 
-        self.m_mgr.AddPane(self.grid, 
+        self.m_mgr.AddPane(self.grid,
                            wx.aui.AuiPaneInfo().CenterPane().
                            CloseButton( False ).MinSize( wx.Size( 240,-1 )))
         self.m_mgr.Update()
@@ -2501,7 +2677,7 @@ class DataFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.GoVariablesFrame,   id = self.bt9.GetId())# 85
         self.Bind(wx.EVT_MENU, self.GoHelpAboutFrame,   id = self.bt10.GetId())# 90
         #-----------------
-        # Menu 
+        # Menu
         self.Bind(wx.EVT_MENU, self.GoClearData,        id = self.mn1.GetId())
         self.Bind(wx.EVT_MENU, self.grid.LoadDataASCII, id = self.mn2.GetId())
         self.Bind(wx.EVT_MENU, self.grid.SaveDataASCII, id = self.mn3.GetId())
@@ -2550,8 +2726,8 @@ class DataFrame(wx.Frame):
             self.Bind(wx.EVT_MENU, self.GoHelpTopicsFrame,  id = ID_HELP_TOPICS)
             self.Bind(wx.EVT_MENU, self.GoHelpLicenceFrame, id = ID_HELP_LICENCE)
             self.Bind(wx.EVT_MENU, self.EndApplication,     id = ID_FILE_EXIT)
-            
-            
+
+
             self.Bind(wx.EVT_MENU, self.GoClearData, id=10) ### VERIFICAR
             # self.Bind(wx.EVT_MENU, ID_FILE_NEWOUTPUT, self.GoNewOutputSheet)
             # unsure if I want this - maybe restrict user to just one?
@@ -2563,8 +2739,8 @@ class DataFrame(wx.Frame):
             self.Bind(wx.EVT_MENU, self.grid.CutData, id= 60)
             self.Bind(wx.EVT_MENU, self.grid.CopyData, id = 70)
             self.Bind(wx.EVT_MENU,  self.grid.PasteData, id = 80)
-            
-            
+
+
             ##self.Bind(EVT_CLOSE, self, self.EndApplication)
 
     def GoClearData(self, evt):
@@ -2581,7 +2757,7 @@ class DataFrame(wx.Frame):
         # NOTE - this doesn't appear to work on the grid, so I might be missing something...
         data = wx.FindReplaceData()
         dlg = wx.FindReplaceDialog(self.grid, data, 'Find and Replace', \
-                                  wx.FR_REPLACEDIALOG)
+                                   wx.FR_REPLACEDIALOG)
         dlg.data = data
         dlg.Show(True)
 
@@ -2609,7 +2785,7 @@ class DataFrame(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             data = dlg.GetFontData()
             #data2 = data.GetChosenFont()
-            self.grid.SetDefaultCellFont(data.GetChosenFont())
+            self.grid.m_grid.SetDefaultCellFont(data.GetChosenFont())
 
     def GoContinuousDescriptives(self, evt):
         # shows the continuous descriptives dialog
@@ -2678,7 +2854,7 @@ class DataFrame(wx.Frame):
             for i in range(len(colnums)):
                 d = salstat_stats.FullDescriptives(self.grid.CleanData(colnums[i]))
                 meanlist[i,1] = d.mean
-                nameslist[i] = frame.grid.GetColLabelValue(i)
+                nameslist[i] = frame.grid.m_grid.GetColLabelValue(i)
             meanlist[:,0] = numpy.arange(len(colnums))
             lines = pyplot.PolyLine(meanlist, legend="Red Line", colour='red')
             #lines2 = pyplot.PolyBars(meanlist)
@@ -2699,7 +2875,7 @@ class DataFrame(wx.Frame):
             for i in range(len(colnums)):
                 d = salstat_stats.FullDescriptives(self.grid.CleanData(colnums[i]))
                 meanlist[i,1] = d.mean
-                nameslist[i] = frame.grid.GetColLabelValue(i)
+                nameslist[i] = frame.grid.m_grid.GetColLabelValue(i)
             meanlist[:,0] = numpy.arange(len(colnums))
             lines = PolyBars(meanlist)
             self.win = PlotFrame(self, -1)
@@ -2767,7 +2943,7 @@ def GetData(column):
 def GetDataName(column):
     """This function returns the name of the data variable - in other words,
     the column label from the grid."""
-    return frame.grid.GetColLabelValue(column)
+    return frame.grid.m_grid.GetColLabelValue(column)
 
 def Display(text):
     """writes the text onto the html page. Handles lists and numerics"""
@@ -2787,10 +2963,10 @@ def PutData(column, data):
     starting at row 0. The grid is resized if the list is too large. This
     routine desparately needs to be updated to prevent errors"""
     n = len(data)
-    if (n > frame.grid.GetNumberRows()):
-        frame.grid.AddNCols(-1, (datawidth - gridwidth + 5))
+    if (n > frame.grid.m_grid.GetNumberRows()):
+        frame.grid.m_grid.AddNCols(-1, (datawidth - gridwidth + 5))
     for i in range(n):
-        frame.grid.SetCellValue(i, column, str(data[i]))
+        frame.grid.m_grid.SetCellValue(i, column, str(data[i]))
 
 #---------------------------------------------------------------------------
 # API statistical analysis functions
@@ -2834,7 +3010,7 @@ def DoOneSampleSignTest(col1, usermean, tail = 2):
         raise #return Error
 
 def DoChiSquareVariance(col1, usermean, tail = 2):
-    """This routine performs a chi square for variance ratio test using 
+    """This routine performs a chi square for variance ratio test using
     the given data and a specified user mean."""
     error = ""
     if (type(col1) == int):
@@ -3048,7 +3224,7 @@ def DoRankSums(col1, col2, tail = 2):
         col2 = frame.grid.CleanData(col1)
     elif (type(col2) != list):
         error = error + 'Invalid information for second dataset\n'
-    selobu = salstat_stats.TwoSampleTests(col1,col2)    
+    selobu = salstat_stats.TwoSampleTests(col1,col2)
     TBase = selobu.RankSums(col1, col2) # salstat_stats.RankSums(col1, col2)
     TBase.TwoSampleSignTextCorrelation(col1, col2)
     if (tail == 1):
