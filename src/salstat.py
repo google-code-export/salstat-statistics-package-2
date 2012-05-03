@@ -15,6 +15,7 @@ import os
 from grid import MyGrid, MyContextGrid
 from matplotlib import mlab
 
+from imagenes import imageEmbed
 import wx.html
 import wx.aui
 import wx.lib.agw.aui as aui
@@ -24,7 +25,7 @@ import wx.lib.wxpTag
 # import system modules
 import string, os, os.path, pickle
 # import SalStat specific modules
-import salstat_stats, images
+import salstat_stats,images
 import numpy, math
 # and for plots!
 #from wxPython.lib.wxPlotCanvas import *
@@ -454,46 +455,20 @@ class SimpleGrid(MyGrid):# wxGrid
         print hist.history
 
     def CutData(self, event):
-        buffer = wx.TextDataObject()
-        currentcol = self.m_grid.GetGridCursorCol()
-        currentrow = self.m_grid.GetGridCursorRow()
-        if self.m_grid.IsSelection():
-            data = 'range' # change this to coords self.tl self.br
-        else:
-            data = self.m_grid.GetCellValue(currentrow, currentcol)
-        if (wx.TheClipboard.Open()):
-            buffer.SetText(data)
-            wx.TheClipboard.SetData(buffer)
-            wx.TheClipboard.Close()
-            self.m_grid.SetCellValue(currentrow, currentcol, '')
+        self.m_grid.Delete()
 
     def CopyData(self, event):
-        buffer = wx.TextDataObject()
-        currentcol = self.m_grid.GetGridCursorCol()
-        currentrow = self.m_grid.GetGridCursorRow()
-        #if self.IsSelection(): # extend this only if SalStat can paste lists
-        #    data = [2,3,4,5]
-        #else:
-        data = self.m_grid.GetCellValue(currentrow, currentcol)
-        if (wx.TheClipboard.Open()):
-            buffer.SetText(data)
-            wx.TheClipboard.SetData(buffer)
-            wx.TheClipboard.Close()
+        self.m_grid.Copy()
+
 
     def PasteData(self, event):
-        buffer = wx.TextDataObject()
-        currentcol = self.m_grid.GetGridCursorCol()
-        currentrow = self.m_grid.GetGridCursorRow()
-        res = wx.TheClipboard.Open()
-        if res:
-            res = wx.TheClipboard.GetData(buffer)
-            wx.TheClipboard.Close()
-            if res:
-                self.Saved = False
-                if type(buffer.GetText()) != list:
-                    self.m_grid.SetCellValue(currentrow, currentcol, buffer.GetText())
-                else:
-                    self.m_grid.SetCellValue(currentrow, currentcol, 'list!')
+        self.m_grid.OnPaste()
+
+    def Undo(self, event):
+        self.m_grid.Undo()
+
+    def Redo(self, event):
+        self.m_grid.Redo()
 
     def EditGrid(self, event, numrows):
         insert = self.AppendRows(numrows)
@@ -1951,14 +1926,14 @@ class ThreeConditionTestFrame(wx.Dialog):
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
         self.m_mgr = wx.aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
-        
+
         icon = images.getIconIcon()
         self.SetIcon(icon)
         alltests = ['anova between subjects','anova within subjects',\
                     'Kruskall Wallis','Friedman test',\
                     'Cochranes Q']
         ColumnList, self.colnums = frame.grid.GetUsedCols()
-        
+
         m_checkList5Choices = []
         self.DescChoice = DescChoiceBox(self, wx.ID_ANY)
         self.m_mgr.AddPane( self.DescChoice, wx.aui.AuiPaneInfo() .Center() .
@@ -1995,8 +1970,8 @@ class ThreeConditionTestFrame(wx.Dialog):
         bSizer21.Add( self.ColChoice, 2, wx.EXPAND, 5 )
         for i in range(len(self.colnums)):
             self.ColChoice.Check(i, True)
-        
-        
+
+
         m_radioBox3Choices = HypList
         self.hypchoice = wx.RadioBox( self.m_panel2, wx.ID_ANY, u"Select Hypotesis", wx.DefaultPosition, wx.DefaultSize, m_radioBox3Choices, 1, wx.RA_SPECIFY_ROWS )
         self.hypchoice.SetSelection( 1 )
@@ -2638,7 +2613,22 @@ class DataFrame(wx.Frame):
         #set icon for frame (needs x-platform separator!
         icon = images.getIconIcon()
         self.SetIcon(icon)
-
+        # Get icons for toolbar
+        imag = imageEmbed()
+        NewIcon =    imag.exporCsv()
+        OpenIcon =   imag.folder()
+        SaveIcon =   imag.disk()
+        SaveAsIcon = imag.save2disk()
+        PrintIcon =  imag.printer()
+        CutIcon =    imag.edit_cut()
+        CopyIcon =   imag.edit_copy()
+        PasteIcon =  imag.edit_paste()
+        PrefsIcon =  imag.preferences()
+        HelpIcon =   imag.about()
+        UndoIcon =   imag.edit_undo()
+        RedoIcon =   imag.edit_redo()
+        ExitIcon =   imag.stop()
+        FindRIcon =  imag.findr()
         #-----------------------
         # Se crea el menubar
         #set up menus
@@ -2652,20 +2642,33 @@ class DataFrame(wx.Frame):
         chart_menu = wx.Menu()
         help_menu = wx.Menu()
         #add contents of menu
-        self.mn1= file_menu.Append(ID_FILE_NEW,'&New Data')
+
+        self.mn1= wx.MenuItem(file_menu,ID_FILE_NEW,'&New Data')
+        self.mn1.SetBitmap(NewIcon)
+        file_menu.AppendItem(self.mn1)
         #file_menu.Append(ID_FILE_NEWOUTPUT, 'New &Output Sheet')
         self.mn2=file_menu.Append(ID_FILE_OPEN, '&Open...')
+        self.mn2.SetBitmap(OpenIcon)
         self.mn3=file_menu.Append(ID_FILE_SAVE, '&Save')
+        self.mn3.SetBitmap(SaveIcon)
         self.mn4=file_menu.Append(ID_FILE_SAVEAS, 'Save &As...')
+        self.mn4.SetBitmap(SaveAsIcon)
         self.mn5=file_menu.AppendSeparator()
         self.mn6=file_menu.Append(ID_FILE_PRINT, '&Print...')
+        self.mn6.SetBitmap(PrintIcon)
         file_menu.AppendSeparator()
         self.mn7=file_menu.Append(ID_FILE_EXIT, 'E&xit')
-        self.mn8=edit_menu.Append(ID_EDIT_CUT, 'Cu&t')
+        self.mn7.SetBitmap(ExitIcon)
+        self.mn8= wx.MenuItem(edit_menu,ID_EDIT_CUT,'Cu&t')
+        self.mn8.SetBitmap(CutIcon)
+        edit_menu.AppendItem(self.mn8)
         self.mn9=edit_menu.Append(ID_EDIT_COPY, '&Copy')
+        self.mn9.SetBitmap(CopyIcon)
         self.mn10=edit_menu.Append(ID_EDIT_PASTE, '&Paste')
+        self.mn10.SetBitmap(PasteIcon)
         self.mn11=edit_menu.Append(ID_EDIT_SELECTALL, 'Select &All')
         self.mn12=edit_menu.Append(ID_EDIT_FIND, '&Find and Replace...')
+        self.mn12.SetBitmap(FindRIcon)
         edit_menu.AppendSeparator()
         self.mn13=edit_menu.Append(ID_EDIT_DELETECOL, 'Delete Current Column')
         self.mn14=edit_menu.Append(ID_EDIT_DELETEROW, 'Delete Current Row')
@@ -2710,29 +2713,24 @@ class DataFrame(wx.Frame):
 
         #----------------------
         # se crea una barra de herramientas
-        # Get icons for toolbar
-        NewIcon =    images.getNewBitmap()
-        OpenIcon =   images.getOpenBitmap()
-        SaveIcon =   images.getSaveBitmap()
-        SaveAsIcon = images.getSaveAsBitmap()
-        PrintIcon =  images.getPrintBitmap()
-        CutIcon =    images.getCutBitmap()
-        CopyIcon =   images.getCopyBitmap()
-        PasteIcon =  images.getPasteBitmap()
-        PrefsIcon =  images.getPreferencesBitmap()
-        HelpIcon =   images.getHelpBitmap()
+
         #create toolbar (nothing to add yet!)
         tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
                             agwStyle=  aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_OVERFLOW)
-
+        ##tb1.SetDimensions(wx.Size(16,16))
         self.bt1 = tb1.AddSimpleTool(10, "New",  NewIcon,"New")
         self.bt2 = tb1.AddSimpleTool(20, "Open", OpenIcon,"Open")
         self.bt3 = tb1.AddSimpleTool(30, "Save", SaveIcon,"Save")
         self.bt4 = tb1.AddSimpleTool(40, "Save As",SaveAsIcon,"Save As")
         self.bt5 = tb1.AddSimpleTool(50, "Print",PrintIcon,"Print")
+        tb1.AddSeparator()
+        self.bt11= tb1.AddSimpleTool(wx.ID_ANY,"Undo",UndoIcon,"Undo")
+        self.bt12= tb1.AddSimpleTool(wx.ID_ANY,"Redo",RedoIcon,"Redo")
+        tb1.AddSeparator()
         self.bt6 = tb1.AddSimpleTool(60, "Cut",  CutIcon, "Cut")
         self.bt7 = tb1.AddSimpleTool(70, "Copy", CopyIcon, "Copy")
         self.bt8 = tb1.AddSimpleTool(80, "Paste",PasteIcon, "Paste")
+        tb1.AddSeparator()
         self.bt9 = tb1.AddSimpleTool(85, "Preferences",PrefsIcon, "Preferences")
         self.bt10= tb1.AddSimpleTool(90, "Help", HelpIcon, "Help")
         tb1.SetToolBitmapSize((24,24))
@@ -2770,8 +2768,10 @@ class DataFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.grid.CutData,       id = self.bt6.GetId())
         self.Bind(wx.EVT_MENU, self.grid.CopyData,      id = self.bt7.GetId())
         self.Bind(wx.EVT_MENU, self.grid.PasteData,     id = self.bt8.GetId())
-        self.Bind(wx.EVT_MENU, self.GoVariablesFrame,   id = self.bt9.GetId())# 85
-        self.Bind(wx.EVT_MENU, self.GoHelpAboutFrame,   id = self.bt10.GetId())# 90
+        self.Bind(wx.EVT_MENU, self.GoVariablesFrame,   id = self.bt9.GetId())
+        self.Bind(wx.EVT_MENU, self.GoHelpAboutFrame,   id = self.bt10.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.Undo,   id = self.bt11.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.Redo,   id = self.bt12.GetId())
         #-----------------
         # Menu
         self.Bind(wx.EVT_MENU, self.GoClearData,        id = self.mn1.GetId())
