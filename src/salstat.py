@@ -12,7 +12,8 @@ details of this license. """
 #from wxPython.lib.editor import wxEditor
 import wx
 import os
-from grid import MyGrid, MyContextGrid
+# from grid import MyContextGrid # MyGrid
+from ntbSheet import MyGridPanel as MyGrid
 from matplotlib import mlab
 
 from imagenes import imageEmbed
@@ -421,17 +422,19 @@ class ManyDescriptives:
 #---------------------------------------------------------------------------
 # class for grid - used as datagrid.
 class SimpleGrid(MyGrid):# wxGrid
-    def __init__(self, parent, log):
-        MyGrid.__init__(self, parent, -1)
+    def __init__(self, parent, log, size= (500,50)):
+        MyGrid.__init__(self, parent, -1, size)
         self.Saved = True
         self.moveTo = None
         ##self.m_grid.SetGridLineColour(wx.Color(0,0,0))
         #self.m_grid.CreateGrid(int(inits.get("gridcellsy")), \
         #                            int(inits.get("gridcellsx")))
+       
+        self.m_grid.setPadreCallBack(self)
         self.m_grid.SetColLabelAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
         for i in range(20):
             self.m_grid.SetColFormatFloat(i, 8, 4)
-        self.m_grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.AlterSaveStatus)
+        # self.m_grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.AlterSaveStatus)
         self.m_grid.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
         self.m_grid.wildcard = "Any File (*.*)|*.*|" \
             "ASCII data format (*.dat)|*.dat|" \
@@ -443,7 +446,7 @@ class SimpleGrid(MyGrid):# wxGrid
             self.tl = event.GetTopLeftCoords()
             self.br = event.GetBottomRightCoords()
 
-    def AlterSaveStatus(self, event):
+    def OnRangeChange(self, event): #AlterSaveStatus
         # this is activated when the user enters some data
         self.Saved = False
         # also record in the history file
@@ -495,9 +498,9 @@ class SimpleGrid(MyGrid):# wxGrid
         insert = self.m_grid.AppendCols(numcols)
         insert = self.m_grid.AppendRows(numrows)
         for i in range(self.m_grid.GetNumberCols() - numcols):
-            self.SetColLabelAlignment(wxALIGN_LEFT, wxALIGN_BOTTOM)
-            self.SetColFormatFloat(i, 8, 4)
-        self.AdjustScrollbars()
+            self.m_grid.SetColLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_BOTTOM)
+            self.m_grid.SetColFormatFloat(i, 8, 4)
+        self.m_grid.AdjustScrollbars()
         xmlevt = '<appendColumn>'+str(numcols)+'</appendColumn>\n'
         hist.AppendEvent(xmlevt)
         xmlevt = '<appendRow>'+str(numrows)+'</appendRow>\n'
@@ -1512,8 +1515,8 @@ class OneConditionTestFrame(wx.Dialog):
                                     hypothesised mean specified')
             self.Close(True)
             return
-        name = frame.grid.m_grid.GetColLabelValue(x1)
         realColx1 = self.colnums[x1]
+        name = frame.grid.m_grid.GetColLabelValue(realColx1)
         x = frame.grid.CleanData(realColx1)
         TBase = salstat_stats.OneSampleTests(frame.grid.CleanData(realColx1), name, \
                                              frame.grid.missing)
@@ -2747,7 +2750,7 @@ class DataFrame(wx.Frame):
         #still need to define event handlers
         #set up the datagrid
 
-        self.grid = SimpleGrid(self, log)
+        self.grid = SimpleGrid(self, log, size= (500,50))
         self.grid.m_grid.SetDefaultColSize(60, True)
         self.grid.m_grid.SetRowLabelSize(40)
 
@@ -2801,7 +2804,7 @@ class DataFrame(wx.Frame):
 
         self.Bind(wx.EVT_MENU, self.GoChartWindow,      id = self.mn26.GetId())
         self.Bind(wx.EVT_MENU, self.GoBarChartWindow,   id = self.mn27.GetId())
-
+        self.grid.m_grid.setPadreCallBack(self) 
         if 0:
             self.Bind(wx.EVT_MENU, self.GoCheckOutliers,    id = ID_PREPARATION_OUTLIERS)
             #self.Bind(wx.EVT_MENU, ID_ANALYSE_2FACT, self.GoMFanovaFrame)
@@ -2968,7 +2971,8 @@ class DataFrame(wx.Frame):
                 meanlist[1,0] = i
                 meanlist[1,1] = 0
                 nameslist[i] = frame.grid.m_grid.GetColLabelValue(i)
-                lines =  pyplot.PolyLine(meanlist,colour = colors[k],legend = nameslist[i])
+                lines =  pyplot.PolyLine(meanlist,colour = colors[k],legend = nameslist[i],
+                                         width = 2)
                 graphs.append(lines)
                 k += 1
             self.win.client.Draw(pyplot.PlotGraphics(graphs,"Bar Chart of all means","X","Mean",))
