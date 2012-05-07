@@ -14,7 +14,7 @@ import wx
 import os
 # from grid import MyContextGrid # MyGrid
 from ntbSheet import MyGridPanel as MyGrid
-from matplotlib import mlab
+#from matplotlib import mlab
 
 from imagenes import imageEmbed
 import wx.html
@@ -439,8 +439,13 @@ class SimpleGrid(MyGrid):# wxGrid
         self.m_grid.wildcard = "Any File (*.*)|*.*|" \
             "ASCII data format (*.dat)|*.dat|" \
             "SalStat Format (*.xml)|*.xml"
-        pass
-
+        # se ajusta el render
+        attr = wx.grid.GridCellAttr()
+        editor = wx.grid.GridCellFloatEditor()
+        attr.SetEditor(editor)
+        renderer = wx.grid.GridCellFloatRenderer(0, 5)
+        attr.SetRenderer(renderer)
+        
     def RangeSelected(self, event):
         if event.Selecting():
             self.tl = event.GetTopLeftCoords()
@@ -559,13 +564,13 @@ class SimpleGrid(MyGrid):# wxGrid
                 maxrows = max(rows)
                 for i in range(len(cols)):
                     for j in range(maxrows):
-                        if (self.GetCellValue(j,i) == ''):
-                            self.SetCellValue(j,i,'.')
+                        if (self.m_grid.GetCellValue(j,i) == ''):
+                            self.m_grid.SetCellValue(j,i,'.')
                 for i in range(maxrows):
                     datapoint=[]
                     for j in range(len(cols)):
                         try:
-                            datapoint.append(self.GetCellValue(i, j))
+                            datapoint.append(self.m_grid.GetCellValue(i, j))
                         except:
                             datapoint.append("0")
                         line = string.join(datapoint)
@@ -581,14 +586,14 @@ class SimpleGrid(MyGrid):# wxGrid
         default = inits.get('savedir')
         if (filename == 'UNTITLED'):
             self.SaveAsDataASCII(event)
-            """dlg = wxFileDialog(self, "Save Data File", default,"",\
+            """dlg = wx.FileDialog(self, "Save Data File", default,"",\
                                     "ASCII Text (*.dat)|*.dat| \
                                     numpy Array (*.npy)|*.npy| \
                                     Any (*.*)| \
                                     *.*", wxSAVE)
             icon = images.getIconIcon()
             dlg.SetIcon(icon)
-            if dlg.ShowModal() == wxID_OK:
+            if dlg.ShowModal() == wx.ID_OK:
                 inits.update({'savedir': dlg.GetDirectory()})
                 filename = dlg.GetPath()
             else:
@@ -620,7 +625,7 @@ class SimpleGrid(MyGrid):# wxGrid
         dlg = wx.FileDialog(self, "Load Data File", default,"",
                             wildcard= "SalStat Native (*.xml)|*.xml|",
                             style = wx.OPEN)
-                #, wxOPEN)
+                #, wx.OPEN)
         icon = images.getIconIcon()
         dlg.SetIcon(icon)
         if dlg.ShowModal() == wx.ID_OK: # ShowModal
@@ -719,12 +724,12 @@ class SimpleGrid(MyGrid):# wxGrid
     def LoadDataASCII2(self, event):
         # redundant routine
         default = inits.get('opendir')
-        dlg = wxFileDialog(self, "Load Data File", default,"",\
-                           "ASCII Text (*.dat)|*.dat",wxOPEN)
-                #numpy Array (*.npy)|*.npy|", wxOPEN)
+        dlg = wx.FileDialog(self, "Load Data File", default,"",\
+                           "ASCII Text (*.dat)|*.dat",wx.OPEN)
+                #numpy Array (*.npy)|*.npy|", wx.OPEN)
         icon = images.getIconIcon()
         dlg.SetIcon(icon)
-        if dlg.ShowModal() == wxID_OK:
+        if dlg.ShowModal() == wx.ID_OK:
             inits.update({'opendir': dlg.GetDirectory()})
             filename = dlg.GetPath()
             self.ClearGrid()
@@ -773,11 +778,11 @@ class SimpleGrid(MyGrid):# wxGrid
 
     def LoadNumericData(self, event):
         default = inits.get('opendir')
-        dlg = wxFileDialog(self, "Load Data File", default,"","*.\
-                                    dat|*.*", wxOPEN)
+        dlg = wx.FileDialog(self, "Load Data File", default,"","*.\
+                                    dat|*.*", wx.OPEN)
         icon = images.getIconIcon()
         dlg.SetIcon(icon)
-        if dlg.ShowModal() == wxID_OK:
+        if dlg.ShowModal() == wx.ID_OK:
             inits.update({'opendir': dlg.GetDirectory()})
             filename = dlg.GetPath()
             self.ClearGrid()
@@ -803,8 +808,8 @@ class SimpleGrid(MyGrid):# wxGrid
         indata = []
         self.missing = 0
         for i in range(self.m_grid.GetNumberRows()):
-            datapoint = self.m_grid.GetCellValue(i, col)
-            if (datapoint != '') and (datapoint != '.'):
+            datapoint = self.m_grid.GetCellValue(i, col).strip().replace(',','.')
+            if (datapoint != u'') and (datapoint != u'.'):
                 try:
                     value = float(datapoint)
                     if (value != missingvalue):
@@ -973,9 +978,9 @@ class ScriptFrame(wx.Frame):
     # the open script method needs work
     def OpenScript(self, event):
         default = inits.get('opendir')
-        dlg = wxFileDialog(self, "Open Script File",default,"",\
-                           "Any (*)|*",wxOPEN)
-        if dlg.ShowModal() == wxID_OK:
+        dlg = wx.FileDialog(self, "Open Script File",default,"",\
+                           "Any (*)|*",wx.OPEN)
+        if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetPath()
             fin = file(filename, "r")
             TextIn = fin.readlines()
@@ -985,9 +990,9 @@ class ScriptFrame(wx.Frame):
 
     def SaveScriptAs(self, event):
         default = inits.get('savedir')
-        dlg = wxFileDialog(self, "Save Script File", default,"",\
+        dlg = wx.FileDialog(self, "Save Script File", default,"",\
                            "Any (*)|*", wxSAVE)
-        if dlg.ShowModal() == wxID_OK:
+        if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetPath()
             fout = open(filename, "w")
             script = self.scripted.GetText()
@@ -1174,16 +1179,16 @@ class MyHtmlWindow(wx.html.HtmlWindow):
         self.Addhtml(TextIn)
 
     def LoadHtmlPage(self, event):
-        dlg = wxFileDialog(self, "Load Output File", "","","*.html|*.*", \
-                           wxOPEN)
-        if dlg.ShowModal() == wxID_OK:
+        dlg = wx.FileDialog(self, "Load Output File", "","","*.html|*.*", \
+                           wx.OPEN)
+        if dlg.ShowModal() == wx.ID_OK:
             outputfilename = dlg.GetPath()
             self.LoadPage(outputfilename)
             inits.update({'opendir': dlg.GetDirectory()})
 
     def SaveHtmlPage(self, event):
-        dlg = wxFileDialog(self, "Save Output","","","*.html|*>*",wxSAVE)
-        if dlg.ShowModal() == wxID_OK:
+        dlg = wx.FileDialog(self, "Save Output","","","*.html|*>*",wx.SAVE)
+        if dlg.ShowModal() == wx.ID_OK:
             outputfilename = dlg.GetPath()
             fout = open(outputfilename, "w")
             fout.write(self.WholeOutString)
@@ -1192,8 +1197,8 @@ class MyHtmlWindow(wx.html.HtmlWindow):
             self.Saved = True
 
     def PrintHtmlPage(self, event):
-        dlg = wxPrintDialog(self)
-        if dlg.ShowModal() == wxID_OK:
+        dlg = wx.PrintDialog(self)
+        if dlg.ShowModal() == wx.ID_OK:
             None #null
 
     def GoBack(self, event):
@@ -1220,20 +1225,20 @@ class OutputSheet(wx.Frame):
         edit_menu = wx.Menu()
         pref_menu = wx.Menu()
         help_menu = wx.Menu()
-        file_menu.Append(ID_FILE_NEW, '&New')
-        file_menu.Append(ID_OFILE_OPEN, '&Open...')
-        file_menu.Append(ID_OFILE_SAVE, '&Save')
-        file_menu.Append(ID_OFILE_SAVEAS, 'Save &As...')
-        file_menu.Append(ID_OFILE_PRINT, '&Print...')
-        file_menu.Append(ID_OFILE_CLOSE, '&Close')
-        edit_menu.Append(ID_OEDIT_CUT, 'Cu&t')
-        edit_menu.Append(ID_OEDIT_COPY, '&Copy')
-        edit_menu.Append(ID_OEDIT_PASTE, '&Paste')
-        edit_menu.Append(ID_OEDIT_SELECTALL, 'Select &All')
-        help_menu.Append(ID_HELP_WIZARD, '&What Test Should I Use...')
-        help_menu.Append(ID_HELP_TOPICS, '&Topics...')
-        help_menu.Append(ID_HELP_LICENCE, '&Licence...')
-        help_menu.Append(ID_HELP_ABOUT, '&About...')
+        self.bt1 = file_menu.Append(ID_FILE_NEW, '&New')
+        self.bt2 = file_menu.Append(ID_OFILE_OPEN, '&Open...')
+        self.bt3 = file_menu.Append(ID_OFILE_SAVE, '&Save')
+        self.bt4 = file_menu.Append(ID_OFILE_SAVEAS, 'Save &As...')
+        self.bt5 = file_menu.Append(ID_OFILE_PRINT, '&Print...')
+        self.bt6 = file_menu.Append(ID_OFILE_CLOSE, '&Close')
+        self.bt7 = edit_menu.Append(ID_OEDIT_CUT, 'Cu&t')
+        self.bt8 = edit_menu.Append(ID_OEDIT_COPY, '&Copy')
+        self.bt9 = edit_menu.Append(ID_OEDIT_PASTE, '&Paste')
+        self.bt10 = edit_menu.Append(ID_OEDIT_SELECTALL, 'Select &All')
+        self.bt11 = help_menu.Append(ID_HELP_WIZARD, '&What Test Should I Use...')
+        self.bt12 = help_menu.Append(ID_HELP_TOPICS, '&Topics...')
+        self.bt13 = help_menu.Append(ID_HELP_LICENCE, '&Licence...')
+        self.bt14 = help_menu.Append(ID_HELP_ABOUT, '&About...')
         omenuBar = wx.MenuBar()
         omenuBar.Append(file_menu, '&File')
         omenuBar.Append(edit_menu, '&Edit')
@@ -1248,13 +1253,13 @@ class OutputSheet(wx.Frame):
         HelpIcon = images.getHelpBitmap()
         toolBar = self.CreateToolBar(wx.TB_HORZ_LAYOUT| \
                                      wx.TB_3DBUTTONS)
-        toolBar.AddSimpleTool(401, NewIcon,"New","New Data Sheet in \
+        self.bt15 = toolBar.AddSimpleTool(wx.ID_ANY, NewIcon,"New","New Data Sheet in \
                                     separate window")
-        toolBar.AddSimpleTool(402, OpenIcon,"Open","Open Data from a File")
-        toolBar.AddSimpleTool(403, SaveAsIcon,"Save As","Save Data under \
+        self.bt16 = toolBar.AddSimpleTool(wx.ID_ANY, OpenIcon,"Open","Open Data from a File")
+        self.bt17 = toolBar.AddSimpleTool(wx.ID_ANY, SaveAsIcon,"Save As","Save Data under \
                                     a new filename")
-        toolBar.AddSimpleTool(404, PrintIcon,"Print","Print Out Results")
-        toolBar.AddSimpleTool(405, HelpIcon, "Help", "Get some help!")
+        self.bt18 = toolBar.AddSimpleTool(wx.ID_ANY, PrintIcon,"Print","Print Out Results")
+        self.bt19 = toolBar.AddSimpleTool(wx.ID_ANY, HelpIcon, "Help", "Get some help!")
         toolBar.SetToolBitmapSize((24,24))
         # more toolbuttons are needed: New Output, Save, Print, Cut, \
         # Variables, and Wizard creates the toolbar
@@ -1266,29 +1271,29 @@ class OutputSheet(wx.Frame):
         self.htmlpage.Addhtml('<P><B>SalStat Statistics</B></P>')
         self.printer = wx.html
         self.Bind(wx.EVT_MENU, self.htmlpage.SaveHtmlPage, id = ID_FILE_SAVEAS)
-        ##EVT_CLOSE(self, self.DoNothing)
-        self.Bind(wx.EVT_MENU, self.ClearAll, id = ID_FILE_NEW, )
-        self.Bind(wx.EVT_MENU, self.PrintOutput, id = ID_OFILE_PRINT)
-        self.Bind(wx.EVT_MENU,  self.htmlpage.LoadHtmlPage, id = ID_FILE_OPEN)
-        self.Bind(wx.EVT_MENU, frame.GoHelpAboutFrame, id = ID_HELP_ABOUT)
-        self.Bind(wx.EVT_MENU, frame.GoHelpWizardFrame, id =  ID_HELP_WIZARD)
-        self.Bind(wx.EVT_MENU, frame.GoHelpTopicsFrame, id = ID_HELP_TOPICS)
-        self.Bind(wx.EVT_MENU, frame.GoHelpLicenceFrame, id  = ID_HELP_LICENCE)
+        
+        self.Bind(wx.EVT_MENU, self.ClearAll, id = self.bt1.GetId() )
+        self.Bind(wx.EVT_MENU, self.PrintOutput, id = self.bt5.GetId())
+        self.Bind(wx.EVT_MENU,  self.htmlpage.LoadHtmlPage, id = self.bt2.GetId())
+        self.Bind(wx.EVT_MENU, frame.GoHelpAboutFrame, id = self.bt14.GetId())
+        self.Bind(wx.EVT_MENU, frame.GoHelpWizardFrame, id =  self.bt11.GetId())
+        self.Bind(wx.EVT_MENU, frame.GoHelpTopicsFrame, id = self.bt12.GetId())
+        self.Bind(wx.EVT_MENU, frame.GoHelpLicenceFrame, id  = self.bt13.GetId())
 
-
-        self.Bind(wx.EVT_TOOL_ENTER, self.ClearAll,  id = 401)
-        self.Bind(wx.EVT_TOOL_ENTER, self.htmlpage.LoadHtmlPage, id = 402)
-        self.Bind(wx.EVT_TOOL_ENTER, self.htmlpage.SaveHtmlPage, id =  403)
-        self.Bind(wx.EVT_TOOL_ENTER, self.PrintOutput, id = 404)
-        self.Bind(wx.EVT_TOOL_ENTER,  frame.GoHelpTopicsFrame, id= 405)
-
+        self.Bind(wx.EVT_MENU, self.ClearAll,  id = self.bt15.GetId())
+        self.Bind(wx.EVT_MENU, self.htmlpage.LoadHtmlPage, id = self.bt16.GetId())
+        self.Bind(wx.EVT_MENU, self.htmlpage.SaveHtmlPage, id = self.bt17.GetId())
+        self.Bind(wx.EVT_MENU, self.PrintOutput, id = self.bt18.GetId())
+        self.Bind(wx.EVT_MENU,  frame.GoHelpTopicsFrame, id= self.bt19.GetId())
+        self.Bind(wx.EVT_CLOSE, self.DoNothing, self)
+        
     def PrintOutput(self, event):
-        data = wxPrintDialogData()
+        data = wx.PrintDialogData()
         data.EnablePrintToFile(True)
         data.EnablePageNumbers(True)
         data.EnableSelection(True)
-        dlg = wxPrintDialog(output, data)
-        if dlg.ShowModal() == wxID_OK:
+        dlg = wx.PrintDialog(output, data)
+        if dlg.ShowModal() == wx.ID_OK:
             #print out html
             self.printer.PrintText(self.htmlpage.WholeOutString)
         dlg.Destroy()
@@ -2751,6 +2756,7 @@ class DataFrame(wx.Frame):
         #set up the datagrid
 
         self.grid = SimpleGrid(self, log, size= (500,50))
+        self.grid.Saved = False
         self.grid.m_grid.SetDefaultColSize(60, True)
         self.grid.m_grid.SetRowLabelSize(40)
 
@@ -2828,7 +2834,7 @@ class DataFrame(wx.Frame):
             self.Bind(wx.EVT_MENU, self.grid.PasteData, id = 80)
 
 
-            ##self.Bind(EVT_CLOSE, self, self.EndApplication)
+            self.Bind(wx.EVT_CLOSE, self.EndApplication, self)
 
     def GoClearData(self, evt):
         #shows a new data entry frame
@@ -3025,7 +3031,6 @@ class DataFrame(wx.Frame):
         if self.grid.Saved == False:
             win = SaveDialog(self, -1)
             win.Show(True)
-            self.grid.Saved = True
         else:
             frame.Destroy()
 
