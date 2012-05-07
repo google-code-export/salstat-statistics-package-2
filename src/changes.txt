@@ -2,6 +2,10 @@ This file outlines the changes that have occurred in the development of the SalS
 
 version:
 
+2012000  a new improved version..  Sebastian Lopez Buritica
+
+
+
 20030911 (codenamed 'Texas!')
 
 1) Replaced he wxPlotCanvas with the wxPyPlot module. Save As... works now along with print previews, setup and printing.
