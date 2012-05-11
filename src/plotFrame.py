@@ -197,7 +197,7 @@ class MpltFrame( wx.Frame ):
         self.m_scrolledWindow1.SetSizer( bSizer2 )
         self.m_scrolledWindow1.Layout()
         bSizer2.Fit( self.m_scrolledWindow1 )
-        self.m_notebook1.AddPage( self.m_scrolledWindow1, u"Main Options", False )
+        self.m_notebook1.AddPage( self.m_scrolledWindow1, u"Main Options", True )
         self.m_scrolledWindow3 = wx.ScrolledWindow( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL )
         self.m_scrolledWindow3.SetScrollRate( 5, 5 )
         bSizer21 = wx.BoxSizer( wx.VERTICAL )
@@ -542,7 +542,7 @@ class MpltFrame( wx.Frame ):
         self.m_scrolledWindow4.SetSizer( bSizer3 )
         self.m_scrolledWindow4.Layout()
         bSizer3.Fit( self.m_scrolledWindow4 )
-        self.m_notebook1.AddPage( self.m_scrolledWindow4, u"patch", True )
+        self.m_notebook1.AddPage( self.m_scrolledWindow4, u"patch", False )
 
         self.statusbar = self.CreateStatusBar( 2, wx.ST_SIZEGRIP, wx.ID_ANY )
 
