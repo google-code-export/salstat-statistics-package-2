@@ -34,6 +34,9 @@ import numpy, math
 import wx.lib.plot as pyplot
 # set ip the xml modules
 from xml.dom import minidom
+# system of graphics
+from plotFrame import MpltFrame as plot
+from multiPlotDialog import data2Plotdiaglog, selectDialogData2plot, scatterDialog
 #---------------------------------------------------------------------------
 # set up id's for menu events - all on menu, some also available elsewhere
 ID_FILE_NEW = wx.ID_ANY
@@ -429,7 +432,7 @@ class SimpleGrid(MyGrid):# wxGrid
         ##self.m_grid.SetGridLineColour(wx.Color(0,0,0))
         #self.m_grid.CreateGrid(int(inits.get("gridcellsy")), \
         #                            int(inits.get("gridcellsx")))
-       
+
         self.m_grid.setPadreCallBack(self)
         self.m_grid.SetColLabelAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
         for i in range(20):
@@ -445,7 +448,7 @@ class SimpleGrid(MyGrid):# wxGrid
         attr.SetEditor(editor)
         renderer = wx.grid.GridCellFloatRenderer(0, 5)
         attr.SetRenderer(renderer)
-        
+
     def RangeSelected(self, event):
         if event.Selecting():
             self.tl = event.GetTopLeftCoords()
@@ -725,7 +728,7 @@ class SimpleGrid(MyGrid):# wxGrid
         # redundant routine
         default = inits.get('opendir')
         dlg = wx.FileDialog(self, "Load Data File", default,"",\
-                           "ASCII Text (*.dat)|*.dat",wx.OPEN)
+                            "ASCII Text (*.dat)|*.dat",wx.OPEN)
                 #numpy Array (*.npy)|*.npy|", wx.OPEN)
         icon = images.getIconIcon()
         dlg.SetIcon(icon)
@@ -979,7 +982,7 @@ class ScriptFrame(wx.Frame):
     def OpenScript(self, event):
         default = inits.get('opendir')
         dlg = wx.FileDialog(self, "Open Script File",default,"",\
-                           "Any (*)|*",wx.OPEN)
+                            "Any (*)|*",wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetPath()
             fin = file(filename, "r")
@@ -991,7 +994,7 @@ class ScriptFrame(wx.Frame):
     def SaveScriptAs(self, event):
         default = inits.get('savedir')
         dlg = wx.FileDialog(self, "Save Script File", default,"",\
-                           "Any (*)|*", wxSAVE)
+                            "Any (*)|*", wxSAVE)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetPath()
             fout = open(filename, "w")
@@ -1180,7 +1183,7 @@ class MyHtmlWindow(wx.html.HtmlWindow):
 
     def LoadHtmlPage(self, event):
         dlg = wx.FileDialog(self, "Load Output File", "","","*.html|*.*", \
-                           wx.OPEN)
+                            wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             outputfilename = dlg.GetPath()
             self.LoadPage(outputfilename)
@@ -1271,7 +1274,7 @@ class OutputSheet(wx.Frame):
         self.htmlpage.Addhtml('<P><B>SalStat Statistics</B></P>')
         self.printer = wx.html
         self.Bind(wx.EVT_MENU, self.htmlpage.SaveHtmlPage, id = ID_FILE_SAVEAS)
-        
+
         self.Bind(wx.EVT_MENU, self.ClearAll, id = self.bt1.GetId() )
         self.Bind(wx.EVT_MENU, self.PrintOutput, id = self.bt5.GetId())
         self.Bind(wx.EVT_MENU,  self.htmlpage.LoadHtmlPage, id = self.bt2.GetId())
@@ -1286,7 +1289,7 @@ class OutputSheet(wx.Frame):
         self.Bind(wx.EVT_MENU, self.PrintOutput, id = self.bt18.GetId())
         self.Bind(wx.EVT_MENU,  frame.GoHelpTopicsFrame, id= self.bt19.GetId())
         self.Bind(wx.EVT_CLOSE, self.DoNothing, self)
-        
+
     def PrintOutput(self, event):
         data = wx.PrintDialogData()
         data.EnablePrintToFile(True)
@@ -2614,7 +2617,7 @@ class DataFrame(wx.Frame):
         posx = int(inits.get('gridposx'))
         posy = int(inits.get('gridposy'))
         wx.Frame.__init__(self,parent,-1,"SalStat Statistics", size=(dimx,\
-                                                                     dimy), pos=(posx,posy))
+                                                                     dimy), pos=wx.DefaultPosition)
         self.m_mgr = wx.aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
 
@@ -2697,8 +2700,12 @@ class DataFrame(wx.Frame):
         analyse_menu.AppendSeparator()
         self.mn25=analyse_menu.Append(ID_ANALYSE_SCRIPT, 'Scripting Window...')
         self.mn26=chart_menu.Append(ID_CHART_DRAW, 'Line Chart of All Means...')
-        # the bar chart is *not* ready yet!
         self.mn27=chart_menu.Append(ID_BARCHART_DRAW, 'Bar Chart of All Means...')
+        self.mn273= chart_menu.Append(wx.NewId(), 'Lines')
+        self.mn271= chart_menu.Append(wx.NewId(), 'Scatter')
+        self.mn272= chart_menu.Append(wx.NewId(), 'Box&Wishker Plot')
+        self.mn274= chart_menu.Append(wx.NewId(), 'Lineal Regress')
+
         self.mn28=help_menu.Append(ID_HELP_WIZARD, '&What Test Should I Use...')
         self.mn29=help_menu.Append(ID_HELP_TOPICS, '&Topics...')
         self.mn30=help_menu.Append(ID_HELP_LICENCE, '&Licence...')
@@ -2714,7 +2721,6 @@ class DataFrame(wx.Frame):
         menuBar.Append(help_menu, '&Help')
         self.SetMenuBar(menuBar)
         #------------------------
-
         #create small status bar
         self.CreateStatusBar()
         self.SetStatusText('SalStat Statistics')
@@ -2810,6 +2816,11 @@ class DataFrame(wx.Frame):
 
         self.Bind(wx.EVT_MENU, self.GoChartWindow,      id = self.mn26.GetId())
         self.Bind(wx.EVT_MENU, self.GoBarChartWindow,   id = self.mn27.GetId())
+        self.Bind(wx.EVT_MENU, self.GoScatterPlot,   id = self.mn271.GetId())
+        self.Bind(wx.EVT_MENU, self.GoBoxWishkerPlot,   id = self.mn272.GetId())
+        self.Bind(wx.EVT_MENU, self.GoLinesPlot,   id = self.mn273.GetId())
+        self.Bind(wx.EVT_MENU, self.GoLinRegressPlot,   id = self.mn274.GetId())
+
         self.grid.m_grid.setPadreCallBack(self) 
         if 0:
             self.Bind(wx.EVT_MENU, self.GoCheckOutliers,    id = ID_PREPARATION_OUTLIERS)
@@ -2938,53 +2949,44 @@ class DataFrame(wx.Frame):
         win.Show(True)
 
     def GoChartWindow(self, event):
-        # Draws a line chart based on the means
         waste, colnums = self.grid.GetUsedCols()
-        if colnums != []:
-            nameslist = [0]*len(colnums)
-            meanlist = numpy.zeros(len(colnums)*2)
-            meanlist.shape = (len(colnums),2)
-            for i in range(len(colnums)):
-                d = salstat_stats.FullDescriptives(self.grid.CleanData(colnums[i]))
-                meanlist[i,1] = d.mean
-                nameslist[i] = frame.grid.m_grid.GetColLabelValue(i)
-            meanlist[:,0] = numpy.arange(len(colnums))
-            lines = pyplot.PolyLine(meanlist, legend="Red Line", colour='red')
-            self.win = PlotFrame(self, -1)
-            self.win.Show(True)
-            self.win.client.Draw(pyplot.PlotGraphics([lines],"Line Chart of all Means","X","Mean"))
-            #self.win.client.draw(lines2,'automatic','automatic',None, nameslist)
-        else:
+        if colnums == []:
             self.SetStatusText('You need some data to draw a graph!')
+            return
+        selection = data2Plotdiaglog(self,waste)
+        if selection.ShowModal() != wx.ID_OK:
+            selection.Destroy()
+            return
+        selectedcols = selection.getData()
+        selection.Destroy()
+        if len(selectedcols) == 0:
+            self.SetStatusText('You need to select some data to draw a graph!')
+            return
+        data = [salstat_stats.FullDescriptives(self.grid.CleanData(cols)) for cols in [colnums[m] for m in selectedcols]]
+        data = [data[i].mean for i in range(len(data))]
+        plt= plot(parent = self, typePlot= 'plotLine',
+                  data2plot= ((range(len(data)),data,'Mean'),))
+        plt.Show()
 
     def GoBarChartWindow(self, event):
-        # Draws a bar chart based on the means
         waste, colnums = self.grid.GetUsedCols()
-        nameslist = [0]*len(colnums)
-        meanlist = numpy.zeros(4)
-        meanlist.shape = (2,2)
-        colors = ['Red','Black','Cyan','Blue']
-        k= 0
-        if colnums != []:
-            self.win = PlotFrame(self, -1)    
-            graphs = list()
-            for i in range(len(colnums)):
-                if k > len(colors)-1: 
-                    k = 0
-                d = salstat_stats.FullDescriptives(self.grid.CleanData(colnums[i]))
-                meanlist[0,0] = i
-                meanlist[0,1] = d.mean
-                meanlist[1,0] = i
-                meanlist[1,1] = 0
-                nameslist[i] = frame.grid.m_grid.GetColLabelValue(i)
-                lines =  pyplot.PolyLine(meanlist,colour = colors[k],legend = nameslist[i],
-                                         width = 2)
-                graphs.append(lines)
-                k += 1
-            self.win.client.Draw(pyplot.PlotGraphics(graphs,"Bar Chart of all means","X","Mean",))
-            self.win.Show(True)
-        else:
+        if colnums == []:
             self.SetStatusText('You need some data to draw a graph!')
+            return
+        selection = data2Plotdiaglog(self,waste)
+        if selection.ShowModal() != wx.ID_OK:
+            selection.Destroy()
+            return
+        selectedcols = selection.getData()
+        selection.Destroy()
+        if len(selectedcols) == 0:
+            self.SetStatusText('You need to select some data to draw a graph!')
+            return
+        data = [salstat_stats.FullDescriptives(self.grid.CleanData(cols)) for cols in [colnums[m] for m in selectedcols]]
+        data = [data[i].mean for i in range(len(data))]
+        plt= plot(parent = self, typePlot= 'plotBar',
+                  data2plot= ((data,'Mean'),))
+        plt.Show()
 
     def GoHelpWizardFrame(self, event):
         # shows the "wizard" in the help box
@@ -3006,6 +3008,83 @@ class DataFrame(wx.Frame):
         win = AboutFrame(frame, -1, 3)
         win.Show(True)
 
+    def GoScatterPlot(self,event):
+        waste, colnums = self.grid.GetUsedCols()
+        if colnums == []:
+            self.SetStatusText('You need some data to draw a graph!')
+            return
+        selection = selectDialogData2plot(self,waste)
+        if selection.ShowModal() != wx.ID_OK:
+            selection.Destroy()
+            return
+        (xcol,ycol) = selection.getData()
+        selection.Destroy()
+        data = [self.grid.CleanData(colnums[i]) for i in (colnums[xcol],colnums[ycol])]
+        if len(data[0]) != len(data[1]):
+            self.SetStatusText('x and y data mus have the same size!')
+            return
+        plt= plot(parent = self, typePlot= 'plotScatter',
+                  data2plot= ((data[0],data[1],waste[xcol] +u' Vs '+ waste[ycol]),))
+        plt.Show()
+
+    def GoBoxWishkerPlot(self,event):
+        waste, colnums = self.grid.GetUsedCols()
+        if colnums == []:
+            self.SetStatusText('You need some data to draw a graph!')
+            return
+        selection = data2Plotdiaglog(self,waste)
+        if selection.ShowModal() != wx.ID_OK:
+            selection.Destroy()
+            return
+        selectedcols = selection.getData()
+        selection.Destroy()
+        if len(selectedcols) == 0:
+            self.SetStatusText('You need to select some data to draw a graph!')
+            return
+        data = [self.grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]]
+        plt= plot(parent = self, typePlot= 'boxPlot',
+                  data2plot= data)
+        plt.Show()
+
+    def GoLinesPlot(self, event):
+        waste, colnums = self.grid.GetUsedCols()
+        if colnums == []:
+            self.SetStatusText('You need some data to draw a graph!')
+            return
+        selection = data2Plotdiaglog(self,waste)
+        if selection.ShowModal() != wx.ID_OK:
+            selection.Destroy()
+            return
+        selectedcols = selection.getData()
+        selection.Destroy()
+        if len(selectedcols) == 0:
+            self.SetStatusText('You need to select some data to draw a graph!')
+            return
+        data = [self.grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]]
+        data = [(range(len(data[i])),data[i],waste[i]) for i in range(len(data))]
+        plt= plot(parent = self, typePlot= 'plotLine',
+                  data2plot= data)
+        plt.Show()
+
+    def GoLinRegressPlot(self, event):
+        waste, colnums = self.grid.GetUsedCols()
+        if colnums == []:
+            self.SetStatusText('You need some data to draw a graph!')
+            return
+        selection = selectDialogData2plot(self,waste)
+        if selection.ShowModal() != wx.ID_OK:
+            selection.Destroy()
+            return
+        (xcol,ycol) = selection.getData()
+        selection.Destroy()
+        data = [self.grid.CleanData(cols) for cols in [colnums[i] for i in (xcol,ycol)]]
+        if len(data[0]) != len(data[1]):
+            self.SetStatusText('x and y data mus have the same size!')
+            return
+        plt= plot(parent = self, typePlot= 'plotLinRegress',
+                  data2plot= (data[0],data[1],waste[xcol] +u' Vs '+ waste[ycol]) )
+        plt.Show()
+        
     def EndApplication(self, evt):
         # close the application (need to check for new data since last save)
         # need to save the inits dictionary to .salstatrc
@@ -3474,7 +3553,7 @@ if __name__ == '__main__':
     frame = DataFrame(None, sys.stdout)
     frame.grid.SetFocus()
     output = OutputSheet(frame, -1)
-    frame.Show(True)
+    frame.Show(True)#FullScreen(True,False)
     output.Show(True)
     app.MainLoop()
 
