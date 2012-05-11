@@ -36,6 +36,7 @@ class MpltFrame( wx.Frame ):
         * plotBar
         * plotBarH
         * plotPie
+        * plotLinRegress
         * boxPlot
         * plotHistogram <pendiente>
         * plotPareto <pendiente>
@@ -48,7 +49,7 @@ class MpltFrame( wx.Frame ):
         ((x1data,y1data,legend1),(x2data,y2data,legend2))
         * plotScatter
         ((x1data,y1data,legend1),(x2data,y2data,legend2))
-        * plotBbar
+        * plotBar
         ((x1data,legend1),(x2data,legend2),...,(xndata,legendn))
         * plotPie
         ((x1,legend1),(x2,legend2),...,(xn,legendn))
@@ -859,7 +860,7 @@ class MpltFrame( wx.Frame ):
         if len(self.m_listBox1.GetItems()) == 0:
             self.m_textCtrl8.SetValue("")
             return
-        if self.m_listBox1.GetSelection() == 0:
+        if self.m_listBox1.GetSelection() == -1:
             self.m_textCtrl8.SetValue("")
             return
         selectedLine= self.axes.get_lines()[self.m_listBox1.GetSelection()]
