@@ -31,7 +31,7 @@ import numpy, math
 # and for plots!
 #from wxPython.lib.wxPlotCanvas import *
 #from wxPython.lib import wxPlotCanvas
-import wx.lib.plot as pyplot
+
 # set ip the xml modules
 from xml.dom import minidom
 # system of graphics
