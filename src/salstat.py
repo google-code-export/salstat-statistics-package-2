@@ -17,6 +17,7 @@ from ntbSheet import MyGridPanel as MyGrid
 #from matplotlib import mlab
 
 from imagenes import imageEmbed
+import wx.html
 import wx.aui
 import wx.lib.agw.aui as aui
 
@@ -815,15 +816,16 @@ class ScriptFrame(wx.Frame):
         icon = images.getIconIcon()
         self.SetIcon(icon)
         self.scripted = wx.TextCtrl(self,-1)
+        imag = imageEmbed()
         GoIcon = images.getApplyBitmap()
-        OpenIcon = images.getOpenBitmap()
-        SaveIcon = images.getSaveBitmap()
-        SaveAsIcon = images.getSaveAsBitmap()
-        PrintIcon = images.getPrintBitmap()
-        CutIcon = images.getCutBitmap()
-        CopyIcon = images.getCopyBitmap()
-        PasteIcon = images.getPasteBitmap()
-        HelpIcon = images.getHelpBitmap()
+        OpenIcon = imag.folderOpen()
+        SaveIcon = imag.disk()
+        SaveAsIcon = imag.save2disk()
+        PrintIcon = imag.printer()
+        CutIcon = imag.edit_cut()
+        CopyIcon = imag.edit_copy()
+        PasteIcon = imag.edit_paste()
+        HelpIcon = imag.about()
         toolBar = self.CreateToolBar(wx.TB_HORIZONTAL|wx.NO_BORDER| \
                                      wx.TB_3DBUTTONS)
         self.bt1 = toolBar.AddSimpleTool(wx.ID_ANY, GoIcon,"Run Script","Run the Script")
@@ -1036,6 +1038,71 @@ class VariablesFrame(wx.Dialog):
 
     def OnCloseVariables(self, event):
         self.Close(True)
+
+#---------------------------------------------------------------------------
+# base html window class
+class MyHtmlWindow(wx.html.HtmlWindow):
+    def __init__(self, parent, id):
+        wx.html.HtmlWindow.__init__(self, parent, id)
+        ##wx.Image_AddHandler(wxJPEGHandler()) # just in case!
+        self.WholeOutString = ''
+        self.Saved = True
+
+    """def OnLinkClicked(self, linkinfo):
+        ref = string.split(linkinfo.GetHref(),',')
+        means = []
+        for i in range(1, len(ref), 2):
+            if ref[i] == 'M':
+                means.append(float(ref[i+1]))
+            elif ref[i] == 'k':
+                k = int(ref[i+1])
+            elif ref[i] == 'n':
+                n = int(ref[i+1])
+            elif ref[i] == 'p':
+                p = float(ref[i+1])
+        self.Addhtml(str(means)+' '+str(k)+' '+str(n)+' '+str(p))
+        if ref[0] == 'friedman':
+            waste = salstat_stats.FriedmanComp(means, k, n, p)"""
+
+    def Addhtml(self, htmlline):
+        self.Saved = False
+        self.AppendToPage(htmlline)
+        self.WholeOutString = self.WholeOutString+htmlline + '\n'
+
+    def write(self, TextIn):
+        TextIn = '<br>'+TextIn
+        self.Addhtml(TextIn)
+
+    def LoadHtmlPage(self, event):
+        dlg = wx.FileDialog(self, "Load Output File", "","","*.html|*.*", \
+                            wx.OPEN)
+        if dlg.ShowModal() == wx.ID_OK:
+            outputfilename = dlg.GetPath()
+            self.LoadPage(outputfilename)
+            inits.update({'opendir': dlg.GetDirectory()})
+
+    def SaveHtmlPage(self, event):
+        dlg = wx.FileDialog(self, "Save Output","","","*.html|*>*",wx.SAVE)
+        if dlg.ShowModal() == wx.ID_OK:
+            outputfilename = dlg.GetPath()
+            fout = open(outputfilename, "w")
+            fout.write(self.WholeOutString)
+            fout.close()
+            inits.update({'savedir': dlg.GetDirectory()})
+            self.Saved = True
+
+    def PrintHtmlPage(self, event):
+        dlg = wx.PrintDialog(self)
+        if dlg.ShowModal() == wx.ID_OK:
+            None #null
+
+    def GoBack(self, event):
+        if self.HistoryCanBack():
+            self.HistoryBack()
+
+    def GoForward(self, event):
+        if self.HistoryCanForward():
+            self.HistoryForward()
 
 #---------------------------------------------------------------------------
 # output window w/html class for output. Also has status bar and menu.Opens
