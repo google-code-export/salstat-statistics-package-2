@@ -37,6 +37,7 @@ from xml.dom import minidom
 # system of graphics
 from plotFrame import MpltFrame as plot
 from multiPlotDialog import data2Plotdiaglog, selectDialogData2plot, scatterDialog
+from ntbSheet import NoteBookSheet
 #---------------------------------------------------------------------------
 # set up id's for menu events - all on menu, some also available elsewhere
 ID_FILE_NEW = wx.ID_ANY
@@ -187,12 +188,12 @@ class SaveDialog(wx.Dialog):
     def SaveData(self, event):
         frame.grid.Saved = True
         frame.grid.SaveAsDataASCII(self) # will it be ASCII or XML?
-        output.Close(True)
+        # output.Close(True)
         frame.Close(True)
         self.Close(True)
 
     def DiscardData(self, event):
-        output.Close(True)
+        # output.Close(True)
         frame.Close(True)
         self.Close(True)
 
@@ -269,158 +270,48 @@ class GetInits:
 class ManyDescriptives:
     def __init__(self, source, ds):
         __x__ = len(ds)
-        outstring = ""
-        outstring = outstring +'<table border = "1"><tr><td>Statistic</td>'
-        for i in range(__x__):
-            outstring = outstring +'<td>'+ds[i].Name+'</td>'
-        if source.DescChoice.IsChecked(0):
-            outstring = outstring +'</tr><tr><td>N </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>'+str(ds[i].N)+'</td>'
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="N"'+col+str(ds[i].N)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        if source.DescChoice.IsChecked(1):
-            outstring = outstring +'</tr><tr><td>Sum </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].sum
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Sum"'+col+str(ds[i].sum)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        if source.DescChoice.IsChecked(2):
-            outstring = outstring +'</tr><tr><td>Mean </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].mean
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Mean"'+col+str(ds[i].mean)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        if source.DescChoice.IsChecked(3):
-            outstring = outstring +'</tr><tr><td>Variance </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].samplevar
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Sample Variance"'+col+str(ds[i].samplevar)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        if source.DescChoice.IsChecked(4):
-            outstring = outstring +'</tr><tr><td>Standard Deviation </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].stddev
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Standard Deviation"'+col+str(ds[i].stddev)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        if source.DescChoice.IsChecked(5):
-            outstring = outstring +'</tr><tr><td>Standard Error </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].stderr
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Standard Error"'+col+str(ds[i].stderr)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        if source.DescChoice.IsChecked(6):
-            outstring = outstring +'</tr><tr><td>Sum of Squares </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].sumsquares
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Sum of Squares"'+col+str(ds[i].sumsquares)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        if source.DescChoice.IsChecked(7):
-            outstring = outstring +'</tr><tr><td>Sum of Squared Deviations </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].ssdevs
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Sum of Squared Deviations"'+col+str(ds[i].ssdevs)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        if source.DescChoice.IsChecked(8):
-            outstring = outstring +'</tr><tr><td>Coefficient of Variation </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].coeffvar
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Coefficient of Variation"'+col+str(ds[i].coeffvar)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        if source.DescChoice.IsChecked(9):
-            outstring = outstring +'</tr><tr><td>Minimum </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].minimum
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Minimum"'+col+str(ds[i].minimum)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        if source.DescChoice.IsChecked(10):
-            outstring = outstring +'</tr><tr><td>Maximum </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].maximum
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Maximum"'+col+str(ds[i].maximum)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        if source.DescChoice.IsChecked(11):
-            outstring = outstring +'</tr><tr><td>Range </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].range
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Range"'+col+str(ds[i].range)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        if source.DescChoice.IsChecked(12):
-            outstring = outstring +'</tr><tr><td>Number Missing</td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%6d</td>'%ds[i].missing
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Number Missing"'+col+str(ds[i].missing)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        if source.DescChoice.IsChecked(13):
-            outstring = outstring +'</tr><tr><td>Geometric Mean</td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].geomean
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Geometric Mean"'+col+str(ds[i].geomean)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        if source.DescChoice.IsChecked(14):
-            outstring = outstring +'</tr><tr><td>Harmonic Mean</td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].harmmean
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Harmonic Mean"'+col+str(ds[i].harmmean)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        if source.DescChoice.IsChecked(15):
-            outstring = outstring +'</tr><tr><td>Skewness </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].skewness
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Skewness"'+col+str(ds[i].skewness)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        if source.DescChoice.IsChecked(16):
-            outstring = outstring +'</tr><tr><td>Kurtosis </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].kurtosis
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Kurtosis"'+col+str(ds[i].kurtosis)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        if source.DescChoice.IsChecked(17):
-            outstring = outstring +'</tr><tr><td>Median </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].median
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Median"'+col+str(ds[i].median)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        if source.DescChoice.IsChecked(18):
-            outstring = outstring +'</tr><tr><td>Median Absolute Deviation </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].mad
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Mean Absolute Deviation"'+col+str(ds[i].mad)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        if source.DescChoice.IsChecked(19):
-            outstring = outstring +'</tr><tr><td>Mode</td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].mode
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Mode"'+col+str(ds[i].mode)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        if source.DescChoice.IsChecked(21):
-            outstring = outstring +'</tr><tr><td>Number Unique Levels</td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5d</td>'%ds[i].numberuniques
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Number of Unique Values"'+col+str(ds[i].numberuniques)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        output.htmlpage.Addhtml(outstring+'</table>')
+        data= {'name': "Many Descriptives",
+               'size': (0,0),
+               'nameCol': list(),
+               'data': []}
+        data['nameCol'].append('Statistic')
+        data['nameCol'].extend([ds[i].Name for i in range(__x__)])
+        funcTrans= {'N': 'N',
+                    'Sum': 'sum',
+                    'Mean': 'mean',
+                    'Variance': 'samplevar', 
+                    'Standard Deviation': 'stddev',
+                    'Standard Error': 'stderr',
+                    'Sum of Squares': 'sumsquares',
+                    'Sum of Squared Devs': 'ssdevs',
+                    'Coefficient of Variation': 'coeffvar',
+                    'Minimum': 'minimum',
+                    'Maximum': 'maximum',
+                    'Range': 'range',
+                    'Number Missing': 'missing',
+                    'Geometric Mean': 'geomean',
+                    'Harmonic Mean': 'harmmean',
+                    'Skewness': 'skewness',
+                    'Kurtosis': 'kurtosis',
+                    'Median': 'median',
+                    'Median Absolute Deviation': 'mad',
+                    'Mode': 'mode',
+                    'Interquartile Range': None,
+                    'Number of Unique Levels': 'numberuniques'}
+        items = source.DescChoice.GetItems()
+        itemsSelected = source.DescChoice.GetChecked()
+        if len(itemsSelected ) == 0:
+            return
+        itemsSelected= [items[pos] for pos in itemsSelected]
+        for aliasParamName in itemsSelected:
+            realParamName = funcTrans[aliasParamName]
+            if realParamName == None:
+                continue
+            res=[aliasParamName] 
+            res.extend([getattr(ds[i],realParamName) for i in range(__x__)])
+            data['data'].append(res)
+        data['size'] = (len(data['data']), len(data['nameCol']))
+        output.upData(data)
 
 #---------------------------------------------------------------------------
 # class for grid - used as datagrid.
@@ -1519,8 +1410,9 @@ class OneConditionTestFrame(wx.Dialog):
         try:
             umean = float(self.UserMean.GetValue())
         except:
-            output.htmlpage.Addhtml('<p>Cannot do test - no user \
-                                    hypothesised mean specified')
+            data= {'name': 'One condition Tests','size':(1,1),'nameCol':'Error',
+                   'data':[('Cannot do test \n No user hypothesised mean specified',),]}
+            output.addPage(data)
             self.Close(True)
             return
         realColx1 = self.colnums[x1]
@@ -1531,50 +1423,53 @@ class OneConditionTestFrame(wx.Dialog):
         d=[0]
         d[0] = TBase.d1
         x2=ManyDescriptives(self, d)
+        # se verifica las opciones seleccionadas
+        if len(self.TestChoice.GetChecked()) == 0:
+            return
         # One sample t-test
-        if self.TestChoice.IsChecked(0):
-            output.htmlpage.Addhtml('<p><b>One sample t-test</b>')
+        data={'name': 'One condition Tests',
+              'size':(3,3),
+              'nameCol': [],
+              'data': []}
+        result=[]
+        result.append('One sample t-test')
+        if self.TestChoice.IsChecked(0):    
             TBase.OneSampleTTest(umean)
             if (TBase.prob == -1.0):
-                output.htmlpage.Addhtml('<br>All elements are the same, \
-                                    test not possible')
+                result.append('All elements are the same, test not possible')
             else:
                 if self.m_radioBtn1.GetValue():  # (self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
-                output.htmlpage.Addhtml('<br>t(%d) = %5.3f, p (approx) = \
-                                    %1.6f'%(TBase.df, TBase.t, TBase.prob))
-                #now draw up the xml history stuff
-                xmlevt = '<analyse test="one sample t-test" column = "'+str(x1)
-                xmlevt = xmlevt+' hyp_value = "'+str(umean)+'" tail="'
-                if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
-                    xmlevt = xmlevt+'1">'
-                else:
-                    xmlevt = xmlevt+'2">'
-                xmlevt = xmlevt+'t ('+str(TBase.df)+') = '+str(TBase.t)+', p = '+str(TBase.prob)
-                xmlevt = xmlevt+'</analyse>'
-                hist.AppendEvent(xmlevt)
-        # One sample sign test
+                result.append('t(%d) = %5.3f'%(TBase.df, TBase.t))
+                result.append('p (approx) = %1.6f'%(TBase.prob))
+            result.append('')
+            
+        result.append('One sample sign test') 
         if self.TestChoice.IsChecked(1):
-            output.htmlpage.Addhtml('<p><b>One sample sign test</b>')
             TBase.OneSampleSignTest(x, umean)
             if (TBase.prob == -1.0):
-                output.htmlpage.Addhtml('<br>All data are the same - no \
-                                    analysis is possible')
+                result.append('All data are the same - no analysis is possible')
             else:
                 if self.m_radioBtn1.GetValue(): #(self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
-                output.htmlpage.Addhtml('<br>N = %5.0f, z = %5.3f, p = %1.6f'%\
-                                        (TBase.ntotal, TBase.z, TBase.prob))
-        # chi square test for variance
+                result.append('N = %5.0f'%(TBase.ntotal))
+                result.append('z = %5.3f'%( TBase.z))
+                result.append('p = %1.6f'%(TBase.prob))
+            result.append('')
+
+        result.append('One sample chi square') 
         if self.TestChoice.IsChecked(2):
-            output.htmlpage.Addhtml('<p><b>One sample chi square</b>')
             TBase.ChiSquareVariance(umean)
             if self.m_radioBtn1.GetValue():  #(self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
             if (TBase.prob == None):
                 TBase.prob = 1.0
-            output.htmlpage.Addhtml('<br>Chi square (%d) = %5.3f, p = %1.6f'%\
-                                    (TBase.df, TBase.chisquare, TBase.prob))
+            result.append('Chi square (%d) = %5.3f'%(TBase.df, TBase.chisquare))
+            result.append('p = %1.6f'%( TBase.prob))
+        # se organiza los datos seleccionados
+        data['data']= [[res] for res in result]
+        data['size']= (len(result),1)
+        output.upData(data)
         self.Close(True)
 
     def OnCloseOneCond(self, event):
@@ -1779,73 +1674,77 @@ class TwoConditionTestFrame(wx.Dialog):
         d[1] = TBase.d2
         x2 = ManyDescriptives(self, d)
         # chi square test
+        data={'name': 'Two condition Tests',
+              'size':(3,1),
+              'data': []}
+        result = []
+        # data['nameCol'].append('One sample t-test')
+        result.append('Chi square')
         if self.paratests.IsChecked(0):
-            output.htmlpage.Addhtml('<p><b>Chi square</b>')
             TBase.ChiSquare(x, y)
             if (TBase.prob == -1.0):
-                output.htmlpage.Addhtml('<BR>Cannot do chi square - \
-                                    unequal data sizes')
+                result.append('Cannot do chi square - unequal data sizes')
+                result.append('')
             else:
-                output.htmlpage.Addhtml('<br>chi (%d) = %5.3f, p = %1.6f'% \
-                                        (TBase.df, TBase.chisq, TBase.prob))
+                if TBase.prob == None:
+                    result.append("can't be computed")
+                else:
+                    result.append('chi (%d) = %5.3f'%(TBase.df, TBase.chisq,))
+                    result.append('p = %1.6f'%(TBase.prob,))
+                result.append('')
 
         # F-test for variance ratio's
+        result.append('F test for variance ratio (independent samples)')
         if self.paratests.IsChecked(1):
-            output.htmlpage.Addhtml('<P><B>F test for variance ratio (\
-                                    independent samples)</B>')
             try:
                 umean = float(self.UserMean.GetValue())
             except:
-                output.htmlpage.Addhtml('<p>Cannot do test - no user \
-                                    hypothesised mean specified')
+                result.append('Cannot do test - no user hypothesised mean specified')
             else:
                 TBase.FTest(umean)
                 if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
-                output.htmlpage.Addhtml('<BR>f(%d, %d) = %5.3f, p = %1.6f'% \
-                                        (TBase.df1,TBase.df2, TBase.f, TBase.prob))
-
-        # Kolmorogov-Smirnov 2 sample test
+                result.append('f(%d, %d) = %5.3f'%( TBase.df1, TBase.df2, TBase.f))
+                result.append('p = %1.6f'%( TBase.prob))
+                result.append('')
+        
+        result.append('Kolmogorov-Smirnov test (unpaired)')
         if self.paratests.IsChecked(2):
-            output.htmlpage.Addhtml('<P><B>Kolmogorov-Smirnov test \
-                                    (unpaired)</B>')
             TBase.KolmogorovSmirnov()
             if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.htmlpage.Addhtml('<BR>D = %5.3f, p = %1.6f'%(TBase.d, \
-                                                                TBase.prob))
+            result.append('D = %5.3f'%(TBase.d))
+            result.append('p = %1.6f'%(TBase.prob))
 
-        # Linear Regression
+        result.append('Linear Regression')
         if self.paratests.IsChecked(3):
-            output.htmlpage.Addhtml('<p><b>Linear Regression</b>')
             TBase.LinearRegression(x,y)
             #s, i, r, prob, st = salstat_stats.LinearRegression(x, y)
             if (TBase.prob == -1.0):
-                output.htmlpage.Addhtml('<BR>Cannot do linear regression - \
-                                    unequal data sizes')
+                result.append('Cannot do linear regression - unequal data sizes')
             else:
                 if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
-                output.htmlpage.Addhtml('<BR>Slope = %5.3f, Intercept = %5.3f,\
+                result.append('Slope = %5.3f, Intercept = %5.3f,\
                                     r = %5.3f, Estimated Standard Error = \
                                     %5.3f' %(TBase.slope, TBase.intercept, \
                                              TBase.r, TBase.sterrest))
-                output.htmlpage.Addhtml('<br>t (%d) = %5.3f, p = %1.6f' \
+                result.append('<br>t (%d) = %5.3f, p = %1.6f' \
                                         %(TBase.df, TBase.t, TBase.prob ))
-        # Mann-Whitney U
+                result.append('')
+                
+        result.append('Mann-Whitney U test (unpaired samples)')
         if self.paratests.IsChecked(4):
-            output.htmlpage.Addhtml('<P><B>Mann-Whitney U test (unpaired \
-                                    samples)</B>')
             TBase.MannWhitneyU(x, y)
             if (TBase.prob == -1.0):
-                output.htmlpage.Addhtml('<BR>Cannot do Mann-Whitney U test \
-                                    - all numbers are identical')
+                result.append('Cannot do Mann-Whitney U test - all numbers are identical')
             else:
                 if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
-                output.htmlpage.Addhtml('<BR>z = %5.3f, small U = %5.3f, \
+                result.append('z = %5.3f, small U = %5.3f, \
                                     big U = %5.3f, p = %1.6f'%(TBase.z, \
-                                                               TBase.smallu, TBase.bigu, TBase.prob))
+                                          TBase.smallu, TBase.bigu, TBase.prob))
+                result.append('')
 
         # Paired permutation test
         """if self.paratests.IsChecked(5):
@@ -1861,67 +1760,73 @@ class TwoConditionTestFrame(wx.Dialog):
                         crit = %5.3f, p = %1.6f'%(TBase.utail, TBase.nperm, \
                         TBase.crit, TBase.prob))"""
 
-        # Paired sign test
+        result.append('2 sample sign test')
         if self.paratests.IsChecked(5):
-            output.htmlpage.Addhtml('<P><B>2 sample sign test</B></P>')
             TBase.TwoSampleSignTest(x, y)
             if (TBase.prob == -1.0):
-                output.htmlpage.Addhtml('<BR>Cannot do test - not paired \
+                result.append('Cannot do test - not paired \
                                     samples')
             else:
                 if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
-                output.htmlpage.Addhtml('<BR>N = %5.0f, z = %5.3f, p = %1.6f'\
-                                        %(TBase.ntotal, TBase.z, TBase.prob))
+                result.append('N = %5.0f, z = %5.3f, p = %1.6f'\
+                              %(TBase.ntotal, TBase.z, TBase.prob))
+                result.append('')
 
-        # Paired t-test
-        if self.paratests.IsChecked(6):
-            output.htmlpage.Addhtml('<p><b>t-test paired</b>')
+        result.append('t-test paired')
+        if self.paratests.IsChecked(6):    
             TBase.TTestPaired(x, y)
             if (TBase.prob == -1.0):
-                output.htmlpage.Addhtml('<br>Cannot do paired t test - \
+                result.append('Cannot do paired t test - \
                                     unequal data sizes')
             else:
                 if self.m_radioBtn1.GetValue():#self.hypchoice.GetSelection() == 0:
                     TBase.prob = TBase.prob / 2
-                output.htmlpage.Addhtml('<BR>t(%d) = %5.3f, p = %1.6f'% \
-                                        (TBase.df, TBase.t, TBase.prob))
+                result.append('t(%d) = %5.3f, p = %1.6f'% \
+                              (TBase.df, TBase.t, TBase.prob))
+                result.append('')
 
-        # unpaired t-test
+        result.append('t-test unpaired')
         if self.paratests.IsChecked(7):
-            output.htmlpage.Addhtml('<p><b>t-test unpaired</b>')
             TBase.TTestUnpaired()
             if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.htmlpage.Addhtml('<BR>t(%d) = %5.3f, p =  %1.6f'% \
-                                    (TBase.df, TBase.t, TBase.prob))
+            result.append('t(%d) = %5.3f, p =  %1.6f'% \
+                          (TBase.df, TBase.t, TBase.prob))
+            result.append('')
 
         # Wald-Wolfowitz runs test (no yet coded)
         if self.paratests.IsChecked(8):
             pass
 
-        # Wilcoxon Rank Sums
+        result.append('Wilcoxon Rank Sums test (unpairedsamples)')
         if self.paratests.IsChecked(9):
-            output.htmlpage.Addhtml('<P><B>Rank Sums test (unpaired \
-                                    samples)</B>')
+            result.append('Rank Sums test (unpaired samples)')
             TBase.RankSums(x, y)
             if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.htmlpage.Addhtml('<BR>t = %5.3f, p = %1.6f'%(TBase.z, \
-                                                                TBase.prob))
+            result.append('t = %5.3f, p = %1.6f'%(TBase.z, \
+                                                  TBase.prob))
+            result.append('')
 
-        # Wilcoxon Signed Ranks
+        result.append('Wilcoxon t (paired samples)')# 
         if self.paratests.IsChecked(10):
-            output.htmlpage.Addhtml('<P><B>Wilcoxon t (paired samples)</B>')
             TBase.SignedRanks(x, y)
             if (TBase.prob == -1.0):
-                output.htmlpage.Addhtml('<BR>Cannot do Wilcoxon t test - \
+                result.append('Cannot do Wilcoxon t test - \
                                     unequal data sizes')
             else:
-                if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
-                    TBase.prob = TBase.prob / 2
-                output.htmlpage.Addhtml('<BR>z = %5.3f, t = %5.3f, p = %1.6f'%\
-                                        (TBase.z, TBase.wt, TBase.prob))
+                if TBase.prob == None:
+                    result.append("can't be computed")
+                else:
+                    if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
+                        TBase.prob = TBase.prob / 2
+                    result.append('z = %5.3f, t = %5.3f, p = %1.6f'%
+                                  (TBase.z, TBase.wt, TBase.prob))
+                result.append('')
+        data['size'] = (len(result),1)
+        data['data'] = [[res] for res in result]
+        output.upData(data)
         self.Close(True)
 
     def OnCloseTwoCond(self, event):
@@ -2047,104 +1952,89 @@ class ThreeConditionTestFrame(wx.Dialog):
             means.append(x2.mean)
             d.append(x2)
         x2=ManyDescriptives(self, d)
+        
+        data={'name': 'Three + condition Tests',
+              'size':(3,1),
+              'data': []}
+        result = []
+        
         if (len(biglist) < 2):
-            output.htmlpage.Addhtml('<p><b>Not enough columns selected for \
-                                    test!</b>')
+            result.append('Not enough columns selected for \
+                                    test!')
+            data['size']=(1,1)
+            output.upData(data)
             self.Close(True)
             return
         TBase = salstat_stats.ThreeSampleTests()
         #single factor between subjects anova
         if self.TestChoice.IsChecked(0):
             cols = []
-            output.htmlpage.Addhtml('<P><B>Single Factor anova - between \
-                                    subjects</B></P>')
-            output.htmlpage.Addhtml('<P><i>Warning!</i> This test is based \
+            result.append('Single Factor anova - between \
+                                    subjects')
+            result.append('Warning! This test is based \
                                     on the following assumptions:')
-            output.htmlpage.Addhtml('<P>1) Each group has a normal \
+            result.append('1) Each group has a normal \
                                     distribution of observations')
-            output.htmlpage.Addhtml('<P>2) The variances of each observation \
+            result.append('2) The variances of each observation \
                                     are equal across groups (homogeneity of \
                                     variance)')
-            output.htmlpage.Addhtml('<P>3) The observations are statistically \
+            result.append('3) The observations are statistically \
                                     independent')
             TBase.anovaBetween(d)
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.htmlpage.Addhtml('<table border="1"><tr><td></td><td>SS \
-                                    </td><td>df</td><td>MS</td><td>F</td>  \
-                                    <td>p-value</TD></tr>')
-            output.htmlpage.Addhtml('<tr><td>FACTOR</td><td>%5.3f</td><td> \
-                                    %5d</td><td>%5.3f</td><td>%5.3f</td>   \
-                                    <td>%1.6f</td></tr>'%(TBase.SSbet,     \
-                                                          TBase.dfbet, TBase.MSbet, TBase.F,\
-                                                          TBase.prob))
-            output.htmlpage.Addhtml('<tr><td>Error</td><td>%5.3f</td><td>  \
-                                    %5d</td><td>%5.3f</td><td></td><td>    \
-                                    </td></tr>'%(TBase.SSwit, TBase.dferr, \
+            result.append('FACTOR %5.3f  %5d  %5.3f %5.3f  %1.6f'%(TBase.SSbet,     \
+                            TBase.dfbet, TBase.MSbet, TBase.F, TBase.prob))
+            result.append('Error %5.3f %5d %5.3f'%(TBase.SSwit, TBase.dferr, \
                                                  TBase.MSerr))
-            output.htmlpage.Addhtml('<tr><td>Total</td><td>%5.3f</td><td>  \
-                                    %5d</td><td></td><td></td><td></td></tr>\
-                                    </table>'%(TBase.SStot, TBase.dftot))
-        # single factor within subjects anova
+            result.append('Total %5.3f %5d'%(TBase.SStot, TBase.dftot))
+            result.append('')
+            
+        result.append('single factor within subjects anova')
         if self.TestChoice.IsChecked(1):
-            output.htmlpage.Addhtml('<P><B>Single Factor anova - within  \
-                                    subjects</b></P>')
-            output.htmlpage.Addhtml('<P><i>Warning!</i> This test is based \
+            result.append('Warning! This test is based \
                                     on the following assumptions:')
-            output.htmlpage.Addhtml('<P>1) Each group has a normal \
+            result.append('1) Each group has a normal \
                                     distribution of observations')
-            output.htmlpage.Addhtml('<P>2) The variances of each observation \
+            result.append('2) The variances of each observation \
                                     are equal across groups (homogeneity of \
                                     variance)')
-            output.htmlpage.Addhtml('<P>3) The observations are statistically \
+            result.append('3) The observations are statistically \
                                     indpendent')
-            output.htmlpage.Addhtml('<P>4) The variances of each participant \
+            result.append('4) The variances of each participant \
                                     are equal across groups (homogeneity of \
                                     covariance)')
             TBase.anovaWithin(biglist, ns, sums, means)
-            if self.hypchoice.GetSelection() == 0:
+            if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.htmlpage.Addhtml('<table border="1"><tr><td></td><td>SS \
-                                    </td><td>df</td><td>MS</td><td>F</td>  \
-                                    <td>p-value</TD></tr>')
-            output.htmlpage.Addhtml('<tr><td>FACTOR</td><td>%5.3f</td><td> \
-                                    %5d</td><td>%5.3f</td><td>%5.3f</td>   \
-                                    <td>%1.6f</td></tr>'%(TBase.SSbet,  \
-                                                          TBase.dfbet, TBase.MSbet, TBase.F,  \
-                                                          TBase.prob))
-            output.htmlpage.Addhtml('<tr><td>Within</td><td>%5.3f</td><td>%5d\
-                                    </td><td>%5.3f</td><td></td><td></td> \
-                                    </tr>'%(TBase.SSwit, TBase.dfwit,     \
+                
+            result.append('FACTOR %5.3f %5d %5.3f %5.3f %1.6f'%(TBase.SSbet,  \
+                                TBase.dfbet, TBase.MSbet, TBase.F, TBase.prob))
+            result.append('Within %5.3f %5d %5.3f '%(TBase.SSwit, TBase.dfwit,     \
                                             TBase.MSwit))
-            output.htmlpage.Addhtml('<tr><td>Error</td><td>%5.3f</td><td> \
-                                    %5d</td><td>%5.3f</td><td></td><td></td> \
-                                    </tr>'%(TBase.SSres, TBase.dfres,   \
+            result.append('Error %5.3f %5d %5.3f'%(TBase.SSres, TBase.dfres,   \
                                             TBase.MSres))
-            output.htmlpage.Addhtml('<tr><td>Total</td><td>%5.3f</td><td>%5d \
-                                    </td><td></td><td></td><td></td>'% \
-                                                                     (TBase.SStot, TBase.dftot))
-            output.htmlpage.Addhtml('</table>')
+            result.append('Total %5.3f %5d '% (TBase.SStot, TBase.dftot))
+            result.append('')
 
-        # kruskal wallis H
+        result.append('kruskal wallis H Test')
         if self.TestChoice.IsChecked(2):
-            output.htmlpage.Addhtml('<p><b>Kruskal Wallis H Test</b>')
             TBase.KruskalWallisH(biglist)
-            if self.hypchoice.GetSelection() == 0:
+            if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.htmlpage.Addhtml('<br>H(%d) = %5.3f, p = %1.6f'% \
-                                    (TBase.df, TBase.h, TBase.prob))
+            result.append('H(%d) = %5.3f, p = %1.6f'% \
+                                (TBase.df, TBase.h, TBase.prob))
 
-        # Friedman test
+        result.append('Friedman Chi Square')
         if self.TestChoice.IsChecked(3):
-            output.htmlpage.Addhtml('<p><b>Friedman Chi Square</b>')
             TBase.FriedmanChiSquare(biglist)
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
                 alpha = 0.10
             else:
                 alpha = 0.05
-            output.htmlpage.Addhtml('<br>Chi(%d) = %5.3f, p = %1.6f'% \
-                                    (TBase.df, TBase.chisq, TBase.prob))
+            result.append('Chi(%d) = %5.3f, p = %1.6f'% \
+                            (TBase.df, TBase.chisq, TBase.prob))
             # the next few lines are commented out & are experimental. They
             # help perform multiple comparisons for the Friedman test.
             #outstring = '<a href="friedman,'
@@ -2155,14 +2045,16 @@ class ThreeConditionTestFrame(wx.Dialog):
             #outstring = outstring+'p,'+str(alpha)+'">Multiple Comparisons</a>'
             #output.htmlpage.Addhtml('<p>'+outstring+'</p>')
 
-        # Cochranes Q
+        result.append('Cochranes Q')
         if self.TestChoice.IsChecked(4):
-            output.htmlpage.Addhtml('<p><b>Cochranes Q</b>')
             TBase.CochranesQ(biglist)
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.htmlpage.Addhtml('<br>Q (%d) = %5.3f, p = %1.6f'% \
+            result.append('Q (%d) = %5.3f, p = %1.6f'% \
                                     (TBase.df, TBase.q, TBase.prob))
+        data['size']= (len(result),1)
+        data['data']= [[res] for res in result]
+        output.upData(data)
         self.Close(True)
 
     def OnCloseThreeCond(self, event):
@@ -2324,40 +2216,49 @@ class CorrelationTestFrame(wx.Dialog):
         d[0] = TBase.d1
         d[1] = TBase.d2
         x2 = ManyDescriptives(self, d)
-        # Kendalls tau correlation
+        
+        data={'name': 'Three + condition Tests',
+              'size':(3,1),
+              'data': []}
+        result = []
+        result.append('Kendalls tau correlation')
         if self.paratests.IsChecked(0):
-            output.htmlpage.Addhtml('<P><B>Kendalls Tau correlation</B>')
             TBase.KendallsTau(x, y)
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.htmlpage.Addhtml('<BR>tau = %5.3f, z = %5.3f, p = %1.6f'% \
+            result.append('tau = %5.3f, z = %5.3f, p = %1.6f'% \
                                     (TBase.tau, TBase.z, TBase.prob))
 
-        # Pearsons r correlation
+            result.append('')
+        
+        result.append('Pearsons r correlation')
         if self.paratests.IsChecked(1):
-            output.htmlpage.Addhtml('<P><B>Pearsons correlation</B>')
             TBase.PearsonsCorrelation(x, y)
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.htmlpage.Addhtml('<BR>r (%d) = %5.3f, t = %5.3f, p = %1.6f'% \
+            result.append('r (%d) = %5.3f, t = %5.3f, p = %1.6f'% \
                                     (TBase.df, TBase.r, TBase.t, TBase.prob))
+            result.append('')
 
         # Point Biserial r
         if self.paratests.IsChecked(2):
             pass
-        # Spearmans rho correlation
+        
+        result.append('Spearmans rho correlation')
         if self.paratests.IsChecked(3):
-            output.htmlpage.Addhtml('<P><B>Spearmans rho correlation</B>')
             TBase.SpearmansCorrelation(x, y)
             if (TBase.prob == -1.0):
-                output.htmlpage.Addhtml('<BR>Cannot do Spearmans correlation \
+                result.append('Cannot do Spearmans correlation \
                                     - unequal data sizes')
             else:
                 if (self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
-                output.htmlpage.Addhtml('<BR>rho(%d) = %5.3f, p = %1.6f'% \
+                result.append('rho(%d) = %5.3f, p = %1.6f'% \
                                         (TBase.df, TBase.rho, TBase.prob))
-
+            result.append('')
+        data['data']= [[res] for res in result]
+        data['size']= (len(result),1)
+        output.upData(data)
         self.Close(True)
 
     def OnCloseTwoCond(self, event):
@@ -2614,8 +2515,6 @@ class DataFrame(wx.Frame):
         # size the frame to 600x400 - will fit in any VGA screen
         dimx = int(inits.get('gridsizex'))
         dimy = int(inits.get('gridsizey'))
-        posx = int(inits.get('gridposx'))
-        posy = int(inits.get('gridposy'))
         wx.Frame.__init__(self,parent,-1,"SalStat Statistics", size=(dimx,\
                                                                      dimy), pos=wx.DefaultPosition)
         self.m_mgr = wx.aui.AuiManager()
@@ -2767,8 +2666,17 @@ class DataFrame(wx.Frame):
         self.grid.m_grid.SetRowLabelSize(40)
 
         self.m_mgr.AddPane(self.grid,
-                           wx.aui.AuiPaneInfo().CenterPane().
+                           wx.aui.AuiPaneInfo().Centre().
+                           CaptionVisible(False).
                            CloseButton( False ).MinSize( wx.Size( 240,-1 )))
+        # adicion de panel para mostrar las respuestas
+        self.answerPanel = NoteBookSheet(self)
+        self.m_mgr.AddPane(self.answerPanel,
+                           wx.aui.AuiPaneInfo().Centre().Right().
+                           CaptionVisible(True).Caption("Output Panel").
+                           MinimizeButton(True).Resizable(True).MaximizeButton(True).
+                           CloseButton( False ).MinSize( wx.Size( 240,-1 )))
+        
         self.m_mgr.Update()
         self.BindEvents()
 
@@ -3552,9 +3460,9 @@ if __name__ == '__main__':
     app = wx.App()
     frame = DataFrame(None, sys.stdout)
     frame.grid.SetFocus()
-    output = OutputSheet(frame, -1)
+    output = frame.answerPanel # OutputSheet(frame, -1)
     frame.Show(True)#FullScreen(True,False)
-    output.Show(True)
+    # output.Show(True)
     app.MainLoop()
 
 #---------------------------------------------------------------------------
