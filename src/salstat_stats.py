@@ -916,7 +916,11 @@ class TwoSampleTests:
             self.wt = min(r_plus, r_minus)
             mn = count * (count+1) * 0.25
             se =  math.sqrt(count*(count+1)*(2.0*count+1.0)/24.0)
-            self.z = math.fabs(self.wt-mn) / se
+            try:
+                self.z = math.fabs(self.wt-mn) / se
+            except ZeroDivisionError:
+                self.prob= None
+                return
             self.prob = 2*(1.0 -zprob(abs(self.z)))
 
     def MannWhitneyU(self, data1, data2):
@@ -961,6 +965,8 @@ class TwoSampleTests:
                 self.r = r_num / r_den
             except ZeroDivisionError:
                 self.r = 0.0
+            if self.r > 1:
+                self.r= 1
             #[] warning - z not used - is there a line missing here?
             z = 0.5*math.log((1.0+self.r+TINY)/(1.0-self.r+TINY))
             self.df = self.d1.N - 2
