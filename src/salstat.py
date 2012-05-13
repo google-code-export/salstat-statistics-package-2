@@ -20,7 +20,7 @@ from imagenes import imageEmbed
 import wx.html
 import wx.aui
 import wx.lib.agw.aui as aui
-
+####from PanelScript import PanelPython
 # import wx # getting ready for the new namespace
 import wx.lib.wxpTag
 # import system modules
@@ -31,13 +31,14 @@ import numpy, math
 # and for plots!
 #from wxPython.lib.wxPlotCanvas import *
 #from wxPython.lib import wxPlotCanvas
-
+import wx.py
 # set ip the xml modules
 from xml.dom import minidom
 # system of graphics
 from plotFrame import MpltFrame as plot
 from multiPlotDialog import data2Plotdiaglog, selectDialogData2plot, scatterDialog
 from ntbSheet import NoteBookSheet
+
 #---------------------------------------------------------------------------
 # set up id's for menu events - all on menu, some also available elsewhere
 ID_FILE_NEW = wx.ID_ANY
@@ -1444,7 +1445,7 @@ class OneConditionTestFrame(wx.Dialog):
                 result.append('t(%d) = %5.3f'%(TBase.df, TBase.t))
                 result.append('p (approx) = %1.6f'%(TBase.prob))
             result.append('')
-            
+
         result.append('One sample sign test') 
         if self.TestChoice.IsChecked(1):
             TBase.OneSampleSignTest(x, umean)
@@ -1708,7 +1709,7 @@ class TwoConditionTestFrame(wx.Dialog):
                 result.append('f(%d, %d) = %5.3f'%( TBase.df1, TBase.df2, TBase.f))
                 result.append('p = %1.6f'%( TBase.prob))
                 result.append('')
-        
+
         result.append('Kolmogorov-Smirnov test (unpaired)')
         if self.paratests.IsChecked(2):
             TBase.KolmogorovSmirnov()
@@ -1731,9 +1732,9 @@ class TwoConditionTestFrame(wx.Dialog):
                                     %5.3f' %(TBase.slope, TBase.intercept, \
                                              TBase.r, TBase.sterrest))
                 result.append('<br>t (%d) = %5.3f, p = %1.6f' \
-                                        %(TBase.df, TBase.t, TBase.prob ))
+                              %(TBase.df, TBase.t, TBase.prob ))
                 result.append('')
-                
+
         result.append('Mann-Whitney U test (unpaired samples)')
         if self.paratests.IsChecked(4):
             TBase.MannWhitneyU(x, y)
@@ -1744,7 +1745,7 @@ class TwoConditionTestFrame(wx.Dialog):
                     TBase.prob = TBase.prob / 2
                 result.append('z = %5.3f, small U = %5.3f, \
                                     big U = %5.3f, p = %1.6f'%(TBase.z, \
-                                          TBase.smallu, TBase.bigu, TBase.prob))
+                                                               TBase.smallu, TBase.bigu, TBase.prob))
                 result.append('')
 
         # Paired permutation test
@@ -1953,12 +1954,12 @@ class ThreeConditionTestFrame(wx.Dialog):
             means.append(x2.mean)
             d.append(x2)
         x2=ManyDescriptives(self, d)
-        
+
         data={'name': 'Three + condition Tests',
               'size':(3,1),
               'data': []}
         result = []
-        
+
         if (len(biglist) < 2):
             result.append('Not enough columns selected for \
                                     test!')
@@ -1985,12 +1986,12 @@ class ThreeConditionTestFrame(wx.Dialog):
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
             result.append('FACTOR %5.3f  %5d  %5.3f %5.3f  %1.6f'%(TBase.SSbet,     \
-                            TBase.dfbet, TBase.MSbet, TBase.F, TBase.prob))
+                                                                   TBase.dfbet, TBase.MSbet, TBase.F, TBase.prob))
             result.append('Error %5.3f %5d %5.3f'%(TBase.SSwit, TBase.dferr, \
-                                                 TBase.MSerr))
+                                                   TBase.MSerr))
             result.append('Total %5.3f %5d'%(TBase.SStot, TBase.dftot))
             result.append('')
-            
+
         result.append('single factor within subjects anova')
         if self.TestChoice.IsChecked(1):
             result.append('Warning! This test is based \
@@ -2008,13 +2009,13 @@ class ThreeConditionTestFrame(wx.Dialog):
             TBase.anovaWithin(biglist, ns, sums, means)
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-                
+
             result.append('FACTOR %5.3f %5d %5.3f %5.3f %1.6f'%(TBase.SSbet,  \
-                                TBase.dfbet, TBase.MSbet, TBase.F, TBase.prob))
+                                                                TBase.dfbet, TBase.MSbet, TBase.F, TBase.prob))
             result.append('Within %5.3f %5d %5.3f '%(TBase.SSwit, TBase.dfwit,     \
-                                            TBase.MSwit))
+                                                     TBase.MSwit))
             result.append('Error %5.3f %5d %5.3f'%(TBase.SSres, TBase.dfres,   \
-                                            TBase.MSres))
+                                                   TBase.MSres))
             result.append('Total %5.3f %5d '% (TBase.SStot, TBase.dftot))
             result.append('')
 
@@ -2024,7 +2025,7 @@ class ThreeConditionTestFrame(wx.Dialog):
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
             result.append('H(%d) = %5.3f, p = %1.6f'% \
-                                (TBase.df, TBase.h, TBase.prob))
+                          (TBase.df, TBase.h, TBase.prob))
 
         result.append('Friedman Chi Square')
         if self.TestChoice.IsChecked(3):
@@ -2035,7 +2036,7 @@ class ThreeConditionTestFrame(wx.Dialog):
             else:
                 alpha = 0.05
             result.append('Chi(%d) = %5.3f, p = %1.6f'% \
-                            (TBase.df, TBase.chisq, TBase.prob))
+                          (TBase.df, TBase.chisq, TBase.prob))
             # the next few lines are commented out & are experimental. They
             # help perform multiple comparisons for the Friedman test.
             #outstring = '<a href="friedman,'
@@ -2052,7 +2053,7 @@ class ThreeConditionTestFrame(wx.Dialog):
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
             result.append('Q (%d) = %5.3f, p = %1.6f'% \
-                                    (TBase.df, TBase.q, TBase.prob))
+                          (TBase.df, TBase.q, TBase.prob))
         data['size']= (len(result),1)
         data['data']= [[res] for res in result]
         output.upData(data)
@@ -2217,7 +2218,7 @@ class CorrelationTestFrame(wx.Dialog):
         d[0] = TBase.d1
         d[1] = TBase.d2
         x2 = ManyDescriptives(self, d)
-        
+
         data={'name': 'Three + condition Tests',
               'size':(3,1),
               'data': []}
@@ -2228,23 +2229,23 @@ class CorrelationTestFrame(wx.Dialog):
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
             result.append('tau = %5.3f, z = %5.3f, p = %1.6f'% \
-                                    (TBase.tau, TBase.z, TBase.prob))
+                          (TBase.tau, TBase.z, TBase.prob))
 
             result.append('')
-        
+
         result.append('Pearsons r correlation')
         if self.paratests.IsChecked(1):
             TBase.PearsonsCorrelation(x, y)
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
             result.append('r (%d) = %5.3f, t = %5.3f, p = %1.6f'% \
-                                    (TBase.df, TBase.r, TBase.t, TBase.prob))
+                          (TBase.df, TBase.r, TBase.t, TBase.prob))
             result.append('')
 
         # Point Biserial r
         if self.paratests.IsChecked(2):
             pass
-        
+
         result.append('Spearmans rho correlation')
         if self.paratests.IsChecked(3):
             TBase.SpearmansCorrelation(x, y)
@@ -2255,7 +2256,7 @@ class CorrelationTestFrame(wx.Dialog):
                 if (self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
                 result.append('rho(%d) = %5.3f, p = %1.6f'% \
-                                        (TBase.df, TBase.rho, TBase.prob))
+                              (TBase.df, TBase.rho, TBase.prob))
             result.append('')
         data['data']= [[res] for res in result]
         data['size']= (len(result),1)
@@ -2512,12 +2513,12 @@ class PlotFrame(wx.Frame):
 # call instance of DataGrid
 # This is main interface of application
 class DataFrame(wx.Frame):
-    def __init__(self, parent, log):
+    def __init__(self, parent, appname , log):
         # size the frame to 600x400 - will fit in any VGA screen
         dimx = int(inits.get('gridsizex'))
         dimy = int(inits.get('gridsizey'))
-        wx.Frame.__init__(self,parent,-1,"SalStat Statistics", size=(dimx,\
-                                                                     dimy), pos=wx.DefaultPosition)
+        wx.Frame.__init__(self,parent,-1,"SalStat Statistics", 
+                          size=(dimx, dimy), pos=wx.DefaultPosition)
         self.m_mgr = wx.aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
 
@@ -2677,9 +2678,42 @@ class DataFrame(wx.Frame):
                            CaptionVisible(True).Caption("Output Panel").
                            MinimizeButton(True).Resizable(True).MaximizeButton(True).
                            CloseButton( False ).MinSize( wx.Size( 240,-1 )))
+
+        self.answerPanel2 = wx.py.crust.editwindow.EditWindow(self)
+        #self.answerPanel2.setDisplayLineNumbers(True)
+        #self.answerPanel2.SetIndent(4)               # Proscribed indent size for wx
+        #self.answerPanel2.SetIndentationGuides(True) # Show indent guides
+        #self.answerPanel2.SetBackSpaceUnIndents(True)# Backspace unindents rather than delete 1 space
+        #self.answerPanel2.SetTabIndents(True)        # Tab key indents
+        #self.answerPanel2.SetTabWidth(4)             # Proscribed tab size for wx
+        #self.answerPanel2.SetUseTabs(False)
+        self.m_mgr.AddPane(self.answerPanel2,
+                           wx.aui.AuiPaneInfo().Centre().Right().
+                           CaptionVisible(True).Caption("Script Panel").
+                           MinimizeButton(True).Resizable(True).MaximizeButton(True).
+                           CloseButton( False ).MinSize( wx.Size( 240,-1 )))
+
+        self.m_notebook1 = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
+
+        #--------------------------------------------
+        self.logPanel= wx.Panel(self.m_notebook1, wx.ID_ANY)
+
+        self.m_notebook1.AddPage( self.logPanel, u"ipython shell", False )
+
+        #--------------------------------
+        self.scriptPanel = wx.py.shell.Shell(self.m_notebook1)
+        self.scriptPanel.wrap(True)
         
-        self.m_mgr.Update()
+        self.m_notebook1.AddPage( self.scriptPanel , u"Shell", True )
+
+        self.m_mgr.AddPane( self.m_notebook1, wx.aui.AuiPaneInfo() .Bottom() .
+                            CloseButton( False ).MaximizeButton( True ).
+                            MinimizeButton( True ).PinButton( False ).
+                            Dock().Resizable().FloatingSize( wx.DefaultSize ).
+                            LeftDockable(False).RightDockable(False).
+                            DockFixed( False ).BestSize(wx.Size(-1,150)))
         self.BindEvents()
+        self.m_mgr.Update()
 
     def BindEvents(self):
         #-----------------
@@ -2993,7 +3027,7 @@ class DataFrame(wx.Frame):
         plt= plot(parent = self, typePlot= 'plotLinRegress',
                   data2plot= (data[0],data[1],waste[xcol] +u' Vs '+ waste[ycol]) )
         plt.Show()
-        
+
     def EndApplication(self, evt):
         # close the application (need to check for new data since last save)
         # need to save the inits dictionary to .salstatrc
@@ -3459,10 +3493,10 @@ if __name__ == '__main__':
     historyClass = History()
     hist = historyClass
     app = wx.App()
-    frame = DataFrame(None, sys.stdout)
+    frame = DataFrame(None, app, sys.stdout, )
     frame.grid.SetFocus()
     output = frame.answerPanel # OutputSheet(frame, -1)
-    frame.Show(True)#FullScreen(True,False)
+    frame.ShowFullScreen(True,False)
     # output.Show(True)
     app.MainLoop()
 
