@@ -181,10 +181,14 @@ class LogPanel( wx.Panel ):
     
     def writeLine(self, lineaTexto):
         '''escribe una linea de texto'''
-        texto= str(self.numLinea.next()) + " >> "
+        #texto= str(self.numLinea.next()) + " >> "
+        texto= str( ">> ")
         texto+= lineaTexto + "\n"
         # se escribe el texto indicado
-        self.log.AppendText(texto)    
+        self.log.AppendText(texto)
+        
+    def clearLog(self):
+        self.log.SetValue('')
         
     def __del__( self ):
         pass
@@ -2383,12 +2387,19 @@ class TransformFrame(wx.Dialog):
 # call instance of DataGrid
 # This is main interface of application
 class DataFrame(wx.Frame):
-    def __init__(self, parent, appname , log):
-        # size the frame to 600x400 - will fit in any VGA screen
+    def __init__(self, parent, appname ):
+        
         dimx = int(inits.get('gridsizex'))
         dimy = int(inits.get('gridsizey'))
+        
         wx.Frame.__init__(self,parent,-1,"SalStat Statistics", 
                           size=(dimx, dimy), pos=wx.DefaultPosition)
+        
+        self.m_notebook1 = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.logPanel = LogPanel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        
+        
+        
         self.m_mgr = wx.aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
 
@@ -2532,7 +2543,7 @@ class DataFrame(wx.Frame):
         #still need to define event handlers
         #set up the datagrid
 
-        self.grid = SimpleGrid(self, log, size= (500,50))
+        self.grid = SimpleGrid(self, self.logPanel, size= (500,50))
         self.grid.Saved = False
         self.grid.m_grid.SetDefaultColSize(60, True)
         self.grid.m_grid.SetRowLabelSize(40)
@@ -2549,25 +2560,25 @@ class DataFrame(wx.Frame):
                            MinimizeButton(True).Resizable(True).MaximizeButton(True).
                            CloseButton( False ).MinSize( wx.Size( 240,-1 )))
         
-        self.answerPanel2 = ScriptPanel(self)
+        
+        self.answerPanel2 = ScriptPanel(self, self.logPanel)
         self.m_mgr.AddPane(self.answerPanel2,
                            wx.aui.AuiPaneInfo().Centre().Right().
                            CaptionVisible(True).Caption("Script Panel").
                            MinimizeButton(True).Resizable(True).MaximizeButton(True).
                            CloseButton( False ).MinSize( wx.Size( 240,-1 )))
 
-        self.m_notebook1 = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
+        
 
         #--------------------------------------------
-        self.logPanel = LogPanel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-
-        self.m_notebook1.AddPage( self.logPanel, u"Log", False )
+    
+        self.m_notebook1.AddPage( self.logPanel, u"Log", True )
 
         #--------------------------------
         self.scriptPanel = wx.py.shell.Shell(self.m_notebook1)
         self.scriptPanel.wrap(True)
         
-        self.m_notebook1.AddPage( self.scriptPanel , u"Shell", True )
+        self.m_notebook1.AddPage( self.scriptPanel , u"Shell", False )
 
         self.m_mgr.AddPane( self.m_notebook1, wx.aui.AuiPaneInfo() .Bottom() .
                             CloseButton( False ).MaximizeButton( True ).
@@ -3354,7 +3365,7 @@ if __name__ == '__main__':
     # find init file and read otherwise create it
     ini = GetInits()
     app = wx.App()
-    frame = DataFrame(None, app, sys.stdout, )
+    frame = DataFrame(None, app)
     frame.grid.SetFocus()
     Logg= frame.logPanel
     output = frame.answerPanel # OutputSheet(frame, -1)
