@@ -495,7 +495,32 @@ class imageEmbed:
         72Z5w2PE5Dkkk0lyuTyAMjFIgKq68XrdDiCTyZBIJMhmsyiKgqqqf8sFYE8AKIpy+0LLue1CiAlT
         FEuSnH+Hx+NpB3L8D/0Gec0bDM69rVkAAAAASUVORK5CYII=
         """)
+    def runIcon(self):
+        return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
+        WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH1QwGESQhztmtXgAAAiFJREFUOMudk0trEwEUhc88Mskk
+        TSYxmWliExNaSTAjukrR1EhSbIoFwWd0J1gQwUK23fkHXPQXSJeCL7pyo4ggLgxCTRWxWGygEUr6
+        0KQzTTIzuS7EpmIpsXd17uaDc+85QHd4HGC4XToCwAGgCYB6BbC7l/z42OtgMJgG4OsVwPwRiiwf
+        GT6V+sYwTMeyzC/lD59utlqtz7VaTe/JQjQWk7w+qfjs6RzvkTz+anVlsr9fGekw9GYgNFCv1Wq0
+        LyCpqpIoOorXCzfYSGSAnTg/wfW53eGN9fXbolNMOkXXu2TyWGN5ubI3YDiVkjiOKV69co0FAa4+
+        N9SkyqVPpwWXU0z8qP+cNC1rdWhwqLK0tNT8B5DLZqW22S5euniZ3dLrMIw2DKMNu8OOeCLB5fPj
+        DiK6QDBTiXj8feZMplEqlcyd3wdkBQ2tDgDQdA0gAgGw8TZ4PT7opIPIYvyH/IbXE5B4jnUDaO4A
+        FEVG9ftvf7q+BZvNjsPBMCzTxOzsA2vx6+JmLBa9owRCbwFauzs1ZfyVPlmWySYIAAjR8CB4nsfj
+        J4+shY8LRjxx9F5mJPuw0+msFgqFFvaKrywrEAQbdYjw8tULKpfnLbfH8zx7dnRaEOyVXC6r7fXG
+        LkAJQBTtNDNz39J0bWU0O3orIIfmj6vqxn5B6t4gIGN7u7V5biw1fUI9OQcwm4qiUM9RJqIwAAPA
+        GsMw1n/XkojYg9T5FzBGwR9B4E5iAAAAAElFTkSuQmCC
+        """)
+    def documentNew(self):
+        return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/ADpAE8017ENAAAACXBI
+        WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH1QISDiYc07YZKQAAAWpJREFUOMutkE9LW1EQxX9z741W
+        JH0lgtDKWxbc1O5cZqkb8w2ycVm/Rd6y3XcjBMSC38BNN90qhVJKslJKSVqEEP9FYpved8eFJsYY
+        k1R6NjMMc+acM1Iul7drtVqREZid/cvcXJtn0W/yy5/f5aJvH+HPvmTDGaVSScfh/HhTL0/faOe8
+        oJcnK52LxuKutrLr2jIzrqvSbDYJIQAgIj31jNlj2n4h474iZgnrTCbY9mrHt1tTzld7BwbJ3Wrk
+        CGvqiHmFuAJgMSpG01+L4F66/qyD5OtebzoLTIE4EAuCABduNFkIOk/Q59hQRdNpQNC0ot6besam
+        FffQ57uHAq/x4SfgsVoBFO9f6OlZ69PM/PeDkRFEBOUpHV1DdYE0/QE8YWvn0GxsbL8FcKPItzWL
+        1zwiQhRFNBpJT9QwIfp/0497EYY5eIh8x8GwpcHZsB0zqd2xEXK5HI+Bi+P4Q5IkxX8hxXH8nv+F
+        K8w9mWB7rBTJAAAAAElFTkSuQmCC
+        """)
 if __name__ == '__main__':
     imagen = imageEmbed()
-    path = 'G:\\proyecto salstat\\src\\findr.png'
+    path = 'f:\\PROYECTO SEI\\tango-icon-theme-0.8.90\\16x16\\actions\\document-new.png'
     imagen.convertFromfile(path, True)
