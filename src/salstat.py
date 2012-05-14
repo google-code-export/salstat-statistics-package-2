@@ -389,8 +389,6 @@ class SimpleGrid(MyGrid):# wxGrid
         row = self.m_grid.GetGridCursorRow()
         value = self.m_grid.GetCellValue(row, col)
         xmlevt = '<data row="'+str(row)+'" col="'+str(col)+'">'+str(value)+'</data>\n'
-        hist.AppendEvent(xmlevt)
-        print hist.history
 
     def CutData(self, event):
         self.m_grid.Delete()
@@ -415,15 +413,14 @@ class SimpleGrid(MyGrid):# wxGrid
         currentcol = self.m_grid.GetGridCursorCol()
         self.m_grid.DeleteCols(currentcol, 1)
         self.m_grid.AdjustScrollbars()
-        xmlevt = '<deleteColumn>'+str(currentcol)+'</deleteColumn>\n'
-        hist.AppendEvent(xmlevt)
+        
 
     def DeleteCurrentRow(self, event):
         currentrow = self.m_grid.GetGridCursorRow()
         self.m_grid.DeleteRows(currentrow, 1)
         self.m_grid.AdjustScrollbars()
         xmlevt = '<deleteRow>'+str(currentrow)+'</deleteRow>\n'
-        hist.AppendEvent(xmlevt)
+       
 
     def SelectAllCells(self, event):
         self.m_grid.SelectAll()
@@ -436,11 +433,7 @@ class SimpleGrid(MyGrid):# wxGrid
             self.m_grid.SetColLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_BOTTOM)
             self.m_grid.SetColFormatFloat(i, 8, 4)
         self.m_grid.AdjustScrollbars()
-        xmlevt = '<appendColumn>'+str(numcols)+'</appendColumn>\n'
-        hist.AppendEvent(xmlevt)
-        xmlevt = '<appendRow>'+str(numrows)+'</appendRow>\n'
-        hist.AppendEvent(xmlevt)
-
+        
     # function finds out how many cols contain data - all in a list
     #(ColsUsed) which has col #'s
     def GetUsedCols(self):
