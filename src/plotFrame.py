@@ -249,10 +249,8 @@ class MpltFrame( wx.Frame ):
         self.m_staticText12.Wrap( -1 )
         fgSizer2.Add( self.m_staticText12, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
-        m_choice3Choices = []
-        self.m_choice3 = wx.Choice( self.m_scrolledWindow3, wx.ID_ANY, wx.DefaultPosition, wx.Size( 60,-1 ), m_choice3Choices, 0 )
-        self.m_choice3.SetSelection( 0 )
-        fgSizer2.Add( self.m_choice3, 0, wx.ALL, 5 )
+        self.m_button12 = wx.Button( self.m_scrolledWindow3, wx.ID_ANY, u"...", wx.DefaultPosition, wx.Size( 60,-1 ), 0 )
+        fgSizer2.Add( self.m_button12, 0, wx.ALL, 5 )
 
         self.m_staticText7 = wx.StaticText( self.m_scrolledWindow3, wx.ID_ANY, u"Line Colour", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText7.Wrap( -1 )
@@ -376,10 +374,8 @@ class MpltFrame( wx.Frame ):
         fgSizer7.SetFlexibleDirection( wx.BOTH )
         fgSizer7.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
 
-        m_choice13Choices = []
-        self.m_choice13 = wx.Choice( self.m_scrolledWindow4, wx.ID_ANY, wx.DefaultPosition, wx.Size( 70,-1 ), m_choice13Choices, 0 )
-        self.m_choice13.SetSelection( 0 )
-        fgSizer7.Add( self.m_choice13, 0, wx.ALL, 5 )
+        self.m_button13 = wx.Button( self.m_scrolledWindow4, wx.ID_ANY, u"...", wx.DefaultPosition, wx.Size( 70,-1 ), 0 )
+        fgSizer7.Add( self.m_button13, 0, wx.ALL, 5 )
 
         self.m_staticText29 = wx.StaticText( self.m_scrolledWindow4, wx.ID_ANY, u"Face Colour", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText29.Wrap( -1 )
@@ -571,7 +567,7 @@ class MpltFrame( wx.Frame ):
         self.m_button41.Bind( wx.EVT_BUTTON, self._OnRefreshLines )
         self.m_textCtrl8.Bind( wx.EVT_TEXT_ENTER, self._OnLineNameChange )
         self.m_choice7.Bind( wx.EVT_CHOICE, self._OnLineWidthChange )
-        self.m_choice3.Bind( wx.EVT_CHOICE, self._OnLineColourChange )
+        self.m_button12.Bind( wx.EVT_BUTTON, self._OnLineColourChange )
         self.m_choice4.Bind( wx.EVT_CHOICE, self._OnLineStyleChange )
         self.m_choice6.Bind( wx.EVT_CHOICE, self._OnLineMarkerStyleChange )
         self.m_choice8.Bind( wx.EVT_CHOICE, self._OnLineMarkerSizeChange )
@@ -582,7 +578,7 @@ class MpltFrame( wx.Frame ):
         self.m_button511.Bind( wx.EVT_BUTTON, self._OnAddRefVertLine )
         self.patchListBox.Bind( wx.EVT_LISTBOX, self._OnPatchListboxChange )
         self.m_button9.Bind( wx.EVT_BUTTON, self._OnDelPatch )
-        self.m_choice13.Bind( wx.EVT_CHOICE, self._OnPatchFaceColorChange )
+        self.m_button13.Bind( wx.EVT_BUTTON, self._OnPatchFaceColorChange )
         self.m_choice14.Bind( wx.EVT_CHOICE, self._OnPatchAlphaChange )
         self.m_button7.Bind( wx.EVT_BUTTON, self._OnAddHorzSpan )
         self.m_textCtrl11.Bind( wx.EVT_TEXT, self._Onm_textCtrl11Change )
@@ -623,20 +619,17 @@ class MpltFrame( wx.Frame ):
         markerSizes = [str(x) for x in range(1,15,1)]
         alpha = [str(x/float(10)) for x in range(1,11)]
         self.m_choice7.SetItems(lineSizes)
-        self.m_choice3.SetItems(faceColors)
         self.m_choice4.SetItems(lineStyles)
         self.m_choice6.SetItems(markerStyles)
         self.m_choice8.SetItems(markerSizes)
         self._updateLineSelectionPane(self.m_listBox1)
         # se actualiza la informacion para la pestana de pach
-        self.m_choice13.SetItems(faceColors)
         self.m_choice14.SetItems(alpha)
         self.m_choice81.SetItems(faceColors)
         self.m_choice12.SetItems(alpha)
         self.m_choice10.SetItems(faceColors)
         self.m_choice11.SetItems(alpha)
 
-        self.m_choice13.SetSelection(0)
         self.m_choice14.SetSelection(0)
         self.m_choice81.SetSelection(0)
         self.m_choice12.SetSelection(0)
@@ -877,10 +870,10 @@ class MpltFrame( wx.Frame ):
             if float(value) == lineWidht:
                 self.m_choice7.SetSelection(pos)
                 break
-        for pos,value in enumerate(self.m_choice3.GetItems()):
-            if value == lineColour:
-                self.m_choice3.SetSelection(pos)
-                break
+        #for pos,value in enumerate(self.m_choice3.GetItems()):
+            #if value == lineColour:
+                #self.m_choice3.SetSelection(pos)
+                #break
         for pos,value in enumerate(self.m_choice4.GetItems()):
             if value == lineStyle:
                 self.m_choice4.SetSelection(pos)
@@ -921,10 +914,18 @@ class MpltFrame( wx.Frame ):
         if len(self.m_listBox1.Items) == 0 or \
            self.m_listBox1.GetSelection() == -1:
             return
+        dlg = wx.ColourDialog(self)
+        dlg.GetColourData().SetChooseFull(True)
+        if dlg.ShowModal() == wx.ID_OK:
+            # If the user selected OK, then the dialog's wx.ColourData will
+            # contain valid information. Fetch the data ...
+            data = dlg.GetColourData()
+        else:
+            return
         actualLineNumber= self.m_listBox1.GetSelection()
         lineSelected = self.axes.get_lines()[actualLineNumber]
-        newcolour = event.GetString()
-        lineSelected.set_color(newcolour)
+        colors = [getattr(data.Colour,param)/float(255) for param in ['red','green','blue','alpha']]
+        lineSelected.set_color(colors)
         self.figpanel.canvas.draw()
 
     def _OnLineStyleChange( self, event ):
@@ -1058,10 +1059,10 @@ class MpltFrame( wx.Frame ):
             if value == Alpha:
                 self.m_choice14.SetSelection(pos)
                 break
-        for pos,value in enumerate(self.m_choice13.GetItems()):
-            if value == faceColor:
-                self.m_choice13.SetSelection(pos)
-                break
+        #for pos,value in enumerate(self.m_choice13.GetItems()):
+            #if value == faceColor:
+                #self.m_choice13.SetSelection(pos)
+                #break
 
     def _OnAddHorzSpan(self,event):
         pos1 = self.m_textCtrl11.GetValue()
@@ -1140,8 +1141,18 @@ class MpltFrame( wx.Frame ):
             if str(patch.get_gid()) == selectedPatch:
                 currPatch= patch
                 break
-        facecolor = self.m_choice13.GetItems()[self.m_choice13.GetSelection()]
-        currPatch.set_facecolor(facecolor)
+        dlg = wx.ColourDialog(self)
+        dlg.GetColourData().SetChooseFull(True)
+        if dlg.ShowModal() == wx.ID_OK:
+            # If the user selected OK, then the dialog's wx.ColourData will
+            # contain valid information. Fetch the data ...
+            data = dlg.GetColourData()
+        else:
+            return
+        actualLineNumber= self.m_listBox1.GetSelection()
+        lineSelected = self.axes.get_lines()[actualLineNumber]
+        colors = [getattr(data.Colour,param)/float(255) for param in ['red','green','blue','alpha']]
+        currPatch.set_facecolor(colors)
         self.figpanel.canvas.draw()
 
     def _OnPatchAlphaChange(self,event):
