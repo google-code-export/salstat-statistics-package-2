@@ -15,7 +15,7 @@ import os
 # from grid import MyContextGrid # MyGrid
 from ntbSheet import MyGridPanel as MyGrid
 #from matplotlib import mlab
-
+from script import ScriptPanel
 from imagenes import imageEmbed
 import wx.html
 import wx.aui
@@ -148,16 +148,47 @@ else:
     wind = 0
     DOCDIR = os.environ['HOME']
     INITDIR = DOCDIR
+    
+class _MyLog(wx.PyLog):
+    def __init__(self, textCtrl, logTime=0):
+        wx.PyLog.__init__(self)
+        self.tc = textCtrl
+        self.logTime = logTime
 
-class History:
-    def __init__(self):
-        self.history = '' # change this for the proper DTD please!
-
-    def AppendEvent(self, xmltags):
-        self.history = self.history + xmltags
-
-    def ClearHistory(self):
-        self.history = ''
+    def DoLogString(self, message, timeStamp):
+        #print message, timeStamp
+        #if self.logTime:
+        #    message = time.strftime("%X", time.localtime(timeStamp)) + \
+        #              ": " + message
+        if self.tc:
+            self.tc.AppendText(message + '\n') 
+            
+class LogPanel( wx.Panel ):
+    def _numLine(self):
+        i = 1
+        while True:
+            yield i
+            i+= 1 
+    def __init__( self, parent,*args,**params ):
+        self.numLinea = self._numLine()
+        wx.Panel.__init__ ( self, parent,*args, **params)
+        bSizer8 = wx.BoxSizer( wx.VERTICAL )
+        self.log = wx.TextCtrl( self, wx.ID_ANY, style = wx.TE_MULTILINE|wx.TE_READONLY|wx.HSCROLL )
+        bSizer8.Add( self.log, 1, wx.EXPAND, 5 )
+        wx.Log_SetActiveTarget(_MyLog(self.log))
+        self.SetSizer( bSizer8 )
+        self.Layout()
+    
+    def writeLine(self, lineaTexto):
+        '''escribe una linea de texto'''
+        texto= str(self.numLinea.next()) + " >> "
+        texto+= lineaTexto + "\n"
+        # se escribe el texto indicado
+        self.log.AppendText(texto)    
+        
+    def __del__( self ):
+        pass
+    
 
 class SaveDialog(wx.Dialog):
     def __init__(self, parent, id):
@@ -804,98 +835,6 @@ class GridPrefs(wx.Dialog):
         self.Close(True)
 
 #---------------------------------------------------------------------------
-# shows the scripting window for entering Python syntax commands
-class ScriptFrame(wx.Frame):
-    def __init__(self, parent, id):
-        dimx = int(inits.get('scriptsizex'))
-        dimy = int(inits.get('scriptsizey'))
-        posx = int(inits.get('scriptposx'))
-        posy = int(inits.get('scriptposy'))
-        wx.Frame.__init__(self, parent, id, "Scripting Window", \
-                          size=(dimx, dimy), pos=(posx,posy))
-        #set icon for frame (needs x-platform separator!
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
-        self.scripted = wx.TextCtrl(self,-1)
-        imag = imageEmbed()
-        GoIcon = images.getApplyBitmap()
-        OpenIcon = imag.folderOpen()
-        SaveIcon = imag.disk()
-        SaveAsIcon = imag.save2disk()
-        PrintIcon = imag.printer()
-        CutIcon = imag.edit_cut()
-        CopyIcon = imag.edit_copy()
-        PasteIcon = imag.edit_paste()
-        HelpIcon = imag.about()
-        toolBar = self.CreateToolBar(wx.TB_HORIZONTAL|wx.NO_BORDER| \
-                                     wx.TB_3DBUTTONS)
-        self.bt1 = toolBar.AddSimpleTool(wx.ID_ANY, GoIcon,"Run Script","Run the Script")
-        self.bt2 = toolBar.AddSimpleTool(wx.ID_ANY, OpenIcon,"Open","Open Script from a File")
-        self.bt3 = toolBar.AddSimpleTool(wx.ID_ANY, SaveIcon,"Save","Save Script to a file")
-        self.bt4 = toolBar.AddSimpleTool(wx.ID_ANY, SaveAsIcon,"Save As","Save Script under \
-                                    a new filename")
-        self.bt5 = toolBar.AddSimpleTool(wx.ID_ANY, PrintIcon,"Print","Print Out Script")
-        self.bt6 = toolBar.AddSimpleTool(wx.ID_ANY, CutIcon, "Cut", "Cut selection to \
-                                    clipboard")
-        self.bt7 = toolBar.AddSimpleTool(wx.ID_ANY, CopyIcon, "Copy", "Copy selection to \
-                                    clipboard")
-        self.bt8 = toolBar.AddSimpleTool(wx.ID_ANY, PasteIcon, "Paste", "Paste selection \
-                                    from clipboard")
-        self.bt9 = toolBar.AddSimpleTool(wx.ID_ANY, HelpIcon, "Help", "Get some help!")
-        toolBar.SetToolBitmapSize((24,24))
-        toolBar.Realize()
-
-        self.Bind(wx.EVT_TOOL, self.ExecuteScript, id = self.bt1.GetId() )
-        self.Bind(wx.EVT_TOOL, self.OpenScript, id = self.bt2.GetId())
-        self.Bind(wx.EVT_TOOL, self.SaveScriptAs, id = self.bt3.GetId())
-        self.Bind(wx.EVT_TOOL, self.CutSelection, id = self.bt6.GetId())
-        self.Bind(wx.EVT_TOOL, self.CopySelection, id = self.bt7.GetId())
-        self.Bind(wx.EVT_TOOL, self.PasteSelection, id = self.bt8.GetId())
-        self.Bind(wx.EVT_TOOL, self.ShowHelp, id = self.bt9.GetId())
-
-    def ExecuteScript(self, event):
-        mainscript = self.scripted.GetValue()
-        execscript = string.join(mainscript, '\n')
-        eval(mainscript)
-
-    def CutSelection(self, event):
-        self.scripted.OnCutSelection(event)
-
-    def CopySelection(self, event):
-        self.scripted.OnCopySelection(event)
-
-    def PasteSelection(self, event):
-        self.scripted.OnPaste(event)
-
-    def ShowHelp(self, event):
-        win = AboutFrame(frame, -1, 2)
-        win.Show(True)
-
-    # the open script method needs work
-    def OpenScript(self, event):
-        default = inits.get('opendir')
-        dlg = wx.FileDialog(self, "Open Script File",default,"",\
-                            "Any (*)|*",wx.OPEN)
-        if dlg.ShowModal() == wx.ID_OK:
-            filename = dlg.GetPath()
-            fin = file(filename, "r")
-            TextIn = fin.readlines()
-
-            self.scripted.SetText(TextIn)
-            fin.close()
-
-    def SaveScriptAs(self, event):
-        default = inits.get('savedir')
-        dlg = wx.FileDialog(self, "Save Script File", default,"",\
-                            "Any (*)|*", wxSAVE)
-        if dlg.ShowModal() == wx.ID_OK:
-            filename = dlg.GetPath()
-            fout = open(filename, "w")
-            script = self.scripted.GetText()
-            for i in range(len(script)):
-                fout.write(script[i]+'\n')
-            fout.close
-#---------------------------------------------------------------------------
 # Simply display the About box w/html frame in it
 class AboutFrame(wx.Frame):
     def __init__(self, parent, id, tabnumber):
@@ -1459,15 +1398,16 @@ class OneConditionTestFrame(wx.Dialog):
                 result.append('p = %1.6f'%(TBase.prob))
             result.append('')
 
-        result.append('One sample chi square') 
-        if self.TestChoice.IsChecked(2):
-            TBase.ChiSquareVariance(umean)
-            if self.m_radioBtn1.GetValue():  #(self.hypchoice.GetSelection() == 0):
-                TBase.prob = TBase.prob / 2
-            if (TBase.prob == None):
-                TBase.prob = 1.0
-            result.append('Chi square (%d) = %5.3f'%(TBase.df, TBase.chisquare))
-            result.append('p = %1.6f'%( TBase.prob))
+        result.append('One sample chi square')
+        if TBase.prob != None:
+            if self.TestChoice.IsChecked(2):
+                TBase.ChiSquareVariance(umean)
+                if self.m_radioBtn1.GetValue():  #(self.hypchoice.GetSelection() == 0):
+                    TBase.prob = TBase.prob / 2
+                result.append('Chi square (%d) = %5.3f'%(TBase.df, TBase.chisquare))
+                result.append('p = %1.6f'%( TBase.prob))
+        else:
+            result.append('Cannot compute the probability')
         # se organiza los datos seleccionados
         data['data']= [[res] for res in result]
         data['size']= (len(result),1)
@@ -2439,76 +2379,6 @@ class TransformFrame(wx.Dialog):
         self.Close(True)
 
 #---------------------------------------------------------------------------
-# Plot Window
-# This frame holds the plots using the wxPlotCanvas widget
-class PlotFrame(wx.Frame):
-    def __init__(self, parent, log):
-        wx.Frame.__init__(self, parent, -1,"SalStat Plot (Basic!)", \
-                          size=(500,400))
-        file_menu = wx.Menu()
-        edit_menu = wx.Menu()
-        title_menu = wx.Menu()
-        self.bt1 = file_menu.Append(ID_FILE_GSAVEAS, 'Save &As...')
-        self.bt2 = file_menu.Append(ID_FILE_GPRINTSETUP, 'Page Setup...')
-        self.bt3 = file_menu.Append(ID_FILE_GPRINTPREVIEW, 'Print Preview...')
-        self.bt4 = file_menu.Append(ID_FILE_GPRINT, '&Print...')
-        self.bt5 = file_menu.Append(ID_FILE_GCLOSE, '&Close')
-        self.bt6 = title_menu.Append(ID_TITLE_GTITLE, '&Graph Title...')
-        self.bt7 = title_menu.Append(ID_TITLE_GXAXIS, '&X Axis Label...')
-        self.bt8 = title_menu.Append(ID_TITLE_GYAXIS, '&Y Axis Label...')
-        self.bt9 = title_menu.Append(ID_TITLE_LEGEND, '&Enable Legend', kind = wx.ITEM_CHECK) # wxITEM_CHECK
-        self.bt10 = title_menu.Append(ID_TITLE_GRID, 'Enable &Grid', kind = wx.ITEM_CHECK) # wxITEM_CHECK
-        gmenuBar = wx.MenuBar()
-        gmenuBar.Append(file_menu, '&File')
-        gmenuBar.Append(edit_menu, '&Edit')
-        gmenuBar.Append(title_menu, '&Plot')
-        self.Bind(wx.EVT_MENU,  self.SaveAs,      id = self.bt1.GetId())
-        self.Bind(wx.EVT_MENU,  self.PrintSetup,  id = self.bt2.GetId())
-        self.Bind(wx.EVT_MENU,  self.PrintPreview,id = self.bt3.GetId())
-        self.Bind(wx.EVT_MENU,  self.PrintGraph,  id = self.bt4.GetId())
-        self.Bind(wx.EVT_MENU,  self.CloseWindow, id = self.bt5.GetId())
-        self.Bind(wx.EVT_MENU,  self.SetTitle,    id = self.bt6.GetId())
-        self.Bind(wx.EVT_MENU,  self.SetXAxis,    id = self.bt7.GetId())
-        self.Bind(wx.EVT_MENU,  self.SetYAxis,    id = self.bt8.GetId())
-        self.Bind(wx.EVT_MENU,  self.EnableLegend,id = self.bt9.GetId())
-        self.Bind(wx.EVT_MENU,  self.EnableGrid,  id = self.bt10.GetId())
-        self.SetMenuBar(gmenuBar)
-        self.client = pyplot.PlotCanvas(self)# PlotCanvas
-
-    def EnableGrid(self, event):
-        self.client.SetEnableGrid(event.IsChecked())
-
-    def SetTitle(self, event):
-        dlg = wx.TextEntryDialog(self, 'Enter the graph title','Graph Title')
-        dlg.SetValue(self.client.GetLabel())
-        # the previous line doesn't work.
-        if dlg.ShowModal() == wx.ID_OK:
-            self.client.SetLabel(dlg.GetValue())
-
-    def SetXAxis(self, event):
-        pass
-
-    def SetYAxis(self, event):
-        pass
-
-    def EnableLegend(self, event):
-        self.client.SetEnableLegend(event.IsChecked())
-
-    def PrintSetup(self, event):
-        self.client.PageSetup()
-
-    def PrintPreview(self, event):
-        self.client.PrintPreview()
-
-    def PrintGraph(self, event):
-        self.client.Printout()
-
-    def SaveAs(self, event):
-        self.client.SaveFile()
-
-    def CloseWindow(self, event):
-        self.Close(True)
-
 #---------------------------------------------------------------------------
 # call instance of DataGrid
 # This is main interface of application
@@ -2678,15 +2548,8 @@ class DataFrame(wx.Frame):
                            CaptionVisible(True).Caption("Output Panel").
                            MinimizeButton(True).Resizable(True).MaximizeButton(True).
                            CloseButton( False ).MinSize( wx.Size( 240,-1 )))
-
-        self.answerPanel2 = wx.py.crust.editwindow.EditWindow(self)
-        #self.answerPanel2.setDisplayLineNumbers(True)
-        #self.answerPanel2.SetIndent(4)               # Proscribed indent size for wx
-        #self.answerPanel2.SetIndentationGuides(True) # Show indent guides
-        #self.answerPanel2.SetBackSpaceUnIndents(True)# Backspace unindents rather than delete 1 space
-        #self.answerPanel2.SetTabIndents(True)        # Tab key indents
-        #self.answerPanel2.SetTabWidth(4)             # Proscribed tab size for wx
-        #self.answerPanel2.SetUseTabs(False)
+        
+        self.answerPanel2 = ScriptPanel(self)
         self.m_mgr.AddPane(self.answerPanel2,
                            wx.aui.AuiPaneInfo().Centre().Right().
                            CaptionVisible(True).Caption("Script Panel").
@@ -2696,9 +2559,9 @@ class DataFrame(wx.Frame):
         self.m_notebook1 = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
 
         #--------------------------------------------
-        self.logPanel= wx.Panel(self.m_notebook1, wx.ID_ANY)
+        self.logPanel = LogPanel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 
-        self.m_notebook1.AddPage( self.logPanel, u"ipython shell", False )
+        self.m_notebook1.AddPage( self.logPanel, u"Log", False )
 
         #--------------------------------
         self.scriptPanel = wx.py.shell.Shell(self.m_notebook1)
@@ -3490,11 +3353,10 @@ if __name__ == '__main__':
     import sys
     # find init file and read otherwise create it
     ini = GetInits()
-    historyClass = History()
-    hist = historyClass
     app = wx.App()
     frame = DataFrame(None, app, sys.stdout, )
     frame.grid.SetFocus()
+    Logg= frame.logPanel
     output = frame.answerPanel # OutputSheet(frame, -1)
     frame.ShowFullScreen(True,False)
     # output.Show(True)
