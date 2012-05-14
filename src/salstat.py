@@ -1,43 +1,37 @@
 #!/usr/bin/env python
 
-"""SalStat Statistics Package. Copyright 2002 Alan James Salmoni. Licensed
+""" Copyright Sebastian Lopez Buritica 2012
+
+SalStat Statistics Package. Copyright 2002 Alan James Salmoni. Licensed
 under the GNU General Public License (GPL). See the file COPYING for full
 details of this license. """
 
-# import wx stuff
-#from wxPython.wx import *
-#from wxPython.stc import *
-#from wxPython.grid import *
-#from wxPython.html import *
-#from wxPython.lib.editor import wxEditor
 import wx
 import os
-# from grid import MyContextGrid # MyGrid
+
 from ntbSheet import MyGridPanel as MyGrid
-#from matplotlib import mlab
+
 from script import ScriptPanel
 from imagenes import imageEmbed
 import wx.html
 import wx.aui
 import wx.lib.agw.aui as aui
 ####from PanelScript import PanelPython
-# import wx # getting ready for the new namespace
+
 import wx.lib.wxpTag
 # import system modules
 import string, os, os.path, pickle
 # import SalStat specific modules
 import salstat_stats,images
 import numpy, math
-# and for plots!
-#from wxPython.lib.wxPlotCanvas import *
-#from wxPython.lib import wxPlotCanvas
 import wx.py
-# set ip the xml modules
 from xml.dom import minidom
 # system of graphics
 from plotFrame import MpltFrame as plot
 from multiPlotDialog import data2Plotdiaglog, selectDialogData2plot, scatterDialog
 from ntbSheet import NoteBookSheet
+
+from openStats import statistics
 
 #---------------------------------------------------------------------------
 # set up id's for menu events - all on menu, some also available elsewhere
@@ -108,15 +102,14 @@ ID_TITLE_GTITLE = wx.ID_ANY
 ID_TITLE_LEGEND = wx.ID_ANY
 ID_TITLE_GRID = wx.ID_ANY
 
-DescList=['N','Sum','Mean','Variance','Standard Deviation','Standard Error',\
-          'Sum of Squares','Sum of Squared Devs', \
-          'Coefficient of Variation','Minimum',   \
-          'Maximum','Range','Number Missing',     \
-          'Geometric Mean','Harmonic Mean',       \
-          'Skewness','Kurtosis', 'Median',        \
-          'Median Absolute Deviation','Mode',     \
-          'Interquartile Range',                  \
-          'Number of Unique Levels']
+DescList=['N','Sum','Mean','missing',
+          'Variance','Standard Deviation','Standard Error',
+          'Sum of Squares',#'Sum of Squared Devs', 
+          'Coefficient of Variation','Minimum',   
+          'Maximum','Range','Number Missing',     
+          'Geometric Mean','Harmonic Mean',       
+          'Skewness','Kurtosis', 'Median',        #'Median Absolute Deviation',
+          'Mode', 'Interquartile Range'] #, 'Number of Unique Levels']
 
 HypList = ['One tailed','Two tailed']
 inits={}    # dictionary to hold the config values
@@ -306,6 +299,8 @@ class GetInits:
 class ManyDescriptives:
     def __init__(self, source, ds):
         __x__ = len(ds)
+        if __x__ == 0:
+            return
         data= {'name': "Many Descriptives",
                'size': (0,0),
                'nameCol': list(),
@@ -313,8 +308,9 @@ class ManyDescriptives:
         data['nameCol'].append('Statistic')
         data['nameCol'].extend([ds[i].Name for i in range(__x__)])
         funcTrans= {'N': 'N',
-                    'Sum': 'sum',
+                    'Sum': 'suma',
                     'Mean': 'mean',
+                    'missing': 'missing',
                     'Variance': 'samplevar', 
                     'Standard Deviation': 'stddev',
                     'Standard Error': 'stderr',
@@ -343,9 +339,10 @@ class ManyDescriptives:
             realParamName = funcTrans[aliasParamName]
             if realParamName == None:
                 continue
-            res=[aliasParamName] 
-            res.extend([getattr(ds[i],realParamName) for i in range(__x__)])
-            data['data'].append(res)
+            res=[aliasParamName]
+            if hasattr(ds[i],realParamName):
+                res.extend([getattr(ds[i],realParamName) for i in range(__x__)])
+                data['data'].append(res)
         data['size'] = (len(data['data']), len(data['nameCol']))
         output.upData(data)
 
@@ -468,8 +465,7 @@ class SimpleGrid(MyGrid):# wxGrid
         return RowsUsed
 
     def SaveAsDataASCII(self, event):
-        default = inits.get('savedir')
-        dlg = wx.FileDialog(self, "Save Data File", default,"",\
+        dlg = wx.FileDialog(self, "Save Data File", "","",\
                             "ASCII Text (*.dat)|*.dat", wx.SAVE)
                                     #"ASCII Text (*.dat)|*.dat|SalStat File (*.xml)|*.xml|", wxSAVE)
         icon = images.getIconIcon()
@@ -544,9 +540,8 @@ class SimpleGrid(MyGrid):# wxGrid
     # Loads an ASCII data file - only with all datapoints filled though!
     # also does csv values as well
     def LoadDataASCII(self, event):
-        default = inits.get('opendir')
-        dlg = wx.FileDialog(self, "Load Data File", default,"",
-                            wildcard= "SalStat Native (*.xml)|*.xml|",
+        dlg = wx.FileDialog(self, "Load Data File", "","",
+                            wildcard= "SalStat Native (*.xml)|*.xml",
                             style = wx.OPEN)
                 #, wx.OPEN)
         icon = images.getIconIcon()
@@ -778,10 +773,10 @@ class EditGridFrame(wx.Dialog):
         l1 = wx.StaticText(self, -1, 'Add Columns',pos=(10,15))
         l2 = wx.StaticText(self, -1, 'Add Rows',pos=(10,55))
         self.numnewcols = wx.SpinCtrl(self, -1, "", wx.Point(110,10), wx.Size(80,25))
-        self.numnewcols.SetRange(0, 100)
+        self.numnewcols.SetRange(1, 5000)
         self.numnewcols.SetValue(0)
         self.numnewRows = wx.SpinCtrl(self, -1, "", wx.Point(110, 50), wx.Size(80,25))
-        self.numnewRows.SetRange(0, 100)
+        self.numnewRows.SetRange(1, 5000)
         self.numnewRows.SetValue(0)
         okaybutton = wx.Button(self, 421, "Okay", wx.Point(10, 90),\
                                wx.Size(BWidth, BHeight))
@@ -1206,9 +1201,12 @@ class DescriptivesFrame(wx.Dialog):
             if self.ColChoice.IsChecked(i):
                 realColi = self.colnums[i]
                 name = frame.grid.m_grid.GetColLabelValue(realColi)
-                descs.append(salstat_stats.FullDescriptives( \
-                    frame.grid.CleanData(realColi), name, \
+                descs.append(statistics( 
+                    frame.grid.CleanData(realColi), name,
                     frame.grid.missing))
+                #descs.append(salstat_stats.FullDescriptives( \
+                #    frame.grid.CleanData(realColi), name, \
+                #    frame.grid.missing))
         ManyDescriptives(self, descs)
         self.Close(True)
 
@@ -2382,11 +2380,11 @@ class TransformFrame(wx.Dialog):
 class DataFrame(wx.Frame):
     def __init__(self, parent, appname ):
         
-        dimx = int(inits.get('gridsizex'))
-        dimy = int(inits.get('gridsizey'))
+        #dimx = int(inits.get('gridsizex'))
+        #dimy = int(inits.get('gridsizey'))
         
         wx.Frame.__init__(self,parent,-1,"SalStat Statistics", 
-                          size=(dimx, dimy), pos=wx.DefaultPosition)
+                          size=wx.Size(640,480 ), pos=wx.DefaultPosition)
         
         self.m_notebook1 = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
         self.logPanel = LogPanel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
@@ -2469,11 +2467,9 @@ class DataFrame(wx.Frame):
         self.mn21=analyse_menu.Append(ID_ANALYSE_1COND, '&1 Condition Tests...')
         self.mn22=analyse_menu.Append(ID_ANALYSE_2COND, '&2 Condition Tests...')
         self.mn23=analyse_menu.Append(ID_ANALYSE_3COND, '&3+ Condition Tests...')
-        #self.mn23.Enable(False)
         self.mn24=analyse_menu.Append(ID_ANALYSE_CORRELATION,'&Correlations...')
         #analyse_menu.Append(ID_ANALYSE_2FACT, '2+ &Factor Tests...')
-        analyse_menu.AppendSeparator()
-        self.mn25=analyse_menu.Append(ID_ANALYSE_SCRIPT, 'Scripting Window...')
+        
         self.mn26=chart_menu.Append(ID_CHART_DRAW, 'Line Chart of All Means...')
         self.mn27=chart_menu.Append(ID_BARCHART_DRAW, 'Bar Chart of All Means...')
         self.mn273= chart_menu.Append(wx.NewId(), 'Lines')
@@ -2622,7 +2618,6 @@ class DataFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.GoTwoConditionTest, id = self.mn22.GetId())
         self.Bind(wx.EVT_MENU, self.GetThreeConditionTest,id = self.mn23.GetId())
         self.Bind(wx.EVT_MENU, self.GetCorrelationsTest,id = self.mn24.GetId())
-        self.Bind(wx.EVT_MENU, self.GoScriptWindow,     id = self.mn25.GetId())
 
         self.Bind(wx.EVT_MENU, self.GoChartWindow,      id = self.mn26.GetId())
         self.Bind(wx.EVT_MENU, self.GoBarChartWindow,   id = self.mn27.GetId())
@@ -2753,10 +2748,7 @@ class DataFrame(wx.Frame):
         win = MFanovaFrame(frame, -1)
         win.Show(True)
 
-    def GoScriptWindow(self, event):
-        # Shows the scripting window
-        win = ScriptFrame(frame, -1)
-        win.Show(True)
+
 
     def GoChartWindow(self, event):
         waste, colnums = self.grid.GetUsedCols()
@@ -2942,7 +2934,7 @@ def Display(text):
 
 def Describe(datain):
     """Provides OO descriptive statistics. Called by >>>x = Describe(a)
-    and then a.N for the N, a.sum for the sum etc"""
+    and then a.N for the N, a.sumafor the sum etc"""
     if (type(datain) == int):
         datain = frame.grid.CleanData(col2)
     return salstat_stats.FullDescriptives(datain)
@@ -3356,7 +3348,7 @@ def GetInverseFProb(prob, df1, df2):
 if __name__ == '__main__':
     import sys
     # find init file and read otherwise create it
-    ini = GetInits()
+    # ini = GetInits()
     app = wx.App()
     frame = DataFrame(None, app)
     frame.grid.SetFocus()
