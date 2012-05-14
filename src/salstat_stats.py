@@ -518,29 +518,29 @@ class FullDescriptives:
         self.Name = name
         if len(inlist) == 0:
             self.N = 0
-            self.sum = self.mean = self.sumsquares = self.minimum = self.maximum = self.median = 0
+            self.suma= self.mean = self.sumsquares = self.minimum = self.maximum = self.median = 0
             self.mad = self.numberuniques = self.harmmean = self.ssdevs = self.samplevar = 0
             self.geomean = self.variance = self.coeffvar = self.skewness = self.kurtosis = self.mode = 0
         elif len(inlist) == 1:
             self.N = self.numberuniques = 1
-            self.sum = self.mean = self.minimum = self.maximum = self.median = inlist[0]
+            self.suma= self.mean = self.minimum = self.maximum = self.median = inlist[0]
             self.mad = self.harmmean = self.geomean = inlist[0]
             self.samplevar = self.variance = self.coeffvar = self.skewness = self.mode = 0
             self.kurtosis = self.sumsquares = ssdevs = 0
         elif len(inlist) > 1:
             self.missing = missing
             self.N = len(inlist)
-            self.sum = reduce(add, inlist)
+            self.suma= sum(inlist)#reduce(add, inlist)
             try:
-                self.mean = self.sum / float(self.N)
+                self.mean = self.suma/ float(self.N)
             except ZeroDivisionError:
                 self.mean = 0.0
             self.sumsquares = reduce(add, map(squared, inlist))
             difflist = []
             self.sortlist = copy.copy(inlist)
             self.sortlist.sort()
-            self.minimum = self.sortlist[0]
-            self.maximum = self.sortlist[len(self.sortlist)-1]
+            self.minimum = min(inlist) #self.sortlist[0]
+            self.maximum = max(inlist) #self.sortlist[len(self.sortlist)-1]
             self.range = self.maximum - self.minimum
             self.harmmean=0.0
             medianindex = self.N / 2
@@ -562,7 +562,7 @@ class FullDescriptives:
             self.numberuniques = 0
             for i in range(self.N):
                 difflist.append(inlist[i] - self.mean)
-                self.mad = self.mad + (inlist[i] - self.median)
+                self.mad += (inlist[i] - self.median)
                 uniques = 1
                 for j in range(self.N):
                     if (i != j):
@@ -740,7 +740,7 @@ class TwoSampleTests:
             self.prob = -1.0
         else:
             summult = reduce(add, map(multiply, data1, data2))
-            r_num = self.d1.N * summult - self.d1.sum * self.d2.sum
+            r_num = self.d1.N * summult - self.d1.suma* self.d2.sum
             r_left = self.d1.N*self.d1.sumsquares-(self.d1.sum**2)
             r_right= self.d2.N*self.d2.sumsquares-(self.d2.sum**2)
             r_den = math.sqrt(r_left*r_right)
