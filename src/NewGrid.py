@@ -148,6 +148,31 @@ class NewGrid(wx.grid.Grid):
         contenidoGrid = [self.getHeader()]
         contenidoGrid.extend([tuple([self.GetCellValue(row,col) for col in range(numCols)]) for row in range(self.GetNumberRows())])
         return tuple(contenidoGrid)
+    def getNumByCol(self,colNumber):
+        # the colNumber exist?
+        ncols= self.GetNumberCols() 
+        nrows= self.GetNumberRows()
+        if ncols < 1 or nrows < 1:
+            return ()
+        if colNumber > nrows:
+            return ()
+        selectCol= list(self.getByColumns()[colNumber])
+        newlist= [selectCol[i] for i in range(len(selectCol)-1,-1,-1)]
+        tamanio = len(selectCol)-1
+        for pos,value in enumerate(newlist):
+            if value == u'':
+                realPos = tamanio-pos
+                selectCol.pop(realPos)
+            else:
+                break
+        if len(selectCol) == 0:
+            return ()
+        for pos, value in enumerate(selectCol):
+            try:
+                selectCol[pos]= float(value)
+            except:
+                selectCol[pos]= None
+        return selectCol
     
 class _PyWXGridEditMixin():
     """ A Copy/Paste and undo/redo mixin for wx.grid. Undo/redo is per-table, not yet global."""
