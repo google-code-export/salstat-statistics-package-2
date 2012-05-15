@@ -52,8 +52,14 @@ class MySTC(stc.StyledTextCtrl):
  
         # use Python code highlighting
         self.SetLexer(stc.STC_LEX_PYTHON)
-        self.SetKeyWords(0, " ".join(keyword.kwlist))
+        keylist=['cls','plot','grid','show']
+        keylist.extend(keyword.kwlist)
+        keylist.extend(keyword.__builtins__.keys())
+        keyWordlist = " ".join(keylist)
+        self.SetKeyWords(0, keyWordlist )
         self.SetMarginType(1,stc.STC_MARGIN_NUMBER)
+        self.SetMaxLength(250)
+        
         # set other options ...
         self.SetProperty("fold", "1")
         self.SetMargins(0, 1)
@@ -421,7 +427,7 @@ class ScriptPanel(wx.Panel):
     def SaveScriptAs(self, event):
         wildcard = 'TEXT files (*.txt)|*.txt|ALL files (*.*)|*.*'
         dlg = wx.FileDialog(self, "Open Script File", "","",\
-                            wildcard, wx.OPEN)
+                            wildcard, wx.SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetPath()
             fout = open(filename, "wb")
