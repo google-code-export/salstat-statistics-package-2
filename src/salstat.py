@@ -2394,7 +2394,7 @@ class DataFrame(wx.Frame):
         
         
         
-        self.m_mgr = wx.aui.AuiManager()
+        self.m_mgr = aui.AuiManager()# wx.aui
         self.m_mgr.SetManagedWindow( self )
 
         #set icon for frame (needs x-platform separator!
@@ -2525,11 +2525,7 @@ class DataFrame(wx.Frame):
         # more toolbuttons are needed: New Output, Save, Print, Cut, \
         # Variables, and Wizard creates the toolbar
         tb1.Realize()
-        self.m_mgr.AddPane( tb1, wx.aui.AuiPaneInfo().Top().Dock().
-                            Resizable(False).FloatingSize( wx.DefaultSize ).
-                            DockFixed( False ).Layer(1).ToolbarPane().
-                            LeftDockable( False ).RightDockable(False).
-                            CloseButton(False ) )
+        
         #--------------------
 
         #still need to define event handlers
@@ -2540,28 +2536,14 @@ class DataFrame(wx.Frame):
         self.grid.m_grid.SetDefaultColSize(60, True)
         self.grid.m_grid.SetRowLabelSize(40)
 
-        self.m_mgr.AddPane(self.grid,
-                           wx.aui.AuiPaneInfo().Centre().
-                           CaptionVisible(False).
-                           CloseButton( False ).MinSize( wx.Size( 240,-1 )))
+        
         # adicion de panel para mostrar las respuestas
         self.answerPanel = NoteBookSheet(self)
-        self.m_mgr.AddPane(self.answerPanel,
-                           wx.aui.AuiPaneInfo().Centre().Right().
-                           CaptionVisible(True).Caption("Output Panel").
-                           MinimizeButton(True).Resizable(True).MaximizeButton(True).
-                           CloseButton( False ).MinSize( wx.Size( 240,-1 )))
+        
         
         
         self.answerPanel2 = ScriptPanel(self, self.logPanel, self.grid.m_grid, self.answerPanel)
-        self.m_mgr.AddPane(self.answerPanel2,
-                           wx.aui.AuiPaneInfo().Centre().Right().
-                           CaptionVisible(True).Caption("Script Panel").
-                           MinimizeButton(True).Resizable(True).MaximizeButton(True).
-                           CloseButton( False ).MinSize( wx.Size( 240,-1 )))
-
-        
-
+ 
         #--------------------------------------------
     
         self.m_notebook1.AddPage( self.logPanel, u"Log", True )
@@ -2571,16 +2553,43 @@ class DataFrame(wx.Frame):
         self.scriptPanel.wrap(True)
         
         self.m_notebook1.AddPage( self.scriptPanel , u"Shell", False )
+        
+        self.m_mgr.AddPane(self.grid,
+                           aui.AuiPaneInfo().Centre().
+                           CaptionVisible(True).Caption('Main Panel').
+                           MaximizeButton(True).MinimizeButton(True).
+                           CloseButton( False ).MinSize( wx.Size( 240,-1 )))
+        
+        self.m_mgr.AddPane(self.answerPanel,
+                           aui.AuiPaneInfo().Centre().Right().
+                           CaptionVisible(True).Caption(("Output Panel")).
+                           MinimizeButton(True).Resizable(True).MaximizeButton(True).
+                           CloseButton( False ).MinSize( wx.Size( 240,-1 )))
+                
+        self.m_mgr.AddPane( tb1, aui.AuiPaneInfo().Top().Dock().
+                            Resizable(False).FloatingSize( wx.DefaultSize ).
+                            DockFixed( False ).Layer(1).ToolbarPane().
+                            LeftDockable( False ).RightDockable(False).
+                            CloseButton(False ) )
+        
+        self.m_mgr.AddPane(self.answerPanel2,
+                           aui.AuiPaneInfo().Centre().Right().
+                           CaptionVisible(True).Caption(("Script Panel")).
+                           MinimizeButton().Resizable(True).MaximizeButton(True).
+                           CloseButton( False ).MinSize( wx.Size( 240,-1 )))
 
-        self.m_mgr.AddPane( self.m_notebook1, wx.aui.AuiPaneInfo() .Bottom() .
+        self.panelNtb = self.m_mgr.AddPane( self.m_notebook1, 
+                            aui.AuiPaneInfo() .Bottom() .
                             CloseButton( False ).MaximizeButton( True ).
-                            MinimizeButton( True ).PinButton( False ).
+                            MinimizeButton().PinButton( False ).
                             Dock().Resizable().FloatingSize( wx.DefaultSize ).
                             LeftDockable(False).RightDockable(False).
+                            CaptionVisible(True).
                             DockFixed( False ).BestSize(wx.Size(-1,150)))
+        #self.setAllflags()
         self.BindEvents()
         self.m_mgr.Update()
-
+    
     def BindEvents(self):
         #-----------------
         # para el toolbar
@@ -2628,6 +2637,9 @@ class DataFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.GoBoxWishkerPlot,   id = self.mn272.GetId())
         self.Bind(wx.EVT_MENU, self.GoLinesPlot,   id = self.mn273.GetId())
         self.Bind(wx.EVT_MENU, self.GoLinRegressPlot,   id = self.mn274.GetId())
+        
+        # controlling the expansion of the notebook
+        self.m_notebook1.Bind( wx.EVT_LEFT_DCLICK, self._OnNtbDbClick )
 
         self.grid.m_grid.setPadreCallBack(self) 
         if 0:
@@ -2654,7 +2666,16 @@ class DataFrame(wx.Frame):
 
 
             self.Bind(wx.EVT_CLOSE, self.EndApplication, self)
-
+    def _OnNtbDbClick(self,event):
+        for pane in self.mm_mgr.AllPanes:
+            if pane.name == 'Bottom Panel':
+                break
+        if not pane.IsMaximized():
+            self.mm_mgr.MaximizePane(pane)
+        else:
+            pane.MinimizeButton(True)
+        #self.m_mgr.Update()
+        
     def GoClearData(self, evt):
         #shows a new data entry frame
         self.grid.m_grid.ClearGrid()
