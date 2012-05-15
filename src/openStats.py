@@ -19,7 +19,10 @@ class statistics:
         self.maximum= max(data)
         self.range = self.maximum-self.minimum
         self.geomean= stats.geometricmean(data)
-        self.harmmean = stats.harmonicmean(data)
+        try:
+            self.harmmean = stats.harmonicmean(data)
+        except ZeroDivisionError:
+            self.harmmean = None
         self.skewness= stats.skew(data)
         self.kurtosis= stats.kurtosis(data)
         self.median= stats.median(data)
