@@ -32,6 +32,7 @@ from multiPlotDialog import data2Plotdiaglog, selectDialogData2plot, scatterDial
 from ntbSheet import NoteBookSheet
 
 from openStats import statistics
+import traceback
 
 #---------------------------------------------------------------------------
 # set up id's for menu events - all on menu, some also available elsewhere
@@ -179,6 +180,12 @@ class LogPanel( wx.Panel ):
         texto+= lineaTexto + "\n"
         # se escribe el texto indicado
         self.log.AppendText(texto)
+    def write(self,lineaTexto):
+        if len(lineaTexto) > 1:
+            last= lineaTexto[-1:]
+            if last =='\n':
+                lineaTexto = lineaTexto[:-2]
+        self.writeLine(lineaTexto)
         
     def clearLog(self):
         self.log.SetValue('')
@@ -830,12 +837,8 @@ class GridPrefs(wx.Dialog):
 # Simply display the About box w/html frame in it
 class AboutFrame(wx.Frame):
     def __init__(self, parent, id, tabnumber):
-        dimx = int(inits.get('scriptsizex'))
-        dimy = int(inits.get('scriptsizey'))
-        posx = int(inits.get('scriptposx'))
-        posy = int(inits.get('scriptposy'))
         wx.Frame.__init__(self, parent, id, "About SalStat", \
-                          size=(dimx, dimy), pos=(posx, posy))
+                          size=wx.Size(320, 240), pos=wx.DefaultPosition)
         #set icon for frame (needs x-platform separator!
         icon = images.getIconIcon()
         self.SetIcon(icon)
@@ -2550,7 +2553,7 @@ class DataFrame(wx.Frame):
                            CloseButton( False ).MinSize( wx.Size( 240,-1 )))
         
         
-        self.answerPanel2 = ScriptPanel(self, self.logPanel)
+        self.answerPanel2 = ScriptPanel(self, self.logPanel, self.grid.m_grid, self.answerPanel)
         self.m_mgr.AddPane(self.answerPanel2,
                            wx.aui.AuiPaneInfo().Centre().Right().
                            CaptionVisible(True).Caption("Script Panel").
@@ -2821,7 +2824,7 @@ class DataFrame(wx.Frame):
             return
         (xcol,ycol) = selection.getData()
         selection.Destroy()
-        data = [self.grid.CleanData(colnums[i]) for i in (colnums[xcol],colnums[ycol])]
+        data = [self.grid.CleanData(col) for col in (colnums[xcol],colnums[ycol])]
         if len(data[0]) != len(data[1]):
             self.SetStatusText('x and y data mus have the same size!')
             return
