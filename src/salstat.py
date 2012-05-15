@@ -2581,12 +2581,11 @@ class DataFrame(wx.Frame):
         self.panelNtb = self.m_mgr.AddPane( self.m_notebook1, 
                             aui.AuiPaneInfo() .Bottom() .
                             CloseButton( False ).MaximizeButton( True ).
+                            Caption(('Shell')).
                             MinimizeButton().PinButton( False ).
                             Dock().Resizable().FloatingSize( wx.DefaultSize ).
-                            LeftDockable(False).RightDockable(False).
                             CaptionVisible(True).
                             DockFixed( False ).BestSize(wx.Size(-1,150)))
-        #self.setAllflags()
         self.BindEvents()
         self.m_mgr.Update()
     
