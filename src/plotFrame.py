@@ -8,6 +8,7 @@ License: GPL
 # wxPython module
 import wx
 import wx.aui
+import wx.lib.agw.aui as aui
 # Matplotlib Figure object
 from matplotlib.figure import Figure
 from matplotlib import font_manager
@@ -61,21 +62,24 @@ class MpltFrame( wx.Frame ):
         wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 642,465 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
 
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
-        self.m_mgr = wx.aui.AuiManager()
+        self.m_mgr = aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
 
         self.figpanel = MplCanvasFrame( self )
-        self.m_mgr.AddPane( self.figpanel, wx.aui.AuiPaneInfo() .Left().
-                            CloseButton( False ).MaximizeButton( True ).MinimizeButton( True ).
-                            Dock().Resizable().FloatingSize( wx.DefaultSize ).DockFixed( False ).
-                            Row( 2 ).Right().Center() )
+        self.m_mgr.AddPane( self.figpanel, aui.AuiPaneInfo() .Left().
+                            CloseButton( False ).MaximizeButton( True ).MinimizeButton( ).
+                            Caption('Graph').CaptionVisible(True).
+                            Dock().Resizable().FloatingSize( wx.DefaultSize ).DockFixed( True ).
+                            CloseButton(False).Centre() )
 
         self.m_notebook1 = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
 
-        self.m_mgr.AddPane( self.m_notebook1, wx.aui.AuiPaneInfo() .Left() .
-                            CloseButton( False ).MaximizeButton( True ).Dock().Resizable().
-                            FloatingSize( wx.DefaultSize ).DockFixed( False ).Left().
-                            BestSize(wx.Size(300,-1)))
+        self.m_mgr.AddPane( self.m_notebook1, aui.AuiPaneInfo() .Left() .
+                            CloseButton( False ).MaximizeButton( True ).
+                            MinimizeButton().Dock().Resizable().
+                            Caption('Graph Properties').CaptionVisible(True).
+                            FloatingSize( wx.DefaultSize ).DockFixed( True ).
+                            CloseButton(False). BestSize(wx.Size(200,-1)))
 
         self.m_scrolledWindow1 = wx.ScrolledWindow( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL )
         self.m_scrolledWindow1.SetScrollRate( 5, 5 )
@@ -1230,11 +1234,11 @@ class test ( wx.Frame ):
                             size = wx.DefaultSize,
                             style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
-        self.m_mgr = wx.aui.AuiManager()
+        self.m_mgr = aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
 
         self.figpanel= MplCanvasFrame( self )
-        self.m_mgr.AddPane( self.figpanel, wx.aui.AuiPaneInfo() .Left() .
+        self.m_mgr.AddPane( self.figpanel, aui.AuiPaneInfo() .Left() .
                             Caption("matplotlib embeded").
                             MaximizeButton( False ).MinimizeButton( False ).
                             PinButton( False ).PaneBorder( False ).Dock().
