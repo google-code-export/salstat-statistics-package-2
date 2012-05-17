@@ -59,7 +59,7 @@ class MySTC(stc.StyledTextCtrl):
         keyWordlist = " ".join(keylist)
         self.SetKeyWords(0, keyWordlist )
         self.SetMarginType(1,stc.STC_MARGIN_NUMBER)
-        self.SetMaxLength(250)
+        #self.SetMaxLength(250)
         
         # set other options ...
         self.SetProperty("fold", "1")
