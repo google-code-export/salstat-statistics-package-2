@@ -8,6 +8,7 @@ import wx.lib.agw.aui as aui
 from imagenes import imageEmbed
 from statlib import stats
 from plotFrame import MpltFrame as plot
+from easyDialog import Dialog
 import traceback
 
 # styled text using wxPython's
@@ -52,7 +53,7 @@ class MySTC(stc.StyledTextCtrl):
  
         # use Python code highlighting
         self.SetLexer(stc.STC_LEX_PYTHON)
-        keylist=['cls','plot','grid','show']
+        keylist=['cls','plot','grid','show','dialog','OK']
         keylist.extend(keyword.kwlist)
         keylist.extend(keyword.__builtins__.keys())
         keyWordlist = " ".join(keylist)
@@ -323,7 +324,6 @@ class ScriptPanel(wx.Panel):
         self.m_mgr = wx.aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
 
-        
         self.answerPanel2 = MySTC(self)#wx.py.crust.editwindow.EditWindow(self)
         #self.answerPanel2.setDisplayLineNumbers(True)
         #self.answerPanel2.SetIndent(4)               # Proscribed indent size for wx
@@ -399,6 +399,8 @@ class ScriptPanel(wx.Panel):
               'plot': self.plot,
               'grid': self.grid,
               'showInGrid':self.showgrid,
+              'dialog': Dialog,
+              'OK': wx.ID_OK,
               }
         buildins = {}
         buildins["locals"]   = None
