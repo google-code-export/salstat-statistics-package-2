@@ -33,6 +33,7 @@ from ntbSheet import NoteBookSheet
 
 from openStats import statistics
 import traceback
+from slbTools import ReportaExcel
 
 #---------------------------------------------------------------------------
 # set up id's for menu events - all on menu, some also available elsewhere
@@ -223,7 +224,7 @@ class SaveDialog(wx.Dialog):
 
     def SaveData(self, event):
         frame.grid.Saved = True
-        frame.grid.SaveAsDataASCII(self) # will it be ASCII or XML?
+        frame.grid.SaveXlsAs(self) # will it be ASCII or XML?
         # output.Close(True)
         frame.Close(True)
         self.Close(True)
@@ -357,6 +358,9 @@ class ManyDescriptives:
 # class for grid - used as datagrid.
 class SimpleGrid(MyGrid):# wxGrid
     def __init__(self, parent, log, size= (500,50)):
+        self.NumSheetReport = 0
+        self.log = log
+        self.path = None
         MyGrid.__init__(self, parent, -1, size)
         self.Saved = True
         self.moveTo = None
@@ -471,81 +475,37 @@ class SimpleGrid(MyGrid):# wxGrid
                         break
         return RowsUsed
 
-    def SaveAsDataASCII(self, event):
-        dlg = wx.FileDialog(self, "Save Data File", "","",\
-                            "ASCII Text (*.dat)|*.dat", wx.SAVE)
-                                    #"ASCII Text (*.dat)|*.dat|SalStat File (*.xml)|*.xml|", wxSAVE)
-        icon = images.getIconIcon()
-        dlg.SetIcon(icon)
-        if dlg.ShowModal() == wx.ID_OK:
-            inits.update({'savedir': dlg.GetDirectory()})
-            filename = dlg.GetPath()
-            fout = open(filename, "w")
-            cols,waste = self.GetUsedCols()
-            if len(cols)== 0:
-                pass
-            elif (dlg.GetFilterIndex() == 0):
-                #save as plain text
-                rows = self.GetUsedRows()
-                maxrows = max(rows)
-                for i in range(len(cols)):
-                    for j in range(maxrows):
-                        if (self.m_grid.GetCellValue(j,i) == ''):
-                            self.m_grid.SetCellValue(j,i,'.')
-                for i in range(maxrows):
-                    datapoint=[]
-                    for j in range(len(cols)):
-                        try:
-                            datapoint.append(self.m_grid.GetCellValue(i, j))
-                        except:
-                            datapoint.append("0")
-                        line = string.join(datapoint)
-                    fout.write(line)
-                    fout.write('\n')
-            elif (dlg.GetFilterIndex() == 1):
-                # save as native format
-                print "cannot do this just yet!"
-            fout.close
-            self.Saved = True
-
-    def SaveDataASCII(self, event):
-        default = inits.get('savedir')
-        if (filename == 'UNTITLED'):
-            self.SaveAsDataASCII(event)
-            """dlg = wx.FileDialog(self, "Save Data File", default,"",\
-                                    "ASCII Text (*.dat)|*.dat| \
-                                    numpy Array (*.npy)|*.npy| \
-                                    Any (*.*)| \
-                                    *.*", wxSAVE)
-            icon = images.getIconIcon()
-            dlg.SetIcon(icon)
+    def SaveXlsAs(self, event):
+        self.SaveXls(None, True)
+        
+    def SaveXls(self, *args):
+        if len(args) == 1:
+            saveAs= False
+        else:
+            saveAs= args[1]
+        self.reportObj= ReportaExcel(cell_overwrite_ok = True) 
+        if self.Saved == False or saveAs: # path del grid
+            # mostrar el dialogo para guardar el archivo
+            dlg= wx.FileDialog(self, "Save Data File", "" , "",\
+                                    "excel (*.xls)|*.xls| \
+                                    Any (*.*)| *.*", wx.SAVE)
             if dlg.ShowModal() == wx.ID_OK:
-                inits.update({'savedir': dlg.GetDirectory()})
-                filename = dlg.GetPath()
+                self.path = dlg.GetPath()
             else:
-                return"""
-        fout = open(filename, "w")
+                return
+            self.reportObj.path = self.path
+        else:
+            self.reportObj.path = self.path
         cols, waste = self.GetUsedCols()
         if len(cols) == 0:
             pass
         else:
             rows = self.GetUsedRows()
-            maxrows = max(rows) + 1
-            for i in range(maxrows):
-                datapoint=[]
-                for j in range(len(cols)):
-                    try:
-                        datapoint.append(self.GetCellValue(i, j))
-                    except:
-                        datapoint.append("0")
-                line = string.join(datapoint)
-                fout.write(line)
-                fout.write('\n')
-        fout.close
+            cols= self.GetUsedCols()[1]
+            self.reportObj.writeByCols(self.m_grid.getByColumns(), self.NumSheetReport)
+        self.reportObj.save()
         self.Saved = True
-
-    # Loads an ASCII data file - only with all datapoints filled though!
-    # also does csv values as well
+        self.log.write("the fil %s was succesfully saved"%self.reportObj.path)
     def LoadDataASCII(self, event):
         dlg = wx.FileDialog(self, "Load Data File", "","",
                             wildcard= "SalStat Native (*.xml)|*.xml",
@@ -1397,15 +1357,16 @@ class OneConditionTestFrame(wx.Dialog):
             result.append('')
 
         result.append('One sample chi square')
-        if TBase.prob != None:
-            if self.TestChoice.IsChecked(2):
-                TBase.ChiSquareVariance(umean)
+        
+        if self.TestChoice.IsChecked(2):
+            TBase.ChiSquareVariance(umean)
+            if TBase.prob != None:
                 if self.m_radioBtn1.GetValue():  #(self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
                 result.append('Chi square (%d) = %5.3f'%(TBase.df, TBase.chisquare))
                 result.append('p = %1.6f'%( TBase.prob))
-        else:
-            result.append('Cannot compute the probability')
+            else:
+                result.append('Cannot compute the probability')
         # se organiza los datos seleccionados
         data['data']= [[res] for res in result]
         data['size']= (len(result),1)
@@ -2385,7 +2346,7 @@ class DataFrame(wx.Frame):
         
         #dimx = int(inits.get('gridsizex'))
         #dimy = int(inits.get('gridsizey'))
-        
+        self.path = None
         wx.Frame.__init__(self,parent,-1,"SalStat Statistics", 
                           size=wx.Size(640,480 ), pos=wx.DefaultPosition)
         
@@ -2594,8 +2555,8 @@ class DataFrame(wx.Frame):
         # para el toolbar
         self.Bind(wx.EVT_MENU, self.GoClearData,        id = self.bt1.GetId())
         self.Bind(wx.EVT_MENU, self.grid.LoadDataASCII, id = self.bt2.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.SaveDataASCII, id = self.bt3.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.SaveAsDataASCII,id= self.bt4.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.SaveXls,  id = self.bt3.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.SaveXlsAs,id= self.bt4.GetId())
         ##self.Bind(wx.EVT_MENU, self.grid.PrintPage, id = self.bt5.GetId())
         self.Bind(wx.EVT_MENU, self.grid.CutData,       id = self.bt6.GetId())
         self.Bind(wx.EVT_MENU, self.grid.CopyData,      id = self.bt7.GetId())
@@ -2608,9 +2569,9 @@ class DataFrame(wx.Frame):
         # Menu
         self.Bind(wx.EVT_MENU, self.GoClearData,        id = self.mn1.GetId())
         self.Bind(wx.EVT_MENU, self.grid.LoadDataASCII, id = self.mn2.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.SaveDataASCII, id = self.mn3.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.SaveAsDataASCII,id = self.mn4.GetId())
-        ##self.Bind(wx.EVT_MENU, seelf.grid.SaveAsDataASCII,id = ID_FILE_PRINT)
+        self.Bind(wx.EVT_MENU, self.grid.SaveXls, id = self.mn3.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.SaveXlsAs,id = self.mn4.GetId())
+        ##self.Bind(wx.EVT_MENU, seelf.grid.SaveXlsAs,id = ID_FILE_PRINT)
         self.Bind(wx.EVT_MENU, self.EndApplication,     id = self.mn7.GetId())
         self.Bind(wx.EVT_MENU, self.grid.CutData,       id = self.mn8.GetId())
         self.Bind(wx.EVT_MENU, self.grid.CopyData,      id = self.mn9.GetId())
@@ -2654,8 +2615,8 @@ class DataFrame(wx.Frame):
             self.Bind(wx.EVT_MENU, self.GoClearData, id=10) ### VERIFICAR
             # self.Bind(wx.EVT_MENU, ID_FILE_NEWOUTPUT, self.GoNewOutputSheet)
             # unsure if I want this - maybe restrict user to just one?
-            self.Bind(wx.EVT_MENU, self.grid.SaveDataASCII, id =  30)
-            self.Bind(wx.EVT_MENU, self.grid.SaveAsDataASCII, id= 40)
+            self.Bind(wx.EVT_MENU, self.grid.SaveXls, id =  30)
+            self.Bind(wx.EVT_MENU, self.grid.SaveAsSaveXlsAs40)
             #self.Bind(wx.EVT_MENU, ID_FILE_OPEN, self.grid.LoadNumericData)
             self.Bind(wx.EVT_MENU, self.grid.LoadDataASCII, id = 20)
             #EVT_TOOL(self, 20, self.grid.LoadNumericData)
