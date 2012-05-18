@@ -2,8 +2,8 @@
 Created on 11/05/2012
 New plot system
 
-@author: Sebastian lopez Buritica
-License: GPL
+@author: Sebastian lopez Buritica <Colombia>
+License: GPL2
 '''
 # wxPython module
 import wx
@@ -1172,7 +1172,7 @@ class MpltFrame( wx.Frame ):
             if str(patch.get_gid()) == selectedPatch:
                 currPatch= patch
                 break
-        alpha = self.m_choice14.GetItems()[self.m_choice14.GetSelection()]
+        alpha = float(self.m_choice14.GetItems()[self.m_choice14.GetSelection()])
         currPatch.set_alpha(alpha)
         self.figpanel.canvas.draw()
 
