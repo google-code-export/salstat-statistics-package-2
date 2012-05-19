@@ -16,41 +16,41 @@ def _siguiente():
 class Dialog ( wx.Dialog ):
     def __init__( self, parent = None , settings= dict(), struct = []):
         '''Dialog(parent,settings, struct)
-        
+
         a funtion to easierly create a wx dialog
-        
+
         paramteres
         settings = {'Tile': String title of the wxdialog ,
-                    'icon': wxbitmap, 
+                    'icon': wxbitmap,
                     '_size': wx.Size(xsize,ysize) the size of the dialog ,
-                    '_pos':  wx.Position(-1,.1) the position of the frame, 
+                    '_pos':  wx.Position(-1,.1) the position of the frame,
                     '_style': wx.DIALOG__STYLE of the dialog ,
         struct = list() information with the data
-        
+
         allowed controls: 'StaticText',   'TextCtrl',    'Choice',
                           'CheckListBox', 'StaticLine',  'RadioBox',
                           'SpinCtrl',     'ToggleButton'
-        
+
         struct example:
-        
+
         >> structure = list()
-        
-        >> group = lambda x,y: (x,y) 
+
+        >> group = lambda x,y: (x,y)
         >> bt1 = group('StaticText', ('hoja a Imprimir',))
         >> bt2 = group('Button', ('nuevo',))
-        
+
         >> bt6=  group('TextCtrl', ('Parametro',))
-        
+
         >> btnChoice = group('Choice',(['opt1','opcion2','opt3'],))
-        
-        >> btnListBox = group('CheckListBox',(['opt1','opcion2','opt3'],))   
-        
+
+        >> btnListBox = group('CheckListBox',(['opt1','opcion2','opt3'],))
+
         >> listSeparator = group('StaticLine',('horz',))
-        
+
         >> bt7= group('RadioBox',('titulo',['opt1','opt2','ra_opt3'],))
         >> bt8 = group('SpinCtrl', ( 0, 100, 5 )) # (min, max, start)
         >> bt9 = group('ToggleButton', ['toggle'])
-        
+
         >> structure.append( [bt6, bt2] )
         >> structure.append( [bt6, bt5] )
         >> structure.append( [btnChoice, bt9 ] )
@@ -58,28 +58,28 @@ class Dialog ( wx.Dialog ):
         >> structure.append( [btnListBox , bt1])
         >> structure.append( [bt7, ])
         >> structure.append( [bt8, ])
-        
+
         to see an example run the class as a main script
-        
+
         }'''
         self.ctrlNum = _siguiente()
         self.sizerNum= _siguiente()
-        
+
         params = {'Title':  wx.EmptyString,
-                  'icon':   wx.EmptyImage,
+                  'icon':   wx.EmptyIcon(),
                   '_size':  wx.Size(260,320),
                   '_pos':   wx.DefaultPosition,
                   '_style': wx.DEFAULT_DIALOG_STYLE}
-        
+
         for key, value in params.items():
             try:
                 params[key] = settings[key]
             except:
                 pass
 
-        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, 
+        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY,
                              title = params['Title'],
-                             pos = params['_pos'], 
+                             pos = params['_pos'],
                              size = params['_size'],
                              style = params['_style'] )
         self.SetIcon(params['icon'])
@@ -164,22 +164,22 @@ class Dialog ( wx.Dialog ):
             if typectrl in self._allow2get:
                 if typectrl  in ['TextCtrl','ToggleButton','SpinCtrl']:
                     prevResult = ctrl.Value
-                    
+
                 elif typectrl == 'Choice':
                     if len(ctrl.GetItems()) == 0:
                         prevResult = []
                     if ctrl.GetSelection() >= 0:
                         prevResult =  ctrl.GetItems()[ctrl.GetSelection()]
-                        
+
                 elif typectrl == 'CheckListBox':
                     if len(ctrl.Checked) > 0:
                         prevResult= [ctrl.Items[pos] for pos in ctrl.Checked]
                     else:
                         prevResult= []
-                        
+
                 elif typectrl == 'RadioBox':
                     prevResult= ctrl.Selection
-                                   
+
                 else:
                     continue
                 resultado.append(prevResult)
@@ -212,7 +212,7 @@ class _MyFrame1 ( wx.Frame ):
         dic= {'Title':'titulo'}
         structure = list()
         group = lambda x,y: (x,y)
-    
+
         bt1 = group('Button', ('print',))
         bt2 = group('StaticText', ('hoja a Imprimir',))
         bt3 = group('Button', ('nuevo',))
@@ -220,12 +220,12 @@ class _MyFrame1 ( wx.Frame ):
         bt5 = group('StaticText', ('Ingrese la presion',))
         bt6=  group('TextCtrl', ('Parametro',))
         btnChoice = group('Choice',(['opt1','opcion2','opt3'],))
-        btnListBox = group('CheckListBox',(['opt1','opcion2','opt3'],))    
+        btnListBox = group('CheckListBox',(['opt1','opcion2','opt3'],))
         listSeparator = group('StaticLine',('horz',))
         bt7= group('RadioBox',('titulo',['opt1','opt2','ra_opt3'],))
         bt8 = group('SpinCtrl', ( 0, 100, 5 )) # (min, max, start)
         bt9 = group('ToggleButton', ['toggle'])
-    
+
         structure.append( [bt6, bt2] )
         structure.append( [bt6, bt5] )
         structure.append( [btnChoice, bt9 ] )
@@ -233,7 +233,7 @@ class _MyFrame1 ( wx.Frame ):
         structure.append( [btnListBox , bt1])
         structure.append( [bt7, ])
         structure.append( [bt8, ])
-    
+
         dlg = Dialog(self,settings = dic, struct= structure)
         if dlg.ShowModal() == wx.ID_OK:
             values = dlg.GetValue()
