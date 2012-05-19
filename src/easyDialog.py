@@ -21,6 +21,7 @@ class Dialog ( wx.Dialog ):
         
         paramteres
         settings = {'Tile': String title of the wxdialog ,
+                    'icon': wxbitmap, 
                     '_size': wx.Size(xsize,ysize) the size of the dialog ,
                     '_pos':  wx.Position(-1,.1) the position of the frame, 
                     '_style': wx.DIALOG__STYLE of the dialog ,
@@ -63,9 +64,11 @@ class Dialog ( wx.Dialog ):
         }'''
         self.ctrlNum = _siguiente()
         self.sizerNum= _siguiente()
-        params = {'Title': wx.EmptyString,
-                  '_size': wx.Size(260,320),
-                  '_pos': wx.DefaultPosition,
+        
+        params = {'Title':  wx.EmptyString,
+                  'icon':   wx.EmptyImage,
+                  '_size':  wx.Size(260,320),
+                  '_pos':   wx.DefaultPosition,
                   '_style': wx.DEFAULT_DIALOG_STYLE}
         
         for key, value in params.items():
@@ -79,6 +82,7 @@ class Dialog ( wx.Dialog ):
                              pos = params['_pos'], 
                              size = params['_size'],
                              style = params['_style'] )
+        self.SetIcon(params['icon'])
 
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
         bSizer1 = wx.BoxSizer( wx.VERTICAL )
