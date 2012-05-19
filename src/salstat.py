@@ -34,6 +34,27 @@ from ntbSheet import NoteBookSheet
 from openStats import statistics
 import traceback
 from slbTools import ReportaExcel
+from easyDialog import Dialog as dialog
+from statlib import stats
+
+STATS = {'Central Tendency': ('geometricmean','harmonicmean','mean',
+                              'median','medianscore','mode'),
+         'Moments': ('moment', 'variation', 'skew', 'kurtosis',
+                     'skewtest', 'kurtosistest', 'normaltest',),
+         'Frequency Stats': ('itemfreq', 'scoreatpercentile', 'percentileofscore',
+                             'histogram', 'cumfreq', 'relfreq',),
+         'Variability': ('obrientransform', 'samplevar', 'samplestdev', 
+                         'signaltonoise', 'var', 'stdev', 'sterr',
+                         'sem','z','zs','zmap',),
+         'Trimming Fcns': ('threshold', 'trimboth', 'trim1', 'round',),
+         'Correlation Fcns': ('covariance', 'correlation', 'paired', 'pearsonr',
+                              'spearmanr', 'pointbiserialr', 'kendalltau', 'linregress',),
+         'Inferential Stats': ('ttest_1samp', 'ttest_ind', 'ttest_rel', 'chisquare',
+                               'ks_2samp', 'mannwhitneyu', 'ranksums', 'wilcoxont',
+                               'kruskalwallish', 'friedmanchisquare',),
+         'Probability Calcs': ('chisqprob', 'erfcc', 'zprob', 'ksprob',
+                               'fprob', 'betacf', 'gammln', 'betai',),
+         'Anova Functions': ( 'F_oneway', 'F_value')}
 
 #---------------------------------------------------------------------------
 # set up id's for menu events - all on menu, some also available elsewhere
@@ -143,7 +164,7 @@ else:
     wind = 0
     DOCDIR = os.environ['HOME']
     INITDIR = DOCDIR
-    
+
 class _MyLog(wx.PyLog):
     def __init__(self, textCtrl, logTime=0):
         wx.PyLog.__init__(self)
@@ -157,7 +178,7 @@ class _MyLog(wx.PyLog):
         #              ": " + message
         if self.tc:
             self.tc.AppendText(message + '\n') 
-            
+
 class LogPanel( wx.Panel ):
     def _numLine(self):
         i = 1
@@ -173,7 +194,7 @@ class LogPanel( wx.Panel ):
         wx.Log_SetActiveTarget(_MyLog(self.log))
         self.SetSizer( bSizer8 )
         self.Layout()
-    
+
     def writeLine(self, lineaTexto):
         '''escribe una linea de texto'''
         #texto= str(self.numLinea.next()) + " >> "
@@ -187,13 +208,13 @@ class LogPanel( wx.Panel ):
             if last =='\n':
                 lineaTexto = lineaTexto[:-2]
         self.writeLine(lineaTexto)
-        
+
     def clearLog(self):
         self.log.SetValue('')
-        
+
     def __del__( self ):
         pass
-    
+
 
 class SaveDialog(wx.Dialog):
     def __init__(self, parent, id):
@@ -421,14 +442,14 @@ class SimpleGrid(MyGrid):# wxGrid
         currentcol = self.m_grid.GetGridCursorCol()
         self.m_grid.DeleteCols(currentcol, 1)
         self.m_grid.AdjustScrollbars()
-        
+
 
     def DeleteCurrentRow(self, event):
         currentrow = self.m_grid.GetGridCursorRow()
         self.m_grid.DeleteRows(currentrow, 1)
         self.m_grid.AdjustScrollbars()
         xmlevt = '<deleteRow>'+str(currentrow)+'</deleteRow>\n'
-       
+
 
     def SelectAllCells(self, event):
         self.m_grid.SelectAll()
@@ -441,7 +462,7 @@ class SimpleGrid(MyGrid):# wxGrid
             self.m_grid.SetColLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_BOTTOM)
             self.m_grid.SetColFormatFloat(i, 8, 4)
         self.m_grid.AdjustScrollbars()
-        
+
     # function finds out how many cols contain data - all in a list
     #(ColsUsed) which has col #'s
     def GetUsedCols(self):
@@ -477,7 +498,7 @@ class SimpleGrid(MyGrid):# wxGrid
 
     def SaveXlsAs(self, event):
         self.SaveXls(None, True)
-        
+
     def SaveXls(self, *args):
         if len(args) == 1:
             saveAs= False
@@ -487,7 +508,7 @@ class SimpleGrid(MyGrid):# wxGrid
         if self.Saved == False or saveAs: # path del grid
             # mostrar el dialogo para guardar el archivo
             dlg= wx.FileDialog(self, "Save Data File", "" , "",\
-                                    "excel (*.xls)|*.xls| \
+                               "excel (*.xls)|*.xls| \
                                     Any (*.*)| *.*", wx.SAVE)
             if dlg.ShowModal() == wx.ID_OK:
                 self.path = dlg.GetPath()
@@ -1177,1045 +1198,6 @@ class DescriptivesFrame(wx.Dialog):
         self.Close(True)
 
 #---------------------------------------------------------------------------
-# Same as DescriptivesContinuousFrame, but for nominal descriptives
-class OneConditionTestFrame(wx.Dialog):
-    def __init__( self, parent, id, ColumnList ):
-        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = "One Condition Tests",
-                             pos = wx.DefaultPosition, size = wx.Size( 500,400+wind ),
-                             style = wx.DEFAULT_DIALOG_STYLE )
-
-        self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
-        self.m_mgr = wx.aui.AuiManager()
-        self.m_mgr.SetManagedWindow( self )
-
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
-        ColumnList, self.colnums = frame.grid.GetUsedCols()
-
-        m_checkList5Choices = DescList
-        # self.ColBox = wx.Choice(self, 101,(10,30), (110,20), choices = ColumnList)
-        self.DescChoice = DescChoiceBox( self, wx.ID_ANY )
-
-        self.m_mgr.AddPane( self.DescChoice, wx.aui.AuiPaneInfo().Center().
-                            Caption(u"Select Descriptive Statistics").CaptionVisible(True).
-                            CloseButton(False).
-                            PaneBorder(False).Dock().Resizable().FloatingSize(wx.DefaultSize).
-                            DockFixed(False).BottomDockable(False).TopDockable(False).
-                            Row(0).Layer(0))
-
-        Tests = ['t-test','Sign test','Chi square test for variance']
-        m_checkList6Choices = Tests
-        self.TestChoice= wx.CheckListBox( self, wx.ID_ANY, wx.DefaultPosition,
-                                          wx.DefaultSize, m_checkList6Choices, 0 )
-        self.m_mgr.AddPane( self.TestChoice, wx.aui.AuiPaneInfo() .Center() .
-                            Caption( u"Select the kind of Test" ).CloseButton( False ).
-                            PaneBorder( False ).Dock().Resizable().FloatingSize( wx.Size( 161,93 ) ).
-                            DockFixed( False ).BottomDockable( False ).TopDockable( False ).
-                            Row( 1 ).Layer( 0 ) )
-
-        self.m_panel2 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-        self.m_mgr.AddPane( self.m_panel2, wx.aui.AuiPaneInfo().Left().CaptionVisible( False ).
-                            CloseButton( False ).PaneBorder( False ).Dock().Resizable().
-                            FloatingSize( wx.DefaultSize ).DockFixed( False ).Row( 1 ).CentrePane() )
-
-        bSizer21 = wx.BoxSizer( wx.VERTICAL )
-
-        sbSizer1 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel2, wx.ID_ANY, u"Columna para analizar" ), wx.VERTICAL )
-
-        m_comboBox1Choices = ColumnList
-        self.DescList2 = wx.ComboBox( self.m_panel2, wx.ID_ANY, m_comboBox1Choices[0],
-                                      wx.DefaultPosition, wx.DefaultSize, m_comboBox1Choices, 0 )
-        if len(ColumnList) > 0 :
-            self.DescList2.SetSelection(0)
-
-        sbSizer1.Add( self.DescList2, 0, wx.ALL|wx.EXPAND, 5 )
-
-        bSizer21.Add( sbSizer1, 1, wx.EXPAND, 5 )
-
-        sbSizer2 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel2, wx.ID_ANY, u"Seleccione Hypotesis" ), wx.HORIZONTAL )
-        self.m_radioBtn1 = wx.RadioButton( self.m_panel2, wx.ID_ANY, u"One Tailed", wx.DefaultPosition, wx.DefaultSize, 0 )
-        sbSizer2.Add( self.m_radioBtn1, 0, wx.ALL, 5 )
-
-        self.m_radioBtn2 = wx.RadioButton( self.m_panel2, wx.ID_ANY, u"Two Tailed", wx.DefaultPosition, wx.DefaultSize, 0 )
-        sbSizer2.Add( self.m_radioBtn2, 0, wx.ALL, 5 )
-        bSizer21.Add( sbSizer2, 1, wx.EXPAND, 5 )
-        sbSizer4 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel2, wx.ID_ANY, u"User hypotesis test" ), wx.VERTICAL )
-
-        self.UserMean = wx.TextCtrl( self.m_panel2, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        sbSizer4.Add( self.UserMean, 0, wx.ALL|wx.EXPAND, 5 )
-        bSizer21.Add( sbSizer4, 1, wx.EXPAND, 5 )
-        self.m_panel2.SetSizer( bSizer21 )
-        self.m_panel2.Layout()
-        bSizer21.Fit( self.m_panel2 )
-        self.m_panel1 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-
-        self.m_mgr.AddPane( self.m_panel1, wx.aui.AuiPaneInfo() .Bottom() .CaptionVisible( False ).
-                            CloseButton( False ).PaneBorder( False ).Dock().Resizable().
-                            FloatingSize( wx.DefaultSize ).DockFixed( False ).LeftDockable( False ).
-                            RightDockable( False ).MinSize( wx.Size( -1,30 ) ) )
-        bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
-
-        self.okaybutton = wx.Button( self.m_panel1, wx.ID_ANY, u"Ok", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.okaybutton.Enable(False)
-        bSizer2.Add( self.okaybutton, 0, wx.ALL, 5 )
-
-        self.cancelbutton = wx.Button( self.m_panel1, wx.ID_ANY, u"Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer2.Add( self.cancelbutton, 0, wx.ALL, 5 )
-
-        self.allbutton= wx.Button( self.m_panel1, wx.ID_ANY, u"Select All", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer2.Add( self.allbutton, 0, wx.ALL, 5 )
-
-        self.nonebutton  = wx.Button( self.m_panel1, wx.ID_ANY, u"Select None", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer2.Add( self.nonebutton, 0, wx.ALL, 5 )
-
-
-        self.m_panel1.SetSizer( bSizer2 )
-        self.m_panel1.Layout()
-        bSizer2.Fit( self.m_panel1 )
-
-        self.m_radioBtn1.SetValue(True)
-        self.m_mgr.Update()
-        self.Centre( wx.BOTH )
-
-        self.Bind(wx.EVT_BUTTON, self.OnOkayButton, id = self.okaybutton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.OnCloseOneCond, id = self.cancelbutton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.DescChoice.SelectAllDescriptives, id = self.allbutton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.DescChoice.SelectNoDescriptives, id = self.nonebutton.GetId())
-        self.UserMean.Bind( wx.EVT_TEXT, self.usermeanControl )
-
-    def usermeanControl( self, event ):
-        allowValues= [u'0',u'1',u'2',u'3',u'4',u'5',u'6',u'7',u'8',u'9',u'.']
-        resultado = [val for val in self.UserMean.GetValue() if val in allowValues]
-        newres = u""
-        for val in resultado:
-            newres+= val
-        if self.UserMean.GetValue() != newres:
-            self.UserMean.SetValue(newres)
-        if len(newres) > 0 :
-            # se habilita el control ok para calcular
-            self.okaybutton.Enable(True)
-        else:
-            self.okaybutton.Enable(False)
-        event.Skip()
-
-    def EnteredText(self, event):
-        self.okaybutton.Enable(True)
-
-    def OnOkayButton(self, event):
-        x1 = self.DescList2.GetSelection()
-        if (x1 < 0): # add top limits of grid to this
-            self.Close(True)
-            return
-        try:
-            umean = float(self.UserMean.GetValue())
-        except:
-            data= {'name': 'One condition Tests','size':(1,1),'nameCol':'Error',
-                   'data':[('Cannot do test \n No user hypothesised mean specified',),]}
-            output.addPage(data)
-            self.Close(True)
-            return
-        realColx1 = self.colnums[x1]
-        name = frame.grid.m_grid.GetColLabelValue(realColx1)
-        x = frame.grid.CleanData(realColx1)
-        TBase = salstat_stats.OneSampleTests(frame.grid.CleanData(realColx1), name, \
-                                             frame.grid.missing)
-        d=[0]
-        d[0] = TBase.d1
-        x2=ManyDescriptives(self, d)
-        # se verifica las opciones seleccionadas
-        if len(self.TestChoice.GetChecked()) == 0:
-            return
-        # One sample t-test
-        data={'name': 'One condition Tests',
-              'size':(3,3),
-              'nameCol': [],
-              'data': []}
-        result=[]
-        result.append('One sample t-test')
-        if self.TestChoice.IsChecked(0):    
-            TBase.OneSampleTTest(umean)
-            if (TBase.prob == -1.0):
-                result.append('All elements are the same, test not possible')
-            else:
-                if self.m_radioBtn1.GetValue():  # (self.hypchoice.GetSelection() == 0):
-                    TBase.prob = TBase.prob / 2
-                result.append('t(%d) = %5.3f'%(TBase.df, TBase.t))
-                result.append('p (approx) = %1.6f'%(TBase.prob))
-            result.append('')
-
-        result.append('One sample sign test') 
-        if self.TestChoice.IsChecked(1):
-            TBase.OneSampleSignTest(x, umean)
-            if (TBase.prob == -1.0):
-                result.append('All data are the same - no analysis is possible')
-            else:
-                if self.m_radioBtn1.GetValue(): #(self.hypchoice.GetSelection() == 0):
-                    TBase.prob = TBase.prob / 2
-                result.append('N = %5.0f'%(TBase.ntotal))
-                result.append('z = %5.3f'%( TBase.z))
-                result.append('p = %1.6f'%(TBase.prob))
-            result.append('')
-
-        result.append('One sample chi square')
-        
-        if self.TestChoice.IsChecked(2):
-            TBase.ChiSquareVariance(umean)
-            if TBase.prob != None:
-                if self.m_radioBtn1.GetValue():  #(self.hypchoice.GetSelection() == 0):
-                    TBase.prob = TBase.prob / 2
-                result.append('Chi square (%d) = %5.3f'%(TBase.df, TBase.chisquare))
-                result.append('p = %1.6f'%( TBase.prob))
-            else:
-                result.append('Cannot compute the probability')
-        # se organiza los datos seleccionados
-        data['data']= [[res] for res in result]
-        data['size']= (len(result),1)
-        output.upData(data)
-        self.Close(True)
-
-    def OnCloseOneCond(self, event):
-        self.Close(True)
-
-#---------------------------------------------------------------------------
-#dialog for 2 sample tests
-class TwoConditionTestFrame(wx.Dialog):
-    def __init__(self, parent, id, ColumnList):
-        wx.Dialog.__init__(self, parent, id, "Two Condition Tests", \
-                           size=(500,400+wind))
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
-
-        self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
-        self.m_mgr = wx.aui.AuiManager()
-        self.m_mgr.SetManagedWindow( self )
-
-        ColumnList, self.colnums = frame.grid.GetUsedCols()
-
-        colsselected =  frame.grid.GetColsUsedList()
-
-        self.DescChoice = DescChoiceBox( self, wx.ID_ANY )
-        self.m_mgr.AddPane( self.DescChoice, wx.aui.AuiPaneInfo() .Center() .
-                            Caption( u"Select Descriptive Statistics" ).CloseButton( False ).
-                            PaneBorder( False ).Dock().Resizable().FloatingSize( wx.DefaultSize ).
-                            DockFixed( False ).BottomDockable( False ).TopDockable( False ).
-                            Row(0).Layer(0) )
-
-        # list of tests in alphabetical order
-        Tests = ['chi square','F test','Kolmogorov-Smirnov', \
-                 'Linear Regression', 'Mann-Whitney U', \
-                 'Paired Sign', 't-test paired','t-test unpaired', \
-                 'Wald-Wolfowitz Runs', 'Wilcoxon Rank Sums', \
-                 'Wilcoxon Signed Ranks'] # nb, paired permutation test missing
-        m_checkList6Choices = Tests
-        self.paratests = wx.CheckListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_checkList6Choices, 0 )
-        self.m_mgr.AddPane( self.paratests , wx.aui.AuiPaneInfo() .Center() .
-                            Caption( u"Select Test(s) to Perform:" ).CloseButton( False ).
-                            PaneBorder( False ).Dock().Resizable().FloatingSize( wx.Size( 161,93 ) ).
-                            DockFixed( False ).BottomDockable( False ).TopDockable( False ).
-                            Row( 1 ).Layer( 0 ) )
-
-        self.m_panel2 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-        self.m_mgr.AddPane( self.m_panel2, wx.aui.AuiPaneInfo() .Left() .CaptionVisible( False ).
-                            CloseButton( False ).PaneBorder( False ).Dock().Resizable().
-                            FloatingSize( wx.DefaultSize ).DockFixed( False ).Row( 1 ).
-                            CentrePane() )
-
-        bSizer21 = wx.BoxSizer( wx.VERTICAL )
-
-        self.m_staticText1 = wx.StaticText( self.m_panel2, wx.ID_ANY, u"Select Columns", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText1.Wrap( -1 )
-        bSizer21.Add( self.m_staticText1, 0, wx.LEFT, 5 )
-
-        m_choice1Choices = ColumnList
-        self.ColBox1 = wx.Choice( self.m_panel2, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choice1Choices, 0 )
-        bSizer21.Add( self.ColBox1, 0, wx.ALL|wx.EXPAND, 5 )
-
-        m_choice2Choices = ColumnList
-        self.ColBox2 = wx.Choice( self.m_panel2, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choice2Choices, 0 )
-        bSizer21.Add( self.ColBox2, 0, wx.ALL|wx.EXPAND, 5 )
-
-        x1 = 0
-        x2 = 1
-        self.ColBox1.SetSelection(x1)
-        self.ColBox2.SetSelection(x2)
-        realColx1 = x1
-        realColx2 = x2
-        x1len = len(frame.grid.CleanData(realColx1))
-        x2len = len(frame.grid.CleanData(realColx2))
-        if (x1len != x2len):
-            self.equallists = False
-        else:
-            self.equallists = True
-
-        sbSizer2 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel2, wx.ID_ANY, u"Seleccione Hypotesis" ), wx.HORIZONTAL )
-
-        self.m_radioBtn1 = wx.RadioButton( self.m_panel2, wx.ID_ANY, u"One Tailed", wx.DefaultPosition, wx.DefaultSize, 0 )
-        sbSizer2.Add( self.m_radioBtn1, 0, wx.ALL, 5 )
-
-        self.m_radioBtn2 = wx.RadioButton( self.m_panel2, wx.ID_ANY, u"Two Tailed", wx.DefaultPosition, wx.DefaultSize, 0 )
-        sbSizer2.Add( self.m_radioBtn2, 0, wx.ALL, 5 )
-        self.m_radioBtn1.SetValue(True)
-
-        bSizer21.Add( sbSizer2, 1, wx.EXPAND, 5 )
-
-        sbSizer4 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel2, wx.ID_ANY, u"User hypotesis test" ), wx.VERTICAL )
-
-        self.UserMean = wx.TextCtrl( self.m_panel2, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        sbSizer4.Add( self.UserMean, 0, wx.EXPAND, 5 )
-
-
-        bSizer21.Add( sbSizer4, 1, wx.EXPAND, 5 )
-
-
-        self.m_panel2.SetSizer( bSizer21 )
-        self.m_panel2.Layout()
-        bSizer21.Fit( self.m_panel2 )
-        self.m_panel1 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-        self.m_mgr.AddPane( self.m_panel1, wx.aui.AuiPaneInfo() .Bottom() .CaptionVisible( False ).
-                            CloseButton( False ).PaneBorder( False ).Dock().Resizable().
-                            FloatingSize( wx.DefaultSize ).DockFixed( False ).LeftDockable( False ).
-                            RightDockable( False ).MinSize( wx.Size( -1,30 ) ) )
-
-        bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
-
-        self.okaybutton = wx.Button( self.m_panel1, wx.ID_ANY, u"Ok", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer2.Add( self.okaybutton, 0, wx.ALL, 5 )
-        self.okaybutton.Enable(False)
-
-        cancelbutton  = wx.Button( self.m_panel1, wx.ID_ANY, u"Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer2.Add( cancelbutton , 0, wx.ALL, 5 )
-
-        self.allbutton = wx.Button( self.m_panel1, wx.ID_ANY, u"Select All", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer2.Add( self.allbutton, 0, wx.ALL, 5 )
-
-        self.nonebutton= wx.Button( self.m_panel1, wx.ID_ANY, u"Select None", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer2.Add( self.nonebutton, 0, wx.ALL, 5 )
-
-
-        self.m_panel1.SetSizer( bSizer2 )
-        self.m_panel1.Layout()
-        bSizer2.Fit( self.m_panel1 )
-
-        self.m_mgr.Update()
-        self.Centre( wx.BOTH )
-
-        # using self.equallists, if True, enable all items in the checklist \
-        # box, otherwise set the within subs and correlations to be
-        # disabled as they cannot be used with unequal list lengths!
-        # Also disble the f-test unless something is entered into the
-        # user hyp variance box
-        self.Bind(wx.EVT_BUTTON, self.OnOkayButton, id = self.okaybutton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.OnCloseTwoCond, id = cancelbutton .GetId())
-        self.Bind(wx.EVT_BUTTON, self.DescChoice.SelectAllDescriptives, id = self.allbutton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.DescChoice.SelectNoDescriptives, id = self.nonebutton.GetId())
-        self.UserMean.Bind( wx.EVT_TEXT, self.usermeanControl )
-        self.Bind(wx.EVT_CHOICE, self.ChangeCol1, id = self.ColBox1.GetId())
-        self.Bind(wx.EVT_CHOICE, self.ChangeCol1, id = self.ColBox2.GetId())
-
-    def usermeanControl( self, event ):
-        allowValues= [u'0',u'1',u'2',u'3',u'4',u'5',u'6',u'7',u'8',u'9',u'.']
-        resultado = [val for val in self.UserMean.GetValue() if val in allowValues]
-        newres = u""
-        for val in resultado:
-            newres+= val
-        if self.UserMean.GetValue() != newres:
-            self.UserMean.SetValue(newres)
-        if len(newres) > 0 :
-            # se habilita el control ok para calcular
-            self.okaybutton.Enable(True)
-        else:
-            self.okaybutton.Enable(False)
-        event.Skip()
-
-    def ChangeCol1(self, event):
-        # check that len of 2 cols is equal, if not disable choices of test
-        colx1 = self.ColBox1.GetSelection()
-        colx2 = self.ColBox2.GetSelection()
-        realColx1 = self.colnums[colx1]
-        realColx2 = self.colnums[colx2]
-        x1 = len(frame.grid.CleanData(realColx1))
-        x2 = len(frame.grid.CleanData(realColx2))
-        if (x1 != x2):
-            # disable some tests in the listbox
-            self.paratests.Check(0,False)
-        else:
-            pass
-            # enable all tests in the listbox
-
-    def ChangeCol2(self, event):
-        # check that len of 2 cols is equal, if not disable choices of test
-        colx1 = self.ColBox1.GetSelection()
-        colx2 = self.ColBox2.GetSelection()
-        realColx1 = self.colnums[colx1]
-        realColx2 = self.colnums[colx2]
-        x1 = len(frame.grid.CleanData(realColx1))
-        x2 = len(frame.grid.CleanData(realColx2))
-        if (x1 != x2):
-            pass
-        else:
-            pass
-
-    def OnOkayButton(self, event):
-        x1 = self.ColBox1.GetSelection()
-        y1 = self.ColBox2.GetSelection()
-        realColx1 = self.colnums[x1]
-        realColy1 = self.colnums[y1]
-        name1 = frame.grid.m_grid.GetColLabelValue(realColx1)
-        name2 = frame.grid.m_grid.GetColLabelValue(realColy1)
-        if (x1 < 0) or (y1 < 0):
-            self.Close(True)
-            return
-        x = frame.grid.CleanData(realColx1)
-        xmiss = frame.grid.missing
-        y = frame.grid.CleanData(realColy1)
-        ymiss = frame.grid.missing
-        TBase = salstat_stats.TwoSampleTests(x, y, name1, name2,xmiss,ymiss)
-        d = [0,0]
-        d[0] = TBase.d1
-        d[1] = TBase.d2
-        x2 = ManyDescriptives(self, d)
-        # chi square test
-        data={'name': 'Two condition Tests',
-              'size':(3,1),
-              'data': []}
-        result = []
-        # data['nameCol'].append('One sample t-test')
-        result.append('Chi square')
-        if self.paratests.IsChecked(0):
-            TBase.ChiSquare(x, y)
-            if (TBase.prob == -1.0):
-                result.append('Cannot do chi square - unequal data sizes')
-                result.append('')
-            else:
-                if TBase.prob == None:
-                    result.append("can't be computed")
-                else:
-                    result.append('chi (%d) = %5.3f'%(TBase.df, TBase.chisq,))
-                    result.append('p = %1.6f'%(TBase.prob,))
-                result.append('')
-
-        # F-test for variance ratio's
-        result.append('F test for variance ratio (independent samples)')
-        if self.paratests.IsChecked(1):
-            try:
-                umean = float(self.UserMean.GetValue())
-            except:
-                result.append('Cannot do test - no user hypothesised mean specified')
-            else:
-                TBase.FTest(umean)
-                if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
-                    TBase.prob = TBase.prob / 2
-                result.append('f(%d, %d) = %5.3f'%( TBase.df1, TBase.df2, TBase.f))
-                result.append('p = %1.6f'%( TBase.prob))
-                result.append('')
-
-        result.append('Kolmogorov-Smirnov test (unpaired)')
-        if self.paratests.IsChecked(2):
-            TBase.KolmogorovSmirnov()
-            if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
-                TBase.prob = TBase.prob / 2
-            result.append('D = %5.3f'%(TBase.d))
-            result.append('p = %1.6f'%(TBase.prob))
-
-        result.append('Linear Regression')
-        if self.paratests.IsChecked(3):
-            TBase.LinearRegression(x,y)
-            #s, i, r, prob, st = salstat_stats.LinearRegression(x, y)
-            if (TBase.prob == -1.0):
-                result.append('Cannot do linear regression - unequal data sizes')
-            else:
-                if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
-                    TBase.prob = TBase.prob / 2
-                result.append('Slope = %5.3f, Intercept = %5.3f,\
-                                    r = %5.3f, Estimated Standard Error = \
-                                    %5.3f' %(TBase.slope, TBase.intercept, \
-                                             TBase.r, TBase.sterrest))
-                result.append('<br>t (%d) = %5.3f, p = %1.6f' \
-                              %(TBase.df, TBase.t, TBase.prob ))
-                result.append('')
-
-        result.append('Mann-Whitney U test (unpaired samples)')
-        if self.paratests.IsChecked(4):
-            TBase.MannWhitneyU(x, y)
-            if (TBase.prob == -1.0):
-                result.append('Cannot do Mann-Whitney U test - all numbers are identical')
-            else:
-                if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
-                    TBase.prob = TBase.prob / 2
-                result.append('z = %5.3f, small U = %5.3f, \
-                                    big U = %5.3f, p = %1.6f'%(TBase.z, \
-                                                               TBase.smallu, TBase.bigu, TBase.prob))
-                result.append('')
-
-        # Paired permutation test
-        """if self.paratests.IsChecked(5):
-            output.htmlpage.Addhtml('<P><B>Paired Permutation test</B></P>')
-            TBase.PairedPermutation(x, y)
-            if (TBase.prob == -1.0):
-                output.htmlpage.Addhtml('<BR>Cannot do test - not paired \
-                                    samples')
-            else:
-                if (self.hypchoice.GetSelection() == 0):
-                    TBase.prob = TBase.prob / 2
-                output.htmlpage.Addhtml('<BR>Utail = %5.0f, nperm = %5.3f, \
-                        crit = %5.3f, p = %1.6f'%(TBase.utail, TBase.nperm, \
-                        TBase.crit, TBase.prob))"""
-
-        result.append('2 sample sign test')
-        if self.paratests.IsChecked(5):
-            TBase.TwoSampleSignTest(x, y)
-            if (TBase.prob == -1.0):
-                result.append('Cannot do test - not paired \
-                                    samples')
-            else:
-                if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
-                    TBase.prob = TBase.prob / 2
-                result.append('N = %5.0f, z = %5.3f, p = %1.6f'\
-                              %(TBase.ntotal, TBase.z, TBase.prob))
-                result.append('')
-
-        result.append('t-test paired')
-        if self.paratests.IsChecked(6):    
-            TBase.TTestPaired(x, y)
-            if (TBase.prob == -1.0):
-                result.append('Cannot do paired t test - \
-                                    unequal data sizes')
-            else:
-                if self.m_radioBtn1.GetValue():#self.hypchoice.GetSelection() == 0:
-                    TBase.prob = TBase.prob / 2
-                result.append('t(%d) = %5.3f, p = %1.6f'% \
-                              (TBase.df, TBase.t, TBase.prob))
-                result.append('')
-
-        result.append('t-test unpaired')
-        if self.paratests.IsChecked(7):
-            TBase.TTestUnpaired()
-            if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
-                TBase.prob = TBase.prob / 2
-            result.append('t(%d) = %5.3f, p =  %1.6f'% \
-                          (TBase.df, TBase.t, TBase.prob))
-            result.append('')
-
-        # Wald-Wolfowitz runs test (no yet coded)
-        if self.paratests.IsChecked(8):
-            pass
-
-        result.append('Wilcoxon Rank Sums test (unpairedsamples)')
-        if self.paratests.IsChecked(9):
-            result.append('Rank Sums test (unpaired samples)')
-            TBase.RankSums(x, y)
-            if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
-                TBase.prob = TBase.prob / 2
-            result.append('t = %5.3f, p = %1.6f'%(TBase.z, \
-                                                  TBase.prob))
-            result.append('')
-
-        result.append('Wilcoxon t (paired samples)')# 
-        if self.paratests.IsChecked(10):
-            TBase.SignedRanks(x, y)
-            if (TBase.prob == -1.0):
-                result.append('Cannot do Wilcoxon t test - \
-                                    unequal data sizes')
-            else:
-                if TBase.prob == None:
-                    result.append("can't be computed")
-                else:
-                    if self.m_radioBtn1.GetValue():#(self.hypchoice.GetSelection() == 0):
-                        TBase.prob = TBase.prob / 2
-                    result.append('z = %5.3f, t = %5.3f, p = %1.6f'%
-                                  (TBase.z, TBase.wt, TBase.prob))
-                result.append('')
-        data['size'] = (len(result),1)
-        data['data'] = [[res] for res in result]
-        output.upData(data)
-        self.Close(True)
-
-    def OnCloseTwoCond(self, event):
-        self.Close(True)
-
-#---------------------------------------------------------------------------
-# dialog for single factor tests with 3+ conditions
-class ThreeConditionTestFrame(wx.Dialog):
-    def __init__(self, parent, id, ColumnList):
-        wx.Dialog.__init__(self, parent, id, "Three Condition Tests", \
-                           size = (500,400+wind))
-
-        self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
-        self.m_mgr = wx.aui.AuiManager()
-        self.m_mgr.SetManagedWindow( self )
-
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
-        alltests = ['anova between subjects','anova within subjects',\
-                    'Kruskall Wallis','Friedman test',\
-                    'Cochranes Q']
-        ColumnList, self.colnums = frame.grid.GetUsedCols()
-
-        m_checkList5Choices = []
-        self.DescChoice = DescChoiceBox(self, wx.ID_ANY)
-        self.m_mgr.AddPane( self.DescChoice, wx.aui.AuiPaneInfo() .Center() .
-                            Caption( u"Select Descriptive Statistics" ).
-                            CloseButton( False ).PaneBorder( False ).Dock().
-                            Resizable().FloatingSize( wx.DefaultSize ).
-                            DockFixed( False ).BottomDockable( False ).
-                            TopDockable( False ).Row(0).Layer( 0 ) )
-
-        m_checkList6Choices = alltests
-        self.TestChoice = wx.CheckListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_checkList6Choices, 0 )
-        self.m_mgr.AddPane( self.TestChoice, wx.aui.AuiPaneInfo() .Center() .
-                            Caption( u"Select the kind of Test" ).CloseButton( False ).
-                            PaneBorder( False ).Dock().Resizable().
-                            FloatingSize( wx.Size( 161,93 ) ).DockFixed( False ).
-                            BottomDockable( False ).TopDockable( False ).Row( 1 ).
-                            Layer( 0 ) )
-
-        self.m_panel2 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.SIMPLE_BORDER|wx.TAB_TRAVERSAL )
-        self.m_mgr.AddPane( self.m_panel2, wx.aui.AuiPaneInfo() .Left() .
-                            CaptionVisible( False ).CloseButton( False ).
-                            PaneBorder( False ).Dock().Resizable().
-                            FloatingSize( wx.DefaultSize ).DockFixed( False ).
-                            Row( 1 ).CentrePane() )
-
-        bSizer21 = wx.BoxSizer( wx.VERTICAL )
-
-        self.m_staticText1 = wx.StaticText( self.m_panel2, wx.ID_ANY, u"Select Columns to Analyse", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText1.Wrap( -1 )
-        bSizer21.Add( self.m_staticText1, 0, wx.LEFT, 5 )
-
-        m_listBox1Choices = ColumnList
-        self.ColChoice = wx.CheckListBox( self.m_panel2, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_listBox1Choices, 0 )
-        bSizer21.Add( self.ColChoice, 2, wx.EXPAND, 5 )
-        for i in range(len(self.colnums)):
-            self.ColChoice.Check(i, True)
-
-
-        m_radioBox3Choices = HypList
-        self.hypchoice = wx.RadioBox( self.m_panel2, wx.ID_ANY, u"Select Hypotesis", wx.DefaultPosition, wx.DefaultSize, m_radioBox3Choices, 1, wx.RA_SPECIFY_ROWS )
-        self.hypchoice.SetSelection( 1 )
-        bSizer21.Add( self.hypchoice, 1, wx.EXPAND, 5 )
-
-
-        self.m_panel2.SetSizer( bSizer21 )
-        self.m_panel2.Layout()
-        bSizer21.Fit( self.m_panel2 )
-        self.m_panel1 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-        self.m_mgr.AddPane( self.m_panel1, wx.aui.AuiPaneInfo() .Bottom() .CaptionVisible( False ).CloseButton( False ).PaneBorder( False ).Dock().Resizable().FloatingSize( wx.DefaultSize ).DockFixed( False ).LeftDockable( False ).RightDockable( False ).MinSize( wx.Size( -1,30 ) ) )
-
-        bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
-
-        self.okaybutton = wx.Button( self.m_panel1, wx.ID_ANY, u"Ok", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer2.Add( self.okaybutton, 0, wx.ALL, 5 )
-
-        self.cancelbutton = wx.Button( self.m_panel1, wx.ID_ANY, u"Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer2.Add( self.cancelbutton, 0, wx.ALL, 5 )
-
-        self.allbutton = wx.Button( self.m_panel1, wx.ID_ANY, u"Select All", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer2.Add( self.allbutton, 0, wx.ALL, 5 )
-
-        self.nonebutton = wx.Button( self.m_panel1, wx.ID_ANY, u"Select None", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer2.Add( self.nonebutton, 0, wx.ALL, 5 )
-
-
-        self.m_panel1.SetSizer( bSizer2 )
-        self.m_panel1.Layout()
-        bSizer2.Fit( self.m_panel1 )
-
-        self.m_mgr.Update()
-        self.Centre( wx.BOTH )
-
-
-        self.Bind(wx.EVT_BUTTON, self.OnOkayButton, id = self.okaybutton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.OnCloseThreeCond, id = self.cancelbutton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.DescChoice.SelectAllDescriptives, id = self.allbutton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.DescChoice.SelectNoDescriptives, id = self.nonebutton.GetId())
-
-    def OnOkayButton(self, event):
-        biglist = []
-        ns = []
-        sums = []
-        means = []
-        names = []
-        miss = []
-        k = 0
-        for i in range(len(self.colnums)):
-            if self.ColChoice.IsChecked(i):
-                k = k + 1
-                tmplist = frame.grid.CleanData(self.colnums[i])
-                miss.append(frame.grid.missing)
-                biglist.append(tmplist)
-                names.append(frame.grid.m_grid.GetColLabelValue(i))
-        k = len(biglist)
-        d = []
-        for i in range(k):
-            x2=salstat_stats.FullDescriptives(biglist[i], names[i], miss[i])
-            ns.append(x2.N)
-            sums.append(x2.sum)
-            means.append(x2.mean)
-            d.append(x2)
-        x2=ManyDescriptives(self, d)
-
-        data={'name': 'Three + condition Tests',
-              'size':(3,1),
-              'data': []}
-        result = []
-
-        if (len(biglist) < 2):
-            result.append('Not enough columns selected for \
-                                    test!')
-            data['size']=(1,1)
-            output.upData(data)
-            self.Close(True)
-            return
-        TBase = salstat_stats.ThreeSampleTests()
-        #single factor between subjects anova
-        if self.TestChoice.IsChecked(0):
-            cols = []
-            result.append('Single Factor anova - between \
-                                    subjects')
-            result.append('Warning! This test is based \
-                                    on the following assumptions:')
-            result.append('1) Each group has a normal \
-                                    distribution of observations')
-            result.append('2) The variances of each observation \
-                                    are equal across groups (homogeneity of \
-                                    variance)')
-            result.append('3) The observations are statistically \
-                                    independent')
-            TBase.anovaBetween(d)
-            if (self.hypchoice.GetSelection() == 0):
-                TBase.prob = TBase.prob / 2
-            result.append('FACTOR %5.3f  %5d  %5.3f %5.3f  %1.6f'%(TBase.SSbet,     \
-                                                                   TBase.dfbet, TBase.MSbet, TBase.F, TBase.prob))
-            result.append('Error %5.3f %5d %5.3f'%(TBase.SSwit, TBase.dferr, \
-                                                   TBase.MSerr))
-            result.append('Total %5.3f %5d'%(TBase.SStot, TBase.dftot))
-            result.append('')
-
-        result.append('single factor within subjects anova')
-        if self.TestChoice.IsChecked(1):
-            result.append('Warning! This test is based \
-                                    on the following assumptions:')
-            result.append('1) Each group has a normal \
-                                    distribution of observations')
-            result.append('2) The variances of each observation \
-                                    are equal across groups (homogeneity of \
-                                    variance)')
-            result.append('3) The observations are statistically \
-                                    indpendent')
-            result.append('4) The variances of each participant \
-                                    are equal across groups (homogeneity of \
-                                    covariance)')
-            TBase.anovaWithin(biglist, ns, sums, means)
-            if (self.hypchoice.GetSelection() == 0):
-                TBase.prob = TBase.prob / 2
-
-            result.append('FACTOR %5.3f %5d %5.3f %5.3f %1.6f'%(TBase.SSbet,  \
-                                                                TBase.dfbet, TBase.MSbet, TBase.F, TBase.prob))
-            result.append('Within %5.3f %5d %5.3f '%(TBase.SSwit, TBase.dfwit,     \
-                                                     TBase.MSwit))
-            result.append('Error %5.3f %5d %5.3f'%(TBase.SSres, TBase.dfres,   \
-                                                   TBase.MSres))
-            result.append('Total %5.3f %5d '% (TBase.SStot, TBase.dftot))
-            result.append('')
-
-        result.append('kruskal wallis H Test')
-        if self.TestChoice.IsChecked(2):
-            TBase.KruskalWallisH(biglist)
-            if (self.hypchoice.GetSelection() == 0):
-                TBase.prob = TBase.prob / 2
-            result.append('H(%d) = %5.3f, p = %1.6f'% \
-                          (TBase.df, TBase.h, TBase.prob))
-
-        result.append('Friedman Chi Square')
-        if self.TestChoice.IsChecked(3):
-            TBase.FriedmanChiSquare(biglist)
-            if (self.hypchoice.GetSelection() == 0):
-                TBase.prob = TBase.prob / 2
-                alpha = 0.10
-            else:
-                alpha = 0.05
-            result.append('Chi(%d) = %5.3f, p = %1.6f'% \
-                          (TBase.df, TBase.chisq, TBase.prob))
-            # the next few lines are commented out & are experimental. They
-            # help perform multiple comparisons for the Friedman test.
-            #outstring = '<a href="friedman,'
-            #for i in range(k):
-            #    outstring = outstring+'M,'+str(TBase.sumranks[i])+','
-            #outstring = outstring+'k,'+str(k)+','
-            #outstring = outstring+'n,'+str(d[0].N)+','
-            #outstring = outstring+'p,'+str(alpha)+'">Multiple Comparisons</a>'
-            #output.htmlpage.Addhtml('<p>'+outstring+'</p>')
-
-        result.append('Cochranes Q')
-        if self.TestChoice.IsChecked(4):
-            TBase.CochranesQ(biglist)
-            if (self.hypchoice.GetSelection() == 0):
-                TBase.prob = TBase.prob / 2
-            result.append('Q (%d) = %5.3f, p = %1.6f'% \
-                          (TBase.df, TBase.q, TBase.prob))
-        data['size']= (len(result),1)
-        data['data']= [[res] for res in result]
-        output.upData(data)
-        self.Close(True)
-
-    def OnCloseThreeCond(self, event):
-        self.Close(True)
-
-#---------------------------------------------------------------------------
-class CorrelationTestFrame(wx.Dialog):
-    def __init__(self, parent, id, ColumnList):
-        winheight = 500 + wind
-        wx.Dialog.__init__(self, parent, id, "Correlations", \
-                           size=(500,400+wind))
-
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
-
-        ColumnList, self.colnums = frame.grid.GetUsedCols()
-        colsselected =  frame.grid.GetColsUsedList()
-
-        self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
-        self.m_mgr = wx.aui.AuiManager()
-        self.m_mgr.SetManagedWindow( self )
-
-        self.DescChoice = DescChoiceBox(self, 215)
-        self.m_mgr.AddPane( self.DescChoice, wx.aui.AuiPaneInfo() .Center() .
-                            Caption( u"Select Descriptive Statistics" ).
-                            CloseButton( False ).PaneBorder( False ).Dock().
-                            Resizable().FloatingSize( wx.DefaultSize ).
-                            DockFixed( False ).BottomDockable( False ).
-                            TopDockable( False ).Row( 0 ).Layer( 0 ) )
-        # list of tests in alphabetical order
-        Tests = ['Kendalls tau','Pearsons correlation','Point Biserial r', \
-                 'Spearmans rho']
-        m_checkList6Choices = Tests
-        self.paratests = wx.CheckListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_checkList6Choices, 0 )
-        self.m_mgr.AddPane( self.paratests, wx.aui.AuiPaneInfo() .Center() .
-                            Caption(u"Select Test(s) to Perform:" ).
-                            CloseButton( False ).PaneBorder( False ).Dock().
-                            Resizable().FloatingSize( wx.Size( 161,93 ) ).
-                            DockFixed( False ).BottomDockable( False ).
-                            TopDockable( False ).Row( 1 ).Layer( 0 ) )
-
-        self.m_panel2 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.SIMPLE_BORDER|wx.TAB_TRAVERSAL )
-        self.m_mgr.AddPane( self.m_panel2, wx.aui.AuiPaneInfo() .Left() .
-                            CaptionVisible( False ).CloseButton( False ).
-                            PaneBorder( False ).Dock().Resizable().
-                            FloatingSize( wx.DefaultSize ).DockFixed( False ).Row( 1 ).
-                            CentrePane() )
-
-        bSizer21 = wx.BoxSizer( wx.VERTICAL )
-
-        self.m_staticText1 = wx.StaticText( self.m_panel2, wx.ID_ANY, u"Select Columns", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText1.Wrap( -1 )
-        bSizer21.Add( self.m_staticText1, 0, wx.LEFT, 5 )
-
-        m_choice1Choices = ColumnList
-        self.ColBox1 = wx.Choice( self.m_panel2, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choice1Choices, 0 )
-        bSizer21.Add( self.ColBox1, 0, wx.ALL|wx.EXPAND, 5 )
-
-        m_choice2Choices = ColumnList
-        self.ColBox2 = wx.Choice( self.m_panel2, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choice2Choices, 0 )
-        bSizer21.Add( self.ColBox2, 0, wx.ALL|wx.EXPAND, 5 )
-
-        x1 = 0
-        x2 = 1
-        self.ColBox1.SetSelection(x1)
-        self.ColBox2.SetSelection(x2)
-        realColx1 = self.colnums[x1]
-        realColx2 = self.colnums[x2]
-        x1len = len(frame.grid.CleanData(realColx1))
-        x2len = len(frame.grid.CleanData(realColx2))
-        if (x1len != x2len):
-            self.equallists = False
-        else:
-            self.equallists = True
-
-        m_radioBox3Choices = HypList
-        self.hypchoice = wx.RadioBox( self.m_panel2, wx.ID_ANY, u"Select Hypotesis", wx.DefaultPosition, wx.DefaultSize, m_radioBox3Choices, 1, wx.RA_SPECIFY_COLS )
-        self.hypchoice.SetSelection( 1 )
-        bSizer21.Add( self.hypchoice, 0, wx.ALL|wx.EXPAND, 5 )
-
-
-        self.m_panel2.SetSizer( bSizer21 )
-        self.m_panel2.Layout()
-        bSizer21.Fit( self.m_panel2 )
-        self.m_panel1 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-        self.m_mgr.AddPane( self.m_panel1, wx.aui.AuiPaneInfo() .Bottom() .CaptionVisible( False ).CloseButton( False ).PaneBorder( False ).Dock().Resizable().FloatingSize( wx.DefaultSize ).DockFixed( False ).LeftDockable( False ).RightDockable( False ).MinSize( wx.Size( -1,30 ) ) )
-
-        bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
-
-        self.okaybutton = wx.Button( self.m_panel1, wx.ID_ANY, u"Ok", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer2.Add( self.okaybutton, 0, wx.ALL, 5 )
-
-        self.cancelbutton = wx.Button( self.m_panel1, wx.ID_ANY, u"Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer2.Add( self.cancelbutton, 0, wx.ALL, 5 )
-
-        self.allbutton = wx.Button( self.m_panel1, wx.ID_ANY, u"Select All", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer2.Add( self.allbutton, 0, wx.ALL, 5 )
-
-        self.nonebutton = wx.Button( self.m_panel1, wx.ID_ANY, u"Select None", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer2.Add( self.nonebutton, 0, wx.ALL, 5 )
-
-
-        self.m_panel1.SetSizer( bSizer2 )
-        self.m_panel1.Layout()
-        bSizer2.Fit( self.m_panel1 )
-
-        self.m_mgr.Update()
-        self.Centre( wx.BOTH )        
-
-        self.Bind(wx.EVT_BUTTON, self.OnOkayButton, id = self.okaybutton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.OnCloseTwoCond, id = self.cancelbutton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.DescChoice.SelectAllDescriptives, id = self.allbutton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.DescChoice.SelectNoDescriptives, id = self.nonebutton.GetId())
-        self.Bind(wx.EVT_COMBOBOX, self.ChangeCol1, id = self.ColBox1.GetId())
-        self.Bind(wx.EVT_COMBOBOX, self.ChangeCol1, id = self.ColBox2.GetId())
-
-    def ChangeCol1(self, event):
-        # check that len of 2 cols is equal, if not disable choices of test
-        realColx1 = self.colnums[self.ColBox1.GetSelection()]
-        realColx2 = self.colnums[self.ColBox2.GetSelection()] 
-        x1 = len(frame.grid.CleanData(realColx1))
-        x2 = len(frame.grid.CleanData(realColx2))
-        if (x1 != x2):
-            print "unequal"
-            # disable some tests in the listbox
-        else:
-            print "equal"
-            # enable all tests in the listbox
-
-    def ChangeCol2(self, event):
-        # check that len of 2 cols is equal, if not disable choices of test
-        realColx1 = self.colnums[self.ColBox1.GetSelection()]
-        realColx2 = self.colnums[self.ColBox2.GetSelection()] 
-        x1 = len(frame.grid.CleanData(realColx1))
-        x2 = len(frame.grid.CleanData(realColx2))
-        if (x1 != x2):
-            print "unequal"
-        else:
-            print "equal"
-
-    def OnOkayButton(self, event):
-        x1 = self.ColBox1.GetSelection()
-        y1 = self.ColBox2.GetSelection()
-        realColx1 = self.colnums[self.ColBox1.GetSelection()]
-        realColy1 = self.colnums[self.ColBox2.GetSelection()] 
-        x1 = len(frame.grid.CleanData(realColx1))
-        y1 = len(frame.grid.CleanData(realColy1))
-        name1 = frame.grid.m_grid.GetColLabelValue(realColx1)
-        name2 = frame.grid.m_grid.GetColLabelValue(realColy1)
-        if (x1 < 0) or (y1 < 0):
-            self.Close(True)
-            return
-        x = frame.grid.CleanData(realColx1)
-        xmiss = frame.grid.missing
-        y = frame.grid.CleanData(realColy1)
-        ymiss = frame.grid.missing
-        TBase = salstat_stats.TwoSampleTests(x, y, name1, name2,xmiss,ymiss)
-        d = [0,0]
-        d[0] = TBase.d1
-        d[1] = TBase.d2
-        x2 = ManyDescriptives(self, d)
-
-        data={'name': 'Three + condition Tests',
-              'size':(3,1),
-              'data': []}
-        result = []
-        result.append('Kendalls tau correlation')
-        if self.paratests.IsChecked(0):
-            TBase.KendallsTau(x, y)
-            if (self.hypchoice.GetSelection() == 0):
-                TBase.prob = TBase.prob / 2
-            result.append('tau = %5.3f, z = %5.3f, p = %1.6f'% \
-                          (TBase.tau, TBase.z, TBase.prob))
-
-            result.append('')
-
-        result.append('Pearsons r correlation')
-        if self.paratests.IsChecked(1):
-            TBase.PearsonsCorrelation(x, y)
-            if (self.hypchoice.GetSelection() == 0):
-                TBase.prob = TBase.prob / 2
-            result.append('r (%d) = %5.3f, t = %5.3f, p = %1.6f'% \
-                          (TBase.df, TBase.r, TBase.t, TBase.prob))
-            result.append('')
-
-        # Point Biserial r
-        if self.paratests.IsChecked(2):
-            pass
-
-        result.append('Spearmans rho correlation')
-        if self.paratests.IsChecked(3):
-            TBase.SpearmansCorrelation(x, y)
-            if (TBase.prob == -1.0):
-                result.append('Cannot do Spearmans correlation \
-                                    - unequal data sizes')
-            else:
-                if (self.hypchoice.GetSelection() == 0):
-                    TBase.prob = TBase.prob / 2
-                result.append('rho(%d) = %5.3f, p = %1.6f'% \
-                              (TBase.df, TBase.rho, TBase.prob))
-            result.append('')
-        data['data']= [[res] for res in result]
-        data['size']= (len(result),1)
-        output.upData(data)
-        self.Close(True)
-
-    def OnCloseTwoCond(self, event):
-        self.Close(True)
-
-#---------------------------------------------------------------------------
-class MFanovaFrame(wx.Dialog):
-    def __init__(self, parent, id):
-        wx.Dialog.__init__(self, parent, id, "Multi-factorial anova", \
-                           size=(500,400+wind))
-        #set icon for frame (needs x-platform separator!
-        x = self.GetClientSize()
-        winheight = x[1]
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
-        ColumnList, self.colnums = frame.grid.GetUsedCols()
-        l0 = wx.StaticText(self,-1,"Select Columns to Analyse",pos=(10,10))
-        l1 = wx.StaticText(self, -1, "Select IV:", pos=(10,60))
-        l2 = wx.StaticText(self, -1, "Select DV", pos=(10,170))
-        l4 = wx.StaticText(self,-1,"Select Descriptive Statistics",pos=(250,10))
-        self.IVbox = wx.CheckListBox(self, 413,wx.Point(10,30),\
-                                     wx.Size(230,130),ColumnList)
-        self.DVbox = wx.CheckListBox(self, 414,wx.Point(10,190), \
-                                     wx.Size(230,120),ColumnList)
-        self.hypchoice=wx.RadioBox(self, 205,"Select Hypothesis",\
-                                   wx.Point(10,320),wx.DefaultSize,HypList)
-        self.hypchoice.SetSelection(1)
-        #self.DescChoice = DescChoiceBox(self, 215)
-        # I might leave the descriptives out and implement a feedback box
-        # that tells the user about the analysis (eg, how many factors, #
-        # levels per factor, # interactions etc which might be useful. It
-        # would be updated whenever the user changes a selection.
-        okaybutton = wx.Button(self,216,"Okay",wx.Point(10,winheight-35), \
-                               wx.Size(BWidth, BHeight))
-        cancelbutton = wx.Button(self,217,"Cancel",wx.Point(100,winheight-35), \
-                                 wx.Size(BWidth, BHeight))
-        allbutton = wx.Button(self, 218,"Select All",wx.Point(250,winheight-70),\
-                              wx.Size(BWidth, BHeight))
-        nonebutton = wx.Button(self, 220, "Select None", wx.Point(360, \
-                                                                  winheight-70),wx.Size(BWidth, BHeight))
-        self.DescChoice = DescChoiceBox(self, 104)
-        self.Bind(wx.EVT_BUTTON,okaybutton, 216, self.OnOkayButton)
-        self.Bind(wx.EVT_BUTTON,cancelbutton, 217, self.OnCloseTwoCond)
-        self.Bind(wx.EVT_BUTTON,allbutton, 218, self.DescChoice.SelectAllDescriptives)
-        self.Bind(wx.EVT_BUTTON,nonebutton, 220, self.DescChoice.SelectNoDescriptives)
-        # Need to check that a col ticked in one box is not ticked in the other
-        #EVT_CHECKLISTBOX(self.IVbox, 413, self.CheckforIXbox)
-        #EVT_CHECKLISTBOX(self.DVbox,414,self.CheckforDVbox)
-
-    def OnOkayButton(self, event):
-        self.Close(True)
-
-    def OnCloseTwoCond(self, event):
-        self.Close(True)
-
-#---------------------------------------------------------------------------
 # instance of the tool window that contains the test buttons
 # note this is experimental and may not be final
 class TestFrame(wx.MiniFrame):
@@ -2343,18 +1325,19 @@ class TransformFrame(wx.Dialog):
 # This is main interface of application
 class DataFrame(wx.Frame):
     def __init__(self, parent, appname ):
-        
+
         #dimx = int(inits.get('gridsizex'))
         #dimy = int(inits.get('gridsizey'))
         self.path = None
         wx.Frame.__init__(self,parent,-1,"SalStat Statistics", 
                           size=wx.Size(640,480 ), pos=wx.DefaultPosition)
-        
+
         self.m_notebook1 = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
         self.logPanel = LogPanel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-        
-        
-        
+
+        self.defaultDialogSettings = {'Title': None,
+                                      'icon': images.getIconIcon()}
+
         self.m_mgr = aui.AuiManager()# wx.aui
         self.m_mgr.SetManagedWindow( self )
 
@@ -2424,18 +1407,31 @@ class DataFrame(wx.Frame):
         self.mn16=prefs_menu.Append(ID_PREF_GRID, 'Add Columns and Rows...')
         self.mn17=prefs_menu.Append(ID_PREF_CELLS, 'Change Cell Size...')
         self.mn18=prefs_menu.Append(ID_PREF_FONTS, 'Change the Font...')
-        self.mn19=preparation_menu.Append(ID_PREPARATION_DESCRIPTIVES, 'Descriptive Statistics...')
-        self.mn20=preparation_menu.Append(ID_PREPARATION_TRANSFORM, 'Transform Data...')
-        #preparation_menu.Append(ID_PREPARATION_OUTLIERS, 'Check for Outliers...')
-        #preparation_menu.Append(ID_PREPARATION_NORMALITY, 'Check for Normal Distribution...')
-        self.mn21=analyse_menu.Append(ID_ANALYSE_1COND, '&1 Condition Tests...')
-        self.mn22=analyse_menu.Append(ID_ANALYSE_2COND, '&2 Condition Tests...')
-        self.mn23=analyse_menu.Append(ID_ANALYSE_3COND, '&3+ Condition Tests...')
-        self.mn24=analyse_menu.Append(ID_ANALYSE_CORRELATION,'&Correlations...')
-        #analyse_menu.Append(ID_ANALYSE_2FACT, '2+ &Factor Tests...')
-        
-        self.mn26=chart_menu.Append(ID_CHART_DRAW, 'Line Chart of All Means...')
-        self.mn27=chart_menu.Append(ID_BARCHART_DRAW, 'Bar Chart of All Means...')
+
+        # se crea el menu de datos estadisticos con base en las caracteristicas disponibles            
+        self.mn19=preparation_menu.Append(ID_PREPARATION_DESCRIPTIVES, 'Descriptive Statistics')
+        self.mn20=preparation_menu.Append(ID_PREPARATION_TRANSFORM, 'Transform Data')
+        self.mn21=preparation_menu.Append(wx.ID_ANY, 'short data')
+        self.menuStats= list()
+        for (mainItem,subitems) in STATS.items():
+            newmenu = wx.Menu()
+            for item in subitems:
+                menuItem = wx.MenuItem( newmenu, wx.ID_ANY, item, wx.EmptyString, wx.ITEM_NORMAL )
+                # setting the callbak
+                self.Bind(wx.EVT_MENU, getattr(self, item), id = menuItem.GetId())
+                newmenu.AppendItem(menuItem )
+            analyse_menu.AppendSubMenu(newmenu,mainItem)
+        # preparation_menu.Append(ID_PREPARATION_OUTLIERS, 'Check for Outliers...')
+        # preparation_menu.Append(ID_PREPARATION_NORMALITY, 'Check for Normal Distribution...')
+        # self.mn21=analyse_menu.Append(ID_ANALYSE_1COND, '&1 Condition Tests...')
+        # self.mn22=analyse_menu.Append(ID_ANALYSE_2COND, '&2 Condition Tests...')
+        # self.mn23=analyse_menu.Append(ID_ANALYSE_3COND, '&3+ Condition Tests...')
+        # self.mn24=analyse_menu.Append(ID_ANALYSE_CORRELATION,'&Correlations...')
+        # analyse_menu.Append(ID_ANALYSE_2FACT, '2+ &Factor Tests...')
+
+
+        self.mn26= chart_menu.Append(ID_CHART_DRAW, 'Line Chart of All Means...')
+        self.mn27= chart_menu.Append(ID_BARCHART_DRAW, 'Bar Chart of All Means...')
         self.mn273= chart_menu.Append(wx.NewId(), 'Lines')
         self.mn271= chart_menu.Append(wx.NewId(), 'Scatter')
         self.mn272= chart_menu.Append(wx.NewId(), 'Box&Wishker Plot')
@@ -2451,7 +1447,7 @@ class DataFrame(wx.Frame):
         menuBar.Append(edit_menu, '&Edit')
         menuBar.Append(prefs_menu, '&Preferences')
         menuBar.Append(preparation_menu, 'P&reparation')
-        menuBar.Append(analyse_menu, '&Analyse')
+        menuBar.Append(analyse_menu, '&Statistics')
         menuBar.Append(chart_menu, '&Graph')
         menuBar.Append(help_menu, '&Help')
         self.SetMenuBar(menuBar)
@@ -2486,7 +1482,7 @@ class DataFrame(wx.Frame):
         # more toolbuttons are needed: New Output, Save, Print, Cut, \
         # Variables, and Wizard creates the toolbar
         tb1.Realize()
-        
+
         #--------------------
 
         #still need to define event handlers
@@ -2497,42 +1493,42 @@ class DataFrame(wx.Frame):
         self.grid.m_grid.SetDefaultColSize(60, True)
         self.grid.m_grid.SetRowLabelSize(40)
 
-        
+
         # adicion de panel para mostrar las respuestas
         self.answerPanel = NoteBookSheet(self)
-        
-        
-        
+
+
+
         self.answerPanel2 = ScriptPanel(self, self.logPanel, self.grid.m_grid, self.answerPanel)
- 
+
         #--------------------------------------------
-    
+
         self.m_notebook1.AddPage( self.logPanel, u"Log", True )
 
         #--------------------------------
         self.scriptPanel = wx.py.shell.Shell(self.m_notebook1)
         self.scriptPanel.wrap(True)
-        
+
         self.m_notebook1.AddPage( self.scriptPanel , u"Shell", False )
-        
+
         self.m_mgr.AddPane(self.grid,
                            aui.AuiPaneInfo().Centre().
                            CaptionVisible(True).Caption('Main Panel').
                            MaximizeButton(True).MinimizeButton(True).
                            CloseButton( False ).MinSize( wx.Size( 240,-1 )))
-        
+
         self.m_mgr.AddPane(self.answerPanel,
                            aui.AuiPaneInfo().Centre().Right().
                            CaptionVisible(True).Caption(("Output Panel")).
                            MinimizeButton(True).Resizable(True).MaximizeButton(True).
                            CloseButton( False ).MinSize( wx.Size( 240,-1 )))
-                
+
         self.m_mgr.AddPane( tb1, aui.AuiPaneInfo().Top().Dock().
                             Resizable(False).FloatingSize( wx.DefaultSize ).
                             DockFixed( False ).Layer(1).ToolbarPane().
                             LeftDockable( False ).RightDockable(False).
                             CloseButton(False ) )
-        
+
         self.m_mgr.AddPane(self.answerPanel2,
                            aui.AuiPaneInfo().Centre().Right().
                            CaptionVisible(True).Caption(("Script Panel")).
@@ -2540,16 +1536,16 @@ class DataFrame(wx.Frame):
                            CloseButton( False ).MinSize( wx.Size( 240,-1 )))
 
         self.panelNtb = self.m_mgr.AddPane( self.m_notebook1, 
-                            aui.AuiPaneInfo() .Bottom() .
-                            CloseButton( False ).MaximizeButton( True ).
-                            Caption(('Shell')).
-                            MinimizeButton().PinButton( False ).
-                            Dock().Resizable().FloatingSize( wx.DefaultSize ).
-                            CaptionVisible(True).
-                            DockFixed( False ).BestSize(wx.Size(-1,150)))
+                                            aui.AuiPaneInfo() .Bottom() .
+                                            CloseButton( False ).MaximizeButton( True ).
+                                            Caption(('Shell')).
+                                            MinimizeButton().PinButton( False ).
+                                            Dock().Resizable().FloatingSize( wx.DefaultSize ).
+                                            CaptionVisible(True).
+                                            DockFixed( False ).BestSize(wx.Size(-1,150)))
         self.BindEvents()
         self.m_mgr.Update()
-    
+
     def BindEvents(self):
         #-----------------
         # para el toolbar
@@ -2586,10 +1582,10 @@ class DataFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.GoFontPrefsDialog,  id = self.mn18.GetId())
         self.Bind(wx.EVT_MENU, self.GoContinuousDescriptives,id = self.mn19.GetId())
         self.Bind(wx.EVT_MENU, self.GoTransformData,    id = self.mn20.GetId())
-        self.Bind(wx.EVT_MENU, self.GoOneConditionTest, id = self.mn21.GetId())
-        self.Bind(wx.EVT_MENU, self.GoTwoConditionTest, id = self.mn22.GetId())
-        self.Bind(wx.EVT_MENU, self.GetThreeConditionTest,id = self.mn23.GetId())
-        self.Bind(wx.EVT_MENU, self.GetCorrelationsTest,id = self.mn24.GetId())
+        #self.Bind(wx.EVT_MENU, self.GoOneConditionTest, id = self.mn21.GetId())
+        #self.Bind(wx.EVT_MENU, self.GoTwoConditionTest, id = self.mn22.GetId())
+        #self.Bind(wx.EVT_MENU, self.GetThreeConditionTest,id = self.mn23.GetId())
+        #self.Bind(wx.EVT_MENU, self.GetCorrelationsTest,id = self.mn24.GetId())
 
         self.Bind(wx.EVT_MENU, self.GoChartWindow,      id = self.mn26.GetId())
         self.Bind(wx.EVT_MENU, self.GoBarChartWindow,   id = self.mn27.GetId())
@@ -2597,7 +1593,7 @@ class DataFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.GoBoxWishkerPlot,   id = self.mn272.GetId())
         self.Bind(wx.EVT_MENU, self.GoLinesPlot,   id = self.mn273.GetId())
         self.Bind(wx.EVT_MENU, self.GoLinRegressPlot,   id = self.mn274.GetId())
-        
+
         # controlling the expansion of the notebook
         self.m_notebook1.Bind( wx.EVT_LEFT_DCLICK, self._OnNtbDbClick )
 
@@ -2635,7 +1631,7 @@ class DataFrame(wx.Frame):
         else:
             pane.MinimizeButton(True)
         #self.m_mgr.Update()
-        
+
     def GoClearData(self, evt):
         #shows a new data entry frame
         self.grid.m_grid.ClearGrid()
@@ -2691,48 +1687,6 @@ class DataFrame(wx.Frame):
 
     def GoCheckOutliers(self, event):
         pass
-
-    def GoOneConditionTest(self, event):
-        # shows One Condition Test dialog
-        ColumnList, waste = self.grid.GetUsedCols()
-        if (len(ColumnList) > 0):
-            win = OneConditionTestFrame(frame, -1, ColumnList)
-            win.Show(True)
-        else:
-            self.SetStatusText('You need to enter 1 data column for this!')
-
-    def GoTwoConditionTest(self,event):
-        # show Two Conditions Test dialog
-        ColumnList, waste = self.grid.GetUsedCols()
-        if (len(ColumnList) > 1):
-            win = TwoConditionTestFrame(frame, -1, ColumnList)
-            win.Show(True)
-        else:
-            self.SetStatusText('You need 2 data columns for that!')
-
-    def GetThreeConditionTest(self, event):
-        # shows three conditions or more test dialog
-        ColumnList, waste = self.grid.GetUsedCols()
-        if (len(ColumnList) > 1):
-            win = ThreeConditionTestFrame(frame, -1, ColumnList)
-            win.Show(True)
-        else:
-            self.SetStatusText('You need some data for that!')
-
-    def GetCorrelationsTest(self, event):
-        # Shows the correlations dialog
-        ColumnList, waste = self.grid.GetUsedCols()
-        if (len(ColumnList) > 1):
-            win = CorrelationTestFrame(frame, -1, ColumnList)
-            win.Show(True)
-        else:
-            self.SetStatusText('You need 2 data columns for that!')
-
-    def GoMFanovaFrame(self, event):
-        win = MFanovaFrame(frame, -1)
-        win.Show(True)
-
-
 
     def GoChartWindow(self, event):
         waste, colnums = self.grid.GetUsedCols()
@@ -2898,6 +1852,228 @@ class DataFrame(wx.Frame):
             win.Show(True)
         else:
             frame.Destroy()
+#------------------------------------------
+# definicion de las funciones estadisticas
+#------------------------------------------
+    def _statsType1(self, functionName, useNumpy = True):
+        group = lambda x,y: (x,y)
+        setting = self.defaultDialogSettings
+        setting['Title'] = functionName
+        ColumnList, colnums  = frame.grid.GetUsedCols()
+        bt1= group('StaticText', ('Select the columns to analyse',) )
+        bt2 = group('CheckListBox', (ColumnList,))
+        structure = list()
+        structure.append([bt1,])
+        structure.append([bt2,])
+        dlg = dialog(settings = setting, struct= structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        # -------------------
+        # changing value strings to numbers
+        colNameSelect = values[0]
+        if len( colNameSelect ) == 0:
+            self.logPanel.write("you don't select any items")
+            return
+        values = [ [pos for pos, value in enumerate( ColumnList ) 
+                    if value == val
+                    ][0]
+                    for val in colNameSelect
+                    ]
+        # -------------------
+        if useNumpy:
+            colums  = list()
+            for pos in values:
+                col = numpy.array(GetData(colnums[ pos ]))
+                col.shape = (len(col),1)
+                colums.append(col)
+        else:
+            colums = [ GetData(colnums[ pos ]) for pos in values]
+        # se hace los calculos para cada columna
+        result = [getattr(stats, functionName)( col ) for col in colums]
+        # se muestra los resultados
+        output.addColData(colNameSelect, functionName)
+        output.addColData(result)
+        self.logPanel.write(functionName + ' successfull')
+        
+    def geometricmean(self,event):
+        self._statsType1("geometricmean")
+
+    def harmonicmean(self,event):
+        self._statsType1("harmonicmean")
+        
+    def mean(self,event):
+        self._statsType1("mean")
+
+    def median(self,event):
+        self._statsType1("median")
+        
+    def medianscore(self,event):
+        self._statsType1("medianscore")
+        
+    def mode(self,event):
+        self._statsType1("mode")
+        
+    def moment(self,event):
+        functionName = "moment"
+        group = lambda x,y: (x,y)
+        setting = self.defaultDialogSettings
+        setting['Title'] = functionName
+        ColumnList, colnums  = frame.grid.GetUsedCols()
+        bt1= group('StaticText', ('Columns to analyse',) )
+        bt2= group('CheckListBox', (ColumnList,))
+        bt3= group('SpinCtrl', ( 1, 100, 1 ))
+        bt4= group('StaticText', ('moment',) )
+        structure = list()
+        structure.append([bt2, bt1])
+        structure.append([bt3, bt4])
+        dlg = dialog(settings = setting, struct= structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        # -------------------
+        # changing value strings to numbers
+        (colNameSelect, moment) = values
+        if len( colNameSelect ) == 0:
+            self.logPanel.write("you don't select any items")
+            return
+        values = [ [pos for pos, value in enumerate( ColumnList ) 
+                    if value == val
+                    ][0]
+                    for val in colNameSelect
+                    ]
+        # -------------------
+        colums = [ GetData(colnums[ pos ]) for pos in values]
+        # se hace los calculos para cada columna
+        result = [getattr(stats, functionName)( col, moment ) for col in colums]
+        # se muestra los resultados
+        output.addColData(colNameSelect, functionName)
+        output.addColData(result)
+        self.logPanel.write(functionName + ' successfull')
+    
+    def variation(self,event):
+        self._statsType1("variation")
+        
+    def skew(self,event):
+        self._statsType1("skew")
+        
+    def kurtosis(self,event):
+        self._statsType1("kurtosis")
+        
+    def skewtest(self,event):
+        self._statsType1("skewtest", useNumpy = False)
+        
+    def kurtosistest(self,event):
+        self._statsType1("kurtosistest", useNumpy = False)
+        
+    def normaltest(self,event):
+        self.logPanel.write('Not implemented yet')
+        #self._statsType1("normaltest", useNumpy = True)
+        
+    def itemfreq(self,event):
+        self.logPanel.write('itemfreq')
+    def scoreatpercentile(self,event):
+        self.logPanel.write('scoreatpercentile')
+    def percentileofscore(self,event):
+        self.logPanel.write('percentileofscore')
+    def histogram(self,event):
+        self.logPanel.write('histogram')
+    def cumfreq(self,event):
+        self.logPanel.write('cumfreq')
+    def relfreq(self,event):
+        self.logPanel.write('relfreq')
+    def obrientransform(self,event):
+        self.logPanel.write('obrientransform')
+    def samplevar(self,event):
+        self.logPanel.write('samplevar')
+    def samplestdev(self,event):
+        self.logPanel.write('samplestdev')
+    def signaltonoise(self,event):
+        self.logPanel.write('signaltonoise')
+    def var(self,event):
+        self.logPanel.write('var')
+    def stdev(self,event):
+        self.logPanel.write('stdev')
+    def sterr(self,event):
+        self.logPanel.write('sterr')
+    def sem(self,event):
+        self.logPanel.write('sem')
+    def z(self,event):
+        self.logPanel.write('z')
+    def zs(self,event):
+        self.logPanel.write('zs')
+    def zmap(self,event):
+        self.logPanel.write('zmap')
+    def threshold(self,event):
+        self.logPanel.write('threshold')
+    def trimboth(self,event):
+        self.logPanel.write('trimboth')
+    def trim1(self,event):
+        self.logPanel.write('trim1')
+    def round(self,event):
+        self.logPanel.write('round')
+    def covariance(self,event):
+        self.logPanel.write('covariance')
+    def correlation(self,event):
+        self.logPanel.write('correlation')
+    def paired(self,event):
+        self.logPanel.write('paired')
+    def pearsonr(self,event):
+        self.logPanel.write('pearsonr')
+    def spearmanr(self,event):
+        self.logPanel.write('spearmanr')
+    def pointbiserialr(self,event):
+        self.logPanel.write('pointbiserialr')
+    def kendalltau(self,event):
+        self.logPanel.write('kendalltau')
+    def linregress(self,event):
+        self.logPanel.write('linregress')
+    def ttest_1samp(self,event):
+        self.logPanel.write('ttest_1samp')
+    def ttest_ind(self,event):
+        self.logPanel.write('ttest_ind')
+    def ttest_rel(self,event):
+        self.logPanel.write('ttest_rel')
+    def chisquare(self,event):
+        self.logPanel.write('chisquare')
+    def ks_2samp(self,event):
+        self.logPanel.write('ks_2samp')
+    def mannwhitneyu(self,event):
+        self.logPanel.write('mannwhitneyu')
+    def ranksums(self,event):
+        self.logPanel.write('ranksums')
+    def wilcoxont(self,event):
+        self.logPanel.write('wilcoxont')
+    def kruskalwallish(self,event):
+        self.logPanel.write('kruskalwallish')
+    def friedmanchisquare(self,event):
+        self.logPanel.write('friedmanchisquare')
+    def chisqprob(self,event):
+        self.logPanel.write('chisqprob')
+    def erfcc(self,event):
+        self.logPanel.write('erfcc')
+    def zprob(self,event):
+        self.logPanel.write('zprob')
+    def ksprob(self,event):
+        self.logPanel.write('ksprob')
+    def fprob(self,event):
+        self.logPanel.write('fprob')
+    def betacf(self,event):
+        self.logPanel.write('betacf')
+    def gammln(self,event):
+        self.logPanel.write('gammln')
+    def betai(self,event):
+        self.logPanel.write('betai')
+    def F_oneway(self,event):
+        self.logPanel.write('F_oneway')
+    def F_value(self,event):
+        self.logPanel.write('F_value')
 
 #---------------------------------------------------------------------------
 # Scripting API is defined here. So far, only basic (but usable!) stuff.
@@ -2911,19 +2087,6 @@ def GetDataName(column):
     the column label from the grid."""
     return frame.grid.m_grid.GetColLabelValue(column)
 
-def Display(text):
-    """writes the text onto the html page. Handles lists and numerics"""
-    text = str(text)
-    output.htmlpage.write(string.join(text, ""))
-
-def Describe(datain):
-    """Provides OO descriptive statistics. Called by >>>x = Describe(a)
-    and then a.N for the N, a.sumafor the sum etc"""
-    if (type(datain) == int):
-        datain = frame.grid.CleanData(col2)
-    return salstat_stats.FullDescriptives(datain)
-
-
 def PutData(column, data):
     """This routine takes a list of data, and puts it into the datagrid
     starting at row 0. The grid is resized if the list is too large. This
@@ -2934,412 +2097,14 @@ def PutData(column, data):
     for i in range(n):
         frame.grid.m_grid.SetCellValue(i, column, str(data[i]))
 
-#---------------------------------------------------------------------------
-# API statistical analysis functions
-#One sample tests:
-def DoOneSampleTTest(col1, usermean, tail = 2):
-    """This routine performs a 1 sample t-test using the given data and
-    a specified user mean."""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for column 1\n'
-    TBase = salstat_stats.OneSampleTests(col1, umean)
-    TBase.OneSampleTTest(usermean)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.t, TBase.df, TBase.prob
-    else:
-        raise #return Error
-
-def DoOneSampleSignTest(col1, usermean, tail = 2):
-    """This routine performs a 1 sample sign-test using the given data and
-    a specified user mean."""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for column 1\n'
-    TBase = salstat_stats.OneSampleTests(col1, umean)
-    TBase.OneSampleSignTest(usermean)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.nplus, TBase.nminus, TBase.z, TBase.prob
-    else:
-        raise #return Error
-
-def DoChiSquareVariance(col1, usermean, tail = 2):
-    """This routine performs a chi square for variance ratio test using
-    the given data and a specified user mean."""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for column 1\n'
-    TBase = salstat_stats.OneSampleTests(col1, umean)
-    TBase.ChiSquareVariance(usermean)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.chisquare, TBase.df, TBase.prob
-    else:
-        raise #return Error
-
-#Two sample tests:
-def DoPairedTTest(col1, col2, tail = 2):
-    """This routine performs a paired t-test using the data contained in
-    col1 and col2 on the grid, with the passed alpha value which defaults
-    to 0.05 (5%). If col1 and col2 are lists, then the data contained in the
-    lists are used instead. There is a modicum of bounds checking on the
-    passed variables to ensure that they are the right types (and bounds)"""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for column 1\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col2)
-    elif (type(col2) != list):
-        error = error +'Invalid information for column 2\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.TTestPaired(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.t, TBase.df, TBase.prob
-    else:
-        raise # return Error
-
-def DoUnpairedTTest(col1, col2, tail = 2):
-    """This function performs an unpaired t-test on the data passed. If the
-    passed parameters are a list, then that is used as the data, otherwise
-    if the parameters are an integer, then that integers columns data are
-    retrieved."""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.TTestUnpaired()
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.t, TBase.df, TBase.prob
-    else:
-        return error
-
-def DoPearsonsCorrelation(col1, col2, tail = 2):
-    """This function performs a Pearsons correlation upon 2 data sets."""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.PearsonsCorrelation(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.t, TBase.r, TBase.df, TBase.prob
-    else:
-        return error
-
-def DoFTest(col1, col2, uservar, tail = 2):
-    """This performs an F-test for variance ratios upon 2 data sets. Passed
-    in addition to the datasets is the user variance"""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.TwoSampleSignTextCorrelation(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.t, TBase.r, TBase.df, TBase.prob
-    else:
-        return error
-
-def DoSignTest(col1, col2, tail = 2):
-    """This function performs a 2-sample sign test on 2 data sets"""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.TwoSampleSignTextCorrelation(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.z, TBase.prob
-    else:
-        return error
-
-def DoKendallsCorrelation(col1, col2, tail = 2):
-    """This function performs a Kendalls tau correlation"""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.KendalssTau(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.tau, TBase.z, TBase.prob
-    else:
-        return error
-
-def DoKSTest(col1, col2, tail = 2):
-    """This function performs a Komogorov-Smirnov test on 2 data sets"""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.KolmogorovSmirnov(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.d, TBase.prob
-    else:
-        return error
-
-def DoSpearmansCorrelation(col1, col2, tail = 2):
-    """This function performs a Spearmans correlation on 2 data sets"""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.SpearmansCorrelation(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.rho, TBase.t, TBase.df, TBase.prob
-    else:
-        return error
-
-def DoRankSums(col1, col2, tail = 2):
-    """This function performs a Wilcoxon rank sums test on 2 data sets"""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    selobu = salstat_stats.TwoSampleTests(col1,col2)
-    TBase = selobu.RankSums(col1, col2) # salstat_stats.RankSums(col1, col2)
-    TBase.TwoSampleSignTextCorrelation(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.z, TBase.prob
-    else:
-        return error
-
-def DoSignedRanks(col1, col2, tail = 2):
-    """This function performs a Wilcoxon signed ranks test on 2 data sets"""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.SignedRanks(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.z, TBase.wt, TBase.prob
-    else:
-        return error
-
-def DoMannWhitneyTest(col1, col2, tail = 2):
-    """This function performs a Mann-Whitney U test on 2 data sets"""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.MannWhitneyU(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.bigu, TBase.smallu, TBase.z, TBase.prob
-    else:
-        return error
-
-def DoLinearRegression(col1, col2, tail = 2):
-    """This function performs a 2-sample sign test on 2 data sets"""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.LinearRegression(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.df, TBase.r, TBase.slope, TBase.intercept, \
-               TBase.sterrest, TBase.prob
-    else:
-        return error
-
-def DoPairedPermutation(col1, col2, tail = 2):
-    """This function performs a 2-sample sign test on 2 data sets"""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.PairedPermutation(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.nperm, TBase.prob
-    else:
-        return error
-
-# Three+ sample tests:
-
-# Probability values
-def GetChiProb(chisq, df):
-    """This function takes the chi square value and the df and returns the
-    p-value"""
-    return salstat_stats.chisqprob(chisq, df)
-
-def GetInverseChiProb(prob, df):
-    """This function returns a chi value that matches the probability and
-    df passed"""
-    return salstat_stats.inversechi(prob, df)
-
-def GetZProb(z):
-    """This function returns the probability of z"""
-    return salstat_stats.zprob(z)
-
-def GetKSProb(ks):
-    """This function returns the probability of a Kolmogorov-Smirnov test
-    being significant"""
-    return salstat_stats.ksprob(ks)
-
-def GetTProb(t, df):
-    """Gets the p-value for the passed t statistic and df"""
-    return salstat_stats.betai(0.5*self.df,0.5,float(self.df)/(self.df+ \
-                                                               self.t*self.t))
-
-def GetFProb(f, df1, df2):
-    """This returns the p-value of the F-ratio and the 2 df's passed"""
-    return salstat_stats.fprob(df1, df2, f)
-
-def GetInverseFProb(prob, df1, df2):
-    """Returns the f-ratio of the given p-value and df's"""
-    return salstat_stats.inversef(prob, df1, df2)
-
-
-#---------------------------------------------------------------------------
+#--------------------------------------------------------------------------
 # main loop
 if __name__ == '__main__':
-    import sys
-    # find init file and read otherwise create it
-    # ini = GetInits()
     app = wx.App()
     frame = DataFrame(None, app)
     frame.grid.SetFocus()
     Logg= frame.logPanel
-    output = frame.answerPanel # OutputSheet(frame, -1)
+    output = frame.answerPanel 
     frame.ShowFullScreen(True,False)
-    # output.Show(True)
     app.MainLoop()
-
-#---------------------------------------------------------------------------
+# eof
