@@ -22,7 +22,7 @@ import wx.lib.wxpTag
 # import system modules
 import string, os, os.path, pickle
 # import SalStat specific modules
-import salstat_stats,images
+import images
 import numpy, math
 import wx.py
 from xml.dom import minidom
