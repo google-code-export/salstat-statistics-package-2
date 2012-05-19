@@ -1,16 +1,23 @@
 from distutils.core import setup
 import py2exe
+import matplotlib
+
 
 opts = { "py2exe":
             { "unbuffered": True,
-              "optimize": 0,
-              "includes": ["wx",],
-              "excludes":["pywin", "pywin.debugger", "pywin.debugger.dbgcon",
+              "optimize": 1,
+              "includes": ["wx",
+                           "numpy",
+                           "matplotlib", 
+                           ],
+              "excludes":['_gtkagg', '_tkagg', '_agg2', '_cairo', '_cocoaagg',
+                          '_fltkagg', '_gtk', '_gtkcairo',
+                          "pywin", "pywin.debugger", "pywin.debugger.dbgcon",
                           "pywin.dialogs", "pywin.dialogs.list","Tkconstants",
-                          "Tkinter","tcl",
-                          "PyQt4","matplotlib",],
+                          "Tkinter","tcl",],
               "dist_dir": u"F:\\proyecto salstat\\dist\\",
-              "dll_excludes" : ["MSVCP90.DLL","API-MS-Win-Security-Base-L1-1-0.dll",
+              "dll_excludes" : ['_gtkagg', '_tkagg',
+                                "MSVCP90.DLL","API-MS-Win-Security-Base-L1-1-0.dll",
                                 "API-MS-Win-Security-Base-L1-1-0.dll",
                                 "API-MS-Win-Core-ProcessThreads-L1-1-0.dll",
                                 "POWRPROF.dll","API-MS-Win-Core-LocalRegistry-L1-1-0.dll",
@@ -32,6 +39,7 @@ setup(name= 'salstat',
            "icon_resources": [(1, "F:\\proyecto salstat\\src\\salstat.ico")]
            }
           ],
+      data_files= matplotlib.get_py2exe_datafiles(),
       zipfile = None,
       options = opts,
       )
