@@ -82,51 +82,73 @@ class NoteBookSheet(wx.Panel):
         self.SetSizer( bSizer )
         # se inicia el generador para el numero de pagina
         self.npage = numPage()
+        self.currentPage = None
+        self.pageNames= dict()
         self.Layout()
 
     def getGridAllValueByCols(self,pageName):
-        # retorna el contenido de una pagina del notebooksheet
-        if pageName in self.getPageNames():
-            for index,value in enumerate(self.getPageNames()):
-                if value == pageName:
-                    numberpage = index
-                    break
-            obj = self.m_notebook.GetPage(numberpage)
-            return obj.getByColumns()
-        else:
+        if not (pageName in self.pageNames.keys()):
             raise StandardError('La pagina no existe')
+        page= self.pageNames[pageName]
+        return page.getByColumns()
+        ## retorna el contenido de una pagina del notebooksheet
+        #if pageName in self.getPageNames():
+            #for index,value in enumerate(self.getPageNames()):
+                #if value == pageName:
+                    #numberpage = index
+                    #break
+            #obj = self.m_notebook.GetPage(numberpage)
+            #return obj.getByColumns()
+        #else:
+            #raise StandardError('La pagina no existe')
 
     def getPageNames(self):
-        # retorna los nombre de las paginas adicionadas, como una lista
-        numpages= self.m_notebook.GetPageCount()
-        if numpages > 0:
-            return tuple([self.m_notebook.GetPageText(page) for page in range(numpages)])
-        else:
-            return ()
+        return self.pageNames.keys()
+        ## retorna los nombre de las paginas adicionadas, como una lista
+        #numpages= self.m_notebook.GetPageCount()
+        #if numpages > 0:
+            #return tuple([self.m_notebook.GetPageText(page) for page in range(numpages)])
+        #else:
+            #return ()
 
     def getHeader(self,pageName):
-        if pageName in self.getPageNames():
-            numberpage= [index for index,value in enumerate(self.getPageNames()) if value == pageName]
-            obj = self.m_notebook.GetPage(numberpage[0]).getHeader()
-            return obj
-        else:
+        if not (pageName in self.pageNames.keys()):
             raise StandardError('La pagina no existe')
+        page= self.pageNames[pageName]
+        return page.getHeader()
+        #if pageName in self.getPageNames():
+            #numberpage= [index for index,value in enumerate(self.getPageNames()) if value == pageName]
+            #obj = self.m_notebook.GetPage(numberpage[0]).getHeader()
+            #return obj
+        #else:
+            #raise StandardError('La pagina no existe')
 
     def OnNotebookPageChange(self,evt):
         self.currentPage= evt.Selection
 
-    def addPage(self,data= {'name': u"un Nombre", 'size':(100,4),'nameCol':('col1','col2','col3','col4')}):
+    def addPage(self, data):
+        defaultData = {'name': u'',
+                       'size': (0,0),
+                       'nameCol': list(),
+                       'nameRow': list()}
+        
+        for key, value in data.items():
+            if defaultData.has_key(key):
+                defaultData[key] = value
         # adiciona una pagina al notebook grid
-        grid= MyGridPanel(self.m_notebook,-1,size= data['size'] )
-        self.m_notebook.AddPage(grid,data['name'] +'_'+ str(self.npage.next()), False )
+        newName= data['name'] +'_'+ str(self.npage.next())
+        self.pageNames[newName]= MyGridPanel(self.m_notebook,-1,size= defaultData['size'] )
+        self.currentPage=  self.pageNames[newName]
+        grid= self.pageNames[newName]
+        self.m_notebook.AddPage(grid, newName, False )
         # se hace activo la pagina adicionada
-        self.m_notebook.SetSelection(self.m_notebook.GetPageCount()-1)#ChangeSelection(self.m_notebook.GetPageCount()-1)
+        self.m_notebook.SetSelection(self.m_notebook.GetPageCount()-1)
         # se escriben los nombres de las columnas en el grid en caso de existir
-        if 'nameCol' in data.keys():
-            for index, value in enumerate(data['nameCol']):
+        if 'nameCol' in defaultData.keys():
+            for index, value in enumerate(defaultData['nameCol']):
                 grid.m_grid.SetColLabelValue(index,value) # str(value)
-        if 'nameRow' in data.keys():
-            for index, value in enumerate(data['nameRow']):
+        if 'nameRow' in defaultData.keys():
+            for index, value in enumerate(defaultData['nameRow']):
                 grid.m_grid.SetRowLabelValue(index,value)
 
         return grid # retorna el objeto MyGrid
@@ -203,10 +225,42 @@ class NoteBookSheet(wx.Panel):
         # se cargan los datos dentro del grid
         self.__loadData__(grid01.m_grid,data['data'],byRows)
         return grid01
-
-    def __del__( self ):
-        pass
-
+    
+    def addColData(self, colData, pageName= None):
+        '''adiciona una columna con el contenido de un iterable'''
+        if pageName == None:
+            if len(self.getPageNames()) == 0:
+                'se procede a adicionar una hoja nueva'
+                page = self.addPage()
+            else:
+                page = self.currentPage
+        elif pageName in self.pageNames.keys():
+            page = self.pageNames[pageName]
+        else:
+            page = self.addPage({'name': pageName})
+        # se procede a verificar las dimensiones de la pagina actual
+        size = (page.m_grid.GetNumberRows(), page.m_grid.GetNumberCols())
+        # se adiciona una columna
+        page.m_grid.AppendCols(1)
+        currCol = size[1]
+        if isinstance(colData,(str,)):
+            colData = [colData]
+        # compare de row numbres
+        if size[0] >= len(colData):
+            pass
+        else:
+            diffColNumber= len(colData) - size[0]
+            # adding the required rows
+            page.m_grid.AppendRows(diffColNumber)
+        # populate with data
+        for colPos, colValue in enumerate(colData):
+            if isinstance(colValue,(str,unicode)):
+                pass
+            else:
+                colValue = str(colValue)
+            page.m_grid.SetCellValue(colPos, currCol, colValue)
+            
+        
 class Test(wx.Frame):
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size=(480, 520))
