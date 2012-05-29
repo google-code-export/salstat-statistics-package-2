@@ -10,6 +10,8 @@ try:
 except:
     pass
 from  warnings import warn
+from copy import deepcopy
+
 class GroupData:
     # ingreso
     def __init__(self,xdata,ydata,names):
@@ -1188,10 +1190,18 @@ class ReportaExcel(object):
         while True:
             yield i
             i+= 1
+            
+    @property
+    def suffix(self):
+        return self._suffix
+    @suffix.setter
+    def suffix(self, suf):
+        if suf in ('xls', 'xlsx'):
+            self._suffix = suf
+            
     @property
     def path(self):
         return self._path
-
     @path.setter
     def path(self,ruta):
         # cambia la ruta en la que se guardara la informacion
@@ -1235,7 +1245,7 @@ class ReportaExcel(object):
         # objeto hoja, iterador sobre columnas, iterador sobre filas
 
     def write(self,lista,sheet = None, cell_overwrite_ok = False):
-        '''reporte al contenido considerando que se han ingresado una columna'''
+        '''reporte al contenido considerando que se ha ingresado una columna'''
         # se verifica si existen hojas para el reporte
         if len(self._hojas) < 1:
             # se crea una hoja
@@ -1255,9 +1265,40 @@ class ReportaExcel(object):
         sheetObj=  self._hojas[sheet][0]
         sheetCol=  self._hojas[sheet][1].next()
         # se reporta el contenido de la lista en la columna
+        style0 = xlwt.easyxf(num_format_str='#,##0.00')
+        lista= self._filterlist(lista)
         for posicion,contenido in enumerate(lista):
-            sheetObj.write(posicion,sheetCol,contenido)
-
+            if isinstance(contenido,(int,float)):
+                sheetObj.write(posicion, sheetCol, contenido, style0)
+            else:
+                sheetObj.write(posicion, sheetCol, contenido)
+                
+    def _filterlist(self, lista):
+        if len(lista) == 0:
+            return lista
+        # quita los campos vacios al final
+        if isinstance(lista, (tuple)):
+            lista = list(lista)
+        lista2 = deepcopy(lista)
+        
+        lista2.reverse()
+        for pos,val in enumerate(lista2):
+            if val != u'':
+                break
+        pos = len(lista) - pos
+        lista = lista[0:pos]
+        # se cambia las posiciones vacias por None
+        for pos,val in enumerate(lista):
+            if val == u'':
+                lista[pos] = None
+            else:
+                # se intenta convertir a numero el campo
+                try:
+                    lista[pos] = float(val)
+                except:
+                    pass
+        return lista
+        
     def writeByRow(self,lista,sheet= None):
         '''escribe los resultados por filas'''
         # se verifica si existen hojas para el reporte
@@ -1280,8 +1321,13 @@ class ReportaExcel(object):
         sheetObj=  self._hojas[sheet][0]
         sheetRow=  self._hojas[sheet][2].next()
         # se reporta el contenido de la lista en la columna
+        style0 = xlwt.easyxf(num_format_str='#,##0.00')
+        lista = self._filterlist(lista)
         for posicion,contenido in enumerate(lista):
-            sheetObj.write(sheetRow, posicion, contenido)
+            if isinstance(contenido,(int,float)):
+                sheetObj.write(sheetRow, posicion, contenido,style0)
+            else:
+                sheetObj.write(sheetRow, posicion, contenido)
 
     def writeByCols(self,lista,sheet = None):
         for col in lista:
