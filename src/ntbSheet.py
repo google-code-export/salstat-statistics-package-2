@@ -267,7 +267,7 @@ class Test(wx.Frame):
         customPanel = NoteBookSheet(self,-1)
         # se adicionan 4 paginas al sheet
         for i in range(4):
-            customPanel.addPage()
+            customPanel.addPage(dict())
         #customPanel.delPage(2)
         self.Centre()
         self.Show(True)
