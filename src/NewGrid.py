@@ -81,6 +81,9 @@ class _MyContextGrid(wx.Menu):
 ###########################################################################
 class NewGrid(wx.grid.Grid):
     def __init__(self,*args, **params):
+        self.nombre = 'selobu'
+        self.maxrow= 0
+        self.maxcol= 0
         wx.grid.Grid.__init__(self, *args, **params)
         if len([clase for clase in wx.grid.Grid.__bases__ if issubclass(_PyWXGridEditMixin,clase)]) == 0:
             wx.grid.Grid.__bases__ += (_PyWXGridEditMixin,)
@@ -119,10 +122,11 @@ class NewGrid(wx.grid.Grid):
         # retorna solo el encabezado de la malla actual
         return tuple([self.GetColLabelValue(index) for index in range(self.GetNumberCols())])
     
-    def getByColumns(self):
+    def getByColumns(self, maxRow = None):
         # retorna el valor de la malla por columnas
         numRows = self.GetNumberRows()
         ncols= self.GetNumberCols()
+        numRows = min([numRows, maxRow])
         # se extrae los contenidos de cada fila
         return tuple([tuple([ self.GetCellValue(row,col) for row in range(numRows) ]) for col in range(ncols)])
     
@@ -230,10 +234,13 @@ class _PyWXGridEditMixin():
 
     def Mixin_OnCellChange(self, evt):
         """Undo/redo handler Use saved value from above for undo."""
-        box = self.GetSelectionBox()[0]
-        newValue = self.GetCellValue(*box[:2])
-        self.AddUndo(undo=(self.Paste, (box, self._editOldValue)),
-            redo=(self.Paste, (box, newValue)))
+        box= self.GetSelectionBox()[0]
+        newValue= self.GetCellValue(*box[:2])
+        if newValue != u'':
+            self.maxcol= max([self.maxcol, box[1]])
+            self.maxrow= max([self.maxrow, box[0]])
+        self.AddUndo(undo= (self.Paste, (box, self._editOldValue)),
+            redo= (self.Paste, (box, newValue)))
         self._editOldValue = None
         self.Mixin_callbackChangeCell(box)
     
@@ -241,8 +248,8 @@ class _PyWXGridEditMixin():
         """Produce a set of selection boxes of the form (top, left, nrows, ncols)"""
         #For wxGrid, blocks, cells, rows and cols all have different selection notations.  
         #This captures them all into a single "box" tuple (top, left, rows, cols)
-        gridRows = self.GetNumberRows()
-        gridCols = self.GetNumberCols()
+        gridRows= self.GetNumberRows()
+        gridCols= self.GetNumberCols()
         tl, br = self.GetSelectionBlockTopLeft(), self.GetSelectionBlockBottomRight()
         # need to reorder based on what should get copy/pasted first
         boxes = []
