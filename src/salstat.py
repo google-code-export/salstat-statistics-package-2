@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-""" Copyright Sebastian Lopez Buritica 2012
+""" Copyright 2012 Sebastian Lopez Buritica
 
 SalStat Statistics Package. Copyright 2002 Alan James Salmoni. Licensed
 under the GNU General Public License (GPL). See the file COPYING for full
@@ -9,14 +9,9 @@ details of this license. """
 import wx
 import os
 
-from ntbSheet import MyGridPanel as MyGrid
-
-from script import ScriptPanel
-from imagenes import imageEmbed
 import wx.html
-import wx.aui
+# import wx.aui
 import wx.lib.agw.aui as aui
-####from PanelScript import PanelPython
 
 import wx.lib.wxpTag
 # import system modules
@@ -25,6 +20,9 @@ import string, os, os.path, pickle
 import images
 import numpy, math
 import wx.py
+import xlrd
+import traceback
+
 from xml.dom import minidom
 # system of graphics
 from plotFrame import MpltFrame as plot
@@ -32,10 +30,14 @@ from multiPlotDialog import data2Plotdiaglog, selectDialogData2plot, scatterDial
 from ntbSheet import NoteBookSheet
 
 from openStats import statistics
-import traceback
+
 from slbTools import ReportaExcel
 from easyDialog import Dialog as dialog
 from statlib import stats
+from ntbSheet import MyGridPanel as MyGrid
+
+from script import ScriptPanel
+from imagenes import imageEmbed
 
 STATS = {'Central Tendency': ('geometricmean','harmonicmean','mean',
                               'median','medianscore','mode'),
@@ -43,102 +45,33 @@ STATS = {'Central Tendency': ('geometricmean','harmonicmean','mean',
                      'skewtest', 'kurtosistest', 'normaltest',),
          'Frequency Stats': ('itemfreq', 'scoreatpercentile', 'percentileofscore',
                              'histogram', 'cumfreq', 'relfreq',),
-         'Variability': ('obrientransform', 'samplevar', 'samplestdev', 
+         'Variability': ( 'samplevar', 'samplestdev', #'obrientransform'
                          'signaltonoise', 'var', 'stdev', 'sterr',
-                         'sem','z','zs','zmap',),
-         'Trimming Fcns': ('threshold', 'trimboth', 'trim1', 'round',),
-         'Correlation Fcns': ('covariance', 'correlation', 'paired', 'pearsonr',
+                         'sem','z','zs',), # 'zmap'
+         'Trimming Fcns': ('threshold', 'trimboth', 'trim1', ), #'round',
+         'Correlation Fcns': ( 'paired', 'pearsonr', # 'covariance', 'correlation'
                               'spearmanr', 'pointbiserialr', 'kendalltau', 'linregress',),
          'Inferential Stats': ('ttest_1samp', 'ttest_ind', 'ttest_rel', 'chisquare',
                                'ks_2samp', 'mannwhitneyu', 'ranksums', 'wilcoxont',
                                'kruskalwallish', 'friedmanchisquare',),
-         'Probability Calcs': ('chisqprob', 'erfcc', 'zprob', 'ksprob',
-                               'fprob', 'betacf', 'gammln', 'betai',),
-         'Anova Functions': ( 'F_oneway', 'F_value')}
+         'Probability Calcs': ('chisqprob', 'erfcc', 'zprob',   # 'ksprob'
+                               'betacf', 'gammln', 'betai',), # 'fprob'
+         'Anova Functions': ( 'F_oneway', )} # 'F_value'
 
-#---------------------------------------------------------------------------
-# set up id's for menu events - all on menu, some also available elsewhere
-ID_FILE_NEW = wx.ID_ANY
-ID_FILE_NEWOUTPUT = wx.ID_ANY
-ID_FILE_OPEN = wx.ID_ANY
-ID_FILE_SAVE = wx.ID_ANY
-ID_FILE_SAVEAS = wx.ID_ANY
-ID_FILE_PRINT = wx.ID_ANY
-ID_FILE_EXIT = wx.ID_ANY
-ID_EDIT_CUT = wx.ID_ANY
-ID_EDIT_COPY = wx.ID_ANY
-ID_EDIT_PASTE = wx.ID_ANY
-ID_EDIT_SELECTALL = wx.ID_ANY
-ID_EDIT_FIND = wx.ID_ANY
-ID_EDIT_DELETECOL = wx.ID_ANY
-ID_EDIT_DELETEROW = wx.ID_ANY
-ID_PREF_VARIABLES = wx.ID_ANY
-ID_PREF_GRID = wx.ID_ANY
-ID_PREF_CELLS = wx.ID_ANY
-ID_PREF_FONTS = wx.ID_ANY
-ID_PREPARATION_DESCRIPTIVES = wx.ID_ANY
-ID_PREPARATION_TRANSFORM = wx.ID_ANY
-ID_PREPARATION_OUTLIERS = wx.ID_ANY
-ID_PREPARATION_NORMALITY = wx.ID_ANY
-ID_TRANSFORM_SQUAREROOT = wx.ID_ANY
-ID_TRANSFORM_SQUARE = wx.ID_ANY
-ID_TRANSFORM_INVERSE = wx.ID_ANY
-ID_TRANSFORM_OTHER = wx.ID_ANY
-ID_ANALYSE_1COND = wx.ID_ANY
-ID_ANALYSE_2COND = wx.ID_ANY
-ID_ANALYSE_3COND = wx.ID_ANY
-ID_ANALYSE_CORRELATION = wx.ID_ANY
-ID_ANALYSE_2FACT = wx.ID_ANY
-ID_ANALYSE_SCRIPT = wx.ID_ANY
-ID_ANALYSE2_1COND = wx.ID_ANY
-ID_ANALYSE2_2COND = wx.ID_ANY
-ID_ANALYSE2_3COND = wx.ID_ANY
-ID_ANALYSE2_1_TTEST = wx.ID_ANY
-ID_ANALYSE2_1_SIGN = wx.ID_ANY
-ID_CHART = wx.ID_ANY
-ID_CHART_DRAW = wx.ID_ANY
-ID_BARCHART_DRAW = wx.ID_ANY
-ID_HELP_WIZARD = wx.ID_ANY
-ID_HELP_TOPICS = wx.ID_ANY
-ID_HELP_SCRIPTING = wx.ID_ANY
-ID_HELP_LICENCE = wx.ID_ANY
-ID_HELP_ABOUT = wx.ID_ANY
-ID_OFILE_NEW = wx.ID_ANY
-ID_OFILE_OPEN = wx.ID_ANY
-ID_OFILE_SAVE = wx.ID_ANY
-ID_OFILE_SAVEAS = wx.ID_ANY
-ID_OFILE_PRINT = wx.ID_ANY
-ID_OFILE_CLOSE = wx.ID_ANY
-ID_OEDIT_CUT = wx.ID_ANY
-ID_OEDIT_COPY = wx.ID_ANY
-ID_OEDIT_PASTE = wx.ID_ANY
-ID_OEDIT_SELECTALL = wx.ID_ANY
-ID_OPREF_FONT = wx.ID_ANY
-ID_FILE_GSAVEAS = wx.ID_ANY
-ID_FILE_GPRINTSETUP = wx.ID_ANY
-ID_FILE_GPRINTPREVIEW = wx.ID_ANY
-ID_FILE_GPRINT = wx.ID_ANY
-ID_FILE_GCLOSE = wx.ID_ANY
-ID_TITLE_GYAXIS = wx.ID_ANY
-ID_TITLE_GXAXIS = wx.ID_ANY
-ID_TITLE_GTITLE = wx.ID_ANY
-ID_TITLE_LEGEND = wx.ID_ANY
-ID_TITLE_GRID = wx.ID_ANY
 
 DescList=['N','Sum','Mean','missing',
           'Variance','Standard Deviation','Standard Error',
-          'Sum of Squares',#'Sum of Squared Devs', 
-          'Coefficient of Variation','Minimum',   
-          'Maximum','Range','Number Missing',     
-          'Geometric Mean','Harmonic Mean',       
+          'Sum of Squares',#'Sum of Squared Devs',
+          'Coefficient of Variation','Minimum',
+          'Maximum','Range','Number Missing',
+          'Geometric Mean','Harmonic Mean',
           'Skewness','Kurtosis', 'Median',        #'Median Absolute Deviation',
           'Mode', 'Interquartile Range'] #, 'Number of Unique Levels']
 
-HypList = ['One tailed','Two tailed']
 inits={}    # dictionary to hold the config values
 ColsUsed = []
 RowsUsed = []
-missingvalue = -99.999
+missingvalue = None
 global filename # ugh
 filename = 'UNTITLED'
 global BWidth, BHeight # ugh again!
@@ -177,14 +110,14 @@ class _MyLog(wx.PyLog):
         #    message = time.strftime("%X", time.localtime(timeStamp)) + \
         #              ": " + message
         if self.tc:
-            self.tc.AppendText(message + '\n') 
+            self.tc.AppendText(message + '\n')
 
 class LogPanel( wx.Panel ):
     def _numLine(self):
         i = 1
         while True:
             yield i
-            i+= 1 
+            i+= 1
     def __init__( self, parent,*args,**params ):
         self.numLinea = self._numLine()
         wx.Panel.__init__ ( self, parent,*args, **params)
@@ -202,6 +135,7 @@ class LogPanel( wx.Panel ):
         texto+= lineaTexto + "\n"
         # se escribe el texto indicado
         self.log.AppendText(texto)
+
     def write(self,lineaTexto):
         if len(lineaTexto) > 1:
             last= lineaTexto[-1:]
@@ -229,9 +163,9 @@ class SaveDialog(wx.Dialog):
         vbox.Add(l1,1, wx.ALIGN_CENTER)
         vbox.Add(l2,1, wx.ALIGN_CENTER)
         hbox = wx.BoxSizer(wx.VERTICAL)
-        saveButton = wx.Button(self, 331, "Save...", size=(BWidth, BHeight))
-        discardButton = wx.Button(self, 332, "Discard", size=(BWidth, BHeight))
-        CancelButton = wx.Button(self, 333, "Cancel", size=(BWidth, BHeight))
+        saveButton = wx.Button(self,    wx.ID_ANY, "Save...", size=(BWidth, BHeight))
+        discardButton = wx.Button(self, wx.ID_ANY, "Discard", size=(BWidth, BHeight))
+        CancelButton = wx.Button(self,  wx.ID_ANY, "Cancel",  size=(BWidth, BHeight))
         hbox.Add(saveButton, 0, wx.ALL, 5)
         hbox.Add(discardButton, 0, wx.ALL, 5)
         hbox.Add(CancelButton, 0, wx.ALL, 5)
@@ -239,9 +173,9 @@ class SaveDialog(wx.Dialog):
         self.SetAutoLayout(True)
         self.SetSizer(vbox)
         self.Layout()
-        self.Bind(wx.EVT_BUTTON, self.SaveData, id = 331)
-        self.Bind(wx.EVT_BUTTON, self.DiscardData, id = 332)
-        self.Bind(wx.EVT_BUTTON, self.CancelDialog, id = 333)
+        self.Bind(wx.EVT_BUTTON, self.SaveData,     id = saveButton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.DiscardData,  id = discardButton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.CancelDialog, id = CancelButton.GetId())
 
     def SaveData(self, event):
         frame.grid.Saved = True
@@ -340,7 +274,7 @@ class ManyDescriptives:
                     'Sum': 'suma',
                     'Mean': 'mean',
                     'missing': 'missing',
-                    'Variance': 'samplevar', 
+                    'Variance': 'samplevar',
                     'Standard Deviation': 'stddev',
                     'Standard Error': 'stderr',
                     'Sum of Squares': 'sumsquares',
@@ -504,7 +438,7 @@ class SimpleGrid(MyGrid):# wxGrid
             saveAs= False
         else:
             saveAs= args[1]
-        self.reportObj= ReportaExcel(cell_overwrite_ok = True) 
+        self.reportObj= ReportaExcel(cell_overwrite_ok = True)
         if self.Saved == False or saveAs: # path del grid
             # mostrar el dialogo para guardar el archivo
             dlg= wx.FileDialog(self, "Save Data File", "" , "",\
@@ -527,40 +461,75 @@ class SimpleGrid(MyGrid):# wxGrid
         self.reportObj.save()
         self.Saved = True
         self.log.write("the fil %s was succesfully saved"%self.reportObj.path)
-    def LoadDataASCII(self, event):
+
+    def LoadXls(self, event):
         dlg = wx.FileDialog(self, "Load Data File", "","",
-                            wildcard= "SalStat Native (*.xml)|*.xml",
+                            wildcard= "Excel File (*.xls)|*.xls",
                             style = wx.OPEN)
                 #, wx.OPEN)
         icon = images.getIconIcon()
         dlg.SetIcon(icon)
-        if dlg.ShowModal() == wx.ID_OK: # ShowModal
-            filename = dlg.GetPath()
-            if filename[-3:] == 'xml':
-                self.LoadNativeXML(filename)
-            else:
-                inits.update({'opendir': dlg.GetDirectory()})
-                self.ClearGrid()
-                # exception handler here!
-                try:
-                    fin = open(filename, "r")
-                except IOError:
-                    pass # what to do if they filename isn't visible? Messagebox?
-                gridline = 0
-                self.Freeze()
-                for i in fin.readlines():
-                    words = string.split(i)
-                    if len(words) > self.GetNumberCols():
-                        NumberCols = len(words) - self.GetNumberCols() + 10
-                        self.AddNCells(NumberCols, 0)
-                    for j in range(len(words)):
-                        self.SetCellValue(gridline, j, words[j])
-                    gridline = gridline + 1
-                    if (gridline == self.GetNumberRows()):
-                        self.AddNCells(0,10)
-                fin.close()
-                self.Thaw()
-            self.ForceRefresh()
+        if dlg.ShowModal() != wx.ID_OK: # ShowModal
+            dlg.Destroy()
+            return
+
+        filename = dlg.GetPath()
+        dlg.Destroy()
+        # se lee el libro
+        wb = xlrd.open_workbook(filename)
+        sheets = [wb.sheet_by_index(i) for i in range(wb.nsheets)]
+        sheetNames = [sheet.name for sheet in sheets]
+        if len(sheetNames) == 1:
+            sheetSelected = sheets[0]
+        else:
+            # create a dialog to selecct the sheet to be loaded
+            bt1= ('Choice',   (sheetNames,))
+            bt2= ('StaticText', ('Selec a sheet to be loaded',))
+            setting = {'Title': 'Select a sheet one'}
+            dlg = dialog(self, struct=[[bt1,bt2],], settings= setting)
+            if dlg.ShowModal() != wx.ID_OK:
+                return
+            (sheetNameSelected,)= dlg.GetValue()
+            dlg.Destroy()
+            if not (sheetNameSelected in sheetNames):
+                return
+            for sheet, sheetname in zip(sheets, sheetNames):
+                if sheetname == sheetNameSelected:
+                    sheetSelected = sheet
+                    break
+        # se lee el tamanio del sheet seleccionado
+        #size = (sheetSelected.nrows, sheetSelected.ncols)
+        # se hace el grid de tamanio 1 celda y se redimensiona luego
+        self.m_grid.ClearGrid()
+        #if size[0] > 1:
+        #    self.m_grid.DeleteRows(1, size[0]-1)
+
+        #if size[1] > 1:
+        #    self.m_grid.DeleteCols(1, size[1]-1)
+
+        size = (sheetSelected.nrows, sheetSelected.ncols)
+        # se lee el tamanio de la pagina y se ajusta las dimensiones
+        newSize = (sheetSelected.nrows, sheetSelected.ncols)
+        if newSize[0]-size[0] > 0:
+            self.m_grid.AppendCols(newSize[0]-size[0])
+
+        if newSize[1]-size[1] > 0:
+            self.m_grid.AppendRows(newSize[1]-size[1])
+
+        # se escribe los datos en el grid
+        for row in range(newSize[0]):
+            for col in range(newSize[1]):
+                newValue = sheetSelected.cell_value(row,col)
+                if isinstance(newValue, (str,)):
+                    self.m_grid.SetCellValue(row, col, newValue)
+                elif isinstance(newValue, (int,float,bool)):
+                    self.m_grid.SetCellValue(row, col, str(newValue))
+                else:
+                    try:
+                        self.m_grid.SetCellValue(row, col, str(newValue))
+                    except:
+                        self.log.write("could not import the row,col (%i,%i)"%(row+1,col+1))
+
 
     def getData(self, x):
         for i in range(len(x)):
@@ -578,126 +547,6 @@ class SimpleGrid(MyGrid):# wxGrid
             if node.nodeType == node.TEXT_NODE:
                 rc = rc + node.data
         return rc
-
-    def LoadNativeXML(self, filename):
-        # also get rid of the old history
-        if os.path.isfile(filename) == 0:
-            pass
-        else:
-            # now start the XML processing
-            self.ClearGrid()
-            self.Freeze()
-            xmldoc = minidom.parse(filename)
-            datatags = xmldoc.getElementsByTagName('data')
-            self.getData(datatags)
-            deleteRowTags = xmldoc.getElementsByTagName('deleteRow')
-            for i in range(len(deleteRowTags)):
-                rownum = int(self.getText(deleteRowTags[i].childNodes))
-                self.DeleteRows(rownum, 1)
-            deleteColTags = xmldoc.getElementsByTagName('deleteColumn')
-            for i in range(len(deleteColTags)):
-                colnum = int(self.getText(deleteColTags[i].childNodes))
-                self.DeleteCols(colnum, 1)
-            appendRowTags = xmldoc.getElementsByTagName('appendRow')
-            for i in range(len(appendRowTags)):
-                rownum = int(self.getText(appendRowTags[i].childNodes))
-                self.AppendRows()
-            appendColTags = xmldoc.getElementsByTagName('appendColumn')
-            for i in range(len(appendColTags)):
-                colnum = int(self.getText(appendRowTags[i].childNodes))
-                self.AppendCols()
-            deleteColTags = xmldoc.getElementsByTagName('deleteColumn')
-            for i in range(len(deleteColTags)):
-                colnum = int(self.getText(deleteColTags[i].childNodes))
-                self.DeleteCurrentCol(colnum)
-            deleteRowTags = xmldoc.getElementsByTagName('deleteRow')
-            for i in range(len(deleteRowTags)):
-                rownum = int(self.getText(deleteRowTags[i].childNodes))
-                self.DeleteCurrentRow(rownum)
-            # there is a problem here - the html tags embedded between the <results> tags
-            # are parsed as XML, but I want the whole lot available as a string.
-            output.htmlpage.SetPage('<P><B>SalStat Statistics</B></P>')
-            output.htmlpage.WholeOutString = ''
-            resultsTags = xmldoc.getElementsByTagName('results')
-            for i in range(len(resultsTags)):
-                outputText = self.getText(resultsTags[i].childNodes)
-                print "out" + outputText # debugging!
-                output.htmlpage.Addhtml(outputText)
-            #describeTags = xmldoc.getElementsByTagName('describe')
-            #for i in range(len(describeTags)):
-            self.Thaw()
-
-    def LoadDataASCII2(self, event):
-        # redundant routine
-        default = inits.get('opendir')
-        dlg = wx.FileDialog(self, "Load Data File", default,"",\
-                            "ASCII Text (*.dat)|*.dat",wx.OPEN)
-                #numpy Array (*.npy)|*.npy|", wx.OPEN)
-        icon = images.getIconIcon()
-        dlg.SetIcon(icon)
-        if dlg.ShowModal() == wx.ID_OK:
-            inits.update({'opendir': dlg.GetDirectory()})
-            filename = dlg.GetPath()
-            self.ClearGrid()
-            # exception handler here!
-            fin = open(filename, "r")
-            #if filename[-3:] == 'dat':
-            if 1:
-                # text data file
-                # size the datafile first
-                dataheight = 0
-                line = fin.readline()
-                words = string.split(line)
-                datawidth = len(words)
-                while 1:
-                    try:
-                        line = fin.readline()
-                    except:
-                        pass
-                    if (line == ''):
-                        break
-                    dataheight = dataheight + 1
-                gridwidth = self.GetNumberCols()
-                gridheight = self.GetNumberRows()
-                if (datawidth > gridwidth):
-                    self.AddNCols(-1, (datawidth - gridwidth + 5))
-                if (dataheight > gridheight):
-                    self.AddNRows(-1, (dataheight -  gridheight + 5))
-                fin.close
-                fin = open(filename, "r")
-                currentrow = 0
-                for i in range(dataheight):
-                    line = fin.readline()
-                    if (line == ''):
-                        break
-                    line = string.replace(line, ',', ' ')
-                    words = string.split(line)
-                    for i in range(len(words)):
-                        self.SetCellValue(currentrow, i, words[i])
-                    currentrow = currentrow + 1
-            elif filename[-3:] == 'npy':
-                p = pickle.Unpickler(fin)
-                dataset = p.load()
-                # put dataset into grid
-            fin.close()
-            self.ForceRefresh()
-
-    def LoadNumericData(self, event):
-        default = inits.get('opendir')
-        dlg = wx.FileDialog(self, "Load Data File", default,"","*.\
-                                    dat|*.*", wx.OPEN)
-        icon = images.getIconIcon()
-        dlg.SetIcon(icon)
-        if dlg.ShowModal() == wx.ID_OK:
-            inits.update({'opendir': dlg.GetDirectory()})
-            filename = dlg.GetPath()
-            self.ClearGrid()
-            # exception handler here!
-            fin = open(filename, "r")
-            p = pickle.Unpickler(fin)
-            dataset = p.load()
-            fin.close()
-            # put dataset into grid
 
     def CleanRowData(self, row):
         indata = []
@@ -1021,103 +870,6 @@ class MyHtmlWindow(wx.html.HtmlWindow):
             self.HistoryForward()
 
 #---------------------------------------------------------------------------
-# output window w/html class for output. Also has status bar and menu.Opens
-# in new frame
-class OutputSheet(wx.Frame):
-    def __init__(self, parent, id):
-        posx = int(inits.get('outputposx'))
-        posy = int(inits.get('outputposy'))
-        wx.Frame.__init__(self, parent, -1, "SalStat Statistics - Output", \
-                          size=wx.DefaultSize )#pos=(posx, posy))
-        #set icon for frame (needs x-platform separator!
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
-        file_menu = wx.Menu()
-        edit_menu = wx.Menu()
-        pref_menu = wx.Menu()
-        help_menu = wx.Menu()
-        self.bt1 = file_menu.Append(ID_FILE_NEW, '&New')
-        self.bt2 = file_menu.Append(ID_OFILE_OPEN, '&Open...')
-        self.bt3 = file_menu.Append(ID_OFILE_SAVE, '&Save')
-        self.bt4 = file_menu.Append(ID_OFILE_SAVEAS, 'Save &As...')
-        self.bt5 = file_menu.Append(ID_OFILE_PRINT, '&Print...')
-        self.bt6 = file_menu.Append(ID_OFILE_CLOSE, '&Close')
-        self.bt7 = edit_menu.Append(ID_OEDIT_CUT, 'Cu&t')
-        self.bt8 = edit_menu.Append(ID_OEDIT_COPY, '&Copy')
-        self.bt9 = edit_menu.Append(ID_OEDIT_PASTE, '&Paste')
-        self.bt10 = edit_menu.Append(ID_OEDIT_SELECTALL, 'Select &All')
-        self.bt11 = help_menu.Append(ID_HELP_WIZARD, '&What Test Should I Use...')
-        self.bt12 = help_menu.Append(ID_HELP_TOPICS, '&Topics...')
-        self.bt13 = help_menu.Append(ID_HELP_LICENCE, '&Licence...')
-        self.bt14 = help_menu.Append(ID_HELP_ABOUT, '&About...')
-        omenuBar = wx.MenuBar()
-        omenuBar.Append(file_menu, '&File')
-        omenuBar.Append(edit_menu, '&Edit')
-        omenuBar.Append(pref_menu, '&Pref')
-        omenuBar.Append(help_menu, '&Help')
-        self.SetMenuBar(omenuBar)
-        #wxInitAllImageHandlers()
-        NewIcon = images.getNewBitmap()
-        OpenIcon = images.getOpenBitmap()
-        SaveAsIcon = images.getSaveAsBitmap()
-        PrintIcon = images.getPrintBitmap()
-        HelpIcon = images.getHelpBitmap()
-        toolBar = self.CreateToolBar(wx.TB_HORZ_LAYOUT| \
-                                     wx.TB_3DBUTTONS)
-        self.bt15 = toolBar.AddSimpleTool(wx.ID_ANY, NewIcon,"New","New Data Sheet in \
-                                    separate window")
-        self.bt16 = toolBar.AddSimpleTool(wx.ID_ANY, OpenIcon,"Open","Open Data from a File")
-        self.bt17 = toolBar.AddSimpleTool(wx.ID_ANY, SaveAsIcon,"Save As","Save Data under \
-                                    a new filename")
-        self.bt18 = toolBar.AddSimpleTool(wx.ID_ANY, PrintIcon,"Print","Print Out Results")
-        self.bt19 = toolBar.AddSimpleTool(wx.ID_ANY, HelpIcon, "Help", "Get some help!")
-        toolBar.SetToolBitmapSize((24,24))
-        # more toolbuttons are needed: New Output, Save, Print, Cut, \
-        # Variables, and Wizard creates the toolbar
-        toolBar.Realize()
-        self.SetToolBar(toolBar)
-        self.CreateStatusBar()
-        self.SetStatusText('SalStat Statistics')
-        self.htmlpage = MyHtmlWindow(self, -1)
-        self.htmlpage.Addhtml('<P><B>SalStat Statistics</B></P>')
-        self.printer = wx.html
-        self.Bind(wx.EVT_MENU, self.htmlpage.SaveHtmlPage, id = ID_FILE_SAVEAS)
-
-        self.Bind(wx.EVT_MENU, self.ClearAll, id = self.bt1.GetId() )
-        self.Bind(wx.EVT_MENU, self.PrintOutput, id = self.bt5.GetId())
-        self.Bind(wx.EVT_MENU,  self.htmlpage.LoadHtmlPage, id = self.bt2.GetId())
-        self.Bind(wx.EVT_MENU, frame.GoHelpAboutFrame, id = self.bt14.GetId())
-        self.Bind(wx.EVT_MENU, frame.GoHelpWizardFrame, id =  self.bt11.GetId())
-        self.Bind(wx.EVT_MENU, frame.GoHelpTopicsFrame, id = self.bt12.GetId())
-        self.Bind(wx.EVT_MENU, frame.GoHelpLicenceFrame, id  = self.bt13.GetId())
-
-        self.Bind(wx.EVT_MENU, self.ClearAll,  id = self.bt15.GetId())
-        self.Bind(wx.EVT_MENU, self.htmlpage.LoadHtmlPage, id = self.bt16.GetId())
-        self.Bind(wx.EVT_MENU, self.htmlpage.SaveHtmlPage, id = self.bt17.GetId())
-        self.Bind(wx.EVT_MENU, self.PrintOutput, id = self.bt18.GetId())
-        self.Bind(wx.EVT_MENU,  frame.GoHelpTopicsFrame, id= self.bt19.GetId())
-        self.Bind(wx.EVT_CLOSE, self.DoNothing, self)
-
-    def PrintOutput(self, event):
-        data = wx.PrintDialogData()
-        data.EnablePrintToFile(True)
-        data.EnablePageNumbers(True)
-        data.EnableSelection(True)
-        dlg = wx.PrintDialog(output, data)
-        if dlg.ShowModal() == wx.ID_OK:
-            #print out html
-            self.printer.PrintText(self.htmlpage.WholeOutString)
-        dlg.Destroy()
-
-    def DoNothing(self, event):
-        pass
-
-    def ClearAll(self, event):
-        # check output has been saved
-        self.htmlpage.SetPage('<P><B>SalStat Statistics</B></P>')
-        self.htmlpage.WholeOutString = ''
-
-#---------------------------------------------------------------------------
 # user selects which cols to analyse, and what stats to have
 class DescriptivesFrame(wx.Dialog):
     def __init__( self, parent, id ):
@@ -1185,10 +937,10 @@ class DescriptivesFrame(wx.Dialog):
             if self.ColChoice.IsChecked(i):
                 realColi = self.colnums[i]
                 name = frame.grid.m_grid.GetColLabelValue(realColi)
-                descs.append(statistics( 
+                descs.append(statistics(
                     frame.grid.CleanData(realColi), name,
                     frame.grid.missing))
-                #descs.append(salstat_stats.FullDescriptives( \
+                #descs.append(statistics( \
                 #    frame.grid.CleanData(realColi), name, \
                 #    frame.grid.missing))
         ManyDescriptives(self, descs)
@@ -1319,6 +1071,33 @@ class TransformFrame(wx.Dialog):
     def OnCloseFrame(self, event):
         self.Close(True)
 
+
+class formulaBar ( wx.Panel ):
+
+	def __init__( self, parent , *args,**params):
+		wx.Panel.__init__ ( self, parent, *args, **params)
+
+		bSizer1 = wx.BoxSizer( wx.HORIZONTAL )
+
+		self.m_textCtrl1 = wx.TextCtrl( self, wx.ID_ANY,
+                    wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
+                    wx.TE_CHARWRAP|wx.TE_MULTILINE|wx.TE_RICH2|
+                    wx.TE_WORDWRAP|wx.NO_BORDER )
+
+		self.m_textCtrl1.SetMinSize( wx.Size( 160,25 ) )
+
+		bSizer1.Add( self.m_textCtrl1, 0, 0, 5 ) # wx.EXPAND
+
+		#self.m_button1 = wx.Button( self, wx.ID_ANY, u">>",
+        #                    wx.DefaultPosition, wx.DefaultSize,
+        #                    wx.BU_EXACTFIT|wx.DOUBLE_BORDER )
+		#bSizer1.Add( self.m_button1, 0, wx.EXPAND, 5 )
+
+		self.SetSizer( bSizer1 )
+		self.Layout()
+		bSizer1.Fit( self )
+
+
 #---------------------------------------------------------------------------
 #---------------------------------------------------------------------------
 # call instance of DataGrid
@@ -1329,7 +1108,7 @@ class DataFrame(wx.Frame):
         #dimx = int(inits.get('gridsizex'))
         #dimy = int(inits.get('gridsizey'))
         self.path = None
-        wx.Frame.__init__(self,parent,-1,"SalStat Statistics", 
+        wx.Frame.__init__(self,parent,-1,"SalStat Statistics",
                           size=wx.Size(640,480 ), pos=wx.DefaultPosition)
 
         self.m_notebook1 = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -1374,43 +1153,43 @@ class DataFrame(wx.Frame):
         help_menu = wx.Menu()
         #add contents of menu
 
-        self.mn1= wx.MenuItem(file_menu,ID_FILE_NEW,'&New Data')
+        self.mn1= wx.MenuItem(file_menu, wx.ID_ANY, '&New Data')
         self.mn1.SetBitmap(NewIcon)
         file_menu.AppendItem(self.mn1)
         #file_menu.Append(ID_FILE_NEWOUTPUT, 'New &Output Sheet')
-        self.mn2=file_menu.Append(ID_FILE_OPEN, '&Open...')
+        self.mn2=file_menu.Append(wx.ID_ANY, '&Open...')
         self.mn2.SetBitmap(OpenIcon)
-        self.mn3=file_menu.Append(ID_FILE_SAVE, '&Save')
+        self.mn3=file_menu.Append(wx.ID_ANY, '&Save')
         self.mn3.SetBitmap(SaveIcon)
-        self.mn4=file_menu.Append(ID_FILE_SAVEAS, 'Save &As...')
+        self.mn4=file_menu.Append(wx.ID_ANY, 'Save &As...')
         self.mn4.SetBitmap(SaveAsIcon)
         self.mn5=file_menu.AppendSeparator()
-        self.mn6=file_menu.Append(ID_FILE_PRINT, '&Print...')
+        self.mn6=file_menu.Append(wx.ID_ANY, '&Print...')
         self.mn6.SetBitmap(PrintIcon)
         file_menu.AppendSeparator()
-        self.mn7=file_menu.Append(ID_FILE_EXIT, 'E&xit')
+        self.mn7=file_menu.Append(wx.ID_ANY, 'E&xit')
         self.mn7.SetBitmap(ExitIcon)
-        self.mn8= wx.MenuItem(edit_menu,ID_EDIT_CUT,'Cu&t')
+        self.mn8= wx.MenuItem(edit_menu, wx.ID_ANY,'Cu&t')
         self.mn8.SetBitmap(CutIcon)
         edit_menu.AppendItem(self.mn8)
-        self.mn9=edit_menu.Append(ID_EDIT_COPY, '&Copy')
+        self.mn9=edit_menu.Append(wx.ID_ANY, '&Copy')
         self.mn9.SetBitmap(CopyIcon)
-        self.mn10=edit_menu.Append(ID_EDIT_PASTE, '&Paste')
+        self.mn10=edit_menu.Append(wx.ID_ANY, '&Paste')
         self.mn10.SetBitmap(PasteIcon)
-        self.mn11=edit_menu.Append(ID_EDIT_SELECTALL, 'Select &All')
-        self.mn12=edit_menu.Append(ID_EDIT_FIND, '&Find and Replace...')
+        self.mn11=edit_menu.Append(wx.ID_ANY, 'Select &All')
+        self.mn12=edit_menu.Append(wx.ID_ANY, '&Find and Replace...')
         self.mn12.SetBitmap(FindRIcon)
         edit_menu.AppendSeparator()
-        self.mn13=edit_menu.Append(ID_EDIT_DELETECOL, 'Delete Current Column')
-        self.mn14=edit_menu.Append(ID_EDIT_DELETEROW, 'Delete Current Row')
-        self.mn15=prefs_menu.Append(ID_PREF_VARIABLES, 'Variables...')
-        self.mn16=prefs_menu.Append(ID_PREF_GRID, 'Add Columns and Rows...')
-        self.mn17=prefs_menu.Append(ID_PREF_CELLS, 'Change Cell Size...')
-        self.mn18=prefs_menu.Append(ID_PREF_FONTS, 'Change the Font...')
+        self.mn13=edit_menu.Append(wx.ID_ANY, 'Delete Current Column')
+        self.mn14=edit_menu.Append(wx.ID_ANY, 'Delete Current Row')
+        self.mn15=prefs_menu.Append(wx.ID_ANY, 'Variables...')
+        self.mn16=prefs_menu.Append(wx.ID_ANY, 'Add Columns and Rows...')
+        self.mn17=prefs_menu.Append(wx.ID_ANY, 'Change Cell Size...')
+        self.mn18=prefs_menu.Append(wx.ID_ANY, 'Change the Font...')
 
-        # se crea el menu de datos estadisticos con base en las caracteristicas disponibles            
-        self.mn19=preparation_menu.Append(ID_PREPARATION_DESCRIPTIVES, 'Descriptive Statistics')
-        self.mn20=preparation_menu.Append(ID_PREPARATION_TRANSFORM, 'Transform Data')
+        # se crea el menu de datos estadisticos con base en las caracteristicas disponibles
+        self.mn19=preparation_menu.Append(wx.ID_ANY, 'Descriptive Statistics')
+        self.mn20=preparation_menu.Append(wx.ID_ANY, 'Transform Data')
         self.mn21=preparation_menu.Append(wx.ID_ANY, 'short data')
         self.menuStats= list()
         for (mainItem,subitems) in STATS.items():
@@ -1421,26 +1200,18 @@ class DataFrame(wx.Frame):
                 self.Bind(wx.EVT_MENU, getattr(self, item), id = menuItem.GetId())
                 newmenu.AppendItem(menuItem )
             analyse_menu.AppendSubMenu(newmenu,mainItem)
-        # preparation_menu.Append(ID_PREPARATION_OUTLIERS, 'Check for Outliers...')
-        # preparation_menu.Append(ID_PREPARATION_NORMALITY, 'Check for Normal Distribution...')
-        # self.mn21=analyse_menu.Append(ID_ANALYSE_1COND, '&1 Condition Tests...')
-        # self.mn22=analyse_menu.Append(ID_ANALYSE_2COND, '&2 Condition Tests...')
-        # self.mn23=analyse_menu.Append(ID_ANALYSE_3COND, '&3+ Condition Tests...')
-        # self.mn24=analyse_menu.Append(ID_ANALYSE_CORRELATION,'&Correlations...')
-        # analyse_menu.Append(ID_ANALYSE_2FACT, '2+ &Factor Tests...')
 
-
-        self.mn26= chart_menu.Append(ID_CHART_DRAW, 'Line Chart of All Means...')
-        self.mn27= chart_menu.Append(ID_BARCHART_DRAW, 'Bar Chart of All Means...')
+        self.mn26= chart_menu.Append(wx.ID_ANY, 'Line Chart of All Means...')
+        self.mn27= chart_menu.Append(wx.ID_ANY, 'Bar Chart of All Means...')
         self.mn273= chart_menu.Append(wx.NewId(), 'Lines')
         self.mn271= chart_menu.Append(wx.NewId(), 'Scatter')
         self.mn272= chart_menu.Append(wx.NewId(), 'Box&Wishker Plot')
         self.mn274= chart_menu.Append(wx.NewId(), 'Lineal Regress')
 
-        self.mn28=help_menu.Append(ID_HELP_WIZARD, '&What Test Should I Use...')
-        self.mn29=help_menu.Append(ID_HELP_TOPICS, '&Topics...')
-        self.mn30=help_menu.Append(ID_HELP_LICENCE, '&Licence...')
-        self.mn31=help_menu.Append(ID_HELP_ABOUT, '&About...')
+        self.mn28=help_menu.Append(wx.ID_ANY, '&What Test Should I Use...')
+        self.mn29=help_menu.Append(wx.ID_ANY, '&Topics...')
+        self.mn30=help_menu.Append(wx.ID_ANY, '&Licence...')
+        self.mn31=help_menu.Append(wx.ID_ANY, '&About...')
         #set up menu bar
         menuBar = wx.MenuBar()
         menuBar.Append(file_menu, '&File')
@@ -1461,8 +1232,8 @@ class DataFrame(wx.Frame):
 
         #create toolbar (nothing to add yet!)
         tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
-                            agwStyle=  aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_OVERFLOW)
-        ##tb1.SetDimensions(wx.Size(16,16))
+                            agwStyle=  aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
+
         self.bt1 = tb1.AddSimpleTool(10, "New",  NewIcon,"New")
         self.bt2 = tb1.AddSimpleTool(20, "Open", OpenIcon,"Open")
         self.bt3 = tb1.AddSimpleTool(30, "Save", SaveIcon,"Save")
@@ -1479,8 +1250,6 @@ class DataFrame(wx.Frame):
         self.bt9 = tb1.AddSimpleTool(85, "Preferences",PrefsIcon, "Preferences")
         self.bt10= tb1.AddSimpleTool(90, "Help", HelpIcon, "Help")
         tb1.SetToolBitmapSize((24,24))
-        # more toolbuttons are needed: New Output, Save, Print, Cut, \
-        # Variables, and Wizard creates the toolbar
         tb1.Realize()
 
         #--------------------
@@ -1497,8 +1266,6 @@ class DataFrame(wx.Frame):
         # adicion de panel para mostrar las respuestas
         self.answerPanel = NoteBookSheet(self)
 
-
-
         self.answerPanel2 = ScriptPanel(self, self.logPanel, self.grid.m_grid, self.answerPanel)
 
         #--------------------------------------------
@@ -1510,6 +1277,14 @@ class DataFrame(wx.Frame):
         self.scriptPanel.wrap(True)
 
         self.m_notebook1.AddPage( self.scriptPanel , u"Shell", False )
+        #-------------------------------
+        self.formulaBarPanel= formulaBar(self,wx.ID_ANY)
+
+        self.m_mgr.AddPane( self.formulaBarPanel,
+                            aui.AuiPaneInfo().ToolbarPane().Top().Row(1).
+                            Position(1).
+                            LeftDockable(False).RightDockable(False).
+                            MinSize( wx.Size( -1,15 ) ).CloseButton( False ) )
 
         self.m_mgr.AddPane(self.grid,
                            aui.AuiPaneInfo().Centre().
@@ -1523,11 +1298,10 @@ class DataFrame(wx.Frame):
                            MinimizeButton(True).Resizable(True).MaximizeButton(True).
                            CloseButton( False ).MinSize( wx.Size( 240,-1 )))
 
-        self.m_mgr.AddPane( tb1, aui.AuiPaneInfo().Top().Dock().
-                            Resizable(False).FloatingSize( wx.DefaultSize ).
-                            DockFixed( False ).Layer(1).ToolbarPane().
-                            LeftDockable( False ).RightDockable(False).
-                            CloseButton(False ) )
+        self.m_mgr.AddPane( tb1, aui.AuiPaneInfo().
+                            ToolbarPane().Top().Row(1).
+                            LeftDockable( False ).RightDockable( False ).
+                            CloseButton( False ) )
 
         self.m_mgr.AddPane(self.answerPanel2,
                            aui.AuiPaneInfo().Centre().Right().
@@ -1535,7 +1309,7 @@ class DataFrame(wx.Frame):
                            MinimizeButton().Resizable(True).MaximizeButton(True).
                            CloseButton( False ).MinSize( wx.Size( 240,-1 )))
 
-        self.panelNtb = self.m_mgr.AddPane( self.m_notebook1, 
+        self.panelNtb = self.m_mgr.AddPane( self.m_notebook1,
                                             aui.AuiPaneInfo() .Bottom() .
                                             CloseButton( False ).MaximizeButton( True ).
                                             Caption(('Shell')).
@@ -1547,10 +1321,13 @@ class DataFrame(wx.Frame):
         self.m_mgr.Update()
 
     def BindEvents(self):
+        # grid callback
+        self.grid.m_grid.Bind( wx.grid.EVT_GRID_CMD_SELECT_CELL, self._cellSelectionChange )
+        self.grid.m_grid.Bind( wx.grid.EVT_GRID_SELECT_CELL, self._cellSelectionChange )
         #-----------------
         # para el toolbar
         self.Bind(wx.EVT_MENU, self.GoClearData,        id = self.bt1.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.LoadDataASCII, id = self.bt2.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.LoadXls, id = self.bt2.GetId())
         self.Bind(wx.EVT_MENU, self.grid.SaveXls,  id = self.bt3.GetId())
         self.Bind(wx.EVT_MENU, self.grid.SaveXlsAs,id= self.bt4.GetId())
         ##self.Bind(wx.EVT_MENU, self.grid.PrintPage, id = self.bt5.GetId())
@@ -1564,7 +1341,7 @@ class DataFrame(wx.Frame):
         #-----------------
         # Menu
         self.Bind(wx.EVT_MENU, self.GoClearData,        id = self.mn1.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.LoadDataASCII, id = self.mn2.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.LoadXls, id = self.mn2.GetId())
         self.Bind(wx.EVT_MENU, self.grid.SaveXls, id = self.mn3.GetId())
         self.Bind(wx.EVT_MENU, self.grid.SaveXlsAs,id = self.mn4.GetId())
         ##self.Bind(wx.EVT_MENU, seelf.grid.SaveXlsAs,id = ID_FILE_PRINT)
@@ -1582,10 +1359,7 @@ class DataFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.GoFontPrefsDialog,  id = self.mn18.GetId())
         self.Bind(wx.EVT_MENU, self.GoContinuousDescriptives,id = self.mn19.GetId())
         self.Bind(wx.EVT_MENU, self.GoTransformData,    id = self.mn20.GetId())
-        #self.Bind(wx.EVT_MENU, self.GoOneConditionTest, id = self.mn21.GetId())
-        #self.Bind(wx.EVT_MENU, self.GoTwoConditionTest, id = self.mn22.GetId())
-        #self.Bind(wx.EVT_MENU, self.GetThreeConditionTest,id = self.mn23.GetId())
-        #self.Bind(wx.EVT_MENU, self.GetCorrelationsTest,id = self.mn24.GetId())
+        self.Bind(wx.EVT_MENU, self.shortData,          id = self.mn21.GetId())
 
         self.Bind(wx.EVT_MENU, self.GoChartWindow,      id = self.mn26.GetId())
         self.Bind(wx.EVT_MENU, self.GoBarChartWindow,   id = self.mn27.GetId())
@@ -1597,31 +1371,22 @@ class DataFrame(wx.Frame):
         # controlling the expansion of the notebook
         self.m_notebook1.Bind( wx.EVT_LEFT_DCLICK, self._OnNtbDbClick )
 
-        self.grid.m_grid.setPadreCallBack(self) 
+        self.grid.m_grid.setPadreCallBack(self)
         if 0:
-            self.Bind(wx.EVT_MENU, self.GoCheckOutliers,    id = ID_PREPARATION_OUTLIERS)
-            #self.Bind(wx.EVT_MENU, ID_ANALYSE_2FACT, self.GoMFanovaFrame)
-            self.Bind(wx.EVT_MENU, self.GoHelpAboutFrame,   id = ID_HELP_ABOUT)
-            self.Bind(wx.EVT_MENU, self.GoHelpWizardFrame,  id = ID_HELP_WIZARD)
-            self.Bind(wx.EVT_MENU, self.GoHelpTopicsFrame,  id = ID_HELP_TOPICS)
-            self.Bind(wx.EVT_MENU, self.GoHelpLicenceFrame, id = ID_HELP_LICENCE)
-            self.Bind(wx.EVT_MENU, self.EndApplication,     id = ID_FILE_EXIT)
+            self.Bind(wx.EVT_MENU, self.GoCheckOutliers,    id = self.mn26.GetID())
+            self.Bind(wx.EVT_MENU, self.GoHelpAboutFrame,   id = self.mn27.GetID())
+            self.Bind(wx.EVT_MENU, self.GoHelpWizardFrame,  id = self.mn28.GetID())
+            self.Bind(wx.EVT_MENU, self.GoHelpTopicsFrame,  id = self.mn29.GetID())
+            self.Bind(wx.EVT_MENU, self.GoHelpLicenceFrame, id = self.mn30.GetID())
+
+    def _cellSelectionChange(self, event):
+        # se lee el contenido de la celda seleccionada
+        row = event.GetRow()
+        col = event.GetCol()
+        texto =self.grid.m_grid.GetCellValue(row, col)
+        self.formulaBarPanel.m_textCtrl1.SetValue(texto)
 
 
-            self.Bind(wx.EVT_MENU, self.GoClearData, id=10) ### VERIFICAR
-            # self.Bind(wx.EVT_MENU, ID_FILE_NEWOUTPUT, self.GoNewOutputSheet)
-            # unsure if I want this - maybe restrict user to just one?
-            self.Bind(wx.EVT_MENU, self.grid.SaveXls, id =  30)
-            self.Bind(wx.EVT_MENU, self.grid.SaveAsSaveXlsAs40)
-            #self.Bind(wx.EVT_MENU, ID_FILE_OPEN, self.grid.LoadNumericData)
-            self.Bind(wx.EVT_MENU, self.grid.LoadDataASCII, id = 20)
-            #EVT_TOOL(self, 20, self.grid.LoadNumericData)
-            self.Bind(wx.EVT_MENU, self.grid.CutData, id= 60)
-            self.Bind(wx.EVT_MENU, self.grid.CopyData, id = 70)
-            self.Bind(wx.EVT_MENU, self.grid.PasteData, id = 80)
-
-
-            self.Bind(wx.EVT_CLOSE, self.EndApplication, self)
     def _OnNtbDbClick(self,event):
         for pane in self.mm_mgr.AllPanes:
             if pane.name == 'Bottom Panel':
@@ -1702,10 +1467,14 @@ class DataFrame(wx.Frame):
         if len(selectedcols) == 0:
             self.SetStatusText('You need to select some data to draw a graph!')
             return
-        data = [salstat_stats.FullDescriptives(self.grid.CleanData(cols)) for cols in [colnums[m] for m in selectedcols]]
+        data = [statistics(self.grid.CleanData(cols), 'noname',None) for cols in [colnums[m] for m in selectedcols]]
         data = [data[i].mean for i in range(len(data))]
         plt= plot(parent = self, typePlot= 'plotLine',
-                  data2plot= ((range(len(data)),data,'Mean'),))
+                  data2plot= ((range(len(data)),data,'Mean'),),
+                  xlabel = 'variable',
+                  ylabel= 'mean',
+                  title= 'Line Chart of all means',
+                  xtics= [waste[i] for i in selectedCols])
         plt.Show()
 
     def GoBarChartWindow(self, event):
@@ -1722,10 +1491,13 @@ class DataFrame(wx.Frame):
         if len(selectedcols) == 0:
             self.SetStatusText('You need to select some data to draw a graph!')
             return
-        data = [salstat_stats.FullDescriptives(self.grid.CleanData(cols)) for cols in [colnums[m] for m in selectedcols]]
+        data = [statistics(self.grid.CleanData(cols),'noname',None) for cols in [colnums[m] for m in selectedcols]]
         data = [data[i].mean for i in range(len(data))]
         plt= plot(parent = self, typePlot= 'plotBar',
-                  data2plot= ((data,'Mean'),))
+                  data2plot= ((data,'Mean'),),
+                  xlabel= 'variable',
+                  ylabel= 'value',
+                  title= 'Bar Chart of all means')
         plt.Show()
 
     def GoHelpWizardFrame(self, event):
@@ -1764,7 +1536,10 @@ class DataFrame(wx.Frame):
             self.SetStatusText('x and y data mus have the same size!')
             return
         plt= plot(parent = self, typePlot= 'plotScatter',
-                  data2plot= ((data[0],data[1],waste[xcol] +u' Vs '+ waste[ycol]),))
+                  data2plot= ((data[0],data[1],waste[xcol] +u' Vs '+ waste[ycol]),),
+                  xlabel= waste[xcol],
+                  ylabel= waste[ycol],
+                  title= 'Scatter Plot')
         plt.Show()
 
     def GoBoxWishkerPlot(self,event):
@@ -1783,7 +1558,12 @@ class DataFrame(wx.Frame):
             return
         data = [self.grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]]
         plt= plot(parent = self, typePlot= 'boxPlot',
-                  data2plot= data)
+                  data2plot= data,
+                  xlabel = 'variable',
+                  ylabel = 'value',
+                  title= 'Box & whiskler plot',
+                  xtics=  [waste[i] for i in selectedcols] )
+
         plt.Show()
 
     def GoLinesPlot(self, event):
@@ -1802,8 +1582,13 @@ class DataFrame(wx.Frame):
             return
         data = [self.grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]]
         data = [(range(len(data[i])),data[i],waste[i]) for i in range(len(data))]
+
         plt= plot(parent = self, typePlot= 'plotLine',
-                  data2plot= data)
+                  data2plot= data,
+                  xlabel = '',
+                  ylabel = 'value',
+                  title= 'Line plot')
+
         plt.Show()
 
     def GoLinRegressPlot(self, event):
@@ -1822,7 +1607,9 @@ class DataFrame(wx.Frame):
             self.SetStatusText('x and y data mus have the same size!')
             return
         plt= plot(parent = self, typePlot= 'plotLinRegress',
-                  data2plot= (data[0],data[1],waste[xcol] +u' Vs '+ waste[ycol]) )
+                  data2plot= (data[0],data[1],waste[xcol] +u' Vs '+ waste[ycol]),
+                  xlabel = waste[xcol], ylabel = waste[ycol],
+                  title= 'Lin Regress plot' )
         plt.Show()
 
     def EndApplication(self, evt):
@@ -1855,7 +1642,9 @@ class DataFrame(wx.Frame):
 #------------------------------------------
 # definicion de las funciones estadisticas
 #------------------------------------------
-    def _statsType1(self, functionName, useNumpy = True):
+    def _statsType1(self, functionName, useNumpy = True,
+                    requiredcols= None,allColsOneCalc = False,
+                    nameResults= None, dataSquare= False):
         group = lambda x,y: (x,y)
         setting = self.defaultDialogSettings
         setting['Title'] = functionName
@@ -1878,7 +1667,93 @@ class DataFrame(wx.Frame):
         if len( colNameSelect ) == 0:
             self.logPanel.write("you don't select any items")
             return
-        values = [ [pos for pos, value in enumerate( ColumnList ) 
+
+        if len(colNameSelect) < None:
+            self.logPanel.write("you have to select at least %i columns"%requiredcols)
+            return
+
+        values = [ [pos for pos, value in enumerate( ColumnList )
+                    if value == val
+                    ][0]
+                    for val in colNameSelect
+                    ]
+        # -------------------
+        if useNumpy:
+            colums  = list()
+            for pos in values:
+                col = numpy.array(GetData(colnums[ pos ]))
+                col.shape = (len(col),1)
+                colums.append(col)
+        else:
+            colums = [ GetData(colnums[ pos ]) for pos in values]
+
+        if dataSquare:
+            # identifica que las columnas seleccionadas deben tener igual
+            #  cantidad de elementos
+            lendata= [len(col) for col in colums]
+            if sum([1 for leni in lendata if leni == lendata[0]]) <> len(colums):
+                return "the data must have the same size"
+
+        if allColsOneCalc:
+            result = getattr(stats, functionName)( *colums )
+        else:
+            # se hace los calculos para cada columna
+            result = [getattr(stats, functionName)( col ) for col in colums]
+
+        # se muestra los resultados
+        if nameResults == None:
+            output.addColData(colNameSelect, functionName)
+        else:
+            output.addColData(nameResults, functionName)
+        if functionName in ['kurtosis','kurtosistest','skewtest',
+                            'normaltest','mode']:
+            opt = False
+            try:
+                len(result[0])
+            except:
+                opt = True
+
+            if opt:
+                output.addColData(result)
+            else:
+                for i in range(len(result[0])):
+                    res1= [res[i] for res in result]
+                    output.addColData(res1)
+
+        else:
+            output.addColData(result)
+
+        self.logPanel.write(functionName + ' successfull')
+
+    def _statsType2(self, functionName, texto = 'moment',spinData= (1,100,1),
+                     factor = 1, useNumpy = True):
+        ''''select plus spin crtl'''
+        group = lambda x,y: (x,y)
+        setting = self.defaultDialogSettings
+        setting['Title'] = functionName
+        ColumnList, colnums  = frame.grid.GetUsedCols()
+        bt1= group('StaticText', ('Columns to analyse',) )
+        bt2= group('CheckListBox', (ColumnList,))
+        bt3= group('SpinCtrl', spinData)
+        bt4= group('StaticText', (texto,) )
+        structure = list()
+        structure.append([bt2, bt1])
+        structure.append([bt3, bt4])
+        dlg = dialog(settings = setting, struct= structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        # -------------------
+        # changing value strings to numbers
+        (colNameSelect, moment) = values
+        moment = moment * factor
+        if len( colNameSelect ) == 0:
+            self.logPanel.write("you don't select any items")
+            return
+        values = [ [pos for pos, value in enumerate( ColumnList )
                     if value == val
                     ][0]
                     for val in colNameSelect
@@ -1893,40 +1768,469 @@ class DataFrame(wx.Frame):
         else:
             colums = [ GetData(colnums[ pos ]) for pos in values]
         # se hace los calculos para cada columna
-        result = [getattr(stats, functionName)( col ) for col in colums]
+        result = [getattr(stats, functionName)( col, moment ) for col in colums]
         # se muestra los resultados
         output.addColData(colNameSelect, functionName)
         output.addColData(result)
         self.logPanel.write(functionName + ' successfull')
-        
+
+    def _statsType3(self, functionName, texto1 = u'',
+                    texto2 = u'', useNumpy = False, nameCols = None,
+                    **params):
+        group = lambda x,y: (x,y)
+        setting = self.defaultDialogSettings
+        setting['Title'] = functionName
+        ColumnList, colnums  = frame.grid.GetUsedCols()
+
+        bt1= group('StaticText',   (texto1,) )
+        bt2= group('Choice',       (ColumnList,))
+        bt3= group('StaticText',   (texto2,) )
+
+        structure = list()
+        structure.append([bt2, bt1])
+        structure.append([bt2, bt3])
+        dlg = dialog(settings = setting, struct= structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        # -------------------
+        # changing value strings to numbers
+        (xcolname, ycolname) = values
+        if len( xcolname ) == 0 or len( ycolname ) == 0:
+            self.logPanel.write("you don't select any items")
+            return
+        xvalue= [ [pos for pos, value in enumerate( ColumnList )
+                    if value == val
+                    ][0]
+                    for val in xcolname
+                    ][0]
+        yvalue= [ [pos for pos, value in enumerate( ColumnList )
+                    if value == val
+                    ][0]
+                    for val in ycolname
+                    ][0]
+        # -------------------
+        if useNumpy:
+            xcolumn = numpy.array(GetData(colnums[ xvalue ]))
+            ycolumn = numpy.array(GetData(colnums[ yvalue ]))
+            xcolumn.shape= (len(xcolumn), 1)
+            ycolumn.shape= (len(ycolumn), 1)
+        else:
+            xcolumn = GetData(colnums[ xvalue ])
+            ycolumn = GetData(colnums[ yvalue ])
+
+        # se hace los calculos
+        result = getattr(stats, functionName)( xcolumn, ycolumn, **params)
+        # se muestra los resultados
+        if nameCols != None:
+            output.addColData(nameCols, functionName)
+            output.addColData(result)
+        else:
+            output.addColData(result, functionName)
+        self.logPanel.write(functionName + ' successfull')
+
+
+    def shortData(self,event):
+        functionName = "short"
+        useNumpy = False
+        requiredcols= None
+        allColsOneCalc = False,
+        dataSquare= False
+        group = lambda x,y: (x,y)
+        setting = self.defaultDialogSettings
+        setting['Title'] = functionName
+        ColumnList, colnums  = frame.grid.GetUsedCols()
+        bt1= group('StaticText', ('Select the column to short',) )
+        bt2 = group('Choice',    (ColumnList,))
+        structure = list()
+        structure.append([bt1,])
+        structure.append([bt2,])
+        dlg = dialog(settings = setting, struct= structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        # -------------------
+        # changing value strings to numbers
+        colNameSelect = values[0]
+        if len( colNameSelect ) == 0:
+            self.logPanel.write("you don't select any items")
+            return
+
+        if len(colNameSelect) < None:
+            self.logPanel.write("you have to select at least %i columns"%requiredcols)
+            return
+
+        values = [ [pos for pos, value in enumerate( ColumnList )
+                    if value == val
+                    ][0]
+                    for val in colNameSelect
+                    ]
+        # -------------------
+        if useNumpy:
+            colums  = list()
+            for pos in values:
+                short = stats.shellsort( GetData(colnums[ pos ]) )[0]
+                col = numpy.array(short)
+                col.shape = (len(col),1)
+                colums.append(col)
+        else:
+            colums = stats.shellsort(GetData(colnums[ values[0] ]))
+
+        # se muestra los resultados
+        output.addColData(colNameSelect, functionName)
+        output.addColData(colums[0])
+        output.addColData(colums[1])
+        self.logPanel.write(functionName + ' successfull')
+
+
     def geometricmean(self,event):
         self._statsType1("geometricmean")
 
     def harmonicmean(self,event):
         self._statsType1("harmonicmean")
-        
+
     def mean(self,event):
         self._statsType1("mean")
 
     def median(self,event):
         self._statsType1("median")
-        
+
     def medianscore(self,event):
         self._statsType1("medianscore")
-        
+
     def mode(self,event):
         self._statsType1("mode")
-        
+
     def moment(self,event):
-        functionName = "moment"
+        self._statsType2("scoreatpercentile", texto = 'moment',
+                        spinData = (1,100,1))
+
+    def variation(self,event):
+        self._statsType1("variation")
+
+    def skew(self,event):
+        self._statsType1("skew")
+
+    def kurtosis(self,event):
+        self._statsType1("kurtosis")
+
+    def skewtest(self,event):
+        self._statsType1("skewtest", useNumpy = False)
+
+    def kurtosistest(self,event):
+        self._statsType1("kurtosistest", useNumpy = False)
+
+    def normaltest(self,event):
+        self._statsType1("normaltest", useNumpy = True)
+
+    def itemfreq(self,event):
+        functionName = "itemfreq"
+        useNumpy = True
+        requiredcols= None
+        allColsOneCalc = False,
+        dataSquare= False
         group = lambda x,y: (x,y)
         setting = self.defaultDialogSettings
         setting['Title'] = functionName
         ColumnList, colnums  = frame.grid.GetUsedCols()
-        bt1= group('StaticText', ('Columns to analyse',) )
+        bt1= group('StaticText', ('Select the columns to analyse',) )
+        bt2 = group('Choice',    (ColumnList,))
+        structure = list()
+        structure.append([bt1,])
+        structure.append([bt2,])
+        dlg = dialog(settings = setting, struct= structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        # -------------------
+        # changing value strings to numbers
+        colNameSelect = values[0]
+        if len( colNameSelect ) == 0:
+            self.logPanel.write("you don't select any items")
+            return
+
+        if len(colNameSelect) < None:
+            self.logPanel.write("you have to select at least %i columns"%requiredcols)
+            return
+
+        values = [ [pos for pos, value in enumerate( ColumnList )
+                    if value == val
+                    ][0]
+                    for val in colNameSelect
+                    ]
+        # -------------------
+        if useNumpy:
+            colums  = list()
+            for pos in values:
+                short = stats.shellsort( GetData(colnums[ pos ]) )[0]
+                col = numpy.array(short)
+                col.shape = (len(col),1)
+                colums.append(col)
+        else:
+            colums = [ stats.shellsort(GetData(colnums[ pos ]))[0] for pos in values]
+
+        if dataSquare:
+            # identifica que las columnas seleccionadas deben tener igual
+            #  cantidad de elementos
+            lendata= [len(col) for col in colums]
+            if sum([1 for leni in lendata if leni == lendata[0]]) <> len(colums):
+                return "the data must have the same size"
+
+        if allColsOneCalc:
+            result = getattr(stats, functionName)( *colums )
+        else:
+            # se hace los calculos para cada columna
+            result = [getattr(stats, functionName)( col ) for col in colums]
+
+        # se muestra los resultados
+        output.addColData(colNameSelect, functionName)
+
+        for i in range(len(result[0])):
+            res1= [res[i] for res in result]
+            output.addColData(res1)
+
+        self.logPanel.write(functionName + ' successfull')
+
+
+
+    def scoreatpercentile(self,event):
+        self._statsType2("scoreatpercentile", texto = ' %',
+                        spinData = (0,100,0))
+
+    def percentileofscore(self,event):
+        #adiconar dos parametros pendientes
+        self._statsType2("scoreatpercentile", texto = 'Score',)
+
+    def histogram(self,event):
+        #adiconar dos parametros pendientes
+        self._statsType2("histogram", texto = 'number of bins',
+                     spinData = (1,100,10))
+
+    def cumfreq(self,event):
+        #adiconar un parametro pendiente
+        self._statsType2("cumfreq", texto = 'number of beans' )
+
+    def relfreq(self,event):
+        #adiconar un parametro pendiente
+        self._statsType2("relfreq", texto = 'number of bins',
+                     spinData = (1,100,10))
+
+    #def obrientransform(self,event):
+    #    self.logPanel.write('obrientransform')
+
+    def samplevar(self,event):
+        self._statsType1("samplevar")
+
+    def samplestdev(self,event):
+        self._statsType1("samplestdev")
+
+    def signaltonoise(self,event):
+        self._statsType2("signaltonoise", texto = 'dimension',
+                     spinData = (0,100,0))
+
+    def var(self,event):
+        self._statsType1("var")
+
+    def stdev(self,event):
+        self._statsType1("stdev")
+
+    def sterr(self,event):
+        self._statsType1("sterr")
+
+    def sem(self,event):
+        self._statsType1("sem")
+
+    def z(self,event):
+        self._statsType2("z", texto = 'score',
+                spinData = (1,100, 1))
+
+    def zs(self,event):
+        self._statsType1("zs")
+
+    def zmap(self,event):
+        self.logPanel.write('zmap')
+
+    def threshold(self,event):
+        functionName= "threshold"
+        group= lambda x,y: (x,y)
+        setting= self.defaultDialogSettings
+        setting['Title']= functionName
+        ColumnList, colnums= frame.grid.GetUsedCols()
+
+        bt1= group('StaticText',   ('Columns to analyse',),)
+        bt2= group('Choice',       (ColumnList,),)
+        bt3= group('NumTextCtrl',  (),)
+        bt4= group('StaticText',   ("threshmin",),)
+        bt5= group('NumTextCtrl',  (), )
+        bt6= group('StaticText',   ("threshmax",),)
+        bt7= group('NumTextCtrl',  (),)
+        bt8= group('StaticText',   ("newval",),)
+
+        structure = list()
+        structure.append([bt2, bt1])
+        structure.append([bt3, bt4])
+        structure.append([bt5, bt6])
+        structure.append([bt7, bt8])
+        dlg = dialog(settings = setting, struct= structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        # -------------------
+        # changing value strings to numbers
+        (colNameSelect, threshmin, threshmax, newval) = values
+        if len( colNameSelect ) == 0:
+            self.logPanel.write("you don't select any items")
+            return
+        if threshmin == None or threshmax == None or newval == None:
+            self.logPanel.write("you don't input all the required values")
+            return
+        values = [ [pos for pos, value in enumerate( ColumnList )
+                    if value == val
+                    ][0]
+                    for val in colNameSelect
+                    ]
+        # -------------------
+        useNumpy = True
+        if useNumpy:
+            colums  = list()
+            for pos in values:
+                col = numpy.array(GetData(colnums[ pos ]))
+                col.shape = (len(col),1)
+                colums.append(col)
+        else:
+            colums = [ GetData(colnums[ pos ]) for pos in values]
+
+        # se hace los calculos para cada columna
+        result = [getattr(stats, functionName)( col, threshmin, threshmax, newval ) for col in colums]
+        # se muestra los resultados
+        output.addColData(colNameSelect, functionName)
+        output.addColData(result)
+        self.logPanel.write(functionName + ' successfull')
+
+    def trimboth(self,event):
+        self._statsType2("trimboth", texto = '% proportiontocut',
+                spinData = (1,100, 1), factor = 0.01)
+
+    def trim1(self,event):
+        functionName = "trim1"
+        group = lambda x,y: (x,y)
+        setting = self.defaultDialogSettings
+        setting['Title'] = functionName
+        ColumnList, colnums  = frame.grid.GetUsedCols()
+
+        bt1= group('StaticText',   ('Columns to analyse',) )
         bt2= group('CheckListBox', (ColumnList,))
-        bt3= group('SpinCtrl', ( 1, 100, 1 ))
-        bt4= group('StaticText', ('moment',) )
+        bt3= group('NumTextCtrl',  ())
+        bt4= group('StaticText',   ("proportiontocut",) )
+        bt5= group('Choice',       (("right","left"),) )
+        bt6= group('StaticText',   ("proportiontocut",) )
+
+        structure = list()
+        structure.append([bt2, bt1])
+        structure.append([bt3, bt4])
+        structure.append([bt5, bt6])
+        dlg = dialog(settings = setting, struct= structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        # -------------------
+        # changing value strings to numbers
+        (colNameSelect, proportiontocut, tail) = values
+        if len( colNameSelect ) == 0:
+            self.logPanel.write("you don't select any items")
+            return
+        values = [ [pos for pos, value in enumerate( ColumnList )
+                    if value == val
+                    ][0]
+                    for val in colNameSelect
+                    ]
+
+        # -------------------
+        colums = [ GetData(colnums[ pos ]) for pos in values]
+        # se hace los calculos para cada columna
+        result = [getattr(stats, functionName)( col, proportiontocut, tail ) for col in colums]
+        # se muestra los resultados
+        output.addColData(colNameSelect, functionName)
+        output.addColData(result)
+        self.logPanel.write(functionName + ' successfull')
+
+
+    #def covariance(self, event):
+    #    self._statsType1("covariance")
+
+    #def correlation(self, event):
+    #    self.logPanel.write('correlation')
+
+    def paired(self, event):
+        self._statsType3(functionName = "paired",
+                        texto1 = u"X Column to analyse",
+                        texto2 = u"Y Column to analyse",
+                        useNumpy = False, allData = True)
+
+    def pearsonr(self, event):
+        self._statsType3(functionName = "pearsonr",
+                        texto1 = u"X Column to analyse",
+                        texto2 = u"Y Column to analyse",
+                        useNumpy = True,
+                        nameCols= ("Pearson's r"," two-tailed p-value"))
+
+
+    def spearmanr(self, event):
+        self._statsType3(functionName = "spearmanr",
+                        texto1 = u"X Column to analyse",
+                        texto2 = u"Y Column to analyse",
+                        useNumpy = True,
+                        nameCols= ("Spearman's r","two-tailed p-value"))
+
+    def pointbiserialr(self, event):
+        self._statsType3(functionName = "pointbiserialr",
+                        texto1 = u"X Column to analyse",
+                        texto2 = u"Y Column to analyse",
+                        useNumpy = True,
+                        nameCols= ("Point-biserial r","two-tailed p-value"))
+
+    def kendalltau(self, event):
+        self._statsType3(functionName = "kendalltau",
+                        texto1 = u"X Column to analyse",
+                        texto2 = u"Y Column to analyse",
+                        useNumpy = True,
+                        nameCols = ("Kendall's tau"," two-tailed p-value"))
+
+    def linregress(self, event):
+        self._statsType3(functionName = "linregress",
+                        texto1 = u"X Column to analyse",
+                        texto2 = u"Y Column to analyse",
+                        useNumpy = True,
+                        nameCols= ("slope", "intercept", "r", "two-tailed prob",
+                                    "sterr-of-the-estimate", "n"))
+
+    def ttest_1samp(self, event):
+        functionName = "ttest_1samp"
+        group = lambda x,y: (x,y)
+        setting = self.defaultDialogSettings
+        setting['Title'] = functionName
+        ColumnList, colnums  = frame.grid.GetUsedCols()
+
+        bt1= group('StaticText',   ('Column to analyse',) )
+        bt2= group('Choice',       (ColumnList,))
+        bt3= group('NumTextCtrl',  ())
+        bt4= group('StaticText',   ("popmean",) )
+
         structure = list()
         structure.append([bt2, bt1])
         structure.append([bt3, bt4])
@@ -1939,142 +2243,599 @@ class DataFrame(wx.Frame):
             return
         # -------------------
         # changing value strings to numbers
-        (colNameSelect, moment) = values
+        (colNameSelect, popmean) = values
         if len( colNameSelect ) == 0:
             self.logPanel.write("you don't select any items")
             return
-        values = [ [pos for pos, value in enumerate( ColumnList ) 
+        values = [ [pos for pos, value in enumerate( ColumnList )
                     if value == val
                     ][0]
                     for val in colNameSelect
                     ]
+
         # -------------------
-        colums = [ GetData(colnums[ pos ]) for pos in values]
+        columns = [ GetData(colnums[ pos ]) for pos in values][0]
         # se hace los calculos para cada columna
-        result = [getattr(stats, functionName)( col, moment ) for col in colums]
+        result = getattr(stats, functionName)( columns, popmean)
         # se muestra los resultados
+        colNameSelect = ['t','prob']
         output.addColData(colNameSelect, functionName)
         output.addColData(result)
         self.logPanel.write(functionName + ' successfull')
-    
-    def variation(self,event):
-        self._statsType1("variation")
-        
-    def skew(self,event):
-        self._statsType1("skew")
-        
-    def kurtosis(self,event):
-        self._statsType1("kurtosis")
-        
-    def skewtest(self,event):
-        self._statsType1("skewtest", useNumpy = False)
-        
-    def kurtosistest(self,event):
-        self._statsType1("kurtosistest", useNumpy = False)
-        
-    def normaltest(self,event):
-        self.logPanel.write('Not implemented yet')
-        #self._statsType1("normaltest", useNumpy = True)
-        
-    def itemfreq(self,event):
-        self.logPanel.write('itemfreq')
-    def scoreatpercentile(self,event):
-        self.logPanel.write('scoreatpercentile')
-    def percentileofscore(self,event):
-        self.logPanel.write('percentileofscore')
-    def histogram(self,event):
-        self.logPanel.write('histogram')
-    def cumfreq(self,event):
-        self.logPanel.write('cumfreq')
-    def relfreq(self,event):
-        self.logPanel.write('relfreq')
-    def obrientransform(self,event):
-        self.logPanel.write('obrientransform')
-    def samplevar(self,event):
-        self.logPanel.write('samplevar')
-    def samplestdev(self,event):
-        self.logPanel.write('samplestdev')
-    def signaltonoise(self,event):
-        self.logPanel.write('signaltonoise')
-    def var(self,event):
-        self.logPanel.write('var')
-    def stdev(self,event):
-        self.logPanel.write('stdev')
-    def sterr(self,event):
-        self.logPanel.write('sterr')
-    def sem(self,event):
-        self.logPanel.write('sem')
-    def z(self,event):
-        self.logPanel.write('z')
-    def zs(self,event):
-        self.logPanel.write('zs')
-    def zmap(self,event):
-        self.logPanel.write('zmap')
-    def threshold(self,event):
-        self.logPanel.write('threshold')
-    def trimboth(self,event):
-        self.logPanel.write('trimboth')
-    def trim1(self,event):
-        self.logPanel.write('trim1')
-    def round(self,event):
-        self.logPanel.write('round')
-    def covariance(self,event):
-        self.logPanel.write('covariance')
-    def correlation(self,event):
-        self.logPanel.write('correlation')
-    def paired(self,event):
-        self.logPanel.write('paired')
-    def pearsonr(self,event):
-        self.logPanel.write('pearsonr')
-    def spearmanr(self,event):
-        self.logPanel.write('spearmanr')
-    def pointbiserialr(self,event):
-        self.logPanel.write('pointbiserialr')
-    def kendalltau(self,event):
-        self.logPanel.write('kendalltau')
-    def linregress(self,event):
-        self.logPanel.write('linregress')
-    def ttest_1samp(self,event):
-        self.logPanel.write('ttest_1samp')
-    def ttest_ind(self,event):
-        self.logPanel.write('ttest_ind')
-    def ttest_rel(self,event):
-        self.logPanel.write('ttest_rel')
-    def chisquare(self,event):
-        self.logPanel.write('chisquare')
-    def ks_2samp(self,event):
-        self.logPanel.write('ks_2samp')
-    def mannwhitneyu(self,event):
-        self.logPanel.write('mannwhitneyu')
-    def ranksums(self,event):
-        self.logPanel.write('ranksums')
-    def wilcoxont(self,event):
-        self.logPanel.write('wilcoxont')
-    def kruskalwallish(self,event):
-        self.logPanel.write('kruskalwallish')
-    def friedmanchisquare(self,event):
-        self.logPanel.write('friedmanchisquare')
-    def chisqprob(self,event):
-        self.logPanel.write('chisqprob')
-    def erfcc(self,event):
-        self.logPanel.write('erfcc')
-    def zprob(self,event):
-        self.logPanel.write('zprob')
-    def ksprob(self,event):
-        self.logPanel.write('ksprob')
-    def fprob(self,event):
-        self.logPanel.write('fprob')
-    def betacf(self,event):
-        self.logPanel.write('betacf')
-    def gammln(self,event):
-        self.logPanel.write('gammln')
-    def betai(self,event):
-        self.logPanel.write('betai')
-    def F_oneway(self,event):
-        self.logPanel.write('F_oneway')
-    def F_value(self,event):
-        self.logPanel.write('F_value')
 
+
+    def ttest_ind(self, event):
+        functionName = "ttest_ind"
+        group = lambda x,y: (x,y)
+        setting = self.defaultDialogSettings
+        setting['Title'] = functionName
+        ColumnList, colnums  = frame.grid.GetUsedCols()
+
+        bt1= group('StaticText',   ('X Column to analyse',) )
+        bt2= group('Choice',       (ColumnList,))
+        bt3= group('StaticText',   ('Y Column to analyse',) )
+
+        structure = list()
+        structure.append([bt2, bt1])
+        structure.append([bt2, bt3])
+        dlg = dialog(settings = setting, struct= structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        # -------------------
+        # changing value strings to numbers
+        (xcolNameSelect, ycolNameSelect) = values
+        if len( xcolNameSelect ) == 0 or len( ycolNameSelect ) == 0:
+            self.logPanel.write("you don't select any items")
+            return
+        xvalues = [ [pos for pos, value in enumerate( ColumnList )
+                    if value == val
+                    ][0]
+                    for val in xcolNameSelect
+                    ]
+        yvalues = [ [pos for pos, value in enumerate( ColumnList )
+                    if value == val
+                    ][0]
+                    for val in ycolNameSelect
+                    ]
+
+        # -------------------
+        xcolumns = [ GetData(colnums[ pos ]) for pos in xvalues][0]
+        ycolumns = [ GetData(colnums[ pos ]) for pos in yvalues][0]
+        # se hace los calculos para cada columna
+        result = getattr(stats, functionName)( xcolumns, ycolumns)
+        # se muestra los resultados
+        colNameSelect = ['t','prob']
+        output.addColData(colNameSelect, functionName)
+        output.addColData(result)
+        self.logPanel.write(functionName + ' successfull')
+
+
+    def ttest_rel(self, event):
+        functionName = "ttest_rel"
+        group = lambda x,y: (x,y)
+        setting = self.defaultDialogSettings
+        setting['Title'] = functionName
+        ColumnList, colnums  = frame.grid.GetUsedCols()
+
+        bt1= group('StaticText',   ('X Column to analyse',) )
+        bt2= group('Choice',       (ColumnList,))
+        bt3= group('StaticText',   ('Y Column to analyse',) )
+
+        structure = list()
+        structure.append([bt2, bt1])
+        structure.append([bt2, bt3])
+        dlg = dialog(settings = setting, struct= structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        # -------------------
+        # changing value strings to numbers
+        (xcolNameSelect, ycolNameSelect) = values
+        if len( xcolNameSelect ) == 0 or len( ycolNameSelect ) == 0:
+            self.logPanel.write("you don't select any items")
+            return
+        xvalues = [ [pos for pos, value in enumerate( ColumnList )
+                    if value == val
+                    ][0]
+                    for val in xcolNameSelect
+                    ]
+        yvalues = [ [pos for pos, value in enumerate( ColumnList )
+                    if value == val
+                    ][0]
+                    for val in ycolNameSelect
+                    ]
+
+        # -------------------
+        xcolumns = [ GetData(colnums[ pos ]) for pos in xvalues][0]
+        ycolumns = [ GetData(colnums[ pos ]) for pos in yvalues][0]
+        # se hace los calculos para cada columna
+        result = getattr(stats, functionName)( xcolumns, ycolumns)
+        # se muestra los resultados
+        colNameSelect = ['t','prob']
+        output.addColData(colNameSelect, functionName)
+        output.addColData(result)
+        self.logPanel.write(functionName + ' successfull')
+
+
+
+    def chisquare(self, event):
+        functionName = "ttest_rel"
+        group = lambda x,y: (x,y)
+        setting = self.defaultDialogSettings
+        setting['Title'] = functionName
+        ColumnList, colnums  = frame.grid.GetUsedCols()
+
+        bt1= group('StaticText',   ('obs',) )
+        bt2= group('Choice',       (ColumnList,))
+        bt3= group('StaticText',   ('frecuences',) )
+
+        structure = list()
+        structure.append([bt2, bt1])
+        structure.append([bt2, bt3])
+        dlg = dialog(settings = setting, struct= structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        # -------------------
+        # changing value strings to numbers
+        (xcolNameSelect, ycolNameSelect) = values
+        if len( xcolNameSelect ) == 0 :
+            self.logPanel.write("you don't select any items")
+            return
+        xvalues = [ [pos for pos, value in enumerate( ColumnList )
+                    if value == val
+                    ][0]
+                    for val in xcolNameSelect
+                    ]
+        xcolumns = [ GetData(colnums[ pos ]) for pos in xvalues][0]
+
+        if len( ycolNameSelect ) == 0:
+            ycolumns = None
+        else:
+            yvalues = [ [pos for pos, value in enumerate( ColumnList )
+                        if value == val
+                        ][0]
+                        for val in ycolNameSelect
+                        ]
+            ycolumns = [ GetData(colnums[ pos ]) for pos in yvalues][0]
+
+        # -------------------
+        # se hace los calculos para cada columna
+        result = getattr(stats, functionName)( xcolumns, ycolumns)
+        # se muestra los resultados
+        colNameSelect = [ 'chisq', 'chisqprob(chisq, k-1)']
+        output.addColData(colNameSelect, functionName)
+        output.addColData(result)
+        self.logPanel.write(functionName + ' successfull')
+
+
+
+    def ks_2samp(self, event):
+        functionName = "ks_2samp"
+        group = lambda x,y: (x,y)
+        setting = self.defaultDialogSettings
+        setting['Title'] = functionName
+        ColumnList, colnums  = frame.grid.GetUsedCols()
+
+        bt1= group('StaticText',   ('X Column to analyse',) )
+        bt2= group('Choice',       (ColumnList,))
+        bt3= group('StaticText',   ('Y Column to analyse',) )
+
+        structure = list()
+        structure.append([bt2, bt1])
+        structure.append([bt2, bt3])
+        dlg = dialog(settings = setting, struct= structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        # -------------------
+        # changing value strings to numbers
+        (xcolNameSelect, ycolNameSelect) = values
+        if len( xcolNameSelect ) == 0 or len( ycolNameSelect ) == 0:
+            self.logPanel.write("you don't select any items")
+            return
+        xvalues = [ [pos for pos, value in enumerate( ColumnList )
+                    if value == val
+                    ][0]
+                    for val in xcolNameSelect
+                    ]
+        yvalues = [ [pos for pos, value in enumerate( ColumnList )
+                    if value == val
+                    ][0]
+                    for val in ycolNameSelect
+                    ]
+
+        # -------------------
+        xcolumns = [ GetData(colnums[ pos ]) for pos in xvalues][0]
+        ycolumns = [ GetData(colnums[ pos ]) for pos in yvalues][0]
+        # se hace los calculos para cada columna
+        result = getattr(stats, functionName)( xcolumns, ycolumns)
+        # se muestra los resultados
+        colNameSelect = ['t','prob']
+        output.addColData(colNameSelect, functionName)
+        output.addColData(result)
+        self.logPanel.write(functionName + ' successfull')
+
+    def mannwhitneyu(self, event):
+        functionName = "mannwhitneyu"
+        group = lambda x,y: (x,y)
+        setting = self.defaultDialogSettings
+        setting['Title'] = functionName
+        ColumnList, colnums  = frame.grid.GetUsedCols()
+
+        bt1= group('StaticText',   ('X Column to analyse',) )
+        bt2= group('Choice',       (ColumnList,))
+        bt3= group('StaticText',   ('Y Column to analyse',) )
+
+        structure = list()
+        structure.append([bt2, bt1])
+        structure.append([bt2, bt3])
+        dlg = dialog(settings = setting, struct= structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        # -------------------
+        # changing value strings to numbers
+        (xcolNameSelect, ycolNameSelect) = values
+        if len( xcolNameSelect ) == 0 or len( ycolNameSelect ) == 0:
+            self.logPanel.write("you don't select any items")
+            return
+        xvalues = [ [pos for pos, value in enumerate( ColumnList )
+                    if value == val
+                    ][0]
+                    for val in xcolNameSelect
+                    ]
+        yvalues = [ [pos for pos, value in enumerate( ColumnList )
+                    if value == val
+                    ][0]
+                    for val in ycolNameSelect
+                    ]
+
+        # -------------------
+        xcolumns = [ GetData(colnums[ pos ]) for pos in xvalues][0]
+        ycolumns = [ GetData(colnums[ pos ]) for pos in yvalues][0]
+        # se hace los calculos para cada columna
+        result = getattr(stats, functionName)( xcolumns, ycolumns)
+        # se muestra los resultados
+        colNameSelect = ['t','prob']
+        output.addColData(colNameSelect, functionName)
+        output.addColData(result)
+        self.logPanel.write(functionName + ' successfull')
+
+    def ranksums(self, event):
+        functionName = "ranksums"
+        group = lambda x,y: (x,y)
+        setting = self.defaultDialogSettings
+        setting['Title'] = functionName
+        ColumnList, colnums  = frame.grid.GetUsedCols()
+
+        bt1= group('StaticText',   ('X Column to analyse',) )
+        bt2= group('Choice',       (ColumnList,))
+        bt3= group('StaticText',   ('Y Column to analyse',) )
+
+        structure = list()
+        structure.append([bt2, bt1])
+        structure.append([bt2, bt3])
+        dlg = dialog(settings = setting, struct= structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        # -------------------
+        # changing value strings to numbers
+        (xcolNameSelect, ycolNameSelect) = values
+        if len( xcolNameSelect ) == 0 or len( ycolNameSelect ) == 0:
+            self.logPanel.write("you don't select any items")
+            return
+        xvalues = [ [pos for pos, value in enumerate( ColumnList )
+                    if value == val
+                    ][0]
+                    for val in xcolNameSelect
+                    ]
+        yvalues = [ [pos for pos, value in enumerate( ColumnList )
+                    if value == val
+                    ][0]
+                    for val in ycolNameSelect
+                    ]
+
+        # -------------------
+        xcolumns = [ GetData(colnums[ pos ]) for pos in xvalues][0]
+        ycolumns = [ GetData(colnums[ pos ]) for pos in yvalues][0]
+        # se hace los calculos para cada columna
+        result = getattr(stats, functionName)( xcolumns, ycolumns)
+        # se muestra los resultados
+        colNameSelect = ['t','prob']
+        output.addColData(colNameSelect, functionName)
+        output.addColData(result)
+        self.logPanel.write(functionName + ' successfull')
+
+    def wilcoxont(self, event):
+        functionName = "wilcoxont"
+        group = lambda x,y: (x,y)
+        setting = self.defaultDialogSettings
+        setting['Title'] = functionName
+        ColumnList, colnums  = frame.grid.GetUsedCols()
+
+        bt1= group('StaticText',   ('X Column to analyse',) )
+        bt2= group('Choice',       (ColumnList,))
+        bt3= group('StaticText',   ('Y Column to analyse',) )
+
+        structure = list()
+        structure.append([bt2, bt1])
+        structure.append([bt2, bt3])
+        dlg = dialog(settings = setting, struct= structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        # -------------------
+        # changing value strings to numbers
+        (xcolNameSelect, ycolNameSelect) = values
+        if len( xcolNameSelect ) == 0 or len( ycolNameSelect ) == 0:
+            self.logPanel.write("you don't select any items")
+            return
+        xvalues = [ [pos for pos, value in enumerate( ColumnList )
+                    if value == val
+                    ][0]
+                    for val in xcolNameSelect
+                    ]
+        yvalues = [ [pos for pos, value in enumerate( ColumnList )
+                    if value == val
+                    ][0]
+                    for val in ycolNameSelect
+                    ]
+
+        # -------------------
+        xcolumns = [ GetData(colnums[ pos ]) for pos in xvalues][0]
+        ycolumns = [ GetData(colnums[ pos ]) for pos in yvalues][0]
+        # se hace los calculos para cada columna
+        result = getattr(stats, functionName)( xcolumns, ycolumns)
+        # se muestra los resultados
+        colNameSelect = ['t','prob']
+        output.addColData(colNameSelect, functionName)
+        output.addColData(result)
+        self.logPanel.write(functionName + ' successfull')
+
+    def kruskalwallish(self, event):
+        self._statsType1(functionName = "kruskalwallish",
+                         useNumpy = True,
+                         allColsOneCalc = True,
+                         nameResults= ('H-statistic (corrected for ties)', 'p-value'))
+
+
+    def friedmanchisquare(self, event):
+        self._statsType1(functionName = "friedmanchisquare",
+                         useNumpy = True,
+                         allColsOneCalc = True,
+                         nameResults= ('chi-square statistic', 'p-value'),
+                         dataSquare= True)
+
+    def chisqprob(self, event):
+        self._statsType2(functionName= "chisqprob",
+                         texto = 'dregrees of fredom',
+                         spinData= (1,100,1),
+                         factor = 1,
+                         useNumpy = True)
+
+    def erfcc(self, event):
+        functionName = "erfcc"
+        group = lambda x,y: (x,y)
+        setting = self.defaultDialogSettings
+        setting['Title'] = functionName
+        ColumnList, colnums  = frame.grid.GetUsedCols()
+
+        bt1= group('StaticText',   ('X value',) )
+        bt2= group('NumTextCtrl',  ())
+
+        structure = list()
+        structure.append([bt2, bt1])
+        dlg = dialog(settings = setting, struct= structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        # -------------------
+        # changing value strings to numbers
+        (xvalue,) = values
+        if xvalue == None:
+            self.logPanel.write("you don?t enter a valid value")
+            return
+
+        # se hace los calculos
+        result = getattr(stats, functionName)( xvalue)
+        # se muestra los resultados
+        colNameSelect = ['x', 'erfc(x)']
+        output.addColData(colNameSelect, functionName)
+        output.addColData([xvalue ,result])
+        self.logPanel.write(functionName + ' successfull')
+
+
+
+    def zprob(self, event):
+        functionName = "zprob"
+        group = lambda x,y: (x,y)
+        setting = self.defaultDialogSettings
+        setting['Title'] = functionName
+        ColumnList, colnums  = frame.grid.GetUsedCols()
+
+        bt1= group('StaticText',   ('Z value',) )
+        bt2= group('NumTextCtrl',  ())
+        structure = list()
+        structure.append([bt2, bt1])
+        dlg = dialog(settings = setting, struct= structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        # -------------------
+        # changing value strings to numbers
+        (xvalue,) = values
+        if xvalue == None:
+            self.logPanel.write("you don?t enter a valid value")
+            return
+
+        # se hace los calculos
+        result = getattr(stats, functionName)( xvalue)
+        # se muestra los resultados
+        colNameSelect = ['x', 'erfc(x)']
+        output.addColData(colNameSelect, functionName)
+        output.addColData([xvalue ,result])
+        self.logPanel.write(functionName + ' successfull')
+
+
+    #def ksprob(self, event):
+    #    self.logPanel.write('ksprob')
+
+    #def fprob(self, event):
+    #    self.logPanel.write('fprob')
+
+    def betacf(self, event):
+        functionName = "betacf"
+        group = lambda x,y: (x,y)
+        setting = self.defaultDialogSettings
+        setting['Title'] = functionName
+        ColumnList, colnums  = frame.grid.GetUsedCols()
+
+        bt1= group('StaticText',   ('a',) )
+        bt2= group('NumTextCtrl',  ())
+        bt3= group('StaticText',   ('b',) )
+        bt4= group('StaticText',   ('% x',) )
+        bt5= group('SpinCtrl',     (0,100,1) )
+        factor = 0.01
+        structure = list()
+        structure.append([bt2, bt1])
+        structure.append([bt2, bt3])
+        structure.append([bt5, bt4])
+
+        dlg = dialog(settings = setting, struct= structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        # -------------------
+        # changing value strings to numbers
+        (a, b, x) = values
+        x= x*factor
+        if a == None or b == None:
+            self.logPanel.write("you don?t enter a valid value")
+            return
+
+        # se hace los calculos
+        result = getattr(stats, functionName)(a, b, x)
+        # se muestra los resultados
+        colNameSelect = ['a', 'b','x','betacf(a,b,x)']
+        output.addColData(colNameSelect, functionName)
+        output.addColData([a, b, x, result])
+        self.logPanel.write(functionName + ' successfull')
+
+    def gammln(self, event):
+        functionName = "gammln"
+        group = lambda x,y: (x,y)
+        setting = self.defaultDialogSettings
+        setting['Title'] = functionName
+        ColumnList, colnums  = frame.grid.GetUsedCols()
+
+        bt1= group('StaticText',   ('xx',) )
+        bt2= group('NumTextCtrl',  ())
+        structure = list()
+        structure.append([bt2, bt1])
+        dlg = dialog(settings = setting, struct= structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        # -------------------
+        # changing value strings to numbers
+        (xvalue,) = values
+        if xvalue == None:
+            self.logPanel.write("you don?t enter a valid value")
+            return
+
+        # se hace los calculos
+        result = getattr(stats, functionName)( xvalue)
+        # se muestra los resultados
+        colNameSelect = ['xx', 'lgammln(xx)']
+        output.addColData(colNameSelect, functionName)
+        output.addColData([xvalue ,result])
+        self.logPanel.write(functionName + ' successfull')
+
+    def betai(self, event):
+        functionName = "betai"
+        group = lambda x,y: (x,y)
+        setting = self.defaultDialogSettings
+        setting['Title'] = functionName
+        ColumnList, colnums  = frame.grid.GetUsedCols()
+
+        bt1= group('StaticText',   ('a',) )
+        bt2= group('NumTextCtrl',  ())
+        bt3= group('StaticText',   ('b',) )
+        bt4= group('StaticText',   ('% x',) )
+        bt5= group('SpinCtrl',     (0,100,1) )
+        factor = 0.01
+        structure = list()
+        structure.append([bt2, bt1])
+        structure.append([bt2, bt3])
+        structure.append([bt5, bt4])
+
+        dlg = dialog(settings = setting, struct= structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        # -------------------
+        # changing value strings to numbers
+        (a, b, x) = values
+        x= x*factor
+        if a == None or b == None:
+            self.logPanel.write("you don?t enter a valid value")
+            return
+
+        # se hace los calculos
+        result = getattr(stats, functionName)(a, b, x)
+        # se muestra los resultados
+        colNameSelect = ['a', 'b','x','betai(a,b,x)']
+        output.addColData(colNameSelect, functionName)
+        output.addColData([a, b, x, result])
+        self.logPanel.write(functionName + ' successfull')
+
+
+    def F_oneway(self, event):
+        self._statsType1("F_oneway", allColsOneCalc = True,
+                        nameResults= ("F","p-value"))
+
+    def F_value(self, event):
+        self._statsType1("F_value", allColsOneCalc = True,
+                        nameResults= ("F","p-value"))
 #---------------------------------------------------------------------------
 # Scripting API is defined here. So far, only basic (but usable!) stuff.
 def GetData(column):
@@ -2086,7 +2847,6 @@ def GetDataName(column):
     """This function returns the name of the data variable - in other words,
     the column label from the grid."""
     return frame.grid.m_grid.GetColLabelValue(column)
-
 def PutData(column, data):
     """This routine takes a list of data, and puts it into the datagrid
     starting at row 0. The grid is resized if the list is too large. This
@@ -2104,7 +2864,7 @@ if __name__ == '__main__':
     frame = DataFrame(None, app)
     frame.grid.SetFocus()
     Logg= frame.logPanel
-    output = frame.answerPanel 
+    output = frame.answerPanel
     frame.ShowFullScreen(True,False)
     app.MainLoop()
 # eof
