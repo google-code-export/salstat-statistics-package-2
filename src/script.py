@@ -16,11 +16,11 @@ import traceback
 # set up for folding and Python code highlighting
 # source: Dietrich  16NOV2008
 # http://www.python-forum.org/pythonforum/viewtopic.php?f=2&t=10065#
- 
+
 import  wx
 import  wx.stc  as  stc
 import  keyword
- 
+
 if wx.Platform == '__WXMSW__':
     # for windows OS
     faces = {
@@ -42,15 +42,15 @@ else:
         'size' : 12,
         'size2': 10,
         }
- 
- 
+
+
 class MySTC(stc.StyledTextCtrl):
     """
    set up for folding and Python code highlighting
    """
     def __init__(self, parent):
         stc.StyledTextCtrl.__init__(self, parent, wx.ID_ANY)
- 
+
         # use Python code highlighting
         self.SetLexer(stc.STC_LEX_PYTHON)
         keylist=['cls','plot','grid','show','dialog','OK']
@@ -60,7 +60,7 @@ class MySTC(stc.StyledTextCtrl):
         self.SetKeyWords(0, keyWordlist )
         self.SetMarginType(1,stc.STC_MARGIN_NUMBER)
         #self.SetMaxLength(250)
-        
+
         # set other options ...
         self.SetProperty("fold", "1")
         self.SetMargins(0, 1)
@@ -69,13 +69,13 @@ class MySTC(stc.StyledTextCtrl):
         self.SetEdgeColumn(78)
         self.SetCaretForeground("blue")
         self.SetTabWidth(4)
- 
+
         # setup a margin to hold the fold markers
         self.SetMarginType(2, stc.STC_MARGIN_SYMBOL)
         self.SetMarginMask(2, stc.STC_MASK_FOLDERS)
         self.SetMarginSensitive(2, True)
         self.SetMarginWidth(2, 12)
- 
+
         # fold markers use square headers
         self.MarkerDefine(stc.STC_MARKNUM_FOLDEROPEN,
             stc.STC_MARK_BOXMINUS, "white", "#808080")
@@ -91,12 +91,12 @@ class MySTC(stc.StyledTextCtrl):
             stc.STC_MARK_BOXMINUSCONNECTED, "white", "#808080")
         self.MarkerDefine(stc.STC_MARKNUM_FOLDERMIDTAIL,
             stc.STC_MARK_TCORNER, "white", "#808080")
- 
+
         # bind some events ...
         self.Bind(stc.EVT_STC_UPDATEUI, self.onUpdateUI)
         self.Bind(stc.EVT_STC_MARGINCLICK, self.onMarginClick)
         self.Bind(wx.EVT_KEY_DOWN, self.onKeyPressed)
- 
+
         # make some general styles ...
         # global default styles for all languages
         # set default font
@@ -108,7 +108,7 @@ class MySTC(stc.StyledTextCtrl):
             back=beige)
         # reset all to be like the default
         self.StyleClearAll()
- 
+
         # more global default styles for all languages
         self.StyleSetSpec(stc.STC_STYLE_LINENUMBER,
             "back:#C0C0C0,face:%(helv)s,size:%(size2)d" % faces)
@@ -118,7 +118,7 @@ class MySTC(stc.StyledTextCtrl):
             "fore:#FFFFFF,back:#0000FF,bold")
         self.StyleSetSpec(stc.STC_STYLE_BRACEBAD,
             "fore:#000000,back:#FF0000,bold")
- 
+
         # make the Python styles ...
         # default
         self.StyleSetSpec(stc.STC_P_DEFAULT,
@@ -163,7 +163,7 @@ class MySTC(stc.StyledTextCtrl):
         self.StyleSetSpec(stc.STC_P_STRINGEOL,
             "fore:#000000,face:%(mono)s,back:#E0C0E0,eol,size:%(size)d"\
                 % faces)
- 
+
         # register some images for use in the AutoComplete box
         self.RegisterImage(1,
             wx.ArtProvider.GetBitmap(wx.ART_TIP, size=(16,16)))
@@ -171,7 +171,7 @@ class MySTC(stc.StyledTextCtrl):
             wx.ArtProvider.GetBitmap(wx.ART_NEW, size=(16,16)))
         self.RegisterImage(3,
             wx.ArtProvider.GetBitmap(wx.ART_COPY, size=(16,16)))
- 
+
     def onKeyPressed(self, event):
         if self.CallTipActive():
             self.CallTipCancel()
@@ -198,7 +198,7 @@ class MySTC(stc.StyledTextCtrl):
                 self.AutoCompShow(0, " ".join(kw))
         else:
             event.Skip()
- 
+
     def onUpdateUI(self, evt):
         """update the user interface"""
         # check for matching braces
@@ -217,7 +217,7 @@ class MySTC(stc.StyledTextCtrl):
         if braceAtCaret < 0:
             charAfter = self.GetCharAt(caretPos)
             styleAfter = self.GetStyleAt(caretPos)
- 
+
             if charAfter and chr(charAfter) in "[]{}()"\
                     and styleAfter == stc.STC_P_OPERATOR:
                 braceAtCaret = caretPos
@@ -227,7 +227,7 @@ class MySTC(stc.StyledTextCtrl):
             self.BraceBadLight(braceAtCaret)
         else:
             self.BraceHighlight(braceAtCaret, braceOpposite)
- 
+
     def onMarginClick(self, evt):
         # fold and unfold as needed
         if evt.GetMargin() == 2:
@@ -249,7 +249,7 @@ class MySTC(stc.StyledTextCtrl):
                             self.expand(lineClicked, True, True, 100)
                     else:
                         self.ToggleFold(lineClicked)
- 
+
     def foldAll(self):
         """folding folds, marker - to +"""
         lineCount = self.GetLineCount()
@@ -276,7 +276,7 @@ class MySTC(stc.StyledTextCtrl):
                     if lastChild > lineNum:
                         self.HideLines(lineNum+1, lastChild)
             lineNum = lineNum + 1
- 
+
     def expand(self, line, doexpand, force=False, visLevels=0, level=-1):
         """expanding folds, marker + to -"""
         lastChild = self.GetLastChild(line, level)
@@ -339,7 +339,7 @@ class ScriptPanel(wx.Panel):
                             CloseButton(False ) )
 
         tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
-                            agwStyle=  aui.AUI_TB_OVERFLOW | aui.AUI_TB_HORZ_LAYOUT)
+                            agwStyle=  aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
         tb1.SetToolBitmapSize(wx.Size(16, 16))
         imagenes = imageEmbed()
         self.bt1= tb1.AddSimpleTool(wx.ID_ANY, u"Run Script" , imagenes.runIcon(), u"Run Script" )
@@ -409,7 +409,7 @@ class ScriptPanel(wx.Panel):
         # buildins["__builtins__"] = None
         try:
             mainscript = self.answerPanel2.GetText()
-            #mainscript = mainscript.replace() 
+            #mainscript = mainscript.replace()
             exec(mainscript,buildins,env)
         except (Exception, TypeError) as e:
             traceback.print_exc(file= self.log)
