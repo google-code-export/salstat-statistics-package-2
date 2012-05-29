@@ -3,7 +3,7 @@ Created on 11/05/2012
 New plot system
 
 @author: Sebastian lopez Buritica <Colombia>
-License: GPL2
+License: GPL3
 '''
 # wxPython module
 import wx
@@ -27,7 +27,7 @@ from matplotlib.backend_bases import MouseEvent
 
 
 class MpltFrame( wx.Frame ):
-    def __init__( self, parent,typePlot = None, data2plot= None):
+    def __init__( self, parent,typePlot = None, data2plot= None, *args, **params):
         '''
         MpltFrame( parent, typePlot, data2plot)
 
@@ -59,6 +59,16 @@ class MpltFrame( wx.Frame ):
         * plotPareto
         ((x1,x2,...,xn))
         '''
+        self.graphParams={'xlabel': '',
+                     'ylabel': '',
+                     'title': '',
+                     'xtics': []}
+
+        for key in self.graphParams.keys():
+            if params.has_key(key):
+                self.graphParams[key] = params[key]
+
+
         wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 642,465 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
 
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
@@ -606,9 +616,14 @@ class MpltFrame( wx.Frame ):
             else:
                 self._plotTest()
 
-        self.axes.set_title("Primer grafica", )
-        self.axes.set_xlabel("Xlabel", )
-        self.axes.set_ylabel("Ylabel", )
+
+        self._Binded()
+        # se actualiza el nombre de las escalas de las x
+        if self.graphParams.has_key('xtics'):
+            self.axes.set_xticklabels(self.graphParams['xtics'])
+        if self.graphParams.has_key('ytics'):
+            self.axes.set_yticklabels(self.graphParams['ytics'])
+
         self.cursor = Cursor(self.axes, useblit=True, color='blue', linewidth=1)
         self.cursor.horizOn = False
         self.cursor.vertOn = False
@@ -641,7 +656,14 @@ class MpltFrame( wx.Frame ):
         self.m_choice11.SetSelection(0)
 
     def _Binded(self):
-        pass
+        self._addLabels(self.graphParams)
+
+    def _addLabels(self,labels):
+        self.figpanel.axes[0].set_title(labels['title'])
+        self.figpanel.axes[0].set_xlabel(labels['xlabel'])
+        self.figpanel.axes[0].set_ylabel(labels['ylabel'])
+        self.figpanel.canvas.draw()
+
     def _plotTest(self):
         x = np.arange(0, 6, .01)
         y = np.sin(x**2)*np.exp(-x)
@@ -706,11 +728,11 @@ class MpltFrame( wx.Frame ):
         arrow_args = dict(arrowstyle="->")
         bbox_args = dict(boxstyle="round", fc="w")
         text2anotate = "y="+str(round(line[0],4)) + \
-            "x" 
+            "x"
         if round(line[1],4) > 0:
-            text2anotate += "+" + str(round(line[1],4)) 
+            text2anotate += "+" + str(round(line[1],4))
         elif round(line[1],4) < 0:
-            text2anotate += str(round(line[1],4)) 
+            text2anotate += str(round(line[1],4))
         text2anotate += "\n r = " + str(round(line[2],6))
         an1= self.axes.annotate(text2anotate, xy=(x[int(len(x)/2)],
                                                   yfit(x[int(len(x)/2)])),  xycoords='data',
@@ -1010,7 +1032,7 @@ class MpltFrame( wx.Frame ):
 
     def _txtNumerOnly(self,refObj):
         texto = refObj.GetValue()
-        if len(texto) == 0: 
+        if len(texto) == 0:
             return
         allowed= [ str(x) for x in range(11)]
         allowed.extend(['.','-'])
@@ -1185,7 +1207,7 @@ def fontDialog(parent):
     data.SetColour(curClr)         # set colour
     data.SetInitialFont(fuente)
 
-    dlg = wx.FontDialog(parent, data)    
+    dlg = wx.FontDialog(parent, data)
     if dlg.ShowModal() == wx.ID_OK:
         data = dlg.GetFontData()
         font = data.GetChosenFont()
