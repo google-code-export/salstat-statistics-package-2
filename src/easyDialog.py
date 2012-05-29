@@ -13,6 +13,31 @@ def _siguiente():
         i+= 1
         yield str(i)
 
+class NumTextCtrl(wx.TextCtrl):
+    '''a text ctrl that only acepts numbers'''
+    def __init__(self, parent, *args, **params):
+        wx.TextCtrl.__init__(self, parent, *args, **params)
+        self.Bind(wx.EVT_TEXT, self._textChange)
+
+    def _textChange(self,event):
+        texto = self.GetValue()
+        if len(texto) == 0:
+            return
+        allowed= [ str(x) for x in range(11)]
+        allowed.extend(['.','-'])
+        newstr= [x for x in texto if x in allowed]
+        if len(newstr) == 0:
+            newstr = u''
+        else:
+            func = lambda x,y: x+y
+            newstr= reduce(func, newstr)
+        # prevent infinite recursion
+        if texto == newstr:
+            return
+
+        self.SetValue(newstr)
+
+
 class Dialog ( wx.Dialog ):
     def __init__( self, parent = None , settings= dict(), struct = []):
         '''Dialog(parent,settings, struct)
@@ -29,7 +54,7 @@ class Dialog ( wx.Dialog ):
 
         allowed controls: 'StaticText',   'TextCtrl',    'Choice',
                           'CheckListBox', 'StaticLine',  'RadioBox',
-                          'SpinCtrl',     'ToggleButton'
+                          'SpinCtrl',     'ToggleButton', 'NumTextCtrl'
 
         struct example:
 
@@ -67,7 +92,7 @@ class Dialog ( wx.Dialog ):
 
         params = {'Title':  wx.EmptyString,
                   'icon':   wx.EmptyIcon(),
-                  '_size':  wx.Size(260,320),
+                  '_size':  wx.Size(-1,-1), #260,320
                   '_pos':   wx.DefaultPosition,
                   '_style': wx.DEFAULT_DIALOG_STYLE}
 
@@ -86,18 +111,19 @@ class Dialog ( wx.Dialog ):
 
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
         bSizer1 = wx.BoxSizer( wx.VERTICAL )
-        self.m_scrolledWindow1 = wx.ScrolledWindow( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.DOUBLE_BORDER|wx.HSCROLL|wx.VSCROLL )
+        self.m_scrolledWindow1 = wx.ScrolledWindow( self, wx.ID_ANY,
+                                     wx.DefaultPosition, wx.DefaultSize,
+                                      wx.DOUBLE_BORDER|wx.HSCROLL|wx.VSCROLL )
         self.m_scrolledWindow1.SetScrollRate( 5, 5 )
         bSizer3 = wx.BoxSizer( wx.VERTICAL )
         self.sisers= list()
         self.ctrls= list()
-        #self.caracte= list()
         self._allow= ['StaticText','TextCtrl','Choice',
                       'CheckListBox','StaticLine','RadioBox',
-                      'SpinCtrl','ToggleButton']
+                      'SpinCtrl','ToggleButton','NumTextCtrl']
         self._allow2get= ['TextCtrl','Choice',
                       'CheckListBox','RadioBox',
-                      'SpinCtrl','ToggleButton']
+                      'SpinCtrl','ToggleButton','NumTextCtrl']
         self.adding(bSizer3, struct)
 
         self.m_scrolledWindow1.SetSizer( bSizer3 )
@@ -121,8 +147,8 @@ class Dialog ( wx.Dialog ):
         diferents = ['CheckListBox','Choice',]
         for row in struct:
             namebox= 'boxSizer'+ self.ctrlNum.next()
-            setattr(self,namebox,wx.FlexGridSizer( 0, len(row), 0, 0 ))
-            currSizer= getattr(self,namebox)
+            setattr(self, namebox, wx.FlexGridSizer( 0, len(row), 0, 0 ))
+            currSizer= getattr(self, namebox)
             currSizer.SetFlexibleDirection( wx.BOTH )
             currSizer.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
             characters = wx.ALIGN_CENTER_VERTICAL | wx.ALL
@@ -153,10 +179,19 @@ class Dialog ( wx.Dialog ):
                     self.ctrls.append((key, getattr(wx, key)(self.m_scrolledWindow1, wx.ID_ANY, *args)))
                     currCtrl = self.ctrls[-1][1]
                     currSizer.Add(currCtrl , 0, characters , 5)
-                    currSizer.Layout()
+                    #currSizer.Layout()
+
+                elif key == 'NumTextCtrl':
+                    self.ctrls.append((key, NumTextCtrl(self.m_scrolledWindow1, wx.ID_ANY, *args)))
+                    currCtrl = self.ctrls[-1][1]
+                    currSizer.Add(currCtrl , 0, characters , 5)
+
                 elif key == 'in':
                     self.adding(parentSizer, [args])
+
             parentSizer.Add( currSizer, 0, wx.EXPAND, 5 )
+            parentSizer.Layout()
+
 
     def GetValue(self):
         resultado = list()
@@ -180,6 +215,13 @@ class Dialog ( wx.Dialog ):
                 elif typectrl == 'RadioBox':
                     prevResult= ctrl.Selection
 
+                elif typectrl == 'NumTextCtrl':
+                    prevResult = ctrl.GetValue()
+                    if len(prevResult) == 0:
+                        prevResult = None
+                    else:
+                        prevResult = float(prevResult)
+
                 else:
                     continue
                 resultado.append(prevResult)
@@ -187,7 +229,9 @@ class Dialog ( wx.Dialog ):
 
 class _MyFrame1 ( wx.Frame ):
     def __init__( self, parent ):
-        wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 163,73 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
+        wx.Frame.__init__ ( self, parent, id = wx.ID_ANY,
+                     title = wx.EmptyString, pos = wx.DefaultPosition,
+                     size = wx.Size( -1, -1 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
 
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
 
