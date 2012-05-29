@@ -10,11 +10,9 @@ import wx
 import os
 
 import wx.html
-# import wx.aui
 import wx.lib.agw.aui as aui
 
 import wx.lib.wxpTag
-# import system modules
 import string, os, os.path, pickle
 # import SalStat specific modules
 import images
@@ -46,11 +44,11 @@ STATS = {'Central Tendency': ('geometricmean','harmonicmean','mean',
          'Frequency Stats': ('itemfreq', 'scoreatpercentile', 'percentileofscore',
                              'histogram', 'cumfreq', 'relfreq',),
          'Variability': ( 'samplevar', 'samplestdev', #'obrientransform'
-                         'signaltonoise', 'var', 'stdev', 'sterr',
-                         'sem','z','zs',), # 'zmap'
+                          'signaltonoise', 'var', 'stdev', 'sterr',
+                          'sem','z','zs',), # 'zmap'
          'Trimming Fcns': ('threshold', 'trimboth', 'trim1', ), #'round',
          'Correlation Fcns': ( 'paired', 'pearsonr', # 'covariance', 'correlation'
-                              'spearmanr', 'pointbiserialr', 'kendalltau', 'linregress',),
+                               'spearmanr', 'pointbiserialr', 'kendalltau', 'linregress',),
          'Inferential Stats': ('ttest_1samp', 'ttest_ind', 'ttest_rel', 'chisquare',
                                'ks_2samp', 'mannwhitneyu', 'ranksums', 'wilcoxont',
                                'kruskalwallish', 'friedmanchisquare',),
@@ -319,20 +317,17 @@ class SimpleGrid(MyGrid):# wxGrid
         MyGrid.__init__(self, parent, -1, size)
         self.Saved = True
         self.moveTo = None
-        ##self.m_grid.SetGridLineColour(wx.Color(0,0,0))
-        #self.m_grid.CreateGrid(int(inits.get("gridcellsy")), \
-        #                            int(inits.get("gridcellsx")))
-
+        
         self.m_grid.setPadreCallBack(self)
         self.m_grid.SetColLabelAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
-        for i in range(20):
+        for i in range(self.m_grid.NumberCols):
             self.m_grid.SetColFormatFloat(i, 8, 4)
-        # self.m_grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.AlterSaveStatus)
+        ##self.m_grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.AlterSaveStatus)
         self.m_grid.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
         self.m_grid.wildcard = "Any File (*.*)|*.*|" \
-            "ASCII data format (*.dat)|*.dat|" \
-            "SalStat Format (*.xml)|*.xml"
-        # se ajusta el render
+            "ASCII data format (*.xls)|*.xls|" \
+            "SalStat Format (*.xls)|*.xls"
+        ## se ajusta el render
         attr = wx.grid.GridCellAttr()
         editor = wx.grid.GridCellFloatEditor()
         attr.SetEditor(editor)
@@ -344,14 +339,14 @@ class SimpleGrid(MyGrid):# wxGrid
             self.tl = event.GetTopLeftCoords()
             self.br = event.GetBottomRightCoords()
 
-    def OnRangeChange(self, event): #AlterSaveStatus
-        # this is activated when the user enters some data
-        self.Saved = False
-        # also record in the history file
-        col = self.m_grid.GetGridCursorCol()
-        row = self.m_grid.GetGridCursorRow()
-        value = self.m_grid.GetCellValue(row, col)
-        xmlevt = '<data row="'+str(row)+'" col="'+str(col)+'">'+str(value)+'</data>\n'
+    #def OnRangeChange(self, event): #AlterSaveStatus
+        ## this is activated when the user enters some data
+        #self.Saved = False
+        ## also record in the history file
+        #col = self.m_grid.GetGridCursorCol()
+        #row = self.m_grid.GetGridCursorRow()
+        #value = self.m_grid.GetCellValue(row, col)
+        #xmlevt = '<data row="'+str(row)+'" col="'+str(col)+'">'+str(value)+'</data>\n'
 
     def CutData(self, event):
         self.m_grid.Delete()
@@ -392,7 +387,7 @@ class SimpleGrid(MyGrid):# wxGrid
     def AddNCells(self, numcols, numrows):
         insert = self.m_grid.AppendCols(numcols)
         insert = self.m_grid.AppendRows(numrows)
-        for i in range(self.m_grid.GetNumberCols() - numcols):
+        for i in range(self.m_grid.GetNumberCols() - numcols, self.m_grid.GetNumberCols(), 1):
             self.m_grid.SetColLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_BOTTOM)
             self.m_grid.SetColFormatFloat(i, 8, 4)
         self.m_grid.AdjustScrollbars()
@@ -455,9 +450,16 @@ class SimpleGrid(MyGrid):# wxGrid
         if len(cols) == 0:
             pass
         else:
-            rows = self.GetUsedRows()
+            # rows = self.GetUsedRows()
             cols= self.GetUsedCols()[1]
-            self.reportObj.writeByCols(self.m_grid.getByColumns(), self.NumSheetReport)
+            totalResult = self.m_grid.getByColumns(maxRow = self.m_grid.maxrow )
+            result= list()
+            for posCol in range(cols[-1]+1):
+                if posCol in cols:
+                    result.append(totalResult[posCol])
+                else:
+                    result.append(list())
+            self.reportObj.writeByCols(result, self.NumSheetReport)
         self.reportObj.save()
         self.Saved = True
         self.log.write("the fil %s was succesfully saved"%self.reportObj.path)
@@ -615,12 +617,12 @@ class EditGridFrame(wx.Dialog):
         self.numnewRows = wx.SpinCtrl(self, -1, "", wx.Point(110, 50), wx.Size(80,25))
         self.numnewRows.SetRange(1, 5000)
         self.numnewRows.SetValue(0)
-        okaybutton = wx.Button(self, 421, "Okay", wx.Point(10, 90),\
+        okaybutton = wx.Button(self, wx.ID_ANY, "Okay", wx.Point(10, 90),\
                                wx.Size(BWidth, BHeight))
-        cancelbutton = wx.Button(self, 422, "Cancel", wx.Point(110,90), \
+        cancelbutton = wx.Button(self, wx.ID_ANY, "Cancel", wx.Point(110,90), \
                                  wx.Size(BWidth, BHeight))
-        self.Bind(wx.EVT_BUTTON, self.OkayButtonPressed, id = 421)
-        self.Bind(wx.EVT_BUTTON, self.CancelButtonPressed, id= 422)
+        self.Bind(wx.EVT_BUTTON, self.OkayButtonPressed, id = okaybutton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.CancelButtonPressed, id= cancelbutton.GetId())
 
     def OkayButtonPressed(self, event):
         colswanted = self.numnewcols.GetValue()
@@ -629,7 +631,7 @@ class EditGridFrame(wx.Dialog):
         self.Close(True)
 
     def CancelButtonPressed(self, event):
-        self.Close(True)
+        self.Destroy()
 
 #---------------------------------------------------------------------------
 # grid preferences - set row & col sizes
@@ -1074,28 +1076,28 @@ class TransformFrame(wx.Dialog):
 
 class formulaBar ( wx.Panel ):
 
-	def __init__( self, parent , *args,**params):
-		wx.Panel.__init__ ( self, parent, *args, **params)
+    def __init__( self, parent , *args,**params):
+        wx.Panel.__init__ ( self, parent, *args, **params)
 
-		bSizer1 = wx.BoxSizer( wx.HORIZONTAL )
+        bSizer1 = wx.BoxSizer( wx.HORIZONTAL )
 
-		self.m_textCtrl1 = wx.TextCtrl( self, wx.ID_ANY,
-                    wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
-                    wx.TE_CHARWRAP|wx.TE_MULTILINE|wx.TE_RICH2|
-                    wx.TE_WORDWRAP|wx.NO_BORDER )
+        self.m_textCtrl1 = wx.TextCtrl( self, wx.ID_ANY,
+                                        wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
+                                        wx.TE_CHARWRAP|wx.TE_MULTILINE|wx.TE_RICH2|
+                                        wx.TE_WORDWRAP|wx.NO_BORDER )
 
-		self.m_textCtrl1.SetMinSize( wx.Size( 160,25 ) )
+        self.m_textCtrl1.SetMinSize( wx.Size( 160,25 ) )
 
-		bSizer1.Add( self.m_textCtrl1, 0, 0, 5 ) # wx.EXPAND
+        bSizer1.Add( self.m_textCtrl1, 0, 0, 5 ) # wx.EXPAND
 
-		#self.m_button1 = wx.Button( self, wx.ID_ANY, u">>",
-        #                    wx.DefaultPosition, wx.DefaultSize,
-        #                    wx.BU_EXACTFIT|wx.DOUBLE_BORDER )
-		#bSizer1.Add( self.m_button1, 0, wx.EXPAND, 5 )
+        #self.m_button1 = wx.Button( self, wx.ID_ANY, u">>",
+    #                    wx.DefaultPosition, wx.DefaultSize,
+    #                    wx.BU_EXACTFIT|wx.DOUBLE_BORDER )
+        #bSizer1.Add( self.m_button1, 0, wx.EXPAND, 5 )
 
-		self.SetSizer( bSizer1 )
-		self.Layout()
-		bSizer1.Fit( self )
+        self.SetSizer( bSizer1 )
+        self.Layout()
+        bSizer1.Fit( self )
 
 
 #---------------------------------------------------------------------------
@@ -1229,8 +1231,7 @@ class DataFrame(wx.Frame):
 
         #----------------------
         # se crea una barra de herramientas
-
-        #create toolbar (nothing to add yet!)
+        
         tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
                             agwStyle=  aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
 
@@ -1615,25 +1616,26 @@ class DataFrame(wx.Frame):
     def EndApplication(self, evt):
         # close the application (need to check for new data since last save)
         # need to save the inits dictionary to .salstatrc
-        dims = self.GetSizeTuple()
-        inits.update({'gridsizex': dims[0]})
-        inits.update({'gridsizey': dims[1]})
-        dims = self.GetPositionTuple()
-        inits.update({'gridposx': dims[0]})
-        inits.update({'gridposy': dims[1]})
-        dims = output.GetSizeTuple()
-        inits.update({'outputsizex': dims[0]})
-        inits.update({'outputsizey': dims[1]})
-        dims = output.GetPositionTuple()
-        inits.update({'outputposx': dims[0]})
-        inits.update({'outputposy': dims[1]})
-        initskeys = inits.keys()
-        initsvalues = inits.values()
-        initfilename = ini.initfile
-        fout = file(initfilename,'w')
-        for i in range(len(initskeys)):
-            fout.write(str(initskeys[i])+' '+str(initsvalues[i])+'\n')
-        fout.close()
+        if 0:
+            dims = self.GetSizeTuple()
+            inits.update({'gridsizex': dims[0]})
+            inits.update({'gridsizey': dims[1]})
+            dims = self.GetPositionTuple()
+            inits.update({'gridposx': dims[0]})
+            inits.update({'gridposy': dims[1]})
+            dims = output.GetSizeTuple()
+            inits.update({'outputsizex': dims[0]})
+            inits.update({'outputsizey': dims[1]})
+            dims = output.GetPositionTuple()
+            inits.update({'outputposx': dims[0]})
+            inits.update({'outputposy': dims[1]})
+            initskeys = inits.keys()
+            initsvalues = inits.values()
+            initfilename = ini.initfile
+            fout = file(initfilename,'w')
+            for i in range(len(initskeys)):
+                fout.write(str(initskeys[i])+' '+str(initsvalues[i])+'\n')
+            fout.close()
         if self.grid.Saved == False:
             win = SaveDialog(self, -1)
             win.Show(True)
@@ -1675,8 +1677,8 @@ class DataFrame(wx.Frame):
         values = [ [pos for pos, value in enumerate( ColumnList )
                     if value == val
                     ][0]
-                    for val in colNameSelect
-                    ]
+                   for val in colNameSelect
+                   ]
         # -------------------
         if useNumpy:
             colums  = list()
@@ -1726,7 +1728,7 @@ class DataFrame(wx.Frame):
         self.logPanel.write(functionName + ' successfull')
 
     def _statsType2(self, functionName, texto = 'moment',spinData= (1,100,1),
-                     factor = 1, useNumpy = True):
+                    factor = 1, useNumpy = True):
         ''''select plus spin crtl'''
         group = lambda x,y: (x,y)
         setting = self.defaultDialogSettings
@@ -1756,8 +1758,8 @@ class DataFrame(wx.Frame):
         values = [ [pos for pos, value in enumerate( ColumnList )
                     if value == val
                     ][0]
-                    for val in colNameSelect
-                    ]
+                   for val in colNameSelect
+                   ]
         # -------------------
         if useNumpy:
             colums  = list()
@@ -1803,15 +1805,15 @@ class DataFrame(wx.Frame):
             self.logPanel.write("you don't select any items")
             return
         xvalue= [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
-                    for val in xcolname
-                    ][0]
+                   if value == val
+                   ][0]
+                  for val in xcolname
+                  ][0]
         yvalue= [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
-                    for val in ycolname
-                    ][0]
+                   if value == val
+                   ][0]
+                  for val in ycolname
+                  ][0]
         # -------------------
         if useNumpy:
             xcolumn = numpy.array(GetData(colnums[ xvalue ]))
@@ -1869,8 +1871,8 @@ class DataFrame(wx.Frame):
         values = [ [pos for pos, value in enumerate( ColumnList )
                     if value == val
                     ][0]
-                    for val in colNameSelect
-                    ]
+                   for val in colNameSelect
+                   ]
         # -------------------
         if useNumpy:
             colums  = list()
@@ -1909,7 +1911,7 @@ class DataFrame(wx.Frame):
 
     def moment(self,event):
         self._statsType2("scoreatpercentile", texto = 'moment',
-                        spinData = (1,100,1))
+                         spinData = (1,100,1))
 
     def variation(self,event):
         self._statsType1("variation")
@@ -1965,8 +1967,8 @@ class DataFrame(wx.Frame):
         values = [ [pos for pos, value in enumerate( ColumnList )
                     if value == val
                     ][0]
-                    for val in colNameSelect
-                    ]
+                   for val in colNameSelect
+                   ]
         # -------------------
         if useNumpy:
             colums  = list()
@@ -2004,7 +2006,7 @@ class DataFrame(wx.Frame):
 
     def scoreatpercentile(self,event):
         self._statsType2("scoreatpercentile", texto = ' %',
-                        spinData = (0,100,0))
+                         spinData = (0,100,0))
 
     def percentileofscore(self,event):
         #adiconar dos parametros pendientes
@@ -2013,7 +2015,7 @@ class DataFrame(wx.Frame):
     def histogram(self,event):
         #adiconar dos parametros pendientes
         self._statsType2("histogram", texto = 'number of bins',
-                     spinData = (1,100,10))
+                         spinData = (1,100,10))
 
     def cumfreq(self,event):
         #adiconar un parametro pendiente
@@ -2022,7 +2024,7 @@ class DataFrame(wx.Frame):
     def relfreq(self,event):
         #adiconar un parametro pendiente
         self._statsType2("relfreq", texto = 'number of bins',
-                     spinData = (1,100,10))
+                         spinData = (1,100,10))
 
     #def obrientransform(self,event):
     #    self.logPanel.write('obrientransform')
@@ -2035,7 +2037,7 @@ class DataFrame(wx.Frame):
 
     def signaltonoise(self,event):
         self._statsType2("signaltonoise", texto = 'dimension',
-                     spinData = (0,100,0))
+                         spinData = (0,100,0))
 
     def var(self,event):
         self._statsType1("var")
@@ -2051,7 +2053,7 @@ class DataFrame(wx.Frame):
 
     def z(self,event):
         self._statsType2("z", texto = 'score',
-                spinData = (1,100, 1))
+                         spinData = (1,100, 1))
 
     def zs(self,event):
         self._statsType1("zs")
@@ -2099,8 +2101,8 @@ class DataFrame(wx.Frame):
         values = [ [pos for pos, value in enumerate( ColumnList )
                     if value == val
                     ][0]
-                    for val in colNameSelect
-                    ]
+                   for val in colNameSelect
+                   ]
         # -------------------
         useNumpy = True
         if useNumpy:
@@ -2121,7 +2123,7 @@ class DataFrame(wx.Frame):
 
     def trimboth(self,event):
         self._statsType2("trimboth", texto = '% proportiontocut',
-                spinData = (1,100, 1), factor = 0.01)
+                         spinData = (1,100, 1), factor = 0.01)
 
     def trim1(self,event):
         functionName = "trim1"
@@ -2157,8 +2159,8 @@ class DataFrame(wx.Frame):
         values = [ [pos for pos, value in enumerate( ColumnList )
                     if value == val
                     ][0]
-                    for val in colNameSelect
-                    ]
+                   for val in colNameSelect
+                   ]
 
         # -------------------
         colums = [ GetData(colnums[ pos ]) for pos in values]
@@ -2178,45 +2180,45 @@ class DataFrame(wx.Frame):
 
     def paired(self, event):
         self._statsType3(functionName = "paired",
-                        texto1 = u"X Column to analyse",
-                        texto2 = u"Y Column to analyse",
-                        useNumpy = False, allData = True)
+                         texto1 = u"X Column to analyse",
+                         texto2 = u"Y Column to analyse",
+                         useNumpy = False, allData = True)
 
     def pearsonr(self, event):
         self._statsType3(functionName = "pearsonr",
-                        texto1 = u"X Column to analyse",
-                        texto2 = u"Y Column to analyse",
-                        useNumpy = True,
-                        nameCols= ("Pearson's r"," two-tailed p-value"))
+                         texto1 = u"X Column to analyse",
+                         texto2 = u"Y Column to analyse",
+                         useNumpy = True,
+                         nameCols= ("Pearson's r"," two-tailed p-value"))
 
 
     def spearmanr(self, event):
         self._statsType3(functionName = "spearmanr",
-                        texto1 = u"X Column to analyse",
-                        texto2 = u"Y Column to analyse",
-                        useNumpy = True,
-                        nameCols= ("Spearman's r","two-tailed p-value"))
+                         texto1 = u"X Column to analyse",
+                         texto2 = u"Y Column to analyse",
+                         useNumpy = True,
+                         nameCols= ("Spearman's r","two-tailed p-value"))
 
     def pointbiserialr(self, event):
         self._statsType3(functionName = "pointbiserialr",
-                        texto1 = u"X Column to analyse",
-                        texto2 = u"Y Column to analyse",
-                        useNumpy = True,
-                        nameCols= ("Point-biserial r","two-tailed p-value"))
+                         texto1 = u"X Column to analyse",
+                         texto2 = u"Y Column to analyse",
+                         useNumpy = True,
+                         nameCols= ("Point-biserial r","two-tailed p-value"))
 
     def kendalltau(self, event):
         self._statsType3(functionName = "kendalltau",
-                        texto1 = u"X Column to analyse",
-                        texto2 = u"Y Column to analyse",
-                        useNumpy = True,
-                        nameCols = ("Kendall's tau"," two-tailed p-value"))
+                         texto1 = u"X Column to analyse",
+                         texto2 = u"Y Column to analyse",
+                         useNumpy = True,
+                         nameCols = ("Kendall's tau"," two-tailed p-value"))
 
     def linregress(self, event):
         self._statsType3(functionName = "linregress",
-                        texto1 = u"X Column to analyse",
-                        texto2 = u"Y Column to analyse",
-                        useNumpy = True,
-                        nameCols= ("slope", "intercept", "r", "two-tailed prob",
+                         texto1 = u"X Column to analyse",
+                         texto2 = u"Y Column to analyse",
+                         useNumpy = True,
+                         nameCols= ("slope", "intercept", "r", "two-tailed prob",
                                     "sterr-of-the-estimate", "n"))
 
     def ttest_1samp(self, event):
@@ -2250,8 +2252,8 @@ class DataFrame(wx.Frame):
         values = [ [pos for pos, value in enumerate( ColumnList )
                     if value == val
                     ][0]
-                    for val in colNameSelect
-                    ]
+                   for val in colNameSelect
+                   ]
 
         # -------------------
         columns = [ GetData(colnums[ pos ]) for pos in values][0]
@@ -2292,13 +2294,13 @@ class DataFrame(wx.Frame):
             self.logPanel.write("you don't select any items")
             return
         xvalues = [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
+                     if value == val
+                     ][0]
                     for val in xcolNameSelect
                     ]
         yvalues = [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
+                     if value == val
+                     ][0]
                     for val in ycolNameSelect
                     ]
 
@@ -2342,13 +2344,13 @@ class DataFrame(wx.Frame):
             self.logPanel.write("you don't select any items")
             return
         xvalues = [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
+                     if value == val
+                     ][0]
                     for val in xcolNameSelect
                     ]
         yvalues = [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
+                     if value == val
+                     ][0]
                     for val in ycolNameSelect
                     ]
 
@@ -2393,8 +2395,8 @@ class DataFrame(wx.Frame):
             self.logPanel.write("you don't select any items")
             return
         xvalues = [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
+                     if value == val
+                     ][0]
                     for val in xcolNameSelect
                     ]
         xcolumns = [ GetData(colnums[ pos ]) for pos in xvalues][0]
@@ -2403,8 +2405,8 @@ class DataFrame(wx.Frame):
             ycolumns = None
         else:
             yvalues = [ [pos for pos, value in enumerate( ColumnList )
-                        if value == val
-                        ][0]
+                         if value == val
+                         ][0]
                         for val in ycolNameSelect
                         ]
             ycolumns = [ GetData(colnums[ pos ]) for pos in yvalues][0]
@@ -2448,13 +2450,13 @@ class DataFrame(wx.Frame):
             self.logPanel.write("you don't select any items")
             return
         xvalues = [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
+                     if value == val
+                     ][0]
                     for val in xcolNameSelect
                     ]
         yvalues = [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
+                     if value == val
+                     ][0]
                     for val in ycolNameSelect
                     ]
 
@@ -2497,13 +2499,13 @@ class DataFrame(wx.Frame):
             self.logPanel.write("you don't select any items")
             return
         xvalues = [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
+                     if value == val
+                     ][0]
                     for val in xcolNameSelect
                     ]
         yvalues = [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
+                     if value == val
+                     ][0]
                     for val in ycolNameSelect
                     ]
 
@@ -2546,13 +2548,13 @@ class DataFrame(wx.Frame):
             self.logPanel.write("you don't select any items")
             return
         xvalues = [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
+                     if value == val
+                     ][0]
                     for val in xcolNameSelect
                     ]
         yvalues = [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
+                     if value == val
+                     ][0]
                     for val in ycolNameSelect
                     ]
 
@@ -2595,13 +2597,13 @@ class DataFrame(wx.Frame):
             self.logPanel.write("you don't select any items")
             return
         xvalues = [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
+                     if value == val
+                     ][0]
                     for val in xcolNameSelect
                     ]
         yvalues = [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
+                     if value == val
+                     ][0]
                     for val in ycolNameSelect
                     ]
 
@@ -2831,11 +2833,11 @@ class DataFrame(wx.Frame):
 
     def F_oneway(self, event):
         self._statsType1("F_oneway", allColsOneCalc = True,
-                        nameResults= ("F","p-value"))
+                         nameResults= ("F","p-value"))
 
     def F_value(self, event):
         self._statsType1("F_value", allColsOneCalc = True,
-                        nameResults= ("F","p-value"))
+                         nameResults= ("F","p-value"))
 #---------------------------------------------------------------------------
 # Scripting API is defined here. So far, only basic (but usable!) stuff.
 def GetData(column):
