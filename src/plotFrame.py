@@ -823,7 +823,21 @@ class MpltFrame( wx.Frame ):
     def _TitleChange( self, event ):
         self.figpanel.axes[0].set_title(event.GetString())
         self.figpanel.canvas.draw()
-
+        
+    def probabilityPlot(self, data2plot):
+        import scipy.stats as stats2
+        from numpy import amin, amax
+        res = stats2.probplot(np.array(data2plot[0]),)
+        (osm,osr) = res[0]
+        (slope, intercept, r) = res[1]
+        ax= self.figpanel.axes[0]
+        ax.plot(osm, osr, 'o', osm, slope*osm + intercept)
+        xmin,xmax= amin(osm),amax(osm)
+        ymin,ymax= amin(data2plot),amax(data2plot)
+        posx,posy = xmin+0.70*(xmax-xmin), ymin+0.01*(ymax-ymin)
+        ax.text(posx,posy, "r^2=%1.4f" % r)
+        self.figpanel.canvas.draw()
+    
     def _xlabelChange( self, event ):
         self.figpanel.axes[0].set_xlabel(event.GetString())
         self.figpanel.canvas.draw()

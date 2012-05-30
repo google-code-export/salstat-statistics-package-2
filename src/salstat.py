@@ -1206,7 +1206,8 @@ class DataFrame(wx.Frame):
         self.mn271= chart_menu.Append(wx.NewId(), 'Scatter')
         self.mn272= chart_menu.Append(wx.NewId(), 'Box&Wishker Plot')
         self.mn274= chart_menu.Append(wx.NewId(), 'Lineal Regress')
-        self.mn275= chart_menu.Append(wx.ID_ANY, 'GoTernaryplot')
+        self.mn275= chart_menu.Append(wx.ID_ANY, 'Ternary Plot')
+        self.mn276= chart_menu.Append(wx.ID_ANY, 'Probability plot')
 
         self.mn28=help_menu.Append(wx.ID_ANY, '&What Test Should I Use...')
         self.mn29=help_menu.Append(wx.ID_ANY, '&Topics...')
@@ -1365,6 +1366,7 @@ class DataFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.GoLinesPlot,        id= self.mn273.GetId())
         self.Bind(wx.EVT_MENU, self.GoLinRegressPlot,   id= self.mn274.GetId())
         self.Bind(wx.EVT_MENU, self.GoTernaryplot,      id= self.mn275.GetId())
+        self.Bind(wx.EVT_MENU, self.GoProbabilityplot,  id= self.mn276.GetId())
 
         # controlling the expansion of the notebook
         self.m_notebook1.Bind( wx.EVT_LEFT_DCLICK, self._OnNtbDbClick )
@@ -1645,6 +1647,38 @@ class DataFrame(wx.Frame):
                   title= 'Lin Regress plot' )
         plt.Show()
 
+    def GoProbabilityplot(self, event):
+        ColumnList, colnums = self.grid.GetUsedCols()
+        if colnums == []:
+            self.SetStatusText('You need some data to draw a graph!')
+            return
+        bt1= ('Choice',(ColumnList,))
+        bt2= ('StaticText',('Select The column to analyse',))
+        setting= {'Title': "Probability plot"}
+        structure= list()
+        structure.append([bt1, bt2])
+        selection= dialog(settings = setting, struct= structure)
+        if selection.ShowModal() != wx.ID_OK:
+            selection.Destroy()
+            return
+        (selectedcols,) = selection.GetValue()
+        selection.Destroy()
+        if len(selectedcols) == 0:
+            self.SetStatusText('You need to select some data to draw a graph!')
+            return
+        values = [ [pos for pos, value in enumerate( ColumnList )
+                    if value == val
+                    ][0]
+                   for val in selectedcols
+                   ]
+        data = [self.grid.CleanData(cols) for cols in [colnums[m] for m in values]]
+        plt= plot(parent = self, typePlot= 'probabilityPlot',
+                  data2plot= data,
+                  title=     'Probability Plot',
+                  xlabel=    'Order Statistic Medians',
+                  ylabel=    'Ordered Values')
+        plt.Show()
+        
     def EndApplication(self, evt):
         # close the application (need to check for new data since last save)
         # need to save the inits dictionary to .salstatrc
