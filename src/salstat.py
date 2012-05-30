@@ -1106,9 +1106,6 @@ class formulaBar ( wx.Panel ):
 # This is main interface of application
 class DataFrame(wx.Frame):
     def __init__(self, parent, appname ):
-
-        #dimx = int(inits.get('gridsizex'))
-        #dimy = int(inits.get('gridsizey'))
         self.path = None
         wx.Frame.__init__(self,parent,-1,"SalStat Statistics",
                           size=wx.Size(640,480 ), pos=wx.DefaultPosition)
@@ -1209,6 +1206,7 @@ class DataFrame(wx.Frame):
         self.mn271= chart_menu.Append(wx.NewId(), 'Scatter')
         self.mn272= chart_menu.Append(wx.NewId(), 'Box&Wishker Plot')
         self.mn274= chart_menu.Append(wx.NewId(), 'Lineal Regress')
+        self.mn275= chart_menu.Append(wx.ID_ANY, 'GoTernaryplot')
 
         self.mn28=help_menu.Append(wx.ID_ANY, '&What Test Should I Use...')
         self.mn29=help_menu.Append(wx.ID_ANY, '&Topics...')
@@ -1266,11 +1264,9 @@ class DataFrame(wx.Frame):
 
         # adicion de panel para mostrar las respuestas
         self.answerPanel = NoteBookSheet(self)
-
         self.answerPanel2 = ScriptPanel(self, self.logPanel, self.grid.m_grid, self.answerPanel)
 
         #--------------------------------------------
-
         self.m_notebook1.AddPage( self.logPanel, u"Log", True )
 
         #--------------------------------
@@ -1327,47 +1323,48 @@ class DataFrame(wx.Frame):
         self.grid.m_grid.Bind( wx.grid.EVT_GRID_SELECT_CELL, self._cellSelectionChange )
         #-----------------
         # para el toolbar
-        self.Bind(wx.EVT_MENU, self.GoClearData,        id = self.bt1.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.LoadXls, id = self.bt2.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.SaveXls,  id = self.bt3.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.SaveXlsAs,id= self.bt4.GetId())
+        self.Bind(wx.EVT_MENU, self.GoClearData,        id= self.bt1.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.LoadXls,       id= self.bt2.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.SaveXls,       id= self.bt3.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.SaveXlsAs,     id= self.bt4.GetId())
         ##self.Bind(wx.EVT_MENU, self.grid.PrintPage, id = self.bt5.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.CutData,       id = self.bt6.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.CopyData,      id = self.bt7.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.PasteData,     id = self.bt8.GetId())
-        self.Bind(wx.EVT_MENU, self.GoVariablesFrame,   id = self.bt9.GetId())
-        self.Bind(wx.EVT_MENU, self.GoHelpAboutFrame,   id = self.bt10.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.Undo,   id = self.bt11.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.Redo,   id = self.bt12.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.CutData,       id= self.bt6.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.CopyData,      id= self.bt7.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.PasteData,     id= self.bt8.GetId())
+        self.Bind(wx.EVT_MENU, self.GoVariablesFrame,   id= self.bt9.GetId())
+        self.Bind(wx.EVT_MENU, self.GoHelpAboutFrame,   id= self.bt10.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.Undo,          id= self.bt11.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.Redo,          id= self.bt12.GetId())
         #-----------------
         # Menu
-        self.Bind(wx.EVT_MENU, self.GoClearData,        id = self.mn1.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.LoadXls, id = self.mn2.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.SaveXls, id = self.mn3.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.SaveXlsAs,id = self.mn4.GetId())
-        ##self.Bind(wx.EVT_MENU, seelf.grid.SaveXlsAs,id = ID_FILE_PRINT)
-        self.Bind(wx.EVT_MENU, self.EndApplication,     id = self.mn7.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.CutData,       id = self.mn8.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.CopyData,      id = self.mn9.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.PasteData,     id = self.mn10.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.SelectAllCells,id = self.mn11.GetId())
-        self.Bind(wx.EVT_MENU, self.GoFindDialog,       id = self.mn12.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.DeleteCurrentCol,id = self.mn13.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.DeleteCurrentRow,id = self.mn14.GetId())
-        self.Bind(wx.EVT_MENU, self.GoVariablesFrame,   id = self.mn15.GetId())
-        self.Bind(wx.EVT_MENU, self.GoEditGrid,         id = self.mn16.GetId())
-        self.Bind(wx.EVT_MENU, self.GoGridPrefFrame,    id = self.mn17.GetId())
-        self.Bind(wx.EVT_MENU, self.GoFontPrefsDialog,  id = self.mn18.GetId())
-        self.Bind(wx.EVT_MENU, self.GoContinuousDescriptives,id = self.mn19.GetId())
-        self.Bind(wx.EVT_MENU, self.GoTransformData,    id = self.mn20.GetId())
-        self.Bind(wx.EVT_MENU, self.shortData,          id = self.mn21.GetId())
+        self.Bind(wx.EVT_MENU, self.GoClearData,        id= self.mn1.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.LoadXls,       id= self.mn2.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.SaveXls,       id= self.mn3.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.SaveXlsAs,     id= self.mn4.GetId())
+        ##self.Bind(wx.EVT_MENU, seelf.grid.SaveXlsAs,  id= ID_FILE_PRINT)
+        self.Bind(wx.EVT_MENU, self.EndApplication,     id= self.mn7.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.CutData,       id= self.mn8.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.CopyData,      id= self.mn9.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.PasteData,     id= self.mn10.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.SelectAllCells,id= self.mn11.GetId())
+        self.Bind(wx.EVT_MENU, self.GoFindDialog,       id= self.mn12.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.DeleteCurrentCol,id= self.mn13.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.DeleteCurrentRow,id= self.mn14.GetId())
+        self.Bind(wx.EVT_MENU, self.GoVariablesFrame,   id= self.mn15.GetId())
+        self.Bind(wx.EVT_MENU, self.GoEditGrid,         id= self.mn16.GetId())
+        self.Bind(wx.EVT_MENU, self.GoGridPrefFrame,    id= self.mn17.GetId())
+        self.Bind(wx.EVT_MENU, self.GoFontPrefsDialog,  id= self.mn18.GetId())
+        self.Bind(wx.EVT_MENU, self.GoContinuousDescriptives,id= self.mn19.GetId())
+        self.Bind(wx.EVT_MENU, self.GoTransformData,    id= self.mn20.GetId())
+        self.Bind(wx.EVT_MENU, self.shortData,          id= self.mn21.GetId())
 
-        self.Bind(wx.EVT_MENU, self.GoChartWindow,      id = self.mn26.GetId())
-        self.Bind(wx.EVT_MENU, self.GoBarChartWindow,   id = self.mn27.GetId())
-        self.Bind(wx.EVT_MENU, self.GoScatterPlot,   id = self.mn271.GetId())
-        self.Bind(wx.EVT_MENU, self.GoBoxWishkerPlot,   id = self.mn272.GetId())
-        self.Bind(wx.EVT_MENU, self.GoLinesPlot,   id = self.mn273.GetId())
-        self.Bind(wx.EVT_MENU, self.GoLinRegressPlot,   id = self.mn274.GetId())
+        self.Bind(wx.EVT_MENU, self.GoChartWindow,      id= self.mn26.GetId())
+        self.Bind(wx.EVT_MENU, self.GoBarChartWindow,   id= self.mn27.GetId())
+        self.Bind(wx.EVT_MENU, self.GoScatterPlot,      id= self.mn271.GetId())
+        self.Bind(wx.EVT_MENU, self.GoBoxWishkerPlot,   id= self.mn272.GetId())
+        self.Bind(wx.EVT_MENU, self.GoLinesPlot,        id= self.mn273.GetId())
+        self.Bind(wx.EVT_MENU, self.GoLinRegressPlot,   id= self.mn274.GetId())
+        self.Bind(wx.EVT_MENU, self.GoTernaryplot,      id= self.mn275.GetId())
 
         # controlling the expansion of the notebook
         self.m_notebook1.Bind( wx.EVT_LEFT_DCLICK, self._OnNtbDbClick )
@@ -1476,6 +1473,41 @@ class DataFrame(wx.Frame):
                   ylabel= 'mean',
                   title= 'Line Chart of all means',
                   xtics= [waste[i] for i in selectedCols])
+        plt.Show()
+        
+    def GoTernaryplot(self, event):
+        waste, colnums = self.grid.GetUsedCols()
+        if colnums == []:
+            self.SetStatusText('You need some data to draw a graph!')
+            return
+        
+        selection = data2Plotdiaglog(self,waste)
+        if selection.ShowModal() != wx.ID_OK:
+            selection.Destroy()
+            return
+        
+        selectedcols = selection.getData()
+        selection.Destroy()
+        if len(selectedcols) == 0:
+            self.SetStatusText('You need to select some data to draw a graph!')
+            return
+        elif len(selectedcols) != 3:
+            self.logPanel.write('You have to select 3 columns a, b and c')
+            return
+        
+        data = [self.grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]]
+        tam = [len(dat) for dat in data]
+        if (tam[0] != tam[1]) or (tam[0] != tam[2]):
+            self.logPanel.write('the selected columns must have the same quantity of elements')
+            return
+        
+        legend = u''
+        data= [data[0], data[1], data[2], legend]
+            
+        plt= plot(parent=    self,
+                  typePlot=  'plotTrian',
+                  data2plot= data, 
+                  title=     'Ternary Plot')
         plt.Show()
 
     def GoBarChartWindow(self, event):

@@ -24,6 +24,7 @@ from matplotlib.backends.backend_wxagg import \
 from matplotlib.backends.backend_wx import NavigationToolbar2Wx
 from matplotlib.backends.backend_wx import StatusBarWx
 from matplotlib.backend_bases import MouseEvent
+from triplot import triplot
 
 
 class MpltFrame( wx.Frame ):
@@ -752,10 +753,73 @@ class MpltFrame( wx.Frame ):
     def boxPlot(self,data2plot):
         plt= self.axes.boxplot(data2plot, notch=0, sym='+', vert=1, whis=1.5,
                                positions=None, widths=None, patch_artist=False)
+        self.figpanel.canvas.draw()
 
     def plotHistigram(self,data2plot):
         pass
-
+    def plotTrian(self,data2plot):
+        '''data2plot = ((a,b,c,'legend'))'''
+        plotT = triplot([data2plot],)
+        # plot the mesh
+        ax = self.figpanel.axes[0]
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_xlim((-0.05, 1.05))
+        ax.set_ylim((-0.05, 0.92))
+        ax.set_axis_off()
+        
+        ax.hold(True)
+        # plot the grid
+        a= plotT.meshLines[-1]
+        plotT.meshLines[-1] = [a[0][:4],a[1][:4]]
+        for pos,lineGrid in enumerate(plotT.meshLines):
+            if pos == 0:
+                ax.plot(lineGrid[0],lineGrid[1], 
+                    color= wx.Colour(0, 0, 0, 0.5),
+                    linestyle= '-',)
+            else:
+                ax.plot(lineGrid[0],lineGrid[1], 
+                    color= wx.Colour(0, 0, 0, 0.5),
+                    linestyle= '--',)
+        # add the ruler
+        for line in plotT.ruler:
+            ax.plot(line[0],line[1], 
+                    color= wx.Colour(0, 0, 0, 0),
+                    linestyle= '-',)
+        # numbering the ruler
+        for key, values in plotT.dataLabel.items():
+            if key == 'AC':
+                for ((x,y), value) in zip(values, range(10,-1,-1)):
+                    value = value/float(10)
+                    ax.text(x, y, str(value),
+                        horizontalalignment= 'right',
+                        verticalalignment=   'bottom',
+                        fontsize=            10)
+                        #transform=           ax.transAxes)
+            if key == 'CB':
+                for ((x,y), value) in zip(values, range(10,-1,-1)):
+                    value = value/float(10)
+                    ax.text(x, y, str(value),
+                        horizontalalignment= 'left',
+                        verticalalignment=   'bottom',
+                        fontsize=            10)
+            if key == 'AB':
+                for ((x,y), value) in zip(values, range(10,-1,-1)):
+                    value = value/float(10)
+                    ax.text(x, y, str(value),
+                        horizontalalignment= 'center',
+                        verticalalignment=   'top',
+                        fontsize=            10)
+            
+        
+        for data in plotT.xydata:
+            ax.plot(data[0],data[1],
+                    linestyle= '_',
+                    marker='d')
+            
+        ax.hold(False)
+        self.figpanel.canvas.draw(0)
+        
     def _TitleChange( self, event ):
         self.figpanel.axes[0].set_title(event.GetString())
         self.figpanel.canvas.draw()
