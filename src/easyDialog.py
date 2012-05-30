@@ -205,6 +205,8 @@ class Dialog ( wx.Dialog ):
                         prevResult = []
                     if ctrl.GetSelection() >= 0:
                         prevResult =  ctrl.GetItems()[ctrl.GetSelection()]
+                    else:
+                        prevResult= []
 
                 elif typectrl == 'CheckListBox':
                     if len(ctrl.Checked) > 0:
