@@ -191,71 +191,6 @@ class SaveDialog(wx.Dialog):
         self.Close(True)
 
 #---------------------------------------------------------------------------
-# creates an init file in the home directory of the user
-class GetInits:
-    """This class deals with a users init file. The coords and sizes of the
-    various widgets are kept here, and are stored throughout the program
-    as a dictionary for easy access. When the program starts, the home
-    directory is checked for the init files existence. If absent, it is
-    created with a series of default values. If it is present, the values are
-    read into the dictionary in a slightly roundabout way! I am sure that
-    there is a more "Python" way of doing this, but this way works for now"""
-    def __init__(self):
-        self.initfile = os.path.join(INITDIR, '.salstatrc')
-        if os.path.isfile(self.initfile):
-            self.ReadInitFile(self.initfile)
-        else:
-            self.CreateInitFile(self.initfile)
-
-    def ReadInitFile(self, initfilename):
-        inits.clear()
-        fin = file(initfilename, 'r')
-        for i in range(28):
-            a = fin.readline()
-            a = string.split(a)
-            tmpdict = {a[0]:a[1]}
-            inits.update(tmpdict)
-
-    def CreateInitFile(self, initfilename):
-        inits = {
-            'gridsizex': '600',
-            'gridsizey': '420',
-            'gridposx': '50',
-            'gridposy': '20',
-            'gridcellsx': '20',
-            'gridcellsy': '80',
-            'outputsizex': '500',
-            'outputsizey': '400',
-            'outputposx': '20',
-            'outputposy': '50',
-            'scriptsizex': '600',
-            'scriptsizey': '400',
-            'scriptposx': '35',
-            'scriptposy': '35',
-            'chartsizex': '600',
-            'chartsizey': '400',
-            'chartposx': '50',
-            'chartposy': '50',
-            'helpsizex': '600',
-            'helpsizey': '400',
-            'helpposx': '40',
-            'helpposy': '40',
-            'lastfile1': "...",
-            'lastfile2': "...",
-            'lastfile3': "...",
-            'lastfile4': "...",
-            'opendir': DOCDIR,
-            'savedir': DOCDIR
-        }
-        initskeys = inits.keys()
-        initsvalues = inits.values()
-        fout = file(initfilename,'w')
-        for i in range(len(initskeys)):
-            fout.write(str(initskeys[i])+' '+str(initsvalues[i])+'\n')
-        fout.close()
-        self.ReadInitFile(initfilename) # damn hack!
-
-#---------------------------------------------------------------------------
 # class to output the results of several "descriptives" in one table
 class ManyDescriptives:
     def __init__(self, source, ds):
@@ -310,7 +245,7 @@ class ManyDescriptives:
 #---------------------------------------------------------------------------
 # class for grid - used as datagrid.
 class SimpleGrid(MyGrid):# wxGrid
-    def __init__(self, parent, log, size= (500,50)):
+    def __init__(self, parent, log, size= (1000,100)):
         self.NumSheetReport = 0
         self.log = log
         self.path = None
@@ -325,8 +260,7 @@ class SimpleGrid(MyGrid):# wxGrid
         ##self.m_grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.AlterSaveStatus)
         self.m_grid.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
         self.m_grid.wildcard = "Any File (*.*)|*.*|" \
-            "ASCII data format (*.xls)|*.xls|" \
-            "SalStat Format (*.xls)|*.xls"
+                               "SalStat Format (*.xls)|*.xls"
         ## se ajusta el render
         attr = wx.grid.GridCellAttr()
         editor = wx.grid.GridCellFloatEditor()
@@ -377,8 +311,6 @@ class SimpleGrid(MyGrid):# wxGrid
         currentrow = self.m_grid.GetGridCursorRow()
         self.m_grid.DeleteRows(currentrow, 1)
         self.m_grid.AdjustScrollbars()
-        xmlevt = '<deleteRow>'+str(currentrow)+'</deleteRow>\n'
-
 
     def SelectAllCells(self, event):
         self.m_grid.SelectAll()
@@ -954,30 +886,6 @@ class DescriptivesFrame(wx.Dialog):
 #---------------------------------------------------------------------------
 # instance of the tool window that contains the test buttons
 # note this is experimental and may not be final
-class TestFrame(wx.MiniFrame):
-    def __init__(self, parent, title):
-        self.parent = parent
-        wx.MiniFrame.__init__(self, parent, -1, 'Tests', size=(120,400), pos=(5,5))
-        descButton = wx.Button(self, 151,'Descriptives (F1)',wx.Point(0,0),wx.Size(115,40))
-        sign1Button=wx.Button(self,153,'sign test 1 sample',wx.Point(0,40),wx.Size(115,40))
-        ttestpairedButton=wx.Button(self,154,'t-test paired <F2>',wx.Point(0,80),wx.Size(115,40))
-        ttestunpairedButton = wx.Button(self, 155, 't-test unpaired <F3>',wx.Point(0,120),wx.Size(115,40))
-        chisquareButton = wx.Button(self,156,'Chi square <F4>',wx.Point(0,160),wx.Size(155,40))
-        mannwhitneyButton=wx.Button(self,157,'Mann-Whitney U',wx.Point(0,200),wx.Size(115,40))
-        kolmogorovButton=wx.Button(self,158,'Kolmogorov-Smirnov',wx.Point(0,240),wx.Size(115,40))
-        anovaButton=wx.Button(self,159,'anova between',wx.Point(0,280),wx.Size(115,40))
-        anovaWButton=wx.Button(self,160,'anova within',wx.Point(0,320),wx.Size(115,40))
-        # and so on...
-        # only put keyboard shortcuts for the most required ones. DONT allow the user to change this
-        EVT_CLOSE(self, self.DoNothing)
-        self.Bind(wx.EVT_BUTTON,descButton, 151, self.GetDescriptives)
-
-    def DoNothing(self, event):
-        pass
-
-    def GetDescriptives(self, event):
-        print self.parent.grid.m_grid.GetSelectedCols()
-
 #---------------------------------------------------------------------------
 class TransformFrame(wx.Dialog):
     def __init__(self, parent, id):
@@ -1039,7 +947,7 @@ class TransformFrame(wx.Dialog):
         self.transformName = " Square"
 
     def OnOkayButton(self, event):
-        pass # start transforming!
+        # start transforming!
         # process: collect each selected column, then pass the contents through the self.transform function
         # then put the resulting column into a new column, and retitle it with the original variable
         # name plus the function.
@@ -1073,7 +981,6 @@ class TransformFrame(wx.Dialog):
     def OnCloseFrame(self, event):
         self.Close(True)
 
-
 class formulaBar ( wx.Panel ):
 
     def __init__( self, parent , *args,**params):
@@ -1099,12 +1006,11 @@ class formulaBar ( wx.Panel ):
         self.Layout()
         bSizer1.Fit( self )
 
-
 #---------------------------------------------------------------------------
 #---------------------------------------------------------------------------
 # call instance of DataGrid
 # This is main interface of application
-class DataFrame(wx.Frame):
+class MainFrame(wx.Frame):
     def __init__(self, parent, appname ):
         self.path = None
         wx.Frame.__init__(self,parent,-1,"SalStat Statistics",
@@ -1821,6 +1727,10 @@ class DataFrame(wx.Frame):
         if len( colNameSelect ) == 0:
             self.logPanel.write("you don't select any items")
             return
+        if not isinstance(colNameSelect, (list, tuple)):
+            colNameSelect = [colNameSelect]
+            moment = [moment]
+            
         values = [ [pos for pos, value in enumerate( ColumnList )
                     if value == val
                     ][0]
@@ -1870,6 +1780,9 @@ class DataFrame(wx.Frame):
         if len( xcolname ) == 0 or len( ycolname ) == 0:
             self.logPanel.write("you don't select any items")
             return
+        if not isinstance(xcolname, (list, tuple)):
+            xcolname = [xcolname]
+            ycolname = [ycolname]
         xvalue= [ [pos for pos, value in enumerate( ColumnList )
                    if value == val
                    ][0]
@@ -2910,7 +2823,6 @@ def GetData(column):
     """This function enables the user to extract the data from the data grid.
     The data are "clean" and ready for analysis."""
     return frame.grid.CleanData(column)
-
 def GetDataName(column):
     """This function returns the name of the data variable - in other words,
     the column label from the grid."""
@@ -2929,7 +2841,7 @@ def PutData(column, data):
 # main loop
 if __name__ == '__main__':
     app = wx.App()
-    frame = DataFrame(None, app)
+    frame = MainFrame(None, app)
     frame.grid.SetFocus()
     Logg= frame.logPanel
     output = frame.answerPanel
