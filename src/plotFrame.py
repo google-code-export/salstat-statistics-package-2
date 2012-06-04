@@ -617,7 +617,6 @@ class MpltFrame( wx.Frame ):
             else:
                 self._plotTest()
 
-
         self._Binded()
         # se actualiza el nombre de las escalas de las x
         if self.graphParams.has_key('xtics'):
@@ -837,6 +836,13 @@ class MpltFrame( wx.Frame ):
         posx,posy = xmin+0.70*(xmax-xmin), ymin+0.01*(ymax-ymin)
         ax.text(posx,posy, "r^2=%1.4f" % r)
         self.figpanel.canvas.draw()
+        
+    def controlChar(self, data2plot):
+        UCL= data2plot['UCL']
+        LCL= data2plot['LCL']
+        target= data2plot['target']
+        data= data2plot['data']
+        posDataOutSide= 1
     
     def _xlabelChange( self, event ):
         self.figpanel.axes[0].set_xlabel(event.GetString())
