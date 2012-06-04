@@ -27,7 +27,7 @@ from plotFrame import MpltFrame as plot
 from multiPlotDialog import data2Plotdiaglog, selectDialogData2plot, scatterDialog
 from ntbSheet import NoteBookSheet
 
-from openStats import statistics
+from openStats import statistics, normProb, normProbInv
 
 from slbTools import ReportaExcel
 from easyDialog import Dialog as dialog
@@ -36,6 +36,7 @@ from ntbSheet import MyGridPanel as MyGrid
 
 from script import ScriptPanel
 from imagenes import imageEmbed
+
 
 STATS = {'Central Tendency': ('geometricmean','harmonicmean','mean',
                               'median','medianscore','mode'),
@@ -987,21 +988,18 @@ class formulaBar ( wx.Panel ):
         wx.Panel.__init__ ( self, parent, *args, **params)
 
         bSizer1 = wx.BoxSizer( wx.HORIZONTAL )
-
         self.m_textCtrl1 = wx.TextCtrl( self, wx.ID_ANY,
                                         wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
                                         wx.TE_CHARWRAP|wx.TE_MULTILINE|wx.TE_RICH2|
                                         wx.TE_WORDWRAP|wx.NO_BORDER )
 
-        self.m_textCtrl1.SetMinSize( wx.Size( 160,25 ) )
-
+        self.m_textCtrl1.SetMinSize( wx.Size( 220,25 ) )
         bSizer1.Add( self.m_textCtrl1, 0, 0, 5 ) # wx.EXPAND
 
         #self.m_button1 = wx.Button( self, wx.ID_ANY, u">>",
     #                    wx.DefaultPosition, wx.DefaultSize,
     #                    wx.BU_EXACTFIT|wx.DOUBLE_BORDER )
         #bSizer1.Add( self.m_button1, 0, wx.EXPAND, 5 )
-
         self.SetSizer( bSizer1 )
         self.Layout()
         bSizer1.Fit( self )
@@ -1015,19 +1013,131 @@ class MainFrame(wx.Frame):
         self.path = None
         wx.Frame.__init__(self,parent,-1,"SalStat Statistics",
                           size=wx.Size(640,480 ), pos=wx.DefaultPosition)
-
+        
+        self.m_mgr = aui.AuiManager()
+        self.m_mgr.SetManagedWindow( self )
+        
+        #set icon for frame (needs x-platform separator!
+        icon = images.getIconIcon()
+        self.SetIcon(icon)
+        
+        #-----------------------
+        # create menubar
+        self._createMenu()
+        #----------------------
+        # create toolbars
+        tb1= self._createTb1()
+        self.formulaBarPanel= formulaBar(self,wx.ID_ANY)
+        #------------------------
+        # create small status bar
+        self.CreateStatusBar()
+        self.SetStatusText('SalStat 2')
+        
+        
         self.m_notebook1 = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
         self.logPanel = LogPanel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 
         self.defaultDialogSettings = {'Title': None,
                                       'icon': images.getIconIcon()}
 
-        self.m_mgr = aui.AuiManager()# wx.aui
-        self.m_mgr.SetManagedWindow( self )
+        #--------------------
+        #set up the datagrid
+        self.grid = SimpleGrid(self, self.logPanel, size= (500,50))
+        self.grid.Saved = False
+        self.grid.m_grid.SetDefaultColSize(60, True)
+        self.grid.m_grid.SetRowLabelSize(40)
 
-        #set icon for frame (needs x-platform separator!
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
+        # response panel
+        self.answerPanel = NoteBookSheet(self, fb= self.formulaBarPanel)
+        self.answerPanel2 = ScriptPanel(self, self.logPanel, self.grid.m_grid, self.answerPanel)
+        #--------------------------------------------
+        self.m_notebook1.AddPage( self.logPanel, u"Log", True )
+        #--------------------------------
+        self.scriptPanel = wx.py.shell.Shell(self.m_notebook1)
+        self.scriptPanel.wrap(True)
+        self.m_notebook1.AddPage( self.scriptPanel , u"Shell", False )
+        
+        #------------------------
+        # organizing panels
+        self.m_mgr.AddPane( self.formulaBarPanel,
+                            aui.AuiPaneInfo().ToolbarPane().Top().Row(1).
+                            Position(1).
+                            LeftDockable(False).RightDockable(False).
+                            MinSize( wx.Size( -1,15 ) ).CloseButton( False ) )
+
+        self.m_mgr.AddPane(self.grid,
+                           aui.AuiPaneInfo().Centre().
+                           CaptionVisible(True).Caption('Main Panel').
+                           MaximizeButton(True).MinimizeButton(True).
+                           CloseButton( False ).MinSize( wx.Size( 240,-1 )))
+
+        self.m_mgr.AddPane(self.answerPanel,
+                           aui.AuiPaneInfo().Centre().Right().
+                           CaptionVisible(True).Caption(("Output Panel")).
+                           MinimizeButton(True).Resizable(True).MaximizeButton(True).
+                           CloseButton( False ).MinSize( wx.Size( 240,-1 )))
+
+        self.m_mgr.AddPane( tb1, aui.AuiPaneInfo().
+                            ToolbarPane().Top().Row(1).
+                            LeftDockable( False ).RightDockable( False ).
+                            CloseButton( False ) )
+
+        self.m_mgr.AddPane(self.answerPanel2,
+                           aui.AuiPaneInfo().Centre().Right().
+                           CaptionVisible(True).Caption(("Script Panel")).
+                           MinimizeButton().Resizable(True).MaximizeButton(True).
+                           CloseButton( False ).MinSize( wx.Size( 240,-1 )))
+
+        self.panelNtb = self.m_mgr.AddPane( self.m_notebook1,
+                                            aui.AuiPaneInfo() .Bottom() .
+                                            CloseButton( False ).MaximizeButton( True ).
+                                            Caption(('Shell')).
+                                            MinimizeButton().PinButton( False ).
+                                            Dock().Resizable().FloatingSize( wx.DefaultSize ).
+                                            CaptionVisible(True).
+                                            DockFixed( False ).BestSize(wx.Size(-1,150)))
+        self._BindEvents()
+        self.m_mgr.Update()
+        
+    def _createTb1(self):
+        # Get icons for toolbar
+        imag = imageEmbed()
+        NewIcon =    imag.exporCsv()
+        OpenIcon =   imag.folder()
+        SaveIcon =   imag.disk()
+        SaveAsIcon = imag.save2disk()
+        PrintIcon =  imag.printer()
+        CutIcon =    imag.edit_cut()
+        CopyIcon =   imag.edit_copy()
+        PasteIcon =  imag.edit_paste()
+        PrefsIcon =  imag.preferences()
+        HelpIcon =   imag.about()
+        UndoIcon =   imag.edit_undo()
+        RedoIcon =   imag.edit_redo()
+        
+        tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
+                            agwStyle=  aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
+
+        self.bt1 = tb1.AddSimpleTool(10, "New",  NewIcon,"New")
+        self.bt2 = tb1.AddSimpleTool(20, "Open", OpenIcon,"Open")
+        self.bt3 = tb1.AddSimpleTool(30, "Save", SaveIcon,"Save")
+        self.bt4 = tb1.AddSimpleTool(40, "Save As",SaveAsIcon,"Save As")
+        self.bt5 = tb1.AddSimpleTool(50, "Print",PrintIcon,"Print")
+        tb1.AddSeparator()
+        self.bt11= tb1.AddSimpleTool(wx.ID_ANY,"Undo",UndoIcon,"Undo")
+        self.bt12= tb1.AddSimpleTool(wx.ID_ANY,"Redo",RedoIcon,"Redo")
+        tb1.AddSeparator()
+        self.bt6 = tb1.AddSimpleTool(60, "Cut",  CutIcon, "Cut")
+        self.bt7 = tb1.AddSimpleTool(70, "Copy", CopyIcon, "Copy")
+        self.bt8 = tb1.AddSimpleTool(80, "Paste",PasteIcon, "Paste")
+        tb1.AddSeparator()
+        self.bt9 = tb1.AddSimpleTool(85, "Preferences",PrefsIcon, "Preferences")
+        self.bt10= tb1.AddSimpleTool(90, "Help", HelpIcon, "Help")
+        tb1.SetToolBitmapSize((24,24))
+        tb1.Realize()
+        return tb1
+        
+    def _createMenu(self):
         # Get icons for toolbar
         imag = imageEmbed()
         NewIcon =    imag.exporCsv()
@@ -1044,18 +1154,18 @@ class MainFrame(wx.Frame):
         RedoIcon =   imag.edit_redo()
         ExitIcon =   imag.stop()
         FindRIcon =  imag.findr()
-        #-----------------------
-        # Se crea el menubar
         #set up menus
-        file_menu = wx.Menu()
-        edit_menu = wx.Menu()
-        prefs_menu = wx.Menu()
-        describe_menu = wx.Menu()
-        analyse_menu = wx.Menu()
-        #analyse2_menu = wx.Menu()
-        preparation_menu = wx.Menu()
-        chart_menu = wx.Menu()
-        help_menu = wx.Menu()
+        file_menu=      wx.Menu()
+        edit_menu=      wx.Menu()
+        prefs_menu=     wx.Menu()
+        describe_menu=  wx.Menu()
+        analyse_menu=   wx.Menu()
+        #analyse2_menu= wx.Menu()
+        preparation_menu= wx.Menu()
+        chart_menu=     wx.Menu()
+        ctrProces_menu= wx.Menu()
+        help_menu=      wx.Menu()
+        
         #add contents of menu
 
         self.mn1= wx.MenuItem(file_menu, wx.ID_ANY, '&New Data')
@@ -1114,11 +1224,19 @@ class MainFrame(wx.Frame):
         self.mn274= chart_menu.Append(wx.NewId(), 'Lineal Regress')
         self.mn275= chart_menu.Append(wx.ID_ANY, 'Ternary Plot')
         self.mn276= chart_menu.Append(wx.ID_ANY, 'Probability plot')
-
-        self.mn28=help_menu.Append(wx.ID_ANY, '&What Test Should I Use...')
+        
+        self.mn401= wx.MenuItem(ctrProces_menu, wx.ID_ANY, 'Six Sigma Pac')
+        self.mn401.SetBitmap(HelpIcon)
+        ctrProces_menu.AppendItem(self.mn401)
+        
+        self.mn28= wx.MenuItem(help_menu, wx.ID_ANY, '&What Test Should I Use...')
+        self.mn28.SetBitmap(HelpIcon)
+        help_menu.AppendItem(self.mn28)
         self.mn29=help_menu.Append(wx.ID_ANY, '&Topics...')
         self.mn30=help_menu.Append(wx.ID_ANY, '&Licence...')
         self.mn31=help_menu.Append(wx.ID_ANY, '&About...')
+        self.mn31.SetBitmap(HelpIcon)
+        
         #set up menu bar
         menuBar = wx.MenuBar()
         menuBar.Append(file_menu, '&File')
@@ -1127,104 +1245,11 @@ class MainFrame(wx.Frame):
         menuBar.Append(preparation_menu, 'P&reparation')
         menuBar.Append(analyse_menu, '&Statistics')
         menuBar.Append(chart_menu, '&Graph')
+        menuBar.Append(ctrProces_menu, 'Ctrl Process')
         menuBar.Append(help_menu, '&Help')
         self.SetMenuBar(menuBar)
-        #------------------------
-        #create small status bar
-        self.CreateStatusBar()
-        self.SetStatusText('SalStat Statistics')
-
-        #----------------------
-        # se crea una barra de herramientas
         
-        tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
-                            agwStyle=  aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
-
-        self.bt1 = tb1.AddSimpleTool(10, "New",  NewIcon,"New")
-        self.bt2 = tb1.AddSimpleTool(20, "Open", OpenIcon,"Open")
-        self.bt3 = tb1.AddSimpleTool(30, "Save", SaveIcon,"Save")
-        self.bt4 = tb1.AddSimpleTool(40, "Save As",SaveAsIcon,"Save As")
-        self.bt5 = tb1.AddSimpleTool(50, "Print",PrintIcon,"Print")
-        tb1.AddSeparator()
-        self.bt11= tb1.AddSimpleTool(wx.ID_ANY,"Undo",UndoIcon,"Undo")
-        self.bt12= tb1.AddSimpleTool(wx.ID_ANY,"Redo",RedoIcon,"Redo")
-        tb1.AddSeparator()
-        self.bt6 = tb1.AddSimpleTool(60, "Cut",  CutIcon, "Cut")
-        self.bt7 = tb1.AddSimpleTool(70, "Copy", CopyIcon, "Copy")
-        self.bt8 = tb1.AddSimpleTool(80, "Paste",PasteIcon, "Paste")
-        tb1.AddSeparator()
-        self.bt9 = tb1.AddSimpleTool(85, "Preferences",PrefsIcon, "Preferences")
-        self.bt10= tb1.AddSimpleTool(90, "Help", HelpIcon, "Help")
-        tb1.SetToolBitmapSize((24,24))
-        tb1.Realize()
-
-        #--------------------
-
-        #still need to define event handlers
-        #set up the datagrid
-
-        self.grid = SimpleGrid(self, self.logPanel, size= (500,50))
-        self.grid.Saved = False
-        self.grid.m_grid.SetDefaultColSize(60, True)
-        self.grid.m_grid.SetRowLabelSize(40)
-
-
-        # adicion de panel para mostrar las respuestas
-        self.answerPanel = NoteBookSheet(self)
-        self.answerPanel2 = ScriptPanel(self, self.logPanel, self.grid.m_grid, self.answerPanel)
-
-        #--------------------------------------------
-        self.m_notebook1.AddPage( self.logPanel, u"Log", True )
-
-        #--------------------------------
-        self.scriptPanel = wx.py.shell.Shell(self.m_notebook1)
-        self.scriptPanel.wrap(True)
-
-        self.m_notebook1.AddPage( self.scriptPanel , u"Shell", False )
-        #-------------------------------
-        self.formulaBarPanel= formulaBar(self,wx.ID_ANY)
-
-        self.m_mgr.AddPane( self.formulaBarPanel,
-                            aui.AuiPaneInfo().ToolbarPane().Top().Row(1).
-                            Position(1).
-                            LeftDockable(False).RightDockable(False).
-                            MinSize( wx.Size( -1,15 ) ).CloseButton( False ) )
-
-        self.m_mgr.AddPane(self.grid,
-                           aui.AuiPaneInfo().Centre().
-                           CaptionVisible(True).Caption('Main Panel').
-                           MaximizeButton(True).MinimizeButton(True).
-                           CloseButton( False ).MinSize( wx.Size( 240,-1 )))
-
-        self.m_mgr.AddPane(self.answerPanel,
-                           aui.AuiPaneInfo().Centre().Right().
-                           CaptionVisible(True).Caption(("Output Panel")).
-                           MinimizeButton(True).Resizable(True).MaximizeButton(True).
-                           CloseButton( False ).MinSize( wx.Size( 240,-1 )))
-
-        self.m_mgr.AddPane( tb1, aui.AuiPaneInfo().
-                            ToolbarPane().Top().Row(1).
-                            LeftDockable( False ).RightDockable( False ).
-                            CloseButton( False ) )
-
-        self.m_mgr.AddPane(self.answerPanel2,
-                           aui.AuiPaneInfo().Centre().Right().
-                           CaptionVisible(True).Caption(("Script Panel")).
-                           MinimizeButton().Resizable(True).MaximizeButton(True).
-                           CloseButton( False ).MinSize( wx.Size( 240,-1 )))
-
-        self.panelNtb = self.m_mgr.AddPane( self.m_notebook1,
-                                            aui.AuiPaneInfo() .Bottom() .
-                                            CloseButton( False ).MaximizeButton( True ).
-                                            Caption(('Shell')).
-                                            MinimizeButton().PinButton( False ).
-                                            Dock().Resizable().FloatingSize( wx.DefaultSize ).
-                                            CaptionVisible(True).
-                                            DockFixed( False ).BestSize(wx.Size(-1,150)))
-        self.BindEvents()
-        self.m_mgr.Update()
-
-    def BindEvents(self):
+    def _BindEvents(self):
         # grid callback
         self.grid.m_grid.Bind( wx.grid.EVT_GRID_CMD_SELECT_CELL, self._cellSelectionChange )
         self.grid.m_grid.Bind( wx.grid.EVT_GRID_SELECT_CELL, self._cellSelectionChange )
@@ -1273,6 +1298,8 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.GoLinRegressPlot,   id= self.mn274.GetId())
         self.Bind(wx.EVT_MENU, self.GoTernaryplot,      id= self.mn275.GetId())
         self.Bind(wx.EVT_MENU, self.GoProbabilityplot,  id= self.mn276.GetId())
+        # control process callback
+        self.Bind(wx.EVT_MENU, self.GoSixPack,          id=self.mn401.GetId())
 
         # controlling the expansion of the notebook
         self.m_notebook1.Bind( wx.EVT_LEFT_DCLICK, self._OnNtbDbClick )
@@ -1287,11 +1314,11 @@ class MainFrame(wx.Frame):
 
     def _cellSelectionChange(self, event):
         # se lee el contenido de la celda seleccionada
-        row = event.GetRow()
-        col = event.GetCol()
-        texto =self.grid.m_grid.GetCellValue(row, col)
+        row= event.GetRow()
+        col= event.GetCol()
+        texto= self.grid.m_grid.GetCellValue(row, col)
         self.formulaBarPanel.m_textCtrl1.SetValue(texto)
-
+        event.Skip()
 
     def _OnNtbDbClick(self,event):
         for pane in self.mm_mgr.AllPanes:
@@ -1585,6 +1612,169 @@ class MainFrame(wx.Frame):
                   ylabel=    'Ordered Values')
         plt.Show()
         
+    def GoSixPack(self, event):
+        '''six pack for continue data
+        references:
+        1) http://en.wikipedia.org/wiki/Process_capability_index
+        2) http://en.wikipedia.org/wiki/Shewhart_individuals_control_chart
+        3) http://www.statisticalprocesscontrol.info/glossary.html
+        4) http://www.isixsigma.com/tools-templates/capability-indices-process-capability/process-capability-cp-cpk-and-process-performance-pp-ppk-what-difference/'''
+        functionName= "Six Sigma analysis"
+        group= lambda x,y: (x,y)
+        setting= self.defaultDialogSettings
+        setting['Title']= functionName
+        ColumnList, colnums = frame.grid.GetUsedCols()
+
+        bt1= group('StaticText',   ('Select variables to analyse',))
+        bt2= group('CheckListBox', (ColumnList,))
+        bt3= group('StaticText',   ('UCL',))
+        bt4= group('NumTextCtrl',  (),)
+        bt5= group('StaticText',   ('LCL',))
+        bt6= group('StaticText',   ('Target Value',))
+        bt7= group('StaticText',   ('Use tolerance of k*sigma k',))
+        bt8= group('SpinCtrl',     (1,10,6) )
+        structure= list()
+        structure.append([bt2, bt1 ])
+        structure.append([bt4, bt3 ])
+        structure.append([bt4, bt5 ])
+        structure.append([bt4, bt6 ])
+        structure.append([bt8, bt7 ])
+
+        dlg= dialog(settings= setting, struct= structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            (ColSelect, UCL, LCL, Target, k) = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        # -------------------
+        # changing value strings to numbers
+        if len(ColSelect) == 0:
+            self.logPanel.write("you don't select a column")
+            return
+        
+        # taking the data
+        values = [ [pos for pos, value in enumerate( ColumnList )
+                    if value == val
+                    ][0]
+                   for val in ColSelect
+                   ]
+        columns  = list()
+        for pos in values:
+            col = numpy.array(GetData(colnums[ pos ]))
+            col.shape = (len(col),1)
+            columns.append(col)
+            
+        for data in columns:
+            result= self._sixpack(data, UCL, LCL, Target, k)
+            description= {'Desv.Est': 'Standar deviation',
+                            'Cp':  'Process Capability. A simple and straightforward indicator of process capability.',
+                            'Pp':  'Process Performance. A simple and straightforward indicator of process performance. basically tries to verify if the sample that you have generated from the process is capable to meet Customer CTQs (requirements)',
+                            'Cpk': 'Process Capability Index. Adjustment of Cp for the effect of non-centered distribution. measures how close a process is running to its specification limits, relative to the natural variability of the process',
+                            'Ppk': 'Process Performance Index. Adjustment of Pp for the effect of non-centered distribution.',
+                            'Cpm': 'Estimates process capability around a target, it is also known as the Taguchi capability index',
+                            'ppm': 'In a quality control context, PPM stands for the number of parts per million (cf. percent) that lie outside the tolerance limits'}
+            
+            general= {'Desv.Est': round(result['stddev'],5),
+                      'Pp':       round(result['Cp'],5),
+                      'Ppk':      round(result['Cpk'],5),
+                      'Cpm':      round(result['Cpm'],5),
+                      'ppm':      int(result['ppm']),}
+
+            LCU=    result['LCU']
+            LCL=    result['LCL']
+            print "LCU %f"%LCU
+            print "LCL %f"%LCL
+            
+            data = numpy.array([dat  for dat in data if (dat <= LCU) and (dat >= LCL)])
+           
+            result = self._sixpack(data, UCL= LCU, LCL= LCL,
+                                   Target= Target, k= 6)
+            inside= {'Desv.Est':  round(result['stddev'],5),
+                      'Cp':       round(result['Cp'],5),
+                      'Cpk':      round(result['Cpk'],5),
+                      'ppm':      round(result['ppm'],5),} 
+            # filter the data that only is inside of the limits
+            
+            # se muestra los resultados
+            output.addColData('general', functionName)
+            keys= list()
+            desc= list()
+            values= list()
+            for key,value in general.items():
+                keys.append(key)
+                desc.append(description[key])
+                values.append(value)
+            output.addColData(desc)
+            output.addColData(keys)
+            output.addColData(values)
+            output.addColData('inside Potential')
+            output.addColData(inside.keys())
+            output.addColData(inside.values())
+        # control process chart
+        
+        self.logPanel.write(functionName + ' successfull')
+        
+    def _sixpack(self, data, UCL, LCL, Target, k= 6):
+        result= dict()
+        stadis= statistics(data)
+        stddev = stadis.stddev
+        if stddev == 0:
+            Logg.write('Six pack analysis fail because the sdtdev is zero')
+            return
+        
+        if UCL == None:
+            UCL= stadis.mean+ 0.5*k*stadis.stddev
+            
+        if LCL == None:
+            LCL= stadis.mean- 0.5*k*stadis.stddev
+        
+        if Target == None:
+            Target= stadis.mean
+            
+        if UCL <= LCL:
+            Logg.write('Six pack analysis fail because LCL >= UCL  %f >= %f'%(LCL, UCL))
+            return
+        
+        mean=     stadis.mean
+        Cp=       (UCL-LCL)/float(k*stddev)
+        Cpl=      2*(mean-LCL)/float(k*stddev)
+        Cpu=      2*(UCL-mean)/float(k*stddev)
+        Cpk=      min(Cpu, Cpl)
+        va1=      (mean-Target)/float(stddev)
+        val2=     math.sqrt(1+va1**2)
+        val3=     Cp/float(val2)
+        Cpm=      Cp/float(math.sqrt(1+((mean-Target)/float(stddev))**2))
+        zUCL=     (UCL - mean)/float(stddev)
+        zLCL=     (mean - LCL)/float(stddev)
+        outOfUCL= sum([1 for x in data if x > UCL])
+        outOfLCL= sum([1 for x in data if x < LCL])
+        probUCL=  1 - normProb(zUCL)
+        probLCL=  1 - normProb(zLCL)
+        probTot=  probLCL + probUCL
+        ppm=      int(probTot*1e6)
+        sigmaLevel= normProbInv(1-probTot)+1.5
+        
+        # data for xbar chat
+        mir= list()
+        for x,y in zip(data[1:],data[:-1]):
+            mir.append(abs(x-y))
+        newData=       numpy.array(mir)
+        meanNewData=  statistics(newData).mean
+        LCU=    stadis.mean+ 2.66*meanNewData
+        LCL=    stadis.mean- 2.66*meanNewData
+        
+        for paramName, value in zip(['stddev', 'mean', 'Cp', 'Cpl', 'Cpu','Cpk',
+                                     'zUCL', 'zLCL', 'probUCL', 'probLCL',
+                                     'probTot', 'ppm', 'sigmaLevel', 'outOfUCL',
+                                     'outOfLCL','Cpm','LCU','LCL'],
+                                    [stddev, mean, Cp, Cpl, Cpu, Cpk, zUCL, zLCL,
+                                     probUCL, probLCL, probTot, ppm, sigmaLevel,
+                                     outOfUCL, outOfLCL, Cpm, LCU, LCL ]):
+            result[paramName] = value
+        return result
+        
+    
     def EndApplication(self, evt):
         # close the application (need to check for new data since last save)
         # need to save the inits dictionary to .salstatrc
@@ -1642,7 +1832,7 @@ class MainFrame(wx.Frame):
             self.logPanel.write("you don't select any items")
             return
 
-        if len(colNameSelect) < None:
+        if len(colNameSelect) < requiredcols:
             self.logPanel.write("you have to select at least %i columns"%requiredcols)
             return
 
