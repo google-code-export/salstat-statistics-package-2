@@ -14,7 +14,6 @@ class statistics:
         self.variance = stats.var(data)
         self.stderr= stats.sterr(data)
         self.sumsquares = stats.ss(data)
-        #self.short = stats.shellsort(data)
         self.minimum= min(data)
         self.maximum= max(data)
         self.range = self.maximum-self.minimum
