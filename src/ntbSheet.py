@@ -8,6 +8,7 @@ Created on 25/10/2010
 import wx
 from NewGrid import NewGrid # grid with context menu
 from imagenes import imageEmbed
+import wx.grid
 
 import wx.aui
 
@@ -17,11 +18,11 @@ def numPage():
         yield i
         i+= 1
 
-class MyGridPanel ( wx.Panel ):
-    def __init__( self, parent , id= wx.ID_ANY, size=(5,5)):
+class MyGridPanel( wx.Panel ):
+    def __init__( self, parent , id= wx.ID_ANY, size= (5,5)):
         # bigParent: id del parent para llamar la funcion OnrangeChange
         wx.Panel.__init__ ( self, parent, id , pos = wx.DefaultPosition, style = wx.TAB_TRAVERSAL )
-        bSizer1 = wx.BoxSizer( wx.VERTICAL )
+        self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.m_grid = NewGrid( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
         # Grid
         self.m_grid.CreateGrid( size[0], size[1] )
@@ -42,9 +43,9 @@ class MyGridPanel ( wx.Panel ):
         self.m_grid.SetLabelBackgroundColour( wx.Colour( 254, 226, 188 ) )
         # Cell Defaults
         self.m_grid.SetDefaultCellAlignment( wx.ALIGN_LEFT, wx.ALIGN_TOP )
-        bSizer1.Add( self.m_grid, 1, wx.ALL|wx.EXPAND, 5 )
-        self.SetSizer( bSizer1 )
-        self.Layout()
+        self.sizer.Add( self.m_grid , 1, wx.ALL|wx.EXPAND, 5 )
+        self.SetSizer(self.sizer)
+        self.Fit()
 
     def setRowNames(self,names):
         self.m_grid.setRowNames(names)
@@ -73,6 +74,9 @@ class MyGridPanel ( wx.Panel ):
 class NoteBookSheet(wx.Panel):
     def __init__( self, parent, *args, **params):
         # se almacenan las paginas en un diccionario con llave el numero de pagina
+        if params.has_key('fb'):
+            self.fb= params.pop('fb')
+
         wx.Panel.__init__ ( self, parent, *args, **params)
         bSizer = wx.BoxSizer( wx.VERTICAL )
         self.m_notebook = wx.aui.AuiNotebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.aui.AUI_NB_DEFAULT_STYLE )
@@ -91,37 +95,15 @@ class NoteBookSheet(wx.Panel):
             raise StandardError('La pagina no existe')
         page= self.pageNames[pageName]
         return page.getByColumns()
-        ## retorna el contenido de una pagina del notebooksheet
-        #if pageName in self.getPageNames():
-            #for index,value in enumerate(self.getPageNames()):
-                #if value == pageName:
-                    #numberpage = index
-                    #break
-            #obj = self.m_notebook.GetPage(numberpage)
-            #return obj.getByColumns()
-        #else:
-            #raise StandardError('La pagina no existe')
 
     def getPageNames(self):
         return self.pageNames.keys()
-        ## retorna los nombre de las paginas adicionadas, como una lista
-        #numpages= self.m_notebook.GetPageCount()
-        #if numpages > 0:
-            #return tuple([self.m_notebook.GetPageText(page) for page in range(numpages)])
-        #else:
-            #return ()
 
     def getHeader(self,pageName):
         if not (pageName in self.pageNames.keys()):
             raise StandardError('La pagina no existe')
         page= self.pageNames[pageName]
         return page.getHeader()
-        #if pageName in self.getPageNames():
-            #numberpage= [index for index,value in enumerate(self.getPageNames()) if value == pageName]
-            #obj = self.m_notebook.GetPage(numberpage[0]).getHeader()
-            #return obj
-        #else:
-            #raise StandardError('La pagina no existe')
 
     def OnNotebookPageChange(self,evt):
         self.currentPage= evt.Selection
@@ -131,7 +113,6 @@ class NoteBookSheet(wx.Panel):
                        'size': (0,0),
                        'nameCol': list(),
                        'nameRow': list()}
-        
         for key, value in data.items():
             if defaultData.has_key(key):
                 defaultData[key] = value
@@ -150,8 +131,31 @@ class NoteBookSheet(wx.Panel):
         if 'nameRow' in defaultData.keys():
             for index, value in enumerate(defaultData['nameRow']):
                 grid.m_grid.SetRowLabelValue(index,value)
+        # para actualizar un toolbar del grid
+        if hasattr(self,'fb'):
+            self.pageNames[newName].Bind(wx.grid.EVT_GRID_CMD_SELECT_CELL,
+                      self._cellSelectionChange,)
+
+            self.pageNames[newName].Bind(wx.grid.EVT_GRID_SELECT_CELL,
+                      self._cellSelectionChange,#      source= self.pageNames[newName],
+                      )
 
         return grid # retorna el objeto MyGrid
+
+    def _cellSelectionChange(self, event):
+        if self.GetPageCount() == 0:
+            return
+        row=  int(event.Row)
+        col=  int(event.Col)
+        Id=   event.GetId()
+        pageSelectNumber=  self.m_notebook.GetSelection()
+        grid= self.m_notebook.GetPage(pageSelectNumber).m_grid
+        try:
+            texto= grid.GetCellValue(row, col)
+            self.fb.m_textCtrl1.SetValue(texto)
+        except:
+            pass
+        event.Skip()
 
     def __loadData__(self,selectedGrid,data, byRows = True):
         # gridId, nombre de la hoja en la que se adicionaran los datos
@@ -225,7 +229,7 @@ class NoteBookSheet(wx.Panel):
         # se cargan los datos dentro del grid
         self.__loadData__(grid01.m_grid,data['data'],byRows)
         return grid01
-    
+
     def addColData(self, colData, pageName= None):
         '''adiciona una columna con el contenido de un iterable'''
         if pageName == None:
@@ -259,8 +263,8 @@ class NoteBookSheet(wx.Panel):
             else:
                 colValue = str(colValue)
             page.m_grid.SetCellValue(colPos, currCol, colValue)
-            
-        
+
+
 class Test(wx.Frame):
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size=(480, 520))
