@@ -1010,7 +1010,7 @@ def llinregress(x,y):
     Calculates a regression line on x,y pairs.
 
     Usage:   llinregress(x,y)      x,y are equal-length lists of x-y coordinates
-    Returns: slope, intercept, r, two-tailed prob, sterr-of-estimate
+    Returns: slope, intercept, r, two-tailed prob, sterr-of-estimate, number of pairs
     """
     TINY = 1.0e-20
     if len(x) <> len(y):
@@ -1033,7 +1033,7 @@ def llinregress(x,y):
         return None, None, None, None, None
     intercept = ymean - slope*xmean
     sterrest = math.sqrt(1-r*r)*samplestdev(y)
-    return slope, intercept, r, prob, sterrest
+    return slope, intercept, r, prob, sterrest, n
 
 
 ####################################
@@ -2745,7 +2745,7 @@ def aobrientransform(*args):
         v[i] = var(nargs[i])
         m[i] = mean(nargs[i])
     for j in range(k):
-        for i in range(n[j]):
+        for i in range(int(n[j])):
             t1 = (n[j]-1.5)*n[j]*(nargs[j][i]-m[j])**2
             t2 = 0.5*v[j]*(n[j]-1.0)
             t3 = (n[j]-1.0)*(n[j]-2.0)
@@ -3047,7 +3047,7 @@ def acorrelation(X):
     return C / N.sqrt(N.multiply.outer(V,V))
 
 
-def apaired(x,y):
+def apaired(x,y, allData= True):
     """
     Interactively determines the type of data in x and y, and then runs the
     appropriated statistic for paired group data.
@@ -3055,60 +3055,78 @@ def apaired(x,y):
     Usage:   apaired(x,y)     x,y = the two arrays of values to be compared
     Returns: appropriate statistic name, value, and probability
     """
-    samples = ''
-    while samples not in ['i','r','I','R','c','C']:
-        print '\nIndependent or related samples, or correlation (i,r,c): ',
+    result= list()
+    if allData:
+        samples= ['i','r','c']
+    else:
+        samples = ['']
+    while not any([True for sample in samples if sample in ['i','r','c','I','R','C']]):
+        print 'Independent or related samples, or correlation (i,r,c): ',
         samples = raw_input()
-
-    if samples in ['i','I','r','R']:
-        print '\nComparing variances ...',
+    
+    if any([True for sample in samples if sample in ['i','I','r','R']]):
+        result.append('Comparing variances ...')
         # USE O'BRIEN'S TEST FOR HOMOGENEITY OF VARIANCE, Maxwell & delaney, p.112
-        r = obrientransform(x,y)
-        f,p = F_oneway(pstat.colex(r,0),pstat.colex(r,1))
-        if p<0.05:
-            vartype='unequal, p='+str(round(p,4))
+        r = obrientransform(x, y)
+        f, p = F_oneway(pstat.colex(r,0), pstat.colex(r,1))
+        if p < 0.05:
+            vartype='unequal, p='+str(round(p,4))            
         else:
             vartype='equal'
-        print vartype
-        if samples in ['i','I']:
+        result.append(vartype)
+        if any([True for sample in samples if sample in ['i','I']]):
             if vartype[0]=='e':
                 t,p = ttest_ind(x,y,None,0)
-                print '\nIndependent samples t-test:  ', round(t,4),round(p,4)
+                result.extend(['Independent samples t-test:  ', round(t,4), round(p,4)])
             else:
                 if len(x)>20 or len(y)>20:
                     z,p = ranksums(x,y)
-                    print '\nRank Sums test (NONparametric, n>20):  ', round(z,4),round(p,4)
+                    result.extend(['Rank Sums test (NONparametric, n>20):  ', round(z,4),round(p,4)])
                 else:
                     u,p = mannwhitneyu(x,y)
-                    print '\nMann-Whitney U-test (NONparametric, ns<20):  ', round(u,4),round(p,4)
+                    result.extend(['Mann-Whitney U-test (NONparametric, ns<20):  ', round(u,4),round(p,4)])
 
-        else:  # RELATED SAMPLES
+        if any([True for sample in samples if sample in ['r','R']]):  # RELATED SAMPLES
             if vartype[0]=='e':
                 t,p = ttest_rel(x,y,0)
-                print '\nRelated samples t-test:  ', round(t,4),round(p,4)
+                result.extend(['Related samples t-test:  ', round(t,4),round(p,4)])
             else:
                 t,p = ranksums(x,y)
-                print '\nWilcoxon T-test (NONparametric):  ', round(t,4),round(p,4)
-    else:  # CORRELATION ANALYSIS
+                result.extend(['Wilcoxon T-test (NONparametric):  ', round(t,4),round(p,4)])
+        result.append('')
+    if allData:
+        corrtype=  ['c','r','d']  # CORRELATION ANALYSIS
+    else:
         corrtype = ''
-        while corrtype not in ['c','C','r','R','d','D']:
+    if corrtype:
+        while not any([True for sample in corrtype if sample in ['c','C','r','R','d','D']]):
             print '\nIs the data Continuous, Ranked, or Dichotomous (c,r,d): ',
             corrtype = raw_input()
-        if corrtype in ['c','C']:
-            m,b,r,p,see = linregress(x,y)
-            print '\nLinear regression for continuous variables ...'
-            lol = [['Slope','Intercept','r','Prob','SEestimate'],[round(m,4),round(b,4),round(r,4),round(p,4),round(see,4)]]
-            pstat.printcc(lol)
-        elif corrtype in ['r','R']:
+        if any([True for sample in corrtype if sample in ['c','C']]):
+            m,b,r,p,see,n = linregress(x,y)
+            result.append('Linear regression for continuous variables ...')
+            lol = ['Slope',      round(m,4) ,
+                   'Intercept',  round(b,4),
+                   'r',          round(r,4),
+                   'Prob',       round(p,4),
+                   'SEestimate', round(see,4),
+                   'n',          int(n)]
+            result.extend(lol)
+        if any([True for sample in corrtype if sample in ['r','R']]):
             r,p = spearmanr(x,y)
-            print '\nCorrelation for ranked variables ...'
-            print "Spearman's r: ",round(r,4),round(p,4)
-        else: # DICHOTOMOUS
+            result.append('Correlation for ranked variables ...')
+            result.extend([ "Spearman's r: ",round(r,4),round(p,4)])
+        if any([True for sample in corrtype if sample in ['d','D']]): # DICHOTOMOUS
             r,p = pointbiserialr(x,y)
-            print '\nAssuming x contains a dichotomous variable ...'
-            print 'Point Biserial r: ',round(r,4),round(p,4)
-    print '\n\n'
-    return None
+            result.append('Assuming x contains a dichotomous variable ...')
+            try:
+                r= round(r,4)
+            except: pass
+            try:
+                p= round(p,4)
+            except: pass
+            result.extend(['Point Biserial r: ', r, p])
+    return result
 
 
 def dices(x,y):
@@ -3226,7 +3244,7 @@ def apointbiserialr(x,y):
     categories = pstat.aunique(x)
     data = pstat.aabut(x,y)
     if len(categories) <> 2:
-        raise ValueError, "Exactly 2 categories required (in x) for pointbiserialr()."
+        return None, None #'Cannot be calculated', "Exactly 2 categories required (in x) for pointbiserialr()."
     else:   # there are 2 categories, continue
         codemap = pstat.aabut(categories,N.arange(2))
         recoded = pstat.arecode(data,codemap,0)
