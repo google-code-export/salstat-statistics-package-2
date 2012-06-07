@@ -826,24 +826,43 @@ class MpltFrame( wx.Frame ):
     def probabilityPlot(self, data2plot):
         import scipy.stats as stats2
         from numpy import amin, amax
-        res = stats2.probplot(np.array(data2plot[0]),)
-        (osm,osr) = res[0]
-        (slope, intercept, r) = res[1]
+        if not isinstance(data2plot[0],(np.ndarray,)):
+            data2plot[0]= np.array(data2plot[0])
+        res=   stats2.probplot(data2plot[0],)
+        (osm,osr)=  res[0]
+        (slope, intercept, r)= res[1]
         ax= self.figpanel.axes[0]
         ax.plot(osm, osr, 'o', osm, slope*osm + intercept)
-        xmin,xmax= amin(osm),amax(osm)
-        ymin,ymax= amin(data2plot),amax(data2plot)
-        posx,posy = xmin+0.70*(xmax-xmin), ymin+0.01*(ymax-ymin)
+        xmin, xmax= amin(osm),amax(osm)
+        ymin, ymax= amin(data2plot),amax(data2plot)
+        posx, posy= xmin+0.70*(xmax-xmin), ymin+0.01*(ymax-ymin)
         ax.text(posx,posy, "r^2=%1.4f" % r)
         self.figpanel.canvas.draw()
         
-    def controlChar(self, data2plot):
+    def controlChart(self, data2plot):
         UCL= data2plot['UCL']
         LCL= data2plot['LCL']
         target= data2plot['target']
         data= data2plot['data']
-        posDataOutSide= 1
-    
+        posDataOutSide= list()
+        # plot all data
+        self.axes.plot(range(len(data)),data,marker= 'o')
+        self.axes.hold(True)
+        for pos, value in enumerate(data):
+            if value > UCL or value < LCL:
+                posDataOutSide.append((pos,value))
+        # then plot the violating points
+        self.axes.plot([dat[0] for dat in posDataOutSide],
+                       [dat[1] for dat in posDataOutSide],
+                       linestyle= '_', color='r', marker='d')
+        # UCL, LCL  Lines
+        self._OnAddRefHorzLine( event= None, ypos= UCL, color= 'r')
+        self._OnAddRefHorzLine( event= None, ypos= LCL, color= 'r')
+        # Target Line
+        self._OnAddRefHorzLine( event= None, ypos= target, color= 'k')
+        self.axes.hold(False)
+        self.figpanel.canvas.draw()
+
     def _xlabelChange( self, event ):
         self.figpanel.axes[0].set_xlabel(event.GetString())
         self.figpanel.canvas.draw()
@@ -1082,19 +1101,26 @@ class MpltFrame( wx.Frame ):
         lineSelected.set_visible(visible)
         self.figpanel.canvas.draw()
 
-    def _OnAddRefHorzLine( self, event ):
-        try:
-            float(self.HorLineTxtCtrl.GetValue())
-        except:
-            return
-        self.axes.hold(True)
-        ypos  = float(self.HorLineTxtCtrl.GetValue())
-        self.axes.axhline(ypos)
-        self.axes.hold(False)
+    def _OnAddRefHorzLine( self, event, **params ):
+        if params.has_key('ypos'):
+            ypos = params.pop('ypos')
+            self.axes.hold(True)
+            line= self.axes.axhline(ypos)
+            self.axes.hold(False)
+        else:
+            try:
+                ypos= float(self.HorLineTxtCtrl.GetValue())
+                self.axes.hold(True)
+                line= self.axes.axhline(ypos)
+                self.axes.hold(False)
+                self.HorLineTxtCtrl.SetValue('')
+                self._OnRefreshLines(None)
+            except:
+                return
+        if params.has_key('color'):
+            line.set_color(params['color'])
         self.figpanel.canvas.draw()
-        self.HorLineTxtCtrl.SetValue('')
-        self._OnRefreshLines(None)
-
+        
     def _OnAddRefVertLine( self, event ):
         try:
             float(self.HorVerTxtCtrl.GetValue())
