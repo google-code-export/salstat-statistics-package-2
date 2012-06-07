@@ -817,29 +817,29 @@ def lpaired(x,y):
         r = obrientransform(x,y)
         f,p = F_oneway(pstat.colex(r,0),pstat.colex(r,1))
         if p<0.05:
-            vartype='unequal, p='+str(round(p,4))
+            vartype='unequal, p='+str(_round(p,4))
         else:
             vartype='equal'
         print vartype
         if samples in ['i','I']:
             if vartype[0]=='e':
                 t,p = ttest_ind(x,y,0)
-                print '\nIndependent samples t-test:  ', round(t,4),round(p,4)
+                print '\nIndependent samples t-test:  ', _round(t,4), _round(p,4)
             else:
                 if len(x)>20 or len(y)>20:
                     z,p = ranksums(x,y)
-                    print '\nRank Sums test (NONparametric, n>20):  ', round(z,4),round(p,4)
+                    print '\nRank Sums test (NONparametric, n>20):  ', _round(z,4), _round(p,4)
                 else:
                     u,p = mannwhitneyu(x,y)
-                    print '\nMann-Whitney U-test (NONparametric, ns<20):  ', round(u,4),round(p,4)
+                    print '\nMann-Whitney U-test (NONparametric, ns<20):  ', _round(u,4), _round(p,4)
 
         else:  # RELATED SAMPLES
             if vartype[0]=='e':
                 t,p = ttest_rel(x,y,0)
-                print '\nRelated samples t-test:  ', round(t,4),round(p,4)
+                print '\nRelated samples t-test:  ', _round(t,4), _round(p,4)
             else:
                 t,p = ranksums(x,y)
-                print '\nWilcoxon T-test (NONparametric):  ', round(t,4),round(p,4)
+                print '\nWilcoxon T-test (NONparametric):  ', _round(t,4), _round(p,4)
     else:  # CORRELATION ANALYSIS
         corrtype = ''
         while corrtype not in ['c','C','r','R','d','D']:
@@ -848,16 +848,16 @@ def lpaired(x,y):
         if corrtype in ['c','C']:
             m,b,r,p,see = linregress(x,y)
             print '\nLinear regression for continuous variables ...'
-            lol = [['Slope','Intercept','r','Prob','SEestimate'],[round(m,4),round(b,4),round(r,4),round(p,4),round(see,4)]]
+            lol = [['Slope','Intercept','r','Prob','SEestimate'],[ _round(m,4), _round(b,4), _round(r,4), _round(p,4), _round(see,4)]]
             pstat.printcc(lol)
         elif corrtype in ['r','R']:
             r,p = spearmanr(x,y)
             print '\nCorrelation for ranked variables ...'
-            print "Spearman's r: ",round(r,4),round(p,4)
+            print "Spearman's r: ", _round(r,4), _round(p,4)
         else: # DICHOTOMOUS
             r,p = pointbiserialr(x,y)
             print '\nAssuming x contains a dichotomous variable ...'
-            print 'Point Biserial r: ',round(r,4),round(p,4)
+            print 'Point Biserial r: ', _round(r,4), _round(p,4)
     print '\n\n'
     return None
 
@@ -1880,8 +1880,8 @@ def outputpairedstats(fname,writemode,name1,n1,m1,se1,min1,max1,name2,n2,m2,se2,
     elif prob < 0.01:  suffix = '  **'
     elif prob < 0.05:  suffix = '  *'
     title = [['Name','N','Mean','SD','Min','Max']]
-    lofl = title+[[name1,n1,round(m1,3),round(math.sqrt(se1),3),min1,max1],
-                  [name2,n2,round(m2,3),round(math.sqrt(se2),3),min2,max2]]
+    lofl = title+[[name1,n1, _round(m1,3), _round(math.sqrt(se1),3),min1,max1],
+                  [name2,n2, _round(m2,3), _round(math.sqrt(se2),3),min2,max2]]
     if type(fname)<>StringType or len(fname)==0:
         print
         print statname
@@ -1895,7 +1895,7 @@ def outputpairedstats(fname,writemode,name1,n1,m1,se1,min1,max1,name2,n2,m2,se2,
                 prob = prob[0]
         except:
             pass
-        print 'Test statistic = ',round(stat,3),'   p = ',round(prob,3),suffix
+        print 'Test statistic = ', _round(stat,3),'   p = ', _round(prob,3),suffix
         print
     else:
         file = open(fname,writemode)
@@ -1910,7 +1910,7 @@ def outputpairedstats(fname,writemode,name1,n1,m1,se1,min1,max1,name2,n2,m2,se2,
                 prob = prob[0]
         except:
             pass
-        file.write(pstat.list2string(['\nTest statistic = ',round(stat,4),'   p = ',round(prob,4),suffix,'\n\n']))
+        file.write(pstat.list2string(['\nTest statistic = ',round(stat,4),'   p = ',  _round(prob,4),suffix,'\n\n']))
         file.close()
     return None
 
@@ -3046,6 +3046,11 @@ def acorrelation(X):
     V = N.diagonal(C)
     return C / N.sqrt(N.multiply.outer(V,V))
 
+def _round(x, cifras):
+    try:
+        x= round(x, cifras)
+    except:
+        return x
 
 def apaired(x,y, allData= True):
     """
@@ -3077,22 +3082,33 @@ def apaired(x,y, allData= True):
         if any([True for sample in samples if sample in ['i','I']]):
             if vartype[0]=='e':
                 t,p = ttest_ind(x,y,None,0)
-                result.extend(['Independent samples t-test:  ', round(t,4), round(p,4)])
+                result.append('')
+                result.extend(['Independent samples t-test:  ',
+                               "t-value",        _round(t,4),
+                               "two-tailed prob", _round(p,4)])
             else:
                 if len(x)>20 or len(y)>20:
-                    z,p = ranksums(x,y)
-                    result.extend(['Rank Sums test (NONparametric, n>20):  ', round(z,4),round(p,4)])
+                    z,p = ranksums(x, y)
+                    result.extend(['Rank Sums test (NONparametric, n>20):  ', 
+                                   "a z-statistic",      round(z,4),
+                                   "two-tailed p-value", round(p,4)])
                 else:
-                    u,p = mannwhitneyu(x,y)
-                    result.extend(['Mann-Whitney U-test (NONparametric, ns<20):  ', round(u,4),round(p,4)])
+                    u,p = mannwhitneyu(x, y)
+                    result.extend(['Mann-Whitney U-test (NONparametric, ns<20):  ',
+                                   "u-statistic",        round(u,4),
+                                   "one-tailed p-value", round(p,4)])
 
         if any([True for sample in samples if sample in ['r','R']]):  # RELATED SAMPLES
             if vartype[0]=='e':
                 t,p = ttest_rel(x,y,0)
-                result.extend(['Related samples t-test:  ', round(t,4),round(p,4)])
+                result.extend(['Related samples t-test:  ',
+                               "t-value",         round(t,4),
+                               "two-tailed prob", round(p,4)])
             else:
                 t,p = ranksums(x,y)
-                result.extend(['Wilcoxon T-test (NONparametric):  ', round(t,4),round(p,4)])
+                result.extend(['Wilcoxon T-test (NONparametric):  ',
+                               'a z-statistic',      round(t,4),
+                               'two-tailed p-value', round(p,4)])
         result.append('')
     if allData:
         corrtype=  ['c','r','d']  # CORRELATION ANALYSIS
@@ -3104,6 +3120,7 @@ def apaired(x,y, allData= True):
             corrtype = raw_input()
         if any([True for sample in corrtype if sample in ['c','C']]):
             m,b,r,p,see,n = linregress(x,y)
+            result.append('')
             result.append('Linear regression for continuous variables ...')
             lol = ['Slope',      round(m,4) ,
                    'Intercept',  round(b,4),
@@ -3114,18 +3131,16 @@ def apaired(x,y, allData= True):
             result.extend(lol)
         if any([True for sample in corrtype if sample in ['r','R']]):
             r,p = spearmanr(x,y)
+            result.append('')
             result.append('Correlation for ranked variables ...')
-            result.extend([ "Spearman's r: ",round(r,4),round(p,4)])
+            result.extend([ "Spearman's r",       round(r,4),
+                            "two-tailed p-value", round(p,4)])
         if any([True for sample in corrtype if sample in ['d','D']]): # DICHOTOMOUS
             r,p = pointbiserialr(x,y)
+            result.append('')
             result.append('Assuming x contains a dichotomous variable ...')
-            try:
-                r= round(r,4)
-            except: pass
-            try:
-                p= round(p,4)
-            except: pass
-            result.extend(['Point Biserial r: ', r, p])
+            result.extend(["Point-biserial r",   _round(r,4),
+                           "two-tailed p-value", _round(p,4)])
     return result
 
 
