@@ -118,7 +118,7 @@ class NoteBookSheet(wx.Panel):
                 grid.SetColLabelValue(index,value) # str(value)
         if 'nameRow' in defaultData.keys():
             for index, value in enumerate(defaultData['nameRow']):
-                grid.CheckListBoxSetRowLabelValue(index,value)
+                grid.SetRowLabelValue(index,value)
         # para actualizar un toolbar del grid
         if hasattr(self,'fb'):
             self.pageNames[newName].Bind(wx.grid.EVT_GRID_CMD_SELECT_CELL,
@@ -231,9 +231,9 @@ class NoteBookSheet(wx.Panel):
         else:
             page = self.addPage({'name': pageName})
         # se procede a verificar las dimensiones de la pagina actual
-        size = (page.CheckListBoxGetNumberRows(), page.CheckListBoxGetNumberCols())
+        size = (page.GetNumberRows(), page.GetNumberCols())
         # se adiciona una columna
-        page.CheckListBoxAppendCols(1)
+        page.AppendCols(1)
         currCol = size[1]
         if isinstance(colData,(str,)):
             colData = [colData]
@@ -243,14 +243,14 @@ class NoteBookSheet(wx.Panel):
         else:
             diffColNumber= len(colData) - size[0]
             # adding the required rows
-            page.CheckListBoxAppendRows(diffColNumber)
+            page.AppendRows(diffColNumber)
         # populate with data
         for colPos, colValue in enumerate(colData):
             if isinstance(colValue,(str,unicode)):
                 pass
             else:
                 colValue = str(colValue)
-            page.CheckListBoxSetCellValue(colPos, currCol, colValue)
+            page.SetCellValue(colPos, currCol, colValue)
 
 
 class Test(wx.Frame):
