@@ -37,6 +37,7 @@ from ntbSheet import MyGridPanel as MyGrid
 from script import ScriptPanel
 from imagenes import imageEmbed
 
+from dialogs import CheckListBox
 
 STATS = {'Central Tendency': ('geometricmean','harmonicmean','mean',
                               'median','medianscore','mode'),
@@ -520,21 +521,6 @@ class SimpleGrid(MyGrid):# wxGrid
         return numpy.array((biglist), numpy.float)
 
 #---------------------------------------------------------------------------
-# DescChoice-wx.CheckListBox with list of descriptive stats in it
-class DescChoiceBox(wx.CheckListBox): # CheckListBox
-    def __init__(self, parent, id):
-        wx.CheckListBox.__init__( self, parent, -1,
-                                  wx.DefaultPosition, wx.DefaultSize, DescList)
-
-    def SelectAllDescriptives(self, event):
-        for i in range(len(DescList)):
-            self.Check(i, True)
-
-    def SelectNoDescriptives(self, event):
-        for i in range(len(DescList)):
-            self.Check(i, False)
-
-#---------------------------------------------------------------------------
 # base class for getting number of columns/rows to add
 class EditGridFrame(wx.Dialog):
     def __init__(self, parent, id):
@@ -821,14 +807,13 @@ class DescriptivesFrame(wx.Dialog):
         self.m_mgr = wx.aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
 
-        self.DescChoice = DescChoiceBox(self, 1107)
-        self.m_checkList5 = self.DescChoice
-        self.m_mgr.AddPane( self.m_checkList5, wx.aui.AuiPaneInfo() .Center() .
+        self.DescChoice = CheckListBox(self, 1107,  wx.DefaultPosition, wx.DefaultSize, DescList, 0 )
+        self.m_mgr.AddPane( self.DescChoice, wx.aui.AuiPaneInfo() .Center() .
                             Caption( u"Select Descriptive Statistics" ).CloseButton( False ).
                             PaneBorder( False ).Dock().Resizable().FloatingSize( wx.DefaultSize ).
                             DockFixed( False ).BottomDockable( False ).TopDockable( False ) )
 
-        self.ColChoice = wx.CheckListBox( self, 1102, wx.DefaultPosition, wx.DefaultSize, ColumnList, 0 )
+        self.ColChoice = CheckListBox( self, 1102, wx.DefaultPosition, wx.DefaultSize, ColumnList, 0 )
         self.m_mgr.AddPane( self.ColChoice, wx.aui.AuiPaneInfo() .Center() .Caption( u"Select Column(s) to Analize" ).
                             CloseButton( False ).PaneBorder( False ).Dock().Resizable().
                             FloatingSize( wx.Size( 161,93 ) ).DockFixed( False ).BottomDockable( False ).
@@ -848,11 +833,11 @@ class DescriptivesFrame(wx.Dialog):
         cancelbutton = wx.Button( self.m_panel1, 1104, u"Cancel", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
         bSizer2.Add( cancelbutton, 0, wx.ALL, 5 )
 
-        allbutton = wx.Button( self.m_panel1,105, u"Select All", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
-        bSizer2.Add( allbutton, 0, wx.ALL, 5 )
+        #allbutton = wx.Button( self.m_panel1,105, u"Select All", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
+        #bSizer2.Add( allbutton, 0, wx.ALL, 5 )
 
-        nonebutton = wx.Button( self.m_panel1, 106, u"Select None", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
-        bSizer2.Add( nonebutton, 0, wx.ALL, 5 )
+        #nonebutton = wx.Button( self.m_panel1, 106, u"Select None", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
+        #bSizer2.Add( nonebutton, 0, wx.ALL, 5 )
 
         self.m_panel1.SetSizer( bSizer2 )
         self.m_panel1.Layout()
@@ -863,8 +848,8 @@ class DescriptivesFrame(wx.Dialog):
 
         self.Bind(wx.EVT_BUTTON, self.OnOkayButton,          id = okaybutton.GetId())
         self.Bind(wx.EVT_BUTTON, self.OnCloseContDesc,       id = cancelbutton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.DescChoice.SelectAllDescriptives, id = allbutton.GetId())
-        self.Bind(wx.EVT_BUTTON,  self.DescChoice.SelectNoDescriptives, id = nonebutton.GetId())
+        #self.Bind(wx.EVT_BUTTON, self.DescChoice.SelectAllDescriptives, id = allbutton.GetId())
+        #self.Bind(wx.EVT_BUTTON,  self.DescChoice.SelectNoDescriptives, id = nonebutton.GetId())
 
     def OnOkayButton(self, event):
         descs = []
@@ -1682,18 +1667,16 @@ class MainFrame(wx.Frame):
                       'ppm':      int(result['ppm']),}
 
             LCU=    result['LCU']
-            LCL=    result['LCL']
-            print "LCU %f"%LCU
-            print "LCL %f"%LCL
+            LCI=    result['LCL']
             
-            data = numpy.array([dat  for dat in data if (dat <= LCU) and (dat >= LCL)])
+            #data = numpy.array([dat  for dat in data if (dat <= LCU) and (dat >= LCL)])
            
-            result = self._sixpack(data, UCL= LCU, LCL= LCL,
-                                   Target= Target, k= 6)
-            inside= {'Desv.Est':  round(result['stddev'],5),
-                      'Cp':       round(result['Cp'],5),
-                      'Cpk':      round(result['Cpk'],5),
-                      'ppm':      round(result['ppm'],5),} 
+            #result = self._sixpack(data, UCL= LCU, LCL= LCL,
+                                   #Target= Target, k= 6)
+            #inside= {'Desv.Est':  round(result['stddev'],5),
+                      #'Cp':       round(result['Cp'],5),
+                      #'Cpk':      round(result['Cpk'],5),
+                      #'ppm':      round(result['ppm'],5),} 
             # filter the data that only is inside of the limits
             
             # se muestra los resultados
@@ -1708,11 +1691,36 @@ class MainFrame(wx.Frame):
             output.addColData(desc)
             output.addColData(keys)
             output.addColData(values)
-            output.addColData('inside Potential')
-            output.addColData(inside.keys())
-            output.addColData(inside.values())
+            #output.addColData('inside Potential')
+            #output.addColData(inside.keys())
+            #output.addColData(inside.values())
         # control process chart
-        
+        data2plot= {'UCL':     UCL,
+                    'LCL':     LCL,
+                    'target':  Target,
+                    'data':    data,
+                    }
+        plt= plot(self,    'controlChart', data2plot,
+                  title=   "Control Chart",
+                  xlabel=   ColSelect[0],
+                  ylabel=   ColSelect[0] + " Value")
+        plt.Show()
+        # normal probability chart
+        pltNorm= plot(self, 'probabilityPlot', [[dat[0] for dat in data]],
+                      title=   "Normal probability plot",
+                      )
+        pltNorm.Show()
+        # xbarchart:
+        data2plot= {'UCL':     LCU,
+                    'LCL':     LCI,
+                    'target':  LCI+(LCU-LCI)/float(2),
+                    'data':    data,
+                    }
+        pltXbar= plot(self,    'controlChart', data2plot,
+                  title=   "X-bar Chart",
+                  xlabel=   ColSelect[0],
+                  ylabel=   ColSelect[0] + " Value")
+        pltXbar.Show()
         self.logPanel.write(functionName + ' successfull')
         
     def _sixpack(self, data, UCL, LCL, Target, k= 6):
@@ -1943,8 +1951,17 @@ class MainFrame(wx.Frame):
         self.logPanel.write(functionName + ' successfull')
 
     def _statsType3(self, functionName, texto1 = u'',
-                    texto2 = u'', useNumpy = False, nameCols = None,
-                    **params):
+                    texto2 = u'', **params):
+        try:
+            useNumpy= params.pop('useNumpy')
+        except:
+            useNumpy= False
+
+        try:
+            nameCols= params.pop('nameCols')
+        except:
+            nameCols= None
+
         group = lambda x,y: (x,y)
         setting = self.defaultDialogSettings
         setting['Title'] = functionName
@@ -2351,7 +2368,7 @@ class MainFrame(wx.Frame):
         self._statsType3(functionName = "paired",
                          texto1 = u"X Column to analyse",
                          texto2 = u"Y Column to analyse",
-                         useNumpy = False, allData = True)
+                         useNumpy = True, allData = True)
 
     def pearsonr(self, event):
         self._statsType3(functionName = "pearsonr",
