@@ -6,37 +6,12 @@ Created on 16/05/2012
 '''easierly create a dialog'''
 
 import wx
-
+from dialogs import CheckListBox, NumTextCtrl
 def _siguiente():
     i = 0
     while 1:
         i+= 1
         yield str(i)
-
-class NumTextCtrl(wx.TextCtrl):
-    '''a text ctrl that only acepts numbers'''
-    def __init__(self, parent, *args, **params):
-        wx.TextCtrl.__init__(self, parent, *args, **params)
-        self.Bind(wx.EVT_TEXT, self._textChange)
-
-    def _textChange(self,event):
-        texto = self.GetValue()
-        if len(texto) == 0:
-            return
-        allowed= [ str(x) for x in range(11)]
-        allowed.extend(['.','-'])
-        newstr= [x for x in texto if x in allowed]
-        if len(newstr) == 0:
-            newstr = u''
-        else:
-            func = lambda x,y: x+y
-            newstr= reduce(func, newstr)
-        # prevent infinite recursion
-        if texto == newstr:
-            return
-
-        self.SetValue(newstr)
-
 
 class Dialog ( wx.Dialog ):
     def __init__( self, parent = None , settings= dict(), struct = []):
@@ -176,7 +151,10 @@ class Dialog ( wx.Dialog ):
                         data= [ wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS]
                         data.extend(list(args))
                         args= data
-                    self.ctrls.append((key, getattr(wx, key)(self.m_scrolledWindow1, wx.ID_ANY, *args)))
+                    if key == 'CheckListBox':
+                        self.ctrls.append((key, CheckListBox(self.m_scrolledWindow1, wx.ID_ANY, *args)))
+                    else:
+                        self.ctrls.append((key, getattr(wx, key)(self.m_scrolledWindow1, wx.ID_ANY, *args)))
                     currCtrl = self.ctrls[-1][1]
                     currSizer.Add(currCtrl , 0, characters , 5)
                     #currSizer.Layout()
