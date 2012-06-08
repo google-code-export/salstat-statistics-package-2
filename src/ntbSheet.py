@@ -18,7 +18,7 @@ def numPage():
         yield i
         i+= 1
 
-class MyGridPanel( wx.Panel ):
+class MyGridPanel( wx.Panel, object ):
     def __init__( self, parent , id= wx.ID_ANY, size= (5,5)):
         # bigParent: id del parent para llamar la funcion OnrangeChange
         wx.Panel.__init__ ( self, parent, id , pos = wx.DefaultPosition, style = wx.TAB_TRAVERSAL )
@@ -46,30 +46,18 @@ class MyGridPanel( wx.Panel ):
         self.sizer.Add( self.m_grid , 1, wx.ALL|wx.EXPAND, 5 )
         self.SetSizer(self.sizer)
         self.Fit()
-
-    def setRowNames(self,names):
-        self.m_grid.setRowNames(names)
-
-    def setColNames(self,names):
-        self.m_grid.setColNames(names)
-
-    def updateGridbyCol(self,values):
-        self.m_grid.updateGridbyCol(values)
-
-    def getByRows(self):
-        return self.m_grid.getByRows()
-
-    def getValue(self):
-        return self.m_grid.getValue()
-
-    def getHeader(self):
-        return self.m_grid.getHeader()
-
-    def getByColumns(self):
-        return self.m_grid.getByColumns()
-
-    def __del__( self ):
-        pass
+        
+    def __getattribute__(self, name):
+        '''wraps the funtions to the grid
+        emulating a grid control'''
+        try:
+            return object.__getattribute__(self, name)
+        except AttributeError:
+            wrapee = self.m_grid.__getattribute__( name)
+            try:
+                return getattr(wrapee, name)
+            except AttributeError:
+                return wrapee  # detect a property value
 
 class NoteBookSheet(wx.Panel):
     def __init__( self, parent, *args, **params):
@@ -117,7 +105,7 @@ class NoteBookSheet(wx.Panel):
             if defaultData.has_key(key):
                 defaultData[key] = value
         # adiciona una pagina al notebook grid
-        newName= data['name'] +'_'+ str(self.npage.next())
+        newName= defaultData['name'] +'_'+ str(self.npage.next())
         self.pageNames[newName]= MyGridPanel(self.m_notebook,-1,size= defaultData['size'] )
         self.currentPage=  self.pageNames[newName]
         grid= self.pageNames[newName]
@@ -127,10 +115,10 @@ class NoteBookSheet(wx.Panel):
         # se escriben los nombres de las columnas en el grid en caso de existir
         if 'nameCol' in defaultData.keys():
             for index, value in enumerate(defaultData['nameCol']):
-                grid.m_grid.SetColLabelValue(index,value) # str(value)
+                grid.SetColLabelValue(index,value) # str(value)
         if 'nameRow' in defaultData.keys():
             for index, value in enumerate(defaultData['nameRow']):
-                grid.m_grid.SetRowLabelValue(index,value)
+                grid.CheckListBoxSetRowLabelValue(index,value)
         # para actualizar un toolbar del grid
         if hasattr(self,'fb'):
             self.pageNames[newName].Bind(wx.grid.EVT_GRID_CMD_SELECT_CELL,
@@ -243,9 +231,9 @@ class NoteBookSheet(wx.Panel):
         else:
             page = self.addPage({'name': pageName})
         # se procede a verificar las dimensiones de la pagina actual
-        size = (page.m_grid.GetNumberRows(), page.m_grid.GetNumberCols())
+        size = (page.CheckListBoxGetNumberRows(), page.CheckListBoxGetNumberCols())
         # se adiciona una columna
-        page.m_grid.AppendCols(1)
+        page.CheckListBoxAppendCols(1)
         currCol = size[1]
         if isinstance(colData,(str,)):
             colData = [colData]
@@ -255,14 +243,14 @@ class NoteBookSheet(wx.Panel):
         else:
             diffColNumber= len(colData) - size[0]
             # adding the required rows
-            page.m_grid.AppendRows(diffColNumber)
+            page.CheckListBoxAppendRows(diffColNumber)
         # populate with data
         for colPos, colValue in enumerate(colData):
             if isinstance(colValue,(str,unicode)):
                 pass
             else:
                 colValue = str(colValue)
-            page.m_grid.SetCellValue(colPos, currCol, colValue)
+            page.CheckListBoxSetCellValue(colPos, currCol, colValue)
 
 
 class Test(wx.Frame):
@@ -271,7 +259,7 @@ class Test(wx.Frame):
         customPanel = NoteBookSheet(self,-1)
         # se adicionan 4 paginas al sheet
         for i in range(4):
-            customPanel.addPage(dict())
+            customPanel.addPage(size=(15,10))
         #customPanel.delPage(2)
         self.Centre()
         self.Show(True)
