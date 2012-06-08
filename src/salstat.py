@@ -255,13 +255,13 @@ class SimpleGrid(MyGrid):# wxGrid
         self.Saved = True
         self.moveTo = None
         
-        self.m_grid.setPadreCallBack(self)
-        self.m_grid.SetColLabelAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
-        for i in range(self.m_grid.NumberCols):
-            self.m_grid.SetColFormatFloat(i, 8, 4)
-        ##self.m_grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.AlterSaveStatus)
-        self.m_grid.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
-        self.m_grid.wildcard = "Any File (*.*)|*.*|" \
+        self.setPadreCallBack(self)
+        self.SetColLabelAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
+        for i in range(self.NumberCols):
+            self.SetColFormatFloat(i, 8, 4)
+        ##self.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.AlterSaveStatus)
+        self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
+        self.wildcard = "Any File (*.*)|*.*|" \
                                "SalStat Format (*.xls)|*.xls"
         ## se ajusta el render
         attr = wx.grid.GridCellAttr()
@@ -279,71 +279,71 @@ class SimpleGrid(MyGrid):# wxGrid
         ## this is activated when the user enters some data
         #self.Saved = False
         ## also record in the history file
-        #col = self.m_grid.GetGridCursorCol()
-        #row = self.m_grid.GetGridCursorRow()
-        #value = self.m_grid.GetCellValue(row, col)
+        #col = self.GetGridCursorCol()
+        #row = self.GetGridCursorRow()
+        #value = self.GetCellValue(row, col)
         #xmlevt = '<data row="'+str(row)+'" col="'+str(col)+'">'+str(value)+'</data>\n'
 
     def CutData(self, event):
-        self.m_grid.Delete()
+        self.Delete()
 
     def CopyData(self, event):
-        self.m_grid.Copy()
+        self.Copy()
 
 
     def PasteData(self, event):
-        self.m_grid.OnPaste()
+        self.OnPaste()
 
-    def Undo(self, event):
-        self.m_grid.Undo()
+    #def Undo(self, event):
+        #self.Undo()
 
-    def Redo(self, event):
-        self.m_grid.Redo()
+    #def Redo(self, event):
+        #self.Redo()
 
     def EditGrid(self, event, numrows):
         insert = self.AppendRows(numrows)
 
     def DeleteCurrentCol(self, event):
-        currentcol = self.m_grid.GetGridCursorCol()
-        self.m_grid.DeleteCols(currentcol, 1)
-        self.m_grid.AdjustScrollbars()
+        currentcol = self.GetGridCursorCol()
+        self.DeleteCols(currentcol, 1)
+        self.AdjustScrollbars()
 
 
     def DeleteCurrentRow(self, event):
-        currentrow = self.m_grid.GetGridCursorRow()
-        self.m_grid.DeleteRows(currentrow, 1)
-        self.m_grid.AdjustScrollbars()
+        currentrow = self.GetGridCursorRow()
+        self.DeleteRows(currentrow, 1)
+        self.AdjustScrollbars()
 
     def SelectAllCells(self, event):
-        self.m_grid.SelectAll()
+        self.SelectAll()
 
     # adds columns and rows to the grid
     def AddNCells(self, numcols, numrows):
-        insert = self.m_grid.AppendCols(numcols)
-        insert = self.m_grid.AppendRows(numrows)
-        for i in range(self.m_grid.GetNumberCols() - numcols, self.m_grid.GetNumberCols(), 1):
-            self.m_grid.SetColLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_BOTTOM)
-            self.m_grid.SetColFormatFloat(i, 8, 4)
-        self.m_grid.AdjustScrollbars()
+        insert = self.AppendCols(numcols)
+        insert = self.AppendRows(numrows)
+        for i in range(self.GetNumberCols() - numcols, self.GetNumberCols(), 1):
+            self.SetColLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_BOTTOM)
+            self.SetColFormatFloat(i, 8, 4)
+        self.AdjustScrollbars()
 
     # function finds out how many cols contain data - all in a list
     #(ColsUsed) which has col #'s
     def GetUsedCols(self):
         ColsUsed = []
         colnums = []
-        cols = self.m_grid.GetNumberCols()
+        cols = self.GetNumberCols()
         for i in range(cols):
-            dat = self.m_grid.GetCellValue(0, i)
+            dat = self.GetCellValue(0, i)
             if (dat!=''):
-                ColsUsed.append(self.m_grid.GetColLabelValue(i))
+                ColsUsed.append(self.GetColLabelValue(i))
                 colnums.append(i)
         return ColsUsed, colnums
 
     def GetColsUsedList(self):
         colsusedlist = []
-        for i in range(self.m_grid.GetNumberCols()):
+        for i in range(self.GetNumberCols()):
             try:
-                tmp = float(self.m_grid.GetCellValue(0,i))
+                tmp = float(self.GetCellValue(0,i))
                 colsusedlist.append(i)
             except ValueError:
                 colsusedlist.append(0)
@@ -351,10 +351,10 @@ class SimpleGrid(MyGrid):# wxGrid
 
     def GetUsedRows(self):
         RowsUsed = []
-        for i in range(self.m_grid.GetNumberCols()):
-            if (self.m_grid.GetCellValue(0, i) != ''):
-                for j in range(self.m_grid.GetNumberRows()):
-                    if (self.m_grid.GetCellValue(j,i) == ''):
+        for i in range(self.GetNumberCols()):
+            if (self.GetCellValue(0, i) != ''):
+                for j in range(self.GetNumberRows()):
+                    if (self.GetCellValue(j,i) == ''):
                         RowsUsed.append(j)
                         break
         return RowsUsed
@@ -386,7 +386,7 @@ class SimpleGrid(MyGrid):# wxGrid
         else:
             # rows = self.GetUsedRows()
             cols= self.GetUsedCols()[1]
-            totalResult = self.m_grid.getByColumns(maxRow = self.m_grid.maxrow )
+            totalResult = self.getByColumns(maxRow = self.maxrow )
             result= list()
             for posCol in range(cols[-1]+1):
                 if posCol in cols:
@@ -436,33 +436,33 @@ class SimpleGrid(MyGrid):# wxGrid
         # se lee el tamanio del sheet seleccionado
         #size = (sheetSelected.nrows, sheetSelected.ncols)
         # se hace el grid de tamanio 1 celda y se redimensiona luego
-        self.m_grid.ClearGrid()
+        self.ClearGrid()
         #if size[0] > 1:
-        #    self.m_grid.DeleteRows(1, size[0]-1)
+        #    self.DeleteRows(1, size[0]-1)
 
         #if size[1] > 1:
-        #    self.m_grid.DeleteCols(1, size[1]-1)
+        #    self.DeleteCols(1, size[1]-1)
 
         size = (sheetSelected.nrows, sheetSelected.ncols)
         # se lee el tamanio de la pagina y se ajusta las dimensiones
         newSize = (sheetSelected.nrows, sheetSelected.ncols)
         if newSize[0]-size[0] > 0:
-            self.m_grid.AppendCols(newSize[0]-size[0])
+            self.AppendCols(newSize[0]-size[0])
 
         if newSize[1]-size[1] > 0:
-            self.m_grid.AppendRows(newSize[1]-size[1])
+            self.AppendRows(newSize[1]-size[1])
 
         # se escribe los datos en el grid
         for row in range(newSize[0]):
             for col in range(newSize[1]):
                 newValue = sheetSelected.cell_value(row,col)
                 if isinstance(newValue, (str,)):
-                    self.m_grid.SetCellValue(row, col, newValue)
+                    self.SetCellValue(row, col, newValue)
                 elif isinstance(newValue, (int,float,bool)):
-                    self.m_grid.SetCellValue(row, col, str(newValue))
+                    self.SetCellValue(row, col, str(newValue))
                 else:
                     try:
-                        self.m_grid.SetCellValue(row, col, str(newValue))
+                        self.SetCellValue(row, col, str(newValue))
                     except:
                         self.log.write("could not import the row,col (%i,%i)"%(row+1,col+1))
 
@@ -498,8 +498,8 @@ class SimpleGrid(MyGrid):# wxGrid
     def CleanData(self, col):
         indata = []
         self.missing = 0
-        for i in range(self.m_grid.GetNumberRows()):
-            datapoint = self.m_grid.GetCellValue(i, col).strip().replace(',','.')
+        for i in range(self.GetNumberRows()):
+            datapoint = self.GetCellValue(i, col).strip().replace(',','.')
             if (datapoint != u'') and (datapoint != u'.'):
                 try:
                     value = float(datapoint)
@@ -562,10 +562,10 @@ class GridPrefs(wx.Dialog):
         self.SetIcon(icon)
         self.colwidth = wx.SpinCtrl(self, -1, "", wx.Point(110,10), wx.Size(80,25))
         self.colwidth.SetRange(1,200)
-        self.colwidth.SetValue(frame.grid.m_grid.GetDefaultColSize())
+        self.colwidth.SetValue(frame.grid.GetDefaultColSize())
         self.rowheight= wx.SpinCtrl(self, -1, "", wx.Point(110,50), wx.Size(80,25))
         self.rowheight.SetRange(1,100)
-        self.rowheight.SetValue(frame.grid.m_grid.GetDefaultRowSize())
+        self.rowheight.SetValue(frame.grid.GetDefaultRowSize())
         l1 = wx.StaticText(self, -1, 'Column Width:',pos=(10,15))
         l2 = wx.StaticText(self, -1, 'Row Height:',pos=(10,55))
         self.okaybutton = wx.Button(self, 321, "Okay", wx.Point(10, 90), \
@@ -576,9 +576,9 @@ class GridPrefs(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.OnCloseGridPrefs, id = self.cancelbutton.GetId())
 
     def OkayButtonPressed(self, event):
-        frame.grid.m_grid.SetDefaultColSize(self.colwidth.GetValue(), True)
-        frame.grid.m_grid.SetDefaultRowSize(self.rowheight.GetValue(), True)
-        frame.grid.m_grid.ForceRefresh()
+        frame.grid.SetDefaultColSize(self.colwidth.GetValue(), True)
+        frame.grid.SetDefaultRowSize(self.rowheight.GetValue(), True)
+        frame.grid.ForceRefresh()
         self.Close(True)
 
     def OnCloseGridPrefs(self, event):
@@ -690,10 +690,10 @@ class VariablesFrame(wx.Dialog):
         self.vargrid = wx.grid.Grid(self,-1,) #
         self.vargrid.SetRowLabelSize(120)
         self.vargrid.SetDefaultRowSize(27, True)
-        maxcols = frame.grid.m_grid.GetNumberCols()
+        maxcols = frame.grid.GetNumberCols()
         self.vargrid.CreateGrid(3,maxcols)
         for i in range(maxcols):
-            oldlabel = frame.grid.m_grid.GetColLabelValue(i)
+            oldlabel = frame.grid.GetColLabelValue(i)
             self.vargrid.SetCellValue(0, i, oldlabel)
         self.vargrid.SetRowLabelValue(0,"Variable Name")
         self.vargrid.SetRowLabelValue(1,"Decimal Places")
@@ -709,17 +709,17 @@ class VariablesFrame(wx.Dialog):
 
     # this method needs to work out the other variables too
     def OnOkayVariables(self, event):
-        for i in range(frame.grid.m_grid.GetNumberCols()-1):
+        for i in range(frame.grid.GetNumberCols()-1):
             newlabel = self.vargrid.GetCellValue(0, i)
             if (newlabel != ''):
-                frame.grid.m_grid.SetColLabelValue(i, newlabel)
+                frame.grid.SetColLabelValue(i, newlabel)
             newsig = self.vargrid.GetCellValue(1, i)
             if (newsig != ''):
                 try:
-                    frame.grid.m_grid.SetColFormatFloat(i, -1, int(newsig))
+                    frame.grid.SetColFormatFloat(i, -1, int(newsig))
                 except ZeroDivisionError:
                     pass
-        frame.grid.m_grid.ForceRefresh()
+        frame.grid.ForceRefresh()
         self.Close(True)
 
     def OnCloseVariables(self, event):
@@ -856,7 +856,7 @@ class DescriptivesFrame(wx.Dialog):
         for i in range(len(self.colnums)):
             if self.ColChoice.IsChecked(i):
                 realColi = self.colnums[i]
-                name = frame.grid.m_grid.GetColLabelValue(realColi)
+                name = frame.grid.GetColLabelValue(realColi)
                 descs.append(statistics(
                     frame.grid.CleanData(realColi), name,
                     frame.grid.missing))
@@ -885,7 +885,7 @@ class TransformFrame(wx.Dialog):
         self.transform = ""
         self.transformName = ""
         self.ColumnList, self.colnums = frame.grid.GetUsedCols()
-        self.cols = frame.grid.m_grid.GetNumberCols()
+        self.cols = frame.grid.GetNumberCols()
         l0 = wx.StaticText(self,-1,"Select Columns to Transform",pos=(10,10))
         self.ColChoice = wx.CheckListBox(self,1102, wx.Point(10,30), \
                                          wx.Size(230,(winheight * 0.8)), self.ColumnList)
@@ -956,11 +956,11 @@ class TransformFrame(wx.Dialog):
                         pass # need to do something here.
                 PutData(emptyCols[i], newcol)
                 # put in a nice new heading
-                oldHead = frame.grid.m_grid.GetColLabelValue(self.colnums[i])
+                oldHead = frame.grid.GetColLabelValue(self.colnums[i])
                 if self.transformName == "":
                     self.transformName = ' ' + self.transform
                 oldHead = oldHead + self.transformName
-                frame.grid.m_grid.SetColLabelValue(emptyCols[i], oldHead)
+                frame.grid.SetColLabelValue(emptyCols[i], oldHead)
                 emptyCols.pop(emptyCols[i])
         self.Close(True)
 
@@ -1029,8 +1029,8 @@ class MainFrame(wx.Frame):
         #set up the datagrid
         self.grid = SimpleGrid(self, self.logPanel, size= (500,50))
         self.grid.Saved = False
-        self.grid.m_grid.SetDefaultColSize(60, True)
-        self.grid.m_grid.SetRowLabelSize(40)
+        self.grid.SetDefaultColSize(60, True)
+        self.grid.SetRowLabelSize(40)
 
         # response panel
         self.answerPanel = NoteBookSheet(self, fb= self.formulaBarPanel)
@@ -1236,8 +1236,8 @@ class MainFrame(wx.Frame):
         
     def _BindEvents(self):
         # grid callback
-        self.grid.m_grid.Bind( wx.grid.EVT_GRID_CMD_SELECT_CELL, self._cellSelectionChange )
-        self.grid.m_grid.Bind( wx.grid.EVT_GRID_SELECT_CELL, self._cellSelectionChange )
+        self.grid.Bind( wx.grid.EVT_GRID_CMD_SELECT_CELL, self._cellSelectionChange )
+        self.grid.Bind( wx.grid.EVT_GRID_SELECT_CELL, self._cellSelectionChange )
         #-----------------
         # para el toolbar
         self.Bind(wx.EVT_MENU, self.GoClearData,        id= self.bt1.GetId())
@@ -1289,7 +1289,7 @@ class MainFrame(wx.Frame):
         # controlling the expansion of the notebook
         self.m_notebook1.Bind( wx.EVT_LEFT_DCLICK, self._OnNtbDbClick )
 
-        self.grid.m_grid.setPadreCallBack(self)
+        self.grid.setPadreCallBack(self)
         if 0:
             self.Bind(wx.EVT_MENU, self.GoCheckOutliers,    id = self.mn26.GetID())
             self.Bind(wx.EVT_MENU, self.GoHelpAboutFrame,   id = self.mn27.GetID())
@@ -1301,7 +1301,7 @@ class MainFrame(wx.Frame):
         # se lee el contenido de la celda seleccionada
         row= event.GetRow()
         col= event.GetCol()
-        texto= self.grid.m_grid.GetCellValue(row, col)
+        texto= self.grid.GetCellValue(row, col)
         self.formulaBarPanel.m_textCtrl1.SetValue(texto)
         event.Skip()
 
@@ -1317,7 +1317,7 @@ class MainFrame(wx.Frame):
 
     def GoClearData(self, evt):
         #shows a new data entry frame
-        self.grid.m_grid.ClearGrid()
+        self.grid.ClearGrid()
 
     def GoNewOutputSheet(self, evt):
         #shows a new output frame
@@ -1357,7 +1357,7 @@ class MainFrame(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             data = dlg.GetFontData()
             #data2 = data.GetChosenFont()
-            self.grid.m_grid.SetDefaultCellFont(data.GetChosenFont())
+            self.grid.SetDefaultCellFont(data.GetChosenFont())
 
     def GoContinuousDescriptives(self, evt):
         # shows the continuous descriptives dialog
@@ -3033,16 +3033,16 @@ def GetData(column):
 def GetDataName(column):
     """This function returns the name of the data variable - in other words,
     the column label from the grid."""
-    return frame.grid.m_grid.GetColLabelValue(column)
+    return frame.grid.GetColLabelValue(column)
 def PutData(column, data):
     """This routine takes a list of data, and puts it into the datagrid
     starting at row 0. The grid is resized if the list is too large. This
     routine desparately needs to be updated to prevent errors"""
     n = len(data)
-    if (n > frame.grid.m_grid.GetNumberRows()):
-        frame.grid.m_grid.AddNCols(-1, (datawidth - gridwidth + 5))
+    if (n > frame.grid.GetNumberRows()):
+        frame.grid.AddNCols(-1, (datawidth - gridwidth + 5))
     for i in range(n):
-        frame.grid.m_grid.SetCellValue(i, column, str(data[i]))
+        frame.grid.SetCellValue(i, column, str(data[i]))
 
 #--------------------------------------------------------------------------
 # main loop
