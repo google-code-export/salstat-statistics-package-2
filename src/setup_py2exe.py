@@ -16,7 +16,7 @@ opts = { "py2exe":
                           '_fltkagg', '_gtk', '_gtkcairo',
                           "pywin", "pywin.debugger", "pywin.debugger.dbgcon",
                           "pywin.dialogs", "pywin.dialogs.list","Tkconstants",
-                          "Tkinter","tcl",],
+                          "Tkinter","tcl","PyQt4","scipy.sparce",],
               "dist_dir": distdir,
               "dll_excludes" : ['_gtkagg', '_tkagg',
                                 "MSVCP90.DLL","API-MS-Win-Security-Base-L1-1-0.dll",
