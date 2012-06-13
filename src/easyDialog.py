@@ -197,11 +197,6 @@ class Dialog ( wx.Dialog ):
 
                 elif typectrl == 'NumTextCtrl':
                     prevResult = ctrl.GetValue()
-                    if len(prevResult) == 0:
-                        prevResult = None
-                    else:
-                        prevResult = float(prevResult)
-
                 else:
                     continue
                 resultado.append(prevResult)
