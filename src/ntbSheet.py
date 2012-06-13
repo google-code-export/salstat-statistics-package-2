@@ -53,11 +53,7 @@ class MyGridPanel( wx.Panel, object ):
         try:
             return object.__getattribute__(self, name)
         except AttributeError:
-            wrapee = self.m_grid.__getattribute__( name)
-            try:
-                return getattr(wrapee, name)
-            except AttributeError:
-                return wrapee  # detect a property value
+            return self.m_grid.__getattribute__( name)
 
 class NoteBookSheet(wx.Panel):
     def __init__( self, parent, *args, **params):
