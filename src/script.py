@@ -421,6 +421,9 @@ class ScriptPanel(wx.Panel):
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetPath()
             self.answerPanel2.SetText('')
+            import os.path
+            if not os.path.exists(filename):
+                return
             fout = open(filename, "rb")
             for line in fout.readlines():
                 self.answerPanel2.AddText(line)
@@ -433,7 +436,7 @@ class ScriptPanel(wx.Panel):
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetPath()
             fout = open(filename, "wb")
-            for line in self.answerPanel2.GetValue().split('\n'):
+            for line in self.answerPanel2.GetText().split('\n'):
                 fout.writelines(line)
             fout.close()
 
