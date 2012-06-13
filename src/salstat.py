@@ -1,5 +1,14 @@
 #!/usr/bin/env python
-
+A2 = [0,0, 1.886, 1.023, 0.729, 0.577, 0.483, 0.419, 0.373, 0.337, 0.308, 0.285, 0.266, 0.249, 0.235, 0.223]
+A3 = [0,0, 2.659, 1.954, 1.628, 1.427, 1.287, 1.182, 1.099, 1.032, 0.975, 0.927, 0.886, 0.850, 0.817, 0.789]#, 0.680, 0.606]
+D3 = [0,0, 0,     0,     0,     0,     0,     0.076, 0.136, 0.184, 0.223, 0.256, 0.283, 0.307, 0.328, 0.347]
+D4 = [0,0, 3.268, 2.574, 2.282, 2.114, 2.004, 1.924, 1.864, 1.816, 1.777, 1.744, 1.717, 1.693, 1.672, 1.653]
+# n   0 1      2      3      4      5      6      7      8      9     10     11     12     13     14     15       20     25
+c4 = [0,0,0.7979,0.8862,0.9213,0.9400,0.9515,0.9594,0.9650,0.9693,0.9727,0.9754,0.9776,0.9794,0.9810,0.9823]#,0.9869,0.9896]
+B3 = [0,0,     0,     0,     0,     0, 0.030, 0.118, 0.185, 0.239, 0.284, 0.322, 0.354, 0.382, 0.407, 0.428]#, 0.510, 0.565]
+B4 = [0,0, 3.267, 2.568, 2.266, 2.089, 1.970, 1.882, 1.815, 1.761, 1.716, 1.678, 1.646, 1.619, 1.593, 1.572]#, 1.490, 1.435]
+B5 = [0,0,     0,     0,     0,     0, 0.029, 0.113, 0.179, 0.232, 0.276, 0.313, 0.346, 0.374, 0.399, 0.421]#, 0.504, 0.559]
+B6 = [0,0, 2.606, 2.276, 2.088, 1.964, 1.874, 1.806, 1.751, 1.707, 1.669, 1.637, 1.610, 1.585, 1.563, 1.544]#, 1.470, 1.420]
 """ Copyright 2012 Sebastian Lopez Buritica
 
 SalStat Statistics Package. Copyright 2002 Alan James Salmoni. Licensed
@@ -29,7 +38,7 @@ from ntbSheet import NoteBookSheet
 
 from openStats import statistics, normProb, normProbInv
 
-from slbTools import ReportaExcel
+from slbTools import ReportaExcel, homogenize
 from easyDialog import Dialog as dialog
 from statlib import stats
 from ntbSheet import MyGridPanel as MyGrid
@@ -37,7 +46,7 @@ from ntbSheet import MyGridPanel as MyGrid
 from script import ScriptPanel
 from imagenes import imageEmbed
 
-from dialogs import CheckListBox
+from dialogs import CheckListBox, SixSigma
 
 STATS = {'Central Tendency': ('geometricmean','harmonicmean','mean',
                               'median','medianscore','mode'),
@@ -1034,7 +1043,7 @@ class MainFrame(wx.Frame):
 
         # response panel
         self.answerPanel = NoteBookSheet(self, fb= self.formulaBarPanel)
-        self.answerPanel2 = ScriptPanel(self, self.logPanel, self.grid.m_grid, self.answerPanel)
+        self.answerPanel2 = ScriptPanel(self, self.logPanel, self.grid, self.answerPanel)
         #--------------------------------------------
         self.m_notebook1.AddPage( self.logPanel, u"Log", True )
         #--------------------------------
@@ -1554,6 +1563,10 @@ class MainFrame(wx.Frame):
             selection.Destroy()
             return
         (xcol,ycol) = selection.getData()
+        # homogenize data
+        data= homogenize(xcol,ycol)
+        xcol= data[0]
+        ycol= data[0]
         selection.Destroy()
         data = [self.grid.CleanData(cols) for cols in [colnums[i] for i in (xcol,ycol)]]
         if len(data[0]) != len(data[1]):
@@ -1604,30 +1617,12 @@ class MainFrame(wx.Frame):
         2) http://en.wikipedia.org/wiki/Shewhart_individuals_control_chart
         3) http://www.statisticalprocesscontrol.info/glossary.html
         4) http://www.isixsigma.com/tools-templates/capability-indices-process-capability/process-capability-cp-cpk-and-process-performance-pp-ppk-what-difference/'''
-        functionName= "Six Sigma analysis"
-        group= lambda x,y: (x,y)
-        setting= self.defaultDialogSettings
-        setting['Title']= functionName
         ColumnList, colnums = frame.grid.GetUsedCols()
-
-        bt1= group('StaticText',   ('Select variables to analyse',))
-        bt2= group('CheckListBox', (ColumnList,))
-        bt3= group('StaticText',   ('UCL',))
-        bt4= group('NumTextCtrl',  (),)
-        bt5= group('StaticText',   ('LCL',))
-        bt6= group('StaticText',   ('Target Value',))
-        bt7= group('StaticText',   ('Use tolerance of k*sigma k',))
-        bt8= group('SpinCtrl',     (1,10,6) )
-        structure= list()
-        structure.append([bt2, bt1 ])
-        structure.append([bt4, bt3 ])
-        structure.append([bt4, bt5 ])
-        structure.append([bt4, bt6 ])
-        structure.append([bt8, bt7 ])
-
-        dlg= dialog(settings= setting, struct= structure)
+        if len(ColumnList) == 0:
+            return
+        dlg= SixSigma(self, ColumnList)
         if dlg.ShowModal() == wx.ID_OK:
-            (ColSelect, UCL, LCL, Target, k) = dlg.GetValue()
+            (ColSelect, UCL, LCL, Target, k, groupSize) = dlg.GetValue()
             dlg.Destroy()
         else:
             dlg.Destroy()
@@ -1639,19 +1634,54 @@ class MainFrame(wx.Frame):
             return
         
         # taking the data
-        values = [ [pos for pos, value in enumerate( ColumnList )
+        values= [ [pos for pos, value in enumerate( ColumnList )
                     if value == val
                     ][0]
                    for val in ColSelect
                    ]
-        columns  = list()
+        columns= list()
         for pos in values:
             col = numpy.array(GetData(colnums[ pos ]))
-            col.shape = (len(col),1)
+            #col.shape = (len(col),1)
             columns.append(col)
             
+        if len(ColSelect) == 1:
+            result= self._sixpack(columns[0], UCL, LCL, Target, k, n= groupSize)
+        else:
+            # group homogenization in order to 
+            # obtain comparable data
+            columns= homogenize(*columns)
+            # get the size of the group
+            groupSize= len(ColumnList)
+            # calculating the averages, ranges and standard deviations
+            from scipy import stats
+            rows= [[columns[pos][fil] for pos in range(len(columns))]
+                   for fil in range(len(columns[0]))]
+            del columns
+            averages= [statistics(row).mean for row in rows]
+            ranges= [max(row)-min(row) for row in rows]
+            stddevs= [statistics(row).stddev for row in rows]
+            
+            Xga= statistics(averages).mean
+            Ra= statistics(ranges).mean
+            Sa= statistics(stddevs).mean
+            
+            # x-bar limits using Ra
+            UCL_xbar= Xga + A2[groupSize]*Ra
+            LCL_xbar= Xga - A2[groupSize]*Ra
+            
+            # R_ chart limits
+            UCL_rchart= D4[groupSize]*Ra
+            LCL_rchary= D3[groupSize]*Ra
+            
+            # S_chart limits
+            UCL_schart= B4[groupSize]*Sa
+            LCL_schart= B3[groupSize]*Sa
+
+            columns= [numpy.array(averages)]
+        
         for data in columns:
-            result= self._sixpack(data, UCL, LCL, Target, k)
+            result= self._sixpack(data, UCL, LCL, Target, k, n= groupSize)
             description= {'Desv.Est': 'Standar deviation',
                             'Cp':  'Process Capability. A simple and straightforward indicator of process capability.',
                             'Pp':  'Process Performance. A simple and straightforward indicator of process performance. basically tries to verify if the sample that you have generated from the process is capable to meet Customer CTQs (requirements)',
@@ -1665,7 +1695,6 @@ class MainFrame(wx.Frame):
                       'Ppk':      round(result['Cpk'],5),
                       'Cpm':      round(result['Cpm'],5),
                       'ppm':      int(result['ppm']),}
-
             LCU=    result['LCU']
             LCI=    result['LCL']
             
@@ -1680,7 +1709,12 @@ class MainFrame(wx.Frame):
             # filter the data that only is inside of the limits
             
             # se muestra los resultados
-            output.addColData('general', functionName)
+            output.addColData( 'SixSigma')
+            output.addColData('Input Data')
+            output.addColData(('UCL','LCL','target','k','group size'))
+            output.addColData((UCL, LCL, Target, k, groupSize))
+            output.addColData('selcted columns',)
+            output.addColData(ColSelect)
             keys= list()
             desc= list()
             values= list()
@@ -1691,6 +1725,8 @@ class MainFrame(wx.Frame):
             output.addColData(desc)
             output.addColData(keys)
             output.addColData(values)
+            output.addColData(('LCU','LCI'))
+            output.addColData((LCU, LCI))
             #output.addColData('inside Potential')
             #output.addColData(inside.keys())
             #output.addColData(inside.values())
@@ -1706,7 +1742,7 @@ class MainFrame(wx.Frame):
                   ylabel=   ColSelect[0] + " Value")
         plt.Show()
         # normal probability chart
-        pltNorm= plot(self, 'probabilityPlot', [[dat[0] for dat in data]],
+        pltNorm= plot(self, 'probabilityPlot', [data],
                       title=   "Normal probability plot",
                       )
         pltNorm.Show()
@@ -1721,9 +1757,9 @@ class MainFrame(wx.Frame):
                   xlabel=   ColSelect[0],
                   ylabel=   ColSelect[0] + " Value")
         pltXbar.Show()
-        self.logPanel.write(functionName + ' successfull')
+        self.logPanel.write('SixSigma' + ' successfull')
         
-    def _sixpack(self, data, UCL, LCL, Target, k= 6):
+    def _sixpack(self, data, UCL, LCL, Target, k= 6, n= 2 ):
         result= dict()
         stadis= statistics(data)
         stddev = stadis.stddev
@@ -1763,19 +1799,19 @@ class MainFrame(wx.Frame):
         ppm=      int(probTot*1e6)
         sigmaLevel= normProbInv(1-probTot)+1.5
         
-        # data for xbar chat
+        # data for xbar chart
         mir= list()
         for x,y in zip(data[1:],data[:-1]):
             mir.append(abs(x-y))
         newData=       numpy.array(mir)
-        meanNewData=  statistics(newData).mean
-        LCU=    stadis.mean+ 2.66*meanNewData
-        LCL=    stadis.mean- 2.66*meanNewData
+        rangeNewData=  max(newData)- min(newData)
+        LCU=    stadis.mean+ A2[n]*rangeNewData
+        LCL=    stadis.mean- A2[n]*rangeNewData
         
         for paramName, value in zip(['stddev', 'mean', 'Cp', 'Cpl', 'Cpu','Cpk',
                                      'zUCL', 'zLCL', 'probUCL', 'probLCL',
                                      'probTot', 'ppm', 'sigmaLevel', 'outOfUCL',
-                                     'outOfLCL','Cpm','LCU','LCL'],
+                                     'outOfLCL','Cpm','LCU','LCL',],
                                     [stddev, mean, Cp, Cpl, Cpu, Cpk, zUCL, zLCL,
                                      probUCL, probLCL, probTot, ppm, sigmaLevel,
                                      outOfUCL, outOfLCL, Cpm, LCU, LCL ]):
@@ -1814,13 +1850,13 @@ class MainFrame(wx.Frame):
 #------------------------------------------
 # definicion de las funciones estadisticas
 #------------------------------------------
-    def _statsType1(self, functionName, useNumpy = True,
+    def _statsType1(self, functionName, grid, useNumpy = True,
                     requiredcols= None,allColsOneCalc = False,
                     nameResults= None, dataSquare= False):
         group = lambda x,y: (x,y)
         setting = self.defaultDialogSettings
         setting['Title'] = functionName
-        ColumnList, colnums  = frame.grid.GetUsedCols()
+        ColumnList, colnums  = grid.GetUsedCols()
         bt1= group('StaticText', ('Select the columns to analyse',) )
         bt2 = group('CheckListBox', (ColumnList,))
         structure = list()
@@ -2078,44 +2114,44 @@ class MainFrame(wx.Frame):
 
 
     def geometricmean(self,event):
-        self._statsType1("geometricmean")
+        self._statsType1("geometricmean", self.grid)
 
     def harmonicmean(self,event):
-        self._statsType1("harmonicmean")
+        self._statsType1("harmonicmean", self.grid)
 
     def mean(self,event):
-        self._statsType1("mean")
+        self._statsType1("mean", self.grid)
 
     def median(self,event):
-        self._statsType1("median")
+        self._statsType1("median", self.grid)
 
     def medianscore(self,event):
-        self._statsType1("medianscore")
+        self._statsType1("medianscore", self.grid)
 
     def mode(self,event):
-        self._statsType1("mode")
+        self._statsType1("mode", self.grid)
 
     def moment(self,event):
         self._statsType2("scoreatpercentile", texto = 'moment',
                          spinData = (1,100,1))
 
     def variation(self,event):
-        self._statsType1("variation")
+        self._statsType1("variation", self.grid)
 
     def skew(self,event):
-        self._statsType1("skew")
+        self._statsType1("skew", self.grid)
 
     def kurtosis(self,event):
-        self._statsType1("kurtosis")
+        self._statsType1("kurtosis", self.grid)
 
     def skewtest(self,event):
-        self._statsType1("skewtest", useNumpy = False)
+        self._statsType1("skewtest", self.grid, useNumpy = False)
 
     def kurtosistest(self,event):
-        self._statsType1("kurtosistest", useNumpy = False)
+        self._statsType1("kurtosistest", self.grid, useNumpy = False)
 
     def normaltest(self,event):
-        self._statsType1("normaltest", useNumpy = True)
+        self._statsType1("normaltest", self.grid, useNumpy = True)
 
     def itemfreq(self,event):
         functionName = "itemfreq"
@@ -2216,33 +2252,33 @@ class MainFrame(wx.Frame):
     #    self.logPanel.write('obrientransform')
 
     def samplevar(self,event):
-        self._statsType1("samplevar")
+        self._statsType1("samplevar", self.grid)
 
     def samplestdev(self,event):
-        self._statsType1("samplestdev")
+        self._statsType1("samplestdev", self.grid)
 
     def signaltonoise(self,event):
         self._statsType2("signaltonoise", texto = 'dimension',
                          spinData = (0,100,0))
 
     def var(self,event):
-        self._statsType1("var")
+        self._statsType1("var", self.grid)
 
     def stdev(self,event):
-        self._statsType1("stdev")
+        self._statsType1("stdev", self.grid)
 
     def sterr(self,event):
-        self._statsType1("sterr")
+        self._statsType1("sterr", self.grid)
 
     def sem(self,event):
-        self._statsType1("sem")
+        self._statsType1("sem", self.grid)
 
     def z(self,event):
         self._statsType2("z", texto = 'score',
                          spinData = (1,100, 1))
 
     def zs(self,event):
-        self._statsType1("zs")
+        self._statsType1("zs", self.grid)
 
     def zmap(self,event):
         self.logPanel.write('zmap')
@@ -2805,14 +2841,16 @@ class MainFrame(wx.Frame):
         self.logPanel.write(functionName + ' successfull')
 
     def kruskalwallish(self, event):
-        self._statsType1(functionName = "kruskalwallish",
+        self._statsType1("kruskalwallish",
+                         self.grid,
                          useNumpy = True,
                          allColsOneCalc = True,
                          nameResults= ('H-statistic (corrected for ties)', 'p-value'))
 
 
     def friedmanchisquare(self, event):
-        self._statsType1(functionName = "friedmanchisquare",
+        self._statsType1("friedmanchisquare",
+                         self.grid,
                          useNumpy = True,
                          allColsOneCalc = True,
                          nameResults= ('chi-square statistic', 'p-value'),
@@ -3018,11 +3056,11 @@ class MainFrame(wx.Frame):
 
 
     def F_oneway(self, event):
-        self._statsType1("F_oneway", allColsOneCalc = True,
+        self._statsType1("F_oneway", self.grid, allColsOneCalc = True,
                          nameResults= ("F","p-value"))
 
     def F_value(self, event):
-        self._statsType1("F_value", allColsOneCalc = True,
+        self._statsType1("F_value",self.grid, allColsOneCalc = True,
                          nameResults= ("F","p-value"))
 #---------------------------------------------------------------------------
 # Scripting API is defined here. So far, only basic (but usable!) stuff.
