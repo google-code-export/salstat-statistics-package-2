@@ -126,10 +126,12 @@ class NewGrid(wx.grid.Grid):
         # retorna el valor de la malla por columnas
         numRows = self.GetNumberRows()
         ncols= self.GetNumberCols()
-        numRows = min([numRows, maxRow])
+        if maxRow != None:
+            numRows= min([numRows, maxRow])
         # se extrae los contenidos de cada fila
-        return tuple([tuple([ self.GetCellValue(row,col) for row in range(numRows) ]) for col in range(ncols)])
-    
+        return tuple([tuple([ self.GetCellValue(row,col) for row in range(numRows) ])
+                       for col in range(ncols)])
+
     def getByRows(self):
         '''retorna el contenido del grid mediante filas
         la primer fila corresponde al nombre de las filas'''
