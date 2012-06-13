@@ -96,7 +96,7 @@ class NoteBookSheet(wx.Panel):
     def OnNotebookPageChange(self,evt):
         self.currentPage= evt.Selection
 
-    def addPage(self, data):
+    def addPage(self, data= dict()):
         defaultData = {'name': u'',
                        'size': (0,0),
                        'nameCol': list(),
