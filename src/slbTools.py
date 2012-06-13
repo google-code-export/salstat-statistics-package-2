@@ -5,6 +5,7 @@ Created on 17/05/2012
 license: GPL3
 '''
 import tempfile, xlwt , os
+import numpy as np
 try:
     import xlrd
 except:
@@ -1629,6 +1630,29 @@ def distinct(data):
         if valor != unicos[-1]:
             unicos.append(valor)
     return unicos
+
+def homogenize(*args):
+    '''given a serie of vectors it check the values and 
+    groups it depens on its value. 
+    arg1: iterable with numerical data'''
+    maxlen= min([len(arg) for arg in args])
+    nelements= len(args)
+    passPos= list()
+    for pos in range(maxlen):
+        dat= [args[i][pos] for i in range(nelements)]
+        if _allnumeric(dat):
+           passPos.append(pos)
+    if sum([isinstance(arg,(np.ndarray,)) for arg in args])== len(args):
+        return [np.array([arg[pos] for pos in passPos]) for arg in args]
+    return [[arg[pos] for pos in passPos] for arg in args]
+        
+def _allnumeric(data):
+    return all([isnumeric(dat) for dat in data])
+
+def isnumeric(data):
+    if isinstance(data, (int, float, long, np.ndarray)):
+        return True
+    return False
 
 
 if __name__ == '__main__':
