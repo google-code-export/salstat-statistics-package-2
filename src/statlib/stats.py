@@ -347,6 +347,8 @@ def lmedian (inlist,numbins=1000):
     Usage:   lmedian (inlist, numbins=1000)
     """
     (hist, smallest, binsize, extras) = histogram(inlist,numbins,[min(inlist),max(inlist)]) # make histog
+    if binsize == 0:
+        return None
     cumhist = cumsum(hist)              # make cumulative histogram
     for i in range(len(cumhist)):        # get 1st(!) index holding 50%ile score
         if cumhist[i]>=len(inlist)/2.0:
@@ -354,7 +356,7 @@ def lmedian (inlist,numbins=1000):
             break
     LRL = smallest + binsize*cfbin        # get lower read limit of that bin
     cfbelow = cumhist[cfbin-1]
-    freq = float(hist[cfbin])                # frequency IN the 50%ile bin
+    freq = float(hist[cfbin])               # frequency IN the 50%ile bin
     median = LRL + ((len(inlist)/2.0 - cfbelow)/float(freq))*binsize  # median formula
     return median
 
@@ -447,7 +449,10 @@ def lskew(inlist):
 
     Usage:   lskew(inlist)
     """
-    return moment(inlist,3)/pow(moment(inlist,2),1.5)
+    try:
+        return moment(inlist,3)/pow(moment(inlist,2),1.5)
+    except ZeroDivisionError:
+        return None
 
 
 def lkurtosis(inlist):
@@ -457,7 +462,10 @@ def lkurtosis(inlist):
 
     Usage:   lkurtosis(inlist)
     """
-    return moment(inlist,4)/pow(moment(inlist,2),2.0)
+    try:
+        return moment(inlist,4)/pow(moment(inlist,2),2.0)
+    except ZeroDivisionError:
+        return None
 
 
 def ldescribe(inlist):
