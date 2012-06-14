@@ -6,6 +6,7 @@ Name Salstat2
 SetCompressor /SOLID lzma
 
 # General Symbol Definitions
+!define CURRPATH "m:\SalStatdist"
 !define REGKEY "SOFTWARE\$(^Name)"
 !define VERSION 2.0
 !define COMPANY "Sebastián López Buriticá"
@@ -72,8 +73,8 @@ ShowUninstDetails show
 Section -Main Section1
     SetOutPath $INSTDIR
     SetOverwrite on
-    File /r dist\*
-    File dist\salstat.exe
+    File /r ${CURRPATH}\*
+    File ${CURRPATH}\salstat.exe # dist
     SetOutPath $SMPROGRAMS\$StartMenuGroup
     CreateShortcut $SMPROGRAMS\$StartMenuGroup\Salstat2.lnk $INSTDIR\salstat.exe \
         "" "$INSTDIR\salstat.exe" 2 SW_SHOWNORMAL \
@@ -90,6 +91,14 @@ Section "src" Section2
      File /r src\*
      SetOutPath $SMPROGRAMS\$StartMenuGroup
      CreateShortcut "$SMPROGRAMS\$StartMenuGroup\src.lnk" "$INSTDIR\src\"
+SectionEnd
+
+Section "script examples" Section3
+     SetOutPath $INSTDIR\scripts
+     SetOverwrite on
+     File /r "script examples\*"
+     SetOutPath $SMPROGRAMS\$StartMenuGroup
+     CreateShortcut "$SMPROGRAMS\$StartMenuGroup\scripts.lnk" "$INSTDIR\scripts\"
 SectionEnd
 
 Section -post SEC0001
