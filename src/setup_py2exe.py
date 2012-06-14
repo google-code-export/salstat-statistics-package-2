@@ -2,7 +2,7 @@ from distutils.core import setup
 import py2exe
 import matplotlib
 
-distdir = '..\\dist'
+distdir = '..\\..\\SalStatdist'
 iconPath = "salstat.ico"
 
 opts = { "py2exe":
