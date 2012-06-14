@@ -271,7 +271,7 @@ class SimpleGrid(MyGrid):# wxGrid
         ##self.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.AlterSaveStatus)
         self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
         self.wildcard = "Any File (*.*)|*.*|" \
-                               "SalStat Format (*.xls)|*.xls"
+                        "SalStat Format (*.xls)|*.xls"
         ## se ajusta el render
         attr = wx.grid.GridCellAttr()
         editor = wx.grid.GridCellFloatEditor()
@@ -1709,8 +1709,7 @@ class MainFrame(wx.Frame):
             # filter the data that only is inside of the limits
             
             # se muestra los resultados
-            output.addColData( 'SixSigma')
-            output.addColData('Input Data')
+            output.addColData('Input Data',pageName= 'SixSigma')
             output.addColData(('UCL','LCL','target','k','group size'))
             output.addColData((UCL, LCL, Target, k, groupSize))
             output.addColData('selcted columns',)
