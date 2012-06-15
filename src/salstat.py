@@ -23,7 +23,6 @@ import wx.lib.agw.aui as aui
 
 import wx.lib.wxpTag
 import string, os, os.path, pickle
-# import SalStat specific modules
 import images
 import numpy, math
 import wx.py
@@ -160,44 +159,57 @@ class LogPanel( wx.Panel ):
 
 
 class SaveDialog(wx.Dialog):
-    def __init__(self, parent, id):
-        wx.Dialog.__init__(self, parent, id, "Save Data?", \
-                           size=(270+wind,100+wind), style = wx.DIALOG_EX_METAL)
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
-        self.Choice = 'none'
-        vbox = wx.BoxSizer(wx.VERTICAL)
-        l1 = wx.StaticText(self, -1, 'You have unsaved Data')
-        l2 = wx.StaticText(self, -1, 'Do you wish to save it?')
-        vbox.Add(l1,1, wx.ALIGN_CENTER)
-        vbox.Add(l2,1, wx.ALIGN_CENTER)
-        hbox = wx.BoxSizer(wx.VERTICAL)
-        saveButton = wx.Button(self,    wx.ID_ANY, "Save...", size=(BWidth, BHeight))
-        discardButton = wx.Button(self, wx.ID_ANY, "Discard", size=(BWidth, BHeight))
-        CancelButton = wx.Button(self,  wx.ID_ANY, "Cancel",  size=(BWidth, BHeight))
-        hbox.Add(saveButton, 0, wx.ALL, 5)
-        hbox.Add(discardButton, 0, wx.ALL, 5)
-        hbox.Add(CancelButton, 0, wx.ALL, 5)
-        vbox.Add(hbox,1)
-        self.SetAutoLayout(True)
-        self.SetSizer(vbox)
+    def __init__(self, parent):  
+        
+        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"save data?", pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.DEFAULT_DIALOG_STYLE )
+        self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
+        self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
+
+        bSizer1 = wx.BoxSizer( wx.VERTICAL )
+
+        self.m_staticText1 = wx.StaticText( self, wx.ID_ANY, u"you have unsaved data", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText1.Wrap( -1 )
+        bSizer1.Add( self.m_staticText1, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALL, 5 )
+
+        self.m_staticText2 = wx.StaticText( self, wx.ID_ANY, u"Do you wish to save it?", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText2.Wrap( -1 )
+        bSizer1.Add( self.m_staticText2, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALL, 5 )
+
+        bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
+
+        self.m_button1 = wx.Button( self, wx.ID_ANY, u"Save", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer2.Add( self.m_button1, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+
+        self.m_button2 = wx.Button( self, wx.ID_ANY, u"Discard", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer2.Add( self.m_button2, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+
+        self.m_button3 = wx.Button( self, wx.ID_ANY, u"Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer2.Add( self.m_button3, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+
+        bSizer1.Add( bSizer2, 1, wx.EXPAND, 5 )
+
+        self.SetSizer( bSizer1 )
         self.Layout()
-        self.Bind(wx.EVT_BUTTON, self.SaveData,     id = saveButton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.DiscardData,  id = discardButton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.CancelDialog, id = CancelButton.GetId())
+        bSizer1.Fit( self )
+
+        self.Centre( wx.BOTH )
+        
+        self.Bind(wx.EVT_BUTTON, self.SaveData,     id = self.m_button1.GetId())
+        self.Bind(wx.EVT_BUTTON, self.DiscardData,  id = self.m_button2.GetId())
+        self.Bind(wx.EVT_BUTTON, self.CancelDialog, id = self.m_button3.GetId())
 
     def SaveData(self, event):
         frame.grid.Saved = True
         frame.grid.SaveXlsAs(self) # will it be ASCII or XML?
         # output.Close(True)
-        frame.Close(True)
         self.Close(True)
+        frame.Close(True)
 
     def DiscardData(self, event):
-        # output.Close(True)
-        frame.Close(True)
         self.Close(True)
-
+        frame.Close(True)
+        
+        
     def CancelDialog(self, event):
         self.Close(True)
 
@@ -263,7 +275,7 @@ class SimpleGrid(MyGrid):# wxGrid
         MyGrid.__init__(self, parent, -1, size)
         self.Saved = True
         self.moveTo = None
-        
+
         self.setPadreCallBack(self)
         self.SetColLabelAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
         for i in range(self.NumberCols):
@@ -271,7 +283,7 @@ class SimpleGrid(MyGrid):# wxGrid
         ##self.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.AlterSaveStatus)
         self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
         self.wildcard = "Any File (*.*)|*.*|" \
-                        "SalStat Format (*.xls)|*.xls"
+            "SalStat Format (*.xls)|*.xls"
         ## se ajusta el render
         attr = wx.grid.GridCellAttr()
         editor = wx.grid.GridCellFloatEditor()
@@ -393,12 +405,11 @@ class SimpleGrid(MyGrid):# wxGrid
         if len(cols) == 0:
             pass
         else:
-            # rows = self.GetUsedRows()
-            cols= self.GetUsedCols()[1]
-            totalResult = self.getByColumns(maxRow = self.maxrow )
+            rows = self.GetUsedRows()
+            totalResult = self.getByColumns(maxRow = max(rows))
             result= list()
-            for posCol in range(cols[-1]+1):
-                if posCol in cols:
+            for posCol in range(waste[-1]+1):
+                if posCol in waste:
                     result.append(totalResult[posCol])
                 else:
                     result.append(list())
@@ -406,6 +417,7 @@ class SimpleGrid(MyGrid):# wxGrid
         self.reportObj.save()
         self.Saved = True
         self.log.write("the fil %s was succesfully saved"%self.reportObj.path)
+        
 
     def LoadXls(self, event):
         dlg = wx.FileDialog(self, "Load Data File", "","",
@@ -434,10 +446,12 @@ class SimpleGrid(MyGrid):# wxGrid
             dlg = dialog(self, struct=[[bt1,bt2],], settings= setting)
             if dlg.ShowModal() != wx.ID_OK:
                 return
+
             (sheetNameSelected,)= dlg.GetValue()
             dlg.Destroy()
             if not (sheetNameSelected in sheetNames):
                 return
+
             for sheet, sheetname in zip(sheets, sheetNames):
                 if sheetname == sheetNameSelected:
                     sheetSelected = sheet
@@ -446,12 +460,6 @@ class SimpleGrid(MyGrid):# wxGrid
         #size = (sheetSelected.nrows, sheetSelected.ncols)
         # se hace el grid de tamanio 1 celda y se redimensiona luego
         self.ClearGrid()
-        #if size[0] > 1:
-        #    self.DeleteRows(1, size[0]-1)
-
-        #if size[1] > 1:
-        #    self.DeleteCols(1, size[1]-1)
-
         size = (sheetSelected.nrows, sheetSelected.ncols)
         # se lee el tamanio de la pagina y se ajusta las dimensiones
         newSize = (sheetSelected.nrows, sheetSelected.ncols)
@@ -467,14 +475,15 @@ class SimpleGrid(MyGrid):# wxGrid
                 newValue = sheetSelected.cell_value(row,col)
                 if isinstance(newValue, (str,)):
                     self.SetCellValue(row, col, newValue)
+
                 elif isinstance(newValue, (int,float,bool)):
                     self.SetCellValue(row, col, str(newValue))
+
                 else:
                     try:
                         self.SetCellValue(row, col, str(newValue))
                     except:
                         self.log.write("could not import the row,col (%i,%i)"%(row+1,col+1))
-
 
     def getData(self, x):
         for i in range(len(x)):
@@ -1007,14 +1016,14 @@ class MainFrame(wx.Frame):
         self.path = None
         wx.Frame.__init__(self,parent,-1,"SalStat Statistics",
                           size=wx.Size(640,480 ), pos=wx.DefaultPosition)
-        
+
         self.m_mgr = aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
-        
+
         #set icon for frame (needs x-platform separator!
         icon = images.getIconIcon()
-        self.SetIcon(icon)
-        
+        self.Icon= icon
+
         #-----------------------
         # create menubar
         self._createMenu()
@@ -1026,8 +1035,8 @@ class MainFrame(wx.Frame):
         # create small status bar
         self.CreateStatusBar()
         self.SetStatusText('SalStat 2')
-        
-        
+
+
         self.m_notebook1 = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
         self.logPanel = LogPanel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 
@@ -1050,7 +1059,7 @@ class MainFrame(wx.Frame):
         self.scriptPanel = wx.py.shell.Shell(self.m_notebook1)
         self.scriptPanel.wrap(True)
         self.m_notebook1.AddPage( self.scriptPanel , u"Shell", False )
-        
+
         #------------------------
         # organizing panels
         self.m_mgr.AddPane( self.formulaBarPanel,
@@ -1092,7 +1101,7 @@ class MainFrame(wx.Frame):
                                             DockFixed( False ).BestSize(wx.Size(-1,150)))
         self._BindEvents()
         self.m_mgr.Update()
-        
+
     def _createTb1(self):
         # Get icons for toolbar
         imag = imageEmbed()
@@ -1108,7 +1117,7 @@ class MainFrame(wx.Frame):
         HelpIcon =   imag.about()
         UndoIcon =   imag.edit_undo()
         RedoIcon =   imag.edit_redo()
-        
+
         tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
                             agwStyle=  aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
 
@@ -1130,7 +1139,7 @@ class MainFrame(wx.Frame):
         tb1.SetToolBitmapSize((24,24))
         tb1.Realize()
         return tb1
-        
+
     def _createMenu(self):
         # Get icons for toolbar
         imag = imageEmbed()
@@ -1159,7 +1168,7 @@ class MainFrame(wx.Frame):
         chart_menu=     wx.Menu()
         ctrProces_menu= wx.Menu()
         help_menu=      wx.Menu()
-        
+
         #add contents of menu
 
         self.mn1= wx.MenuItem(file_menu, wx.ID_ANY, '&New Data')
@@ -1218,11 +1227,11 @@ class MainFrame(wx.Frame):
         self.mn274= chart_menu.Append(wx.NewId(), 'Lineal Regress')
         self.mn275= chart_menu.Append(wx.ID_ANY, 'Ternary Plot')
         self.mn276= chart_menu.Append(wx.ID_ANY, 'Probability plot')
-        
+
         self.mn401= wx.MenuItem(ctrProces_menu, wx.ID_ANY, 'Six Sigma Pac')
         self.mn401.SetBitmap(HelpIcon)
         ctrProces_menu.AppendItem(self.mn401)
-        
+
         self.mn28= wx.MenuItem(help_menu, wx.ID_ANY, '&What Test Should I Use...')
         self.mn28.SetBitmap(HelpIcon)
         help_menu.AppendItem(self.mn28)
@@ -1230,7 +1239,7 @@ class MainFrame(wx.Frame):
         self.mn30=help_menu.Append(wx.ID_ANY, '&Licence...')
         self.mn31=help_menu.Append(wx.ID_ANY, '&About...')
         self.mn31.SetBitmap(HelpIcon)
-        
+
         #set up menu bar
         menuBar = wx.MenuBar()
         menuBar.Append(file_menu, '&File')
@@ -1242,7 +1251,7 @@ class MainFrame(wx.Frame):
         menuBar.Append(ctrProces_menu, 'Ctrl Process')
         menuBar.Append(help_menu, '&Help')
         self.SetMenuBar(menuBar)
-        
+
     def _BindEvents(self):
         # grid callback
         self.grid.Bind( wx.grid.EVT_GRID_CMD_SELECT_CELL, self._cellSelectionChange )
@@ -1297,7 +1306,7 @@ class MainFrame(wx.Frame):
 
         # controlling the expansion of the notebook
         self.m_notebook1.Bind( wx.EVT_LEFT_DCLICK, self._OnNtbDbClick )
-
+        # self.Bind( wx.EVT_CLOSE, self.EndApplication )
         self.grid.setPadreCallBack(self)
         if 0:
             self.Bind(wx.EVT_MENU, self.GoCheckOutliers,    id = self.mn26.GetID())
@@ -1403,18 +1412,18 @@ class MainFrame(wx.Frame):
                   title= 'Line Chart of all means',
                   xtics= [waste[i] for i in selectedCols])
         plt.Show()
-        
+
     def GoTernaryplot(self, event):
         waste, colnums = self.grid.GetUsedCols()
         if colnums == []:
             self.SetStatusText('You need some data to draw a graph!')
             return
-        
+
         selection = data2Plotdiaglog(self,waste)
         if selection.ShowModal() != wx.ID_OK:
             selection.Destroy()
             return
-        
+
         selectedcols = selection.getData()
         selection.Destroy()
         if len(selectedcols) == 0:
@@ -1423,16 +1432,16 @@ class MainFrame(wx.Frame):
         elif len(selectedcols) != 3:
             self.logPanel.write('You have to select 3 columns a, b and c')
             return
-        
+
         data = [self.grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]]
         tam = [len(dat) for dat in data]
         if (tam[0] != tam[1]) or (tam[0] != tam[2]):
             self.logPanel.write('the selected columns must have the same quantity of elements')
             return
-        
+
         legend = u''
         data= [data[0], data[1], data[2], legend]
-            
+
         plt= plot(parent=    self,
                   typePlot=  'plotTrian',
                   data2plot= data, 
@@ -1609,7 +1618,7 @@ class MainFrame(wx.Frame):
                   xlabel=    'Order Statistic Medians',
                   ylabel=    'Ordered Values')
         plt.Show()
-        
+
     def GoSixPack(self, event):
         '''six pack for continue data
         references:
@@ -1632,19 +1641,19 @@ class MainFrame(wx.Frame):
         if len(ColSelect) == 0:
             self.logPanel.write("you don't select a column")
             return
-        
+
         # taking the data
         values= [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
-                   for val in ColSelect
-                   ]
+                   if value == val
+                   ][0]
+                  for val in ColSelect
+                  ]
         columns= list()
         for pos in values:
             col = numpy.array(GetData(colnums[ pos ]))
             #col.shape = (len(col),1)
             columns.append(col)
-            
+
         if len(ColSelect) == 1:
             result= self._sixpack(columns[0], UCL, LCL, Target, k, n= groupSize)
         else:
@@ -1661,35 +1670,35 @@ class MainFrame(wx.Frame):
             averages= [statistics(row).mean for row in rows]
             ranges= [max(row)-min(row) for row in rows]
             stddevs= [statistics(row).stddev for row in rows]
-            
+
             Xga= statistics(averages).mean
             Ra= statistics(ranges).mean
             Sa= statistics(stddevs).mean
-            
+
             # x-bar limits using Ra
             UCL_xbar= Xga + A2[groupSize]*Ra
             LCL_xbar= Xga - A2[groupSize]*Ra
-            
+
             # R_ chart limits
             UCL_rchart= D4[groupSize]*Ra
             LCL_rchary= D3[groupSize]*Ra
-            
+
             # S_chart limits
             UCL_schart= B4[groupSize]*Sa
             LCL_schart= B3[groupSize]*Sa
 
             columns= [numpy.array(averages)]
-        
+
         for data in columns:
             result= self._sixpack(data, UCL, LCL, Target, k, n= groupSize)
             description= {'Desv.Est': 'Standar deviation',
-                            'Cp':  'Process Capability. A simple and straightforward indicator of process capability.',
-                            'Pp':  'Process Performance. A simple and straightforward indicator of process performance. basically tries to verify if the sample that you have generated from the process is capable to meet Customer CTQs (requirements)',
-                            'Cpk': 'Process Capability Index. Adjustment of Cp for the effect of non-centered distribution. measures how close a process is running to its specification limits, relative to the natural variability of the process',
-                            'Ppk': 'Process Performance Index. Adjustment of Pp for the effect of non-centered distribution.',
-                            'Cpm': 'Estimates process capability around a target, it is also known as the Taguchi capability index',
-                            'ppm': 'In a quality control context, PPM stands for the number of parts per million (cf. percent) that lie outside the tolerance limits'}
-            
+                          'Cp':  'Process Capability. A simple and straightforward indicator of process capability.',
+                          'Pp':  'Process Performance. A simple and straightforward indicator of process performance. basically tries to verify if the sample that you have generated from the process is capable to meet Customer CTQs (requirements)',
+                          'Cpk': 'Process Capability Index. Adjustment of Cp for the effect of non-centered distribution. measures how close a process is running to its specification limits, relative to the natural variability of the process',
+                          'Ppk': 'Process Performance Index. Adjustment of Pp for the effect of non-centered distribution.',
+                          'Cpm': 'Estimates process capability around a target, it is also known as the Taguchi capability index',
+                          'ppm': 'In a quality control context, PPM stands for the number of parts per million (cf. percent) that lie outside the tolerance limits'}
+
             general= {'Desv.Est': round(result['stddev'],5),
                       'Pp':       round(result['Cp'],5),
                       'Ppk':      round(result['Cpk'],5),
@@ -1697,17 +1706,17 @@ class MainFrame(wx.Frame):
                       'ppm':      int(result['ppm']),}
             LCU=    result['LCU']
             LCI=    result['LCL']
-            
+
             #data = numpy.array([dat  for dat in data if (dat <= LCU) and (dat >= LCL)])
-           
+
             #result = self._sixpack(data, UCL= LCU, LCL= LCL,
-                                   #Target= Target, k= 6)
+                                    #Target= Target, k= 6)
             #inside= {'Desv.Est':  round(result['stddev'],5),
-                      #'Cp':       round(result['Cp'],5),
-                      #'Cpk':      round(result['Cpk'],5),
-                      #'ppm':      round(result['ppm'],5),} 
+                        #'Cp':       round(result['Cp'],5),
+                        #'Cpk':      round(result['Cpk'],5),
+                        #'ppm':      round(result['ppm'],5),} 
             # filter the data that only is inside of the limits
-            
+
             # se muestra los resultados
             output.addColData('Input Data',pageName= 'SixSigma')
             output.addColData(('UCL','LCL','target','k','group size'))
@@ -1752,12 +1761,12 @@ class MainFrame(wx.Frame):
                     'data':    data,
                     }
         pltXbar= plot(self,    'controlChart', data2plot,
-                  title=   "X-bar Chart",
-                  xlabel=   ColSelect[0],
-                  ylabel=   ColSelect[0] + " Value")
+                      title=   "X-bar Chart",
+                      xlabel=   ColSelect[0],
+                      ylabel=   ColSelect[0] + " Value")
         pltXbar.Show()
         self.logPanel.write('SixSigma' + ' successfull')
-        
+
     def _sixpack(self, data, UCL, LCL, Target, k= 6, n= 2 ):
         result= dict()
         stadis= statistics(data)
@@ -1765,20 +1774,20 @@ class MainFrame(wx.Frame):
         if stddev == 0:
             Logg.write('Six pack analysis fail because the sdtdev is zero')
             return
-        
+
         if UCL == None:
             UCL= stadis.mean+ 0.5*k*stadis.stddev
-            
+
         if LCL == None:
             LCL= stadis.mean- 0.5*k*stadis.stddev
-        
+
         if Target == None:
             Target= stadis.mean
-            
+
         if UCL <= LCL:
             Logg.write('Six pack analysis fail because LCL >= UCL  %f >= %f'%(LCL, UCL))
             return
-        
+
         mean=     stadis.mean
         Cp=       (UCL-LCL)/float(k*stddev)
         Cpl=      2*(mean-LCL)/float(k*stddev)
@@ -1797,7 +1806,7 @@ class MainFrame(wx.Frame):
         probTot=  probLCL + probUCL
         ppm=      int(probTot*1e6)
         sigmaLevel= normProbInv(1-probTot)+1.5
-        
+
         # data for xbar chart
         mir= list()
         for x,y in zip(data[1:],data[:-1]):
@@ -1806,7 +1815,7 @@ class MainFrame(wx.Frame):
         rangeNewData=  max(newData)- min(newData)
         LCU=    stadis.mean+ A2[n]*rangeNewData
         LCL=    stadis.mean- A2[n]*rangeNewData
-        
+
         for paramName, value in zip(['stddev', 'mean', 'Cp', 'Cpl', 'Cpu','Cpk',
                                      'zUCL', 'zLCL', 'probUCL', 'probLCL',
                                      'probTot', 'ppm', 'sigmaLevel', 'outOfUCL',
@@ -1816,33 +1825,11 @@ class MainFrame(wx.Frame):
                                      outOfUCL, outOfLCL, Cpm, LCU, LCL ]):
             result[paramName] = value
         return result
-        
-    
+
+
     def EndApplication(self, evt):
-        # close the application (need to check for new data since last save)
-        # need to save the inits dictionary to .salstatrc
-        if 0:
-            dims = self.GetSizeTuple()
-            inits.update({'gridsizex': dims[0]})
-            inits.update({'gridsizey': dims[1]})
-            dims = self.GetPositionTuple()
-            inits.update({'gridposx': dims[0]})
-            inits.update({'gridposy': dims[1]})
-            dims = output.GetSizeTuple()
-            inits.update({'outputsizex': dims[0]})
-            inits.update({'outputsizey': dims[1]})
-            dims = output.GetPositionTuple()
-            inits.update({'outputposx': dims[0]})
-            inits.update({'outputposy': dims[1]})
-            initskeys = inits.keys()
-            initsvalues = inits.values()
-            initfilename = ini.initfile
-            fout = file(initfilename,'w')
-            for i in range(len(initskeys)):
-                fout.write(str(initskeys[i])+' '+str(initsvalues[i])+'\n')
-            fout.close()
         if self.grid.Saved == False:
-            win = SaveDialog(self, -1)
+            win = SaveDialog(self)
             win.Show(True)
         else:
             frame.Destroy()
@@ -1963,7 +1950,7 @@ class MainFrame(wx.Frame):
         if not isinstance(colNameSelect, (list, tuple)):
             colNameSelect = [colNameSelect]
             moment = [moment]
-            
+
         values = [ [pos for pos, value in enumerate( ColumnList )
                     if value == val
                     ][0]
