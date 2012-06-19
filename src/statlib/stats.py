@@ -346,10 +346,13 @@ def lmedian (inlist,numbins=1000):
 
     Usage:   lmedian (inlist, numbins=1000)
     """
+    # ordering the data
     (hist, smallest, binsize, extras) = histogram(inlist,numbins,[min(inlist),max(inlist)]) # make histog
     if binsize == 0:
         return None
     cumhist = cumsum(hist)              # make cumulative histogram
+    # gives a default value to the cfbin in case
+    cfbin= len(cumhist)-1
     for i in range(len(cumhist)):        # get 1st(!) index holding 50%ile score
         if cumhist[i]>=len(inlist)/2.0:
             cfbin = i
@@ -564,12 +567,15 @@ def lhistogram (inlist,numbins=10,defaultreallimits=None,printextras=0):
         lowerreallimit = min(inlist) - binsize/2 #lower real limit,1st bin
     bins = [0]*(numbins)
     extrapoints = 0
-    for num in inlist:
+    inlist= shellsort(inlist)[0]
+    for num in inlist: # ordering the list of data in order to work correctly
         try:
             if (num-lowerreallimit) < 0:
                 extrapoints = extrapoints + 1
             else:
                 bintoincrement = int((num-lowerreallimit)/float(binsize))
+                if bintoincrement >= numbins:
+                    bintoincrement= numbins-1
                 bins[bintoincrement] = bins[bintoincrement] + 1
         except:
             extrapoints = extrapoints + 1
