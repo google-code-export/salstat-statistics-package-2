@@ -1706,17 +1706,6 @@ class MainFrame(wx.Frame):
                       'ppm':      int(result['ppm']),}
             LCU=    result['LCU']
             LCI=    result['LCL']
-
-            #data = numpy.array([dat  for dat in data if (dat <= LCU) and (dat >= LCL)])
-
-            #result = self._sixpack(data, UCL= LCU, LCL= LCL,
-                                    #Target= Target, k= 6)
-            #inside= {'Desv.Est':  round(result['stddev'],5),
-                        #'Cp':       round(result['Cp'],5),
-                        #'Cpk':      round(result['Cpk'],5),
-                        #'ppm':      round(result['ppm'],5),} 
-            # filter the data that only is inside of the limits
-
             # se muestra los resultados
             output.addColData('Input Data',pageName= 'SixSigma')
             output.addColData(('UCL','LCL','target','k','group size'))
@@ -1733,6 +1722,7 @@ class MainFrame(wx.Frame):
             output.addColData(desc)
             output.addColData(keys)
             output.addColData(values)
+            utput.addColData(('xbar chart Limits'))
             output.addColData(('LCU','LCI'))
             output.addColData((LCU, LCI))
             #output.addColData('inside Potential')
@@ -1754,10 +1744,14 @@ class MainFrame(wx.Frame):
                       title=   "Normal probability plot",
                       )
         pltNorm.Show()
-        # xbarchart:
-        data2plot= {'UCL':     LCU,
-                    'LCL':     LCI,
-                    'target':  LCI+(LCU-LCI)/float(2),
+        # x-bar chart:
+        xbar_data= (data[1:]+data[:-1])/2.0
+        xbar_UCL=  Xga + A2[groupSize]*Ra
+        xbar_LCL=  Xga - A2[groupSize]*Ra
+        xbar_target= Xga
+        data2plot= {'UCL':     xbar_UCL,
+                    'LCL':     xbar_LCL,
+                    'target':  xbar_target,
                     'data':    data,
                     }
         pltXbar= plot(self,    'controlChart', data2plot,
@@ -1765,6 +1759,15 @@ class MainFrame(wx.Frame):
                       xlabel=   ColSelect[0],
                       ylabel=   ColSelect[0] + " Value")
         pltXbar.Show()
+        # r-chart:
+        rchart_UCL= D4[groupSize]*Ra
+        rchart_LCL= D3[groupSize]*Ra
+        rchart_target= Ra
+        # s-chart:
+        schart_UCL= B4[groupSize]*Ra
+        schart_LCL= B3[groupSize]*Ra
+        schart_target= Sa
+        
         self.logPanel.write('SixSigma' + ' successfull')
 
     def _sixpack(self, data, UCL, LCL, Target, k= 6, n= 2 ):
@@ -3073,6 +3076,7 @@ def PutData(column, data):
 if __name__ == '__main__':
     app = wx.App()
     frame = MainFrame(None, app)
+    app.SetTopWindow(frame)
     frame.grid.SetFocus()
     Logg= frame.logPanel
     output = frame.answerPanel
