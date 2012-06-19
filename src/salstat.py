@@ -1571,13 +1571,12 @@ class MainFrame(wx.Frame):
         if selection.ShowModal() != wx.ID_OK:
             selection.Destroy()
             return
-        (xcol,ycol) = selection.getData()
-        # homogenize data
-        data= homogenize(xcol,ycol)
-        xcol= data[0]
-        ycol= data[0]
+        (xcol, ycol) = selection.getData()
         selection.Destroy()
         data = [self.grid.CleanData(cols) for cols in [colnums[i] for i in (xcol,ycol)]]
+        # homogenize data
+        data= homogenize(data[0],data[1])
+        
         if len(data[0]) != len(data[1]):
             self.SetStatusText('x and y data mus have the same size!')
             return
@@ -1586,6 +1585,8 @@ class MainFrame(wx.Frame):
                   xlabel = waste[xcol], ylabel = waste[ycol],
                   title= 'Lin Regress plot' )
         plt.Show()
+        # lin regress removing most disperse data
+        
 
     def GoProbabilityplot(self, event):
         ColumnList, colnums = self.grid.GetUsedCols()
