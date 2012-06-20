@@ -1036,7 +1036,6 @@ class MainFrame(wx.Frame):
         self.CreateStatusBar()
         self.SetStatusText('SalStat 2')
 
-
         self.m_notebook1 = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
         self.logPanel = LogPanel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 
@@ -1101,6 +1100,7 @@ class MainFrame(wx.Frame):
                                             DockFixed( False ).BestSize(wx.Size(-1,150)))
         self._BindEvents()
         self.m_mgr.Update()
+        self.Center()
 
     def _createTb1(self):
         # Get icons for toolbar
@@ -1223,10 +1223,11 @@ class MainFrame(wx.Frame):
         self.mn27= chart_menu.Append(wx.ID_ANY, 'Bar Chart of All Means...')
         self.mn273= chart_menu.Append(wx.NewId(), 'Lines')
         self.mn271= chart_menu.Append(wx.NewId(), 'Scatter')
-        self.mn272= chart_menu.Append(wx.NewId(), 'Box&Wishker Plot')
+        self.mn272= chart_menu.Append(wx.NewId(), 'Box&Wishker')
         self.mn274= chart_menu.Append(wx.NewId(), 'Lineal Regress')
-        self.mn275= chart_menu.Append(wx.ID_ANY, 'Ternary Plot')
-        self.mn276= chart_menu.Append(wx.ID_ANY, 'Probability plot')
+        self.mn275= chart_menu.Append(wx.ID_ANY, 'Ternary')
+        self.mn276= chart_menu.Append(wx.ID_ANY, 'Probability')
+        self.mn277= chart_menu.Append(wx.ID_ANY, 'Adaptative BMS')
 
         self.mn401= wx.MenuItem(ctrProces_menu, wx.ID_ANY, 'Six Sigma Pac')
         self.mn401.SetBitmap(HelpIcon)
@@ -1301,6 +1302,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.GoLinRegressPlot,   id= self.mn274.GetId())
         self.Bind(wx.EVT_MENU, self.GoTernaryplot,      id= self.mn275.GetId())
         self.Bind(wx.EVT_MENU, self.GoProbabilityplot,  id= self.mn276.GetId())
+        self.Bind(wx.EVT_MENU, self.GoAdaptativeBMS,  id= self.mn277.GetId())
         # control process callback
         self.Bind(wx.EVT_MENU, self.GoSixPack,          id=self.mn401.GetId())
 
@@ -1536,7 +1538,30 @@ class MainFrame(wx.Frame):
                   xtics=  [waste[i] for i in selectedcols] )
 
         plt.Show()
-
+    def GoAdaptativeBMS(self,event):
+        waste, colnums = self.grid.GetUsedCols()
+        if colnums == []:
+            self.SetStatusText('You need some data to draw a graph!')
+            return
+        selection = data2Plotdiaglog(self,waste)
+        if selection.ShowModal() != wx.ID_OK:
+            selection.Destroy()
+            return
+        selectedcols = selection.getData()
+        selection.Destroy()
+        if len(selectedcols) == 0:
+            self.SetStatusText('You need to select some data to draw a graph!')
+            return
+        data= [self.grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]]
+        plt= plot(parent = self,
+                  typePlot = 'AdaptativeBMS',
+                  data2plot = data,
+                  xlabel = 'variable',
+                  ylabel = 'value',
+                  title= 'Adaptative BMS plot',
+                  xtics=  [waste[i] for i in selectedcols])
+        plt.Show()
+        
     def GoLinesPlot(self, event):
         waste, colnums = self.grid.GetUsedCols()
         if colnums == []:

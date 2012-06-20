@@ -40,6 +40,7 @@ class MpltFrame( wx.Frame ):
         * plotPie
         * plotLinRegress
         * boxPlot
+        * AdaptativeBMS
         * plotHistogram <pendiente>
         * plotPareto <pendiente>
 
@@ -66,9 +67,10 @@ class MpltFrame( wx.Frame ):
                      'xtics': []}
 
         for key in self.graphParams.keys():
-            if params.has_key(key):
-                self.graphParams[key] = params[key]
-
+            try:
+                self.graphParams[key] = params.pop(key)
+            except KeyError:
+                continue
 
         wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 642,465 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
 
@@ -754,7 +756,7 @@ class MpltFrame( wx.Frame ):
                                positions=None, widths=None, patch_artist=False)
         self.figpanel.canvas.draw()
 
-    def plotHistigram(self,data2plot):
+    def plotHistogram(self,data2plot):
         pass
     def plotTrian(self,data2plot):
         '''data2plot = ((a,b,c,'legend'))'''
@@ -818,6 +820,21 @@ class MpltFrame( wx.Frame ):
             
         ax.hold(False)
         self.figpanel.canvas.draw(0)
+    def AdaptativeBMS(self, data, xlabel='', ylabel='', title=''):
+        self.figpanel.axes[0].hold(True)
+        for serieNumber, serieData in enumerate(data): 
+            xmin= serieNumber-0.4
+            xmax= serieNumber+0.4
+            size= len(serieData)
+            step= 0.8/float(size)
+            xdata= [ -0.4 + serieNumber + i*step for i in range(size)]
+            self.axes.plot(xdata, serieData, marker= '.', linestyle= '_')
+        self.axes.set_xticks(range(len(data)))
+        self.figpanel.axes[0].set_title(title)
+        self.figpanel.axes[0].set_xlabel(xlabel)
+        self.figpanel.axes[0].set_ylabel(ylabel)
+        self.figpanel.axes[0].hold(False)
+        self.figpanel.canvas.draw()
         
     def _TitleChange( self, event ):
         self.figpanel.axes[0].set_title(event.GetString())
