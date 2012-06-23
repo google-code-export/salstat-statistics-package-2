@@ -6,6 +6,7 @@ Created on 11/05/2012
 # -*- coding: utf-8 -*- 
 
 import wx
+from easyDialog import CheckListBox
 
 class data2Plotdiaglog( wx.Dialog ):
     def __init__( self, parent, lisOfColumns ):
@@ -18,7 +19,7 @@ class data2Plotdiaglog( wx.Dialog ):
         sbSizer16 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Select data to plot" ), wx.VERTICAL )
 
         m_checkList1Choices = []
-        self.m_checkList1 = wx.CheckListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_checkList1Choices,  wx.LB_MULTIPLE  )
+        self.m_checkList1 = CheckListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_checkList1Choices,  wx.LB_MULTIPLE  )
         sbSizer16.Add( self.m_checkList1, 1, wx.ALL|wx.EXPAND, 5 )
 
         bSizer6.Add( sbSizer16, 1, wx.EXPAND, 5 )
@@ -111,7 +112,7 @@ class scatterDialog( wx.Dialog ):
         bSizer4 = wx.BoxSizer( wx.HORIZONTAL )
 
         m_checkList1Choices = []
-        self.m_checkList1 = wx.CheckListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_checkList1Choices, 0 )
+        self.m_checkList1 = CheckListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_checkList1Choices, 0 )
         bSizer4.Add( self.m_checkList1, 0, wx.ALL, 5 )
 
         fgSizer2 = wx.FlexGridSizer( 2, 1, 0, 0 )
