@@ -4,7 +4,6 @@ Created on 25/10/2010
 
 @author: Sebastian Lopez
 '''
-
 import wx
 from NewGrid import NewGrid # grid with context menu
 from imagenes import imageEmbed
@@ -233,6 +232,13 @@ class NoteBookSheet(wx.Panel):
         currCol = size[1]
         if isinstance(colData,(str,)):
             colData = [colData]
+        else:
+            # se verifica si tiene mas de un elemento
+            try:
+                len(colData)
+            except TypeError:
+                colData = [colData]
+                
         # compare de row numbres
         if size[0] >= len(colData):
             pass
@@ -241,11 +247,12 @@ class NoteBookSheet(wx.Panel):
             # adding the required rows
             page.AppendRows(diffColNumber)
         # populate with data
+        DECIMAL_POINT= wx.GetApp().DECIMAL_POINT
         for colPos, colValue in enumerate(colData):
             if isinstance(colValue,(str,unicode)):
                 pass
             else:
-                colValue = str(colValue)
+                colValue = str(colValue).replace('.', DECIMAL_POINT)
             page.SetCellValue(colPos, currCol, colValue)
 
 

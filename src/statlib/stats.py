@@ -4528,6 +4528,8 @@ try:
                        (atrim1, (N.ndarray,)) )
 
     ## CORRELATION FCNS:
+    covariance = Dispatch((lcov, (ListType, TupleType)),
+                          (acov, (N.ndarray,)) )
     paired = Dispatch ( (lpaired, (ListType, TupleType)),
                         (apaired, (N.ndarray,)) )
     lincc = Dispatch ( (llincc, (ListType, TupleType)),
