@@ -3007,6 +3007,7 @@ def atrimboth (a,proportiontocut):
     Usage:   atrimboth (a,proportiontocut)
     Returns: trimmed version of array a
     """
+    a= N.ravel(a)
     lowercut = int(proportiontocut*len(a))
     uppercut = len(a) - lowercut
     return a[lowercut:uppercut]
@@ -3022,6 +3023,7 @@ def atrim1 (a,proportiontocut,tail='right'):
     Usage:   atrim1(a,proportiontocut,tail='right')  or set tail='left'
     Returns: trimmed version of array a
     """
+    a= N.ravel(a)
     if string.lower(tail) == 'right':
         lowercut = 0
         uppercut = len(a) - int(proportiontocut*len(a))
