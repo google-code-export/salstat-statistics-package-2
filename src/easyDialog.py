@@ -182,7 +182,7 @@ class Dialog ( wx.Dialog ):
                     if len(ctrl.GetItems()) == 0:
                         prevResult = []
                     if ctrl.GetSelection() >= 0:
-                        prevResult =  ctrl.GetItems()[ctrl.GetSelection()]
+                        prevResult =  [ctrl.GetItems()[ctrl.GetSelection()]]
                     else:
                         prevResult= []
 
