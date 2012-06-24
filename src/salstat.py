@@ -1405,9 +1405,7 @@ class MainFrame(wx.Frame):
                 ('z',             None, self.z),
                 ('zs',            None, self.zs)),), # 'zmap'
               ('Trimming Fcns',
-               (('threshold',     None, self.threshold),
-                ('trimboth',      None, self.trimboth),
-                ('trim1',         None, self.trim1)),), #'round',
+               (('threshold',     None, self.threshold),)),#                 ('trimboth',      None, self.trimboth),                ('trim1',         None, self.trim1)),), #'round',
               ('Correlation Fcns',
                (( 'paired',       None, self.paired),
                 ('pearsonr',      None, self.pearsonr),
@@ -2206,7 +2204,7 @@ class MainFrame(wx.Frame):
         result = [getattr(stats, functionName)( col, moment ) for col in colums]
         # se muestra los resultados
         wx.GetApp().output.addColData(colNameSelect, functionName)
-        wx.GetApp().output.addColData(result)
+        wx.GetApp().output.addColData(numpy.ravel(result))
         self.logPanel.write(functionName + ' successfull')
 
     def _statsType3(self, functionName, texto1 = u'',
@@ -2563,7 +2561,7 @@ class MainFrame(wx.Frame):
         result = [getattr(stats, functionName)( col, threshmin, threshmax, newval ) for col in colums]
         # se muestra los resultados
         wx.GetApp().output.addColData(colNameSelect, functionName)
-        wx.GetApp().output.addColData(result)
+        wx.GetApp().output.addColData(numpy.ravel(result))
         self.logPanel.write(functionName + ' successfull')
 
     def trimboth(self,event):
@@ -2610,10 +2608,10 @@ class MainFrame(wx.Frame):
         # -------------------
         colums = [ GetData(colnums[ pos ]) for pos in values]
         # se hace los calculos para cada columna
-        result = [getattr(stats, functionName)( col, proportiontocut, tail ) for col in colums]
+        result = [getattr(stats, functionName)( col, proportiontocut, tail[0] ) for col in colums]
         # se muestra los resultados
         wx.GetApp().output.addColData(colNameSelect, functionName)
-        wx.GetApp().output.addColData(result)
+        wx.GetApp().output.addColData(numpy.ravel(result))
         self.logPanel.write(functionName + ' successfull')
 
 
@@ -2848,7 +2846,8 @@ class MainFrame(wx.Frame):
                     for val in xcolNameSelect
                     ]
         xcolumns = [ GetData(colnums[ pos ]) for pos in xvalues][0]
-
+        if isinstance(ycolNameSelect, (str, unicode)):
+            ycolNameSelect = [ycolNameSelect]
         if len( ycolNameSelect ) == 0:
             ycolumns = None
         else:
