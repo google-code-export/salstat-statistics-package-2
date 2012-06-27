@@ -14,14 +14,14 @@ class Navegator ( wx.Frame ):
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
         bSizer1 = wx.BoxSizer( wx.VERTICAL )
         self.m_panel1 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-        fileName= path.join(self.path, "salstat2-v2.hhp")
+        fileName= path.join(self.path, "help.hhp")
         ## help system ######
         if path.isfile(fileName):
-            helpData= HtmlHelpData()
-            helpData.AddBook(fileName)
+            self.helpData= HtmlHelpData()
+            self.helpData.AddBook(fileName)
             self.html= HtmlHelpWindow(self, -1, size= self.GetClientSize(),
                                       helpStyle= wx.html.HF_DEFAULT_STYLE | wx.html.HF_EMBEDDED,
-                                      data= helpData) ## the trouble could be here
+                                      data= self.helpData) ## the trouble could be here
         else:
             self.html = wx.html.HtmlHelpWindow( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.html.HW_SCROLLBAR_AUTO)
         bSizer1.Add( self.html, 1, wx.EXPAND )
