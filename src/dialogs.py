@@ -11,7 +11,7 @@ class NumTextCtrl(wx.TextCtrl):
         if len(texto) == 0:
             return
         allowed= [ str(x) for x in range(11)]
-        allowed.extend(['.','-'])
+        allowed.extend([wx.GetApp().DECIMAL_POINT, '-'])
         newstr= [x for x in texto if x in allowed]
         if len(newstr) == 0:
             newstr = u''
@@ -21,15 +21,15 @@ class NumTextCtrl(wx.TextCtrl):
         # prevent infinite recursion
         if texto == newstr:
             return
-
         self.SetValue(newstr)
+        
     def GetAsNumber(self):
         prevResult = self.Value
         if len(prevResult) == 0:
             prevResult = None
         else:
             try:
-                prevResult = float(prevResult)
+                prevResult = float(prevResult.replace(wx.GetApp().DECIMAL_POINT, '.'))
             except:
                 prevResult = None
         return prevResult
