@@ -22,8 +22,8 @@ class Dialog ( wx.Dialog ):
         paramteres
         settings = {'Tile': String title of the wxdialog ,
                     'icon': wxbitmap,
-                    '_size': wx.Size(xsize,ysize) the size of the dialog ,
-                    '_pos':  wx.Position(-1,.1) the position of the frame,
+                    '_size': wx.Size(xsize, ysize) the size of the dialog ,
+                    '_pos':  wx.Position(-1, -1) the position of the frame,
                     '_style': wx.DIALOG__STYLE of the dialog ,
         struct = list() information with the data
 
@@ -35,21 +35,20 @@ class Dialog ( wx.Dialog ):
 
         >> structure = list()
 
-        >> group = lambda x,y: (x,y)
-        >> bt1 = group('StaticText', ('hoja a Imprimir',))
-        >> bt2 = group('Button', ('nuevo',))
+        >> bt1 = ('StaticText', ('hoja a Imprimir',))
+        >> bt2 = ('Button', ('nuevo',))
 
-        >> bt6=  group('TextCtrl', ('Parametro',))
+        >> bt6=  ('TextCtrl', ('Parametro',))
 
-        >> btnChoice = group('Choice',(['opt1','opcion2','opt3'],))
+        >> btnChoice = ('Choice',(['opt1','opcion2','opt3'],))
 
-        >> btnListBox = group('CheckListBox',(['opt1','opcion2','opt3'],))
+        >> btnListBox = ('CheckListBox',(['opt1','opcion2','opt3'],))
 
-        >> listSeparator = group('StaticLine',('horz',))
+        >> listSeparator = ('StaticLine',('horz',))
 
-        >> bt7= group('RadioBox',('titulo',['opt1','opt2','ra_opt3'],))
-        >> bt8 = group('SpinCtrl', ( 0, 100, 5 )) # (min, max, start)
-        >> bt9 = group('ToggleButton', ['toggle'])
+        >> bt7 = ('RadioBox',('titulo',['opt1','opt2','opt3'],))
+        >> bt8 = ('SpinCtrl', ( 0, 100, 5 )) # (min, max, start)
+        >> bt9 = ('ToggleButton', ['toggle'])
 
         >> structure.append( [bt6, bt2] )
         >> structure.append( [bt6, bt5] )
@@ -78,11 +77,11 @@ class Dialog ( wx.Dialog ):
                 pass
 
         wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY,
-                             title = params['Title'],
-                             pos = params['_pos'],
-                             size = params['_size'],
-                             style = params['_style'] )
-        self.SetIcon(params['icon'])
+                             title = params.pop('Title'),
+                             pos = params.pop('_pos'),
+                             size = params.pop('_size'),
+                             style = params.pop('_style') )
+        self.SetIcon(params.pop('icon'))
 
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
         bSizer1 = wx.BoxSizer( wx.VERTICAL )
@@ -99,6 +98,7 @@ class Dialog ( wx.Dialog ):
         self._allow2get= ['TextCtrl','Choice',
                       'CheckListBox','RadioBox',
                       'SpinCtrl','ToggleButton','NumTextCtrl']
+        
         self.adding(bSizer3, struct)
 
         self.m_scrolledWindow1.SetSizer( bSizer3 )
@@ -117,26 +117,25 @@ class Dialog ( wx.Dialog ):
         self.Layout()
         self.Centre( wx.BOTH )
 
-
     def adding(self, parentSizer, struct ):
-        diferents = ['CheckListBox','Choice',]
+        diferents= ['CheckListBox','Choice',]
         for row in struct:
             namebox= 'boxSizer'+ self.ctrlNum.next()
             setattr(self, namebox, wx.FlexGridSizer( 0, len(row), 0, 0 ))
             currSizer= getattr(self, namebox)
             currSizer.SetFlexibleDirection( wx.BOTH )
             currSizer.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-            characters = wx.ALIGN_CENTER_VERTICAL | wx.ALL
+            characters= wx.ALIGN_CENTER_VERTICAL | wx.ALL
             for key, args in row:
-                if hasattr(wx,key):
-                    nameCtrl = 'ctrl' + self.sizerNum.next()
+                if hasattr(wx, key):
+                    nameCtrl= 'ctrl' + self.sizerNum.next()
                     if key in diferents:
-                        data = [wx.DefaultPosition, wx.DefaultSize, ]
+                        data= [wx.DefaultPosition, wx.DefaultSize, ]
                         data.extend(list(args))
                         data.append(0)
-                        args = data
+                        args= data
                     elif key == 'StaticLine':
-                        data = [wx.DefaultPosition, wx.DefaultSize, ]
+                        data= [wx.DefaultPosition, wx.DefaultSize, ]
                         if args[0] == 'horz':
                             data.append(wx.LI_HORIZONTAL|wx.DOUBLE_BORDER)
                         else:
@@ -144,7 +143,7 @@ class Dialog ( wx.Dialog ):
                         args = data
                         characters = wx.ALL | wx.EXPAND
                     elif key == 'RadioBox':
-                        data = [args[0] , wx.DefaultPosition, wx.DefaultSize]
+                        data= [args[0] , wx.DefaultPosition, wx.DefaultSize]
                         data.append(args[1])
                         args= data
                     elif key == 'SpinCtrl':
@@ -155,17 +154,16 @@ class Dialog ( wx.Dialog ):
                         self.ctrls.append((key, CheckListBox(self.m_scrolledWindow1, wx.ID_ANY, *args)))
                     else:
                         self.ctrls.append((key, getattr(wx, key)(self.m_scrolledWindow1, wx.ID_ANY, *args)))
-                    currCtrl = self.ctrls[-1][1]
-                    currSizer.Add(currCtrl , 0, characters , 5)
-                    #currSizer.Layout()
+                    currCtrl= self.ctrls[-1][1]
+                    currSizer.Add(currCtrl, 0, characters , 5)
 
                 elif key == 'NumTextCtrl':
                     self.ctrls.append((key, NumTextCtrl(self.m_scrolledWindow1, wx.ID_ANY, *args)))
-                    currCtrl = self.ctrls[-1][1]
-                    currSizer.Add(currCtrl , 0, characters , 5)
+                    currCtrl= self.ctrls[-1][1]
+                    currSizer.Add(currCtrl, 0, characters , 5)
 
-                elif key == 'in':
-                    self.adding(parentSizer, [args])
+                #elif key == 'in':  # not used
+                #    self.adding(parentSizer, [args])
 
             parentSizer.Add( currSizer, 0, wx.EXPAND, 5 )
             parentSizer.Layout()
@@ -208,7 +206,7 @@ class Dialog ( wx.Dialog ):
                 resultado.append(prevResult)
         return resultado
 
-class _MyFrame1 ( wx.Frame ):
+class _example( wx.Frame ):
     def __init__( self, parent ):
         wx.Frame.__init__ ( self, parent, id = wx.ID_ANY,
                      title = wx.EmptyString, pos = wx.DefaultPosition,
@@ -221,7 +219,6 @@ class _MyFrame1 ( wx.Frame ):
         self.m_button8 = wx.Button( self, wx.ID_ANY, u"Show Dialog", wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer10.Add( self.m_button8, 0, wx.ALL, 5 )
 
-
         self.SetSizer( bSizer10 )
         self.Layout()
 
@@ -230,27 +227,23 @@ class _MyFrame1 ( wx.Frame ):
         # Connect Events
         self.m_button8.Bind( wx.EVT_BUTTON, self.showDialog )
 
-
     # Virtual event handlers, overide them in your derived class
     def showDialog( self, event ):
-
-        dic= {'Title':'titulo'}
-        structure = list()
-        group = lambda x,y: (x,y)
-
-        bt1 = group('Button', ('print',))
-        bt2 = group('StaticText', ('hoja a Imprimir',))
-        bt3 = group('Button', ('nuevo',))
-        bt4 = group('StaticText', ('sebas',))
-        bt5 = group('StaticText', ('Ingrese la presion',))
-        bt6=  group('TextCtrl', ('Parametro',))
-        btnChoice = group('Choice',(['opt1','opcion2','opt3'],))
-        btnListBox = group('CheckListBox',(['opt1','opcion2','opt3'],))
-        listSeparator = group('StaticLine',('horz',))
-        bt7= group('RadioBox',('titulo',['opt1','opt2','ra_opt3'],))
-        bt8 = group('SpinCtrl', ( 0, 100, 5 )) # (min, max, start)
-        bt9 = group('ToggleButton', ['toggle'])
-
+        dic= {'Title': 'title'}
+        bt1= ('Button',     ['print'])
+        bt2= ('StaticText', ['hoja a Imprimir'])
+        bt3= ('Button',     ['nuevo'])
+        bt4= ('StaticText', ['sebas'])
+        bt5= ('StaticText', ['Ingrese la presion'])
+        bt6= ('TextCtrl',   ['Parametro'])
+        btnChoice=     ('Choice',       [['opt1', 'opcion2', 'opt3']])
+        btnListBox=    ('CheckListBox', [['opt1', 'opcion2', 'opt3']])
+        listSeparator= ('StaticLine',   ['horz'])
+        bt7= ('RadioBox',     ['title', ['opt1', 'opt2', 'opt3']])
+        bt8= ('SpinCtrl',     [ 0, 100, 5 ]) # (min, max, start)
+        bt9= ('ToggleButton', ['toggle'])
+        
+        structure= list()
         structure.append( [bt6, bt2] )
         structure.append( [bt6, bt5] )
         structure.append( [btnChoice, bt9 ] )
@@ -259,14 +252,14 @@ class _MyFrame1 ( wx.Frame ):
         structure.append( [bt7, ])
         structure.append( [bt8, ])
 
-        dlg = Dialog(self,settings = dic, struct= structure)
+        dlg= Dialog(self, settings = dic, struct= structure)
         if dlg.ShowModal() == wx.ID_OK:
-            values = dlg.GetValue()
+            values= dlg.GetValue()
             print values
         dlg.Destroy()
 
 if __name__ == '__main__':
-    app = wx.App()
-    frame = _MyFrame1(None)
+    app= wx.App()
+    frame= _example(None)
     frame.Show()
     app.MainLoop()
