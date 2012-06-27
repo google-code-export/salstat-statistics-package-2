@@ -24,6 +24,7 @@ import wx.lib.agw.aui as aui
 import wx.lib.wxpTag
 import string, os, os.path, pickle
 import images
+from imagenes import imageEmbed
 import numpy, math
 import wx.py
 import xlrd
@@ -51,22 +52,25 @@ from ntbSheet import MyGridPanel as MyGrid
 from script import ScriptPanel
 from imagenes import imageEmbed
 
+from helpSystem import Navegator
+
 from dialogs import CheckListBox, SixSigma
 APPNAME= 'SalStat2'
 DescList= ['N','Sum','Mean','missing',
-          'Variance','Standard Deviation','Standard Error',
-          'Sum of Squares',#'Sum of Squared Devs',
-          'Coefficient of Variation','Minimum',
-          'Maximum','Range','Number Missing',
-          'Geometric Mean','Harmonic Mean',
-          'Skewness','Kurtosis', 'Median',        #'Median Absolute Deviation',
-          'Mode', ] #'Interquartile Range', 'Number of Unique Levels']
+           'Variance','Standard Deviation','Standard Error',
+           'Sum of Squares',#'Sum of Squared Devs',
+           'Coefficient of Variation','Minimum',
+           'Maximum','Range','Number Missing',
+           'Geometric Mean','Harmonic Mean',
+           'Skewness','Kurtosis', 'Median',        #'Median Absolute Deviation',
+           'Mode', ] #'Interquartile Range', 'Number of Unique Levels']
 
 inits ={}    # dictionary to hold the config values
 ColsUsed= []
 RowsUsed= []
 missingvalue= None
 HOME= os.getcwd()
+imagenes = imageEmbed()
 
 if os.name == 'nt':
     face1 = 'Courier New'
@@ -141,7 +145,7 @@ class LogPanel( wx.Panel ):
 
 class SaveDialog(wx.Dialog):
     def __init__(self, parent):  
-        
+
         wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"save data?", pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.DEFAULT_DIALOG_STYLE )
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
@@ -174,7 +178,7 @@ class SaveDialog(wx.Dialog):
         bSizer1.Fit( self )
 
         self.Centre( wx.BOTH )
-        
+
         self.Bind(wx.EVT_BUTTON, self.SaveData,     id = self.m_button1.GetId())
         self.Bind(wx.EVT_BUTTON, self.DiscardData,  id = self.m_button2.GetId())
         self.Bind(wx.EVT_BUTTON, self.CancelDialog, id = self.m_button3.GetId())
@@ -189,8 +193,8 @@ class SaveDialog(wx.Dialog):
     def DiscardData(self, event):
         self.Close(True)
         wx.GetApp().frame.Close(True)
-        
-        
+
+
     def CancelDialog(self, event):
         self.Close(True)
 
@@ -402,14 +406,14 @@ class SimpleGrid(MyGrid):# wxGrid
         self.reportObj.save()
         self.Saved = True
         self.log.write("the fil %s was succesfully saved"%self.reportObj.path)
-        
+
 
     def LoadXls(self, event):
         dlg = wx.FileDialog(self, "Load Data File", "","",
                             wildcard= "Excel File (*.xls)|*.xls",
                             style = wx.OPEN)
                 #, wx.OPEN)
-        icon = images.getIconIcon()
+        icon = imagenes.logo16()
         dlg.SetIcon(icon)
         if dlg.ShowModal() != wx.ID_OK: # ShowModal
             dlg.Destroy()
@@ -528,7 +532,7 @@ class EditGridFrame(wx.Dialog):
     def __init__(self, parent, id):
         wx.Dialog.__init__(self, parent, id, "Change Grid Size", \
                            size=(205, 100+wind))
-        icon = images.getIconIcon()
+        icon = imagenes.logo16()
         self.SetIcon(icon)
         l1 = wx.StaticText(self, -1, 'Add Columns',pos=(10,15))
         l2 = wx.StaticText(self, -1, 'Add Rows',pos=(10,55))
@@ -558,7 +562,7 @@ class GridPrefs(wx.Dialog):
     def __init__(self, parent, id):
         wx.Dialog.__init__(self, parent, id, "Cell Size", \
                            size=(205,100+wind))
-        icon = images.getIconIcon()
+        icon = imagenes.logo16()
         self.SetIcon(icon)
         self.colwidth = wx.SpinCtrl(self, -1, "", wx.Point(110,10), wx.Size(80,25))
         self.colwidth.SetRange(1,200)
@@ -589,7 +593,7 @@ class AboutFrame(wx.Frame):
         wx.Frame.__init__(self, parent, id, "About SalStat", \
                           size=wx.Size(320, 240), pos=wx.DefaultPosition)
         #set icon for frame (needs x-platform separator!
-        icon = images.getIconIcon()
+        icon = imagenes.logo16()
         self.SetIcon(icon)
         GoIcon = images.getApplyBitmap()
 
@@ -798,7 +802,7 @@ class DescriptivesFrame(wx.Dialog):
                              style = wx.DEFAULT_DIALOG_STYLE )
 
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
-        icon = images.getIconIcon()
+        icon = imagenes.logo16()
         self.SetIcon(icon)
         ColumnList, self.colnums  = wx.GetApp().frame.grid.GetUsedCols()
 
@@ -878,7 +882,7 @@ class TransformFrame(wx.Dialog):
         #set icon for frame (needs x-platform separator!
         x = self.GetClientSize()
         winheight = x[1]
-        icon = images.getIconIcon()
+        icon = imagenes.logo16()
         self.SetIcon(icon)
         self.transform = ""
         self.transformName = ""
@@ -988,20 +992,20 @@ def GetLocaleDict(loc_list, opt=0):
     dictionary of available language values using the canonical name as
     the key. Supplying the Option OPT_DESCRIPT will return a dictionary
     of language id's with languages description as the key.
-    
-    
+
+
     **Parameters:**
 
     * loc_list: list of locals
-    
+
     **Keywords:**
 
     * opt: option for configuring return data
-    
+
     **Returns:**
 
     *  dict of locales mapped to wx.LANGUAGE_*** values
-    
+
     **Note:**
 
     *  from Editra.dev_tool
@@ -1009,7 +1013,7 @@ def GetLocaleDict(loc_list, opt=0):
     lang_dict = dict()
     for lang in [x for x in dir(wx) if x.startswith("LANGUAGE")]:
         loc_i = wx.Locale(wx.LANGUAGE_DEFAULT).\
-                          GetLanguageInfo(getattr(wx, lang))
+            GetLanguageInfo(getattr(wx, lang))
         if loc_i:
             if loc_i.CanonicalName in loc_list:
                 if opt == 1:
@@ -1024,20 +1028,20 @@ def GetLangId(installDir, lang_n):
     Gets the ID of a language from the description string. If the
     language cannot be found the function simply returns the default language
 
-    
+
     **Parameters:**
 
     * lang_n: Canonical name of a language
-    
+
     **Returns:**
 
     *  wx.LANGUAGE_*** id of language
-    
+
     **Note:**
 
     *  from Editra.dev_tool
     """
-    
+
     lang_desc = GetLocaleDict(GetAvailLocales(installDir), 1)
     return lang_desc.get(lang_n, wx.LANGUAGE_DEFAULT)
 
@@ -1046,12 +1050,12 @@ def GetAvailLocales(installDir):
     Gets a list of the available locales that have been installed.
     Returning a list of strings that represent the
     canonical names of each language.
-    
-    
+
+
     **Returns:**
 
     *  list of all available local/languages available
-    
+
     **Note:**
 
     *  from Editra.dev_tool
@@ -1068,16 +1072,16 @@ def GetAvailLocales(installDir):
 
 def FormatTrace(etype, value, trace):
     """Formats the given traceback
-    
+
     **Returns:**
 
     *  Formatted string of traceback with attached timestamp
-    
+
     **Note:**
 
     *  from Editra.dev_tool
     """
-    
+
     exc = traceback.format_exception(etype, value, trace)
     exc.insert(0, "*** %s ***%s" % (now(), os.linesep))
     return "".join(exc)
@@ -1086,13 +1090,16 @@ def FormatTrace(etype, value, trace):
 class SalStat2App(wx.App):
     # the main app
     def OnInit(self):
+        # getting the os type
+        self.OSNAME = os.name
+        
         wx.SetDefaultPyEncoding("utf-8")
         self.SetAppName(APPNAME)
         try:
             installDir = os.path.dirname(os.path.abspath(__file__))
         except:
             installDir = os.path.dirname(os.path.abspath(sys.argv[0]))
-        
+
         language = self.GetPreferences("Language")
         if not language:
             language = "Default"
@@ -1105,7 +1112,7 @@ class SalStat2App(wx.App):
         else:
             del self.locale
             self.locale = None
-        
+
         self.getConfigFile()
         self.DECIMAL_POINT=  locale.localeconv()['decimal_point']
         self.frame = MainFrame(None, self)
@@ -1115,12 +1122,12 @@ class SalStat2App(wx.App):
         self.output = self.frame.answerPanel
         self.frame.ShowFullScreen(True,False)
         return True
-    
+
     def getDataDir(self):
         '''Getting the config directory'''
         dd= wx.StandardPaths.Get()
         return dd.GetUserDataDir()
-    
+
     def getConfigFile(self):
         """ Returns the configuration """
         if not os.path.exists(self.getDataDir()):
@@ -1129,13 +1136,13 @@ class SalStat2App(wx.App):
 
         config= wx.FileConfig(localFilename = os.path.join(self.getDataDir(), "options"))
         return config
-    
+
     def LoadConfig(self):
         """ Checks for the option file in wx.Config. """
         userDir = self.getDataDir()
         fileName = os.path.join(userDir, "options")
         preferences = {}
-        
+
         # Check for the option configuration file
         if os.path.isfile(fileName):
             options= wx.FileConfig(localFilename = fileName)
@@ -1144,9 +1151,9 @@ class SalStat2App(wx.App):
             if val:
                 # Evaluate preferences
                 preferences= eval(val)
-        
+
         return preferences
-    
+
     def GetPreferences(self, preferenceKey = None, default = None):
         """
         Returns the user preferences as stored in wx.Config.
@@ -1168,9 +1175,9 @@ class SalStat2App(wx.App):
                 preferences[preferenceKey]= default
                 self.SetPreferences(preferences)
                 return default
-            
+
         return optionVal
-    
+
     def SetPreferences(self, newPreferences):
         """
         Saves the user preferences in wx.Config.
@@ -1183,7 +1190,7 @@ class SalStat2App(wx.App):
         config= self.GetConfig()
         for key in newPreferences:
             preferences[key]= newPreferences[key]
-            
+
         config.Write("Preferences", str(preferences))     
         config.Flush()
     def GetVersion(self):
@@ -1201,10 +1208,9 @@ class MainFrame(wx.Frame):
         self.m_mgr.SetManagedWindow( self )
 
         #set icon for frame (needs x-platform separator!
-        icon= images.getIconIcon()
+        icon= imagenes.logo16()
         self.Icon= icon
 
-        
         #----------------------
         # create toolbars
         tb1= self._createTb1()
@@ -1218,7 +1224,7 @@ class MainFrame(wx.Frame):
         self.logPanel= LogPanel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 
         self.defaultDialogSettings = {'Title': None,
-                                      'icon': images.getIconIcon()}
+                                      'icon': imagenes.logo16()}
 
         #--------------------
         #set up the datagrid
@@ -1226,11 +1232,11 @@ class MainFrame(wx.Frame):
         self.grid.Saved= False
         self.grid.SetDefaultColSize(60, True)
         self.grid.SetRowLabelSize(40)
-        
+
         #-----------------------
         # create menubar
         self._createMenu()
-        
+
         # response panel
         self.answerPanel= NoteBookSheet(self, fb = self.formulaBarPanel)
         self.answerPanel2= ScriptPanel(self, self.logPanel, self.grid, self.answerPanel)
@@ -1363,10 +1369,10 @@ class MainFrame(wx.Frame):
               ('Delete Current Column', None,  self.grid.DeleteCurrentCol),
               ('Delete Current Row',    None,  self.grid.DeleteCurrentRow),)),
             ('&Preferences',
-             (('Variables...',             None,  None ),
-              ('Add Columns and Rows...',  None,  self.GoVariablesFrame),
-              ('Change Cell Size...',      None,  self.GoEditGrid),
-              ('Change the Font...',       None,  self.GoGridPrefFrame),)),
+             (('Variables...',             None,  self.GoVariablesFrame ),
+              ('Add Columns and Rows...',  None,  self.GoEditGrid),
+              ('Change Cell Size...',      None,  self.GoGridPrefFrame),
+              ('Change the Font...',       None,  self.GoFontPrefsDialog),)),
             ('P&reparation',
              (('Descriptive Statistics',   None,  self.GoContinuousDescriptives),
               ('Transform Data',           None,  self.GoTransformData),
@@ -1447,15 +1453,13 @@ class MainFrame(wx.Frame):
             ('Ctrl Process',
              (('Six Sigma Pac',           None, self.GoSixPack),)),
             ('&Help',
-             (('&What Test Should I Use', None, None),
-              ('&Topics...',              None, None),
-              ('&Licence...',             None, None),
-              ('&About...',               None, None),)),
-         )
-        
+             (('Help',       imag.about(), self.GoHelpSystem),
+              ('&About...',  None, None),)),
+        )
+
         self.__createMenu(dat1, menuBar)
         self.SetMenuBar(menuBar)
-        
+
         # se crea el menu de datos estadisticos con base en las caracteristicas disponibles
         if 0:
             analyse_menu= wx.Menu()
@@ -1470,7 +1474,7 @@ class MainFrame(wx.Frame):
                     newmenu.AppendItem(menuItem )
                 analyse_menu.AppendSubMenu(newmenu, mainItem)
             menuBar.Append(analyse_menu, 'Statistics')
-        
+
     def __createMenu(self,data,parent):
         if len(data) == 3:
             if not isinstance(data[2], (list,tuple)):
@@ -1491,8 +1495,8 @@ class MainFrame(wx.Frame):
             elif type(parent) == type(wx.MenuBar()):
                 parent.Append(menu,item[0])
             self.__createMenu(item[1], menu)
-            
-                
+
+
     def _BindEvents(self):
         # grid callback
         self.grid.Bind( wx.grid.EVT_GRID_CMD_SELECT_CELL, self._cellSelectionChange )
@@ -1578,7 +1582,7 @@ class MainFrame(wx.Frame):
         # shows Font dialog for the data grid (wx.GetApp().output window has its own)
         data = wx.FontData()
         dlg = wx.FontDialog(wx.GetApp().frame, data)
-        icon = images.getIconIcon()
+        icon = imagenes.logo16()
         self.SetIcon(icon)
         if dlg.ShowModal() == wx.ID_OK:
             data = dlg.GetFontData()
@@ -1679,15 +1683,11 @@ class MainFrame(wx.Frame):
                   title= 'Bar Chart of all means')
         plt.Show()
 
-    def GoHelpWizardFrame(self, event):
+    def GoHelpSystem(self, event):
         # shows the "wizard" in the help box
-        win = AboutFrame(wx.GetApp().frame, -1, 0)
+        win= Navegator(self)
         win.Show(True)
-
-    def GoHelpTopicsFrame(self, event):
-        # shows the help topics in the help box
-        win = AboutFrame(wx.GetApp().frame, -1, 1)
-        win.Show(True)
+        event.Skip()
 
     def GoHelpLicenceFrame(self, evt):
         # shows the licence in the help box
@@ -1767,7 +1767,7 @@ class MainFrame(wx.Frame):
                   title= 'Adaptative BMS plot',
                   xtics=  [waste[i] for i in selectedcols])
         plt.Show()
-        
+
     def GoLinesPlot(self, event):
         waste, colnums = self.grid.GetUsedCols()
         if colnums == []:
@@ -1807,7 +1807,7 @@ class MainFrame(wx.Frame):
         data = [self.grid.CleanData(cols) for cols in [colnums[i] for i in (xcol,ycol)]]
         # homogenize data
         data= homogenize(data[0],data[1])
-        
+
         if len(data[0]) != len(data[1]):
             self.SetStatusText('x and y data mus have the same size!')
             return
@@ -1817,7 +1817,7 @@ class MainFrame(wx.Frame):
                   title= 'Lin Regress plot' )
         plt.Show()
         # lin regress removing most disperse data
-        
+
 
     def GoProbabilityplot(self, event):
         ColumnList, colnums = self.grid.GetUsedCols()
@@ -1999,7 +1999,7 @@ class MainFrame(wx.Frame):
         schart_UCL= B4[groupSize]*Ra
         schart_LCL= B3[groupSize]*Ra
         schart_target= Sa
-        
+
         self.logPanel.write('SixSigma' + ' successfull')
 
     def _sixpack(self, data, UCL, LCL, Target, k= 6, n= 2 ):
