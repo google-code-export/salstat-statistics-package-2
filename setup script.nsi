@@ -3,12 +3,12 @@
 
 Name Salstat2
 
-SetCompressor /SOLID lzma
+SetCompressor /SOLID LZMA
 
 # General Symbol Definitions
-!define CURRPATH "m:\SalStatdist"
+!define CURRPATH "f:\SalStatdist"
 !define REGKEY "SOFTWARE\$(^Name)"
-!define VERSION 2.0
+!define VERSION 2.1
 !define COMPANY "Sebastián López Buriticá"
 !define URL http://selobu.blogspot.com
 
@@ -36,6 +36,7 @@ SetCompressor /SOLID lzma
 
 # Variables
 Var StartMenuGroup
+Var vcredist2008set
 
 # Installer pages
 !insertmacro MUI_PAGE_WELCOME
@@ -43,7 +44,7 @@ Var StartMenuGroup
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_STARTMENU Application $StartMenuGroup
 !insertmacro MUI_PAGE_INSTFILES
-!insertmacro MUI_PAGE_COMPONENTS ;MUI_PAGE_INSTFILES
+!insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_FINISH
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
@@ -69,23 +70,23 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} LegalCopyright ""
 InstallDirRegKey HKLM "${REGKEY}" Path
 ShowUninstDetails show
 
-# Installer sections
-Section -Main Section1
+Section -Main Section2
+    call vcredist2008installer
     SetOutPath $INSTDIR
     SetOverwrite on
     File /r ${CURRPATH}\*
-    File ${CURRPATH}\salstat.exe # dist
+    #File ${CURRPATH}\salstat.exe
     SetOutPath $SMPROGRAMS\$StartMenuGroup
-    CreateShortcut $SMPROGRAMS\$StartMenuGroup\Salstat2.lnk $INSTDIR\salstat.exe \
-        "" "$INSTDIR\salstat.exe" 2 SW_SHOWNORMAL \
-        ALT|CONTROL|SHIFT|F5 "Paquete de estadistica"
-    CreateShortcut "$SMPROGRAMS\$StartMenuGroup\Ayuda.lnk" $INSTDIR\help\index.html \
+    CreateShortcut "$SMPROGRAMS\$StartMenuGroup\Salstat2.lnk" "$INSTDIR\salstat.exe" \
+        "" "$INSTDIR\Salstat2.ico" 0 SW_SHOWNORMAL # "" "Paquete de e2stadistica"
+    CreateShortcut "$SMPROGRAMS\$StartMenuGroup\Ayuda.lnk" "$INSTDIR\help\index.html"
     SetOutPath $DESKTOP
-    CreateShortcut $DESKTOP\Salstat2.lnk $INSTDIR\salstat.exe
+    CreateShortcut "$DESKTOP\Salstat2.lnk" "$INSTDIR\salstat.exe" "" \
+                "$INSTDIR\Salstat2.ico" 0
     WriteRegStr HKLM "${REGKEY}\Components" Main 1
 SectionEnd
 
-Section "src" Section2
+Section "src" Section3
      SetOutPath $INSTDIR\src
      SetOverwrite on
      File /r src\*
@@ -93,7 +94,7 @@ Section "src" Section2
      CreateShortcut "$SMPROGRAMS\$StartMenuGroup\src.lnk" "$INSTDIR\src\"
 SectionEnd
 
-Section "script examples" Section3
+Section "script examples" Section4
      SetOutPath $INSTDIR\scripts
      SetOverwrite on
      File /r "script examples\*"
@@ -163,6 +164,37 @@ Section -un.post UNSEC0001
     ;RmDir /r SMPROGRAMS\$StartMenuGroup
     ;RmDir /REBOOTOK SMPROGRAMS\$StartMenuGroup   
 SectionEnd
+
+Function vcredist2008installer
+  SetOutPath "$INSTDIR\Prerequisites"
+  SetOverwrite on
+  File /r ${CURRPATH}\Prerequisites\*
+  StrCmp $vcredist2008set "" 0 vcredist2008_done
+  StrCpy $vcredist2008set "true"
+  ;Check if VC++ 2008 runtimes are already installed.
+  ;NOTE Both the UID in the registry key and the DisplayName string must be updated here (and below)
+  ;whenever the Redistributable package is upgraded:
+  ReadRegStr $0 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{9BE518E6-ECC6-35A9-88E4-87755C07200F}" "DisplayName"
+  StrCmp $0 "Microsoft Visual C++ 2008 Redistributable - x86 9.0.30729.6161" vcredist2008_done vcredist2008_silent_install
+  ;If VC++ 2008 runtimes are not installed...
+  vcredist2008_silent_install:
+    DetailPrint "Installing Microsoft Visual C++ 2008 Redistributable"
+    #File ..\vcredist2008_x86.exe
+    ExecWait '"$INSTDIR\Prerequisites\vcredist_x86.exe" /q' $0
+    ;Check for successful installation of our 2008 version of vcredist_x86.exe...
+    ReadRegStr $0 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{9BE518E6-ECC6-35A9-88E4-87755C07200F}" "DisplayName"
+    StrCmp $0 "Microsoft Visual C++ 2008 Redistributable - x86 9.0.30729.6161" vcredist2008_success vcredist2008_not_present
+    vcredist2008_not_present:
+      DetailPrint "Microsoft Visual C++ 2008 Redistributable failed to install"
+      IfSilent vcredist2008_done vcredist2008_messagebox
+      vcredist2008_messagebox:
+        MessageBox MB_OK "Microsoft Visual C++ 2008 Redistributable Package (x86) failed to install ($INSTDIR\Prerequisites\vcredist_x86.exe). Please ensure your system meets the minimum requirements before running the installer again."
+        Goto vcredist2008_done
+    vcredist2008_success:
+      Delete "$INSTDIR\Prerequisites\vcredist_x86.exe"
+      DetailPrint "Microsoft Visual C++ 2008 Redistributable was successfully installed"
+  vcredist2008_done:
+FunctionEnd
 
 # Installer functions
 Function .onInit
