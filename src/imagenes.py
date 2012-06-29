@@ -520,9 +520,8 @@ class imageEmbed:
         1zwiQhRFNBpJT9QwIfp/0497EYY5eIh8x8GwpcHZsB0zqd2xEXK5HI+Bi+P4Q5IkxX8hxXH8nv+F
         K8w9mWB7rBTJAAAAAElFTkSuQmCC
         """)
-    
-    def logo16(self):
-        return IconFromBitmap(self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
+    def icon16(self):
+        return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3AYYEC0yRx5UOwAAAB1pVFh0Q29tbWVudAAAAAAAQ3Jl
         YXRlZCB3aXRoIEdJTVBkLmUHAAADL0lEQVQ4y22TbUiddRjGf/dzznnMOnMoHinMcxTfX4a4ZNrC
         toGrD6tBg6wkasig6OOKZHPRjLI+5CiCYl/WYLH1Mvowg1hSS3Isk8nMl1labB4beo5vs+f/dM7z
@@ -540,7 +539,10 @@ class imageEmbed:
         Pb9IIDOamRyf+KPnrePRO8p0tOv4hZBpPr69cbvODpfL9akAWoTqKp+0Na2vDl8VJ53ue7une///
         thHg41Nn6q6Njh12XGdvXl7u/QArSytzIdPsr6+vO9HR8dz4Zv3fVDCAyQsMbqMAAAAASUVORK5C
         YII=
-        """))
+        """)
+    
+    def logo16(self):
+        return IconFromBitmap(self.icon16())
     
     def logo64(self):
         return IconFromBitmap(self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
