@@ -1,24 +1,22 @@
 __name__ ='Central Tendency'
-from statlib import stats
+from statlib import stats as _stats
 import numpy
 # _genericFunc ist called from the __init__.py file
 from statFunctions import _genericFunc
-import wx
-
+from wx import ID_OK as _OK
 
 class geometricMean(_genericFunc):
     ''''''
-    __name__= 'geometric Mean'
-    __statName__ = 'geometricmean'
-    colNameSelect= ''
-    minRequiredCols= 1
-    
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
+        self.name=     'geometric Mean'
+        self.statName= 'geometricmean'
+        self.minRequiredCols= 1
+        self.colNameSelect= ''
         
     def _dialog(self, *arg, **params):
-        setting= {'Title': self.__name__}
+        setting= {'Title': self.name}
         self._updateColsInfo() # update self.columnames and self.colnums
         bt1= ['StaticText',   ['Select the columns to analyse']]
         bt2= ['CheckListBox', [self.columnNames]]
@@ -29,7 +27,7 @@ class geometricMean(_genericFunc):
     
     def _showGui_GetValues(self):
         dlg= self._dialog()
-        if dlg.ShowModal() == wx.ID_OK:
+        if dlg.ShowModal() == _OK:
             values = dlg.GetValue()
             dlg.Destroy()
         else:
@@ -52,11 +50,11 @@ class geometricMean(_genericFunc):
     def _calc(self, columns, *args, **params):
         return [self.evaluate( col ) for col in columns]
         
-    def geometricMean(self):
-        return stats.geometricmean
+    def object(self):
+        return _stats.geometricmean
     
     def evaluate(self, *args, **params):
-        return stats.geometricmean(*args, **params)
+        return _stats.geometricmean(*args, **params)
     
     def showGui(self):
         values= self._showGui_GetValues()
@@ -66,9 +64,70 @@ class geometricMean(_genericFunc):
         self._report(result)
         
     def _report(self, result):
-        self.outpuGrid.addColData(self.colNameSelect, self.__name__)
+        self.outpuGrid.addColData(self.colNameSelect, self.name)
         self.outpuGrid.addColData(result)
-        self.Logg.write(self.__statName__+ ' successfull')
+        self.Logg.write(self.statName+ ' successfull')
         
-        
+class harmonicmean(geometricMean):
+    def __init__(self):
+        geometricMean.__init__(self)
+        self.name = 'harmonic mean'
+        self.statName= 'harmonicmean'
+        self.minRequiredCols= 1
+    def evaluate(sef, *args, **params):
+        return _stats.harmonicmean(*args, **params)
+    def object(self):
+        return _stats.harmonicmean
     
+class mean(geometricMean):
+    def __init__(self):
+        geometricMean.__init__(self)
+        self.name = 'mean'
+        self.statName= 'mean'
+        self.minRequiredCols= 1
+    def evaluate(sef, *args, **params):
+        return _stats.mean(*args, **params)
+    def object(self):
+        return _stats.mean
+    
+class median(geometricMean):
+    def __init__(self):
+        geometricMean.__init__(self)
+        self.name = 'median'
+        self.statName= 'median'
+        self.minRequiredCols= 1
+    def evaluate(sef, *args, **params):
+        return _stats.median(*args, **params)
+    def object(self):
+        return _stats.median
+    
+class medianscore(geometricMean):
+    def __init__(self):
+        geometricMean.__init__(self)
+        self.name = 'medianscore'
+        self.statName= 'medianscore'
+        self.minRequiredCols= 1
+    def evaluate(sef, *args, **params):
+        return _stats.medianscore(*args, **params)
+    def object(self):
+        return _stats.medianscore
+
+class mode(geometricMean):
+    def __init__(self):
+        geometricMean.__init__(self)
+        self.name = 'mode'
+        self.statName= 'mode'
+        self.minRequiredCols= 1
+    def evaluate(sef, *args, **params):
+        return _stats.mode(*args, **params)
+    def _report(self, result):
+        res1= ['var Name']
+        res1.extend(self.colNameSelect)
+        self.outpuGrid.addColData(res1, self.name)
+        res2= ['value']
+        res2.extend([res[1][0] for res in result])
+        self.outpuGrid.addColData(res2)
+        res3= ['frecuency']
+        res3.extend([res[0][0] for res in result])
+        self.outpuGrid.addColData(res3)
+        self.Logg.write(self.statName+ ' successfull')

@@ -17,7 +17,10 @@ details of this license. """
 
 import wx
 import os
-from statFunctions.centralTendency import geometricMean
+# automatically importing all the central tendency classes
+
+from statFunctions.centralTendency import geometricMean,\
+     harmonicmean, mean, median, medianscore, mode
 import wx.html
 import wx.lib.agw.aui as aui
 
@@ -2199,19 +2202,20 @@ class MainFrame(wx.Frame):
         geometricMean().showGui()
 
     def harmonicmean(self,evt):
-        self._statsType1("harmonicmean", self.grid)
+        harmonicmean().showGui()
+        #self._statsType1("harmonicmean", self.grid)
 
     def mean(self,evt):
-        self._statsType1("mean", self.grid)
+        mean().showGui()
 
     def median(self,evt):
-        self._statsType1("median", self.grid)
+        median().showGui()
 
     def medianscore(self,evt):
-        self._statsType1("medianscore", self.grid)
+        medianscore().showGui()
 
     def mode(self,evt):
-        self._statsType1("mode", self.grid)
+        mode().showGui()
 
     def moment(self,evt):
         self._statsType2("scoreatpercentile", texto = 'moment',
@@ -3172,6 +3176,6 @@ def PutData(column, data):
 #--------------------------------------------------------------------------
 # main loop
 if __name__ == '__main__':
-    app = SalStat2App(1)
+    app = SalStat2App(0)
     app.MainLoop()
 # eof
