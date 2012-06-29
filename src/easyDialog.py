@@ -65,7 +65,7 @@ class Dialog ( wx.Dialog ):
         self.sizerNum= _siguiente()
 
         params = {'Title':  wx.EmptyString,
-                  'icon':   wx.EmptyIcon(),
+                  'icon':   None,
                   '_size':  wx.Size(-1,-1), #260,320
                   '_pos':   wx.DefaultPosition,
                   '_style': wx.DEFAULT_DIALOG_STYLE}
@@ -76,12 +76,21 @@ class Dialog ( wx.Dialog ):
             except:
                 pass
 
-        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY,
-                             title = params.pop('Title'),
-                             pos = params.pop('_pos'),
-                             size = params.pop('_size'),
-                             style = params.pop('_style') )
-        self.SetIcon(params.pop('icon'))
+        wx.Dialog.__init__ ( self, parent, 
+                             id=     wx.ID_ANY,
+                             title=  params.pop('Title'),
+                             pos=    params.pop('_pos'),
+                             size=   params.pop('_size'),
+                             style=  params.pop('_style') )
+        #< setting the icon
+        icon= params.pop('icon')
+        if icon == None:
+            try:
+                icon= wx.GetApp().icon
+            except AttributeError:
+                icon= wx.EmptyIcon()
+        self.SetIcon(icon)
+        # setting the icon/>
 
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
         bSizer1 = wx.BoxSizer( wx.VERTICAL )
@@ -228,7 +237,7 @@ class _example( wx.Frame ):
         self.m_button8.Bind( wx.EVT_BUTTON, self.showDialog )
 
     # Virtual event handlers, overide them in your derived class
-    def showDialog( self, event ):
+    def showDialog( self, evt ):
         dic= {'Title': 'title'}
         bt1= ('Button',     ['print'])
         bt2= ('StaticText', ['hoja a Imprimir'])
