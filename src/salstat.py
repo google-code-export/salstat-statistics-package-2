@@ -1339,21 +1339,6 @@ class MainFrame(wx.Frame):
         self.__createMenu(dat1, menuBar)
         self.SetMenuBar(menuBar)
 
-        # se crea el menu de datos estadisticos con base en las caracteristicas disponibles
-        if 0:
-            analyse_menu= wx.Menu()
-            menuBar.Append(analyse_menu,'Statistics')
-            self.menuStats= list()
-            for (mainItem,subitems) in STATS.items():
-                newmenu = wx.Menu()
-                for item in subitems:
-                    menuItem = wx.MenuItem( newmenu, wx.ID_ANY, item, wx.EmptyString, wx.ITEM_NORMAL )
-                    # setting the callbak
-                    self.Bind(wx.EVT_MENU, getattr(self, item), id = menuItem.GetId())
-                    newmenu.AppendItem(menuItem )
-                analyse_menu.AppendSubMenu(newmenu, mainItem)
-            menuBar.Append(analyse_menu, 'Statistics')
-
     def __createMenu(self,data,parent):
         if len(data) == 3:
             if not isinstance(data[2], (list,tuple)):
@@ -1427,11 +1412,6 @@ class MainFrame(wx.Frame):
     def GoClearData(self, evt):
         #shows a new data entry frame
         self.grid.ClearGrid()
-
-    def GoNewOutputSheet(self, evt):
-        #shows a new wx.GetApp().output frame
-        SheetWin = OutputSheet(wx.GetApp().frame, -1)
-        SheetWin.Show(True)
 
     def GoFindDialog(self, evt):
         # Shows the find & replace dialog
