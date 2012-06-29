@@ -26,7 +26,7 @@ import wx.lib.agw.aui as aui
 
 import wx.lib.wxpTag
 import string, os, os.path, pickle
-import images
+
 from imagenes import imageEmbed
 import numpy, math
 import wx.py
@@ -963,7 +963,7 @@ class SalStat2App(wx.App):
     def OnInit(self):
         # getting the os type
         self.OSNAME = os.name
-        
+        self.VERSION= '2.1 alpha'
         wx.SetDefaultPyEncoding("utf-8")
         self.SetAppName(APPNAME)
         try:
@@ -994,6 +994,7 @@ class SalStat2App(wx.App):
         self.HELPDATA.AddBook(fileName)
         # help data />
         self.icon= imagenes.logo16()
+        self.icon64= imagenes.logo64()
         self.frame = MainFrame(None, self)
         # let the main app known the input Grid
         self.inputGrid = self.frame.grid
@@ -1336,7 +1337,7 @@ class MainFrame(wx.Frame):
              (('Six Sigma Pac',           None, self.GoSixPack),)),
             ('&Help',
              (('Help',       imag.about(), self.GoHelpSystem),
-              ('&About...',  None, None),)),
+              ('&About...',  imag.icon16(), self.ShowAbout),)),
         )
 
         self.__createMenu(dat1, menuBar)
@@ -1555,11 +1556,38 @@ class MainFrame(wx.Frame):
         win = AboutFrame(wx.GetApp().frame, -1, 2)
         win.Show(True)
 
-    def GoHelpAboutFrame(self, evt):
-        # Shows the "About" thing in the help box
-        win = AboutFrame(wx.GetApp().frame, -1, 3)
-        win.Show(True)
+    def ShowAbout(self, evt):
+        info= wx.AboutDialogInfo()
+        info.Name= "S2 salstat statistics package 2"
+        info.Version= wx.GetApp().VERSION
+        info.Copyright= "(C) 2012 Sebastian Lopez Buritica"
+        info.Icon= wx.GetApp().icon64
+        from wx.lib.wordwrap import wordwrap
+        info.Description = wordwrap(
+            "A newer version of the salstat statistics package "
+            "originally developed by Alan James Salmoni and Mark Livingstone. "
+            "There were a minor bug corrections and a new improved version: "
+            "you can copy, paste and cut multiple cells,"
+            "you can undo and redo some actions. "
+            "the calculations are faster than the original version. "
+            "The plot system can draw:"
+            "scatter chart, line chart of all means, bar chart of all means,"
+            "line charts of the data, Box and whisker chart,"
+            "Lineal regresion plot <show the equation and the correlation inside the chart>,"
+            "much more.\n"
+            "The input data can be save and load from an xls format file.\n"
+            "Salstat2 can be script by using python.\n"
+            "All the numerical results are send to a sheet in a diferent panel where you can copy, paste, cut and edit",
+            400, wx.ClientDC(self))
+        info.WebSite = ("http://code.google.com/p/salstat-statistics-package-2/", "S2 home page")
+        info.Developers = [ "Sebastian Lopez Buritica",
+                            "Mark livingstone",]
 
+        info.License = wordwrap("GLP 2", 500, wx.ClientDC(self))
+
+        # Then we call wx.AboutBox giving it that info object
+        wx.AboutBox(info)
+        
     def GoScatterPlot(self,evt):
         waste, colnums = self.grid.GetUsedCols()
         if colnums == []:
