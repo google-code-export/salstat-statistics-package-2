@@ -4,6 +4,7 @@ Created on 17/05/2012
 @author: sebastian lopez buritica
 license: GPL3
 '''
+import collections
 import tempfile, xlwt , os
 import numpy as np
 try:
@@ -298,5 +299,10 @@ def _allnumeric(data):
 
 def isnumeric(data):
     if isinstance(data, (int, float, long, np.ndarray)):
+        return True
+    return False
+def isiterable(data):
+    '''check if the data is iterable'''
+    if isinstance(data, collections.Iterable):
         return True
     return False

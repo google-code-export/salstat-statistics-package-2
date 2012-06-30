@@ -8,7 +8,7 @@ import wx
 from NewGrid import NewGrid # grid with context menu
 from imagenes import imageEmbed
 import wx.grid
-
+from slbTools import isnumeric, isiterable
 import wx.aui
 
 def numPage():
@@ -52,8 +52,53 @@ class MyGridPanel( wx.Panel, object ):
         try:
             return object.__getattribute__(self, name)
         except AttributeError:
-            return self.m_grid.__getattribute__( name)
-
+            return self.m_grid.__getattribute__(name)
+        
+    def _getCol(self, colNumber):
+        if isinstance(colNumber, (str,)):
+            # searching for a col with the name:
+            if not(colNumber in self.colNames):
+                raise TypeError('You only could use a numeric value or a name of an existen column')
+            for pos, value in enumerate(self.colNames):
+                if value == colNumber:
+                    colNumber= pos
+                    break
+        
+        if not isnumeric(colNumber):
+            raise TypeError('You only could use a numeric value or a name of an existen column')
+        
+        if colNumber > self.GetNumberRows():
+            raise StandardError('The maximun column allowed is %i but you select %i'%(self.GetNumberRows()-1, colNumber))
+        
+        return self._getColNumber(colNumber)
+    
+    def _getColNumber(self, colNumber):
+        if not isnumeric(colNumber):
+            raise TypeError('Only allow numeric values for the col but you input '+ str(type(colNumber)))
+        
+        colNumber= int(colNumber)
+        if colNumber < 0 or colNumber > self.GetNumberCols():
+            raise StandardError('the minimum acepted col is 0 an the maximum is %i'%self.GetNumberCols()-1)
+        
+        return [self.GetCellValue(row, colNumber) for row in range(self.GetNumberRows())]
+        
+    @property
+    def colNames(self):
+        return [self.GetColLabelValue(col) for col in range(self.GetNumberCols())]
+    @colNames.setter
+    def colNames(self, colNames):
+        if isinstance(colNames, (str,)):
+            colNames= [colNames]
+            
+        if not isiterable(colName):
+            raise TypeError('colNames must be an iterable object')
+        
+        if len(colNames) == 0:
+            return
+        
+        for colnumber, colname in enumerate(colNames):
+            self.SetColLabelValue(pos, colname)
+            
 class NoteBookSheet(wx.Panel):
     def __init__( self, parent, *args, **params):
         # se almacenan las paginas en un diccionario con llave el numero de pagina

@@ -398,7 +398,7 @@ class ScriptPanel(wx.Panel):
               'stats': self.stats,
               'plot': self.plot,
               'grid': self.grid,
-              'showInGrid':self.showgrid,
+              'report':self.showgrid,
               'dialog': Dialog,
               'OK': wx.ID_OK,
               }
