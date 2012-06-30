@@ -18,6 +18,7 @@ details of this license. """
 import wx
 import os
 # automatically importing all the central tendency classes
+from slbTools import isiterable
 
 from statFunctions.centralTendency import geometricMean,\
      harmonicmean, mean, median, medianscore, mode
@@ -261,6 +262,7 @@ class ManyDescriptives:
 #---------------------------------------------------------------------------
 # class for grid - used as datagrid.
 class SimpleGrid(MyGrid):# wxGrid
+    
     def __init__(self, parent, log, size= (1000,100)):
         self.NumSheetReport = 0
         self.log = log
@@ -508,19 +510,63 @@ class SimpleGrid(MyGrid):# wxGrid
     def CleanData(self, col):
         indata = []
         self.missing = 0
-        for i in range(self.GetNumberRows()):
-            datapoint = self.GetCellValue(i, col).strip().replace(',','.')
-            if (datapoint != u'') and (datapoint != u'.'):
-                try:
-                    value = float(datapoint)
-                    if (value != missingvalue):
-                        indata.append(value)
-                    else:
-                        self.missing = self.missing + 1
-                except ValueError:
-                    pass
+        dp= wx.GetApp().DECIMAL_POINT
+        if dp == '.':
+            for i in range(self.GetNumberRows()):
+                datapoint = self.GetCellValue(i, col).strip()
+                if (datapoint != u'') and (datapoint != u'.'):
+                    try:
+                        value = float(datapoint)
+                        if (value != missingvalue):
+                            indata.append(value)
+                        else:
+                            self.missing = self.missing + 1
+                    except ValueError:
+                        pass
+        else:
+            for i in range(self.GetNumberRows()):
+                datapoint = self.GetCellValue(i, col).strip().replace(dp, '.')
+                if (datapoint != u'') and (datapoint != u'.'):
+                    try:
+                        value = float(datapoint)
+                        if (value != missingvalue):
+                            indata.append(value)
+                        else:
+                            self.missing = self.missing + 1
+                    except ValueError:
+                        pass
         return indata
-
+    
+    def _cleanData(self, data):
+        if isinstance(data, (str)):
+            data= [data]
+            
+        if not isiterable(data):
+            raise TypeError('only allowed iterable data')
+        
+        for pos in range(len(data)-1, -1, -1):
+            if data[pos] != u'':
+                break
+        
+        data= data[:pos]
+        # changing data into a numerical value
+        dp = wx.GetApp().DECIMAL_POINT
+        result= list()
+        for dat in data:
+            if dat == u'':
+                dat = None
+            else:
+                try:
+                    dat= float(dat.replace(dp, '.'))
+                except:
+                    pass
+                
+            result.append(dat)
+        return result
+    
+    def GetCol(self, col):
+        return self._cleanData( self._getCol( col))
+    
     def GetEntireDataSet(self, numcols):
         """Returns the data specified by a list 'numcols' in a Numeric
         array"""
@@ -1551,15 +1597,10 @@ class MainFrame(wx.Frame):
         win= Navegator(wx.GetApp().frame,)
         win.Show(True)
 
-    def GoHelpLicenceFrame(self, evt):
-        # shows the licence in the help box
-        win = AboutFrame(wx.GetApp().frame, -1, 2)
-        win.Show(True)
-
     def ShowAbout(self, evt):
         info= wx.AboutDialogInfo()
         info.Name= "S2 salstat statistics package 2"
-        info.Version= wx.GetApp().VERSION
+        info.Version= "V" + wx.GetApp().VERSION
         info.Copyright= "(C) 2012 Sebastian Lopez Buritica"
         info.Icon= wx.GetApp().icon64
         from wx.lib.wordwrap import wordwrap
@@ -1583,7 +1624,7 @@ class MainFrame(wx.Frame):
         info.Developers = [ "Sebastian Lopez Buritica",
                             "Mark livingstone",]
 
-        info.License = wordwrap("GLP 2", 500, wx.ClientDC(self))
+        info.License = wordwrap("GPL 2", 500, wx.ClientDC(self))
 
         # Then we call wx.AboutBox giving it that info object
         wx.AboutBox(info)
@@ -1747,6 +1788,10 @@ class MainFrame(wx.Frame):
         2) http://en.wikipedia.org/wiki/Shewhart_individuals_control_chart
         3) http://www.statisticalprocesscontrol.info/glossary.html
         4) http://www.isixsigma.com/tools-templates/capability-indices-process-capability/process-capability-cp-cpk-and-process-performance-pp-ppk-what-difference/'''
+        
+        #####
+        colValues = self.grid.GetCol('D')
+        #####
         ColumnList, colnums = wx.GetApp().frame.grid.GetUsedCols()
         if len(ColumnList) == 0:
             return
