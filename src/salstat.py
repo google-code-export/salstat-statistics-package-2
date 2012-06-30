@@ -76,7 +76,7 @@ RowsUsed= []
 missingvalue= None
 HOME= os.getcwd()
 imagenes = imageEmbed()
-
+ 
 if os.name == 'nt':
     face1 = 'Courier New'
     face2 = 'Times New Roman'
@@ -566,6 +566,9 @@ class SimpleGrid(MyGrid):# wxGrid
     
     def GetCol(self, col):
         return self._cleanData( self._getCol( col))
+    
+    def PutCol(self, colNumber, data):
+        return self.putCol(colNumber, data)
     
     def GetEntireDataSet(self, numcols):
         """Returns the data specified by a list 'numcols' in a Numeric

@@ -10,6 +10,7 @@ from imagenes import imageEmbed
 import wx.grid
 from slbTools import isnumeric, isiterable
 import wx.aui
+from numpy import ndarray, ravel
 
 def numPage():
     i = 1
@@ -71,7 +72,7 @@ class MyGridPanel( wx.Panel, object ):
             raise StandardError('The maximun column allowed is %i but you select %i'%(self.GetNumberRows()-1, colNumber))
         
         return self._getColNumber(colNumber)
-    
+     
     def _getColNumber(self, colNumber):
         if not isnumeric(colNumber):
             raise TypeError('Only allow numeric values for the col but you input '+ str(type(colNumber)))
@@ -81,7 +82,74 @@ class MyGridPanel( wx.Panel, object ):
             raise StandardError('the minimum acepted col is 0 an the maximum is %i'%self.GetNumberCols()-1)
         
         return [self.GetCellValue(row, colNumber) for row in range(self.GetNumberRows())]
+    
+    def putCol(self, colNumber, data):
+        if isinstance(colNumber, (str,)):
+            if not(colNumber in self.colNames):
+                raise TypeError('You only could use a numeric value or a name of an existen column')
+            for pos, value in enumerate(self.colNames):
+                if value == colNumber:
+                    colNumber= pos
+                    break
+                
+        if not isnumeric(colNumber):
+            raise TypeError('You only could use a numeric value or a name of an existen column')
         
+        colNumber= int(colNumber)        
+        if colNumber < 0 or colNumber > self.GetNumberCols():
+            raise StandardError('the minimum acepted col is 0 an the maximum is %i'%self.GetNumberCols()-1)
+        
+        self.clearCol(colNumber)
+        
+        if isinstance( data,(str, unicode)):
+            data= [data]
+        
+        if isinstance( data, (int, long, float)):
+            data= [data]
+        
+        if isinstance( data, (ndarray),):
+            data= ravel( data)
+        
+        cols2add= len( data) - self.GetNumberRows()
+        if cols2add > 0:
+            if len( data) > 1e6:
+                data= data[:1e6]
+                cols2add= len( data) - self.GetNumberRows()
+            self.AppendRows( cols2add)
+
+        
+        try:
+            dp= wx.GetApp().DECIMAL_POINT
+        except:
+            d= '.'
+            
+        newdat= list()
+        for row, dat in enumerate( data):
+            if isinstance( dat, (str, unicode)):
+                try:
+                    dat= str(float(dat.replace(dp,'.'))).replace('.',dp)
+                except:
+                    pass
+            else:
+                try:
+                    dat= str(dat)
+                except:
+                    dat= None
+                    
+            newdat.append(dat)
+            
+        for row, dat in enumerate(newdat):
+            self.SetCellValue(row, colNumber, dat)
+            
+        
+            
+    def clearCol(self, colNumber):
+        if colNumber < 0 or colNumber > self.GetNumberCols():
+            raise StandardError('the minimum acepted col is 0 an the maximum is %i'%self.GetNumberCols()-1)
+        
+        for row in range(self.GetNumberRows()):
+            self.SetCellValue(row, colNumber, u'')
+     
     @property
     def colNames(self):
         return [self.GetColLabelValue(col) for col in range(self.GetNumberCols())]
