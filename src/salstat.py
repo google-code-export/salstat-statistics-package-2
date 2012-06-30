@@ -548,7 +548,7 @@ class SimpleGrid(MyGrid):# wxGrid
             if data[pos] != u'':
                 break
         
-        data= data[:pos]
+        data= data[:pos+1]
         # changing data into a numerical value
         dp = wx.GetApp().DECIMAL_POINT
         result= list()
