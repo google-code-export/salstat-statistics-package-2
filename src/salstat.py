@@ -1284,6 +1284,7 @@ class MainFrame(wx.Frame):
         RedoIcon =   imag.edit_redo()
         ExitIcon =   imag.stop()
         FindRIcon =  imag.findr()
+        sixsigma =   imag.sixsigma16()
         #set up menus
         menuBar = wx.MenuBar()
         #add contents of menu
@@ -1387,7 +1388,7 @@ class MainFrame(wx.Frame):
               ('Probability',             None, self.GoProbabilityplot),
               ('Adaptative BMS',          None, self.GoAdaptativeBMS))),
             ('Ctrl Process',
-             (('Six Sigma Pac',           None, self.GoSixPack),)),
+             (('Six Sigma Pac',           sixsigma, self.GoSixPack),)),
             ('&Help',
              (('Help',       imag.about(), self.GoHelpSystem),
               ('&About...',  imag.icon16(), self.ShowAbout),)),

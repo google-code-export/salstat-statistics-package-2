@@ -826,8 +826,26 @@ class imageEmbed:
         AJcuTnM1GkPqcS5Lk+1NQhUY/RX8m37vpe/eDqLZOHD1A0EkEsG2bRKJBAKJEBCLxXAcZwCyLCv8
         F67POq8Ah+Fi9eWL13f/AFb41aOFu4AaAAAAAElFTkSuQmCC
         """)
+    def sixsigma16(self):
+        return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
+        WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3AcBARwRLrHaGQAAAB1pVFh0Q29tbWVudAAAAAAAQ3Jl
+        YXRlZCB3aXRoIEdJTVBkLmUHAAACyklEQVQ4yz2TTYjVZRSHn9/7vvc2M17mC8cUI4exKKlImKFN
+        G3V2wmBTRC2EzCRmIa2SJhfRokWU6QQJRVhUlIs2kVB+LKI2WeBISYEVjU1DDF6bD+/V+fj/33Na
+        3Ev783t+58BzVJx70lXchhBBAUcEW8dDB55XCLFCNiPi7ZmEWUYYWEkAh5CQO0jIDVcCDJRACUEb
+        DuCtsAIKiYQ7jhGrgZu3O5m93kdMYnCgTpUGqAORQVWkVh+K4CWOWgDcOH95J48dn6QoEw5MjF7g
+        nedOYpZbAcuQIkhgJUK4G0mUXPt3C2PHXuajw+8yPvw9ZQ7UG33kMuIykgw6C4gZ3EEBciavRBIx
+        c+SzA+ze8Qtjw9Os5SrJV7i7/zpmQspcnr2XiVMTzC/1kC3iDr1dTc5PvkKyssL0n0P01xrcc3iK
+        tbJC1x0rvHfoffY+fJGFW92MHH2Dt5/5gF0P/soPv23n0MkX+OTVKfo3LBNcCXfxV32An45NsnD6
+        CQ7u+obx4y+hsMrpi6MMbZrn+dEL7Nj6D8/u+Y6Hhv7g0ux9VDshhOCEkNnzwBU21hbJjRpHxr6g
+        KAO/z29n6VYXvRuaCEOecYOBngb1pQ6wgqSYGR6aobnaSSDjGDkHyJFKWGdz7yKLzRpBDu7E4NSX
+        u7mrfwGUCOTAif2nODs9wuc/Pkr9Zg/jJ45y/7Y5Bu/8m4O7v+XajU28eWYfoWpMfb2XK3PbmBg9
+        BxbQ+tnHvcIqZy49wmtfPsVSs8bOwRne2v8hm7tvECuJn2e28uKnB5hb3MiWvmVef/pjRgav4i60
+        /tU+lxshBJSqYAXuAULEilWkhLxAIUCMYI6rglmJrKQlusL/lkMCWwMACcdQTLhlMOFKyIqWUDgB
+        ArKMK+KWcc+YG+4GuUByLBetBxPtDR0hsEyQ1KJZS1P3drMinqrIDFcF2q2SWuchSBX+A40aVd72
+        vVRxAAAAAElFTkSuQmCC
+        """)
     
 if __name__ == '__main__':
     imagen = imageEmbed()
-    path = 'f:\\salstat src\\icons\\go-home.png'
+    path = 'm:\\proyecto salstat\\iconos\\6sigma16.png'
     imagen.convertFromfile(path, True)
