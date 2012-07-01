@@ -24,19 +24,14 @@ class _genericFunc(object):
         
     def _convertColName2Values(self, colNamesSelected, *args, **params):
         '''geting the selected columns of the InputGrid'''
-        values = [ [pos for pos, value in enumerate( self.columnNames )
-                    if value == val
-                    ][0]
-                   for val in colNamesSelected
-                   ]
-        # -------------------
         columns  = list()
-        for pos in values:
-            col= numpy.array(self.inputGrid.CleanData(self.columnNumbers[ pos ]))
-            col.shape = (len(col),1)
-            columns.append(col)
-            
+        for colName in colNamesSelected:
+            col= numpy.array( self.inputGrid._cleanData( self.inputGrid.GetCol( colName)))
+            col.shape = ( len(col),1)
+            columns.append( col)
+        
         return columns
+    
     @property
     def name(self):
         return self.__name__
