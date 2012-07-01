@@ -1241,8 +1241,12 @@ class MainFrame(wx.Frame):
         UndoIcon =   imag.edit_undo()
         RedoIcon =   imag.edit_redo()
 
-        tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
-                            agwStyle=  aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
+        if wx.version() < "2.9":
+            tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
+                            style = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
+        else:
+            tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize, style = 0,
+                agwStyle = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
 
         self.bt1 = tb1.AddSimpleTool(10, "New",  NewIcon,"New")
         self.bt2 = tb1.AddSimpleTool(20, "Open", OpenIcon,"Open")
@@ -3253,5 +3257,6 @@ def PutData(column, data):
 # main loop
 if __name__ == '__main__':
     app = SalStat2App(0)
+    app.frame.Show()
     app.MainLoop()
 # eof
