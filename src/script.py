@@ -338,8 +338,13 @@ class ScriptPanel(wx.Panel):
                             DockFixed( True ).Centre().
                             CloseButton(False ) )
 
-        tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
-                            agwStyle=  aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
+        if wx.version < "2.9":
+            tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
+                            style = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
+        else:
+            tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
+                agwStyle = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
+
         tb1.SetToolBitmapSize(wx.Size(16, 16))
         imagenes = imageEmbed()
         self.bt1= tb1.AddSimpleTool(wx.ID_ANY, u"Run Script" , imagenes.runIcon(), u"Run Script" )
