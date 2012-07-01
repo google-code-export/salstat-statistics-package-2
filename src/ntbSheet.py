@@ -56,7 +56,7 @@ class MyGridPanel( wx.Panel, object ):
             return self.m_grid.__getattribute__(name)
         
     def _getCol(self, colNumber):
-        if isinstance(colNumber, (str,)):
+        if isinstance(colNumber, (str, unicode)):
             # searching for a col with the name:
             if not(colNumber in self.colNames):
                 raise TypeError('You only could use a numeric value or a name of an existen column')
