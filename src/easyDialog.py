@@ -179,6 +179,11 @@ class Dialog ( wx.Dialog ):
 
 
     def GetValue(self):
+        try:
+            self.DECIMAL_POINT = wx.GetApp().DECIMAL_POINT
+        except AttributeError:
+            self.DECIMAL_POINT = '.'
+            
         resultado = list()
         for typectrl, ctrl in self.ctrls:
             if typectrl in self._allow2get:
@@ -205,7 +210,7 @@ class Dialog ( wx.Dialog ):
                 elif typectrl == 'NumTextCtrl':
                     prevResult = ctrl.GetValue()
                     if prevResult != None:
-                        prevResult= float(prevResult)
+                        prevResult= float(prevResult.replace(self.DECIMAL_POINT,'.'))
                         if prevResult == int(prevResult):
                             prevResult == int(prevResult)
                     else:
