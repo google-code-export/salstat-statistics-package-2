@@ -1377,6 +1377,10 @@ class MainFrame(wx.Frame):
                 ('betai',        None, self.betai)),), # 'fprob'
               ('Anova Functions',
                (( 'F_oneway',    None, self.F_oneway),))),),
+            ('Anlyse',
+             (('One Condition Test',      None, self.goOneConditionTest),
+              ('Two Condition Test',      None, self.goTwoConditionTest),
+              ('Three Condition Test',    None, self.goThreeConditionTest))),
             ('&Graph',
              (('Line Chart of All Means', None, self.GoChartWindow),
               ('Bar Chart of All Means',  None, self.GoBarChartWindow),
@@ -1393,7 +1397,6 @@ class MainFrame(wx.Frame):
              (('Help',       imag.about(), self.GoHelpSystem),
               ('&About...',  imag.icon16(), self.ShowAbout),)),
         )
-
         self.__createMenu(dat1, menuBar)
         self.SetMenuBar(menuBar)
 
@@ -1465,8 +1468,16 @@ class MainFrame(wx.Frame):
             self.mm_mgr.MaximizePane(pane)
         else:
             pane.MinimizeButton(True)
-        #self.m_mgr.Update()
-
+        
+    def goOneConditionTest(self, evt):
+        evt.Skip()
+        
+    def goTwoConditionTest(self, evt):
+        evt.Skip()
+        
+    def goThreeConditionTest(self, evt):
+        evt.Skip()
+        
     def GoClearData(self, evt):
         #shows a new data entry frame
         self.grid.ClearGrid()
@@ -2100,7 +2111,7 @@ class MainFrame(wx.Frame):
         self.logPanel.write(functionName + ' successfull')
 
     def _statsType2(self, functionName, texto = 'moment',spinData= (1,100,1),
-                    factor = 1, useNumpy = True):
+                    factor = 1, useNumpy = True, nameResults= None):
         ''''select plus spin crtl'''
         group = lambda x,y: (x,y)
         setting = self.defaultDialogSettings
@@ -2149,6 +2160,8 @@ class MainFrame(wx.Frame):
         result = [getattr(stats, functionName)( col, moment ) for col in colums]
         # se muestra los resultados
         wx.GetApp().output.addColData(colNameSelect, functionName)
+        if nameResults != None:
+            wx.GetApp().output.addColData(nameResults)
         wx.GetApp().output.addColData(numpy.ravel(result))
         self.logPanel.write(functionName + ' successfull')
 
@@ -2652,7 +2665,7 @@ class MainFrame(wx.Frame):
         # se hace los calculos para cada columna
         result = getattr(stats, functionName)( columns, popmean)
         # se muestra los resultados
-        colNameSelect = ['t','prob']
+        colNameSelect = ['t','two tailed prob']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
         self.logPanel.write(functionName + ' successfull')
@@ -2702,7 +2715,7 @@ class MainFrame(wx.Frame):
         # se hace los calculos para cada columna
         result = getattr(stats, functionName)( xcolumns, ycolumns)
         # se muestra los resultados
-        colNameSelect = ['t','prob']
+        colNameSelect = ['t','two tailed prob']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
         self.logPanel.write(functionName + ' successfull')
@@ -2752,7 +2765,7 @@ class MainFrame(wx.Frame):
         # se hace los calculos para cada columna
         result = getattr(stats, functionName)( xcolumns, ycolumns)
         # se muestra los resultados
-        colNameSelect = ['t','prob']
+        colNameSelect = ['t', 'two tailed prob']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
         self.logPanel.write(functionName + ' successfull')
@@ -2813,8 +2826,6 @@ class MainFrame(wx.Frame):
         wx.GetApp().output.addColData(result)
         self.logPanel.write(functionName + ' successfull')
 
-
-
     def ks_2samp(self, evt):
         functionName = "ks_2samp"
         group = lambda x,y: (x,y)
@@ -2859,7 +2870,7 @@ class MainFrame(wx.Frame):
         # se hace los calculos para cada columna
         result = getattr(stats, functionName)( xcolumns, ycolumns)
         # se muestra los resultados
-        colNameSelect = ['t','prob']
+        colNameSelect = ['KS D-value', 'associated p-value']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
         self.logPanel.write(functionName + ' successfull')
@@ -2908,7 +2919,7 @@ class MainFrame(wx.Frame):
         # se hace los calculos para cada columna
         result = getattr(stats, functionName)( xcolumns, ycolumns)
         # se muestra los resultados
-        colNameSelect = ['t','prob']
+        colNameSelect = ['u-statistic', 'one-tailed p-value']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
         self.logPanel.write(functionName + ' successfull')
@@ -2957,7 +2968,7 @@ class MainFrame(wx.Frame):
         # se hace los calculos para cada columna
         result = getattr(stats, functionName)( xcolumns, ycolumns)
         # se muestra los resultados
-        colNameSelect = ['t','prob']
+        colNameSelect = ['z-statistic', 'two-tailed p-value']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
         self.logPanel.write(functionName + ' successfull')
@@ -3006,7 +3017,7 @@ class MainFrame(wx.Frame):
         # se hace los calculos para cada columna
         result = getattr(stats, functionName)( xcolumns, ycolumns)
         # se muestra los resultados
-        colNameSelect = ['t','prob']
+        colNameSelect = ['t-statistic', 'two-tail probability estimate']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
         self.logPanel.write(functionName + ' successfull')
@@ -3032,8 +3043,9 @@ class MainFrame(wx.Frame):
                          texto = 'dregrees of fredom',
                          spinData= (1,100,1),
                          factor = 1,
-                         useNumpy = True)
-
+                         useNumpy = True,
+                         nameResults= ('one tailed probability'))
+        
     def erfcc(self, evt):
         functionName = "erfcc"
         group = lambda x,y: (x,y)
@@ -3068,8 +3080,6 @@ class MainFrame(wx.Frame):
         wx.GetApp().output.addColData([xvalue ,result])
         self.logPanel.write(functionName + ' successfull')
 
-
-
     def zprob(self, evt):
         functionName = "zprob"
         group = lambda x,y: (x,y)
@@ -3102,7 +3112,6 @@ class MainFrame(wx.Frame):
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData([xvalue ,result])
         self.logPanel.write(functionName + ' successfull')
-
 
     #def ksprob(self, evt):
     #    self.logPanel.write('ksprob')
