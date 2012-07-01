@@ -220,7 +220,7 @@ class ManyDescriptives:
                     'Sum': 'suma',
                     'Mean': 'mean',
                     'missing': 'missing',
-                    'Variance': 'samplevar',
+                    'Variance': 'variance', # changing by the correct
                     'Standard Deviation': 'stddev',
                     'Standard Error': 'stderr',
                     'Sum of Squares': 'sumsquares',
@@ -729,13 +729,13 @@ class DescriptivesFrame(wx.Dialog):
         self.m_mgr = wx.aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
 
-        self.DescChoice = CheckListBox(self, 1107,  wx.DefaultPosition, wx.DefaultSize, DescList, 0 )
+        self.DescChoice = CheckListBox(self, wx.ID_ANY,  wx.DefaultPosition, wx.DefaultSize, DescList, 0 )
         self.m_mgr.AddPane( self.DescChoice, wx.aui.AuiPaneInfo() .Center() .
                             Caption( u"Select Descriptive Statistics" ).CloseButton( False ).
                             PaneBorder( False ).Dock().Resizable().FloatingSize( wx.DefaultSize ).
                             DockFixed( False ).BottomDockable( False ).TopDockable( False ) )
 
-        self.ColChoice = CheckListBox( self, 1102, wx.DefaultPosition, wx.DefaultSize, ColumnList, 0 )
+        self.ColChoice = CheckListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, ColumnList, 0 )
         self.m_mgr.AddPane( self.ColChoice, wx.aui.AuiPaneInfo() .Center() .Caption( u"Select Column(s) to Analize" ).
                             CloseButton( False ).PaneBorder( False ).Dock().Resizable().
                             FloatingSize( wx.Size( 161,93 ) ).DockFixed( False ).BottomDockable( False ).
@@ -749,17 +749,11 @@ class DescriptivesFrame(wx.Dialog):
 
         bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
 
-        okaybutton = wx.Button( self.m_panel1, 1103, u"Ok", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
+        okaybutton = wx.Button( self.m_panel1, wx.ID_ANY, u"Ok", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
         bSizer2.Add( okaybutton, 0, wx.ALL, 5 )
 
-        cancelbutton = wx.Button( self.m_panel1, 1104, u"Cancel", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
+        cancelbutton = wx.Button( self.m_panel1, wx.ID_ANY, u"Cancel", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
         bSizer2.Add( cancelbutton, 0, wx.ALL, 5 )
-
-        #allbutton = wx.Button( self.m_panel1,105, u"Select All", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
-        #bSizer2.Add( allbutton, 0, wx.ALL, 5 )
-
-        #nonebutton = wx.Button( self.m_panel1, 106, u"Select None", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
-        #bSizer2.Add( nonebutton, 0, wx.ALL, 5 )
 
         self.m_panel1.SetSizer( bSizer2 )
         self.m_panel1.Layout()
@@ -770,9 +764,7 @@ class DescriptivesFrame(wx.Dialog):
 
         self.Bind(wx.EVT_BUTTON, self.OnOkayButton,          id = okaybutton.GetId())
         self.Bind(wx.EVT_BUTTON, self.OnCloseContDesc,       id = cancelbutton.GetId())
-        #self.Bind(wx.EVT_BUTTON, self.DescChoice.SelectAllDescriptives, id = allbutton.GetId())
-        #self.Bind(wx.EVT_BUTTON,  self.DescChoice.SelectNoDescriptives, id = nonebutton.GetId())
-
+   
     def OnOkayButton(self, evt):
         descs = []
         for i in range(len(self.colnums)):
@@ -782,9 +774,6 @@ class DescriptivesFrame(wx.Dialog):
                 descs.append(statistics(
                     wx.GetApp().frame.grid.CleanData(realColi), name,
                     wx.GetApp().frame.grid.missing))
-                #descs.append(statistics( \
-                #    wx.GetApp().frame.grid.CleanData(realColi), name, \
-                #    wx.GetApp().frame.grid.missing))
         ManyDescriptives(self, descs)
         self.Close(True)
 
