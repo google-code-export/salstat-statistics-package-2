@@ -1607,30 +1607,30 @@ class MainFrame(wx.Frame):
 
     def ShowAbout(self, evt):
         info= wx.AboutDialogInfo()
-        info.Name= "S2 salstat statistics package 2"
+        info.Name= "S2 SalStat Statistics Package 2"
         info.Version= "V" + wx.GetApp().VERSION
         info.Copyright= "(C) 2012 Sebastian Lopez Buritica"
         info.Icon= wx.GetApp().icon64
         from wx.lib.wordwrap import wordwrap
         info.Description = wordwrap(
-            "A newer version of the salstat statistics package "
+            "This is a newer version of the SalStat Statistics Package "
             "originally developed by Alan James Salmoni and Mark Livingstone. "
-            "There were a minor bug corrections and a new improved version: "
-            "you can copy, paste and cut multiple cells,"
-            "you can undo and redo some actions. "
-            "the calculations are faster than the original version. "
+            "There have been minor bug corrections, and new improvements: "
+            "You can cut, copy, and paste multiple cells,"
+            "You can undo and redo some actions. "
+            "The calculations are faster than the original version. "
             "The plot system can draw:"
-            "scatter chart, line chart of all means, bar chart of all means,"
-            "line charts of the data, Box and whisker chart,"
-            "Lineal regresion plot <show the equation and the correlation inside the chart>,"
-            "much more.\n"
-            "The input data can be save and load from an xls format file.\n"
-            "Salstat2 can be script by using python.\n"
-            "All the numerical results are send to a sheet in a diferent panel where you can copy, paste, cut and edit",
+            "Scatter charts, line chart of all means, bar chart of all means,"
+            "Line charts of the data, box and whisker chart,"
+            "Linear regression plot (show the equation and the correlation inside the chart),"
+            "and much more!\n"
+            "The input data can be saved to, and loaded from an xls format file.\n"
+            "Salstat2 can be scripted by using Python.\n"
+            "All the numerical results are send to a sheet in a different panel where you can cut, copy, paste, and edit them.",
             400, wx.ClientDC(self))
         info.WebSite = ("http://code.google.com/p/salstat-statistics-package-2/", "S2 home page")
         info.Developers = [ "Sebastian Lopez Buritica",
-                            "Mark livingstone",]
+                            "Mark Livingstone",]
 
         info.License = wordwrap("GPL 2", 500, wx.ClientDC(self))
 
