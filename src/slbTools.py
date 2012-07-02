@@ -4,9 +4,11 @@ Created on 17/05/2012
 @author: sebastian lopez buritica
 license: GPL3
 '''
+
 import collections
 import tempfile, xlwt , os
 import numpy as np
+
 try:
     import xlrd
 except:
@@ -69,7 +71,7 @@ class ReportaExcel(object):
         ruta = os.path.abspath(ruta)
         (dirPath, fileName) = os.path.split(ruta)
         if not os.access(dirPath, os.R_OK):
-            raise StandardError("SaveClass: doesn't have permisions on the selected dir")
+            raise StandardError("SaveClass: doesn't have permissions on the selected dir")
         if fileName =='':
             raise StandardError("Debe ingresar un nombre de arhivo")
         self._path = ruta

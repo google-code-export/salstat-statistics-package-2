@@ -4,6 +4,7 @@ Created on 25/10/2010
 
 @author: Sebastian Lopez
 '''
+
 import wx
 from NewGrid import NewGrid # grid with context menu
 from imagenes import imageEmbed
@@ -59,45 +60,45 @@ class MyGridPanel( wx.Panel, object ):
         if isinstance(colNumber, (str, unicode)):
             # searching for a col with the name:
             if not(colNumber in self.colNames):
-                raise TypeError('You only could use a numeric value or a name of an existen column')
+                raise TypeError('You can only use a numeric value, or the name of an existing column')
             for pos, value in enumerate(self.colNames):
                 if value == colNumber:
                     colNumber= pos
                     break
         
         if not isnumeric(colNumber):
-            raise TypeError('You only could use a numeric value or a name of an existen column')
+            raise TypeError('You can only use a numeric value, or the name of an existing column')
         
         if colNumber > self.GetNumberRows():
-            raise StandardError('The maximun column allowed is %i but you select %i'%(self.GetNumberRows()-1, colNumber))
+            raise StandardError('The maximum column allowed is %i, but you selected %i'%(self.GetNumberRows()-1, colNumber))
         
         return self._getColNumber(colNumber)
      
     def _getColNumber(self, colNumber):
         if not isnumeric(colNumber):
-            raise TypeError('Only allow numeric values for the col but you input '+ str(type(colNumber)))
+            raise TypeError('Only allow numeric values for the column, but you input '+ str(type(colNumber)))
         
         colNumber= int(colNumber)
         if colNumber < 0 or colNumber > self.GetNumberCols():
-            raise StandardError('the minimum acepted col is 0 an the maximum is %i'%self.GetNumberCols()-1)
+            raise StandardError('the minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
         
         return [self.GetCellValue(row, colNumber) for row in range(self.GetNumberRows())]
     
     def putCol(self, colNumber, data):
         if isinstance(colNumber, (str,)):
             if not(colNumber in self.colNames):
-                raise TypeError('You only could use a numeric value or a name of an existen column')
+                raise TypeError('You can only use a numeric value, or the name of an existing column')
             for pos, value in enumerate(self.colNames):
                 if value == colNumber:
                     colNumber= pos
                     break
                 
         if not isnumeric(colNumber):
-            raise TypeError('You only could use a numeric value or a name of an existen column')
+            raise TypeError('You can only use a numeric value, or the name of an existing column')
         
         colNumber= int(colNumber)        
         if colNumber < 0 or colNumber > self.GetNumberCols():
-            raise StandardError('the minimum acepted col is 0 an the maximum is %i'%self.GetNumberCols()-1)
+            raise StandardError('the minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
         
         self.clearCol(colNumber)
         
@@ -145,7 +146,7 @@ class MyGridPanel( wx.Panel, object ):
             
     def clearCol(self, colNumber):
         if colNumber < 0 or colNumber > self.GetNumberCols():
-            raise StandardError('the minimum acepted col is 0 an the maximum is %i'%self.GetNumberCols()-1)
+            raise StandardError('the minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
         
         for row in range(self.GetNumberRows()):
             self.SetCellValue(row, colNumber, u'')

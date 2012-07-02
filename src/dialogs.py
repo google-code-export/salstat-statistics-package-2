@@ -1,7 +1,7 @@
 import wx
 
 class NumTextCtrl(wx.TextCtrl):
-    '''a text ctrl that only acepts numbers'''
+    '''a text ctrl that only accepts numbers'''
     def __init__(self, parent, *args, **params):
         wx.TextCtrl.__init__(self, parent, *args, **params)
         self.Bind(wx.EVT_TEXT, self._textChange)
@@ -77,7 +77,7 @@ class CheckListBox( wx.Panel, object ):
             except AttributeError:
                 return wrapee  # detect a property value
 
-    # Virtual event handlers, overide them in your derived class
+    # Virtual event handlers, override them in your derived class
     def All( self, event ):
         self.m_checkList2.Checked= range(len(self.m_checkList2.Items))
         customEvent = wx.PyCommandEvent(wx.EVT_CHECKLISTBOX.typeId, self.m_checkList2.GetId())
@@ -89,7 +89,7 @@ class CheckListBox( wx.Panel, object ):
         self.GetEventHandler().ProcessEvent(customEvent)
         
     def Invert( self, event ):
-        # identifing not checked
+        # identifying not checked
         checked= self.m_checkList2.Checked
         notchecked= [pos for pos in range(len((self.m_checkList2.Items)))
                      if not(pos in checked)]
@@ -255,7 +255,7 @@ class _MyFrame1 ( wx.Frame ):
         self.m_button8.Bind( wx.EVT_BUTTON, self.showDialog )
 
 
-    # Virtual event handlers, overide them in your derived class
+    # Virtual event handlers, override them in your derived class
     def showDialog( self, event ):
 
         dlg = SixSigma(self,[str(i) for i in range(20)])

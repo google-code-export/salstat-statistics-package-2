@@ -8,8 +8,10 @@ Created on 27/10/2010
 @author: Administrator
 
 '''
+
 import wx
 import wx.grid
+
 """
 Mixin for wx.grid to implement cut/copy/paste and undo/redo.
 Handlers are in the method Key below.  Other handlers (e.g., menu, toolbar) should call the functions in OnMixinKeypress.

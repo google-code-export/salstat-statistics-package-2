@@ -3,7 +3,9 @@ Created on 29/05/2012
 
 @author: Sebastian Lopez Buritica <Colombia>
 '''
+
 from math import sqrt
+
 class triplot:
     def __init__(self, data2plot):
         self.meshLines = self._generateMeshPoints(10)
