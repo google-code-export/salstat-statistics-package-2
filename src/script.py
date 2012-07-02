@@ -3,6 +3,7 @@ Created on 14/05/2012
 
 @author: USUARIO
 '''
+
 import wx
 import wx.lib.agw.aui as aui
 from imagenes import imageEmbed
@@ -38,7 +39,7 @@ else:
         'times': 'Times',
         'mono' : 'Courier',
         'helv' : 'Helvetica',
-        'other': 'new century schoolbook',
+        'other': 'Century Schoolbook',
         'size' : 12,
         'size2': 10,
         }
@@ -181,7 +182,7 @@ class MySTC(stc.StyledTextCtrl):
             # tips
             if event.ShiftDown():
                 self.CallTipSetBackground("yellow")
-                self.CallTipShow(pos, 'show tip stuff')
+                self.CallTipShow(pos, 'Show tip stuff')
             # code completion (needs more work)
             else:
                 kw = keyword.kwlist[:]

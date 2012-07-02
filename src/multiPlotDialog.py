@@ -49,7 +49,7 @@ class selectDialogData2plot(wx.Dialog):
 
         bSizer5 = wx.BoxSizer( wx.VERTICAL )
 
-        sbSizer15 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Choosen data to plot" ), wx.VERTICAL )
+        sbSizer15 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Select data to plot" ), wx.VERTICAL )
 
         fgSizer8 = wx.FlexGridSizer( 0, 2, 0, 0 )
         fgSizer8.SetFlexibleDirection( wx.BOTH )
@@ -135,7 +135,7 @@ class scatterDialog( wx.Dialog ):
 
         bSizer5 = wx.BoxSizer( wx.HORIZONTAL )
 
-        self.m_staticText4 = wx.StaticText( self, wx.ID_ANY, u"Serie Name", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText4 = wx.StaticText( self, wx.ID_ANY, u"Series Name", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText4.Wrap( -1 )
         bSizer5.Add( self.m_staticText4, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
@@ -217,7 +217,7 @@ class scatterDialog( wx.Dialog ):
         pass
 
 
-    # Virtual event handlers, overide them in your derived class
+    # Virtual event handlers, override them in your derived class
     def _OnSetXData( self, event ):
         event.Skip()
 

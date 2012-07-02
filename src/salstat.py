@@ -9,14 +9,16 @@ B3 = [0,0,     0,     0,     0,     0, 0.030, 0.118, 0.185, 0.239, 0.284, 0.322,
 B4 = [0,0, 3.267, 2.568, 2.266, 2.089, 1.970, 1.882, 1.815, 1.761, 1.716, 1.678, 1.646, 1.619, 1.593, 1.572]#, 1.490, 1.435]
 B5 = [0,0,     0,     0,     0,     0, 0.029, 0.113, 0.179, 0.232, 0.276, 0.313, 0.346, 0.374, 0.399, 0.421]#, 0.504, 0.559]
 B6 = [0,0, 2.606, 2.276, 2.088, 1.964, 1.874, 1.806, 1.751, 1.707, 1.669, 1.637, 1.610, 1.585, 1.563, 1.544]#, 1.470, 1.420]
+
 """ Copyright 2012 Sebastian Lopez Buritica
 
 SalStat Statistics Package. Copyright 2002 Alan James Salmoni. Licensed
-under the GNU General Public License (GPL). See the file COPYING for full
+under the GNU General Public License (GPL 2). See the file COPYING for full
 details of this license. """
 
 import wx
 import os
+
 # automatically importing all the central tendency classes
 from slbTools import isiterable
 
@@ -76,8 +78,9 @@ RowsUsed= []
 missingvalue= None
 HOME= os.getcwd()
 imagenes = imageEmbed()
- 
-if os.name == 'nt':
+
+if wx.Platform == '__WXMSW__':
+    # for windows OS
     face1 = 'Courier New'
     face2 = 'Times New Roman'
     face3 = 'Courier New'
@@ -151,13 +154,13 @@ class LogPanel( wx.Panel ):
 class SaveDialog(wx.Dialog):
     def __init__(self, parent):  
 
-        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"save data?", pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.DEFAULT_DIALOG_STYLE )
+        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"Save data?", pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.DEFAULT_DIALOG_STYLE )
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
 
         bSizer1 = wx.BoxSizer( wx.VERTICAL )
 
-        self.m_staticText1 = wx.StaticText( self, wx.ID_ANY, u"you have unsaved data", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText1 = wx.StaticText( self, wx.ID_ANY, u"You have unsaved data!", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText1.Wrap( -1 )
         bSizer1.Add( self.m_staticText1, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALL, 5 )
 
@@ -387,7 +390,7 @@ class SimpleGrid(MyGrid):# wxGrid
         if self.Saved == False or saveAs: # path del grid
             # mostrar el dialogo para guardar el archivo
             dlg= wx.FileDialog(self, "Save Data File", "" , "",\
-                               "excel (*.xls)|*.xls| \
+                               "Excel (*.xls)|*.xls| \
                                     Any (*.*)| *.*", wx.SAVE)
             if dlg.ShowModal() == wx.ID_OK:
                 self.path = dlg.GetPath()
@@ -411,7 +414,7 @@ class SimpleGrid(MyGrid):# wxGrid
             self.reportObj.writeByCols(result, self.NumSheetReport)
         self.reportObj.save()
         self.Saved = True
-        self.log.write("the fil %s was succesfully saved"%self.reportObj.path)
+        self.log.write("The file %s was successfully saved!" % self.reportObj.path)
 
 
     def LoadXls(self, evt):
@@ -436,7 +439,7 @@ class SimpleGrid(MyGrid):# wxGrid
         else:
             # create a dialog to selecct the sheet to be loaded
             bt1= ('Choice',   (sheetNames,))
-            bt2= ('StaticText', ('Selec a sheet to be loaded',))
+            bt2= ('StaticText', ('Select a sheet to be loaded',))
             setting = {'Title': 'Select a sheet one'}
             dlg = dialog(self, struct=[[bt1,bt2],], settings= setting)
             if dlg.ShowModal() != wx.ID_OK:
@@ -477,7 +480,7 @@ class SimpleGrid(MyGrid):# wxGrid
                     try:
                         self.SetCellValue(row, col, str(newValue))
                     except:
-                        self.log.write("could not import the row,col (%i,%i)"%(row+1,col+1))
+                        self.log.write("Could not import the row,col (%i,%i)" % (row+1,col+1))
 
     def getData(self, x):
         for i in range(len(x)):
@@ -487,7 +490,7 @@ class SimpleGrid(MyGrid):# wxGrid
                 datavalue = float(self.getText(x[i].childNodes))
                 self.SetCellValue(row, col, str(datavalue))
             except ValueError:
-                print "problem importing the xml"
+                print "Problem importing the xml"
 
     def getText(self, nodelist):
         rc = ""
@@ -542,7 +545,7 @@ class SimpleGrid(MyGrid):# wxGrid
             data= [data]
             
         if not isiterable(data):
-            raise TypeError('only allowed iterable data')
+            raise TypeError('Only iterable data allowed!')
         
         for pos in range(len(data)-1, -1, -1):
             if data[pos] != u'':
@@ -647,7 +650,7 @@ class GridPrefs(wx.Dialog):
 class VariablesFrame(wx.Dialog):
     def __init__(self,parent,id):
         wx.Dialog.__init__(self, parent,id,"SalStat - Variables", \
-                           size=(500,185+wind))
+                           size=(500,190+wind))
 
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
         self.m_mgr = wx.aui.AuiManager()
@@ -736,7 +739,7 @@ class DescriptivesFrame(wx.Dialog):
                             DockFixed( False ).BottomDockable( False ).TopDockable( False ) )
 
         self.ColChoice = CheckListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, ColumnList, 0 )
-        self.m_mgr.AddPane( self.ColChoice, wx.aui.AuiPaneInfo() .Center() .Caption( u"Select Column(s) to Analize" ).
+        self.m_mgr.AddPane( self.ColChoice, wx.aui.AuiPaneInfo() .Center() .Caption( u"Select Column(s) to Analyse" ).
                             CloseButton( False ).PaneBorder( False ).Dock().Resizable().
                             FloatingSize( wx.Size( 161,93 ) ).DockFixed( False ).BottomDockable( False ).
                             TopDockable( False ).Row( 1 ).Layer( 0 ) )
@@ -797,7 +800,7 @@ class TransformFrame(wx.Dialog):
         self.transformName = ""
         self.ColumnList, self.colnums = wx.GetApp().frame.grid.GetUsedCols()
         self.cols = wx.GetApp().frame.grid.GetNumberCols()
-        l0 = wx.StaticText(self,-1,"Select Columns to Transform",pos=(10,10))
+        l0 = wx.StaticText(self,-1,"Select Column(s) to Transform",pos=(10,10))
         self.ColChoice = wx.CheckListBox(self,1102, wx.Point(10,30), \
                                          wx.Size(230,(winheight * 0.8)), self.ColumnList)
         self.okaybutton = wx.Button(self, wx.ID_ANY, "Okay",wx.Point(10,winheight-35))
@@ -897,7 +900,7 @@ class formulaBar ( wx.Panel ):
 #---------------------------------------------------------------------------
 def GetLocaleDict(loc_list, opt=0):
     """
-    Takes a list of cannonical locale names and by default returns a
+    Takes a list of canonical locale names and by default returns a
     dictionary of available language values using the canonical name as
     the key. Supplying the Option OPT_DESCRIPT will return a dictionary
     of language id's with languages description as the key.
@@ -1181,13 +1184,13 @@ class MainFrame(wx.Frame):
 
         self.m_mgr.AddPane(self.grid,
                            aui.AuiPaneInfo().Centre().
-                           CaptionVisible(True).Caption('Main Panel').
+                           CaptionVisible(True).Caption("Data Entry Panel").
                            MaximizeButton(True).MinimizeButton(True).
                            CloseButton( False ).MinSize( wx.Size( 240,-1 )))
 
         self.m_mgr.AddPane(self.answerPanel,
                            aui.AuiPaneInfo().Centre().Right().
-                           CaptionVisible(True).Caption(("output Panel")).
+                           CaptionVisible(True).Caption(("Output Panel")).
                            MinimizeButton(True).Resizable(True).MaximizeButton(True).
                            CloseButton( False ).MinSize( wx.Size( 240,-1 )))
 
@@ -1366,7 +1369,7 @@ class MainFrame(wx.Frame):
                 ('betai',        None, self.betai)),), # 'fprob'
               ('Anova Functions',
                (( 'F_oneway',    None, self.F_oneway),))),),
-            ('Anlyse',
+            ('Analyse',
              (('One Condition Test',      None, self.goOneConditionTest),
               ('Two Condition Test',      None, self.goTwoConditionTest),
               ('Three Condition Test',    None, self.goThreeConditionTest))),
@@ -1375,11 +1378,11 @@ class MainFrame(wx.Frame):
               ('Bar Chart of All Means',  None, self.GoBarChartWindow),
               ('Lines',                   None, self.GoLinesPlot),
               ('Scatter',                 None, self.GoScatterPlot),
-              ('Box&Wishker',             None, self.GoBoxWishkerPlot),
-              ('Lineal Regress',          None, self.GoLinRegressPlot),
+              ('Box &Whisker',             None, self.GoBoxWhiskerPlot),
+              ('Linear Regression',          None, self.GoLinRegressPlot),
               ('Ternary',                 None, self.GoTernaryplot),
               ('Probability',             None, self.GoProbabilityplot),
-              ('Adaptative BMS',          None, self.GoAdaptativeBMS))),
+              ('Adaptive BMS',          None, self.GoAdaptativeBMS))),
             ('Ctrl Process',
              (('Six Sigma Pac',           sixsigma, self.GoSixPack),)),
             ('&Help',
@@ -1559,13 +1562,13 @@ class MainFrame(wx.Frame):
             self.SetStatusText('You need to select some data to draw a graph!')
             return
         elif len(selectedcols) != 3:
-            self.logPanel.write('You have to select 3 columns a, b and c')
+            self.logPanel.write('You have to select 3 columns a, b, and c')
             return
 
         data = [self.grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]]
         tam = [len(dat) for dat in data]
         if (tam[0] != tam[1]) or (tam[0] != tam[2]):
-            self.logPanel.write('the selected columns must have the same quantity of elements')
+            self.logPanel.write('The selected columns must have the same number of elements')
             return
 
         legend = u''
@@ -1650,7 +1653,7 @@ class MainFrame(wx.Frame):
         selection.Destroy()
         data = [self.grid.CleanData(col) for col in (colnums[xcol],colnums[ycol])]
         if len(data[0]) != len(data[1]):
-            self.SetStatusText('x and y data mus have the same size!')
+            self.SetStatusText('X and Y data must have the same number of elements!')
             return
         plt= plot(parent = self, typePlot= 'plotScatter',
                   data2plot= ((data[0],data[1],waste[xcol] +u' Vs '+ waste[ycol]),),
@@ -1659,7 +1662,7 @@ class MainFrame(wx.Frame):
                   title= 'Scatter Plot')
         plt.Show()
 
-    def GoBoxWishkerPlot(self,evt):
+    def GoBoxWhiskerPlot(self,evt):
         waste, colnums = self.grid.GetUsedCols()
         if colnums == []:
             self.SetStatusText('You need some data to draw a graph!')
@@ -1678,7 +1681,7 @@ class MainFrame(wx.Frame):
                   data2plot= data,
                   xlabel = 'variable',
                   ylabel = 'value',
-                  title= 'Box & whiskler plot',
+                  title= 'Box & whisker plot',
                   xtics=  [waste[i] for i in selectedcols] )
 
         plt.Show()
@@ -1747,12 +1750,12 @@ class MainFrame(wx.Frame):
         data= homogenize(data[0],data[1])
 
         if len(data[0]) != len(data[1]):
-            self.SetStatusText('x and y data mus have the same size!')
+            self.SetStatusText('X and Y data must have the same number of elements!')
             return
         plt= plot(parent = self, typePlot= 'plotLinRegress',
                   data2plot= (data[0],data[1],waste[xcol] +u' Vs '+ waste[ycol]),
                   xlabel = waste[xcol], ylabel = waste[ycol],
-                  title= 'Lin Regress plot' )
+                  title= 'Linear Regression plot' )
         plt.Show()
         # lin regress removing most disperse data
 
@@ -1813,7 +1816,7 @@ class MainFrame(wx.Frame):
         # -------------------
         # changing value strings to numbers
         if len(ColSelect) == 0:
-            self.logPanel.write("you don't select a column")
+            self.logPanel.write("You haven't selected a column!")
             return
 
         # taking the data
@@ -1865,7 +1868,7 @@ class MainFrame(wx.Frame):
 
         for data in columns:
             result= self._sixpack(data, UCL, LCL, Target, k, n= groupSize)
-            description= {'Desv.Est': 'Standar deviation',
+            description= {'Desv.Est': 'Standard Deviation',
                           'Cp':  'Process Capability. A simple and straightforward indicator of process capability.',
                           'Pp':  'Process Performance. A simple and straightforward indicator of process performance. basically tries to verify if the sample that you have generated from the process is capable to meet Customer CTQs (requirements)',
                           'Cpk': 'Process Capability Index. Adjustment of Cp for the effect of non-centered distribution. measures how close a process is running to its specification limits, relative to the natural variability of the process',
@@ -1942,14 +1945,14 @@ class MainFrame(wx.Frame):
         schart_LCL= B3[groupSize]*Ra
         schart_target= Sa
 
-        self.logPanel.write('SixSigma' + ' successfull')
+        self.logPanel.write('SixSigma' + ' successful')
 
     def _sixpack(self, data, UCL, LCL, Target, k= 6, n= 2 ):
         result= dict()
         stadis= statistics(data)
         stddev = stadis.stddev
         if stddev == 0:
-            wx.GetApp().Logg.write('Six pack analysis fail because the sdtdev is zero')
+            wx.GetApp().Logg.write('Six pack analysis fail because the stddev is zero')
             return
 
         if UCL == None:
@@ -2039,11 +2042,11 @@ class MainFrame(wx.Frame):
         # changing value strings to numbers
         colNameSelect = values[0]
         if len( colNameSelect ) == 0:
-            self.logPanel.write("you don't select any items")
+            self.logPanel.write("You haven't selected any items!")
             return
 
         if len(colNameSelect) < requiredcols:
-            self.logPanel.write("you have to select at least %i columns"%requiredcols)
+            self.logPanel.write("Uou have to select at least %i columns"%requiredcols)
             return
 
         values = [ [pos for pos, value in enumerate( ColumnList )
@@ -2066,7 +2069,7 @@ class MainFrame(wx.Frame):
             #  cantidad de elementos
             lendata= [len(col) for col in colums]
             if sum([1 for leni in lendata if leni == lendata[0]]) <> len(colums):
-                return "the data must have the same size"
+                return "The data must have the same dimensions!"
 
         if allColsOneCalc:
             result = getattr(stats, functionName)( *colums )
@@ -2097,7 +2100,7 @@ class MainFrame(wx.Frame):
         else:
             wx.GetApp().output.addColData(result)
 
-        self.logPanel.write(functionName + ' successfull')
+        self.logPanel.write(functionName + ' successful')
 
     def _statsType2(self, functionName, texto = 'moment',spinData= (1,100,1),
                     factor = 1, useNumpy = True, nameResults= None):
@@ -2125,7 +2128,7 @@ class MainFrame(wx.Frame):
         (colNameSelect, moment) = values
         moment = moment * factor
         if len( colNameSelect ) == 0:
-            self.logPanel.write("you don't select any items")
+            self.logPanel.write("You haven't selected any items!")
             return
         if not isinstance(colNameSelect, (list, tuple)):
             colNameSelect = [colNameSelect]
@@ -2152,7 +2155,7 @@ class MainFrame(wx.Frame):
         if nameResults != None:
             wx.GetApp().output.addColData(nameResults)
         wx.GetApp().output.addColData(numpy.ravel(result))
-        self.logPanel.write(functionName + ' successfull')
+        self.logPanel.write(functionName + ' successful')
 
     def _statsType3(self, functionName, texto1 = u'',
                     texto2 = u'', **params):
@@ -2189,7 +2192,7 @@ class MainFrame(wx.Frame):
         # changing value strings to numbers
         (xcolname, ycolname) = values
         if len( xcolname ) == 0 or len( ycolname ) == 0:
-            self.logPanel.write("you don't select any items")
+            self.logPanel.write("You haven't selected any items!")
             return
         if not isinstance(xcolname, (list, tuple)):
             xcolname = [xcolname]
@@ -2222,7 +2225,7 @@ class MainFrame(wx.Frame):
             wx.GetApp().output.addColData(result)
         else:
             wx.GetApp().output.addColData(result, functionName)
-        self.logPanel.write(functionName + ' successfull')
+        self.logPanel.write(functionName + ' successful')
 
 
     def shortData(self,evt):
@@ -2251,11 +2254,11 @@ class MainFrame(wx.Frame):
         # changing value strings to numbers
         colNameSelect = values[0]
         if len( colNameSelect ) == 0:
-            self.logPanel.write("you don't select any items")
+            self.logPanel.write("You haven't select any items!")
             return
 
         if len(colNameSelect) < None:
-            self.logPanel.write("you have to select at least %i columns"%requiredcols)
+            self.logPanel.write("You have to select at least %i columns"%requiredcols)
             return
 
         values = [ [pos for pos, value in enumerate( ColumnList )
@@ -2278,7 +2281,7 @@ class MainFrame(wx.Frame):
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(colums[0])
         wx.GetApp().output.addColData(colums[1])
-        self.logPanel.write(functionName + ' successfull')
+        self.logPanel.write(functionName + ' successful')
 
 
     def geometricmean(self,evt):
@@ -2348,11 +2351,11 @@ class MainFrame(wx.Frame):
         # changing value strings to numbers
         colNameSelect = values[0]
         if len( colNameSelect ) == 0:
-            self.logPanel.write("you don't select any items")
+            self.logPanel.write("You haven't select any items!")
             return
 
         if len(colNameSelect) < None:
-            self.logPanel.write("you have to select at least %i columns"%requiredcols)
+            self.logPanel.write("You have to select at least %i columns"%requiredcols)
             return
 
         values = [ [pos for pos, value in enumerate( ColumnList )
@@ -2376,7 +2379,7 @@ class MainFrame(wx.Frame):
             #  cantidad de elementos
             lendata= [len(col) for col in colums]
             if sum([1 for leni in lendata if leni == lendata[0]]) <> len(colums):
-                return "the data must have the same size"
+                return "The data must have the same dimensions"
 
         if allColsOneCalc:
             result = getattr(stats, functionName)( *colums )
@@ -2391,7 +2394,7 @@ class MainFrame(wx.Frame):
             res1= [res[i] for res in result]
             wx.GetApp().output.addColData(res1)
 
-        self.logPanel.write(functionName + ' successfull')
+        self.logPanel.write(functionName + ' successful')
 
 
 
@@ -2484,10 +2487,10 @@ class MainFrame(wx.Frame):
         # changing value strings to numbers
         (colNameSelect, threshmin, threshmax, newval) = values
         if len( colNameSelect ) == 0:
-            self.logPanel.write("you don't select any items")
+            self.logPanel.write("You haven't selected any items!")
             return
         if threshmin == None or threshmax == None or newval == None:
-            self.logPanel.write("you don't input all the required values")
+            self.logPanel.write("You haven't entered all the required values!")
             return
         values = [ [pos for pos, value in enumerate( ColumnList )
                     if value == val
@@ -2510,7 +2513,7 @@ class MainFrame(wx.Frame):
         # se muestra los resultados
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(numpy.ravel(result))
-        self.logPanel.write(functionName + ' successfull')
+        self.logPanel.write(functionName + ' successful')
 
     def trimboth(self,evt):
         self._statsType2("trimboth", texto = '% proportiontocut',
@@ -2545,7 +2548,7 @@ class MainFrame(wx.Frame):
         # changing value strings to numbers
         (colNameSelect, proportiontocut, tail) = values
         if len( colNameSelect ) == 0:
-            self.logPanel.write("you don't select any items")
+            self.logPanel.write("You haven't selected any items!")
             return
         values = [ [pos for pos, value in enumerate( ColumnList )
                     if value == val
@@ -2560,7 +2563,7 @@ class MainFrame(wx.Frame):
         # se muestra los resultados
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(numpy.ravel(result))
-        self.logPanel.write(functionName + ' successfull')
+        self.logPanel.write(functionName + ' successful')
 
 
     def covariance(self, evt):
@@ -2641,7 +2644,7 @@ class MainFrame(wx.Frame):
         # changing value strings to numbers
         (colNameSelect, popmean) = values
         if len( colNameSelect ) == 0:
-            self.logPanel.write("you don't select any items")
+            self.logPanel.write("You haven't select any items!")
             return
         values = [ [pos for pos, value in enumerate( ColumnList )
                     if value == val
@@ -2657,7 +2660,7 @@ class MainFrame(wx.Frame):
         colNameSelect = ['t','two tailed prob']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
-        self.logPanel.write(functionName + ' successfull')
+        self.logPanel.write(functionName + ' successful')
 
 
     def ttest_ind(self, evt):
@@ -2685,7 +2688,7 @@ class MainFrame(wx.Frame):
         # changing value strings to numbers
         (xcolNameSelect, ycolNameSelect) = values
         if len( xcolNameSelect ) == 0 or len( ycolNameSelect ) == 0:
-            self.logPanel.write("you don't select any items")
+            self.logPanel.write("You haven't select any items!")
             return
         xvalues = [ [pos for pos, value in enumerate( ColumnList )
                      if value == val
@@ -2707,7 +2710,7 @@ class MainFrame(wx.Frame):
         colNameSelect = ['t','two tailed prob']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
-        self.logPanel.write(functionName + ' successfull')
+        self.logPanel.write(functionName + ' successful')
 
 
     def ttest_rel(self, evt):
@@ -2735,7 +2738,7 @@ class MainFrame(wx.Frame):
         # changing value strings to numbers
         (xcolNameSelect, ycolNameSelect) = values
         if len( xcolNameSelect ) == 0 or len( ycolNameSelect ) == 0:
-            self.logPanel.write("you don't select any items")
+            self.logPanel.write("You haven't selected any items!")
             return
         xvalues = [ [pos for pos, value in enumerate( ColumnList )
                      if value == val
@@ -2757,7 +2760,7 @@ class MainFrame(wx.Frame):
         colNameSelect = ['t', 'two tailed prob']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
-        self.logPanel.write(functionName + ' successfull')
+        self.logPanel.write(functionName + ' successful')
 
 
 
@@ -2786,7 +2789,7 @@ class MainFrame(wx.Frame):
         # changing value strings to numbers
         (xcolNameSelect, ycolNameSelect) = values
         if len( xcolNameSelect ) == 0 :
-            self.logPanel.write("you don't select any items")
+            self.logPanel.write("You haven't selected any items!")
             return
         xvalues = [ [pos for pos, value in enumerate( ColumnList )
                      if value == val
@@ -2813,7 +2816,7 @@ class MainFrame(wx.Frame):
         colNameSelect = [ 'chisq', 'chisqprob(chisq, k-1)']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
-        self.logPanel.write(functionName + ' successfull')
+        self.logPanel.write(functionName + ' successful')
 
     def ks_2samp(self, evt):
         functionName = "ks_2samp"
@@ -2840,7 +2843,7 @@ class MainFrame(wx.Frame):
         # changing value strings to numbers
         (xcolNameSelect, ycolNameSelect) = values
         if len( xcolNameSelect ) == 0 or len( ycolNameSelect ) == 0:
-            self.logPanel.write("you don't select any items")
+            self.logPanel.write("You haven't selected any items!")
             return
         xvalues = [ [pos for pos, value in enumerate( ColumnList )
                      if value == val
@@ -2862,7 +2865,7 @@ class MainFrame(wx.Frame):
         colNameSelect = ['KS D-value', 'associated p-value']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
-        self.logPanel.write(functionName + ' successfull')
+        self.logPanel.write(functionName + ' successful')
 
     def mannwhitneyu(self, evt):
         functionName = "mannwhitneyu"
@@ -2889,7 +2892,7 @@ class MainFrame(wx.Frame):
         # changing value strings to numbers
         (xcolNameSelect, ycolNameSelect) = values
         if len( xcolNameSelect ) == 0 or len( ycolNameSelect ) == 0:
-            self.logPanel.write("you don't select any items")
+            self.logPanel.write("You haven't selected any items!")
             return
         xvalues = [ [pos for pos, value in enumerate( ColumnList )
                      if value == val
@@ -2911,7 +2914,7 @@ class MainFrame(wx.Frame):
         colNameSelect = ['u-statistic', 'one-tailed p-value']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
-        self.logPanel.write(functionName + ' successfull')
+        self.logPanel.write(functionName + ' successful')
 
     def ranksums(self, evt):
         functionName = "ranksums"
@@ -2938,7 +2941,7 @@ class MainFrame(wx.Frame):
         # changing value strings to numbers
         (xcolNameSelect, ycolNameSelect) = values
         if len( xcolNameSelect ) == 0 or len( ycolNameSelect ) == 0:
-            self.logPanel.write("you don't select any items")
+            self.logPanel.write("You haven't selected any items!")
             return
         xvalues = [ [pos for pos, value in enumerate( ColumnList )
                      if value == val
@@ -2960,7 +2963,7 @@ class MainFrame(wx.Frame):
         colNameSelect = ['z-statistic', 'two-tailed p-value']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
-        self.logPanel.write(functionName + ' successfull')
+        self.logPanel.write(functionName + ' successful')
 
     def wilcoxont(self, evt):
         functionName = "wilcoxont"
@@ -2987,7 +2990,7 @@ class MainFrame(wx.Frame):
         # changing value strings to numbers
         (xcolNameSelect, ycolNameSelect) = values
         if len( xcolNameSelect ) == 0 or len( ycolNameSelect ) == 0:
-            self.logPanel.write("you don't select any items")
+            self.logPanel.write("You haven't selected any items!")
             return
         xvalues = [ [pos for pos, value in enumerate( ColumnList )
                      if value == val
@@ -3009,7 +3012,7 @@ class MainFrame(wx.Frame):
         colNameSelect = ['t-statistic', 'two-tail probability estimate']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
-        self.logPanel.write(functionName + ' successfull')
+        self.logPanel.write(functionName + ' successful')
 
     def kruskalwallish(self, evt):
         self._statsType1("kruskalwallish",
@@ -3058,7 +3061,7 @@ class MainFrame(wx.Frame):
         # changing value strings to numbers
         (xvalue,) = values
         if xvalue == None:
-            self.logPanel.write("you don?t enter a valid value")
+            self.logPanel.write("You haven't entered a valid value!")
             return
 
         # se hace los calculos
@@ -3067,7 +3070,7 @@ class MainFrame(wx.Frame):
         colNameSelect = ['x', 'erfc(x)']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData([xvalue ,result])
-        self.logPanel.write(functionName + ' successfull')
+        self.logPanel.write(functionName + ' successful')
 
     def zprob(self, evt):
         functionName = "zprob"
@@ -3091,7 +3094,7 @@ class MainFrame(wx.Frame):
         # changing value strings to numbers
         (xvalue,) = values
         if xvalue == None:
-            self.logPanel.write("you don?t enter a valid value")
+            self.logPanel.write("You haven't entered a valid value!")
             return
 
         # se hace los calculos
@@ -3100,7 +3103,7 @@ class MainFrame(wx.Frame):
         colNameSelect = ['x', 'erfc(x)']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData([xvalue ,result])
-        self.logPanel.write(functionName + ' successfull')
+        self.logPanel.write(functionName + ' successful')
 
     #def ksprob(self, evt):
     #    self.logPanel.write('ksprob')
@@ -3138,7 +3141,7 @@ class MainFrame(wx.Frame):
         (a, b, x) = values
         x= x*factor
         if a == None or b == None:
-            self.logPanel.write("you don?t enter a valid value")
+            self.logPanel.write("You haven't entered a valid value!")
             return
 
         # se hace los calculos
@@ -3147,7 +3150,7 @@ class MainFrame(wx.Frame):
         colNameSelect = ['a', 'b','x','betacf(a,b,x)']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData([a, b, x, result])
-        self.logPanel.write(functionName + ' successfull')
+        self.logPanel.write(functionName + ' successful')
 
     def gammln(self, evt):
         functionName = "gammln"
@@ -3171,7 +3174,7 @@ class MainFrame(wx.Frame):
         # changing value strings to numbers
         (xvalue,) = values
         if xvalue == None:
-            self.logPanel.write("you don?t enter a valid value")
+            self.logPanel.write("You haven't entered a valid value!")
             return
 
         # se hace los calculos
@@ -3180,7 +3183,7 @@ class MainFrame(wx.Frame):
         colNameSelect = ['xx', 'lgammln(xx)']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData([xvalue ,result])
-        self.logPanel.write(functionName + ' successfull')
+        self.logPanel.write(functionName + ' successful')
 
     def betai(self, evt):
         functionName = "betai"
@@ -3212,7 +3215,7 @@ class MainFrame(wx.Frame):
         (a, b, x) = values
         x= x*factor
         if a == None or b == None:
-            self.logPanel.write("you don?t enter a valid value")
+            self.logPanel.write("You haven't enter a valid value!")
             return
 
         # se hace los calculos
@@ -3221,7 +3224,7 @@ class MainFrame(wx.Frame):
         colNameSelect = ['a', 'b','x','betai(a,b,x)']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData([a, b, x, result])
-        self.logPanel.write(functionName + ' successfull')
+        self.logPanel.write(functionName + ' successful')
 
 
     def F_oneway(self, evt):

@@ -1,11 +1,11 @@
 SalStat Statistics - Test Report 1
 
 The primary objective of SalStat is accuracy. If the output of the analysis is
-not accurate, then SalStat is worse whan useless.
+not accurate, then SalStat is worse than useless.
 
 In order to test this, sets of data were analysed, and the results compared
 against those obtained from other statistics packages. Packages used were SPSS,
-StatView, Minitab and Statistica.
+StatView, Minitab, and Statistica.
 
 Test data set 1 - Small integer data set.
 a) 10 11 12 11 10 9 10
@@ -83,7 +83,7 @@ SalStat: chi = 14.0, p = 0.003569571
 SPSS:    chi = 14.0, p = 0.001
 StatView:chi = 14.0, p = 0.0009
 
-So what conclusions can be drawn? The Freidman is obviously way out of what it
+So what conclusions can be drawn? The Friedman is obviously way out of what it
 should be, but all the parametric tests agree absolutely with the others, except
 that SalStat has a greater degree of specificity of the p-value.
 

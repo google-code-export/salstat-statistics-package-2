@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-#!/usr/bin/env pytho
+#!/usr/bin/env python
+
 import wx
 from wx.html import HtmlHelpWindow
 import sys

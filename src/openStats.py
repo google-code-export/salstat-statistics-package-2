@@ -3,6 +3,7 @@ Created on 14/05/2012
 
 @author: USUARIO
 '''
+
 from statlib import stats
 from scipy import stats as stats2
 

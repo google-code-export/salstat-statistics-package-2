@@ -3,10 +3,11 @@ Created on 16/05/2012
 
 @author: USUARIO
 '''
-'''easierly create a dialog'''
+'''Easily create a dialog'''
 
 import wx
 from dialogs import CheckListBox, NumTextCtrl
+
 def _siguiente():
     i = 0
     while 1:
@@ -17,7 +18,7 @@ class Dialog ( wx.Dialog ):
     def __init__( self, parent = None , settings= dict(), struct = []):
         '''Dialog(parent,settings, struct)
 
-        a funtion to easierly create a wx dialog
+        a function to easily create a wx dialog
 
         paramteres
         settings = {'Tile': String title of the wxdialog ,
