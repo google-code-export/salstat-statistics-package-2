@@ -30,7 +30,8 @@ class Dialog ( wx.Dialog ):
 
         allowed controls: 'StaticText',   'TextCtrl',    'Choice',
                           'CheckListBox', 'StaticLine',  'RadioBox',
-                          'SpinCtrl',     'ToggleButton', 'NumTextCtrl'
+                          'SpinCtrl',     'ToggleButton', 'NumTextCtrl',
+                          'CheckBox'
 
         struct example:
 
@@ -50,6 +51,7 @@ class Dialog ( wx.Dialog ):
         >> bt7 = ('RadioBox',('titulo',['opt1','opt2','opt3'],))
         >> bt8 = ('SpinCtrl', ( 0, 100, 5 )) # (min, max, start)
         >> bt9 = ('ToggleButton', ['toggle'])
+        >> bt10= ('CheckBox', ['Accept'])
 
         >> structure.append( [bt6, bt2] )
         >> structure.append( [bt6, bt5] )
@@ -104,10 +106,12 @@ class Dialog ( wx.Dialog ):
         self.ctrls= list()
         self._allow= ['StaticText','TextCtrl','Choice',
                       'CheckListBox','StaticLine','RadioBox',
-                      'SpinCtrl','ToggleButton','NumTextCtrl']
+                      'SpinCtrl','ToggleButton','NumTextCtrl',
+                      'CheckBox']
         self._allow2get= ['TextCtrl','Choice',
                       'CheckListBox','RadioBox',
-                      'SpinCtrl','ToggleButton','NumTextCtrl']
+                      'SpinCtrl','ToggleButton','NumTextCtrl',
+                      'CheckBox']
         
         self.adding(bSizer3, struct)
 
@@ -158,8 +162,11 @@ class Dialog ( wx.Dialog ):
                         args= data
                     elif key == 'SpinCtrl':
                         data= [ wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS]
-                        data.extend(list(args))
+                        data.extend((args))
                         args= data
+                    elif key == 'CheckBox':
+                        args.extend(data[:2])
+                        args.append(0)
                     if key == 'CheckListBox':
                         self.ctrls.append((key, CheckListBox(self.m_scrolledWindow1, wx.ID_ANY, *args)))
                     else:
@@ -198,7 +205,10 @@ class Dialog ( wx.Dialog ):
                         prevResult =  [ctrl.GetItems()[ctrl.GetSelection()]]
                     else:
                         prevResult= []
-
+                        
+                elif typectrl == 'CheckBox':
+                    prevResult= ctrl.IsChecked()
+                
                 elif typectrl == 'CheckListBox':
                     if len(ctrl.Checked) > 0:
                         prevResult= [ctrl.Items[pos] for pos in ctrl.Checked]
