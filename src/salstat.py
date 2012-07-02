@@ -458,14 +458,14 @@ class SimpleGrid(MyGrid):# wxGrid
         #size = (sheetSelected.nrows, sheetSelected.ncols)
         # se hace el grid de tamanio 1 celda y se redimensiona luego
         self.ClearGrid()
-        size = (sheetSelected.nrows, sheetSelected.ncols)
+        size = (self.NumberRows, self.NumberCols)
         # se lee el tamanio de la pagina y se ajusta las dimensiones
         newSize = (sheetSelected.nrows, sheetSelected.ncols)
         if newSize[0]-size[0] > 0:
-            self.AppendCols(newSize[0]-size[0])
+            self.AppendRows(newSize[0]-size[0])
 
         if newSize[1]-size[1] > 0:
-            self.AppendRows(newSize[1]-size[1])
+            self.AppendCols(newSize[1]-size[1])
 
         # se escribe los datos en el grid
         DECIMAL_POINT= wx.GetApp().DECIMAL_POINT
