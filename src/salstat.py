@@ -406,11 +406,16 @@ class SimpleGrid(MyGrid):# wxGrid
             rows = self.GetUsedRows()
             totalResult = self.getByColumns(maxRow = max(rows))
             result= list()
+            # reporting the header
+            allColNames= [self.GetColLabelValue(col) for col in range(self.NumberCols) ]
             for posCol in range(waste[-1]+1):
+                header= [  ]
                 if posCol in waste:
-                    result.append(totalResult[posCol])
+                    header.append(allColNames[posCol])
+                    header.extend(totalResult[posCol])
                 else:
-                    result.append(list())
+                    pass
+                result.append(header)
             self.reportObj.writeByCols(result, self.NumSheetReport)
         self.reportObj.save()
         self.Saved = True
@@ -427,33 +432,33 @@ class SimpleGrid(MyGrid):# wxGrid
         if dlg.ShowModal() != wx.ID_OK: # ShowModal
             dlg.Destroy()
             return
-
+        
         filename = dlg.GetPath()
         dlg.Destroy()
         # se lee el libro
         wb = xlrd.open_workbook(filename)
         sheets = [wb.sheet_by_index(i) for i in range(wb.nsheets)]
         sheetNames = [sheet.name for sheet in sheets]
-        if len(sheetNames) == 1:
-            sheetSelected = sheets[0]
-        else:
-            # create a dialog to selecct the sheet to be loaded
-            bt1= ('Choice',   (sheetNames,))
-            bt2= ('StaticText', ('Select a sheet to be loaded',))
-            setting = {'Title': 'Select a sheet one'}
-            dlg = dialog(self, struct=[[bt1,bt2],], settings= setting)
-            if dlg.ShowModal() != wx.ID_OK:
-                return
-
-            (sheetNameSelected,)= dlg.GetValue()
-            dlg.Destroy()
-            if not (sheetNameSelected in sheetNames):
-                return
-
-            for sheet, sheetname in zip(sheets, sheetNames):
-                if sheetname == sheetNameSelected:
-                    sheetSelected = sheet
-                    break
+        bt1= ('Choice',     [sheetNames])
+        bt2= ('StaticText', ['Select a sheet to be loaded'])
+        bt3= ('CheckBox',   ['Has header'])
+        setting = {'Title': 'Select a sheet one'}
+        
+        dlg = dialog(self, struct=[[bt1,bt2],[bt3]], settings= setting)
+        if dlg.ShowModal() != wx.ID_OK:
+            return
+        (sheetNameSelected, hasHeader)= dlg.GetValue()
+        sheetNameSelected= sheetNameSelected[0]
+        dlg.Destroy()
+        
+        if not (sheetNameSelected in sheetNames):
+            return
+        
+        for sheet, sheetname in zip(sheets, sheetNames):
+            if sheetname == sheetNameSelected:
+                sheetSelected = sheet
+                break
+        
         # se lee el tamanio del sheet seleccionado
         #size = (sheetSelected.nrows, sheetSelected.ncols)
         # se hace el grid de tamanio 1 celda y se redimensiona luego
@@ -469,18 +474,29 @@ class SimpleGrid(MyGrid):# wxGrid
 
         # se escribe los datos en el grid
         DECIMAL_POINT= wx.GetApp().DECIMAL_POINT
-        for row in range(newSize[0]):
-            for col in range(newSize[1]):
-                newValue = sheetSelected.cell_value(row,col)
-                if isinstance(newValue, (str,)):
-                    self.SetCellValue(row, col, newValue)
-                elif sheetSelected.cell_type(row,col) in (2,3):
-                    self.SetCellValue(row, col, str(newValue).replace('.', DECIMAL_POINT))
+        star= 0
+        if hasHeader:
+            star= 1
+            for col in range( newSize[1]):
+                header= sheetSelected.cell_value(0, col)
+                if header != u'':
+                    self.SetColLabelValue(col, sheetSelected.cell_value(0, col))
+        
+        if hasHeader and newSize[0] < 2:
+            return
+        
+        for reportRow, row in enumerate(range( star, newSize[0])):
+            for col in range( newSize[1]):
+                newValue = sheetSelected.cell_value( row, col)
+                if isinstance( newValue, (str, unicode)):
+                    self.SetCellValue( reportRow, col, newValue)
+                elif sheetSelected.cell_type( row, col) in (2,3):
+                    self.SetCellValue( reportRow, col, str( newValue).replace('.', DECIMAL_POINT))
                 else:
                     try:
-                        self.SetCellValue(row, col, str(newValue))
+                        self.SetCellValue (reportRow, col, str(newValue))
                     except:
-                        self.log.write("Could not import the row,col (%i,%i)" % (row+1,col+1))
+                        self.log.write( "Could not import the row,col (%i,%i)" % (row+1,col+1))
 
     def getData(self, x):
         for i in range(len(x)):
@@ -541,7 +557,7 @@ class SimpleGrid(MyGrid):# wxGrid
         return indata
     
     def _cleanData(self, data):
-        if isinstance(data, (str)):
+        if isinstance(data, (str, unicode)):
             data= [data]
             
         if not isiterable(data):
