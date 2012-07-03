@@ -334,12 +334,13 @@ class SimpleGrid(MyGrid):# wxGrid
         self.SelectAll()
 
     # adds columns and rows to the grid
-    def AddNCells(self, numcols, numrows):
+    def AddNCells(self, numcols, numrows, attr= None):
         insert = self.AppendCols(numcols)
         insert = self.AppendRows(numrows)
-        for i in range(self.GetNumberCols() - numcols, self.GetNumberCols(), 1):
-            self.SetColLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_BOTTOM)
-            self.SetColFormatFloat(i, 8, 4)
+        if attr != None:
+            for colNumber in range(self.GetNumberCols() - numcols, self.GetNumberCols(), 1):
+                #self.SetColLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_BOTTOM)
+                self.SetColAttr( colNumber, attr)
         self.AdjustScrollbars()
 
     # function finds out how many cols contain data - all in a list
@@ -619,7 +620,8 @@ class EditGridFrame(wx.Dialog):
     def OkayButtonPressed(self, evt):
         colswanted = self.numnewcols.GetValue()
         rowswanted = self.numnewRows.GetValue()
-        wx.GetApp().frame.grid.AddNCells(colswanted, rowswanted)
+        editorRederer= wx.GetApp().frame.floatCellAttr
+        wx.GetApp().frame.grid.AddNCells(colswanted, rowswanted, attr= editorRederer)
         self.Close(True)
 
     def CancelButtonPressed(self, evt):
@@ -1179,9 +1181,9 @@ class MainFrame(wx.Frame):
         attr.SetEditor(editor)
         renderer = floatRenderer( 4)
         attr.SetRenderer( renderer)
-        self.floarCellAttr= attr
+        self.floatCellAttr= attr
         for colNumber in range( self.grid.NumberCols):
-            self.grid.SetColAttr( colNumber, self.floarCellAttr)
+            self.grid.SetColAttr( colNumber, self.floatCellAttr)
         #-----------------------
         # create menubar
         self._createMenu()
