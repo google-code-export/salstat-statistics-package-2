@@ -245,11 +245,14 @@ class ManyDescriptives:
         itemsSelected = source.DescChoice.GetChecked()
         if len(itemsSelected ) == 0:
             return
-        itemsSelected= [items[pos] for pos in itemsSelected]
-        wx.GetApp().output.addColData(itemsSelected, 'Descriptive statistics')
-        for i in range(__x__):
+        firstcol= ['Descriptives']
+        firstcol.extend([items[pos] for pos in itemsSelected])
+        wx.GetApp().output.addColData(firstcol, 'Descriptive statistics')
+        itemNamesSelected= [ items[ itemnumber] for  itemnumber in itemsSelected ]
+        for i, nameCol in zip(range(__x__), data['nameCol'][1:]):
             statsi = ds[i]
-            result = [getattr(statsi,funcTrans[aliasParamName]) for aliasParamName in itemsSelected]
+            result= [nameCol]
+            result.extend([getattr(statsi,funcTrans[ itemNameSelected]) for itemNameSelected in itemNamesSelected])
             wx.GetApp().output.addColData(result)
         #for aliasParamName in itemsSelected:
             #realParamName = funcTrans[aliasParamName]
