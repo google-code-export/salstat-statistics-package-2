@@ -1432,6 +1432,12 @@ class MainFrame(wx.Frame):
                 parent.Append(menu,item[0])
             self.__createMenu(item[1], menu)
 
+        if wx.Platform == '__WXMAC__':
+            app = wx.GetApp()
+            # Allow spell checking in cells
+            # TODO Still need to add this to the Edit menu once we add Mac menu options
+            spellcheck = "mac.textcontrol-use-spell-checker"
+            wx.SystemOptions.SetOptionInt(spellcheck, 1)
 
     def _BindEvents(self):
         # grid callback
