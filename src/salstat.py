@@ -286,13 +286,6 @@ class SimpleGrid(MyGrid):# wxGrid
         self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
         self.wildcard = "Any File (*.*)|*.*|" \
             "SalStat Format (*.xls)|*.xls"
-        ## se ajusta el render
-        attr = wx.grid.GridCellAttr()
-        #editor = wx.grid.GridCellFloatEditor(-1, 5)
-        #attr.SetEditor(editor)
-        renderer = floatRenderer(1)
-        ## wx.grid.GridCellFloatRenderer(-1, 5)
-        attr.SetRenderer(renderer)
 
     def RangeSelected(self, evt):
         if evt.Selecting():
@@ -1177,9 +1170,18 @@ class MainFrame(wx.Frame):
         self.grid= SimpleGrid(self, self.logPanel, size = (500,50))
         # let />
         self.grid.Saved= False
-        self.grid.SetDefaultColSize(60, True)
-        self.grid.SetRowLabelSize(40)
+        self.grid.SetDefaultColSize( 60, True)
+        self.grid.SetRowLabelSize( 40)
         self.grid.SetDefaultCellAlignment( wx.ALIGN_RIGHT, wx.ALIGN_CENTER )
+        ## adjust the renderer 
+        attr=   wx.grid.GridCellAttr()
+        editor= wx.grid.GridCellFloatEditor()
+        attr.SetEditor(editor)
+        renderer = floatRenderer( 4)
+        attr.SetRenderer( renderer)
+        self.floarCellAttr= attr
+        for colNumber in range( self.grid.NumberCols):
+            self.grid.SetColAttr( colNumber, self.floarCellAttr)
         #-----------------------
         # create menubar
         self._createMenu()
