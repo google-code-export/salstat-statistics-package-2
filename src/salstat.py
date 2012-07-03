@@ -61,6 +61,7 @@ from imagenes import imageEmbed
 from helpSystem import Navegator
 
 from dialogs import CheckListBox, SixSigma
+from gridCellRenderers import floatRenderer, AutoWrapStringRenderer
 
 APPNAME= 'SalStat2'
 DescList= ['N','Sum','Mean','missing',
@@ -279,24 +280,25 @@ class SimpleGrid(MyGrid):# wxGrid
 
         self.setPadreCallBack(self)
         self.SetColLabelAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
-        for i in range(self.NumberCols):
-            self.SetColFormatFloat(i, 8, 4)
-        ##self.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.AlterSaveStatus)
+        #for i in range(self.NumberCols):
+        #    self.SetColFormatFloat(i, 8, 4)
+        #self.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.AlterSaveStatus)
         self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
         self.wildcard = "Any File (*.*)|*.*|" \
             "SalStat Format (*.xls)|*.xls"
         ## se ajusta el render
         attr = wx.grid.GridCellAttr()
-        editor = wx.grid.GridCellFloatEditor()
-        attr.SetEditor(editor)
-        renderer = wx.grid.GridCellFloatRenderer(0, 5)
+        #editor = wx.grid.GridCellFloatEditor(-1, 5)
+        #attr.SetEditor(editor)
+        renderer = floatRenderer(1)
+        ## wx.grid.GridCellFloatRenderer(-1, 5)
         attr.SetRenderer(renderer)
 
     def RangeSelected(self, evt):
         if evt.Selecting():
             self.tl = evt.GetTopLeftCoords()
             self.br = evt.GetBottomRightCoords()
-
+            
     #def OnRangeChange(self, evt): #AlterSaveStatus
         ## this is activated when the user enters some data
         #self.Saved = False
@@ -304,7 +306,6 @@ class SimpleGrid(MyGrid):# wxGrid
         #col = self.GetGridCursorCol()
         #row = self.GetGridCursorRow()
         #value = self.GetCellValue(row, col)
-        #xmlevt = '<data row="'+str(row)+'" col="'+str(col)+'">'+str(value)+'</data>\n'
 
     def CutData(self, evt):
         self.Delete()
@@ -1152,16 +1153,18 @@ class MainFrame(wx.Frame):
         self.m_mgr.SetManagedWindow( self )
 
         #set icon for frame (needs x-platform separator!
-        self.Icon= wx.GetApp().icon
-
+        self.Icon= appname.icon
+        self.DECIMAL_POINT= appname.DECIMAL_POINT
         #----------------------
         # create toolbars
         tb1= self._createTb1()
         self.formulaBarPanel= formulaBar(self,wx.ID_ANY)
         #------------------------
         # create small status bar
-        self.CreateStatusBar()
-        self.SetStatusText('SalStat 2')
+        self.StatusBar= self.CreateStatusBar(3)
+        self.StatusBar.SetStatusText('SalStat 2',0)
+        self.StatusBar.SetStatusText('cells Selected:   '+'count:      '+'sum:    ',1 )
+        self.StatusBar.SetStatusText('none',2)
 
         self.m_notebook1= wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
         self.logPanel= LogPanel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
@@ -1176,6 +1179,7 @@ class MainFrame(wx.Frame):
         self.grid.Saved= False
         self.grid.SetDefaultColSize(60, True)
         self.grid.SetRowLabelSize(40)
+        self.grid.SetDefaultCellAlignment( wx.ALIGN_RIGHT, wx.ALIGN_CENTER )
         #-----------------------
         # create menubar
         self._createMenu()
@@ -1443,6 +1447,7 @@ class MainFrame(wx.Frame):
         # grid callback
         self.grid.Bind( wx.grid.EVT_GRID_CMD_SELECT_CELL, self._cellSelectionChange )
         self.grid.Bind( wx.grid.EVT_GRID_SELECT_CELL, self._cellSelectionChange )
+        self.grid.Bind( wx.grid.EVT_GRID_RANGE_SELECT, self._gridRangeSelect )
         #-----------------
         # para el toolbar
         self.Bind(wx.EVT_MENU, self.GoClearData,        id= self.bt1.GetId())
@@ -1462,19 +1467,40 @@ class MainFrame(wx.Frame):
         self.m_notebook1.Bind( wx.EVT_LEFT_DCLICK, self._OnNtbDbClick )
         # self.Bind( wx.EVT_CLOSE, self.EndApplication )
         self.grid.setPadreCallBack(self)
-        if 0:
-            self.Bind(wx.EVT_MENU, self.GoCheckOutliers,    id = self.mn26.GetID())
-            self.Bind(wx.EVT_MENU, self.GoHelpAboutFrame,   id = self.mn27.GetID())
-            self.Bind(wx.EVT_MENU, self.GoHelpWizardFrame,  id = self.mn28.GetID())
-            self.Bind(wx.EVT_MENU, self.GoHelpTopicsFrame,  id = self.mn29.GetID())
-            self.Bind(wx.EVT_MENU, self.GoHelpLicenceFrame, id = self.mn30.GetID())
-
-    def _cellSelectionChange(self, evt):
+        self.sig= self.siguiente()
+      
+    def siguiente(self):
+        i= 0
+        while 1:
+            yield i
+            i+= 1
+            
+    def _gridRangeSelect(self, evt):
+        # displays the count and the sum of selected values
+        
+        selectedCells= self.grid.get_selection()
+        # Count the selected cells
+        # getting the cell values:
+        selectedCellText= list()
+        selectedNumerical= list()
+        emptyText= 0
+        for rowi, coli in selectedCells:
+            currText= self.grid.GetCellValue( rowi, coli)
+            if currText == u'':
+                emptyText+= 1
+            try:
+                selectedNumerical.append( float( currText.replace( self.DECIMAL_POINT, '.')))
+            except:
+                pass
+            selectedCellText.append( currText)
+        self.StatusBar.SetStatusText( 'cells Selected: %.0f  count: %.0f  sum: %.4f '%(len(selectedCells),len(selectedCells)-emptyText,sum(selectedNumerical)),1 )
+        
+    def _cellSelectionChange( self, evt):
         # se lee el contenido de la celda seleccionada
         row= evt.GetRow()
         col= evt.GetCol()
-        texto= self.grid.GetCellValue(row, col)
-        self.formulaBarPanel.m_textCtrl1.SetValue(texto)
+        texto= self.grid.GetCellValue( row, col)
+        self.formulaBarPanel.m_textCtrl1.SetValue( texto)
         evt.Skip()
 
     def _OnNtbDbClick(self,evt):
