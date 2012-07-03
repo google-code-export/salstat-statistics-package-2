@@ -95,6 +95,34 @@ class NewGrid(wx.grid.Grid):
             self.__init_mixin__( params['parent'])
         # se activa el menu contextual sobre el grid
         self.Bind(wx.grid.EVT_GRID_CELL_RIGHT_CLICK, self.OnGridRighClic )
+    
+    def get_selection(self):
+        """ Returns an index list of all cell that are selected in 
+        the grid. All selection types are considered equal. If no 
+        cells are selected, the current cell is returned.
+        
+        
+        from: http://trac.wxwidgets.org/ticket/9473"""
+
+        # GetSelectedCells: individual cells selected by ctrl-clicking
+        # GetSelectedRows: rows selected by clicking on the labels
+        # GetSelectedCols: cols selected by clicking on the labels
+        # GetSelectionBlockTopLeft
+        # GetSelectionBlockBottomRight: For blocks of cells selected by dragging across the grid cells.
+
+        dimx, dimy = (self.NumberRows, self.NumberCols) #self.parent.grid.dimensions[:2]
+        selection = []
+        selection += self.GetSelectedCells()
+        selected_rows = self.GetSelectedRows()
+        selected_cols = self.GetSelectedCols()
+        selection += list((row, y) for row in selected_rows for y in xrange(dimy))
+        selection += list((x, col) for col in selected_cols for x in xrange(dimx)) 
+        for tl,br in zip(self.GetSelectionBlockTopLeft(), self.GetSelectionBlockBottomRight()):
+            selection += [(x,y) for x in xrange(tl[0],br[0]+1) for y in xrange(tl[1], br[1]+1)]
+            if selection == []: 
+                selection = self.get_currentcell()
+        selection = sorted(list(set(selection)))
+        return selection
         
     def OnGridRighClic(self,evt):
         self.PopupMenu(_MyContextGrid(self), evt.GetPosition())
