@@ -397,6 +397,8 @@ class SimpleGrid(MyGrid):# wxGrid
     def SaveXls(self, *args):
         if len(args) == 1:
             saveAs= False
+        elif len(args) == 0:
+            saveAs= True
         else:
             saveAs= args[1]
         self.reportObj= ReportaExcel(cell_overwrite_ok = True)
@@ -1061,13 +1063,13 @@ class SalStat2App(wx.App):
 
         self.getConfigFile()
         self.DECIMAL_POINT=  locale.localeconv()['decimal_point']
-        #< help data
+        #<p> help data
         from wx.html import HtmlHelpData
         path= os.path.abspath(os.path.join(os.path.split(sys.argv[0])[0], 'help'))
         fileName= os.path.join(path, "help.hhp")
         self.HELPDATA= HtmlHelpData()
         self.HELPDATA.AddBook(fileName)
-        # help data />
+        # help data /<p>
         self.icon= imagenes.logo16()
         self.icon64= imagenes.logo64()
         self.frame = MainFrame(None, self)
@@ -1189,7 +1191,7 @@ class MainFrame(wx.Frame):
         #< set up the datagrid
         self.grid= SimpleGrid(self, self.logPanel, size = (500,50))
         # let />
-        self.grid.Saved= False
+        self.grid.Saved= True
         self.grid.SetDefaultColSize( 60, True)
         self.grid.SetRowLabelSize( 40)
         self.grid.SetDefaultCellAlignment( wx.ALIGN_RIGHT, wx.ALIGN_CENTER )
@@ -1545,9 +1547,37 @@ class MainFrame(wx.Frame):
         evt.Skip()
         
     def GoClearData(self, evt):
-        #shows a new data entry frame
-        self.grid.ClearGrid()
+        if not self.grid.Saved:
+            # display discard dialog
+            bt1=       ['StaticText', ['save Data?\n if you press cancel then\n all changes will be lost']]
+            setting=   {'Title': "Saving data"}
+            structure= [[bt1],]
+            dlg= dialog( settings = setting, struct = structure)
+            if dlg.ShowModal() == wx.ID_OK:
+                self.grid.SaveXls()
+            dlg.Destroy()
+            
+        #<p> shows a new data entry frame
+        # resizing the grid
+        try:
+            self.grid.DeleteCols( pos=0, numCols= int(self.grid.NumberCols))
+        except wx._core.PyAssertionError:
+            pass
+        
+        try:
+            self.grid.DeleteRows( pos=0, numRows= int(self.grid.NumberRows))
+        except wx._core.PyAssertionError:
+            pass
+        
+        self.grid.AppendCols( 50)
+        self.grid.AppendRows( 500)
+        self.grid.path= None
+        self.grid.Saved = False
+        self.m_mgr.Update()
+        # /<p>
+        # empting the undo redo
 
+        
     def GoFindDialog(self, evt):
         # Shows the find & replace dialog
         # NOTE - this doesn't appear to work on the grid, so I might be missing something...
