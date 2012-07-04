@@ -1863,9 +1863,6 @@ class MainFrame(wx.Frame):
         3) http://www.statisticalprocesscontrol.info/glossary.html
         4) http://www.isixsigma.com/tools-templates/capability-indices-process-capability/process-capability-cp-cpk-and-process-performance-pp-ppk-what-difference/'''
         
-        #####
-        colValues = self.grid.GetCol('D')
-        #####
         ColumnList, colnums = wx.GetApp().frame.grid.GetUsedCols()
         if len(ColumnList) == 0:
             return
