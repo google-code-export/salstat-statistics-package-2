@@ -6,7 +6,6 @@ Created on 27/10/2010
 #    range=(top, left, #rows, #cols)
 -> adicion de cambio en la posicion del cursor cuando se realiza un cambio en el grid
 @author: Administrator
-
 '''
 
 import wx
@@ -18,7 +17,7 @@ Handlers are in the method Key below.  Other handlers (e.g., menu, toolbar) shou
 """
 class PyWXGridEditMixin():
     """ A Copy/Paste and undo/redo mixin for wx.grid. Undo/redo is per-table, not yet global."""
-    def __init_mixin__(self,padre=False):
+    def __init_mixin__(self, padre=False):
         # el parent se utiliza para hacer un llamado a una funcion externa 
         # luego de modificar las celda en el caso que se deban aceptar ciertos 
         # valores en las celdas, especificamente cuando se quiera realizar una accion
@@ -31,23 +30,30 @@ class PyWXGridEditMixin():
         self._redoStack = []
         self._stackPtr = 0
         self.padre= padre
-
+        
+    def setPadreCallBack(self,padreObj):
+        self.padre = padreObj
+        
     def OnMixinKeypress(self, event):
         """Keystroke handler."""
         key = event.GetKeyCode() 
-        if key == ord(" ") and event.ShiftDown and not event.ControlDown:
-            self.SelectRow(self.GetGridCursorRow())
+        if key == ord(" ") and event.ShiftDown():
+            #self.SelectRow(self.GetGridCursorRow())
+            self.SelectCol(self.GetGridCursorCol())
             return
-
-        if not event.ControlDown: return
-        if key == 67: self.Copy()
-        elif key == 86: self.OnPaste()
+        
+        if key == wx.WXK_DELETE: self.Delete()
+        
+        if not event.ControlDown():
+            event.Skip()
+            return
+        
+        if key == 67:         self.Copy()
+        elif key == 86:       self.OnPaste()
         elif key == ord("X"): self.OnCut()
-        elif key == wx.WXK_DELETE: self.Delete()
         elif key == ord("Z"): self.Undo()
-        elif key == ord("Y"): self.Redo()
-        elif key == ord(" "): self.SelectCol(self.GetGridCursorCol())
-        elif key: event.Skip()
+        elif key == ord("Y"): self.Redo() # elif key == ord(" "): self.SelectCol(self.GetGridCursorCol())
+        elif key:  event.Skip()
         
     def Mixin_callbackChangeCell(self,rango):
         # realiza el llamado a la funcion OnRangeChange del respectivo parent
@@ -226,7 +232,7 @@ class PyWXGridEditMixin():
             self.SetGridCursor(top,left)
             self.Mixin_callbackChangeCell(params[0])
             padre= self.GetParent() 
-            padre.m_grid.SetGridCursor(top, left) # se espera que el parent sea el grid
+            #padre.m_grid.SetGridCursor(top, left) # se espera que el parent sea el grid
 
     def Redo(self, evt = None):
         if self._stackPtr < len(self._redoStack):
@@ -240,7 +246,7 @@ class PyWXGridEditMixin():
             self._stackPtr += 1
             self.Mixin_callbackChangeCell(params[0])
             padre= self.GetParent() 
-            padre.m_grid.SetGridCursor(top, left) # se espera que el parent sea el grid
+            #padre.m_grid.SetGridCursor(top, left) # se espera que el parent sea el grid
 
 if __name__ == '__main__':
         import sys
@@ -265,10 +271,10 @@ if __name__ == '__main__':
         grid.SetCellValue(5,3,"geeges")
         
         # make column 1 multiline, autowrap
-        cattr = wx.grid.GridCellAttr()
-        cattr.SetEditor(wx.grid.GridCellAutoWrapStringEditor())
-        #cattr.SetRenderer(wx.grid.GridCellAutoWrapStringRenderer())
-        grid.SetColAttr(1, cattr)
+        ##cattr = wx.grid.GridCellAttr()
+        ##cattr.SetEditor(wx.grid.GridCellAutoWrapStringEditor())
+        ##cattr.SetRenderer(wx.grid.GridCellAutoWrapStringRenderer())
+        ##grid.SetColAttr(1, cattr)
         
         frame.Show(True)
         app.MainLoop()
