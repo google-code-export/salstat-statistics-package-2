@@ -20,13 +20,13 @@ class _MyContextGrid(wx.Menu):
     def __init__(self,parent,*args,**params):
         wx.Menu.__init__(self)
         self.parent = parent
-        cortar =    wx.MenuItem(self, wx.NewId(), '&Cortar\tCtrl+X')
-        copiar =    wx.MenuItem(self, wx.NewId(), 'Copiar\tCtrl+C')
-        pegar =     wx.MenuItem(self, wx.NewId(), '&Pegar\tCtrl+V')
-        eliminar =  wx.MenuItem(self, wx.NewId(), '&Eliminar\tDel')
-        deshacer =  wx.MenuItem(self, wx.NewId(), '&Deshacer\tCtrl+Z')
-        rehacer =   wx.MenuItem(self, wx.NewId(), '&Rehacer\tCtrl+Y')
-        exportarCsv= wx.MenuItem(self,wx.NewId(), '&Exportar\tCtrl+E')
+        cortar =     wx.MenuItem(self, wx.NewId(), '&Cut\tCtrl+X')
+        copiar =     wx.MenuItem(self, wx.NewId(), 'C&opy\tCtrl+C')
+        pegar =      wx.MenuItem(self, wx.NewId(), '&Paste\tCtrl+V')
+        eliminar =   wx.MenuItem(self, wx.NewId(), '&Del\tDel')
+        deshacer =   wx.MenuItem(self, wx.NewId(), '&Undo\tCtrl+Z')
+        rehacer =    wx.MenuItem(self, wx.NewId(), '&Redo\tCtrl+Y')
+        exportarCsv= wx.MenuItem(self, wx.NewId(), '&Export\tCtrl+E')
         
         imagenes = imageEmbed()
         cortar.SetBitmap(imagenes.edit_cut())
@@ -36,7 +36,7 @@ class _MyContextGrid(wx.Menu):
         deshacer.SetBitmap(imagenes.edit_undo())
         rehacer.SetBitmap(imagenes.edit_redo())
         exportarCsv.SetBitmap(imagenes.exporCsv())
-        # edit_redo
+
         self.AppendSeparator()
         self.AppendItem(cortar)
         self.AppendItem(copiar,)
@@ -49,13 +49,13 @@ class _MyContextGrid(wx.Menu):
         self.AppendSeparator()
         self.AppendItem(exportarCsv,)
         
-        self.Bind(wx.EVT_MENU, self.OnCortar, id=cortar.GetId())
-        self.Bind(wx.EVT_MENU, self.OnCopiar, id=copiar.GetId())
-        self.Bind(wx.EVT_MENU, self.OnPegar, id=pegar.GetId())
-        self.Bind(wx.EVT_MENU, self.OnEliminar, id=eliminar.GetId())
-        self.Bind(wx.EVT_MENU, self.OnDeshacer, id=deshacer.GetId())
-        self.Bind(wx.EVT_MENU, self.OnRehacer, id=rehacer.GetId())
-        self.Bind(wx.EVT_MENU, self.OnExportarCsv, id=exportarCsv.GetId())
+        self.Bind(wx.EVT_MENU, self.OnCortar,      id= cortar.GetId())
+        self.Bind(wx.EVT_MENU, self.OnCopiar,      id= copiar.GetId())
+        self.Bind(wx.EVT_MENU, self.OnPegar,       id= pegar.GetId())
+        self.Bind(wx.EVT_MENU, self.OnEliminar,    id= eliminar.GetId())
+        self.Bind(wx.EVT_MENU, self.OnDeshacer,    id= deshacer.GetId())
+        self.Bind(wx.EVT_MENU, self.OnRehacer,     id= rehacer.GetId())
+        self.Bind(wx.EVT_MENU, self.OnExportarCsv, id= exportarCsv.GetId())
         
     def OnCortar(self, event):
         self.parent.OnCut()
