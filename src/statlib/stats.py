@@ -1964,7 +1964,7 @@ def lfindwithin (data):
 geometricmean = Dispatch ( (lgeometricmean, (ListType, TupleType)), )
 harmonicmean = Dispatch ( (lharmonicmean, (ListType, TupleType)), )
 mean = Dispatch ( (lmean, (ListType, TupleType)), )
-median = Dispatch ( (lmedian, (ListType, TupleType)), )
+median = Dispatch ( (lmedianscore, (ListType, TupleType)), )  # replacing the media function to medianScore  lmedian
 medianscore = Dispatch ( (lmedianscore, (ListType, TupleType)), )
 mode = Dispatch ( (lmode, (ListType, TupleType)), )
 
@@ -4455,8 +4455,8 @@ try:
                               (aharmonicmean, (N.ndarray,)) )
     mean = Dispatch ( (lmean, (ListType, TupleType)),
                       (amean, (N.ndarray,)) )
-    median = Dispatch ( (lmedian, (ListType, TupleType)),
-                        (amedian, (N.ndarray,)) )
+    median = Dispatch ( (lmedianscore, (ListType, TupleType)),  # changing the median to medianscore lmedian, amedian
+                        (amedianscore, (N.ndarray,)) )
     medianscore = Dispatch ( (lmedianscore, (ListType, TupleType)),
                              (amedianscore, (N.ndarray,)) )
     mode = Dispatch ( (lmode, (ListType, TupleType)),
