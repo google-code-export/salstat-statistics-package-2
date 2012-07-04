@@ -1570,6 +1570,10 @@ class MainFrame(wx.Frame):
             pass
         
         self.grid.AppendCols( 50)
+        # update the renderer
+        for colNumber in range( self.grid.NumberCols):
+            self.grid.SetColAttr( colNumber, self.floatCellAttr)
+            
         self.grid.AppendRows( 500)
         self.grid.path= None
         self.grid.Saved = False
