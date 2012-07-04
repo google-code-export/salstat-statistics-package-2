@@ -20,31 +20,37 @@ def numPage():
         i+= 1
 
 class MyGridPanel( wx.Panel, object ):
+    # can be used as a grid ctrl
     def __init__( self, parent , id= wx.ID_ANY, size= (5,5)):
         # bigParent: id del parent para llamar la funcion OnrangeChange
         wx.Panel.__init__ ( self, parent, id , pos = wx.DefaultPosition, style = wx.TAB_TRAVERSAL )
         self.sizer = wx.BoxSizer(wx.VERTICAL)
+        #< don't change this line
         self.m_grid = NewGrid( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
+        # don't change this line/>
         # Grid
-        self.m_grid.CreateGrid( size[0], size[1] )
-        self.m_grid.EnableEditing( True )
-        self.m_grid.EnableGridLines( True )
-        self.m_grid.EnableDragGridSize( False )
-        self.m_grid.SetMargins( 0, 0 )
+        self.CreateGrid( size[0], size[1] )
+        self.EnableEditing( True )
+        self.EnableGridLines( True )
+        self.EnableDragGridSize( False )
+        self.SetMargins( 0, 0 )
+        self.floatCellAttr= None
         # Columns
-        self.m_grid.EnableDragColMove( False )
-        self.m_grid.EnableDragColSize( True )
-        self.m_grid.SetColLabelSize( 30 )
-        self.m_grid.SetColLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
+        self.EnableDragColMove( False )
+        self.EnableDragColSize( True )
+        self.SetColLabelSize( 30 )
+        self.SetColLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
         # Rows
-        self.m_grid.EnableDragRowSize( True )
-        self.m_grid.SetRowLabelSize( 80 )
-        self.m_grid.SetRowLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
+        self.EnableDragRowSize( True )
+        self.SetRowLabelSize( 80 )
+        self.SetRowLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
         # Label Appearance
-        self.m_grid.SetLabelBackgroundColour( wx.Colour( 254, 226, 188 ) )
+        self.SetLabelBackgroundColour( wx.Colour( 254, 226, 188 ) )
         # Cell Defaults
-        self.m_grid.SetDefaultCellAlignment( wx.ALIGN_LEFT, wx.ALIGN_TOP )
+        self.SetDefaultCellAlignment( wx.ALIGN_LEFT, wx.ALIGN_TOP )
+        #< don't change this line
         self.sizer.Add( self.m_grid , 1, wx.ALL|wx.EXPAND, 5 )
+        # don't change this line/>
         self.SetSizer(self.sizer)
         self.Fit()
         
@@ -111,13 +117,12 @@ class MyGridPanel( wx.Panel, object ):
         if isinstance( data, (ndarray),):
             data= ravel( data)
         
-        cols2add= len( data) - self.GetNumberRows()
-        if cols2add > 0:
+        rows2add= len( data) - self.GetNumberRows()
+        if rows2add > 0:
             if len( data) > 1e6:
                 data= data[:1e6]
-                cols2add= len( data) - self.GetNumberRows()
-            self.AppendRows( cols2add)
-
+                rows2add= len( data) - self.GetNumberRows()
+            self.AppendRows( rows2add)
         
         try:
             dp= wx.GetApp().DECIMAL_POINT
@@ -168,7 +173,7 @@ class MyGridPanel( wx.Panel, object ):
         for colnumber, colname in enumerate(colNames):
             self.SetColLabelValue(pos, colname)
             
-class NoteBookSheet(wx.Panel):
+class NoteBookSheet(wx.Panel, object):
     def __init__( self, parent, *args, **params):
         # se almacenan las paginas en un diccionario con llave el numero de pagina
         if params.has_key('fb'):
@@ -186,6 +191,18 @@ class NoteBookSheet(wx.Panel):
         self.currentPage = None
         self.pageNames= dict()
         self.Layout()
+        
+    # implementing a wrap to the current grid
+    def __getattribute__(self, name):
+        '''wraps the funtions to the grid
+        emulating a grid control'''
+        try:
+            return object.__getattribute__(self, name)
+        except AttributeError:
+            if self.GetPageCount() != 0:
+                currGrid= self.m_notebook.GetSelection()
+                return currGrid.__getattribute__(name)
+            raise AttributeError
 
     def getGridAllValueByCols(self,pageName):
         if not (pageName in self.pageNames.keys()):
@@ -246,7 +263,7 @@ class NoteBookSheet(wx.Panel):
         col=  int(event.Col)
         Id=   event.GetId()
         pageSelectNumber=  self.m_notebook.GetSelection()
-        grid= self.m_notebook.GetPage(pageSelectNumber).m_grid
+        grid= self.m_notebook.GetPage(pageSelectNumber)
         try:
             texto= grid.GetCellValue(row, col)
             self.fb.m_textCtrl1.SetValue(texto)
@@ -324,7 +341,17 @@ class NoteBookSheet(wx.Panel):
         # se adiciona la pagina grid
         grid01= self.addPage(data)
         # se cargan los datos dentro del grid
-        self.__loadData__(grid01.m_grid,data['data'],byRows)
+        self.__loadData__( grid01, data['data'], byRows)
+        #< setting the renderer
+        try:
+            attr= wx.grid.GridCellAttr()
+            floatCellRenderer= wx.GetApp().frame.floatCellRenderer
+            attr.SetRenderer( floatCellRenderer)
+            grid01.SetColAttr( grid01.NumberCols-1, attr)
+        except AttributeError:
+            # the renderer was not find
+            pass
+        # setting the renderer />
         return grid01
 
     def addColData(self, colData, pageName= None):
@@ -341,8 +368,18 @@ class NoteBookSheet(wx.Panel):
             page = self.addPage({'name': pageName})
         # se procede a verificar las dimensiones de la pagina actual
         size = (page.GetNumberRows(), page.GetNumberCols())
-        # se adiciona una columna
+        # adding one column
         page.AppendCols(1)
+        #< setting the renderer
+        try:
+            attr= wx.grid.GridCellAttr()
+            floatCellRenderer= wx.GetApp().frame.floatCellRenderer
+            attr.SetRenderer(floatCellRenderer)
+            page.SetColAttr( page.NumberCols-1, attr)
+        except AttributeError:
+            # the renderer was not find
+            pass
+        # setting the renderer />
         currCol = size[1]
         if isinstance(colData,(str,)):
             colData = [colData]
@@ -368,7 +405,6 @@ class NoteBookSheet(wx.Panel):
             else:
                 colValue = str(colValue).replace('.', DECIMAL_POINT)
             page.SetCellValue(colPos, currCol, colValue)
-
 
 class Test(wx.Frame):
     def __init__(self, parent, id, title):
