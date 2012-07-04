@@ -72,7 +72,6 @@ class floatRenderer(Grid.PyGridCellRenderer):
             dp= wx.GetApp().DECIMAL_POINT
         except AttributeError:
             dp= '.'
-        print text
         try:
             text= float( text.replace( dp,'.'))
             text= round( text, self.decimalPoints)
