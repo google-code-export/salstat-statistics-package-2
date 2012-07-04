@@ -269,7 +269,6 @@ class ManyDescriptives:
 #---------------------------------------------------------------------------
 # class for grid - used as datagrid.
 class SimpleGrid(MyGrid):# wxGrid
-    
     def __init__(self, parent, log, size= (1000,100)):
         self.NumSheetReport = 0
         self.log = log
@@ -284,8 +283,12 @@ class SimpleGrid(MyGrid):# wxGrid
         #    self.SetColFormatFloat(i, 8, 4)
         #self.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.AlterSaveStatus)
         self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
+        self.m_grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.onCellChanged)
         self.wildcard = "Any File (*.*)|*.*|" \
-            "SalStat Format (*.xls)|*.xls"
+            "S2 Format (*.xls)|*.xls"
+        
+    def onCellChanged(self, evt):
+        self.Saved = False
 
     def RangeSelected(self, evt):
         if evt.Selecting():
@@ -302,6 +305,7 @@ class SimpleGrid(MyGrid):# wxGrid
 
     def CutData(self, evt):
         self.Delete()
+        self.Saved= False
 
     def CopyData(self, evt):
         self.Copy()
@@ -309,6 +313,7 @@ class SimpleGrid(MyGrid):# wxGrid
 
     def PasteData(self, evt):
         self.OnPaste()
+        self.Saved= False
 
     #def Undo(self, evt):
         #self.Undo()
@@ -316,32 +321,35 @@ class SimpleGrid(MyGrid):# wxGrid
     #def Redo(self, evt):
         #self.Redo()
 
-    def EditGrid(self, evt, numrows):
-        insert = self.AppendRows(numrows)
+    #def EditGrid(self, evt, numrows):
+        #insert = self.AppendRows(numrows)
 
     def DeleteCurrentCol(self, evt):
         currentcol = self.GetGridCursorCol()
         self.DeleteCols(currentcol, 1)
         self.AdjustScrollbars()
+        self.Saved= False
 
 
     def DeleteCurrentRow(self, evt):
         currentrow = self.GetGridCursorRow()
         self.DeleteRows(currentrow, 1)
         self.AdjustScrollbars()
+        self.Saved= False
 
     def SelectAllCells(self, evt):
         self.SelectAll()
 
     # adds columns and rows to the grid
     def AddNCells(self, numcols, numrows, attr= None):
-        insert = self.AppendCols(numcols)
-        insert = self.AppendRows(numrows)
+        insert= self.AppendCols(numcols)
+        insert= self.AppendRows(numrows)
         if attr != None:
             for colNumber in range(self.GetNumberCols() - numcols, self.GetNumberCols(), 1):
                 #self.SetColLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_BOTTOM)
                 self.SetColAttr( colNumber, attr)
         self.AdjustScrollbars()
+        self.Saved= False
 
     # function finds out how many cols contain data - all in a list
     #(ColsUsed) which has col #'s
@@ -461,8 +469,12 @@ class SimpleGrid(MyGrid):# wxGrid
         
         for sheet, sheetname in zip(sheets, sheetNames):
             if sheetname == sheetNameSelected:
-                sheetSelected = sheet
+                sheetSelected= sheet
                 break
+        #<p> updating the path related to the new open file
+        self.path= filename
+        self.Saved= True
+        # /<p>
         
         # se lee el tamanio del sheet seleccionado
         #size = (sheetSelected.nrows, sheetSelected.ncols)
@@ -592,7 +604,12 @@ class SimpleGrid(MyGrid):# wxGrid
         return self._cleanData( self._getCol( col))
     
     def PutCol(self, colNumber, data):
-        return self.putCol(colNumber, data)
+        try:
+            return self.putCol(colNumber, data)
+        except:
+            raise
+        finally:
+            self.Saved= False
     
     def GetEntireDataSet(self, numcols):
         """Returns the data specified by a list 'numcols' in a Numeric
@@ -682,8 +699,8 @@ class VariablesFrame(wx.Dialog):
 
         bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
 
-        okaybutton = wx.Button(self.m_panel1 , 2001, "Okay", wx.DefaultPosition, wx.DefaultSize, 0 )
-        cancelbutton = wx.Button(self.m_panel1 , 2002, "Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
+        okaybutton = wx.Button(self.m_panel1 , wx.ID_ANY, "Okay", wx.DefaultPosition, wx.DefaultSize, 0 )
+        cancelbutton = wx.Button(self.m_panel1 , wx.ID_ANY, "Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
 
         bSizer2.Add( okaybutton, 0, wx.ALL, 5 )
         bSizer2.Add( cancelbutton , 0, wx.ALL, 5 )
@@ -909,12 +926,7 @@ class formulaBar ( wx.Panel ):
                                         wx.TE_WORDWRAP|wx.NO_BORDER )
 
         self.m_textCtrl1.SetMinSize( wx.Size( 220,25 ) )
-        bSizer1.Add( self.m_textCtrl1, 0, 0, 5 ) # wx.EXPAND
-
-        #self.m_button1 = wx.Button( self, wx.ID_ANY, u">>",
-    #                    wx.DefaultPosition, wx.DefaultSize,
-    #                    wx.BU_EXACTFIT|wx.DOUBLE_BORDER )
-        #bSizer1.Add( self.m_button1, 0, wx.EXPAND, 5 )
+        bSizer1.Add( self.m_textCtrl1, 0, 0, 5 ) 
         self.SetSizer( bSizer1 )
         self.Layout()
         bSizer1.Fit( self )
@@ -1160,13 +1172,12 @@ class MainFrame(wx.Frame):
         #----------------------
         # create toolbars
         tb1= self._createTb1()
-        self.formulaBarPanel= formulaBar(self,wx.ID_ANY)
+        self.formulaBarPanel= formulaBar( self,wx.ID_ANY)
         #------------------------
         # create small status bar
-        self.StatusBar= self.CreateStatusBar(3)
-        self.StatusBar.SetStatusText('SalStat 2',0)
-        self.StatusBar.SetStatusText('cells Selected:   '+'count:      '+'sum:    ',1 )
-        self.StatusBar.SetStatusText('none',2)
+        self.StatusBar= self.CreateStatusBar( 3)
+        self.StatusBar.SetStatusText( 'S2', 2)
+        self.StatusBar.SetStatusText( 'cells Selected:   '+'count:      '+'sum:    ', 1 )
 
         self.m_notebook1= wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
         self.logPanel= LogPanel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
@@ -2066,11 +2077,14 @@ class MainFrame(wx.Frame):
             result[paramName] = value
         return result
 
-
     def EndApplication(self, evt):
         if self.grid.Saved == False:
-            win = SaveDialog(self)
-            win.Show(True)
+            # checking if there is a data to be saved
+            if len(self.grid.GetUsedCols()[0]) != 0:
+                win = SaveDialog(self)
+                win.Show(True)
+            else:
+                wx.GetApp().frame.Destroy()
         else:
             wx.GetApp().frame.Destroy()
 #------------------------------------------
