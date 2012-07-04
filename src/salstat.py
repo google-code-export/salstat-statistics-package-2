@@ -1187,6 +1187,7 @@ class MainFrame(wx.Frame):
         editor= wx.grid.GridCellFloatEditor()
         attr.SetEditor(editor)
         renderer = floatRenderer( 4)
+        self.floatCellRenderer= renderer
         attr.SetRenderer( renderer)
         self.floatCellAttr= attr
         for colNumber in range( self.grid.NumberCols):
@@ -2752,6 +2753,7 @@ class MainFrame(wx.Frame):
         if len( xcolNameSelect ) == 0 or len( ycolNameSelect ) == 0:
             self.logPanel.write("You haven't select any items!")
             return
+        
         xvalues = [ [pos for pos, value in enumerate( ColumnList )
                      if value == val
                      ][0]
