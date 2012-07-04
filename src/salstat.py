@@ -348,12 +348,20 @@ class SimpleGrid(MyGrid):# wxGrid
     def GetUsedCols(self):
         ColsUsed = []
         colnums = []
-        cols = self.GetNumberCols()
-        for i in range(cols):
-            dat = self.GetCellValue(0, i)
-            if (dat!=''):
-                ColsUsed.append(self.GetColLabelValue(i))
-                colnums.append(i)
+        dat = ''
+        tmp = 0
+        for col in range(self.GetNumberCols()):
+            for row in range(self.GetNumberRows()):
+                dat = self.GetCellValue(row, col)
+                if dat != '':
+                    tmp += 1
+                    break # it's just needed to serch by the first element 
+                
+            if tmp > 0:
+                print tmp
+                ColsUsed.append(self.GetColLabelValue(col))
+                colnums.append(col)
+                tmp = 0
         return ColsUsed, colnums
 
     def GetColsUsedList(self):
