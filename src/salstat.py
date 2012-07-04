@@ -358,7 +358,6 @@ class SimpleGrid(MyGrid):# wxGrid
                     break # it's just needed to serch by the first element 
                 
             if tmp > 0:
-                print tmp
                 ColsUsed.append(self.GetColLabelValue(col))
                 colnums.append(col)
                 tmp = 0
