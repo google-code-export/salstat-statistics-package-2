@@ -276,7 +276,8 @@ class SimpleGrid(MyGrid):# wxGrid
         MyGrid.__init__(self, parent, -1, size)
         self.Saved = True
         self.moveTo = None
-
+        if wx.Platform == "__WXMAC__":
+            self.SetGridLineColour(wx.BLACK)
         self.setPadreCallBack(self)
         self.SetColLabelAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
         #for i in range(self.NumberCols):
@@ -691,6 +692,11 @@ class VariablesFrame(wx.Dialog):
         self.vargrid.CreateGrid(3,maxcols)
         for i in range(maxcols):
             oldlabel = wx.GetApp().frame.grid.GetColLabelValue(i)
+            self.vargrid.SetDefaultCellAlignment(wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
+            if wx.Platform == '__WXMAC__':
+                self.vargrid.SetGridLineColour("#b7b7b7")
+                self.vargrid.SetLabelBackgroundColour("#d2d2d2")
+                self.vargrid.SetLabelTextColour("#444444")
             self.vargrid.SetCellValue(0, i, oldlabel)
         self.vargrid.SetRowLabelValue(0,"Variable Name")
         self.vargrid.SetRowLabelValue(1,"Decimal Places")
@@ -1171,6 +1177,10 @@ class MainFrame(wx.Frame):
         self.floatCellAttr= attr
         for colNumber in range( self.grid.NumberCols):
             self.grid.SetColAttr( colNumber, self.floatCellAttr)
+        if wx.Platform == '__WXMAC__':
+            self.grid.SetGridLineColour("#b7b7b7")
+            self.grid.SetLabelBackgroundColour("#d2d2d2")
+            self.grid.SetLabelTextColour("#444444")
         #-----------------------
         # create menubar
         self._createMenu()
