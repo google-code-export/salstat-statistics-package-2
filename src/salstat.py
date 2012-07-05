@@ -1524,7 +1524,11 @@ class MainFrame(wx.Frame):
         # se lee el contenido de la celda seleccionada
         row= evt.GetRow()
         col= evt.GetCol()
-        texto= self.grid.GetCellValue( row, col)
+        texto= u''
+        try:
+            texto= self.grid.GetCellValue( row, col)
+        except wx._core.PyAssertionError:
+            pass
         self.formulaBarPanel.m_textCtrl1.SetValue( texto)
         evt.Skip()
 
@@ -1569,12 +1573,20 @@ class MainFrame(wx.Frame):
         except wx._core.PyAssertionError:
             pass
         
+        self.grid.AppendRows( 500)
         self.grid.AppendCols( 50)
-        # update the renderer
+        # <p> updating the renderer
+        attr=   wx.grid.GridCellAttr()
+        editor= wx.grid.GridCellFloatEditor()
+        attr.SetEditor(editor)
+        renderer = floatRenderer( 4)
+        self.floatCellRenderer= renderer
+        attr.SetRenderer( renderer)
+        self.floatCellAttr= attr
         for colNumber in range( self.grid.NumberCols):
             self.grid.SetColAttr( colNumber, self.floatCellAttr)
+        # /<p>
             
-        self.grid.AppendRows( 500)
         self.grid.path= None
         self.grid.Saved = False
         self.m_mgr.Update()
