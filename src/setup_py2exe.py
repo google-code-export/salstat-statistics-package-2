@@ -38,7 +38,7 @@ setup(name= 'salstat',
       author='Sebastian Lopez Buritica',
       windows=[
           {"script": 'salstat.py',
-           "icon_resources": [(1, iconPath)]
+           "icon_resources": [(0, iconPath)]
            }
           ],
       data_files= matplotlib.get_py2exe_datafiles(),
