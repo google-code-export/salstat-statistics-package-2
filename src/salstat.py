@@ -627,8 +627,8 @@ class SimpleGrid(MyGrid):# wxGrid
 # base class for getting number of columns/rows to add
 class EditGridFrame(wx.Dialog):
     def __init__(self, parent, id):
-        wx.Dialog.__init__(self, parent, id, "Change Grid Size", \
-                           size=(205, 100+wind))
+        wx.Dialog.__init__(self, parent, id, "Add Row(s) and Column(s)", \
+                           size=(305, 200+wind))
         icon = imagenes.logo16()
         self.SetIcon(icon)
         l1 = wx.StaticText(self, -1, 'Add Columns',pos=(10,15))
@@ -639,8 +639,8 @@ class EditGridFrame(wx.Dialog):
         self.numnewRows = wx.SpinCtrl(self, -1, "", wx.Point(110, 50), wx.Size(80,25))
         self.numnewRows.SetRange(1, 5000)
         self.numnewRows.SetValue(0)
-        okaybutton = wx.Button(self, wx.ID_ANY, "Okay", wx.Point(10, 90))
-        cancelbutton = wx.Button(self, wx.ID_ANY, "Cancel", wx.Point(110,90))
+        okaybutton = wx.Button(self, wx.ID_ANY, "Okay", wx.Point(10, 90), wx.DefaultSize)
+        cancelbutton = wx.Button(self, wx.ID_ANY, "Cancel", wx.Point(110,90), wx.DefaultSize)
         self.Bind(wx.EVT_BUTTON, self.OkayButtonPressed, id = okaybutton.GetId())
         self.Bind(wx.EVT_BUTTON, self.CancelButtonPressed, id= cancelbutton.GetId())
 
@@ -658,8 +658,8 @@ class EditGridFrame(wx.Dialog):
 # grid preferences - set row & col sizes
 class GridPrefs(wx.Dialog):
     def __init__(self, parent, id):
-        wx.Dialog.__init__(self, parent, id, "Cell Size", \
-                           size=(205,100+wind))
+        wx.Dialog.__init__(self, parent, id, "Change Cell Size", \
+                           size=(305,200+wind))
         icon = imagenes.logo16()
         self.SetIcon(icon)
         self.colwidth = wx.SpinCtrl(self, -1, "", wx.Point(110,10), wx.Size(80,25))
@@ -1357,7 +1357,7 @@ class MainFrame(wx.Frame):
               ('Delete Current Row',    None,  self.grid.DeleteCurrentRow),)),
             ('&Preferences',
              (('Variables...',             None,  self.GoVariablesFrame ),
-              ('Add Columns and Rows...',  None,  self.GoEditGrid),
+              ('Add Row(s) and Column(s)...',  None,  self.GoEditGrid),
               ('Change Cell Size...',      None,  self.GoGridPrefFrame),
               ('Change the Font...',       None,  self.GoFontPrefsDialog),)),
             ('P&reparation',
