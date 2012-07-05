@@ -623,65 +623,31 @@ class SimpleGrid(MyGrid):# wxGrid
         return numpy.array((biglist), numpy.float)
 
 #---------------------------------------------------------------------------
-# base class for getting number of columns/rows to add
-class EditGridFrame(wx.Dialog):
-    def __init__(self, parent, id):
-        wx.Dialog.__init__(self, parent, id, "Change Grid Size", \
-                           size=(205, 100+wind))
-        icon = imagenes.logo16()
-        self.SetIcon(icon)
-        l1 = wx.StaticText(self, -1, 'Add Columns',pos=(10,15))
-        l2 = wx.StaticText(self, -1, 'Add Rows',pos=(10,55))
-        self.numnewcols = wx.SpinCtrl(self, -1, "", wx.Point(110,10), wx.Size(80,25))
-        self.numnewcols.SetRange(1, 5000)
-        self.numnewcols.SetValue(0)
-        self.numnewRows = wx.SpinCtrl(self, -1, "", wx.Point(110, 50), wx.Size(80,25))
-        self.numnewRows.SetRange(1, 5000)
-        self.numnewRows.SetValue(0)
-        okaybutton = wx.Button(self, wx.ID_ANY, "Okay", wx.Point(10, 90))
-        cancelbutton = wx.Button(self, wx.ID_ANY, "Cancel", wx.Point(110,90))
-        self.Bind(wx.EVT_BUTTON, self.OkayButtonPressed, id = okaybutton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.CancelButtonPressed, id= cancelbutton.GetId())
-
-    def OkayButtonPressed(self, evt):
-        colswanted = self.numnewcols.GetValue()
-        rowswanted = self.numnewRows.GetValue()
-        editorRederer= wx.GetApp().frame.floatCellAttr
-        wx.GetApp().frame.grid.AddNCells(colswanted, rowswanted, attr= editorRederer)
-        self.Close(True)
-
-    def CancelButtonPressed(self, evt):
-        self.Destroy()
-
-#---------------------------------------------------------------------------
 # grid preferences - set row & col sizes
-class GridPrefs(wx.Dialog):
-    def __init__(self, parent, id):
-        wx.Dialog.__init__(self, parent, id, "Cell Size", \
-                           size=(205,100+wind))
-        icon = imagenes.logo16()
-        self.SetIcon(icon)
-        self.colwidth = wx.SpinCtrl(self, -1, "", wx.Point(110,10), wx.Size(80,25))
-        self.colwidth.SetRange(1,200)
-        self.colwidth.SetValue(wx.GetApp().frame.grid.GetDefaultColSize())
-        self.rowheight= wx.SpinCtrl(self, -1, "", wx.Point(110,50), wx.Size(80,25))
-        self.rowheight.SetRange(1,100)
-        self.rowheight.SetValue(wx.GetApp().frame.grid.GetDefaultRowSize())
-        l1 = wx.StaticText(self, -1, 'Column Width:',pos=(10,15))
-        l2 = wx.StaticText(self, -1, 'Row Height:',pos=(10,55))
-        self.okaybutton = wx.Button(self, 321, "Okay", wx.Point(10, 90))
-        self.cancelbutton = wx.Button(self, 322, "Cancel", wx.Point(110,90))
-        self.Bind(wx.EVT_BUTTON, self.OkayButtonPressed, id = self.okaybutton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.OnCloseGridPrefs, id = self.cancelbutton.GetId())
-
-    def OkayButtonPressed(self, evt):
-        wx.GetApp().frame.grid.SetDefaultColSize(self.colwidth.GetValue(), True)
-        wx.GetApp().frame.grid.SetDefaultRowSize(self.rowheight.GetValue(), True)
-        wx.GetApp().frame.grid.ForceRefresh()
-        self.Close(True)
-
-    def OnCloseGridPrefs(self, evt):
-        self.Close(True)
+def GridPrefs(parent):
+#shows dialog for editing the data grid
+    btn1=  ['SpinCtrl',   [0,5000,0]]
+    btn2=  ['StaticText', ["Change the cell Size"]]
+    btn3=  ['StaticText', ["Column Width"]]
+    btn4=  ['StaticText', ["Row Height"]]
+    setting= {'Title': 'Change the cell size'}
+    
+    struct= list()
+    struct.append([btn2])
+    struct.append([btn1, btn3])
+    struct.append([btn1, btn4])
+    dlg= dialog(self, settings = setting, struct = struct)
+    
+    if dlg.ShowModal() == wx.ID_OK:
+        values= dlg.GetValue()
+    else:
+        dlg.Destroy()
+        return
+    colwidth= values[0]
+    rowheight= values[1]
+    wx.GetApp().frame.grid.SetDefaultColSize(colwidth, True)
+    wx.GetApp().frame.grid.SetDefaultRowSize(rowheight, True)
+    wx.GetApp().frame.grid.ForceRefresh()
 
 #---------------------------------------------------------------------------
 # user can change settings like variable names, decimal places, missing no.s
@@ -1605,8 +1571,27 @@ class MainFrame(wx.Frame):
 
     def GoEditGrid(self, evt):
         #shows dialog for editing the data grid
-        win = EditGridFrame(wx.GetApp().frame, -1)
-        win.Show(True)
+        btn1=  ['SpinCtrl',   [0,5000,0]]
+        btn2=  ['StaticText', ["Change Grid Size"]]
+        btn3=  ['StaticText', ["Add Columns"]]
+        btn4=  ['StaticText', ["Add Rows"]]
+        setting= {'Title': 'Change Grid size'}
+        
+        struct= list()
+        struct.append([btn2])
+        struct.append([btn1, btn3])
+        struct.append([btn1, btn4])
+        dlg= dialog(self, settings = setting, struct = struct)
+        
+        if dlg.ShowModal() == wx.ID_OK:
+            values= dlg.GetValue()
+        else:
+            dlg.Destroy()
+            return
+        colswanted= values[0]
+        rowswanted= values[1]
+        editorRederer= wx.GetApp().frame.floatCellAttr
+        wx.GetApp().frame.grid.AddNCells(colswanted, rowswanted, attr= editorRederer)
 
     def GoVariablesFrame(self, evt):
         # shows Variables dialog
@@ -1615,8 +1600,28 @@ class MainFrame(wx.Frame):
 
     def GoGridPrefFrame(self, evt):
         # shows Grid Preferences form
-        win = GridPrefs(wx.GetApp().frame, -1)
-        win.Show(True)
+        btn1=  ['SpinCtrl',   [5,90,5]]
+        btn2=  ['StaticText', ["Change the cell Size"]]
+        btn3=  ['StaticText', ["Column Width"]]
+        btn4=  ['StaticText', ["Row Height"]]
+        setting= {'Title': 'Change the cell size'}
+        
+        struct= list()
+        struct.append([btn2])
+        struct.append([btn1, btn3])
+        struct.append([btn1, btn4])
+        dlg= dialog(self, settings = setting, struct = struct)
+        
+        if dlg.ShowModal() == wx.ID_OK:
+            values= dlg.GetValue()
+        else:
+            dlg.Destroy()
+            return
+        colwidth= values[0]
+        rowheight= values[1]
+        wx.GetApp().frame.grid.SetDefaultColSize(colwidth, True)
+        wx.GetApp().frame.grid.SetDefaultRowSize(rowheight, True)
+        wx.GetApp().frame.grid.ForceRefresh()
 
     def GoFontPrefsDialog(self, evt):
         # shows Font dialog for the data grid (wx.GetApp().output window has its own)
