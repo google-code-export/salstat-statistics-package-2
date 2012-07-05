@@ -1,7 +1,7 @@
 '''
 Created on 14/05/2012
 
-@author: USUARIO
+@author: Sebastian Lopez Buritica
 '''
 
 from statlib import stats
