@@ -6,7 +6,7 @@ Created on 16/05/2012
 '''Easily create a dialog'''
 
 import wx
-from dialogs import CheckListBox, NumTextCtrl
+from dialogs import CheckListBox, NumTextCtrl, makePairs
 
 def _siguiente():
     i = 0
@@ -16,7 +16,7 @@ def _siguiente():
 
 class Dialog ( wx.Dialog ):
     def __init__( self, parent = None , settings= dict(), struct = []):
-        '''Dialog(parent,settings, struct)
+        '''Dialog( parent, settings, struct)
 
         a function to easily create a wx dialog
 
@@ -31,7 +31,7 @@ class Dialog ( wx.Dialog ):
         allowed controls: 'StaticText',   'TextCtrl',    'Choice',
                           'CheckListBox', 'StaticLine',  'RadioBox',
                           'SpinCtrl',     'ToggleButton', 'NumTextCtrl',
-                          'CheckBox'
+                          'CheckBox',      makePairs
 
         struct example:
 
@@ -52,6 +52,7 @@ class Dialog ( wx.Dialog ):
         >> bt8 = ('SpinCtrl', ( 0, 100, 5 )) # (min, max, start)
         >> bt9 = ('ToggleButton', ['toggle'])
         >> bt10= ('CheckBox', ['Accept'])
+        >> bt11= ('makePairs', [['col1','col2','col3'],['opt2','opt5'], 8]) # colum names, options, number of rows
 
         >> structure.append( [bt6, bt2] )
         >> structure.append( [bt6, bt5] )
@@ -60,6 +61,7 @@ class Dialog ( wx.Dialog ):
         >> structure.append( [btnListBox , bt1])
         >> structure.append( [bt7, ])
         >> structure.append( [bt8, ])
+        >> structure.append( [bt11, ])
 
         to see an example run the class as a main script
 
@@ -107,11 +109,11 @@ class Dialog ( wx.Dialog ):
         self._allow= ['StaticText','TextCtrl','Choice',
                       'CheckListBox','StaticLine','RadioBox',
                       'SpinCtrl','ToggleButton','NumTextCtrl',
-                      'CheckBox']
+                      'CheckBox', 'makePairs']
         self._allow2get= ['TextCtrl','Choice',
                       'CheckListBox','RadioBox',
                       'SpinCtrl','ToggleButton','NumTextCtrl',
-                      'CheckBox']
+                      'CheckBox', 'makePairs']
         
         self.adding(bSizer3, struct)
 
@@ -178,6 +180,10 @@ class Dialog ( wx.Dialog ):
                     self.ctrls.append((key, NumTextCtrl(self.m_scrolledWindow1, wx.ID_ANY, *args)))
                     currCtrl= self.ctrls[-1][1]
                     currSizer.Add(currCtrl, 0, characters , 5)
+                elif key == 'makePairs':
+                    self.ctrls.append((key, makePairs(self.m_scrolledWindow1, wx.ID_ANY, *args)))
+                    currCtrl= self.ctrls[-1][1]
+                    currSizer.Add(currCtrl, 0, characters , 5)
 
                 #elif key == 'in':  # not used
                 #    self.adding(parentSizer, [args])
@@ -226,8 +232,11 @@ class Dialog ( wx.Dialog ):
                             prevResult == int(prevResult)
                     else:
                         prevResult=  None
+                elif typectrl == 'makePairs':
+                    prevResult = ctrl.GetValue()
                 else:
-                    continue
+                    prevResult = ctrl.GetValue()
+                    
                 resultado.append(prevResult)
         return resultado
 
@@ -267,6 +276,7 @@ class _example( wx.Frame ):
         bt7= ('RadioBox',     ['title', ['opt1', 'opt2', 'opt3']])
         bt8= ('SpinCtrl',     [ 0, 100, 5 ]) # (min, max, start)
         bt9= ('ToggleButton', ['toggle'])
+        bt10= ['makePairs',[['column '+str(i) for i in range(2)],['opt1','opt2']]]
         
         structure= list()
         structure.append( [bt6, bt2] )
@@ -276,6 +286,7 @@ class _example( wx.Frame ):
         structure.append( [btnListBox , bt1])
         structure.append( [bt7, ])
         structure.append( [bt8, ])
+        structure.append( [bt10, ])
 
         dlg= Dialog(self, settings = dic, struct= structure)
         if dlg.ShowModal() == wx.ID_OK:
