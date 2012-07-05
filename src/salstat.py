@@ -1673,11 +1673,7 @@ class MainFrame(wx.Frame):
             self.logPanel.write('You have to select 3 columns a, b, and c')
             return
 
-        data = [self.grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]]
-        tam = [len(dat) for dat in data]
-        if (tam[0] != tam[1]) or (tam[0] != tam[2]):
-            self.logPanel.write('The selected columns must have the same number of elements')
-            return
+        data = homogenize(*[self.grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]])
 
         legend = u''
         data= [data[0], data[1], data[2], legend]
@@ -1759,10 +1755,7 @@ class MainFrame(wx.Frame):
             return
         (xcol,ycol) = selection.getData()
         selection.Destroy()
-        data = [self.grid.CleanData(col) for col in (colnums[xcol],colnums[ycol])]
-        if len(data[0]) != len(data[1]):
-            self.SetStatusText('X and Y data must have the same number of elements!')
-            return
+        data = homogenize(*[self.grid.CleanData(col) for col in (colnums[xcol],colnums[ycol])])
         plt= plot(parent = self, typePlot= 'plotScatter',
                   data2plot= ((data[0],data[1],waste[xcol] +u' Vs '+ waste[ycol]),),
                   xlabel= waste[xcol],
@@ -1851,9 +1844,9 @@ class MainFrame(wx.Frame):
         if selection.ShowModal() != wx.ID_OK:
             selection.Destroy()
             return
-        (xcol, ycol) = selection.getData()
+        (xcol, ycol)= selection.getData()
         selection.Destroy()
-        data = [self.grid.CleanData(cols) for cols in [colnums[i] for i in (xcol,ycol)]]
+        data= homogenize(*[self.grid.CleanData(cols) for cols in [colnums[i] for i in (xcol,ycol)]])
         # homogenize data
         data= homogenize(data[0],data[1])
 
