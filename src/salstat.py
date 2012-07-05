@@ -276,7 +276,8 @@ class SimpleGrid(MyGrid):# wxGrid
         MyGrid.__init__(self, parent, -1, size)
         self.Saved = True
         self.moveTo = None
-
+        if wx.Platform == "__WXMAC__":
+            self.SetGridLineColour(wx.BLACK)
         self.setPadreCallBack(self)
         self.SetColLabelAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
         #for i in range(self.NumberCols):
@@ -701,8 +702,8 @@ class VariablesFrame(wx.Dialog):
 
         bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
 
-        okaybutton = wx.Button(self.m_panel1 , wx.ID_ANY, "Okay", wx.DefaultPosition, wx.DefaultSize, 0 )
-        cancelbutton = wx.Button(self.m_panel1 , wx.ID_ANY, "Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
+        okaybutton = wx.Button(self.m_panel1 , 2001, "Okay", wx.DefaultPosition, wx.DefaultSize, 0 )
+        cancelbutton = wx.Button(self.m_panel1 , 2002, "Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
 
         bSizer2.Add( okaybutton, 0, wx.ALL, 5 )
         bSizer2.Add( cancelbutton , 0, wx.ALL, 5 )
@@ -723,6 +724,11 @@ class VariablesFrame(wx.Dialog):
         self.vargrid.SetDefaultRowSize(27, True)
         maxcols = wx.GetApp().frame.grid.GetNumberCols()
         self.vargrid.CreateGrid(3,maxcols)
+        self.vargrid.SetDefaultCellAlignment(wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
+        if wx.Platform == '__WXMAC__':
+            self.vargrid.SetGridLineColour("#b7b7b7")
+            self.vargrid.SetLabelBackgroundColour("#d2d2d2")
+            self.vargrid.SetLabelTextColour("#444444")
         for i in range(maxcols):
             oldlabel = wx.GetApp().frame.grid.GetColLabelValue(i)
             self.vargrid.SetCellValue(0, i, oldlabel)
@@ -1195,6 +1201,10 @@ class MainFrame(wx.Frame):
         self.grid.SetDefaultColSize( 60, True)
         self.grid.SetRowLabelSize( 40)
         self.grid.SetDefaultCellAlignment( wx.ALIGN_RIGHT, wx.ALIGN_CENTER )
+        if wx.Platform == '__WXMAC__':
+            self.grid.SetGridLineColour("#b7b7b7")
+            self.grid.SetLabelBackgroundColour("#d2d2d2")
+            self.grid.SetLabelTextColour("#444444")
         ## adjust the renderer 
         attr=   wx.grid.GridCellAttr()
         editor= wx.grid.GridCellFloatEditor()
@@ -1614,8 +1624,10 @@ class MainFrame(wx.Frame):
         self.SetIcon(icon)
         if dlg.ShowModal() == wx.ID_OK:
             data = dlg.GetFontData()
-            #data2 = data.GetChosenFont()
+            colour = data.GetColour()
             self.grid.SetDefaultCellFont(data.GetChosenFont())
+            self.grid.SetDefaultCellTextColour(colour)
+        dlg.Destroy()
 
     def GoContinuousDescriptives(self, evt):
         # shows the continuous descriptives dialog
