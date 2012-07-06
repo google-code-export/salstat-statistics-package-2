@@ -1757,24 +1757,24 @@ class MainFrame(wx.Frame):
         info.Description = wordwrap(
             "This is a newer version of the SalStat Statistics Package "
             "originally developed by Alan James Salmoni and Mark Livingstone. "
-            "There have been minor bug corrections, and new improvements: "
-            "You can cut, copy, and paste multiple cells,"
-            "You can undo and redo some actions. "
-            "The calculations are faster than the original version. "
-            "The plot system can draw:"
-            "Scatter charts, line chart of all means, bar chart of all means,"
-            "Line charts of the data, box and whisker chart,"
-            "Linear regression plot (show the equation and the correlation inside the chart),"
-            "and much more!\n"
-            "The input data can be saved to, and loaded from an xls format file.\n"
-            "Salstat2 can be scripted by using Python.\n"
-            "All the numerical results are send to a sheet in a different panel where you can cut, copy, paste, and edit them.",
-            400, wx.ClientDC(self))
+            "There have been minor bug corrections, and new improvements:\n\n"
+            "*You can cut, copy, and paste multiple cells,\n"
+            "*You can undo and redo some actions.\n"
+            "*The calculations are faster than the original version.\n\n"
+            "The plot system can draw:\n\n"
+            "*Scatter charts\n*line chart of all means\n*bar chart of all means\n"
+            "*Line charts of the data,\n*box and whisker chart\n*Ternary chart\n"
+            "*Linear regression plot (show the equation and the correlation inside the chart),\n"
+            "The input data can be saved to, and loaded from an xls format file.\n\n"
+            "Salstat2 can be scripted by using Python.\n\n"
+            "All the numerical results are send to a sheet in a different panel where you can cut, copy, paste, and edit them.\n\n"
+            "and much more!",
+            460, wx.ClientDC(self))
         info.WebSite = ("http://code.google.com/p/salstat-statistics-package-2/", "S2 home page")
         info.Developers = [ "Sebastian Lopez Buritica",
-                            "Mark Livingstone",]
+                            "\nMark Livingstone -- MAC, LINUX Translator",]
 
-        info.License = wordwrap("GPL 2", 500, wx.ClientDC(self))
+        info.License = wordwrap("GPL 2", 450, wx.ClientDC(self))
 
         # Then we call wx.AboutBox giving it that info object
         wx.AboutBox(info)
