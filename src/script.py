@@ -316,28 +316,21 @@ class MySTC(stc.StyledTextCtrl):
 class ScriptPanel(wx.Panel):
     def __init__(self, parent,*args):
         '''ScriptPanel parent, log, grid, *args'''
-        self.log = args[0]
-        self.grid = args[1]
-        self.stats = stats
-        self.plot = plot
+        self.log=   args[0]
+        self.grid=  args[1]
+        self.stats= stats
+        self.plot=  plot
         self.showgrid= args[2]
         try:
             wx.Panel.__init__(self, parent, wx.ID_ANY, *args[1:])
         except:
             wx.Panel.__init__(self, parent, wx.ID_ANY)
-        self.m_mgr = wx.aui.AuiManager()
+        self.m_mgr = aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
 
-        self.answerPanel2 = MySTC(self)#wx.py.crust.editwindow.EditWindow(self)
-        #self.answerPanel2.setDisplayLineNumbers(True)
-        #self.answerPanel2.SetIndent(4)               # Prescribed indent size for wx
-        #self.answerPanel2.SetIndentationGuides(True) # Show indent guides
-        #self.answerPanel2.SetBackSpaceUnIndents(True)# Backspace unindents rather than delete 1 space
-        #self.answerPanel2.SetTabIndents(True)        # Tab key indents
-        #self.answerPanel2.SetTabWidth(4)             # Proscribed tab size for wx
-        #self.answerPanel2.SetUseTabs(False)
+        self.answerPanel2 = MySTC(self)
 
-        self.m_mgr.AddPane( self.answerPanel2, wx.aui.AuiPaneInfo().CenterPane().Dock().
+        self.m_mgr.AddPane( self.answerPanel2, aui.AuiPaneInfo().CenterPane().Dock().
                             Resizable(True).FloatingSize( wx.DefaultSize ).
                             DockFixed( True ).Centre().
                             CloseButton(False ) )
@@ -349,7 +342,6 @@ class ScriptPanel(wx.Panel):
             tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
                 agwStyle = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
 
-        tb1.SetToolBitmapSize(wx.Size(16, 16))
         imagenes = imageEmbed()
         self.bt1= tb1.AddSimpleTool(wx.ID_ANY, u"Run Script" , imagenes.runIcon(), u"Run Script" )
         tb1.AddSeparator()
@@ -363,17 +355,17 @@ class ScriptPanel(wx.Panel):
         self.bt5= tb1.AddSimpleTool(wx.ID_ANY, u"Cut" , imagenes.edit_cut(), u"Cut" )
         self.bt6= tb1.AddSimpleTool(wx.ID_ANY, u"Copy" , imagenes.edit_copy(), u"Copy" )
         self.bt7= tb1.AddSimpleTool(wx.ID_ANY, u"Paste" , imagenes.edit_paste(), u"Paste" )
+        tb1.SetToolBitmapSize(wx.Size(24, 24))
         tb1.Realize()
+        
+        self.m_mgr.AddPane( tb1,
+                            aui.AuiPaneInfo().Name("tb1").Caption("Basic Operations").
+                            ToolbarPane().Top().Row(1).CloseButton( False ))
 
-        self.m_mgr.AddPane( tb1, wx.aui.AuiPaneInfo().Top().Dock().
-                            ToolbarPane().Resizable(False).FloatingSize( wx.DefaultSize ).
-                            DockFixed( False ).Layer(1).Gripper(True).
-                            LeftDockable( False ).RightDockable(False).
-                            CloseButton(False ) )
         self.Bindded()
         self.Layout()
         self.m_mgr.Update()
-        self.Centre( wx.BOTH )
+        self.Center( )
 
 
     def Bindded(self):

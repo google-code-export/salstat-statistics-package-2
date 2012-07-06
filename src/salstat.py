@@ -280,6 +280,7 @@ class SimpleGrid(MyGrid):# wxGrid
             self.SetGridLineColour(wx.BLACK)
         self.setPadreCallBack(self)
         self.SetColLabelAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
+        #self.EnableDragColMove( True )
         #for i in range(self.NumberCols):
         #    self.SetColFormatFloat(i, 8, 4)
         #self.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.AlterSaveStatus)
@@ -897,7 +898,7 @@ class formulaBar ( wx.Panel ):
         self.m_textCtrl1 = wx.TextCtrl( self, wx.ID_ANY,
                                         wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
                                         wx.TE_CHARWRAP|wx.TE_MULTILINE|wx.TE_RICH2|
-                                        wx.TE_WORDWRAP|wx.NO_BORDER )
+                                        wx.TE_WORDWRAP ) #|wx.NO_BORDER
 
         self.m_textCtrl1.SetMinSize( wx.Size( 220,25 ) )
         bSizer1.Add( self.m_textCtrl1, 0, 0, 5 ) 
@@ -1134,7 +1135,7 @@ class SalStat2App(wx.App):
 class MainFrame(wx.Frame):
     def __init__(self, parent, appname ):
         self.path= None
-        wx.Frame.__init__(self,parent,-1,"SalStat Statistics",
+        wx.Frame.__init__(self,parent,-1,"S2",
                           size = wx.Size(640,480 ), pos = wx.DefaultPosition)
 
         self.m_mgr= aui.AuiManager()
@@ -1146,12 +1147,12 @@ class MainFrame(wx.Frame):
         #----------------------
         # create toolbars
         tb1= self._createTb1()
-        self.formulaBarPanel= formulaBar( self,wx.ID_ANY)
+        self.formulaBarPanel= formulaBar( self, wx.ID_ANY)
         #------------------------
         # create small status bar
         self.StatusBar= self.CreateStatusBar( 3)
-        self.StatusBar.SetStatusText( 'S2', 2)
         self.StatusBar.SetStatusText( 'cells Selected:   '+'count:      '+'sum:    ', 1 )
+        self.StatusBar.SetStatusText( 'S2', 2)
 
         self.m_notebook1= wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
         self.logPanel= LogPanel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
@@ -1201,11 +1202,9 @@ class MainFrame(wx.Frame):
         #------------------------
         # organizing panels
         self.m_mgr.AddPane( self.formulaBarPanel,
-                            aui.AuiPaneInfo().ToolbarPane().Top().Row(1).
-                            Position(1).
-                            LeftDockable(False).RightDockable(False).
-                            MinSize( wx.Size( -1,15 ) ).CloseButton( False ) )
-
+                            aui.AuiPaneInfo().Name("tb2").Caption("Inspection Tool").ToolbarPane().Top().Row(1).
+                            Position(1).CloseButton( False ))
+        
         self.m_mgr.AddPane(self.grid,
                            aui.AuiPaneInfo().Centre().
                            CaptionVisible(True).Caption("Data Entry Panel").
@@ -1218,11 +1217,9 @@ class MainFrame(wx.Frame):
                            MinimizeButton(True).Resizable(True).MaximizeButton(True).
                            CloseButton( False ).MinSize( wx.Size( 240,-1 )))
 
-        self.m_mgr.AddPane( tb1, aui.AuiPaneInfo().
-                            ToolbarPane().Top().Row(1).
-                            LeftDockable( False ).RightDockable( False ).
-                            CloseButton( False ) )
-
+        self.m_mgr.AddPane( tb1, aui.AuiPaneInfo().Name("tb1").Caption("Basic Operations").
+                            ToolbarPane().Top().Row(1).CloseButton( False ))
+        
         self.m_mgr.AddPane(self.answerPanel2,
                            aui.AuiPaneInfo().Centre().Right().
                            CaptionVisible(True).Caption(("Script Panel")).
@@ -1237,6 +1234,7 @@ class MainFrame(wx.Frame):
                                             Dock().Resizable().FloatingSize( wx.DefaultSize ).
                                             CaptionVisible(True).
                                             DockFixed( False ).BestSize(wx.Size(-1,150)))
+        
         self._BindEvents()
         self.m_mgr.Update()
         self.Center()
@@ -1655,8 +1653,12 @@ class MainFrame(wx.Frame):
         win.Show(True)
 
     def GoTransformData(self, evt):
-        win = TransformFrame(wx.GetApp().frame, -1)
-        win.Show(True)
+        bt1= ''
+        #win= makePairCtrl(wx.GetApp().frame, -1)
+        
+        
+        #win = TransformFrame(wx.GetApp().frame, -1)
+        #win.Show(True)
 
     def GoCheckOutliers(self, evt):
         pass
@@ -1960,9 +1962,9 @@ class MainFrame(wx.Frame):
             col = numpy.array(GetData(colnums[ pos ]))
             #col.shape = (len(col),1)
             columns.append(col)
-
         if len(ColSelect) == 1:
             result= self._sixpack(columns[0], UCL, LCL, Target, k, n= groupSize)
+            Xga= statistics(columns[0]).mean
         else:
             # group homogenization in order to 
             # obtain comparable data
