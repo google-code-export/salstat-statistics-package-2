@@ -104,7 +104,7 @@ class CustTableGrid(gridlib.Grid):
         # table and will destroy it when done.  Otherwise you would need to keep
         # a reference to it and call it's Destroy method later.
         self.SetTable(table, True)
-        self.SetRowLabelSize(0)
+        # self.SetRowLabelSize(0)
         self.SetMargins(0,0)
         self.AutoSizeColumns(False)
 
