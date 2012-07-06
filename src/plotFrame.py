@@ -26,6 +26,8 @@ from matplotlib.backends.backend_wx import StatusBarWx
 from matplotlib.backend_bases import MouseEvent
 from triplot import triplot
 
+from slbTools import homogenize
+
 
 class MpltFrame( wx.Frame ):
     def __init__( self, parent,typePlot = None, data2plot= None, *args, **params):
@@ -688,11 +690,13 @@ class MpltFrame( wx.Frame ):
         listLegend= list()
         listPlot = list()
         for x,y,texto in data2plot:
-            listPlot.append(self.axes.plot(x,y,'.'))
-            listLegend.append(texto)
-        legend= self.figpanel.legend(listPlot,listLegend)
-        legend.draggable(state=True)
-        self.axes.hold(False)
+            # se homogeniza la informacion
+            (x, y) = homogenize( x, y)
+            listPlot.append( self.axes.plot( x, y, '.'))
+            listLegend.append( texto)
+        legend= self.figpanel.legend( listPlot, listLegend)
+        legend.draggable( state= True)
+        self.axes.hold( False)
         self.figpanel.canvas.draw()
 
     def plotBar(self,data2plot):

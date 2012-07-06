@@ -1783,17 +1783,29 @@ class MainFrame(wx.Frame):
         if colnums == []:
             self.SetStatusText('You need some data to draw a graph!')
             return
-        selection = selectDialogData2plot(self,waste)
-        if selection.ShowModal() != wx.ID_OK:
-            selection.Destroy()
+        
+        bt1= ['StaticText', ['Select pairs of data by rows']]
+        bt2= ['makePairs',  [['X data to plot','Y data to plot'], waste, 20]]
+        structure= list()
+        structure.append([bt1,])
+        structure.append([bt2,])
+        dlg= dialog(self, struct= structure)
+        if dlg.ShowModal() != wx.ID_OK:
+            dlg.Destroy()
             return
-        (xcol,ycol) = selection.getData()
-        selection.Destroy()
-        data = homogenize(*[self.grid.CleanData(col) for col in (colnums[xcol],colnums[ycol])])
-        plt= plot(parent = self, typePlot= 'plotScatter',
-                  data2plot= ((data[0],data[1],waste[xcol] +u' Vs '+ waste[ycol]),),
-                  xlabel= waste[xcol],
-                  ylabel= waste[ycol],
+        values= dlg.GetValue()
+        dlg.Destroy()
+        
+        pairs= values[0]
+        if len(pairs) == 0:
+            return
+        
+        data= [(self.grid.GetCol(colX), self.grid.GetCol(colY), colX +' VS ' +colY) for (colX,colY) in pairs]
+        plt= plot(parent= self,
+                  typePlot= 'plotScatter',
+                  data2plot= data,
+                  xlabel= 'X data',
+                  ylabel= 'Y data',
                   title= 'Scatter Plot')
         plt.Show()
 
