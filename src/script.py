@@ -104,9 +104,12 @@ class MySTC(stc.StyledTextCtrl):
         self.StyleSetSpec(stc.STC_STYLE_DEFAULT,
             "face:%(helv)s,size:%(size)d" % faces)
         # set default background color
-        beige = '#F5F5DC'
-        self.StyleSetBackground(style=stc.STC_STYLE_DEFAULT,
-            back=beige)
+        if wx.Platform == "__WXMAC__":
+            self.StyleSetBackground(style=stc.STC_STYLE_DEFAULT,
+                back="#ffffff") # White
+        else:
+            self.StyleSetBackground(style=stc.STC_STYLE_DEFAULT,
+                back="#F5F5DC") # beige / light yellow
         # reset all to be like the default
         self.StyleClearAll()
 
@@ -327,7 +330,7 @@ class ScriptPanel(wx.Panel):
 
         self.answerPanel2 = MySTC(self)#wx.py.crust.editwindow.EditWindow(self)
         #self.answerPanel2.setDisplayLineNumbers(True)
-        #self.answerPanel2.SetIndent(4)               # Proscribed indent size for wx
+        #self.answerPanel2.SetIndent(4)               # Prescribed indent size for wx
         #self.answerPanel2.SetIndentationGuides(True) # Show indent guides
         #self.answerPanel2.SetBackSpaceUnIndents(True)# Backspace unindents rather than delete 1 space
         #self.answerPanel2.SetTabIndents(True)        # Tab key indents
@@ -351,15 +354,15 @@ class ScriptPanel(wx.Panel):
         self.bt1= tb1.AddSimpleTool(wx.ID_ANY, u"Run Script" , imagenes.runIcon(), u"Run Script" )
         tb1.AddSeparator()
         self.bt2= tb1.AddSimpleTool(wx.ID_ANY, u"New Script" , imagenes.documentNew(), u"New Script" )
-        self.bt3= tb1.AddSimpleTool(wx.ID_ANY, u"Save data" , imagenes.save2disk(), u"Save data" )
-        self.bt4= tb1.AddSimpleTool(wx.ID_ANY, u"Load data" , imagenes.folderOpen(), u"Load data" )
+        self.bt4= tb1.AddSimpleTool(wx.ID_ANY, u"Load Script" , imagenes.folderOpen(), u"Load Script" )
+        self.bt3= tb1.AddSimpleTool(wx.ID_ANY, u"Save Script" , imagenes.save2disk(), u"Save Script" )
+        tb1.AddSeparator()
+        self.bt8= tb1.AddSimpleTool(wx.ID_ANY, u"Undo", imagenes.edit_undo(), u"Undo")
+        self.bt9= tb1.AddSimpleTool(wx.ID_ANY, u"Redo" , imagenes.edit_redo(), u"Redo" )
         tb1.AddSeparator()
         self.bt5= tb1.AddSimpleTool(wx.ID_ANY, u"Cut" , imagenes.edit_cut(), u"Cut" )
         self.bt6= tb1.AddSimpleTool(wx.ID_ANY, u"Copy" , imagenes.edit_copy(), u"Copy" )
         self.bt7= tb1.AddSimpleTool(wx.ID_ANY, u"Paste" , imagenes.edit_paste(), u"Paste" )
-        tb1.AddSeparator()
-        self.bt8= tb1.AddSimpleTool(wx.ID_ANY, u"Undo", imagenes.edit_undo(), u"Undo")
-        self.bt9= tb1.AddSimpleTool(wx.ID_ANY, u"Redo" , imagenes.edit_redo(), u"Redo" )
         tb1.Realize()
 
         self.m_mgr.AddPane( tb1, wx.aui.AuiPaneInfo().Top().Dock().
