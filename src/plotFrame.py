@@ -16,6 +16,8 @@ from matplotlib.widgets import Cursor
 # Numpy functions for image creation
 import numpy as np
 from statlib.stats import linregress
+import matplotlib.path as mpath
+import matplotlib.patches as mpatches
 
 # import the WxAgg FigureCanvas object, that binds Figure to
 # WxAgg backend. In this case, this is a wxPanel
@@ -24,10 +26,10 @@ from matplotlib.backends.backend_wxagg import \
 from matplotlib.backends.backend_wx import NavigationToolbar2Wx
 from matplotlib.backends.backend_wx import StatusBarWx
 from matplotlib.backend_bases import MouseEvent
-from triplot import triplot
+from triplot import triplot, triang2xy
 
 from slbTools import homogenize
-
+PROPLEGEND= {'size':11}
 
 class MpltFrame( wx.Frame ):
     def __init__( self, parent,typePlot = None, data2plot= None, *args, **params):
@@ -73,7 +75,7 @@ class MpltFrame( wx.Frame ):
                 self.graphParams[key] = params.pop(key)
             except KeyError:
                 continue
-
+        
         wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 642,465 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
 
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
@@ -694,7 +696,7 @@ class MpltFrame( wx.Frame ):
             (x, y) = homogenize( x, y)
             listPlot.append( self.axes.plot( x, y, '.'))
             listLegend.append( texto)
-        legend= self.figpanel.legend( listPlot, listLegend)
+        legend= self.figpanel.legend( listPlot, listLegend, prop = PROPLEGEND)
         legend.draggable( state= True)
         self.axes.hold( False)
         self.figpanel.canvas.draw()
@@ -706,7 +708,7 @@ class MpltFrame( wx.Frame ):
         for y,texto in data2plot:
             listPlot.append(self.axes.bar(range(len(y)),y))
             listLegend.append(texto)
-        legend= self.figpanel.legend(listPlot,listLegend)
+        legend= self.figpanel.legend(listPlot,listLegend, prop = PROPLEGEND)
         legend.draggable(state=True)
         self.axes.hold(False)
         self.figpanel.canvas.draw()
@@ -718,7 +720,7 @@ class MpltFrame( wx.Frame ):
         for y,texto in data2plot:
             listPlot.append(self.axes.barh(range(len(y)),y,align='center'))
             listLegend.append(texto)
-        legend= self.figpanel.legend(listPlot,listLegend)
+        legend= self.figpanel.legend(listPlot,listLegend,  prop = PROPLEGEND)
         legend.draggable(state=True)
         self.axes.hold(False)
         self.figpanel.canvas.draw()
@@ -729,7 +731,7 @@ class MpltFrame( wx.Frame ):
         line =  linregress(x,y)
         yfit = lambda x: x*line[0]+line[1]
         plt= self.axes.plot(x,y,'b.',x,[yfit(x1) for x1 in x],'r')
-        legend= self.figpanel.legend(plt,(data2plot[-1],'linRegressFit'))
+        legend= self.figpanel.legend(plt,(data2plot[-1],'linRegressFit'), prop = PROPLEGEND)
         legend.draggable(state=True)
         arrow_args = dict(arrowstyle="->")
         bbox_args = dict(boxstyle="round", fc="w")
@@ -764,17 +766,17 @@ class MpltFrame( wx.Frame ):
         pass
     def plotTrian(self,data2plot):
         '''data2plot = ((a,b,c,'legend'))'''
-        plotT = triplot([data2plot],)
+        plotT = triplot(data2plot,)
         # plot the mesh
-        ax = self.figpanel.axes[0]
+        ax= self.figpanel.axes[0]
         ax.set_xticks([])
         ax.set_yticks([])
-        ax.set_xlim((-0.05, 1.05))
-        ax.set_ylim((-0.05, 0.92))
+        ax.set_xlim((-0.08, 1.08))
+        ax.set_ylim((-0.08, 0.97))
         ax.set_axis_off()
         
         ax.hold(True)
-        # plot the grid
+        #<p> plot the grid
         a= plotT.meshLines[-1]
         plotT.meshLines[-1] = [a[0][:4],a[1][:4]]
         for pos,lineGrid in enumerate(plotT.meshLines):
@@ -786,7 +788,51 @@ class MpltFrame( wx.Frame ):
                 ax.plot(lineGrid[0],lineGrid[1], 
                     color= wx.Colour(0, 0, 0, 0.5),
                     linestyle= '--',)
-        # add the ruler
+        #plot the grid /<p>
+        
+        #<p> generating a background patch
+        # changing triangular coordinates to xy coordinates
+        cord1= triang2xy(1,0,0)
+        cord2= triang2xy(0,1,0)
+        cord3= triang2xy(0,0,1)
+        Path = mpath.Path
+        pathdata = [(Path.MOVETO, cord1),
+                    (Path.LINETO, cord2),
+                    (Path.LINETO, cord3),
+                    (Path.CLOSEPOLY, cord1),
+                    ]
+        codes, verts = zip(*pathdata)
+        path = mpath.Path(verts, codes)
+        patch = mpatches.PathPatch(path, facecolor='white', edgecolor='black', alpha=0.5)
+        ax.add_patch(patch)
+        #/<p>
+        
+        # <p> adding Corner labels
+        cordLeft=  (-0.06, -0.03)
+        cordRigth= ( 1.06, -0.03)
+        cordUpper= ( 0.5, 0.94)
+        stylename= 'round'
+        fontsize= 13
+        an1=ax.text( cordLeft[0], cordLeft[1], 'A',
+                 ha= "right",
+                 va= 'top',
+                 size= fontsize, #                 transform= ax.figure.transFigure,
+                 bbox=dict(boxstyle=stylename, fc="w", ec="k")) #              bbox=dict(boxstyle=stylename, fc="w", ec="k")
+        
+        an2=ax.text( cordRigth[0], cordRigth[1], 'B',
+                 ha= "left",
+                 va= 'top',
+                 size= fontsize,#                 transform= ax.figure.transFigure,
+                 bbox=dict(boxstyle=stylename, fc="w", ec="k"))
+        
+        an3=ax.text( cordUpper[0], cordUpper[1], 'C',
+                 ha= "center",
+                 va= 'baseline',
+                 size= fontsize, #                 transform= ax.figure.transFigure,
+                 bbox=dict(boxstyle=stylename, fc="w", ec="k"))
+        # adding coordinates  /<p>
+        
+        #<p> add a ruler
         for line in plotT.ruler:
             ax.plot(line[0],line[1], 
                     color= wx.Colour(0, 0, 0, 0),
@@ -815,15 +861,19 @@ class MpltFrame( wx.Frame ):
                         horizontalalignment= 'center',
                         verticalalignment=   'top',
                         fontsize=            10)
-            
+        # add the ruler /<p>
         
+        listPlot = list()
         for data in plotT.xydata:
-            ax.plot(data[0],data[1],
-                    linestyle= '_',
-                    marker='d')
+            listPlot.append( ax.plot( data[0],data[1],
+                                linestyle= '_', marker='d'))
             
+        listLegend= [dat[3] for dat in data2plot]
+        legend= self.figpanel.legend( listPlot, listLegend, prop = PROPLEGEND)
+        legend.draggable( state= True)
         ax.hold(False)
         self.figpanel.canvas.draw(0)
+        
     def AdaptativeBMS(self, data, xlabel='', ylabel='', title=''):
         self.figpanel.axes[0].hold(True)
         for serieNumber, serieData in enumerate(data): 
