@@ -1,10 +1,11 @@
 '''
 Created on 29/05/2012
 
-@author: Sebastian Lopez Buritica <Colombia>
+@author: 2012 Sebastian Lopez Buritica <Colombia>
 '''
 
 from math import sqrt
+from slbTools import homogenize
 
 class triplot:
     def __init__(self, data2plot):
@@ -15,24 +16,17 @@ class triplot:
         for avec, bvec, cvec,legend in data:
             x= list()
             y= list()
-            for a, b, c in zip(avec, bvec, cvec):
-                (xi, yi)= self.triang2xy(a, b, c) 
-                x.append(xi)
-                y.append(yi)
-            convertedData.append((x, y, legend))
+            # homogenizing the data
+            (avec, bvec, cvec) = homogenize( avec, bvec, cvec)
+            for a, b, c in zip( avec, bvec, cvec):
+                (xi, yi)= triang2xy( a, b, c) 
+                x.append( xi)
+                y.append( yi)
+            convertedData.append( (x, y, legend))
         self.xydata= convertedData
         self.ruler= self._generateRuler()
         self.dataLabel= self._generatePosLabel()
-        
-    def triang2xy(self,a,b,c, triangle = 'equilater'):
-        '''a= 100%   (0, 0)
-        b= 100%  (1, 0)
-        c= 100%  (1/2, sqrt(3)/2'''
-        #if a < 0 or b < 0 or c < 0:
-        #    raise StandardError('all input data must be positive')
-        total = a+b+c
-        return (2*b+c)/float(2*total), c*sqrt(3)/float(2*total)
-    
+  
     def _generatePosLabel(self):
         result= dict()
         data=   list()
@@ -41,7 +35,7 @@ class triplot:
             xa= xa/float(10)
             xb= 0
             xc= 1-xa
-            xip, yip= self.triang2xy(xa, val1, xc) 
+            xip, yip= triang2xy(xa, val1, xc) 
             data.append((xip, yip))
         result['AC']= data
         data= list()
@@ -49,7 +43,7 @@ class triplot:
             xa= xa/float(10)
             xb= 0
             xc= 1-xa
-            xip, yip= self.triang2xy(val1, xc,  xa) 
+            xip, yip= triang2xy(val1, xc,  xa) 
             data.append((xip, yip))
         result['CB']= data
         data= list()
@@ -57,7 +51,7 @@ class triplot:
             xa= xa/float(10)
             xb= 0
             xc= 1-xa
-            xip, yip= self.triang2xy(xc, xa,  val1) 
+            xip, yip= triang2xy(xc, xa,  val1) 
             data.append((xip, yip))
         result['AB']= data
         return result
@@ -72,8 +66,8 @@ class triplot:
             xa= xa/float(10)
             xb= 0
             xc= 1-xa
-            xi, yi= self.triang2xy(xa, xb, xc)
-            xip, yip= self.triang2xy(xa, val1, xc) 
+            xi, yi= triang2xy(xa, xb, xc)
+            xip, yip= triang2xy(xa, val1, xc) 
             x= [xi, xip]
             y= [yi, yip]
             data.append((x, y))
@@ -81,8 +75,8 @@ class triplot:
             xa= xa/float(20)
             xb= 0
             xc= 1-xa
-            xi, yi= self.triang2xy(xa, xb, xc)
-            xip, yip= self.triang2xy(xa, val2, xc) 
+            xi, yi= triang2xy(xa, xb, xc)
+            xip, yip= triang2xy(xa, val2, xc) 
             x= [xi, xip]
             y= [yi, yip]
             data.append((x, y))
@@ -90,8 +84,8 @@ class triplot:
             xa= xa/float(100)
             xb= 0
             xc= 1-xa
-            xi, yi= self.triang2xy(xa, xb, xc)
-            xip, yip= self.triang2xy(xa, val3, xc) 
+            xi, yi= triang2xy(xa, xb, xc)
+            xip, yip= triang2xy(xa, val3, xc) 
             x= [xi, xip]
             y= [yi, yip]
             data.append((x, y))
@@ -100,8 +94,8 @@ class triplot:
             xa= xa/float(10)
             xb= 0
             xc= 1-xa
-            xi, yi= self.triang2xy(xb, xc,   xa)
-            xip, yip= self.triang2xy(val1, xc,  xa) 
+            xi, yi= triang2xy(xb, xc,   xa)
+            xip, yip= triang2xy(val1, xc,  xa) 
             x= [xi, xip]
             y= [yi, yip]
             data.append((x, y))
@@ -109,8 +103,8 @@ class triplot:
             xa= xa/float(20)
             xb= 0
             xc= 1-xa
-            xi, yi= self.triang2xy(xb, xc,   xa)
-            xip, yip= self.triang2xy( val2, xc,   xa) 
+            xi, yi= triang2xy(xb, xc,   xa)
+            xip, yip= triang2xy( val2, xc,   xa) 
             x= [xi, xip]
             y= [yi, yip]
             data.append((x, y))
@@ -118,8 +112,8 @@ class triplot:
             xa= xa/float(100)
             xb= 0
             xc= 1-xa
-            xi, yi= self.triang2xy(xb, xc,   xa)
-            xip, yip= self.triang2xy( val3, xc,   xa) 
+            xi, yi= triang2xy(xb, xc,   xa)
+            xip, yip= triang2xy( val3, xc,   xa) 
             x= [xi, xip]
             y= [yi, yip]
             data.append((x, y))
@@ -128,8 +122,8 @@ class triplot:
             xa= xa/float(10)
             xb= 0
             xc= 1-xa
-            xi, yi= self.triang2xy(xc,  xa,  xb)
-            xip, yip= self.triang2xy(xc, xa,  val1) 
+            xi, yi= triang2xy(xc,  xa,  xb)
+            xip, yip= triang2xy(xc, xa,  val1) 
             x= [xi, xip]
             y= [yi, yip]
             data.append((x, y))
@@ -137,8 +131,8 @@ class triplot:
             xa= xa/float(20)
             xb= 0
             xc= 1-xa
-            xi, yi= self.triang2xy(xc,  xa,  xb)
-            xip, yip= self.triang2xy(xc,  xa, val2) 
+            xi, yi= triang2xy(xc,  xa,  xb)
+            xip, yip= triang2xy(xc,  xa, val2) 
             x= [xi, xip]
             y= [yi, yip]
             data.append((x, y))
@@ -146,8 +140,8 @@ class triplot:
             xa= xa/float(100)
             xb= 0
             xc= 1-xa
-            xi, yi= self.triang2xy(xc,  xa,  xb)
-            xip, yip= self.triang2xy(xc,  xa,  val3) 
+            xi, yi= triang2xy(xc,  xa,  xb)
+            xip, yip= triang2xy(xc,  xa,  val3) 
             x= [xi, xip]
             y= [yi, yip]
             data.append((x, y))
@@ -171,13 +165,18 @@ class triplot:
                  (0, 1-a1, a1),
                  (a1, 1-a1, 0),
                  (a1, 0, 1-a1)]
-            a1 = [self.triang2xy(*ai) for ai in a1]
+            a1 = [triang2xy(*ai) for ai in a1]
             for xi,yi in a1:
                 x.append(xi)
                 y.append(yi)
             lines.append((x,y))
         return lines
 
-if __name__ == '__main__':
-    points = generateMeshPoints()
-    print points
+def triang2xy( a, b, c, triangle = 'equilater'):
+    '''a= 100%   (0, 0)
+    b= 100%  (1, 0)
+    c= 100%  (1/2, sqrt(3)/2'''
+    #if a < 0 or b < 0 or c < 0:
+    #    raise StandardError('all input data must be positive')
+    total = a+b+c
+    return (2*b+c)/float(2*total), c*sqrt(3)/float(2*total)

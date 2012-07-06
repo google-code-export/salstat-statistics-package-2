@@ -1692,26 +1692,27 @@ class MainFrame(wx.Frame):
         if colnums == []:
             self.SetStatusText('You need some data to draw a graph!')
             return
-
-        selection = data2Plotdiaglog(self,waste)
-        if selection.ShowModal() != wx.ID_OK:
-            selection.Destroy()
+        
+        bt1= ['StaticText', ['Select the pairs of data by rows']]
+        bt2= ['makePairs',  [['A Left Corner','C Upper Corner', 'B Right Corener'], waste, 30]]
+        structure= list()
+        structure.append([bt1,])
+        structure.append([bt2,])
+        dlg= dialog(self, struct= structure)
+        if dlg.ShowModal() != wx.ID_OK:
+            dlg.Destroy()
             return
+        values= dlg.GetValue()
+        dlg.Destroy()
 
-        selectedcols = selection.getData()
-        selection.Destroy()
-        if len(selectedcols) == 0:
-            self.SetStatusText('You need to select some data to draw a graph!')
+        pairs= values[0]
+        if len(pairs) == 0:
             return
-        elif len(selectedcols) != 3:
-            self.logPanel.write('You have to select 3 columns a, b, and c')
-            return
-
-        data = homogenize(*[self.grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]])
-
-        legend = u''
-        data= [data[0], data[1], data[2], legend]
-
+        data= [(self.grid.GetCol(colLeft),
+                self.grid.GetCol(colUpper),
+                self.grid.GetCol(colRight),
+                colLeft+' - '+colUpper+' - '+colRight ) 
+               for (colLeft, colUpper, colRight) in pairs]
         plt= plot(parent=    self,
                   typePlot=  'plotTrian',
                   data2plot= data, 
