@@ -276,7 +276,7 @@ class _example( wx.Frame ):
         bt7= ('RadioBox',     ['title', ['opt1', 'opt2', 'opt3']])
         bt8= ('SpinCtrl',     [ 0, 100, 5 ]) # (min, max, start)
         bt9= ('ToggleButton', ['toggle'])
-        bt10= ['makePairs',[['column '+str(i) for i in range(2)],['opt1','opt2']]]
+        bt10= ['makePairs',[['column '+str(i) for i in range(2)],['opt1','opt2'],5]]
         
         structure= list()
         structure.append( [bt6, bt2] )
