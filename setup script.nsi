@@ -6,7 +6,7 @@ Name S2
 SetCompressor /SOLID LZMA
 
 # General Symbol Definitions
-!define CURRPATH "g:\SalStatdist\"
+!define CURRPATH "..\..\SalStatdist\"
 !define REGKEY "SOFTWARE\$(^Name)"
 !define VERSION 2.1
 !define COMPANY "Sebastián López Buriticá"
@@ -54,7 +54,7 @@ Var vcredist2008set
 !insertmacro MUI_LANGUAGE SpanishInternational
 
 # Installer attributes
-OutFile "S2 setup.exe"
+OutFile "S2 V2.1 Alpha 4 setup.exe"
 InstallDir Salstat2
 CRCCheck on
 XPStyle on
@@ -78,11 +78,11 @@ Section -Main Section2
     #File ${CURRPATH}\salstat.exe
     SetOutPath $SMPROGRAMS\$StartMenuGroup
     CreateShortcut "$SMPROGRAMS\$StartMenuGroup\$(^Name).lnk" "$INSTDIR\salstat.exe" \
-        "" "$INSTDIR\Salstat2.ico" 0 SW_SHOWNORMAL # "" "Paquete de e2stadistica"
+        "" "$INSTDIR\salstat.ico" 0 SW_SHOWNORMAL # "" "Paquete de e2stadistica"
     CreateShortcut "$SMPROGRAMS\$StartMenuGroup\Ayuda.lnk" "$INSTDIR\help\index.html"
     SetOutPath $DESKTOP
     CreateShortcut "$DESKTOP\$(^Name).lnk" "$INSTDIR\salstat.exe" "" \
-                "$INSTDIR\Salstat2.ico" 0
+                "$INSTDIR\salstat.ico" 0
     WriteRegStr HKLM "${REGKEY}\Components" Main 1
 SectionEnd
 
@@ -97,7 +97,7 @@ SectionEnd
 Section "script examples" Section4
      SetOutPath $INSTDIR\scripts
      SetOverwrite on
-     File /r "sript examples\*"
+     File /r "script examples\*"
      SetOutPath $SMPROGRAMS\$StartMenuGroup
      CreateShortcut "$SMPROGRAMS\$StartMenuGroup\scripts.lnk" "$INSTDIR\scripts\"
 SectionEnd
