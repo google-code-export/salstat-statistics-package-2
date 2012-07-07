@@ -669,8 +669,8 @@ class VariablesFrame(wx.Dialog):
 
         bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
 
-        okaybutton = wx.Button(self.m_panel1 , wx.ID_ANY, "Okay", wx.DefaultPosition, wx.DefaultSize, 0 )
-        cancelbutton = wx.Button(self.m_panel1 , wx.ID_ANY, "Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
+        okaybutton = wx.Button(self.m_panel1 ,   2001, "Okay", wx.DefaultPosition, wx.DefaultSize, 0 )
+        cancelbutton = wx.Button(self.m_panel1 , 2002, "Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
 
         bSizer2.Add( okaybutton, 0, wx.ALL, 5 )
         bSizer2.Add( cancelbutton , 0, wx.ALL, 5 )
