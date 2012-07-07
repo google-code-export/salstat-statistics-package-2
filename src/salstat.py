@@ -1301,22 +1301,22 @@ class MainFrame(wx.Frame):
         sixsigma =   imag.sixsigma16()
         #set up menus
         menuBar = wx.MenuBar()
-        #add contents of menu
+        #add contents of menus
         dat1= (
             ('&File',
-             (('&New Data',   NewIcon,    self.GoClearData,     None),
-              ('&Open...',    OpenIcon,   self.grid.LoadXls,     None),
-              ('&Save',       SaveIcon,   self.grid.SaveXls,     None),
-              ('Save &As...', SaveAsIcon, self.grid.SaveXlsAs,     None),
-              ('&Print...',   PrintIcon,  None,     None),
+             (('&New Data',   NewIcon,    self.GoClearData,     wx.ID_NEW),
+              ('&Open...',    OpenIcon,   self.grid.LoadXls,     wx.ID_OPEN),
+              ('&Save',       SaveIcon,   self.grid.SaveXls,     wx.ID_SAVE),
+              ('Save &As...', SaveAsIcon, self.grid.SaveXlsAs,     wx.ID_SAVEAS),
+              ('&Print...',   PrintIcon,  None,     wx.ID_PRINT),
               ('E&xit',       ExitIcon,   self.EndApplication,     wx.ID_EXIT),
               )),
             ('&Edit',
-             (('Cu&t',           CutIcon,         self.grid.CutData,     None),
-              ('&Copy',          CopyIcon,        self.grid.CopyData,     None),
-              ('&Paste',         PasteIcon,       self.grid.PasteData,     None),
-              ('Select &All',    None,            self.grid.SelectAllCells,     None),
-              ('&Find and Replace...',  FindRIcon,     self.GoFindDialog,     None),
+             (('Cu&t',           CutIcon,         self.grid.CutData,     wx.ID_CUT),
+              ('&Copy',          CopyIcon,        self.grid.CopyData,     wx.ID_COPY),
+              ('&Paste',         PasteIcon,       self.grid.PasteData,     wx.ID_PASTE),
+              ('Select &All',    None,            self.grid.SelectAllCells,     wx.ID_SELECTALL),
+              ('&Find and Replace...',  FindRIcon,     self.GoFindDialog,     wx.ID_FIND),
               ('Delete Current Column', None,  self.grid.DeleteCurrentCol,     None),
               ('Delete Current Row',    None,  self.grid.DeleteCurrentRow,     None),)),
             ('&Preferences',
@@ -1444,8 +1444,7 @@ class MainFrame(wx.Frame):
             app = wx.GetApp()
             # Allow spell checking in cells
             # TODO Still need to add this to the Edit menu once we add Mac menu options
-            spellcheck = "mac.textcontrol-use-spell-checker"
-            wx.SystemOptions.SetOptionInt(spellcheck, 1)
+
 
     def _BindEvents(self):
         # grid callback
@@ -1532,8 +1531,8 @@ class MainFrame(wx.Frame):
     def GoClearData(self, evt):
         if not self.grid.Saved:
             # display discard dialog
-            bt1=       ['StaticText', ['save Data?\n if you press cancel then\n all changes will be lost']]
-            setting=   {'Title': "Saving data"}
+            bt1=       ['StaticText', ['Save Data?\n If you press Cancel then\n all changes will be lost!']]
+            setting=   {'Title': "Saving Data"}
             structure= [[bt1],]
             dlg= dialog( settings = setting, struct = structure)
             if dlg.ShowModal() == wx.ID_OK:
@@ -1570,7 +1569,7 @@ class MainFrame(wx.Frame):
         self.grid.Saved = False
         self.m_mgr.Update()
         # /<p>
-        # empting the undo redo
+        # emptying the undo redo
 
         
     def GoFindDialog(self, evt):
@@ -1588,7 +1587,7 @@ class MainFrame(wx.Frame):
         btn2=  ['StaticText', ["Change Grid Size"]]
         btn3=  ['StaticText', ["Add Columns"]]
         btn4=  ['StaticText', ["Add Rows"]]
-        setting= {'Title': 'Change Grid size'}
+        setting= {'Title': 'Change Grid Size'}
         
         struct= list()
         struct.append([btn2])
@@ -1694,7 +1693,7 @@ class MainFrame(wx.Frame):
             return
         
         bt1= ['StaticText', ['Select the pairs of data by rows']]
-        bt2= ['makePairs',  [['A Left Corner','C Upper Corner', 'B Right Corener'], waste, 30]]
+        bt2= ['makePairs',  [['A Left Corner','C Upper Corner', 'B Right Corner'], waste, 30]]
         structure= list()
         structure.append([bt1,])
         structure.append([bt2,])
@@ -2194,7 +2193,7 @@ class MainFrame(wx.Frame):
             return
 
         if len(colNameSelect) < requiredcols:
-            self.logPanel.write("Uou have to select at least %i columns"%requiredcols)
+            self.logPanel.write("You have to select at least %i columns"%requiredcols)
             return
 
         values = [ [pos for pos, value in enumerate( ColumnList )
@@ -2442,9 +2441,11 @@ class MainFrame(wx.Frame):
     def mean(self,evt):
         mean().showGui()
 
+    # median uses histogram to select median. See also medianscore
     def median(self,evt):
         median().showGui()
 
+    # medianscore picks middle number of sorted list. See also median
     def medianscore(self,evt):
         medianscore().showGui()
 
@@ -3408,6 +3409,9 @@ def PutData(column, data):
 # main loop
 if __name__ == '__main__':
     app = SalStat2App(0)
+    spellcheck = "mac.textcontrol-use-spell-checker"
+    wx.SystemOptions.SetOptionInt(spellcheck, 1)
+    app.SetMacSupportPCMenuShortcuts(True)
     app.frame.Show()
     app.MainLoop()
 # eof
