@@ -1041,9 +1041,11 @@ class SalStat2App(wx.App):
         path= os.path.abspath(os.path.join(os.path.split(sys.argv[0])[0], 'help'))
         fileName= os.path.join(path, "help.hhp")
         self.HELPDATA= HtmlHelpData()
-        self.HELPDATA.AddBook(fileName)
+        if os.path.isfile(fileName):
+            self.HELPDATA.AddBook(fileName)
         # help data /<p>
-        self.icon= imagenes.logo16()
+        self.icon= imagenes.logo24()
+        self.icon24= imagenes.logo24()
         self.icon64= imagenes.logo64()
         self.frame = MainFrame(None, self)
         # let the main app known the input Grid
