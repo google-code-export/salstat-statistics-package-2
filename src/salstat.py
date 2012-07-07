@@ -802,8 +802,8 @@ class DescriptivesFrame(wx.Dialog):
 # note this is experimental and may not be final
 #---------------------------------------------------------------------------
 class TransformFrame(wx.Dialog):
-    def __init__(self, parent, id):
-        wx.Dialog.__init__(self, parent, id, "Transformations", \
+    def __init__(self, parent, id= wx.ID_ANY):
+        wx.Dialog.__init__( self, parent, id, "Transformations",
                            size=(500,400+wind))
         #set icon for frame (needs x-platform separator!
         x = self.GetClientSize()
@@ -1655,12 +1655,8 @@ class MainFrame(wx.Frame):
         win.Show(True)
 
     def GoTransformData(self, evt):
-        bt1= ''
-        #win= makePairCtrl(wx.GetApp().frame, -1)
-        
-        
-        #win = TransformFrame(wx.GetApp().frame, -1)
-        #win.Show(True)
+        win = TransformFrame(wx.GetApp().frame, -1)
+        win.Show(True)
 
     def GoCheckOutliers(self, evt):
         pass
