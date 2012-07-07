@@ -32,10 +32,11 @@ opts = { "py2exe":
               }
           }
 
-setup(name= 'salstat',
-      version='2.0',
-      description='Statistics Package',
-      author='Sebastian Lopez Buritica',
+setup(name=         'salstat',
+      version=      '2.1',
+      description=  'Statistics Package',
+      url=          'http://code.google.com/p/salstat-statistics-package-2/',
+      license=      'GPL 2',
       windows=[
           {"script": 'salstat.py',
            "icon_resources": [(0, iconPath)]
