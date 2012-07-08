@@ -2,6 +2,8 @@
 # Colombia
 
 import  wx
+from imagenes import imageEmbed
+from openStats import statistics # used in descriptives frame
 
 # creating a class to make pairs
 #<p> INIT MAKE PAIRS
@@ -140,6 +142,365 @@ class makePairs(wx.Panel):
         return result
 
 #  END MAKE PAIRS /<p>
+
+class SaveDialog(wx.Dialog):
+    def __init__(self, parent):  
+
+        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"Save data?", pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.DEFAULT_DIALOG_STYLE )
+        self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
+        self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
+
+        bSizer1 = wx.BoxSizer( wx.VERTICAL )
+
+        self.m_staticText1 = wx.StaticText( self, wx.ID_ANY, u"You have unsaved data!", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText1.Wrap( -1 )
+        bSizer1.Add( self.m_staticText1, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALL, 5 )
+
+        self.m_staticText2 = wx.StaticText( self, wx.ID_ANY, u"Do you wish to save it?", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText2.Wrap( -1 )
+        bSizer1.Add( self.m_staticText2, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALL, 5 )
+
+        bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
+
+        self.m_button1 = wx.Button( self, wx.ID_ANY, u"Save", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer2.Add( self.m_button1, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+
+        self.m_button2 = wx.Button( self, wx.ID_ANY, u"Discard", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer2.Add( self.m_button2, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+
+        self.m_button3 = wx.Button( self, wx.ID_ANY, u"Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer2.Add( self.m_button3, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+
+        bSizer1.Add( bSizer2, 1, wx.EXPAND, 5 )
+
+        self.SetSizer( bSizer1 )
+        self.Layout()
+        bSizer1.Fit( self )
+
+        self.Centre( wx.BOTH )
+
+        self.Bind(wx.EVT_BUTTON, self.SaveData,     id = self.m_button1.GetId())
+        self.Bind(wx.EVT_BUTTON, self.DiscardData,  id = self.m_button2.GetId())
+        self.Bind(wx.EVT_BUTTON, self.CancelDialog, id = self.m_button3.GetId())
+
+    def SaveData(self, evt):
+        wx.GetApp().frame.grid.Saved = True
+        wx.GetApp().frame.grid.SaveXlsAs(self) # will it be ASCII or XML?
+        # wx.GetApp().output.Close(True)
+        self.Close(True)
+        wx.GetApp().frame.Close(True)
+
+    def DiscardData(self, evt):
+        self.Close(True)
+        wx.GetApp().frame.Close(True)
+
+
+    def CancelDialog(self, evt):
+        self.Close(True)
+
+class VariablesFrame(wx.Dialog):
+    def __init__(self,parent,id):
+        wx.Dialog.__init__(self, parent,id,"SalStat - Variables", \
+                           size=(500,190+wind))
+
+        self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
+        self.m_mgr = wx.aui.AuiManager()
+        self.m_mgr.SetManagedWindow( self )
+
+        self.m_panel1 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+
+        bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
+
+        okaybutton = wx.Button(self.m_panel1 ,   2001, "Okay", wx.DefaultPosition, wx.DefaultSize, 0 )
+        cancelbutton = wx.Button(self.m_panel1 , 2002, "Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
+
+        bSizer2.Add( okaybutton, 0, wx.ALL, 5 )
+        bSizer2.Add( cancelbutton , 0, wx.ALL, 5 )
+
+        self.m_panel1.SetSizer( bSizer2 )
+        self.m_panel1.Layout()
+        bSizer2.Fit( self.m_panel1 )
+        self.m_mgr.AddPane( self.m_panel1, wx.aui.AuiPaneInfo().Bottom().
+                            CaptionVisible( False ).CloseButton( False ).PaneBorder( False ).
+                            Dock().Resizable().FloatingSize( wx.Size( 170,54 ) ).
+                            DockFixed( False ).LeftDockable( False ).RightDockable( False ).
+                            MinSize( wx.Size( -1,30 ) ).Layer( 10 ) )
+
+
+        self.m_grid1 = wx.grid.Grid( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.vargrid = wx.grid.Grid(self,-1,) #
+        self.vargrid.SetRowLabelSize(120)
+        self.vargrid.SetDefaultRowSize(27, True)
+        maxcols = wx.GetApp().frame.grid.GetNumberCols()
+        self.vargrid.CreateGrid(3,maxcols)
+        for i in range(maxcols):
+            oldlabel = wx.GetApp().frame.grid.GetColLabelValue(i)
+            self.vargrid.SetDefaultCellAlignment(wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
+            if wx.Platform == '__WXMAC__':
+                self.vargrid.SetGridLineColour("#b7b7b7")
+                self.vargrid.SetLabelBackgroundColour("#d2d2d2")
+                self.vargrid.SetLabelTextColour("#444444")
+            self.vargrid.SetCellValue(0, i, oldlabel)
+        self.vargrid.SetRowLabelValue(0,"Variable Name")
+        self.vargrid.SetRowLabelValue(1,"Decimal Places")
+        self.vargrid.SetRowLabelValue(2,"Missing Value")
+
+        self.m_mgr.AddPane( self.vargrid, wx.aui.AuiPaneInfo() .Left() .CaptionVisible( False ).PaneBorder( False ).Dock().Resizable().FloatingSize( wx.DefaultSize ).DockFixed( False ).CentrePane() )
+
+        self.m_mgr.Update()
+        self.Centre( wx.BOTH )
+
+        self.Bind(wx.EVT_BUTTON, self.OnOkayVariables, id= 2001)
+        self.Bind(wx.EVT_BUTTON, self.OnCloseVariables, id =  2002)
+
+    # this method needs to work out the other variables too
+    def OnOkayVariables(self, evt):
+        for i in range(wx.GetApp().frame.grid.GetNumberCols()-1):
+            newlabel = self.vargrid.GetCellValue(0, i)
+            if (newlabel != ''):
+                wx.GetApp().frame.grid.SetColLabelValue(i, newlabel)
+            newsig = self.vargrid.GetCellValue(1, i)
+            if (newsig != ''):
+                try:
+                    wx.GetApp().frame.grid.SetColFormatFloat(i, -1, int(newsig))
+                except ZeroDivisionError:
+                    pass
+        wx.GetApp().frame.grid.ForceRefresh()
+        self.Close(True)
+
+    def OnCloseVariables(self, evt):
+        self.Close(True)
+
+#---------------------------------------------------------------------------
+# user selects which cols to analyse, and what stats to have
+DescList= ['N','Sum','Mean','missing',
+           'Variance','Standard Deviation','Standard Error',
+           'Sum of Squares',#'Sum of Squared Devs',
+           'Coefficient of Variation','Minimum',
+           'Maximum','Range','Number Missing',
+           'Geometric Mean','Harmonic Mean',
+           'Skewness','Kurtosis', 'Median',        #'Median Absolute Deviation',
+           'Mode', ] #'Interquartile Range', 'Number of Unique Levels']
+class ManyDescriptives:
+    def __init__(self, source, ds):
+        __x__= len(ds)
+        if __x__ == 0:
+            return
+        data= {'name': "Many Descriptives",
+               'size': (0,0),
+               'nameCol': list(),
+               'data': []}
+        data['nameCol'].append('Statistic')
+        data['nameCol'].extend([ds[i].Name for i in range(__x__)])
+        funcTrans= {'N': 'N',
+                    'Sum': 'suma',
+                    'Mean': 'mean',
+                    'missing': 'missing',
+                    'Variance': 'variance', # changing by the correct
+                    'Standard Deviation': 'stddev',
+                    'Standard Error': 'stderr',
+                    'Sum of Squares': 'sumsquares',
+                    'Sum of Squared Devs': 'ssdevs',
+                    'Coefficient of Variation': 'coeffvar',
+                    'Minimum': 'minimum',
+                    'Maximum': 'maximum',
+                    'Range': 'range',
+                    'Number Missing': 'missing',
+                    'Geometric Mean': 'geomean',
+                    'Harmonic Mean': 'harmmean',
+                    'Skewness': 'skewness',
+                    'Kurtosis': 'kurtosis',
+                    'Median': 'median',
+                    'Median Absolute Deviation': 'mad',
+                    'Mode': 'mode',#    'Interquartile Range': None,
+                    'Number of Unique Levels': 'numberuniques'}
+        items= source.DescChoice.GetItems()
+        itemsSelected = source.DescChoice.GetChecked()
+        if len(itemsSelected ) == 0:
+            return
+        firstcol= ['Descriptives']
+        firstcol.extend([items[pos] for pos in itemsSelected])
+        wx.GetApp().output.addColData(firstcol, 'Descriptive statistics')
+        itemNamesSelected= [ items[ itemnumber] for  itemnumber in itemsSelected ]
+        for i, nameCol in zip(range(__x__), data['nameCol'][1:]):
+            statsi = ds[i]
+            result= [nameCol]
+            result.extend([getattr(statsi,funcTrans[ itemNameSelected]) for itemNameSelected in itemNamesSelected])
+            wx.GetApp().output.addColData(result)
+
+class DescriptivesFrame(wx.Dialog):
+    def __init__( self, parent, id ):
+        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY,
+                             title = "Descriptive Statistics",
+                             pos = wx.DefaultPosition, size = wx.Size( 375,326 ),
+                             style = wx.DEFAULT_DIALOG_STYLE )
+
+        self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
+        icon = imageEmbed().logo16()
+        self.SetIcon(icon)
+        ColumnList, self.colnums  = wx.GetApp().frame.grid.GetUsedCols()
+
+        self.m_mgr = wx.aui.AuiManager()
+        self.m_mgr.SetManagedWindow( self )
+
+        self.DescChoice = CheckListBox(self, wx.ID_ANY,  wx.DefaultPosition, wx.DefaultSize, DescList, 0 )
+        self.m_mgr.AddPane( self.DescChoice, wx.aui.AuiPaneInfo() .Center() .
+                            Caption( u"Select Descriptive Statistics" ).CloseButton( False ).
+                            PaneBorder( False ).Dock().Resizable().FloatingSize( wx.DefaultSize ).
+                            DockFixed( False ).BottomDockable( False ).TopDockable( False ) )
+
+        self.ColChoice = CheckListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, ColumnList, 0 )
+        self.m_mgr.AddPane( self.ColChoice, wx.aui.AuiPaneInfo() .Center() .Caption( u"Select Column(s) to Analyse" ).
+                            CloseButton( False ).PaneBorder( False ).Dock().Resizable().
+                            FloatingSize( wx.Size( 161,93 ) ).DockFixed( False ).BottomDockable( False ).
+                            TopDockable( False ).Row( 1 ).Layer( 0 ) )
+
+        self.m_panel1 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.m_mgr.AddPane( self.m_panel1, wx.aui.AuiPaneInfo() .Bottom() .CaptionVisible( False ).
+                            CloseButton( False ).PaneBorder( False ).Dock().Resizable().
+                            FloatingSize( wx.DefaultSize ).DockFixed( False ).LeftDockable( False ).
+                            RightDockable( False ).MinSize( wx.Size( -1,30 ) ) )
+
+        bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
+
+        okaybutton = wx.Button( self.m_panel1, wx.ID_ANY, u"Ok", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
+        bSizer2.Add( okaybutton, 0, wx.ALL, 5 )
+
+        cancelbutton = wx.Button( self.m_panel1, wx.ID_ANY, u"Cancel", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
+        bSizer2.Add( cancelbutton, 0, wx.ALL, 5 )
+
+        self.m_panel1.SetSizer( bSizer2 )
+        self.m_panel1.Layout()
+        bSizer2.Fit( self.m_panel1 )
+
+        self.m_mgr.Update()
+        self.Centre( wx.BOTH )
+
+        self.Bind(wx.EVT_BUTTON, self.OnOkayButton,          id = okaybutton.GetId())
+        self.Bind(wx.EVT_BUTTON, self.OnCloseContDesc,       id = cancelbutton.GetId())
+   
+    def OnOkayButton(self, evt):
+        descs = []
+        for i in range(len(self.colnums)):
+            if self.ColChoice.IsChecked(i):
+                realColi = self.colnums[i]
+                name = wx.GetApp().frame.grid.GetColLabelValue(realColi)
+                descs.append(statistics(
+                    wx.GetApp().frame.grid.CleanData(realColi), name,
+                    wx.GetApp().frame.grid.missing))
+        ManyDescriptives(self, descs)
+        self.Close(True)
+
+    def OnCloseContDesc(self, evt):
+        self.Close(True)
+
+#---------------------------------------------------------------------------
+# instance of the tool window that contains the test buttons
+# note this is experimental and may not be final
+#---------------------------------------------------------------------------
+class TransformFrame(wx.Dialog):
+    def __init__(self, parent, id= wx.ID_ANY):
+        wx.Dialog.__init__( self, parent, id, "Transformations",
+                           size=(500,400+wind))
+        #set icon for frame (needs x-platform separator!
+        x= self.GetClientSize()
+        winheight= x[1]
+        icon= imagenes.logo16()
+        self.SetIcon(icon)
+        self.transform= ""
+        self.transformName= ""
+        self.ColumnList, self.colnums= wx.GetApp().frame.grid.GetUsedCols()
+        self.cols = wx.GetApp().frame.grid.NumberCols
+        l0 = wx.StaticText( self, -1, "Select Column(s) to Transform", pos=(10,10))
+        self.ColChoice = wx.CheckListBox( self,1102, wx.Point(10,30), \
+                                         wx.Size(230,(winheight * 0.8)), self.ColumnList)
+        self.okaybutton = wx.Button( self, wx.ID_ANY, "Okay",wx.Point(10,winheight-35))
+        self.cancelbutton = wx.Button( self, wx.ID_ANY, "Cancel",wx.Point(100,winheight-35))
+        # common transformations:
+        l1= wx.StaticText( self, -1, "Common Transformations:", pos=(250,30))
+        self.squareRootButton= wx.Button( self, wx.ID_ANY, "Square Root", wx.Point(250, 60))
+        self.logButton= wx.Button( self, wx.ID_ANY, "Logarithmic",wx.Point(250, 100))
+        self.reciprocalButton= wx.Button( self, wx.ID_ANY, "Reciprocal", wx.Point(250,140))
+        self.squareButton= wx.Button( self, wx.ID_ANY, "Square", wx.Point(250,180))
+        l2 = wx.StaticText( self, -1, "Function :", wx.Point(250, 315))
+        self.transformEdit= wx.TextCtrl( self, 1114,pos=(250,335),size=(150,20))
+        self.Bind( wx.EVT_BUTTON, self.OnOkayButton,        id = self.okaybutton.GetId())
+        self.Bind( wx.EVT_BUTTON, self.OnCloseFrame,        id = self.cancelbutton.GetId())
+        self.Bind( wx.EVT_BUTTON, self.squareRootTransform, id = self.squareRootButton.GetId())
+        self.Bind( wx.EVT_BUTTON, self.logTransform,        id = self.logButton.GetId())
+        self.Bind( wx.EVT_BUTTON, self.reciprocalTransform, id = self.reciprocalButton.GetId())
+        self.Bind( wx.EVT_BUTTON, self.squareTransform,     id = self.squareButton.GetId())
+
+    def squareRootTransform(self, evt):
+        self.transform = "math.sqrt(x)"
+        self.transformEdit.SetValue(self.transform)
+        self.transformName = " Square Root"
+
+    def logTransform(self, evt):
+        self.transform = "math.log(x)"
+        self.transformEdit.SetValue(self.transform)
+        self.transformName = " Logarithm"
+
+    def reciprocalTransform(self, evt):
+        self.transform = "1 / x"
+        self.transformEdit.SetValue(self.transform)
+        self.transformName = " Reciprocal"
+
+    def squareTransform(self, evt):
+        self.transform = "x * x"
+        self.transformEdit.SetValue(self.transform)
+        self.transformName = " Square"
+
+    def OnOkayButton(self, evt):
+        # start transforming!
+        # process: collect each selected column, then pass the contents through the self.transform function
+        # then put the resulting column into a new column, and retitle it with the original variable
+        # name plus the function.
+        frame=  wx.GetApp().frame
+        self.transform= self.transformEdit.GetValue()
+        cols= range(frame.grid.NumberCols)
+        emptyCols= []
+        for i in cols:
+            if cols[i] not in self.colnums:
+                emptyCols.append( cols[i])
+        
+        # count the number of needed columns 
+        neededCols= sum( [1 for i in range(len(self.colnums)) if self.ColChoice.IsChecked(i)])
+        cols2add=   len(self.colnums) + neededCols - frame.grid.NumberCols 
+        if cols2add > 0:
+            # adding the needed cols
+            editorRederer= frame.floatCellAttr
+            frame.grid.AddNCells(cols2add, 0, attr= editorRederer)
+            emptyCols.extend( range(len(cols), frame.grid.NumberCols))
+            cols= frame.grid.NumberCols
+
+        for i in range( len( self.colnums)):
+            if self.ColChoice.IsChecked( i):
+                newColi= self.colnums[i]
+                oldcol= frame.grid.CleanData( newColi)
+                newcol= [0]*len( oldcol)
+                for j in range( len( oldcol)):
+                    x= oldcol[j]
+                    try:
+                        newcol[j]= eval( self.transform)
+                    except: # which exception would this be?
+                        newcol[j]= u''
+
+                posNewCol= emptyCols.pop(0)
+                PutData( posNewCol, newcol)
+                # put in a nice new heading
+                oldHead= frame.grid.GetColLabelValue(self.colnums[i])
+                if self.transformName == "":
+                    self.transformName = ' ' + self.transform
+                oldHead= oldHead + self.transformName
+                frame.grid.SetColLabelValue(posNewCol, oldHead)
+        self.Close(True)
+
+    def OnCloseFrame(self, evt):
+        self.Close(True)
+
+
+
 class NumTextCtrl(wx.TextCtrl):
     '''a text ctrl that only accepts numbers'''
     def __init__(self, parent, *args, **params):
