@@ -806,33 +806,33 @@ class TransformFrame(wx.Dialog):
         wx.Dialog.__init__( self, parent, id, "Transformations",
                            size=(500,400+wind))
         #set icon for frame (needs x-platform separator!
-        x = self.GetClientSize()
-        winheight = x[1]
-        icon = imagenes.logo16()
+        x= self.GetClientSize()
+        winheight= x[1]
+        icon= imagenes.logo16()
         self.SetIcon(icon)
-        self.transform = ""
-        self.transformName = ""
-        self.ColumnList, self.colnums = wx.GetApp().frame.grid.GetUsedCols()
-        self.cols = wx.GetApp().frame.grid.GetNumberCols()
-        l0 = wx.StaticText(self,-1,"Select Column(s) to Transform",pos=(10,10))
-        self.ColChoice = wx.CheckListBox(self,1102, wx.Point(10,30), \
+        self.transform= ""
+        self.transformName= ""
+        self.ColumnList, self.colnums= wx.GetApp().frame.grid.GetUsedCols()
+        self.cols = wx.GetApp().frame.grid.NumberCols
+        l0 = wx.StaticText( self, -1, "Select Column(s) to Transform", pos=(10,10))
+        self.ColChoice = wx.CheckListBox( self,1102, wx.Point(10,30), \
                                          wx.Size(230,(winheight * 0.8)), self.ColumnList)
-        self.okaybutton = wx.Button(self, wx.ID_ANY, "Okay",wx.Point(10,winheight-35))
-        self.cancelbutton = wx.Button(self, wx.ID_ANY, "Cancel",wx.Point(100,winheight-35))
+        self.okaybutton = wx.Button( self, wx.ID_ANY, "Okay",wx.Point(10,winheight-35))
+        self.cancelbutton = wx.Button( self, wx.ID_ANY, "Cancel",wx.Point(100,winheight-35))
         # common transformations:
-        l1 = wx.StaticText(self, -1, "Common Transformations:", pos=(250,30))
-        self.squareRootButton = wx.Button(self, wx.ID_ANY, "Square Root", wx.Point(250, 60))
-        self.logButton = wx.Button(self, wx.ID_ANY, "Logarithmic",wx.Point(250, 100))
-        self.reciprocalButton = wx.Button(self, wx.ID_ANY, "Reciprocal", wx.Point(250,140))
-        self.squareButton = wx.Button(self, wx.ID_ANY, "Square", wx.Point(250,180))
-        l2 = wx.StaticText(self, -1, "Function :", wx.Point(250, 315))
-        self.transformEdit = wx.TextCtrl(self, 1114,pos=(250,335),size=(150,20))
-        self.Bind(wx.EVT_BUTTON, self.OnOkayButton,        id = self.okaybutton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.OnCloseFrame,        id = self.cancelbutton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.squareRootTransform, id = self.squareRootButton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.logTransform,        id = self.logButton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.reciprocalTransform, id = self.reciprocalButton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.squareTransform,     id = self.squareButton.GetId())
+        l1= wx.StaticText( self, -1, "Common Transformations:", pos=(250,30))
+        self.squareRootButton= wx.Button( self, wx.ID_ANY, "Square Root", wx.Point(250, 60))
+        self.logButton= wx.Button( self, wx.ID_ANY, "Logarithmic",wx.Point(250, 100))
+        self.reciprocalButton= wx.Button( self, wx.ID_ANY, "Reciprocal", wx.Point(250,140))
+        self.squareButton= wx.Button( self, wx.ID_ANY, "Square", wx.Point(250,180))
+        l2 = wx.StaticText( self, -1, "Function :", wx.Point(250, 315))
+        self.transformEdit= wx.TextCtrl( self, 1114,pos=(250,335),size=(150,20))
+        self.Bind( wx.EVT_BUTTON, self.OnOkayButton,        id = self.okaybutton.GetId())
+        self.Bind( wx.EVT_BUTTON, self.OnCloseFrame,        id = self.cancelbutton.GetId())
+        self.Bind( wx.EVT_BUTTON, self.squareRootTransform, id = self.squareRootButton.GetId())
+        self.Bind( wx.EVT_BUTTON, self.logTransform,        id = self.logButton.GetId())
+        self.Bind( wx.EVT_BUTTON, self.reciprocalTransform, id = self.reciprocalButton.GetId())
+        self.Bind( wx.EVT_BUTTON, self.squareTransform,     id = self.squareButton.GetId())
 
     def squareRootTransform(self, evt):
         self.transform = "math.sqrt(x)"
@@ -859,31 +859,44 @@ class TransformFrame(wx.Dialog):
         # process: collect each selected column, then pass the contents through the self.transform function
         # then put the resulting column into a new column, and retitle it with the original variable
         # name plus the function.
-        self.transform = self.transformEdit.GetValue()
-        cols = range(self.cols)
-        emptyCols = []
+        frame=  wx.GetApp().frame
+        self.transform= self.transformEdit.GetValue()
+        cols= range(frame.grid.NumberCols)
+        emptyCols= []
         for i in cols:
             if cols[i] not in self.colnums:
-                emptyCols.append(cols[i])
-        for i in range(len(self.colnums)):
-            if self.ColChoice.IsChecked(i):
-                newColi = self.colnums[i]
-                oldcol = wx.GetApp().frame.grid.CleanData(newColi)
-                newcol = [0]*len(oldcol)
-                for j in range(len(oldcol)):
-                    x = oldcol[j]
+                emptyCols.append( cols[i])
+        
+        # count the number of needed columns 
+        neededCols= sum( [1 for i in range(len(self.colnums)) if self.ColChoice.IsChecked(i)])
+        cols2add=   len(self.colnums) + neededCols - frame.grid.NumberCols 
+        if cols2add > 0:
+            # adding the needed cols
+            editorRederer= frame.floatCellAttr
+            frame.grid.AddNCells(cols2add, 0, attr= editorRederer)
+            emptyCols.extend( range(len(cols), frame.grid.NumberCols))
+            cols= frame.grid.NumberCols
+
+        for i in range( len( self.colnums)):
+            if self.ColChoice.IsChecked( i):
+                newColi= self.colnums[i]
+                oldcol= frame.grid.CleanData( newColi)
+                newcol= [0]*len( oldcol)
+                for j in range( len( oldcol)):
+                    x= oldcol[j]
                     try:
-                        newcol[j] = eval(self.transform)
+                        newcol[j]= eval( self.transform)
                     except: # which exception would this be?
-                        pass # need to do something here.
-                PutData(emptyCols[i], newcol)
+                        newcol[j]= u''
+
+                posNewCol= emptyCols.pop(0)
+                PutData( posNewCol, newcol)
                 # put in a nice new heading
-                oldHead = wx.GetApp().frame.grid.GetColLabelValue(self.colnums[i])
+                oldHead= frame.grid.GetColLabelValue(self.colnums[i])
                 if self.transformName == "":
                     self.transformName = ' ' + self.transform
-                oldHead = oldHead + self.transformName
-                wx.GetApp().frame.grid.SetColLabelValue(emptyCols[i], oldHead)
-                emptyCols.pop(emptyCols[i])
+                oldHead= oldHead + self.transformName
+                frame.grid.SetColLabelValue(posNewCol, oldHead)
         self.Close(True)
 
     def OnCloseFrame(self, evt):
