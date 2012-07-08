@@ -1047,14 +1047,14 @@ class MainFrame(wx.Frame):
               ('Three Condition Test',    None, self.goThreeConditionTest,     None))),
             ('&Graph',
              (('Line Chart of All Means', None, self.GoChartWindow,     None),
-              ('Bar Chart of All Means',  None, self.GoBarChartWindow,     None),
+              ('Bar Chart of All Means',  None, self.GoMeanBarChartWindow,     None),
               ('Lines',                   None, self.GoLinesPlot,     None),
               ('Scatter',                 None, self.GoScatterPlot,     None),
-              ('Box &Whisker',             None, self.GoBoxWhiskerPlot,     None),
-              ('Linear Regression',          None, self.GoLinRegressPlot,     None),
+              ('Box &Whisker',            None, self.GoBoxWhiskerPlot,     None),
+              ('Linear Regression',       None, self.GoLinRegressPlot,     None),
               ('Ternary',                 None, self.GoTernaryplot,     None),
               ('Probability',             None, self.GoProbabilityplot,     None),
-              ('Adaptive BMS',          None, self.GoAdaptativeBMS,     None))),
+              ('Adaptive BMS',            None, self.GoAdaptativeBMS,     None))),
             ('Ctrl Process',
              (('Six Sigma Pac',           sixsigma, self.GoSixPack,     None),)),
             ('&Help',
@@ -1365,27 +1365,65 @@ class MainFrame(wx.Frame):
                   title=     'Ternary Plot')
         plt.Show()
 
-    def GoBarChartWindow(self, evt):
+    def GoMeanBarChartWindow(self, evt):
+        '''this funtcion is used to plot the bar chart of all means'''
         waste, colnums = self.grid.GetUsedCols()
         if colnums == []:
             self.SetStatusText('You need some data to draw a graph!')
             return
-        selection = data2Plotdiaglog(self,waste)
-        if selection.ShowModal() != wx.ID_OK:
-            selection.Destroy()
+        
+        colours= ['random', 'white', 'blue', 'black',
+                  'red', 'green', 'ligthgreen', 'darkblue',
+                  'yellow', 'hsv']
+        # getting all the available figures
+        path=     os.path.split(sys.argv[0])[0] + '\\nicePlot\\images\\barplot\\'
+        figTypes= [fil[:-4] for fil in os.listdir(path) if fil.endswith('.png')]
+        txt1= ['StaticText', ['Bar type']]
+        txt2= ['StaticText', ['Colour']]
+        txt3= ['StaticText', ['Select data to plot']]
+        btn1= ['Choice', [figTypes]]
+        btn2= ['Choice', [colours]]
+        btn3= ['CheckListBox', [waste]]
+        structure= list()
+        structure.append([btn1, txt1])
+        structure.append([btn2, txt2])
+        structure.append([txt3])
+        structure.append([btn3])
+        setting= {'Title':'Bar chart means of selected columns'}
+        dlg= dialog(self, settings= setting, struct= structure)
+        if dlg.ShowModal() != wx.ID_OK:
+            dlg.Destroy()
             return
-        selectedcols = selection.getData()
-        selection.Destroy()
+        
+        values=  dlg.GetValue()
+        barType= values[0]
+        colour=  values[1]
+        selectedcols= values[2]
+        
+        if len(barType) == 0:
+            barType= 'redunca'
+        else:
+            barType= barType[0]
+            
+        if len(colour) == 0:
+            colour= 'random'
+        else:
+            colour= colour[0]
+        
+        dlg.Destroy()
         if len(selectedcols) == 0:
             self.SetStatusText('You need to select some data to draw a graph!')
             return
-        data = [statistics(self.grid.CleanData(cols),'noname',None) for cols in [colnums[m] for m in selectedcols]]
-        data = [data[i].mean for i in range(len(data))]
-        plt= plot(parent = self, typePlot= 'plotBar',
-                  data2plot= ((data,'Mean'),),
-                  xlabel= 'variable',
-                  ylabel= 'value',
-                  title= 'Bar Chart of all means')
+        
+        data = [statistics( self.grid.GetCol(cols),'noname',None).mean
+                for cols in selectedcols]
+        
+        plt= plot(parent=   self,
+                  typePlot= 'plotNiceBar',
+                  data2plot= (numpy.arange(1, len(data)+1), data,  None,  colour, barType,),
+                  xlabel=  'variable',
+                  ylabel=  'value',
+                  title=   'Bar Chart of all means')
         plt.Show()
 
     def GoHelpSystem(self, evt):
