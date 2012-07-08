@@ -505,7 +505,13 @@ class SimpleGrid(MyGrid):# wxGrid
             smalllist = wx.GetApp().frame.grid.CleanData(numcols[i])
             biglist.append(smalllist)
         return numpy.array((biglist), numpy.float)
-
+    
+    def GetColNumeric(self,colNumber):
+        # return only the numeric values of a selected colNumber or col label
+        # all else values are drop
+        data= self._cleanData( self.GetCol(colNumber))
+        return [dat in data if dat != None]
+        
 #---------------------------------------------------------------------------
 # grid preferences - set row & col sizes
 def GridPrefs(parent):
@@ -1415,7 +1421,7 @@ class MainFrame(wx.Frame):
             self.SetStatusText('You need to select some data to draw a graph!')
             return
         
-        data = [statistics( self.grid.GetCol(cols),'noname',None).mean
+        data = [statistics( self.grid._getColNumber(self.grid.GetCol(cols)),'noname',None).mean
                 for cols in selectedcols]
         
         plt= plot(parent=   self,
