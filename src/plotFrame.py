@@ -29,6 +29,8 @@ from matplotlib.backend_bases import MouseEvent
 from triplot import triplot, triang2xy
 
 from slbTools import homogenize
+from nicePlot.graficaRibon import plotBar # nice plot
+
 PROPLEGEND= {'size':11}
 
 class MpltFrame( wx.Frame ):
@@ -661,21 +663,21 @@ class MpltFrame( wx.Frame ):
         self.m_choice10.SetSelection(0)
         self.m_choice11.SetSelection(0)
 
-    def _Binded(self):
+    def _Binded( self):
         self._addLabels(self.graphParams)
 
-    def _addLabels(self,labels):
+    def _addLabels( self,labels):
         self.figpanel.axes[0].set_title(labels['title'])
         self.figpanel.axes[0].set_xlabel(labels['xlabel'])
         self.figpanel.axes[0].set_ylabel(labels['ylabel'])
         self.figpanel.canvas.draw()
 
-    def _plotTest(self):
+    def _plotTest( self):
         x = np.arange(0, 6, .01)
         y = np.sin(x**2)*np.exp(-x)
         self.axes.plot(x, y)
 
-    def plotLine(self,data2plot):
+    def plotLine( self,data2plot):
         self.axes.hold(True)
         listLegend= list()
         listPlot = list()
@@ -687,7 +689,7 @@ class MpltFrame( wx.Frame ):
         self.axes.hold(False)
         self.figpanel.canvas.draw()
 
-    def plotScatter(self,data2plot):
+    def plotScatter( self,data2plot):
         self.axes.hold(True)
         listLegend= list()
         listPlot = list()
@@ -701,7 +703,9 @@ class MpltFrame( wx.Frame ):
         self.axes.hold( False)
         self.figpanel.canvas.draw()
 
-    def plotBar(self,data2plot):
+    def plotBar( self,data2plot):
+        DeprecationWarning( 'Deprecated function')
+        # warnings.warn( 'Deprecated function', DeprecationWarning)
         self.axes.hold(True)
         listLegend= list()
         listPlot = list()
@@ -709,11 +713,32 @@ class MpltFrame( wx.Frame ):
             listPlot.append(self.axes.bar(range(len(y)),y))
             listLegend.append(texto)
         legend= self.figpanel.legend(listPlot,listLegend, prop = PROPLEGEND)
-        legend.draggable(state=True)
-        self.axes.hold(False)
+        legend.draggable( state = True)
+        self.axes.hold( False)
         self.figpanel.canvas.draw()
+        
+    def plotNiceBar( self, data2plot):
+        xdat=  data2plot[0]
+        ydat=  data2plot[1]
+        label= data2plot[2]
+        colour= data2plot[3]
+        figNam= data2plot[4]
+        self.axes.hold( True)
+        try:
+            plotBar(ax=      self.axes,
+                    xdata=   xdat,
+                    ydata=   ydat,
+                    labels=  None,
+                    colors=  colour,
+                    figName= figNam,
+                    path= '.\\nicePlot\\images\\barplot\\')
+        except:
+            data2plot= (ydata,'Media')
+            plotBar(data2plot)
+        self.axes.hold( False)
+        self.figpanel.canvas.draw( )
 
-    def plotBarH(self,data2plot):
+    def plotBarH( self,data2plot):
         self.axes.hold(True)
         listLegend= list()
         listPlot = list()
@@ -725,7 +750,7 @@ class MpltFrame( wx.Frame ):
         self.axes.hold(False)
         self.figpanel.canvas.draw()
 
-    def plotLinRegress(self,data2plot):
+    def plotLinRegress( self,data2plot):
         x = data2plot[0]
         y = data2plot[1]
         line =  linregress(x,y)
@@ -750,11 +775,14 @@ class MpltFrame( wx.Frame ):
         an1.draggable()
         self.figpanel.canvas.draw()
 
-    def plotPie(self,data2plot):
+    def plotPie( self, data2plot):
         labels = data2plot[0]#'Frogs', 'Hogs', 'Dogs', 'Logs'
         fracs = data2plot[1]#[15,30,45, 10]
         explode= data2plot[2]#(0, 0.05, 0, 0)
-        plt = self.figpanel.axes[0].pie(fracs, explode=explode, labels=labels, autopct='%1.1f%%', shadow=True)
+        plt = self.figpanel.axes[0].pie( fracs, explode=explode,
+                                         labels=labels,
+                                         autopct='%1.1f%%',
+                                         shadow=True)
         self.figpanel.canvas.draw()
 
     def boxPlot(self,data2plot):
@@ -766,6 +794,8 @@ class MpltFrame( wx.Frame ):
         pass
     def plotTrian(self,data2plot):
         '''data2plot = ((a,b,c,'legend'))'''
+        legends= data2plot[1]
+        data2plot= data2plot[0]
         plotT = triplot(data2plot,)
         # plot the mesh
         ax= self.figpanel.axes[0]
@@ -813,19 +843,19 @@ class MpltFrame( wx.Frame ):
         cordUpper= ( 0.5, 0.94)
         stylename= 'round'
         fontsize= 13
-        an1=ax.text( cordLeft[0], cordLeft[1], 'A',
+        an1=ax.text( cordLeft[0], cordLeft[1], legends[0],
                  ha= "right",
                  va= 'top',
                  size= fontsize, #                 transform= ax.figure.transFigure,
                  bbox=dict(boxstyle=stylename, fc="w", ec="k")) #              bbox=dict(boxstyle=stylename, fc="w", ec="k")
         
-        an2=ax.text( cordRigth[0], cordRigth[1], 'B',
+        an2=ax.text( cordRigth[0], cordRigth[1],  legends[1],
                  ha= "left",
                  va= 'top',
                  size= fontsize,#                 transform= ax.figure.transFigure,
                  bbox=dict(boxstyle=stylename, fc="w", ec="k"))
         
-        an3=ax.text( cordUpper[0], cordUpper[1], 'C',
+        an3=ax.text( cordUpper[0], cordUpper[1],  legends[2],
                  ha= "center",
                  va= 'baseline',
                  size= fontsize, #                 transform= ax.figure.transFigure,

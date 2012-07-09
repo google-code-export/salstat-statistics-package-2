@@ -61,17 +61,11 @@ from imagenes import imageEmbed
 from helpSystem import Navegator
 
 from dialogs import CheckListBox, SixSigma
+from dialogs import SaveDialog, VariablesFrame, DescriptivesFrame
+
 from gridCellRenderers import floatRenderer, AutoWrapStringRenderer
 
 APPNAME= 'SalStat2'
-DescList= ['N','Sum','Mean','missing',
-           'Variance','Standard Deviation','Standard Error',
-           'Sum of Squares',#'Sum of Squared Devs',
-           'Coefficient of Variation','Minimum',
-           'Maximum','Range','Number Missing',
-           'Geometric Mean','Harmonic Mean',
-           'Skewness','Kurtosis', 'Median',        #'Median Absolute Deviation',
-           'Mode', ] #'Interquartile Range', 'Number of Unique Levels']
 
 inits ={}    # dictionary to hold the config values
 ColsUsed= []
@@ -152,120 +146,8 @@ class LogPanel( wx.Panel ):
         pass
 
 
-class SaveDialog(wx.Dialog):
-    def __init__(self, parent):  
-
-        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = u"Save data?", pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.DEFAULT_DIALOG_STYLE )
-        self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
-        self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
-
-        bSizer1 = wx.BoxSizer( wx.VERTICAL )
-
-        self.m_staticText1 = wx.StaticText( self, wx.ID_ANY, u"You have unsaved data!", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText1.Wrap( -1 )
-        bSizer1.Add( self.m_staticText1, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALL, 5 )
-
-        self.m_staticText2 = wx.StaticText( self, wx.ID_ANY, u"Do you wish to save it?", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText2.Wrap( -1 )
-        bSizer1.Add( self.m_staticText2, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALL, 5 )
-
-        bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
-
-        self.m_button1 = wx.Button( self, wx.ID_ANY, u"Save", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer2.Add( self.m_button1, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
-
-        self.m_button2 = wx.Button( self, wx.ID_ANY, u"Discard", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer2.Add( self.m_button2, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
-
-        self.m_button3 = wx.Button( self, wx.ID_ANY, u"Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer2.Add( self.m_button3, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
-
-        bSizer1.Add( bSizer2, 1, wx.EXPAND, 5 )
-
-        self.SetSizer( bSizer1 )
-        self.Layout()
-        bSizer1.Fit( self )
-
-        self.Centre( wx.BOTH )
-
-        self.Bind(wx.EVT_BUTTON, self.SaveData,     id = self.m_button1.GetId())
-        self.Bind(wx.EVT_BUTTON, self.DiscardData,  id = self.m_button2.GetId())
-        self.Bind(wx.EVT_BUTTON, self.CancelDialog, id = self.m_button3.GetId())
-
-    def SaveData(self, evt):
-        wx.GetApp().frame.grid.Saved = True
-        wx.GetApp().frame.grid.SaveXlsAs(self) # will it be ASCII or XML?
-        # wx.GetApp().output.Close(True)
-        self.Close(True)
-        wx.GetApp().frame.Close(True)
-
-    def DiscardData(self, evt):
-        self.Close(True)
-        wx.GetApp().frame.Close(True)
-
-
-    def CancelDialog(self, evt):
-        self.Close(True)
-
 #---------------------------------------------------------------------------
 # class to wx.GetApp().output the results of several "descriptives" in one table
-class ManyDescriptives:
-    def __init__(self, source, ds):
-        __x__= len(ds)
-        if __x__ == 0:
-            return
-        data= {'name': "Many Descriptives",
-               'size': (0,0),
-               'nameCol': list(),
-               'data': []}
-        data['nameCol'].append('Statistic')
-        data['nameCol'].extend([ds[i].Name for i in range(__x__)])
-        funcTrans= {'N': 'N',
-                    'Sum': 'suma',
-                    'Mean': 'mean',
-                    'missing': 'missing',
-                    'Variance': 'variance', # changing by the correct
-                    'Standard Deviation': 'stddev',
-                    'Standard Error': 'stderr',
-                    'Sum of Squares': 'sumsquares',
-                    'Sum of Squared Devs': 'ssdevs',
-                    'Coefficient of Variation': 'coeffvar',
-                    'Minimum': 'minimum',
-                    'Maximum': 'maximum',
-                    'Range': 'range',
-                    'Number Missing': 'missing',
-                    'Geometric Mean': 'geomean',
-                    'Harmonic Mean': 'harmmean',
-                    'Skewness': 'skewness',
-                    'Kurtosis': 'kurtosis',
-                    'Median': 'median',
-                    'Median Absolute Deviation': 'mad',
-                    'Mode': 'mode',#    'Interquartile Range': None,
-                    'Number of Unique Levels': 'numberuniques'}
-        items= source.DescChoice.GetItems()
-        itemsSelected = source.DescChoice.GetChecked()
-        if len(itemsSelected ) == 0:
-            return
-        firstcol= ['Descriptives']
-        firstcol.extend([items[pos] for pos in itemsSelected])
-        wx.GetApp().output.addColData(firstcol, 'Descriptive statistics')
-        itemNamesSelected= [ items[ itemnumber] for  itemnumber in itemsSelected ]
-        for i, nameCol in zip(range(__x__), data['nameCol'][1:]):
-            statsi = ds[i]
-            result= [nameCol]
-            result.extend([getattr(statsi,funcTrans[ itemNameSelected]) for itemNameSelected in itemNamesSelected])
-            wx.GetApp().output.addColData(result)
-        #for aliasParamName in itemsSelected:
-            #realParamName = funcTrans[aliasParamName]
-            #if realParamName == None:
-                #continue
-            #res= [aliasParamName]
-            #if hasattr(ds[i],realParamName):
-                #res.extend([getattr(ds[i],realParamName) for i in range(__x__)])
-                #data['data'].append(res)
-            #wx.GetApp().output.addColData(funcTrans.keys())
-        #data['size']= (len(data['data']), len(data['nameCol']))
-
 #---------------------------------------------------------------------------
 # class for grid - used as datagrid.
 class SimpleGrid(MyGrid):# wxGrid
@@ -465,6 +347,9 @@ class SimpleGrid(MyGrid):# wxGrid
         if dlg.ShowModal() != wx.ID_OK:
             return
         (sheetNameSelected, hasHeader)= dlg.GetValue()
+        if len(sheetNameSelected) == 0:
+            return
+        
         sheetNameSelected= sheetNameSelected[0]
         dlg.Destroy()
         
@@ -547,14 +432,14 @@ class SimpleGrid(MyGrid):# wxGrid
         return indata
 
     # Routine to return a "clean" list of data from one column
-    def CleanData(self, col):
+    def CleanData(self, coldata):
         indata = []
         self.missing = 0
         dp= wx.GetApp().DECIMAL_POINT
         if dp == '.':
             for i in range(self.GetNumberRows()):
-                datapoint = self.GetCellValue(i, col).strip()
-                if (datapoint != u'') and (datapoint != u'.'):
+                datapoint = self.GetCellValue(i, coldata).strip()
+                if (datapoint != u'' or datapoint.replace(' ','') != u'') and (datapoint != u'.'):
                     try:
                         value = float(datapoint)
                         if (value != missingvalue):
@@ -565,8 +450,8 @@ class SimpleGrid(MyGrid):# wxGrid
                         pass
         else:
             for i in range(self.GetNumberRows()):
-                datapoint = self.GetCellValue(i, col).strip().replace(dp, '.')
-                if (datapoint != u'') and (datapoint != u'.'):
+                datapoint = self.GetCellValue(i, coldata).strip().replace(dp, '.')
+                if (datapoint != u'' or datapoint.replace(' ','') != u'') and (datapoint != u'.'):
                     try:
                         value = float(datapoint)
                         if (value != missingvalue):
@@ -593,7 +478,7 @@ class SimpleGrid(MyGrid):# wxGrid
         dp = wx.GetApp().DECIMAL_POINT
         result= list()
         for dat in data:
-            if dat == u'':
+            if dat == u'' or dat.replace(' ','') == u'': # to detect a cell of only space bar
                 dat = None
             else:
                 try:
@@ -623,7 +508,13 @@ class SimpleGrid(MyGrid):# wxGrid
             smalllist = wx.GetApp().frame.grid.CleanData(numcols[i])
             biglist.append(smalllist)
         return numpy.array((biglist), numpy.float)
-
+    
+    def GetColNumeric(self, colNumber):
+        # return only the numeric values of a selected colNumber or col label
+        # all else values are drop
+        values= self._cleanData( self._getCol( colNumber))
+        return [val for val in values if not isinstance(val,(unicode, str)) and val != None ]
+        
 #---------------------------------------------------------------------------
 # grid preferences - set row & col sizes
 def GridPrefs(parent):
@@ -655,240 +546,6 @@ def GridPrefs(parent):
 # user can change settings like variable names, decimal places, missing no.s
 # using a SimpleGrid Need evt handler - when new name entered, must be
 #checked against others so no match each other
-
-class VariablesFrame(wx.Dialog):
-    def __init__(self,parent,id):
-        wx.Dialog.__init__(self, parent,id,"SalStat - Variables", \
-                           size=(500,190+wind))
-
-        self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
-        self.m_mgr = wx.aui.AuiManager()
-        self.m_mgr.SetManagedWindow( self )
-
-        self.m_panel1 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-
-        bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
-
-        okaybutton = wx.Button(self.m_panel1 , wx.ID_ANY, "Okay", wx.DefaultPosition, wx.DefaultSize, 0 )
-        cancelbutton = wx.Button(self.m_panel1 , wx.ID_ANY, "Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
-
-        bSizer2.Add( okaybutton, 0, wx.ALL, 5 )
-        bSizer2.Add( cancelbutton , 0, wx.ALL, 5 )
-
-        self.m_panel1.SetSizer( bSizer2 )
-        self.m_panel1.Layout()
-        bSizer2.Fit( self.m_panel1 )
-        self.m_mgr.AddPane( self.m_panel1, wx.aui.AuiPaneInfo().Bottom().
-                            CaptionVisible( False ).CloseButton( False ).PaneBorder( False ).
-                            Dock().Resizable().FloatingSize( wx.Size( 170,54 ) ).
-                            DockFixed( False ).LeftDockable( False ).RightDockable( False ).
-                            MinSize( wx.Size( -1,30 ) ).Layer( 10 ) )
-
-
-        self.m_grid1 = wx.grid.Grid( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.vargrid = wx.grid.Grid(self,-1,) #
-        self.vargrid.SetRowLabelSize(120)
-        self.vargrid.SetDefaultRowSize(27, True)
-        maxcols = wx.GetApp().frame.grid.GetNumberCols()
-        self.vargrid.CreateGrid(3,maxcols)
-        for i in range(maxcols):
-            oldlabel = wx.GetApp().frame.grid.GetColLabelValue(i)
-            self.vargrid.SetDefaultCellAlignment(wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
-            if wx.Platform == '__WXMAC__':
-                self.vargrid.SetGridLineColour("#b7b7b7")
-                self.vargrid.SetLabelBackgroundColour("#d2d2d2")
-                self.vargrid.SetLabelTextColour("#444444")
-            self.vargrid.SetCellValue(0, i, oldlabel)
-        self.vargrid.SetRowLabelValue(0,"Variable Name")
-        self.vargrid.SetRowLabelValue(1,"Decimal Places")
-        self.vargrid.SetRowLabelValue(2,"Missing Value")
-
-        self.m_mgr.AddPane( self.vargrid, wx.aui.AuiPaneInfo() .Left() .CaptionVisible( False ).PaneBorder( False ).Dock().Resizable().FloatingSize( wx.DefaultSize ).DockFixed( False ).CentrePane() )
-
-        self.m_mgr.Update()
-        self.Centre( wx.BOTH )
-
-        self.Bind(wx.EVT_BUTTON, self.OnOkayVariables, id= 2001)
-        self.Bind(wx.EVT_BUTTON, self.OnCloseVariables, id =  2002)
-
-    # this method needs to work out the other variables too
-    def OnOkayVariables(self, evt):
-        for i in range(wx.GetApp().frame.grid.GetNumberCols()-1):
-            newlabel = self.vargrid.GetCellValue(0, i)
-            if (newlabel != ''):
-                wx.GetApp().frame.grid.SetColLabelValue(i, newlabel)
-            newsig = self.vargrid.GetCellValue(1, i)
-            if (newsig != ''):
-                try:
-                    wx.GetApp().frame.grid.SetColFormatFloat(i, -1, int(newsig))
-                except ZeroDivisionError:
-                    pass
-        wx.GetApp().frame.grid.ForceRefresh()
-        self.Close(True)
-
-    def OnCloseVariables(self, evt):
-        self.Close(True)
-
-#---------------------------------------------------------------------------
-# user selects which cols to analyse, and what stats to have
-class DescriptivesFrame(wx.Dialog):
-    def __init__( self, parent, id ):
-        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY,
-                             title = "Descriptive Statistics",
-                             pos = wx.DefaultPosition, size = wx.Size( 375,326 ),
-                             style = wx.DEFAULT_DIALOG_STYLE )
-
-        self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
-        icon = imagenes.logo16()
-        self.SetIcon(icon)
-        ColumnList, self.colnums  = wx.GetApp().frame.grid.GetUsedCols()
-
-        self.m_mgr = wx.aui.AuiManager()
-        self.m_mgr.SetManagedWindow( self )
-
-        self.DescChoice = CheckListBox(self, wx.ID_ANY,  wx.DefaultPosition, wx.DefaultSize, DescList, 0 )
-        self.m_mgr.AddPane( self.DescChoice, wx.aui.AuiPaneInfo() .Center() .
-                            Caption( u"Select Descriptive Statistics" ).CloseButton( False ).
-                            PaneBorder( False ).Dock().Resizable().FloatingSize( wx.DefaultSize ).
-                            DockFixed( False ).BottomDockable( False ).TopDockable( False ) )
-
-        self.ColChoice = CheckListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, ColumnList, 0 )
-        self.m_mgr.AddPane( self.ColChoice, wx.aui.AuiPaneInfo() .Center() .Caption( u"Select Column(s) to Analyse" ).
-                            CloseButton( False ).PaneBorder( False ).Dock().Resizable().
-                            FloatingSize( wx.Size( 161,93 ) ).DockFixed( False ).BottomDockable( False ).
-                            TopDockable( False ).Row( 1 ).Layer( 0 ) )
-
-        self.m_panel1 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-        self.m_mgr.AddPane( self.m_panel1, wx.aui.AuiPaneInfo() .Bottom() .CaptionVisible( False ).
-                            CloseButton( False ).PaneBorder( False ).Dock().Resizable().
-                            FloatingSize( wx.DefaultSize ).DockFixed( False ).LeftDockable( False ).
-                            RightDockable( False ).MinSize( wx.Size( -1,30 ) ) )
-
-        bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
-
-        okaybutton = wx.Button( self.m_panel1, wx.ID_ANY, u"Ok", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
-        bSizer2.Add( okaybutton, 0, wx.ALL, 5 )
-
-        cancelbutton = wx.Button( self.m_panel1, wx.ID_ANY, u"Cancel", wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
-        bSizer2.Add( cancelbutton, 0, wx.ALL, 5 )
-
-        self.m_panel1.SetSizer( bSizer2 )
-        self.m_panel1.Layout()
-        bSizer2.Fit( self.m_panel1 )
-
-        self.m_mgr.Update()
-        self.Centre( wx.BOTH )
-
-        self.Bind(wx.EVT_BUTTON, self.OnOkayButton,          id = okaybutton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.OnCloseContDesc,       id = cancelbutton.GetId())
-   
-    def OnOkayButton(self, evt):
-        descs = []
-        for i in range(len(self.colnums)):
-            if self.ColChoice.IsChecked(i):
-                realColi = self.colnums[i]
-                name = wx.GetApp().frame.grid.GetColLabelValue(realColi)
-                descs.append(statistics(
-                    wx.GetApp().frame.grid.CleanData(realColi), name,
-                    wx.GetApp().frame.grid.missing))
-        ManyDescriptives(self, descs)
-        self.Close(True)
-
-    def OnCloseContDesc(self, evt):
-        self.Close(True)
-
-#---------------------------------------------------------------------------
-# instance of the tool window that contains the test buttons
-# note this is experimental and may not be final
-#---------------------------------------------------------------------------
-class TransformFrame(wx.Dialog):
-    def __init__(self, parent, id):
-        wx.Dialog.__init__(self, parent, id, "Transformations", \
-                           size=(500,400+wind))
-        #set icon for frame (needs x-platform separator!
-        x = self.GetClientSize()
-        winheight = x[1]
-        icon = imagenes.logo16()
-        self.SetIcon(icon)
-        self.transform = ""
-        self.transformName = ""
-        self.ColumnList, self.colnums = wx.GetApp().frame.grid.GetUsedCols()
-        self.cols = wx.GetApp().frame.grid.GetNumberCols()
-        l0 = wx.StaticText(self,-1,"Select Column(s) to Transform",pos=(10,10))
-        self.ColChoice = wx.CheckListBox(self,1102, wx.Point(10,30), \
-                                         wx.Size(230,(winheight * 0.8)), self.ColumnList)
-        self.okaybutton = wx.Button(self, wx.ID_ANY, "Okay",wx.Point(10,winheight-35))
-        self.cancelbutton = wx.Button(self, wx.ID_ANY, "Cancel",wx.Point(100,winheight-35))
-        # common transformations:
-        l1 = wx.StaticText(self, -1, "Common Transformations:", pos=(250,30))
-        self.squareRootButton = wx.Button(self, wx.ID_ANY, "Square Root", wx.Point(250, 60))
-        self.logButton = wx.Button(self, wx.ID_ANY, "Logarithmic",wx.Point(250, 100))
-        self.reciprocalButton = wx.Button(self, wx.ID_ANY, "Reciprocal", wx.Point(250,140))
-        self.squareButton = wx.Button(self, wx.ID_ANY, "Square", wx.Point(250,180))
-        l2 = wx.StaticText(self, -1, "Function :", wx.Point(250, 315))
-        self.transformEdit = wx.TextCtrl(self, 1114,pos=(250,335),size=(150,20))
-        self.Bind(wx.EVT_BUTTON, self.OnOkayButton,        id = self.okaybutton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.OnCloseFrame,        id = self.cancelbutton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.squareRootTransform, id = self.squareRootButton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.logTransform,        id = self.logButton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.reciprocalTransform, id = self.reciprocalButton.GetId())
-        self.Bind(wx.EVT_BUTTON, self.squareTransform,     id = self.squareButton.GetId())
-
-    def squareRootTransform(self, evt):
-        self.transform = "math.sqrt(x)"
-        self.transformEdit.SetValue(self.transform)
-        self.transformName = " Square Root"
-
-    def logTransform(self, evt):
-        self.transform = "math.log(x)"
-        self.transformEdit.SetValue(self.transform)
-        self.transformName = " Logarithm"
-
-    def reciprocalTransform(self, evt):
-        self.transform = "1 / x"
-        self.transformEdit.SetValue(self.transform)
-        self.transformName = " Reciprocal"
-
-    def squareTransform(self, evt):
-        self.transform = "x * x"
-        self.transformEdit.SetValue(self.transform)
-        self.transformName = " Square"
-
-    def OnOkayButton(self, evt):
-        # start transforming!
-        # process: collect each selected column, then pass the contents through the self.transform function
-        # then put the resulting column into a new column, and retitle it with the original variable
-        # name plus the function.
-        self.transform = self.transformEdit.GetValue()
-        cols = range(self.cols)
-        emptyCols = []
-        for i in cols:
-            if cols[i] not in self.colnums:
-                emptyCols.append(cols[i])
-        for i in range(len(self.colnums)):
-            if self.ColChoice.IsChecked(i):
-                newColi = self.colnums[i]
-                oldcol = wx.GetApp().frame.grid.CleanData(newColi)
-                newcol = [0]*len(oldcol)
-                for j in range(len(oldcol)):
-                    x = oldcol[j]
-                    try:
-                        newcol[j] = eval(self.transform)
-                    except: # which exception would this be?
-                        pass # need to do something here.
-                PutData(emptyCols[i], newcol)
-                # put in a nice new heading
-                oldHead = wx.GetApp().frame.grid.GetColLabelValue(self.colnums[i])
-                if self.transformName == "":
-                    self.transformName = ' ' + self.transform
-                oldHead = oldHead + self.transformName
-                wx.GetApp().frame.grid.SetColLabelValue(emptyCols[i], oldHead)
-                emptyCols.pop(emptyCols[i])
-        self.Close(True)
-
-    def OnCloseFrame(self, evt):
-        self.Close(True)
-
 class formulaBar ( wx.Panel ):
 
     def __init__( self, parent , *args,**params):
@@ -1041,9 +698,12 @@ class SalStat2App(wx.App):
         path= os.path.abspath(os.path.join(os.path.split(sys.argv[0])[0], 'help'))
         fileName= os.path.join(path, "help.hhp")
         self.HELPDATA= HtmlHelpData()
-        self.HELPDATA.AddBook(fileName)
+        if os.path.isfile(fileName):
+            self.HELPDATA.AddBook(fileName)
         # help data /<p>
         self.icon= imagenes.logo16()
+        self.icon16= imagenes.logo16()
+        self.icon24= imagenes.logo24()
         self.icon64= imagenes.logo64()
         self.frame = MainFrame(None, self)
         # let the main app known the input Grid
@@ -1142,7 +802,7 @@ class MainFrame(wx.Frame):
         self.m_mgr.SetManagedWindow( self )
 
         #set icon for frame (needs x-platform separator!
-        self.Icon= appname.icon
+        self.Icon= appname.icon24
         self.DECIMAL_POINT= appname.DECIMAL_POINT
         #----------------------
         # create toolbars
@@ -1301,22 +961,22 @@ class MainFrame(wx.Frame):
         sixsigma =   imag.sixsigma16()
         #set up menus
         menuBar = wx.MenuBar()
-        #add contents of menus
+        #add contents of menu
         dat1= (
             ('&File',
-             (('&New Data',   NewIcon,    self.GoClearData,     wx.ID_NEW),
-              ('&Open...',    OpenIcon,   self.grid.LoadXls,     wx.ID_OPEN),
-              ('&Save',       SaveIcon,   self.grid.SaveXls,     wx.ID_SAVE),
-              ('Save &As...', SaveAsIcon, self.grid.SaveXlsAs,     wx.ID_SAVEAS),
-              ('&Print...',   PrintIcon,  None,     wx.ID_PRINT),
+             (('&New Data',   NewIcon,    self.GoClearData,     None),
+              ('&Open...',    OpenIcon,   self.grid.LoadXls,     None),
+              ('&Save',       SaveIcon,   self.grid.SaveXls,     None),
+              ('Save &As...', SaveAsIcon, self.grid.SaveXlsAs,     None),
+              ('&Print...',   PrintIcon,  None,     None),
               ('E&xit',       ExitIcon,   self.EndApplication,     wx.ID_EXIT),
               )),
             ('&Edit',
-             (('Cu&t',           CutIcon,         self.grid.CutData,     wx.ID_CUT),
-              ('&Copy',          CopyIcon,        self.grid.CopyData,     wx.ID_COPY),
-              ('&Paste',         PasteIcon,       self.grid.PasteData,     wx.ID_PASTE),
-              ('Select &All',    None,            self.grid.SelectAllCells,     wx.ID_SELECTALL),
-              ('&Find and Replace...',  FindRIcon,     self.GoFindDialog,     wx.ID_FIND),
+             (('Cu&t',           CutIcon,         self.grid.CutData,     None),
+              ('&Copy',          CopyIcon,        self.grid.CopyData,     None),
+              ('&Paste',         PasteIcon,       self.grid.PasteData,     None),
+              ('Select &All',    None,            self.grid.SelectAllCells,     None),
+              ('&Find and Replace...',  FindRIcon,     self.GoFindDialog,     None),
               ('Delete Current Column', None,  self.grid.DeleteCurrentCol,     None),
               ('Delete Current Row',    None,  self.grid.DeleteCurrentRow,     None),)),
             ('&Preferences',
@@ -1397,14 +1057,14 @@ class MainFrame(wx.Frame):
               ('Three Condition Test',    None, self.goThreeConditionTest,     None))),
             ('&Graph',
              (('Line Chart of All Means', None, self.GoChartWindow,     None),
-              ('Bar Chart of All Means',  None, self.GoBarChartWindow,     None),
+              ('Bar Chart of All Means',  None, self.GoMeanBarChartWindow,     None),
               ('Lines',                   None, self.GoLinesPlot,     None),
               ('Scatter',                 None, self.GoScatterPlot,     None),
-              ('Box &Whisker',             None, self.GoBoxWhiskerPlot,     None),
-              ('Linear Regression',          None, self.GoLinRegressPlot,     None),
+              ('Box &Whisker',            None, self.GoBoxWhiskerPlot,     None),
+              ('Linear Regression',       None, self.GoLinRegressPlot,     None),
               ('Ternary',                 None, self.GoTernaryplot,     None),
               ('Probability',             None, self.GoProbabilityplot,     None),
-              ('Adaptive BMS',          None, self.GoAdaptativeBMS,     None))),
+              ('Adaptive BMS',            None, self.GoAdaptativeBMS,     None))),
             ('Ctrl Process',
              (('Six Sigma Pac',           sixsigma, self.GoSixPack,     None),)),
             ('&Help',
@@ -1444,7 +1104,8 @@ class MainFrame(wx.Frame):
             app = wx.GetApp()
             # Allow spell checking in cells
             # TODO Still need to add this to the Edit menu once we add Mac menu options
-
+            spellcheck = "mac.textcontrol-use-spell-checker"
+            wx.SystemOptions.SetOptionInt(spellcheck, 1)
 
     def _BindEvents(self):
         # grid callback
@@ -1531,8 +1192,8 @@ class MainFrame(wx.Frame):
     def GoClearData(self, evt):
         if not self.grid.Saved:
             # display discard dialog
-            bt1=       ['StaticText', ['Save Data?\n If you press Cancel then\n all changes will be lost!']]
-            setting=   {'Title': "Saving Data"}
+            bt1=       ['StaticText', ['save Data?\n if you press cancel then\n all changes will be lost']]
+            setting=   {'Title': "Saving data"}
             structure= [[bt1],]
             dlg= dialog( settings = setting, struct = structure)
             if dlg.ShowModal() == wx.ID_OK:
@@ -1569,7 +1230,7 @@ class MainFrame(wx.Frame):
         self.grid.Saved = False
         self.m_mgr.Update()
         # /<p>
-        # emptying the undo redo
+        # empting the undo redo
 
         
     def GoFindDialog(self, evt):
@@ -1587,7 +1248,7 @@ class MainFrame(wx.Frame):
         btn2=  ['StaticText', ["Change Grid Size"]]
         btn3=  ['StaticText', ["Add Columns"]]
         btn4=  ['StaticText', ["Add Rows"]]
-        setting= {'Title': 'Change Grid Size'}
+        setting= {'Title': 'Change Grid size'}
         
         struct= list()
         struct.append([btn2])
@@ -1652,12 +1313,8 @@ class MainFrame(wx.Frame):
         win.Show(True)
 
     def GoTransformData(self, evt):
-        bt1= ''
-        #win= makePairCtrl(wx.GetApp().frame, -1)
-        
-        
-        #win = TransformFrame(wx.GetApp().frame, -1)
-        #win.Show(True)
+        win = TransformFrame(wx.GetApp().frame, -1)
+        win.Show(True)
 
     def GoCheckOutliers(self, evt):
         pass
@@ -1692,21 +1349,43 @@ class MainFrame(wx.Frame):
             self.SetStatusText('You need some data to draw a graph!')
             return
         
-        bt1= ['StaticText', ['Select the pairs of data by rows']]
-        bt2= ['makePairs',  [['A Left Corner','C Upper Corner', 'B Right Corner'], waste, 30]]
+        txt1= ['StaticText', ['Left Corner Label']]
+        txt2= ['StaticText', ['Rigth Corner Label']]
+        txt3= ['StaticText', ['Upper Corner Label']]
+        btn1= ['TextCtrl',   ['A']]
+        btn2= ['TextCtrl',   ['B']]
+        btn3= ['TextCtrl',   ['C']]
+        btn4= ['StaticText', ['Select the pairs of data by rows']]
+        btn5= ['makePairs',  [['A Left Corner','C Upper Corner', 'B Right Corener'], waste, 30]]
         structure= list()
-        structure.append([bt1,])
-        structure.append([bt2,])
+        structure.append( [btn1, txt1])
+        structure.append( [btn2, txt2])
+        structure.append( [btn3, txt3])
+        structure.append( [btn4,])
+        structure.append( [btn5,])
         dlg= dialog(self, struct= structure)
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return
+        
         values= dlg.GetValue()
         dlg.Destroy()
-
-        pairs= values[0]
+        Alabel= values[0]
+        if Alabel == u'' or Alabel.replace(' ','') == u'':
+            Alabel= u'A'
+            
+        Blabel= values[1]
+        if Blabel == u'' or Blabel.replace(' ','') == u'':
+            Blabel= u'B'
+            
+        Clabel= values[2]
+        if Clabel == u'' or Clabel.replace(' ','') == u'':
+            Clabel= u'C'
+        
+        pairs= values[3]
         if len(pairs) == 0:
             return
+        
         data= [(self.grid.GetCol(colLeft),
                 self.grid.GetCol(colUpper),
                 self.grid.GetCol(colRight),
@@ -1714,31 +1393,69 @@ class MainFrame(wx.Frame):
                for (colLeft, colUpper, colRight) in pairs]
         plt= plot(parent=    self,
                   typePlot=  'plotTrian',
-                  data2plot= data, 
+                  data2plot= (data, [Alabel, Blabel, Clabel]), 
                   title=     'Ternary Plot')
         plt.Show()
 
-    def GoBarChartWindow(self, evt):
+    def GoMeanBarChartWindow(self, evt):
+        '''this funtcion is used to plot the bar chart of all means'''
         waste, colnums = self.grid.GetUsedCols()
         if colnums == []:
             self.SetStatusText('You need some data to draw a graph!')
             return
-        selection = data2Plotdiaglog(self,waste)
-        if selection.ShowModal() != wx.ID_OK:
-            selection.Destroy()
+        
+        colours= ['random', 'white', 'blue', 'black',
+                  'red', 'green', 'ligthgreen', 'darkblue',
+                  'yellow', 'hsv']
+        # getting all the available figures
+        path=     os.path.split(sys.argv[0])[0] + '\\nicePlot\\images\\barplot\\'
+        figTypes= [fil[:-4] for fil in os.listdir(path) if fil.endswith('.png')]
+        txt1= ['StaticText', ['Bar type']]
+        txt2= ['StaticText', ['Colour']]
+        txt3= ['StaticText', ['Select data to plot']]
+        btn1= ['Choice', [figTypes]]
+        btn2= ['Choice', [colours]]
+        btn3= ['CheckListBox', [waste]]
+        structure= list()
+        structure.append([btn1, txt1])
+        structure.append([btn2, txt2])
+        structure.append([txt3])
+        structure.append([btn3])
+        setting= {'Title':'Bar chart means of selected columns'}
+        dlg= dialog(self, settings= setting, struct= structure)
+        if dlg.ShowModal() != wx.ID_OK:
+            dlg.Destroy()
             return
-        selectedcols = selection.getData()
-        selection.Destroy()
+        
+        values=  dlg.GetValue()
+        barType= values[0]
+        colour=  values[1]
+        selectedcols= values[2]
+        
+        if len(barType) == 0:
+            barType= 'redunca'
+        else:
+            barType= barType[0]
+            
+        if len(colour) == 0:
+            colour= 'random'
+        else:
+            colour= colour[0]
+        
+        dlg.Destroy()
         if len(selectedcols) == 0:
             self.SetStatusText('You need to select some data to draw a graph!')
             return
-        data = [statistics(self.grid.CleanData(cols),'noname',None) for cols in [colnums[m] for m in selectedcols]]
-        data = [data[i].mean for i in range(len(data))]
-        plt= plot(parent = self, typePlot= 'plotBar',
-                  data2plot= ((data,'Mean'),),
-                  xlabel= 'variable',
-                  ylabel= 'value',
-                  title= 'Bar Chart of all means')
+        
+        data = [statistics( self.grid.GetColNumeric(col),'noname',None).mean
+                for col in selectedcols]
+        
+        plt= plot(parent=   self,
+                  typePlot= 'plotNiceBar',
+                  data2plot= (numpy.arange(1, len(data)+1), data,  None,  colour, barType,),
+                  xlabel=  'variable',
+                  ylabel=  'value',
+                  title=   'Bar Chart of all means')
         plt.Show()
 
     def GoHelpSystem(self, evt):
@@ -1770,8 +1487,7 @@ class MainFrame(wx.Frame):
             "and much more!",
             460, wx.ClientDC(self))
         info.WebSite = ("http://code.google.com/p/salstat-statistics-package-2/", "S2 home page")
-        info.Developers = [ "Sebastian Lopez Buritica",
-                            "\nMark Livingstone -- MAC, LINUX Translator",]
+        info.Developers = [ "Mark Livingstone -- MAC & LINUX Translator\n","Sebastian Lopez Buritica",]
 
         info.License = wordwrap("GPL 2", 450, wx.ClientDC(self))
 
@@ -2193,7 +1909,7 @@ class MainFrame(wx.Frame):
             return
 
         if len(colNameSelect) < requiredcols:
-            self.logPanel.write("You have to select at least %i columns"%requiredcols)
+            self.logPanel.write("Uou have to select at least %i columns"%requiredcols)
             return
 
         values = [ [pos for pos, value in enumerate( ColumnList )
@@ -2441,11 +2157,9 @@ class MainFrame(wx.Frame):
     def mean(self,evt):
         mean().showGui()
 
-    # median uses histogram to select median. See also medianscore
     def median(self,evt):
         median().showGui()
 
-    # medianscore picks middle number of sorted list. See also median
     def medianscore(self,evt):
         medianscore().showGui()
 
@@ -3409,9 +3123,6 @@ def PutData(column, data):
 # main loop
 if __name__ == '__main__':
     app = SalStat2App(0)
-    spellcheck = "mac.textcontrol-use-spell-checker"
-    wx.SystemOptions.SetOptionInt(spellcheck, 1)
-    app.SetMacSupportPCMenuShortcuts(True)
     app.frame.Show()
     app.MainLoop()
 # eof

@@ -8,15 +8,17 @@ iconPath = "salstat.ico"
 opts = { "py2exe":
             { "unbuffered": True,
               "optimize": 1,
-              "includes": ["wx",
-                           "numpy",
+              "includes": ["wx", "numpy",
                            "matplotlib",
+                           "matplotlib.backends",
+                           "matplotlib.backends.backend_qt4agg",
+                           "PyQt4"
                            ],
               "excludes":['_gtkagg', '_tkagg', '_agg2', '_cairo', '_cocoaagg',
                           '_fltkagg', '_gtk', '_gtkcairo',
                           "pywin", "pywin.debugger", "pywin.debugger.dbgcon",
                           "pywin.dialogs", "pywin.dialogs.list","Tkconstants",
-                          "Tkinter","tcl","PyQt4","scipy.sparce",],
+                          "Tkinter","tcl","scipy.sparce",], 
               "dist_dir": distdir,
               "dll_excludes" : ['_gtkagg', '_tkagg',
                                 "MSVCP90.DLL","API-MS-Win-Security-Base-L1-1-0.dll",
@@ -32,10 +34,11 @@ opts = { "py2exe":
               }
           }
 
-setup(name= 'salstat',
-      version='2.0',
-      description='Statistics Package',
-      author='Sebastian Lopez Buritica',
+setup(name=         'salstat',
+      version=      '2.1',
+      description=  'Statistics Package',
+      url=          'http://code.google.com/p/salstat-statistics-package-2/',
+      license=      'GPL 2',
       windows=[
           {"script": 'salstat.py',
            "icon_resources": [(0, iconPath)]
