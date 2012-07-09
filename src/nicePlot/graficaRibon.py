@@ -14,8 +14,10 @@ class _RibbonBox(object):
     def __init__(self, color, figName, 
                  path='.//images//barplot//'):
         
-        self.original_image = read_png( str(os.path.abspath(
+        print str(os.path.relpath(  path + figName + '.png'))
+        self.original_image = read_png( str(os.path.relpath(
                     path + figName + '.png')))
+        
         self.cut_location = 70
         self.b_and_h= self.original_image[:,:,2]
         self.color=   self.original_image[:,:,2] - self.original_image[:,:,0]
