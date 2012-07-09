@@ -794,6 +794,8 @@ class MpltFrame( wx.Frame ):
         pass
     def plotTrian(self,data2plot):
         '''data2plot = ((a,b,c,'legend'))'''
+        legends= data2plot[1]
+        data2plot= data2plot[0]
         plotT = triplot(data2plot,)
         # plot the mesh
         ax= self.figpanel.axes[0]
@@ -841,19 +843,19 @@ class MpltFrame( wx.Frame ):
         cordUpper= ( 0.5, 0.94)
         stylename= 'round'
         fontsize= 13
-        an1=ax.text( cordLeft[0], cordLeft[1], 'A',
+        an1=ax.text( cordLeft[0], cordLeft[1], legends[0],
                  ha= "right",
                  va= 'top',
                  size= fontsize, #                 transform= ax.figure.transFigure,
                  bbox=dict(boxstyle=stylename, fc="w", ec="k")) #              bbox=dict(boxstyle=stylename, fc="w", ec="k")
         
-        an2=ax.text( cordRigth[0], cordRigth[1], 'B',
+        an2=ax.text( cordRigth[0], cordRigth[1],  legends[1],
                  ha= "left",
                  va= 'top',
                  size= fontsize,#                 transform= ax.figure.transFigure,
                  bbox=dict(boxstyle=stylename, fc="w", ec="k"))
         
-        an3=ax.text( cordUpper[0], cordUpper[1], 'C',
+        an3=ax.text( cordUpper[0], cordUpper[1],  legends[2],
                  ha= "center",
                  va= 'baseline',
                  size= fontsize, #                 transform= ax.figure.transFigure,
