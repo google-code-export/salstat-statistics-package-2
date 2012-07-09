@@ -5,6 +5,11 @@ import  wx
 from imagenes import imageEmbed
 from openStats import statistics # used in descriptives frame
 
+if wx.Platform == '__WXMSW__':
+    wind = 50
+else:
+    wind = 0
+
 # creating a class to make pairs
 #<p> INIT MAKE PAIRS
 import  wx.grid as gridlib
