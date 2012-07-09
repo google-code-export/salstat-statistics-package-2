@@ -701,7 +701,8 @@ class SalStat2App(wx.App):
         if os.path.isfile(fileName):
             self.HELPDATA.AddBook(fileName)
         # help data /<p>
-        self.icon= imagenes.logo24()
+        self.icon= imagenes.logo16()
+        self.icon16= imagenes.logo16()
         self.icon24= imagenes.logo24()
         self.icon64= imagenes.logo64()
         self.frame = MainFrame(None, self)
@@ -801,7 +802,7 @@ class MainFrame(wx.Frame):
         self.m_mgr.SetManagedWindow( self )
 
         #set icon for frame (needs x-platform separator!
-        self.Icon= appname.icon
+        self.Icon= appname.icon24
         self.DECIMAL_POINT= appname.DECIMAL_POINT
         #----------------------
         # create toolbars
@@ -1348,21 +1349,43 @@ class MainFrame(wx.Frame):
             self.SetStatusText('You need some data to draw a graph!')
             return
         
-        bt1= ['StaticText', ['Select the pairs of data by rows']]
-        bt2= ['makePairs',  [['A Left Corner','C Upper Corner', 'B Right Corener'], waste, 30]]
+        txt1= ['StaticText', ['Left Corner Label']]
+        txt2= ['StaticText', ['Rigth Corner Label']]
+        txt3= ['StaticText', ['Upper Corner Label']]
+        btn1= ['TextCtrl',   ['A']]
+        btn2= ['TextCtrl',   ['B']]
+        btn3= ['TextCtrl',   ['C']]
+        btn4= ['StaticText', ['Select the pairs of data by rows']]
+        btn5= ['makePairs',  [['A Left Corner','C Upper Corner', 'B Right Corener'], waste, 30]]
         structure= list()
-        structure.append([bt1,])
-        structure.append([bt2,])
+        structure.append( [btn1, txt1])
+        structure.append( [btn2, txt2])
+        structure.append( [btn3, txt3])
+        structure.append( [btn4,])
+        structure.append( [btn5,])
         dlg= dialog(self, struct= structure)
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return
+        
         values= dlg.GetValue()
         dlg.Destroy()
-
-        pairs= values[0]
+        Alabel= values[0]
+        if Alabel == u'' or Alabel.replace(' ','') == u'':
+            Alabel= u'A'
+            
+        Blabel= values[1]
+        if Blabel == u'' or Blabel.replace(' ','') == u'':
+            Blabel= u'B'
+            
+        Clabel= values[2]
+        if Clabel == u'' or Clabel.replace(' ','') == u'':
+            Clabel= u'C'
+        
+        pairs= values[3]
         if len(pairs) == 0:
             return
+        
         data= [(self.grid.GetCol(colLeft),
                 self.grid.GetCol(colUpper),
                 self.grid.GetCol(colRight),
@@ -1370,7 +1393,7 @@ class MainFrame(wx.Frame):
                for (colLeft, colUpper, colRight) in pairs]
         plt= plot(parent=    self,
                   typePlot=  'plotTrian',
-                  data2plot= data, 
+                  data2plot= (data, [Alabel, Blabel, Clabel]), 
                   title=     'Ternary Plot')
         plt.Show()
 
