@@ -347,6 +347,9 @@ class SimpleGrid(MyGrid):# wxGrid
         if dlg.ShowModal() != wx.ID_OK:
             return
         (sheetNameSelected, hasHeader)= dlg.GetValue()
+        if len(sheetNameSelected) == 0:
+            return
+        
         sheetNameSelected= sheetNameSelected[0]
         dlg.Destroy()
         
@@ -429,14 +432,14 @@ class SimpleGrid(MyGrid):# wxGrid
         return indata
 
     # Routine to return a "clean" list of data from one column
-    def CleanData(self, col):
+    def CleanData(self, coldata):
         indata = []
         self.missing = 0
         dp= wx.GetApp().DECIMAL_POINT
         if dp == '.':
             for i in range(self.GetNumberRows()):
-                datapoint = self.GetCellValue(i, col).strip()
-                if (datapoint != u'') and (datapoint != u'.'):
+                datapoint = self.GetCellValue(i, coldata).strip()
+                if (datapoint != u'' or datapoint.replace(' ','') != u'') and (datapoint != u'.'):
                     try:
                         value = float(datapoint)
                         if (value != missingvalue):
@@ -447,8 +450,8 @@ class SimpleGrid(MyGrid):# wxGrid
                         pass
         else:
             for i in range(self.GetNumberRows()):
-                datapoint = self.GetCellValue(i, col).strip().replace(dp, '.')
-                if (datapoint != u'') and (datapoint != u'.'):
+                datapoint = self.GetCellValue(i, coldata).strip().replace(dp, '.')
+                if (datapoint != u'' or datapoint.replace(' ','') != u'') and (datapoint != u'.'):
                     try:
                         value = float(datapoint)
                         if (value != missingvalue):
@@ -475,7 +478,7 @@ class SimpleGrid(MyGrid):# wxGrid
         dp = wx.GetApp().DECIMAL_POINT
         result= list()
         for dat in data:
-            if dat == u'':
+            if dat == u'' or dat.replace(' ','') == u'': # to detect a cell of only space bar
                 dat = None
             else:
                 try:
@@ -506,11 +509,11 @@ class SimpleGrid(MyGrid):# wxGrid
             biglist.append(smalllist)
         return numpy.array((biglist), numpy.float)
     
-    def GetColNumeric(self,colNumber):
+    def GetColNumeric(self, colNumber):
         # return only the numeric values of a selected colNumber or col label
         # all else values are drop
-        data= self._cleanData( self.GetCol(colNumber))
-        return [dat in data if dat != None]
+        values= self._cleanData( self._getCol( colNumber))
+        return [val for val in values if not isinstance(val,(unicode, str)) and val != None ]
         
 #---------------------------------------------------------------------------
 # grid preferences - set row & col sizes
@@ -1421,8 +1424,8 @@ class MainFrame(wx.Frame):
             self.SetStatusText('You need to select some data to draw a graph!')
             return
         
-        data = [statistics( self.grid._getColNumber(self.grid.GetCol(cols)),'noname',None).mean
-                for cols in selectedcols]
+        data = [statistics( self.grid.GetColNumeric(col),'noname',None).mean
+                for col in selectedcols]
         
         plt= plot(parent=   self,
                   typePlot= 'plotNiceBar',
