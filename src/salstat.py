@@ -62,6 +62,7 @@ from helpSystem import Navegator
 
 from dialogs import CheckListBox, SixSigma
 from dialogs import SaveDialog, VariablesFrame, DescriptivesFrame
+from dialogs import TransformFrame
 
 from gridCellRenderers import floatRenderer, AutoWrapStringRenderer
 
