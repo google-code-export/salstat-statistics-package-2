@@ -4,6 +4,7 @@
 import  wx
 from imagenes import imageEmbed
 from openStats import statistics # used in descriptives frame
+import math # to be used in transform pane
 
 if wx.Platform == '__WXMSW__':
     wind = 50
@@ -408,7 +409,7 @@ class TransformFrame(wx.Dialog):
         #set icon for frame (needs x-platform separator!
         x= self.GetClientSize()
         winheight= x[1]
-        icon= imagenes.logo16()
+        icon= imageEmbed().logo16()
         self.SetIcon(icon)
         self.transform= ""
         self.transformName= ""
@@ -490,7 +491,7 @@ class TransformFrame(wx.Dialog):
                         newcol[j]= u''
 
                 posNewCol= emptyCols.pop(0)
-                PutData( posNewCol, newcol)
+                frame.grid.PutCol( posNewCol, newcol)
                 # put in a nice new heading
                 oldHead= frame.grid.GetColLabelValue(self.colnums[i])
                 if self.transformName == "":
