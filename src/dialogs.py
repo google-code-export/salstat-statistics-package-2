@@ -231,8 +231,6 @@ class VariablesFrame(wx.Dialog):
                             DockFixed( False ).LeftDockable( False ).RightDockable( False ).
                             MinSize( wx.Size( -1,30 ) ).Layer( 10 ) )
 
-
-        self.m_grid1 = wx.grid.Grid( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
         self.vargrid = wx.grid.Grid(self,-1,) #
         self.vargrid.SetRowLabelSize(120)
         self.vargrid.SetDefaultRowSize(27, True)
