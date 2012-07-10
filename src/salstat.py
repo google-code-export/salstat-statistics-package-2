@@ -964,19 +964,19 @@ class MainFrame(wx.Frame):
         #add contents of menu
         dat1= (
             ('&File',
-             (('&New Data',   NewIcon,    self.GoClearData,     None),
-              ('&Open...',    OpenIcon,   self.grid.LoadXls,     None),
-              ('&Save',       SaveIcon,   self.grid.SaveXls,     None),
-              ('Save &As...', SaveAsIcon, self.grid.SaveXlsAs,     None),
+             (('&New Data',   NewIcon,    self.GoClearData,     wx.ID_NEW),
+              ('&Open...',    OpenIcon,   self.grid.LoadXls,     wx.ID_OPEN),
+              ('&Save',       SaveIcon,   self.grid.SaveXls,     wx.ID_SAVE),
+              ('Save &As...', SaveAsIcon, self.grid.SaveXlsAs,     wx.ID_SAVEAS),
               ('&Print...',   PrintIcon,  None,     None),
               ('E&xit',       ExitIcon,   self.EndApplication,     wx.ID_EXIT),
               )),
             ('&Edit',
-             (('Cu&t',           CutIcon,         self.grid.CutData,     None),
-              ('&Copy',          CopyIcon,        self.grid.CopyData,     None),
-              ('&Paste',         PasteIcon,       self.grid.PasteData,     None),
-              ('Select &All',    None,            self.grid.SelectAllCells,     None),
-              ('&Find and Replace...',  FindRIcon,     self.GoFindDialog,     None),
+             (('Cu&t',           CutIcon,         self.grid.CutData,     wx.ID_CUT),
+              ('&Copy',          CopyIcon,        self.grid.CopyData,     wx.ID_COPY),
+              ('&Paste',         PasteIcon,       self.grid.PasteData,     wx.ID_PASTE),
+              ('Select &All',    None,            self.grid.SelectAllCells,     wx.ID_SELECTALL),
+              ('&Find and Replace...',  FindRIcon,     self.GoFindDialog,     wx.ID_REPLACE),
               ('Delete Current Column', None,  self.grid.DeleteCurrentCol,     None),
               ('Delete Current Row',    None,  self.grid.DeleteCurrentRow,     None),)),
             ('&Preferences',
@@ -1102,6 +1102,7 @@ class MainFrame(wx.Frame):
 
         if wx.Platform == '__WXMAC__':
             app = wx.GetApp()
+            wx.App_SetMacHelpMenuTitleName("&Help")
             # Allow spell checking in cells
             # TODO Still need to add this to the Edit menu once we add Mac menu options
             spellcheck = "mac.textcontrol-use-spell-checker"
