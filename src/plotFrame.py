@@ -33,8 +33,8 @@ from nicePlot.graficaRibon import plotBar # nice plot
 
 PROPLEGEND= {'size':11}
 
-class MpltFrame( wx.Frame ):
-    def __init__( self, parent,typePlot = None, data2plot= None, *args, **params):
+class MpltFrame( wx.Frame, object ):
+    def __init__( self, parent, typePlot = None, data2plot= None, *args, **params):
         '''
         MpltFrame( parent, typePlot, data2plot)
 
@@ -106,7 +106,7 @@ class MpltFrame( wx.Frame ):
 
         sbSizer3 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow1, wx.ID_ANY, u"Title" ), wx.HORIZONTAL )
 
-        self.m_textCtrl1 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, u"Title", wx.DefaultPosition, wx.Size( 135,-1 ), 0 )
+        self.m_textCtrl1 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, self.graphParams['title'], wx.DefaultPosition, wx.Size( 135,-1 ), 0 )
         sbSizer3.Add( self.m_textCtrl1, 0, 0, 5 )
 
         self.m_button3 = wx.Button( self.m_scrolledWindow1, wx.ID_ANY, u"...", wx.DefaultPosition, wx.Size( 20,-1 ), 0 )
@@ -117,7 +117,7 @@ class MpltFrame( wx.Frame ):
 
         sbSizer4 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow1, wx.ID_ANY, u"Xlabel" ), wx.HORIZONTAL )
 
-        self.m_textCtrl2 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, u"xlabel", wx.DefaultPosition, wx.Size( 135,-1 ), 0 )
+        self.m_textCtrl2 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, self.graphParams['xlabel'], wx.DefaultPosition, wx.Size( 135,-1 ), 0 )
         sbSizer4.Add( self.m_textCtrl2, 0, 0, 5 )
 
         self.m_button4 = wx.Button( self.m_scrolledWindow1, wx.ID_ANY, u"...", wx.DefaultPosition, wx.Size( 20,-1 ), 0 )
@@ -128,7 +128,7 @@ class MpltFrame( wx.Frame ):
 
         sbSizer5 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow1, wx.ID_ANY, u"Ylabel" ), wx.HORIZONTAL )
 
-        self.m_textCtrl3 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, u"ylabel", wx.DefaultPosition, wx.Size( 135,-1 ), 0 )
+        self.m_textCtrl3 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, self.graphParams['ylabel'], wx.DefaultPosition, wx.Size( 135,-1 ), 0 )
         sbSizer5.Add( self.m_textCtrl3, 0, 0, 5 )
 
         self.m_button5 = wx.Button( self.m_scrolledWindow1, wx.ID_ANY, u"...", wx.DefaultPosition, wx.Size( 20,-1 ), 0 )
@@ -145,9 +145,8 @@ class MpltFrame( wx.Frame ):
         self.m_checkBox3 = wx.CheckBox( self.m_scrolledWindow1, wx.ID_ANY, u"View Cursor", wx.DefaultPosition, wx.DefaultSize, 0 )
         gSizer1.Add( self.m_checkBox3, 0, wx.LEFT|wx.TOP, 5 )
 
-        self.m_checkBox2 = wx.CheckBox( self.m_scrolledWindow1, wx.ID_ANY, u"Legend", wx.DefaultPosition, wx.DefaultSize, 0 )
-        gSizer1.Add( self.m_checkBox2, 0, wx.ALL, 5 )
-
+        #self.m_checkBox2 = wx.CheckBox( self.m_scrolledWindow1, wx.ID_ANY, u"Legend", wx.DefaultPosition, wx.DefaultSize, 0 )
+        #gSizer1.Add( self.m_checkBox2, 0, wx.ALL, 5 )
 
         bSizer2.Add( gSizer1, 0, 0, 5 )
 
@@ -211,12 +210,9 @@ class MpltFrame( wx.Frame ):
         self.m_choice1.SetSelection( 0 )
         gSizer2.Add( self.m_choice1, 0, wx.LEFT|wx.RIGHT, 5 )
 
-
         sbSizer7.Add( gSizer2, 0, 0, 5 )
 
-
         bSizer2.Add( sbSizer7, 0, 0, 5 )
-
 
         self.m_scrolledWindow1.SetSizer( bSizer2 )
         self.m_scrolledWindow1.Layout()
@@ -549,15 +545,11 @@ class MpltFrame( wx.Frame ):
         self.m_staticText25.Wrap( -1 )
         gSizer3.Add( self.m_staticText25, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5 )
 
-
         sbSizer14.Add( gSizer3, 0, 0, 5 )
-
 
         sbSizer12.Add( sbSizer14, 0, 0, 5 )
 
-
         bSizer3.Add( sbSizer12, 0, 0, 5 )
-
 
         self.m_scrolledWindow4.SetSizer( bSizer3 )
         self.m_scrolledWindow4.Layout()
@@ -570,6 +562,7 @@ class MpltFrame( wx.Frame ):
         self.Centre( wx.BOTH )
 
         # Connect Events
+        self.Bind( wx.EVT_ACTIVATE, self.OnActivate )
         self.m_textCtrl1.Bind( wx.EVT_TEXT, self._TitleChange )
         self.m_button3.Bind( wx.EVT_BUTTON, self._titleFontProp )
         self.m_textCtrl2.Bind( wx.EVT_TEXT, self._xlabelChange )
@@ -578,7 +571,7 @@ class MpltFrame( wx.Frame ):
         self.m_button5.Bind( wx.EVT_BUTTON, self._ylabelFontProp )
         self.m_checkBox1.Bind( wx.EVT_CHECKBOX, self._OnGrid )
         self.m_checkBox3.Bind( wx.EVT_CHECKBOX, self._OnViewCursor )
-        self.m_checkBox2.Bind( wx.EVT_CHECKBOX, self._OnLegend )
+        ##self.m_checkBox2.Bind( wx.EVT_CHECKBOX, self._OnLegend )# leggend callback
         self.m_textCtrl4.Bind( wx.EVT_TEXT, self._xminValue )
         self.m_textCtrl5.Bind( wx.EVT_TEXT, self._xmaxValue )
         self.m_textCtrl6.Bind( wx.EVT_TEXT, self._yminValue )
@@ -612,39 +605,40 @@ class MpltFrame( wx.Frame ):
         self.m_button11.Bind( wx.EVT_BUTTON, self._patchListboxUpdate )
 
         self.figpanel.canvas.mpl_connect('motion_notify_event', self._UpdateStatusBar)
-        self.axes = self.figpanel.add_subplot(111)
-
-        # Virtual event handlers, overide them in your derived class
-
+        ###
+        ###
         if typePlot == None:
             self._plotTest()
         else:
             # se ejecuta la opcion seleccionada
-            if hasattr(self,typePlot):
-                getattr(self,typePlot)(data2plot)
+            if hasattr(self, typePlot):
+                getattr(self, typePlot)( data2plot, *args, **params)
             else:
                 self._plotTest()
-
-        self._Binded()
+        self._addLabels(self.graphParams)
+        #
         # se actualiza el nombre de las escalas de las x
-        if self.graphParams.has_key('xtics'):
-            self.axes.set_xticklabels(self.graphParams['xtics'])
-        if self.graphParams.has_key('ytics'):
-            self.axes.set_yticklabels(self.graphParams['ytics'])
-
-        self.cursor = Cursor(self.axes, useblit=True, color='blue', linewidth=1)
-        self.cursor.horizOn = False
-        self.cursor.vertOn = False
-
-        # se actualiza el numero de opciones disponibles
-        lineListNames= [line.get_label() for line in self.axes.get_lines()]
-        self.m_listBox1.SetItems(lineListNames)
-        markerStyles= [ 'None','o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd']
-        faceColors= ['b', 'g', 'r', 'c', 'm', 'y', 'k']
-        lineStyles= ['_', '-', '--', ':']
-        lineSizes = [str(x*0.5) for x in range(1,15,1)]
-        markerSizes = [str(x) for x in range(1,15,1)]
-        alpha = [str(x/float(10)) for x in range(1,11)]
+        if self.graphParams.has_key( 'xtics'):
+            xtics = self.graphParams['xtics']
+            if len(xtics) != 0:
+                self.gca().set_xticklabels( self.graphParams['xtics'])
+        if self.graphParams.has_key( 'ytics'):
+            self.gca().set_yticklabels( self.graphParams['ytics'])
+        # connect cursos with a selected axes
+        # self._connectCursor(self.gca())
+        # se actualiza las lineas del axes actual
+        lineListNames= [line.get_label() for line in self.gca().get_lines()]
+        self.m_listBox1.SetItems( lineListNames)
+        #
+        ###
+        ###
+        
+        markerStyles= [ 'None', 'o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd']
+        faceColors=   ['b', 'g', 'r', 'c', 'm', 'y', 'k']
+        lineStyles=   ['_', '-', '--', ':']
+        lineSizes=    [str(x*0.5) for x in range(1,15,1)]
+        markerSizes=  [str(x) for x in range(1,15,1)]
+        alpha=        [str(x/float(10)) for x in range(1,11)]
         self.m_choice7.SetItems(lineSizes)
         self.m_choice4.SetItems(lineStyles)
         self.m_choice6.SetItems(markerStyles)
@@ -656,65 +650,101 @@ class MpltFrame( wx.Frame ):
         self.m_choice12.SetItems(alpha)
         self.m_choice10.SetItems(faceColors)
         self.m_choice11.SetItems(alpha)
-
         self.m_choice14.SetSelection(0)
         self.m_choice81.SetSelection(0)
         self.m_choice12.SetSelection(0)
         self.m_choice10.SetSelection(0)
         self.m_choice11.SetSelection(0)
-
-    def _Binded( self):
-        self._addLabels(self.graphParams)
-
+           
+    def OnActivate(self, evt):
+        # read the actual axes
+        if hasattr(self, 'axes'):
+            if len(self.axes) == 0:
+                # clear the title, x and ylabel contents
+                self._cleartitles()
+            else:
+                # update the title, x and ylabel contents
+                self.m_textCtrl2.Value= self.gca().get_xlabel()
+                # clear ylabel ctrl
+                self.m_textCtrl3.Value= self.gca().get_ylabel()
+                # clear title
+                self.m_textCtrl1.Value= self.gca().get_title()
+                # connect the cursor to current axes
+                self._connectCursor(self.gca()) 
+        
+    def _clearTitles(self, evt):
+        # clear xlabel ctrl
+        self.m_textCtrl2.Value= u''
+        # clear ylabel ctrl
+        self.m_textCtrl3.Value= u''
+        # clear title
+        self.m_textCtrl1.Value= u''
+        
+    
+    def _connectCursor(self, axes):
+        # connect the cursor to the axes selected
+        self.cursor= Cursor( axes, useblit = True, color = 'blue', linewidth = 1)
+        self.cursor.horizOn= False
+        self.cursor.vertOn=  False
+        
+        
+    def __getattribute__(self, name):
+        '''wraps the funtions to the grid
+        emulating a plot frame control'''
+        try:
+            return object.__getattribute__(self, name)
+        except AttributeError:
+            return self.figpanel.__getattribute__(name)
+        
     def _addLabels( self,labels):
-        self.figpanel.axes[0].set_title(labels['title'])
-        self.figpanel.axes[0].set_xlabel(labels['xlabel'])
-        self.figpanel.axes[0].set_ylabel(labels['ylabel'])
+        self.figpanel.gca().set_title(labels['title'])
+        self.figpanel.gca().set_xlabel(labels['xlabel'])
+        self.figpanel.gca().set_ylabel(labels['ylabel'])
         self.figpanel.canvas.draw()
 
     def _plotTest( self):
         x = np.arange(0, 6, .01)
         y = np.sin(x**2)*np.exp(-x)
-        self.axes.plot(x, y)
+        self.gca().plot(x, y)
 
     def plotLine( self,data2plot):
-        self.axes.hold(True)
+        self.gca().hold(True)
         listLegend= list()
         listPlot = list()
         for x,y,texto in data2plot:
-            listPlot.append(self.axes.plot(x,y))
+            listPlot.append(self.gca().plot(x,y))
             listLegend.append(texto)
         legend= self.figpanel.legend(listPlot,listLegend)
         legend.draggable(state=True)
-        self.axes.hold(False)
+        self.gca().hold(False)
         self.figpanel.canvas.draw()
 
     def plotScatter( self,data2plot):
-        self.axes.hold(True)
+        self.gca().hold(True)
         listLegend= list()
         listPlot = list()
         for x,y,texto in data2plot:
             # se homogeniza la informacion
             (x, y) = homogenize( x, y)
-            listPlot.append( self.axes.plot( x, y, '.'))
+            listPlot.append( self.gca().plot( x, y, '.'))
             listLegend.append( texto)
         legend= self.figpanel.legend( listPlot, listLegend, prop = PROPLEGEND)
         legend.draggable( state= True)
-        self.axes.hold( False)
+        self.gca().hold( False)
         self.figpanel.canvas.draw()
 
     def plotBar( self,data2plot):
         DeprecationWarning( 'Deprecated function')
         # warnings.warn( 'Deprecated function', DeprecationWarning)
-        self.axes.hold(True)
+        self.gca().hold(True)
         listLegend= list()
         listPlot = list()
         for y,texto in data2plot:
-            listPlot.append(self.axes.bar(range(len(y)),y))
+            listPlot.append(self.gca().bar(range(len(y)),y))
             listLegend.append(texto)
         legend= self.figpanel.legend(listPlot,listLegend, prop = PROPLEGEND)
         legend.draggable( state = True)
-        self.axes.hold( False)
+        self.gca().hold( False)
         self.figpanel.canvas.draw()
         
     def plotNiceBar( self, data2plot):
@@ -723,9 +753,9 @@ class MpltFrame( wx.Frame ):
         label= data2plot[2]
         colour= data2plot[3]
         figNam= data2plot[4]
-        self.axes.hold( True)
+        self.gca().hold( True)
         try:
-            plotBar(ax=      self.axes,
+            plotBar(ax=      self.gca(),
                     xdata=   xdat,
                     ydata=   ydat,
                     labels=  None,
@@ -735,19 +765,19 @@ class MpltFrame( wx.Frame ):
         except:
             data2plot= (ydata,'Media')
             plotBar(data2plot)
-        self.axes.hold( False)
+        self.gca().hold( False)
         self.figpanel.canvas.draw( )
 
     def plotBarH( self,data2plot):
-        self.axes.hold(True)
+        self.gca().hold(True)
         listLegend= list()
         listPlot = list()
         for y,texto in data2plot:
-            listPlot.append(self.axes.barh(range(len(y)),y,align='center'))
+            listPlot.append(self.gca().barh(range(len(y)),y,align='center'))
             listLegend.append(texto)
         legend= self.figpanel.legend(listPlot,listLegend,  prop = PROPLEGEND)
         legend.draggable(state=True)
-        self.axes.hold(False)
+        self.gca().hold(False)
         self.figpanel.canvas.draw()
 
     def plotLinRegress( self,data2plot):
@@ -755,7 +785,7 @@ class MpltFrame( wx.Frame ):
         y = data2plot[1]
         line =  linregress(x,y)
         yfit = lambda x: x*line[0]+line[1]
-        plt= self.axes.plot(x,y,'b.',x,[yfit(x1) for x1 in x],'r')
+        plt= self.gca().plot(x,y,'b.',x,[yfit(x1) for x1 in x],'r')
         legend= self.figpanel.legend(plt,(data2plot[-1],'linRegressFit'), prop = PROPLEGEND)
         legend.draggable(state=True)
         arrow_args = dict(arrowstyle="->")
@@ -767,7 +797,7 @@ class MpltFrame( wx.Frame ):
         elif round(line[1],4) < 0:
             text2anotate += str(round(line[1],4))
         text2anotate += "\n r = " + str(round(line[2],6))
-        an1= self.axes.annotate(text2anotate, xy=(x[int(len(x)/2)],
+        an1= self.gca().annotate(text2anotate, xy=(x[int(len(x)/2)],
                                                   yfit(x[int(len(x)/2)])),  xycoords='data',
                                               ha="center", va="center",
                                               bbox=bbox_args,
@@ -779,14 +809,14 @@ class MpltFrame( wx.Frame ):
         labels = data2plot[0]#'Frogs', 'Hogs', 'Dogs', 'Logs'
         fracs = data2plot[1]#[15,30,45, 10]
         explode= data2plot[2]#(0, 0.05, 0, 0)
-        plt = self.figpanel.axes[0].pie( fracs, explode=explode,
+        plt = self.figpanel.gca().pie( fracs, explode=explode,
                                          labels=labels,
                                          autopct='%1.1f%%',
                                          shadow=True)
         self.figpanel.canvas.draw()
 
     def boxPlot(self,data2plot):
-        plt= self.axes.boxplot(data2plot, notch=0, sym='+', vert=1, whis=1.5,
+        plt= self.gca().boxplot(data2plot, notch=0, sym='+', vert=1, whis=1.5,
                                positions=None, widths=None, patch_artist=False)
         self.figpanel.canvas.draw()
 
@@ -798,7 +828,7 @@ class MpltFrame( wx.Frame ):
         data2plot= data2plot[0]
         plotT = triplot(data2plot,)
         # plot the mesh
-        ax= self.figpanel.axes[0]
+        ax= self.figpanel.gca()
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_xlim((-0.08, 1.08))
@@ -905,23 +935,23 @@ class MpltFrame( wx.Frame ):
         self.figpanel.canvas.draw(0)
         
     def AdaptativeBMS(self, data, xlabel='', ylabel='', title=''):
-        self.figpanel.axes[0].hold(True)
+        self.figpanel.gca().hold(True)
         for serieNumber, serieData in enumerate(data): 
             xmin= serieNumber-0.4
             xmax= serieNumber+0.4
             size= len(serieData)
             step= 0.8/float(size)
             xdata= [ -0.4 + serieNumber + i*step for i in range(size)]
-            self.axes.plot(xdata, serieData, marker= '.', linestyle= '_')
-        self.axes.set_xticks(range(len(data)))
-        self.figpanel.axes[0].set_title(title)
-        self.figpanel.axes[0].set_xlabel(xlabel)
-        self.figpanel.axes[0].set_ylabel(ylabel)
-        self.figpanel.axes[0].hold(False)
+            self.gca().plot(xdata, serieData, marker= '.', linestyle= '_')
+        self.gca().set_xticks(range(len(data)))
+        self.figpanel.gca().set_title(title)
+        self.figpanel.gca().set_xlabel(xlabel)
+        self.figpanel.gca().set_ylabel(ylabel)
+        self.figpanel.gca().hold(False)
         self.figpanel.canvas.draw()
         
     def _TitleChange( self, event ):
-        self.figpanel.axes[0].set_title(event.GetString())
+        self.figpanel.gca().set_title(event.GetString())
         self.figpanel.canvas.draw()
         
     def probabilityPlot(self, data2plot):
@@ -932,7 +962,7 @@ class MpltFrame( wx.Frame ):
         res=   stats2.probplot(data2plot[0],)
         (osm,osr)=  res[0]
         (slope, intercept, r)= res[1]
-        ax= self.figpanel.axes[0]
+        ax= self.figpanel.gca()
         ax.plot(osm, osr, 'o', osm, slope*osm + intercept)
         xmin, xmax= amin(osm),amax(osm)
         ymin, ymax= amin(data2plot),amax(data2plot)
@@ -947,13 +977,13 @@ class MpltFrame( wx.Frame ):
         data= data2plot['data']
         posDataOutSide= list()
         # plot all data
-        self.axes.plot(range(len(data)),data,marker= 'o')
-        self.axes.hold(True)
+        self.gca().plot(range(len(data)),data,marker= 'o')
+        self.gca().hold(True)
         for pos, value in enumerate(data):
             if value > UCL or value < LCL:
                 posDataOutSide.append((pos,value))
         # then plot the violating points
-        self.axes.plot([dat[0] for dat in posDataOutSide],
+        self.gca().plot([dat[0] for dat in posDataOutSide],
                        [dat[1] for dat in posDataOutSide],
                        linestyle= '_', color='r', marker='d')
         # UCL, LCL  Lines
@@ -961,111 +991,115 @@ class MpltFrame( wx.Frame ):
         self._OnAddRefHorzLine( event= None, ypos= LCL, color= 'r')
         # Target Line
         self._OnAddRefHorzLine( event= None, ypos= target, color= 'k')
-        self.axes.hold(False)
+        self.gca().hold(False)
         self.figpanel.canvas.draw()
 
     def _xlabelChange( self, event ):
-        self.figpanel.axes[0].set_xlabel(event.GetString())
+        self.figpanel.gca().set_xlabel(event.GetString())
         self.figpanel.canvas.draw()
 
     def _ylabelChange( self, event ):
-        self.figpanel.axes[0].set_ylabel(event.GetString())
+        self.figpanel.gca().set_ylabel(event.GetString())
         self.figpanel.canvas.draw()
 
     def _OnGrid( self, event ):
         value = event.Checked()
-        self.figpanel.axes[0].grid(value)
+        self.figpanel.gca().grid(value)
         self.figpanel.canvas.draw()
 
     def _OnXaxisScale( self, event ):
         value = 'linear'
         if event.Selection == 1:
             value = 'symlog'
-        self.axes.set_xscale(value)
+        self.gca().set_xscale(value)
         self.figpanel.canvas.draw()
 
     def _OnYaxisScale( self, event ):
         value = 'linear'
         if event.Selection == 1:
             value = 'symlog'
-        self.axes.set_yscale(value)
+        self.gca().set_yscale(value)
         self.figpanel.canvas.draw()
 
     def _OnLegend( self, event ):
         value = event.Checked()
         try:
-            legend= self.figpanel.axes[0].legend()
+            legend= self.figpanel.gca().legend()
             legend.set_visible(value)
         except:
             pass
 
     def _xminValue( self, event ):
-        axisValue = self.figpanel.axes[0].get_xbound()
+        axisValue = self.figpanel.gca().get_xbound()
         try:
             float(event.GetString())
         except:
             return
-        self.figpanel.axes[0].set_xbound((float(event.GetString()),axisValue[1]))
+        self.figpanel.gca().set_xbound((float(event.GetString()),axisValue[1]))
         self.figpanel.canvas.draw()
 
     def _xmaxValue( self, event ):
-        axisValue = self.figpanel.axes[0].get_xbound()
+        axisValue = self.figpanel.gca().get_xbound()
         try:
             float(event.GetString())
         except:
             return
-        self.figpanel.axes[0].set_xbound((axisValue[0],float(event.GetString())))
+        self.figpanel.gca().set_xbound((axisValue[0],float(event.GetString())))
         self.figpanel.canvas.draw()
 
     def _yminValue( self, event ):
-        axisValue = self.figpanel.axes[0].get_ybound()
+        axisValue = self.figpanel.gca().get_ybound()
         try:
             float(event.GetString())
         except:
             return
-        self.figpanel.axes[0].set_ybound((float(event.GetString()),axisValue[1]))
+        self.figpanel.gca().set_ybound((float(event.GetString()),axisValue[1]))
         self.figpanel.canvas.draw()
 
     def _ymaxValue( self, event ):
-        axisValue = self.figpanel.axes[0].get_ybound()
+        axisValue = self.figpanel.gca().get_ybound()
         try:
             float(event.GetString())
         except:
             return
-        self.figpanel.axes[0].set_ybound((axisValue[0],float(event.GetString())))
+        self.figpanel.gca().set_ybound((axisValue[0],float(event.GetString())))
         self.figpanel.canvas.draw()
     def _titleFontProp( self, event ):
         fontprop= fontDialog(self)
-        currtitle = self.figpanel.axes[0].get_title()
-        self.figpanel.axes[0].set_title(currtitle,fontprop)
+        currtitle = self.figpanel.gca().get_title()
+        self.figpanel.gca().set_title(currtitle,fontprop)
         self.figpanel.canvas.draw()
 
     def _xlabelFontProp( self, event ):
         fontprop= fontDialog(self)
-        currtitle = self.figpanel.axes[0].get_xlabel()
-        self.figpanel.axes[0].set_xlabel(currtitle,fontprop)
+        currtitle = self.figpanel.gca().get_xlabel()
+        self.figpanel.gca().set_xlabel(currtitle,fontprop)
         self.figpanel.canvas.draw()
 
     def _ylabelFontProp( self, event ):
         fontprop= fontDialog(self)
-        currtitle = self.figpanel.axes[0].get_ylabel()
-        self.figpanel.axes[0].set_ylabel(currtitle,fontprop)
+        currtitle = self.figpanel.gca().get_ylabel()
+        self.figpanel.gca().set_ylabel(currtitle,fontprop)
         self.figpanel.canvas.draw()
 
     def _OnLineDel(self,event):
-        if len(self.axes.get_lines())== 0:
+        if len(self.gca().get_lines())== 0:
             return
-        selectedLine= self.figpanel.axes[0].get_lines()[self.m_listBox1.GetSelection()]
+        selectedLine= self.figpanel.gca().get_lines()[self.m_listBox1.GetSelection()]
         selectedLine.remove()
         # se actualiza la linea seleccionada
         self._OnRefreshLines(None)
         self.figpanel.canvas.draw()
 
     def _OnViewCursor( self, event ):
+        # verify the cursor property created with
+        # connectCursor
+        if not hasattr(self,'cursor'):
+            return
         value = event.Checked()
         if not value:
             self.statusbar.SetStatusText(( ""), 1)
-            #self.cursor.useblit = False
+        
         self.cursor.horizOn = value
         self.cursor.vertOn = value
         self.figpanel.canvas.draw()
@@ -1086,7 +1120,7 @@ class MpltFrame( wx.Frame ):
         if self.m_listBox1.GetSelection() == -1:
             self.m_textCtrl8.SetValue("")
             return
-        selectedLine= self.axes.get_lines()[self.m_listBox1.GetSelection()]
+        selectedLine= self.gca().get_lines()[self.m_listBox1.GetSelection()]
         lineName = selectedLine.get_label()
         lineWidht= float(selectedLine.get_linewidth())
         lineColour= selectedLine.get_color()
@@ -1123,15 +1157,15 @@ class MpltFrame( wx.Frame ):
            self.m_listBox1.GetSelection() == -1:
             return
         newWidth= float(event.String)
-        selectedLine= self.axes.get_lines()[self.m_listBox1.GetSelection()]
+        selectedLine= self.gca().get_lines()[self.m_listBox1.GetSelection()]
         selectedLine.set_linewidth(newWidth)
         self.figpanel.canvas.draw()
 
     def _OnRefreshLines( self, event ):
-        if len(self.axes.get_lines())== 0:
+        if len(self.gca().get_lines())== 0:
             self.m_listBox1.SetItems([])
             return
-        lineListNames= [line.get_label() for line in self.axes.get_lines()]
+        lineListNames= [line.get_label() for line in self.gca().get_lines()]
         self.m_listBox1.SetItems(lineListNames)
         self.m_listBox1.SetSelection(0)
         self._updateLineSelectionPane(self.m_listBox1)
@@ -1153,7 +1187,7 @@ class MpltFrame( wx.Frame ):
         else:
             return
         actualLineNumber= self.m_listBox1.GetSelection()
-        lineSelected = self.axes.get_lines()[actualLineNumber]
+        lineSelected = self.gca().get_lines()[actualLineNumber]
         colors = [getattr(data.Colour,param)/float(255) for param in ['red','green','blue','alpha']]
         lineSelected.set_color(colors)
         self.figpanel.canvas.draw()
@@ -1163,7 +1197,7 @@ class MpltFrame( wx.Frame ):
            self.m_listBox1.GetSelection() == -1:
             return
         actualLineNumber= self.m_listBox1.GetSelection()
-        lineSelected = self.axes.get_lines()[actualLineNumber]
+        lineSelected = self.gca().get_lines()[actualLineNumber]
         newStyle = event.GetString()
         lineSelected.set_linestyle(newStyle)
         self.figpanel.canvas.draw()
@@ -1173,7 +1207,7 @@ class MpltFrame( wx.Frame ):
            self.m_listBox1.GetSelection() == -1:
             return
         actualLineNumber= self.m_listBox1.GetSelection()
-        lineSelected = self.axes.get_lines()[actualLineNumber]
+        lineSelected = self.gca().get_lines()[actualLineNumber]
 
         newMarkerStyle = event.GetString()
         lineSelected.set_marker(newMarkerStyle)
@@ -1185,7 +1219,7 @@ class MpltFrame( wx.Frame ):
            self.m_listBox1.GetSelection() == -1:
             return
         actualLineNumber= self.m_listBox1.GetSelection()
-        lineSelected = self.axes.get_lines()[actualLineNumber]
+        lineSelected = self.gca().get_lines()[actualLineNumber]
 
         newMarkerSize = float(event.GetString())
         lineSelected.set_markersize(newMarkerSize)
@@ -1197,7 +1231,7 @@ class MpltFrame( wx.Frame ):
            self.m_listBox1.GetSelection() == -1:
             return
         actualLineNumber= self.m_listBox1.GetSelection()
-        lineSelected = self.axes.get_lines()[actualLineNumber]
+        lineSelected = self.gca().get_lines()[actualLineNumber]
         visible = event.Checked()
         lineSelected.set_visible(visible)
         self.figpanel.canvas.draw()
@@ -1205,15 +1239,15 @@ class MpltFrame( wx.Frame ):
     def _OnAddRefHorzLine( self, event, **params ):
         if params.has_key('ypos'):
             ypos = params.pop('ypos')
-            self.axes.hold(True)
-            line= self.axes.axhline(ypos)
-            self.axes.hold(False)
+            self.gca().hold(True)
+            line= self.gca().axhline(ypos)
+            self.gca().hold(False)
         else:
             try:
                 ypos= float(self.HorLineTxtCtrl.GetValue())
-                self.axes.hold(True)
-                line= self.axes.axhline(ypos)
-                self.axes.hold(False)
+                self.gca().hold(True)
+                line= self.gca().axhline(ypos)
+                self.gca().hold(False)
                 self.HorLineTxtCtrl.SetValue('')
                 self._OnRefreshLines(None)
             except:
@@ -1227,10 +1261,10 @@ class MpltFrame( wx.Frame ):
             float(self.HorVerTxtCtrl.GetValue())
         except:
             return
-        self.axes.hold(True)
+        self.gca().hold(True)
         xpos  = float(self.HorVerTxtCtrl.GetValue())
-        self.axes.axvline(xpos)
-        self.axes.hold(False)
+        self.gca().axvline(xpos)
+        self.gca().hold(False)
         self.figpanel.canvas.draw()
         self.HorVerTxtCtrl.SetValue('')
         self._OnRefreshLines(None)
@@ -1280,7 +1314,7 @@ class MpltFrame( wx.Frame ):
             return
         selectedPatch= self.patchListBox.GetItems()[self.patchListBox.GetSelection()]
         currPatch= None
-        for patch in self.figpanel.axes[0].patches:
+        for patch in self.figpanel.gca().patches:
             if str(patch.get_gid()) == selectedPatch:
                 currPatch= patch
                 break
@@ -1311,7 +1345,7 @@ class MpltFrame( wx.Frame ):
             return
         faceColor= self.m_choice81.GetItems()[self.m_choice81.GetSelection()]
         Alpha= float(self.m_choice12.GetItems()[self.m_choice12.GetSelection()])
-        patch= self.figpanel.axes[0].axhspan(pos1,pos2, facecolor= faceColor, alpha= Alpha)
+        patch= self.figpanel.gca().axhspan(pos1,pos2, facecolor= faceColor, alpha= Alpha)
         patch.set_gid(wx.NewId())
         self._patchListboxUpdate()
         self.figpanel.canvas.draw()
@@ -1326,14 +1360,14 @@ class MpltFrame( wx.Frame ):
             return
         faceColor= self.m_choice10.GetItems()[self.m_choice10.GetSelection()]
         Alpha= str(self.m_choice11.GetItems()[self.m_choice11.GetSelection()])
-        patch = self.figpanel.axes[0].axvspan(pos1,pos2,facecolor= faceColor, alpha= Alpha)
+        patch = self.figpanel.gca().axvspan(pos1,pos2,facecolor= faceColor, alpha= Alpha)
         patch.set_gid(wx.NewId())
         self._patchListboxUpdate()
         self.figpanel.canvas.draw()
 
     def _patchListboxUpdate(self,*args):
         # se lista todos los patch
-        patches = self.figpanel.axes[0].patches
+        patches = self.figpanel.gca().patches
         if len(patches) == 0:
             self.patchListBox.SetItems([])
         # se agrega un id para los patches que no lo tengan
@@ -1357,7 +1391,7 @@ class MpltFrame( wx.Frame ):
         if selected == -1:
             return
         selectedPatch = items[selected]
-        for patch in self.figpanel.axes[0].patches:
+        for patch in self.figpanel.gca().patches:
             if str(patch.get_gid()) == selectedPatch:
                 patch.remove()
                 break
@@ -1374,7 +1408,7 @@ class MpltFrame( wx.Frame ):
             return
         selectedPatch= self.patchListBox.GetItems()[self.patchListBox.GetSelection()]
         currPatch= None
-        for patch in self.figpanel.axes[0].patches:
+        for patch in self.figpanel.gca().patches:
             if str(patch.get_gid()) == selectedPatch:
                 currPatch= patch
                 break
@@ -1387,7 +1421,7 @@ class MpltFrame( wx.Frame ):
         else:
             return
         actualLineNumber= self.m_listBox1.GetSelection()
-        lineSelected = self.axes.get_lines()[actualLineNumber]
+        lineSelected = self.gca().get_lines()[actualLineNumber]
         colors = [getattr(data.Colour,param)/float(255) for param in ['red','green','blue','alpha']]
         currPatch.set_facecolor(colors)
         self.figpanel.canvas.draw()
@@ -1401,7 +1435,7 @@ class MpltFrame( wx.Frame ):
             return
         selectedPatch= self.patchListBox.GetItems()[self.patchListBox.GetSelection()]
         currPatch= None
-        for patch in self.figpanel.axes[0].patches:
+        for patch in self.figpanel.gca().patches:
             if str(patch.get_gid()) == selectedPatch:
                 currPatch= patch
                 break
@@ -1490,23 +1524,21 @@ class test ( wx.Frame ):
 
 class MplCanvasFrame(wx.Panel,Figure):
     """Class to represent a Matplotlib Figure as a wxPanel with Figure properties"""
-    def __init__(self,parent, *args, **params):
+    def __init__( self, parent, *args, **params):
         # initialize the superclass, the wx.Frame
-        wx.Panel.__init__(self, parent, wx.ID_ANY)
-        Figure.__init__(self,)
-        self.canvas = FigureCanvas(self, wx.ID_ANY, self)
-        self.sizer = wx.BoxSizer(wx.VERTICAL)
+        wx.Panel.__init__( self, parent, wx.ID_ANY)
+        Figure.__init__( self,)
+        self.canvas=  FigureCanvas( self, wx.ID_ANY, self)
+        self.sizer=   wx.BoxSizer( wx.VERTICAL)
         # instantiate the Navigation Toolbar
-        self.toolbar = NavigationToolbar2Wx(self.canvas)
+        self.toolbar= NavigationToolbar2Wx( self.canvas)
         # needed to support Windows systems
         self.toolbar.Realize()
         # add it to the sizer
-        self.sizer.Add(self.toolbar, 0, wx.LEFT | wx.EXPAND)
+        self.sizer.Add( self.toolbar, 0, wx.LEFT | wx.EXPAND)
         # explicitly show the toolbar
         self.toolbar.Show()
-        self.sizer.Add(self.canvas, 1,  wx.LEFT | wx.TOP | wx.EXPAND)
-
-        #self.sizer.Add(self.statusbar, 1,  wx.EXPAND) # wx.LEFT | wx.TOP |
+        self.sizer.Add( self.canvas, 1,  wx.LEFT | wx.TOP | wx.EXPAND)
 
         self.SetSizer(self.sizer)
         self.Fit()
@@ -1516,8 +1548,8 @@ if __name__ == '__main__':
     # Create a wrapper wxWidgets application
     app = wx.App()
     # instantiate the Matplotlib wxFrame
-    frame = MpltFrame(None,"boxPlot",[range(20),range(30),range(35),])
+    frame = MpltFrame( None, "boxPlot", [range(20),range(30),range(35),])
     # show it
-    frame.Show(True)
+    frame.Show( True)
     # start wxWidgets mainloop
     app.MainLoop()
