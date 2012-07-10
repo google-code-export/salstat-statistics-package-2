@@ -889,7 +889,7 @@ class MainFrame(wx.Frame):
         self.panelNtb = self.m_mgr.AddPane( self.m_notebook1,
                                             aui.AuiPaneInfo() .Bottom() .
                                             CloseButton( False ).MaximizeButton( True ).
-                                            Caption(('Shell')).
+                                            Caption(('Log / Shell Panel')).
                                             MinimizeButton().PinButton( False ).
                                             Dock().Resizable().FloatingSize( wx.DefaultSize ).
                                             CaptionVisible(True).
@@ -1305,8 +1305,9 @@ class MainFrame(wx.Frame):
         self.SetIcon(icon)
         if dlg.ShowModal() == wx.ID_OK:
             data = dlg.GetFontData()
-            #data2 = data.GetChosenFont()
+            self.grid.SetDefaultCellTextColour(data.GetColour())
             self.grid.SetDefaultCellFont(data.GetChosenFont())
+        dlg.Destroy()
 
     def GoContinuousDescriptives(self, evt):
         # shows the continuous descriptives dialog

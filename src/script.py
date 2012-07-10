@@ -180,7 +180,7 @@ class MySTC(stc.StyledTextCtrl):
         if self.CallTipActive():
             self.CallTipCancel()
         key = event.GetKeyCode()
-        if key == 32 and event.ControlDown():
+        if key == 32 and event.CmdDown():
             pos = self.GetCurrentPos()
             # tips
             if event.ShiftDown():
