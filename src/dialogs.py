@@ -337,7 +337,7 @@ class DescriptivesFrame(wx.Dialog):
     def __init__( self, parent, id ):
         wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY,
                              title = "Descriptive Statistics",
-                             pos = wx.DefaultPosition, size = wx.Size( 375,326 ),
+                             pos = wx.DefaultPosition, size = wx.Size( 420,326 ),
                              style = wx.DEFAULT_DIALOG_STYLE )
 
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
