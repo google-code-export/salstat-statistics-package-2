@@ -44,12 +44,12 @@ class PyWXGridEditMixin():
         
         if key == wx.WXK_DELETE: self.Delete()
         
-        if not event.ControlDown():
+        if not event.CmdDown():
             event.Skip()
             return
         
-        if key == 67:         self.Copy()
-        elif key == 86:       self.OnPaste()
+        if key == ord("C"):   self.Copy()
+        elif key == ord("V"): self.OnPaste()
         elif key == ord("X"): self.OnCut()
         elif key == ord("Z"): self.Undo()
         elif key == ord("Y"): self.Redo() # elif key == ord(" "): self.SelectCol(self.GetGridCursorCol())
