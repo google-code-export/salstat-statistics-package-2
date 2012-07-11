@@ -1092,7 +1092,7 @@ class MainFrame(wx.Frame):
               ('Bar Chart of All Means',  None, self.GoMeanBarChartWindow,     None),
               ('Lines',                   None, self.GoLinesPlot,     None),
               ('Scatter',                 None, self.GoScatterPlot,     None),
-              ('Box &Whisker',            None, self.GoBoxWhiskerPlot,     None),
+              ('Box & Whisker',           None, self.GoBoxWhiskerPlot,     None),
               ('Linear Regression',       None, self.GoLinRegressPlot,     None),
               ('Ternary',                 None, self.GoTernaryplot,     None),
               ('Probability',             None, self.GoProbabilityplot,     None),
@@ -1357,8 +1357,9 @@ class MainFrame(wx.Frame):
         pass
 
     def GoChartWindow(self, evt):
-        self.log.write('''waste, colnums = grid.GetUsedCols()''', False)
+        self.log.write('''Line chart of all means''')
         waste, colnums = self.grid.GetUsedCols()
+        self.log.write('''waste, colnums = grid.GetUsedCols()''', False)
         if colnums == []:
             self.SetStatusText( 'You need some data to draw a graph!')
             return
@@ -1392,6 +1393,7 @@ class MainFrame(wx.Frame):
         plt.Show()
 
     def GoTernaryplot(self, evt):
+        self.log.write('Ternary')
         waste, colnums= self.grid.GetUsedCols()
         self.log.write('waste, colnums= grid.GetUsedCols()', False)
         
@@ -1466,8 +1468,9 @@ class MainFrame(wx.Frame):
 
     def GoMeanBarChartWindow(self, evt):
         '''this funtcion is used to plot the bar chart of all means'''
-        self.log.write('''waste, colnums = grid.GetUsedCols()''', False)
+        self.log.write('Bar Chart of All Means')
         waste, colnums = self.grid.GetUsedCols()
+        self.log.write('''waste, colnums = grid.GetUsedCols()''', False)
         if colnums == []:
             self.SetStatusText('You need some data to draw a graph!')
             return
@@ -1573,6 +1576,7 @@ class MainFrame(wx.Frame):
         wx.AboutBox(info)
         
     def GoScatterPlot(self,evt):
+        self.log.write('Scatter')
         waste, colnums = self.grid.GetUsedCols()
         self.log.write('''waste, colnums = grid.GetUsedCols()''', False)
         if colnums == []:
@@ -1617,6 +1621,7 @@ class MainFrame(wx.Frame):
         self.log.write('plt.Show()', False)
 
     def GoBoxWhiskerPlot(self,evt):
+        self.log.write('Box & Whisker')
         waste, colnums = self.grid.GetUsedCols()
         self.log.write('waste, colnums = grid.GetUsedCols()', False)
         if colnums == []:
@@ -1654,6 +1659,7 @@ class MainFrame(wx.Frame):
         self.log.write('plt.Show()', False)
         
     def GoAdaptativeBMS(self,evt):
+        self.log.write('Adaptive BMS')
         waste, colnums = self.grid.GetUsedCols()
         self.log.write('waste, colnums = grid.GetUsedCols()', False)
         if colnums == []:
@@ -1692,6 +1698,7 @@ class MainFrame(wx.Frame):
         self.log.write('plt.Show()', False)
 
     def GoLinesPlot(self, evt):
+        self.log.write('Lines')
         waste, colnums = self.grid.GetUsedCols()
         self.log.write('''waste, colnums = grid.GetUsedCols()''', False)
         if colnums == []:
@@ -1728,6 +1735,7 @@ class MainFrame(wx.Frame):
         self.log.write("plt.Show()", False)
 
     def GoLinRegressPlot(self, evt):
+        self.log.write('Linear Regression')
         waste, colnums = self.grid.GetUsedCols()
         self.log.write('waste, colnums = grid.GetUsedCols()', False)
         if colnums == []:
@@ -1767,6 +1775,7 @@ class MainFrame(wx.Frame):
 
 
     def GoProbabilityplot(self, evt):
+        self.log.write('Probability')
         ColumnList, colnums= self.grid.GetUsedCols()
         self.log.write('ColumnList, colnums= grid.GetUsedCols()', False)
         if colnums == []:

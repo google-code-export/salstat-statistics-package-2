@@ -1150,9 +1150,9 @@ class MpltFrame( wx.Frame, object ):
                                            "  y=" +str(y) ),
                                          1)
     def _OnListLinesChange( self, evt ):
-        self._updateLineSelectionPane(event)
+        self._updateLineSelectionPane(evt)
 
-    def _updateLineSelectionPane(self,event):
+    def _updateLineSelectionPane(self,evt):
         if len(self.m_listBox1.GetItems()) == 0:
             self.plt_textCtr8.SetValue("")
             return
