@@ -45,7 +45,12 @@ class MyGridPanel( wx.Panel, object ):
         self.SetRowLabelSize( 80 )
         self.SetRowLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
         # Label Appearance
-        self.SetLabelBackgroundColour( wx.Colour( 254, 226, 188 ) )
+        if wx.Platform == '__WXMAC__':
+            self.SetGridLineColour("#b7b7b7")
+            self.SetLabelBackgroundColour("#d2d2d2")
+            self.SetLabelTextColour("#444444")
+        else:
+            self.SetLabelBackgroundColour( wx.Colour( 254, 226, 188 ) )
         # Cell Defaults
         self.SetDefaultCellAlignment( wx.ALIGN_LEFT, wx.ALIGN_TOP )
         #< don't change this line
@@ -86,7 +91,7 @@ class MyGridPanel( wx.Panel, object ):
         
         colNumber= int(colNumber)
         if colNumber < 0 or colNumber > self.GetNumberCols():
-            raise StandardError('the minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
+            raise StandardError('The minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
         
         return [self.GetCellValue(row, colNumber) for row in range(self.GetNumberRows())]
     
@@ -104,7 +109,7 @@ class MyGridPanel( wx.Panel, object ):
         
         colNumber= int(colNumber)        
         if colNumber < 0 or colNumber > self.GetNumberCols():
-            raise StandardError('the minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
+            raise StandardError('The minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
         
         self.clearCol(colNumber)
         
@@ -151,7 +156,7 @@ class MyGridPanel( wx.Panel, object ):
             
     def clearCol(self, colNumber):
         if colNumber < 0 or colNumber > self.GetNumberCols():
-            raise StandardError('the minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
+            raise StandardError('The minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
         
         for row in range(self.GetNumberRows()):
             self.SetCellValue(row, colNumber, u'')
@@ -206,7 +211,7 @@ class NoteBookSheet(wx.Panel, object):
 
     def getGridAllValueByCols(self,pageName):
         if not (pageName in self.pageNames.keys()):
-            raise StandardError('La pagina no existe')
+            raise StandardError('The page does not exist')
         page= self.pageNames[pageName]
         return page.getByColumns()
 
@@ -215,7 +220,7 @@ class NoteBookSheet(wx.Panel, object):
 
     def getHeader(self,pageName):
         if not (pageName in self.pageNames.keys()):
-            raise StandardError('La pagina no existe')
+            raise StandardError('The page does not exist')
         page= self.pageNames[pageName]
         return page.getHeader()
 

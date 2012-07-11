@@ -6,6 +6,10 @@ VariablesFrame.__init__()
 MainFrame.__init__()
 SimpleGrid.__init__()
 
-Script.py
+Script.py:
 
 MySTC.__init__()
+
+ntbSheet.py:
+
+MyGridPanel.__init__()
