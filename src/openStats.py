@@ -84,7 +84,7 @@ def OneSampleTests(colData, tests, userMean):
             z=     0
             prob= -1.0
         else:
-            prob= stats.erfcc(abs(self.z) / 1.4142136)
+            prob= stats.erfcc(abs(z) / 1.4142136)
         return (z, prob)
     #####
     def ChiSquareVariance(de, usermean):
@@ -98,7 +98,7 @@ def OneSampleTests(colData, tests, userMean):
             chisquare = (de.stderr / usermean) * df
         except ZeroDivisionError:
             chisquare = 0.0
-        prob = chisqprob( chisquare, df)
+        prob = stats.chisqprob( float(chisquare), df) 
         
         return (df, chisquare, prob)
     #####

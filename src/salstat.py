@@ -24,6 +24,8 @@ from slbTools import isiterable
 
 from statFunctions.centralTendency import geometricMean,\
      harmonicmean, mean, median, medianscore, mode
+from statFunctions.oneCondition import oneConditionTest
+
 import wx.html
 import wx.lib.agw.aui as aui
 
@@ -2308,6 +2310,7 @@ class MainFrame(wx.Frame):
 
 
     def geometricmean(self,evt):
+        oneConditionTest().showGui()
         geometricMean().showGui()
 
     def harmonicmean(self,evt):
