@@ -141,7 +141,7 @@ class LogPanel( wx.Panel ):
         else:
             lineaTexto= obj.__str__()
         if lineaTexto.endswith('\n'):
-            lineaTexto= lineaTexto[:-2]
+            lineaTexto= lineaTexto[:-1]
         self.writeLine(lineaTexto, writem)
 
     def clearLog(self):
