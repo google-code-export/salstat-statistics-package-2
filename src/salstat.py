@@ -1225,14 +1225,16 @@ class MainFrame(wx.Frame):
     def GoClearData(self, evt):
         if not self.grid.Saved:
             # display discard dialog
-            bt1=       ['StaticText', ['save Data?\n if you press cancel then\n all changes will be lost']]
-            setting=   {'Title': "Saving data"}
-            structure= [[bt1],]
-            dlg= dialog( settings = setting, struct = structure)
-            if dlg.ShowModal() == wx.ID_OK:
+            dlg = wx.MessageDialog(None, 'Do you wish to save now?',
+                                    'You have Unsaved Data', wx.YES_NO | wx.CANCEL | wx.ICON_QUESTION)
+            response = dlg.ShowModal()
+            if response == wx.ID_CANCEL:
+                return
+            elif response == wx.ID_YES:
                 self.grid.SaveXls()
-            dlg.Destroy()
-            
+            elif response == wx.ID_NO:
+                pass
+
         #<p> shows a new data entry frame
         # resizing the grid
         try:
@@ -1255,6 +1257,7 @@ class MainFrame(wx.Frame):
         self.floatCellRenderer= renderer
         attr.SetRenderer( renderer)
         self.floatCellAttr= attr
+
         for colNumber in range( self.grid.NumberCols):
             self.grid.SetColAttr( colNumber, self.floatCellAttr)
         # /<p>
@@ -1263,7 +1266,7 @@ class MainFrame(wx.Frame):
         self.grid.Saved = False
         self.m_mgr.Update()
         # /<p>
-        # empting the undo redo
+        # emptying the undo redo
 
         
     def GoFindDialog(self, evt):
