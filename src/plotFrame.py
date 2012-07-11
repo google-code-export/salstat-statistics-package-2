@@ -1038,7 +1038,7 @@ class MpltFrame( wx.Frame, object ):
             value = 'symlog'
         self.gca().set_yscale(value)
         self.figpanel.canvas.draw()
-        self.log.write('plt.gca().set_yscale('+ "'" + value.__str__()+ "'" +')')
+        self.log.write('plt.gca().set_yscale('+ "'" + value.__str__()+ "'" +')', False)
 
     def _OnLegend( self, evt ):
         value = evt.Checked()
