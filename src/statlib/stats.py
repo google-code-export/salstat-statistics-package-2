@@ -1171,7 +1171,7 @@ def lchisquare(f_obs,f_exp=None):
         f_exp = [sum(f_obs)/float(k)] * len(f_obs) # create k bins with = freq.
     chisq = 0
     for i in range(len(f_obs)):
-        chisq = chisq + (f_obs[i]-f_exp[i])**2 / float(f_exp[i])
+        chisq += (f_obs[i]-f_exp[i])**2 / float(f_exp[i])
     return chisq, chisqprob(chisq, k-1)
 
 
