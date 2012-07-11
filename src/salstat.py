@@ -351,7 +351,7 @@ class SimpleGrid(MyGrid):# wxGrid
         bt1= ('Choice',     [sheetNames])
         bt2= ('StaticText', ['Select a sheet to be loaded'])
         bt3= ('CheckBox',   ['Has header'])
-        setting = {'Title': 'Select a sheet one'}
+        setting = {'Title': 'Select a sheet'}
         
         dlg = dialog(self, struct=[[bt1,bt2],[bt3]], settings= setting)
         if dlg.ShowModal() != wx.ID_OK:
@@ -378,7 +378,7 @@ class SimpleGrid(MyGrid):# wxGrid
                       filename= filename,
                       hasHeader= hasHeader)''', None)
         
-        self.log.write('Imperting  : %s successful'%filename)
+        self.log.write('Importing  : %s successful'%filename)
         
     def _loadXls( self, *args,**params):
         sheets=         params.pop( 'sheets')
@@ -996,19 +996,19 @@ class MainFrame(wx.Frame):
         #add contents of menu
         dat1= (
             ('&File',
-             (('&New Data',   NewIcon,    self.GoClearData,     wx.ID_NEW),
-              ('&Open...',    OpenIcon,   self.grid.LoadXls,     wx.ID_OPEN),
-              ('&Save',       SaveIcon,   self.grid.SaveXls,     wx.ID_SAVE),
-              ('Save &As...', SaveAsIcon, self.grid.SaveXlsAs,     wx.ID_SAVEAS),
-              ('&Print...',   PrintIcon,  None,     None),
-              ('E&xit',       ExitIcon,   self.EndApplication,     wx.ID_EXIT),
+             (('&New Data\tCtrl-N',   NewIcon,    self.GoClearData,     wx.ID_NEW),
+              ('&Open...\tCtrl-O',    OpenIcon,   self.grid.LoadXls,     wx.ID_OPEN),
+              ('&Save\tCtrl-S',       SaveIcon,   self.grid.SaveXls,     wx.ID_SAVE),
+              ('Save &As...\tCtrl-Shift-S', SaveAsIcon, self.grid.SaveXlsAs,     wx.ID_SAVEAS),
+              ('&Print...\tCtrl-P',   PrintIcon,  None,     None),
+              ('E&xit\tCtrl-Q',       ExitIcon,   self.EndApplication,     wx.ID_EXIT),
               )),
             ('&Edit',
-             (('Cu&t',           CutIcon,         self.grid.CutData,     wx.ID_CUT),
-              ('&Copy',          CopyIcon,        self.grid.CopyData,     wx.ID_COPY),
-              ('&Paste',         PasteIcon,       self.grid.PasteData,     wx.ID_PASTE),
-              ('Select &All',    None,            self.grid.SelectAllCells,     wx.ID_SELECTALL),
-              ('&Find and Replace...',  FindRIcon,     self.GoFindDialog,     wx.ID_REPLACE),
+             (('Cu&t\tCtrl-X',           CutIcon,         self.grid.CutData,     wx.ID_CUT),
+              ('&Copy\tCtrl-C',          CopyIcon,        self.grid.CopyData,     wx.ID_COPY),
+              ('&Paste\tCtrl-V',         PasteIcon,       self.grid.PasteData,     wx.ID_PASTE),
+              ('Select &All\tCtrl-A',    None,            self.grid.SelectAllCells,     wx.ID_SELECTALL),
+              ('&Find and Replace...\tCtrl-F',  FindRIcon,     self.GoFindDialog,     wx.ID_REPLACE),
               ('Delete Current Column', None,  self.grid.DeleteCurrentCol,     None),
               ('Delete Current Row',    None,  self.grid.DeleteCurrentRow,     None),)),
             ('&Preferences',
@@ -1100,7 +1100,7 @@ class MainFrame(wx.Frame):
             ('Ctrl Process',
              (('Six Sigma Pac',           sixsigma, self.GoSixPack,     None),)),
             ('&Help',
-             (('Help',       imag.about(), self.GoHelpSystem,     wx.ID_HELP),
+             (('Help\tCtrl-H',       imag.about(), self.GoHelpSystem,     wx.ID_HELP),
               ('&About...',  imag.icon16(), self.ShowAbout,     wx.ID_ABOUT),)),
         )
         self.__createMenu(dat1, menuBar)
