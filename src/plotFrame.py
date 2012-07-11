@@ -994,10 +994,10 @@ class MpltFrame( wx.Frame, object ):
                        [dat[1] for dat in posDataOutSide],
                        linestyle= '_', color='r', marker='d')
         # UCL, LCL  Lines
-        self._OnAddRefHorzLine( event= None, ypos= UCL, color= 'r')
-        self._OnAddRefHorzLine( event= None, ypos= LCL, color= 'r')
+        self._OnAddRefHorzLine( evt= None, ypos= UCL, color= 'r')
+        self._OnAddRefHorzLine( evt= None, ypos= LCL, color= 'r')
         # Target Line
-        self._OnAddRefHorzLine( event= None, ypos= target, color= 'k')
+        self._OnAddRefHorzLine( evt= None, ypos= target, color= 'k')
         self.gca().hold(False)
         self.figpanel.canvas.draw()
 
