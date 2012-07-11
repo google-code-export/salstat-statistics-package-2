@@ -1401,7 +1401,7 @@ class MpltFrame( wx.Frame, object ):
         self.log.write('Alpha= '+Alpha.__str__(), False)
         
         patch= self.figpanel.gca().axhspan(pos1,pos2, facecolor= faceColor, alpha= Alpha)
-        self.log.write('patch= plt.gca().axhspan(pos1,pos2, facecolor= faceColor, alpha= Alpha', False)
+        self.log.write('patch= plt.gca().axhspan(pos1,pos2, facecolor= faceColor, alpha= Alpha)', False)
         patch.set_gid(wx.NewId())
         self._patchListboxUpdate()
         self.figpanel.canvas.draw()
