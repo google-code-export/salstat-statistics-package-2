@@ -1021,6 +1021,7 @@ class MpltFrame( wx.Frame, object ):
         self.figpanel.gca().grid(value)
         self.figpanel.canvas.draw()
         self.log.write('plt.gca().grid('+value.__str__()+')', False)
+ 
 
     def _OnXaxisScale( self, evt ):
         self.log.write('# changing x axis scale', False)
@@ -1031,6 +1032,7 @@ class MpltFrame( wx.Frame, object ):
         self.figpanel.canvas.draw()
         self.log.write('plt.gca().set_xscale('+ "'" + value.__str__()+ "'" +')', False)
 
+
     def _OnYaxisScale( self, evt ):
         self.log.write('# changing y axis scale', False)
         value = 'linear'
@@ -1039,6 +1041,7 @@ class MpltFrame( wx.Frame, object ):
         self.gca().set_yscale(value)
         self.figpanel.canvas.draw()
         self.log.write('plt.gca().set_yscale('+ "'" + value.__str__()+ "'" +')', False)
+
 
     def _OnLegend( self, evt ):
         value = evt.Checked()
@@ -1059,6 +1062,7 @@ class MpltFrame( wx.Frame, object ):
         self.figpanel.gca().set_xbound((float(evt.GetString()),axisValue[1]))
         self.figpanel.canvas.draw()
         self.log.write('plt.gca().set_xbound((float('+evt.GetString().__str__()+'),axisValue[1]))', False)
+
 
     def _xmaxValue( self, evt ):
         self.log.write('# changing x axis max value', False)
@@ -1084,6 +1088,7 @@ class MpltFrame( wx.Frame, object ):
         self.figpanel.gca().set_ybound((float(evt.GetString()),axisValue[1]))
         self.figpanel.canvas.draw()
         self.log.write('plt.gca().set_ybound((float('+evt.GetString().__str__()+'),axisValue[1]))', False)
+
         
     def _ymaxValue( self, evt ):
         self.log.write('# changing y axis max value', False)
@@ -1096,6 +1101,7 @@ class MpltFrame( wx.Frame, object ):
         self.figpanel.gca().set_ybound((axisValue[0],float(evt.GetString())))
         self.figpanel.canvas.draw()
         self.log.write('plt.gca().set_ybound((axisValue[0],float('+evt.GetString().__str__()+')))', False)
+
         
     def _titleFontProp( self, evt ):
         fontprop= fontDialog(self)
@@ -1274,12 +1280,12 @@ class MpltFrame( wx.Frame, object ):
         if params.has_key('ypos'):
             ypos = params.pop('ypos')
             self.gca().hold(True)
-            self.log.write('plt.gca().hold(True)', False)
+            #self.log.write('plt.gca().hold(True)', False)
             
             line= self.gca().axhline(ypos)
             self.log.write('line= pltgca().axhline('+ypos.__str__()+')', False)
             self.gca().hold(False)
-            self.log.write('plt.gca().hold(False)', False)
+            #self.log.write('plt.gca().hold(False)', False)
         else:
             try:
                 ypos= float(self.HorLineTxtCtrl.GetValue())
@@ -1297,6 +1303,7 @@ class MpltFrame( wx.Frame, object ):
             line.set_color(params['color'])
             self.log.write('line.set_color('+"'"+params['color'].__str__()+"'"+')', False)
         self.figpanel.canvas.draw()
+        #self.log.write('plt.draw()',False)
         
     def _OnAddRefVertLine( self, evt ):
         self.log.write('# adding reference vertical line', False)
@@ -1309,12 +1316,14 @@ class MpltFrame( wx.Frame, object ):
         
         xpos= float(self.HorVerTxtCtrl.GetValue())
         self.gca().axvline(xpos)
-        self.log.write('plt.gca().axvline('+"'"+xpos.__str__()+"'"+')', False)
+        self.log.write('plt.gca().axvline('+xpos.__str__()+')', False)
         self.gca().hold(False)
         self.log.write('plt.gca().hold(False)', False)
         self.figpanel.canvas.draw()
         self.HorVerTxtCtrl.SetValue('')
         self._OnRefreshLines(None)
+        self.figpanel.canvas.draw()
+        #self.log.write('plt.draw()',False)
 
     def _OnTxtRefLineHorzChange( self, evt ):
         self._txtNumerOnly( self.HorLineTxtCtrl)
