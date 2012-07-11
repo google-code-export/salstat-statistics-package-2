@@ -125,20 +125,24 @@ class LogPanel( wx.Panel ):
         self.SetSizer( bSizer8 )
         self.Layout()
 
-    def writeLine(self, lineaTexto):
+    def writeLine(self, lineaTexto, writem= True):
         '''escribe una linea de texto'''
         #texto= str(self.numLinea.next()) + " >> "
-        texto= str( ">> ")
+        texto= ''
+        if writem:
+            texto= str( ">>")
         texto+= lineaTexto + "\n"
         # se escribe el texto indicado
         self.log.AppendText(texto)
 
-    def write(self,lineaTexto):
-        if len(lineaTexto) > 1:
-            last= lineaTexto[-1:]
-            if last =='\n':
-                lineaTexto = lineaTexto[:-2]
-        self.writeLine(lineaTexto)
+    def write(self, obj, writem= True):
+        if isinstance(obj, (str, unicode)):
+            lineaTexto= obj
+        else:
+            lineaTexto= obj.__str__()
+        if lineaTexto.endswith('\n'):
+            lineaTexto= lineaTexto[:-2]
+        self.writeLine(lineaTexto, writem)
 
     def clearLog(self):
         self.log.SetValue('')
@@ -326,19 +330,24 @@ class SimpleGrid(MyGrid):# wxGrid
         dlg = wx.FileDialog(self, "Load Data File", "","",
                             wildcard= "Excel File (*.xls)|*.xls",
                             style = wx.OPEN)
-                #, wx.OPEN)
         icon = imagenes.logo16()
         dlg.SetIcon(icon)
         if dlg.ShowModal() != wx.ID_OK: # ShowModal
             dlg.Destroy()
             return
-        
-        filename = dlg.GetPath()
+        self.log.write('import xlrd', None)
+        filename= dlg.GetPath()
+        filenamestr= filename.__str__()
+        self.log.write('# remember to write an  r   before the path', None)
+        self.log.write('filename= ' + "'" + filename.__str__() + "'", None)
         dlg.Destroy()
         # se lee el libro
-        wb = xlrd.open_workbook(filename)
-        sheets = [wb.sheet_by_index(i) for i in range(wb.nsheets)]
+        wb= xlrd.open_workbook(filename)
+        self.log.write('wb = xlrd.open_workbook(filename)', None)
+        sheets= [wb.sheet_by_index(i) for i in range(wb.nsheets)]
+        self.log.write('sheets= [wb.sheet_by_index(i) for i in range(wb.nsheets)]', None)
         sheetNames = [sheet.name for sheet in sheets]
+        self.log.write('sheetNames= ' + sheetNames.__str__(), None)
         bt1= ('Choice',     [sheetNames])
         bt2= ('StaticText', ['Select a sheet to be loaded'])
         bt3= ('CheckBox',   ['Has header'])
@@ -350,17 +359,38 @@ class SimpleGrid(MyGrid):# wxGrid
         (sheetNameSelected, hasHeader)= dlg.GetValue()
         if len(sheetNameSelected) == 0:
             return
-        
+        self.log.write('sheetNameSelected= ' + "'" + sheetNameSelected[0].__str__() + "'",None)
+        self.log.write('hasHeader= ' + hasHeader.__str__(), None)
         sheetNameSelected= sheetNameSelected[0]
         dlg.Destroy()
         
-        if not (sheetNameSelected in sheetNames):
+        if not ( sheetNameSelected in sheetNames):
             return
         
+        self._loadXls(sheetNameSelected= sheetNameSelected,
+                      sheets= sheets,
+                      sheetNames= sheetNames,
+                      filename= filename,
+                      hasHeader= hasHeader)
+        self.log.write('''grid._loadXls(sheetNameSelected= sheetNameSelected,
+                      sheets= sheets,
+                      sheetNames= sheetNames,
+                      filename= filename,
+                      hasHeader= hasHeader)''', None)
+        
+        self.log.write('Imperting  : %s successful'%filename)
+        
+    def _loadXls( self, *args,**params):
+        sheets=         params.pop( 'sheets')
+        sheetNames=     params.pop( 'sheetNames')
+        sheetNameSelected= params.pop( 'sheetNameSelected')
+        filename=       params.pop( 'filename')
+        hasHeader=      params.pop( 'hasHeader')
         for sheet, sheetname in zip(sheets, sheetNames):
             if sheetname == sheetNameSelected:
                 sheetSelected= sheet
                 break
+            
         #<p> updating the path related to the new open file
         self.path= filename
         self.Saved= True
@@ -817,6 +847,7 @@ class MainFrame(wx.Frame):
 
         self.m_notebook1= wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
         self.logPanel= LogPanel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.log = self.logPanel # self.log = self.logPanel
 
         self.defaultDialogSettings = {'Title': None,
                                       'icon': imagenes.logo16()}
@@ -1323,31 +1354,44 @@ class MainFrame(wx.Frame):
         pass
 
     def GoChartWindow(self, evt):
+        self.log.write('''waste, colnums = grid.GetUsedCols()''', False)
         waste, colnums = self.grid.GetUsedCols()
         if colnums == []:
-            self.SetStatusText('You need some data to draw a graph!')
+            self.SetStatusText( 'You need some data to draw a graph!')
             return
-        selection = data2Plotdiaglog(self,waste)
+        selection= data2Plotdiaglog( self,waste)
         if selection.ShowModal() != wx.ID_OK:
             selection.Destroy()
             return
-        selectedcols = selection.getData()
+        selectedcols= selection.getData()
+        self.log.write( 'selectedcols=' + selectedcols.__str__(), False)
         selection.Destroy()
-        if len(selectedcols) == 0:
-            self.SetStatusText('You need to select some data to draw a graph!')
+        if len( selectedcols) == 0:
+            self.SetStatusText( 'You need to select some data to draw a graph!')
             return
+        self.log.write('''data = [statistics(grid.CleanData(cols), 'noname',None) for cols in [colnums[m] for m in selectedcols]]''', False)
         data = [statistics(self.grid.CleanData(cols), 'noname',None) for cols in [colnums[m] for m in selectedcols]]
+        self.log.write('''data = [data[i].mean for i in range(len(data))]''', False)
         data = [data[i].mean for i in range(len(data))]
+        self.log.write('''plt= plot(parent = None, typePlot= 'plotLine',
+                  data2plot= ((range(len(data)),data,'Mean'),),
+                  xlabel = 'variable',
+                  ylabel= 'mean',
+                  title= 'Line Chart of all means',
+                  xtics= [waste[i] for i in selectedcols])''', False)
         plt= plot(parent = self, typePlot= 'plotLine',
                   data2plot= ((range(len(data)),data,'Mean'),),
                   xlabel = 'variable',
                   ylabel= 'mean',
                   title= 'Line Chart of all means',
                   xtics= [waste[i] for i in selectedcols])
+        self.log.write('''plt.Show()''', False)
         plt.Show()
 
     def GoTernaryplot(self, evt):
-        waste, colnums = self.grid.GetUsedCols()
+        waste, colnums= self.grid.GetUsedCols()
+        self.log.write('waste, colnums= grid.GetUsedCols()', False)
+        
         if colnums == []:
             self.SetStatusText('You need some data to draw a graph!')
             return
@@ -1373,35 +1417,53 @@ class MainFrame(wx.Frame):
         
         values= dlg.GetValue()
         dlg.Destroy()
+        
         Alabel= values[0]
         if Alabel == u'' or Alabel.replace(' ','') == u'':
             Alabel= u'A'
-            
+        self.log.write('Alabel= '+"'"+Alabel.__str__()+"'", False)
+        
         Blabel= values[1]
         if Blabel == u'' or Blabel.replace(' ','') == u'':
             Blabel= u'B'
-            
+        self.log.write('Blabel= '+"'"+ Blabel.__str__()+"'", False)
+        
         Clabel= values[2]
         if Clabel == u'' or Clabel.replace(' ','') == u'':
             Clabel= u'C'
+        self.log.write('Clabel= '+"'"+ Clabel.__str__()+"'", False)
         
         pairs= values[3]
         if len(pairs) == 0:
             return
+        self.log.write('pairs= '+pairs.__str__(), False)
         
         data= [(self.grid.GetCol(colLeft),
                 self.grid.GetCol(colUpper),
                 self.grid.GetCol(colRight),
                 colLeft+' - '+colUpper+' - '+colRight ) 
                for (colLeft, colUpper, colRight) in pairs]
+        self.log.write('''data= [(grid.GetCol(colLeft),
+                grid.GetCol(colUpper),
+                grid.GetCol(colRight),
+                colLeft+' - '+colUpper+' - '+colRight ) 
+               for (colLeft, colUpper, colRight) in pairs]''', False)
+        
         plt= plot(parent=    self,
                   typePlot=  'plotTrian',
                   data2plot= (data, [Alabel, Blabel, Clabel]), 
                   title=     'Ternary Plot')
+        self.log.write('''plt= plot(parent=    None,
+                  typePlot=  'plotTrian',
+                  data2plot= (data, [Alabel, Blabel, Clabel]), 
+                  title=     'Ternary Plot')''', False)
+        
         plt.Show()
+        self.log.write('plt.Show()', False)
 
     def GoMeanBarChartWindow(self, evt):
         '''this funtcion is used to plot the bar chart of all means'''
+        self.log.write('''waste, colnums = grid.GetUsedCols()''', False)
         waste, colnums = self.grid.GetUsedCols()
         if colnums == []:
             self.SetStatusText('You need some data to draw a graph!')
@@ -1450,9 +1512,18 @@ class MainFrame(wx.Frame):
             self.SetStatusText('You need to select some data to draw a graph!')
             return
         
+        self.log.write('barType= '+ "'" + barType.__str__() + "'", False)
+        self.log.write('colour= '+ "'" + colour.__str__() + "'", False)
+        self.log.write('selectedcols= '+ selectedcols.__str__(), False)        
+        self.log.write('''data= [statistics( grid.GetColNumeric(col),'noname',None).mean for col in selectedcols]''', False)
         data = [statistics( self.grid.GetColNumeric(col),'noname',None).mean
                 for col in selectedcols]
-        
+        self.log.write('''plt= plot(parent=   None,
+                  typePlot= 'plotNiceBar',
+                  data2plot= (numpy.arange(1, len(data)+1), data,  None,  colour, barType,),
+                  xlabel=  'variable',
+                  ylabel=  'value',
+                  title=   'Bar Chart of all means')''', False)
         plt= plot(parent=   self,
                   typePlot= 'plotNiceBar',
                   data2plot= (numpy.arange(1, len(data)+1), data,  None,  colour, barType,),
@@ -1460,6 +1531,7 @@ class MainFrame(wx.Frame):
                   ylabel=  'value',
                   title=   'Bar Chart of all means')
         plt.Show()
+        self.log.write('plt.Show()', False)
 
     def GoHelpSystem(self, evt):
         # shows the "wizard" in the help box
@@ -1499,6 +1571,7 @@ class MainFrame(wx.Frame):
         
     def GoScatterPlot(self,evt):
         waste, colnums = self.grid.GetUsedCols()
+        self.log.write('''waste, colnums = grid.GetUsedCols()''', False)
         if colnums == []:
             self.SetStatusText('You need some data to draw a graph!')
             return
@@ -1512,24 +1585,37 @@ class MainFrame(wx.Frame):
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return
+        
         values= dlg.GetValue()
         dlg.Destroy()
         
         pairs= values[0]
         if len(pairs) == 0:
             return
+        self.log.write('pairs= '+ pairs.__str__(), False)
         
         data= [(self.grid.GetCol(colX), self.grid.GetCol(colY), colX +' VS ' +colY) for (colX,colY) in pairs]
+        self.log.write("data= [(grid.GetCol(colX), grid.GetCol(colY), colX +' VS ' +colY) for (colX,colY) in pairs]", False)
+        
         plt= plot(parent= self,
                   typePlot= 'plotScatter',
                   data2plot= data,
                   xlabel= 'X data',
                   ylabel= 'Y data',
                   title= 'Scatter Plot')
+        self.log.write('''plt= plot(parent= None,
+                  typePlot= 'plotScatter',
+                  data2plot= data,
+                  xlabel= 'X data',
+                  ylabel= 'Y data',
+                  title= 'Scatter Plot')''', False)
+        
         plt.Show()
+        self.log.write('plt.Show()', False)
 
     def GoBoxWhiskerPlot(self,evt):
         waste, colnums = self.grid.GetUsedCols()
+        self.log.write('waste, colnums = grid.GetUsedCols()', False)
         if colnums == []:
             self.SetStatusText('You need some data to draw a graph!')
             return
@@ -1537,22 +1623,36 @@ class MainFrame(wx.Frame):
         if selection.ShowModal() != wx.ID_OK:
             selection.Destroy()
             return
-        selectedcols = selection.getData()
+        
+        selectedcols = selection.getData()        
         selection.Destroy()
         if len(selectedcols) == 0:
             self.SetStatusText('You need to select some data to draw a graph!')
-            return
+            return        
+        self.log.write('selectedcols= ' + selectedcols.__str__(), False)
+        
         data = [self.grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]]
+        self.log.write('''data= [grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]]''', False)
+        
         plt= plot(parent = self, typePlot= 'boxPlot',
                   data2plot= data,
                   xlabel = 'variable',
                   ylabel = 'value',
                   title= 'Box & whisker plot',
                   xtics=  [waste[i] for i in selectedcols] )
+        self.log.write('''plt= plot(parent = None, typePlot= 'boxPlot',
+                  data2plot= data,
+                  xlabel = 'variable',
+                  ylabel = 'value',
+                  title= 'Box & whisker plot',
+                  xtics=  [waste[i] for i in selectedcols] )''', False)
 
         plt.Show()
+        self.log.write('plt.Show()', False)
+        
     def GoAdaptativeBMS(self,evt):
         waste, colnums = self.grid.GetUsedCols()
+        self.log.write('waste, colnums = grid.GetUsedCols()', False)
         if colnums == []:
             self.SetStatusText('You need some data to draw a graph!')
             return
@@ -1565,7 +1665,11 @@ class MainFrame(wx.Frame):
         if len(selectedcols) == 0:
             self.SetStatusText('You need to select some data to draw a graph!')
             return
-        data= [self.grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]]
+        self.log.write('selectedcols=  '+selectedcols.__str__(), False)
+        
+        data= [self.grid.GetColNumeric(cols) for cols in selectedcols]
+        self.log.write('data= [grid.GetColNumeric(cols) for cols in selectedcols]', False)
+        
         plt= plot(parent = self,
                   typePlot = 'AdaptativeBMS',
                   data2plot = data,
@@ -1573,10 +1677,20 @@ class MainFrame(wx.Frame):
                   ylabel = 'value',
                   title= 'Adaptative BMS plot',
                   xtics=  [waste[i] for i in selectedcols])
+        self.log.write('''plt= plot(parent = None,
+                  typePlot = 'AdaptativeBMS',
+                  data2plot = data,
+                  xlabel = 'variable',
+                  ylabel = 'value',
+                  title= 'Adaptative BMS plot',
+                  xtics=  [waste[i] for i in selectedcols])''', False)
+        
         plt.Show()
+        self.log.write('plt.Show()', False)
 
     def GoLinesPlot(self, evt):
         waste, colnums = self.grid.GetUsedCols()
+        self.log.write('''waste, colnums = grid.GetUsedCols()''', False)
         if colnums == []:
             self.SetStatusText('You need some data to draw a graph!')
             return
@@ -1585,23 +1699,34 @@ class MainFrame(wx.Frame):
             selection.Destroy()
             return
         selectedcols = selection.getData()
+        self.log.write('selectedcols= ' + selectedcols.__str__(), False)
         selection.Destroy()
         if len(selectedcols) == 0:
             self.SetStatusText('You need to select some data to draw a graph!')
             return
+        
         data = [self.grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]]
+        self.log.write('''data = [grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]]''', False)
+        
         data = [(range(len(data[i])),data[i],waste[i]) for i in range(len(data))]
-
+        self.log.write('''data = [(range(len(data[i])),data[i],waste[i]) for i in range(len(data))]''', False)
+        
         plt= plot(parent = self, typePlot= 'plotLine',
                   data2plot= data,
                   xlabel = '',
                   ylabel = 'value',
                   title= 'Line plot')
-
+        self.log.write('''plt= plot(parent = None, typePlot= 'plotLine',
+                  data2plot= data,
+                  xlabel = '',
+                  ylabel = 'value',
+                  title= 'Line plot')''', False)
         plt.Show()
+        self.log.write("plt.Show()", False)
 
     def GoLinRegressPlot(self, evt):
         waste, colnums = self.grid.GetUsedCols()
+        self.log.write('waste, colnums = grid.GetUsedCols()', False)
         if colnums == []:
             self.SetStatusText('You need some data to draw a graph!')
             return
@@ -1610,24 +1735,37 @@ class MainFrame(wx.Frame):
             selection.Destroy()
             return
         (xcol, ycol)= selection.getData()
+        self.log.write('(xcol, ycol)= '+ selection.getData().__str__(), False)
+        
         selection.Destroy()
+        
         data= homogenize(*[self.grid.CleanData(cols) for cols in [colnums[i] for i in (xcol,ycol)]])
+        self.log.write('''data= homogenize(*[grid.CleanData(cols) for cols in [colnums[i] for i in (xcol,ycol)]])''', False)
+        
         # homogenize data
         data= homogenize(data[0],data[1])
-
+        self.log.write('data= homogenize(data[0],data[1])', False)
         if len(data[0]) != len(data[1]):
             self.SetStatusText('X and Y data must have the same number of elements!')
             return
+        
         plt= plot(parent = self, typePlot= 'plotLinRegress',
                   data2plot= (data[0],data[1],waste[xcol] +u' Vs '+ waste[ycol]),
                   xlabel = waste[xcol], ylabel = waste[ycol],
                   title= 'Linear Regression plot' )
+        self.log.write('''plt= plot(parent = None, typePlot= 'plotLinRegress',
+                  data2plot= (data[0],data[1],waste[xcol] +u' Vs '+ waste[ycol]),
+                  xlabel = waste[xcol], ylabel = waste[ycol],
+                  title= 'Linear Regression plot' )''', False)
+        
         plt.Show()
+        self.log.write('plt.Show()', False)
         # lin regress removing most disperse data
 
 
     def GoProbabilityplot(self, evt):
-        ColumnList, colnums = self.grid.GetUsedCols()
+        ColumnList, colnums= self.grid.GetUsedCols()
+        self.log.write('ColumnList, colnums= grid.GetUsedCols()', False)
         if colnums == []:
             self.SetStatusText('You need some data to draw a graph!')
             return
@@ -1641,22 +1779,29 @@ class MainFrame(wx.Frame):
             selection.Destroy()
             return
         (selectedcols,) = selection.GetValue()
+        self.log.write('selectedcols= '+selectedcols.__str__(), False)
+        
         selection.Destroy()
         if len(selectedcols) == 0:
             self.SetStatusText('You need to select some data to draw a graph!')
             return
-        values = [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
-                   for val in selectedcols
-                   ]
-        data = [self.grid.CleanData(cols) for cols in [colnums[m] for m in values]]
+
+        data = [self.grid.GetColNumeric(cols) for cols in selectedcols]
+        self.log.write('data = [grid.GetColNumeric(cols) for cols in selectedcols]', False)
+        
         plt= plot(parent = self, typePlot= 'probabilityPlot',
                   data2plot= data,
                   title=     'Probability Plot',
                   xlabel=    'Order Statistic Medians',
                   ylabel=    'Ordered Values')
+        self.log.write('''plt= plot(parent = None, typePlot= 'probabilityPlot',
+                  data2plot= data,
+                  title=     'Probability Plot',
+                  xlabel=    'Order Statistic Medians',
+                  ylabel=    'Ordered Values')''', False)
+        
         plt.Show()
+        self.log.write('plt.Show()', False)
 
     def GoSixPack(self, evt):
         '''six pack for continue data

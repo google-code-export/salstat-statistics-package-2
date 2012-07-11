@@ -11,6 +11,9 @@ from statlib import stats
 from plotFrame import MpltFrame as plot
 from easyDialog import Dialog
 import traceback
+from openStats import statistics
+import numpy
+from slbTools import homogenize
 
 # styled text using wxPython's
 # wx.StyledTextCtrl(parent, id, pos, size, style, name)
@@ -402,6 +405,9 @@ class ScriptPanel(wx.Panel):
               'report':self.showgrid,
               'dialog': Dialog,
               'OK': wx.ID_OK,
+              'statistics':statistics,
+              'numpy': numpy,
+              'homogenize':homogenize,
               }
         buildins = {}
         buildins["locals"]   = None
