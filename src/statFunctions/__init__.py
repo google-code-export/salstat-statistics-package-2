@@ -26,7 +26,7 @@ class _genericFunc(object):
         '''geting the selected columns of the InputGrid'''
         columns  = list()
         for colName in colNamesSelected:
-            col= numpy.array( self.inputGrid._cleanData( self.inputGrid.GetCol( colName)))
+            col= numpy.array( self.inputGrid.GetColNumeric( colName))
             col.shape = ( len(col),1)
             columns.append( col)
         
