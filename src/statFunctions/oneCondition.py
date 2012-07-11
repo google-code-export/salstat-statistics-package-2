@@ -14,6 +14,8 @@ class oneConditionTest(_genericFunc):
         self.name=     'One condition test'
         self.statName= 'oneConditionTest'
         self.minRequiredCols= 1
+        self.colNameSelect= []
+        self.tests= []
         
     def _dialog( self, *arg, **params):
         setting= {'Title': self.name}
@@ -21,7 +23,7 @@ class oneConditionTest(_genericFunc):
         btn1= ['StaticText',   ['Select the columns to analyse']]
         btn2= ['CheckListBox', [self.columnNames]]
         btn3= ['StaticText',   ['Choose test(s)']]
-        btn4= ['CheckListBox'  ['t-test', 'Sign Test', 'Chi square test for variance']]
+        btn4= ['CheckListBox',  [['t-test', 'Sign Test', 'Chi square test for variance'],]]
         btn5= ['RadioBox',     ['Select hypothesis',   ['One tailed','Two tailed'],]]
         btn6= ['StaticText',   ['User hypothesised mean:']]
         btn7= ['NumTextCtrl',  []]
@@ -53,72 +55,27 @@ class oneConditionTest(_genericFunc):
             self.logPanel.write("you have to select at least %i columns"%requiredcols)
             return
         
-        columns=   self._convertColName2Values( self.colNameSelect )
-        tests=     values[1]
+        columns=  [numpy.ravel(self._convertColName2Values( colName )) for colName in self.colNameSelect]
+        self.tests= values[1]
         hypotesis= values[2]
         userMean=  values[3]
-        return (columns, tests, hypotesis, userMean)
+        return (columns, self.tests, hypotesis, userMean)
     
     def _calc( self, columns, *args, **params):
-        return [self.evaluate( col, *args, **params) for col in columns]
+        return self.evaluate( columns, *args, **params)
     
     def evaluate( self, *args, **params):
         # computations here
         columns=   args[0]
         tests=     args[1]
-        hypotesis= args[2]
+        hypotesis= args[2] #0== One Tailed, 1== two tailed
         umean=     args[3]
         if umean == None or len(columns) == 0 or len(tests) == 0:
             raise StandardError('The input parameters are incorrect')
         
         TBase= [OneSampleTests(col, tests, umean)  for col in columns]
-        
-        if 0:
-            d=    [0]
-            d[0]= TBase.d1
-            x2=   ManyDescriptives(self, d)
-    
-            # One sample t-test
-    
-            result= []
-            result.append( 'One sample t-test')
-            if self.TestChoice.IsChecked( 0):
-                TBase.OneSampleTTest( umean)
-                if (TBase.prob == -1.0):
-                    result.append( 'All elements are the same, test not possible')
-                else:
-                    if self.m_radioBtn1.GetValue():  # (self.hypchoice.GetSelection() == 0):
-                        TBase.prob = TBase.prob / 2
-                    result.append( 't(%d) = %5.3f'%(TBase.df, TBase.t))
-                    result.append( 'p (approx) = %1.6f'%(TBase.prob))
-                result.append( '')
-                
-            result.append( 'One sample sign test') 
-            if self.TestChoice.IsChecked( 1):
-                TBase.OneSampleSignTest( x, umean)
-                if (TBase.prob == -1.0):
-                    result.append( 'All data are the same - no analysis is possible')
-                else:
-                    if self.m_radioBtn1.GetValue(): #(self.hypchoice.GetSelection() == 0):
-                        TBase.prob = TBase.prob / 2
-                    result.append( 'N = %5.0f'%(TBase.ntotal))
-                    result.append( 'z = %5.3f'%( TBase.z))
-                    result.append( 'p = %1.6f'%(TBase.prob))
-                result.append( '')
-    
-            result.append( 'One sample chi square') 
-            if self.TestChoice.IsChecked( 2):
-                TBase.ChiSquareVariance( umean)
-                if self.m_radioBtn1.GetValue():  #(self.hypchoice.GetSelection() == 0):
-                    TBase.prob = TBase.prob / 2
-                if (TBase.prob == None):
-                    TBase.prob = 1.0
-                result.append( 'Chi square (%d) = %5.3f'%(TBase.df, TBase.chisquare))
-                result.append( 'p = %1.6f'%( TBase.prob))
-            # se organiza los datos seleccionados
-            data= [[res] for res in result]
-        writeByRow
-    
+        return TBase
+
     def showGui( self):
         values= self._showGui_GetValues()
         if values== None:
@@ -128,9 +85,57 @@ class oneConditionTest(_genericFunc):
         self._report(result)
         
     def _report( self, result):
+        self.colNameSelect # names
+        if len(result) == 0:
+            return
+        
+        # se hace el reporte por variables
+        self.outpuGrid.addColData(coldescription, self.name)
+        
+        d=    [0]
+        d[0]= TBase.d1
+        x2=   ManyDescriptives(self, d)
+
+        # One sample t-test
+
+        result= []
+        result.append( 'One sample t-test')
+        if self.TestChoice.IsChecked( 0):
+            TBase.OneSampleTTest( umean)
+            if (TBase.prob == -1.0):
+                result.append( 'All elements are the same, test not possible')
+            else:
+                if self.m_radioBtn1.GetValue():  # (self.hypchoice.GetSelection() == 0):
+                    TBase.prob = TBase.prob / 2
+                result.append( 't(%d) = %5.3f'%(TBase.df, TBase.t))
+                result.append( 'p (approx) = %1.6f'%(TBase.prob))
+            result.append( '')
+            
+        result.append( 'One sample sign test') 
+        if self.TestChoice.IsChecked( 1):
+            TBase.OneSampleSignTest( x, umean)
+            if (TBase.prob == -1.0):
+                result.append( 'All data are the same - no analysis is possible')
+            else:
+                if self.m_radioBtn1.GetValue(): #(self.hypchoice.GetSelection() == 0):
+                    TBase.prob = TBase.prob / 2
+                result.append( 'N = %5.0f'%(TBase.ntotal))
+                result.append( 'z = %5.3f'%( TBase.z))
+                result.append( 'p = %1.6f'%(TBase.prob))
+            result.append( '')
+
+        result.append( 'One sample chi square') 
+        if self.TestChoice.IsChecked( 2):
+            TBase.ChiSquareVariance( umean)
+            if self.m_radioBtn1.GetValue():  #(self.hypchoice.GetSelection() == 0):
+                TBase.prob = TBase.prob / 2
+            if (TBase.prob == None):
+                TBase.prob = 1.0
+            result.append( 'Chi square (%d) = %5.3f'%(TBase.df, TBase.chisquare))
+            result.append( 'p = %1.6f'%( TBase.prob))
+        # se organiza los datos seleccionados
+        data= [[res] for res in result]
         self.outpuGrid.addColData(self.colNameSelect, self.name)
         self.outpuGrid.addColData(result)
         self.Logg.write(self.statName+ ' successfull')
-    
-        
         
