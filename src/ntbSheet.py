@@ -405,7 +405,7 @@ class NoteBookSheet(wx.Panel, object):
         # populate with data
         DECIMAL_POINT= wx.GetApp().DECIMAL_POINT
         for colPos, colValue in enumerate(colData):
-            if isinstance(colValue,(str,unicode)):
+            if isinstance(colValue, (str,unicode)):
                 pass
             else:
                 colValue = str(colValue).replace('.', DECIMAL_POINT)

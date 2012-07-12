@@ -41,7 +41,7 @@ class geometricMean(_genericFunc):
             return
         
         if len( self.colNameSelect ) < self.minRequiredCols:
-            self.logPanel.write("you have to select at least %i columns"%requiredcols)
+            self.logPanel.write("you have to select at least %i column(s)"%self.requiredcols)
             return
         
         columns= self._convertColName2Values( self.colNameSelect )
@@ -64,8 +64,8 @@ class geometricMean(_genericFunc):
         self._report(result)
         
     def _report(self, result):
-        self.outpuGrid.addColData(self.colNameSelect, self.name)
-        self.outpuGrid.addColData(result)
+        self.outputGrid.addColData(self.colNameSelect, self.name)
+        self.outputGrid.addColData(result)
         self.Logg.write(self.statName+ ' successfull')
         
 class harmonicmean(geometricMean):
@@ -74,8 +74,10 @@ class harmonicmean(geometricMean):
         self.name = 'harmonic mean'
         self.statName= 'harmonicmean'
         self.minRequiredCols= 1
-    def evaluate(sef, *args, **params):
+        
+    def evaluate(self, *args, **params):
         return _stats.harmonicmean(*args, **params)
+    
     def object(self):
         return _stats.harmonicmean
     
@@ -85,8 +87,10 @@ class mean(geometricMean):
         self.name = 'mean'
         self.statName= 'mean'
         self.minRequiredCols= 1
-    def evaluate(sef, *args, **params):
+        
+    def evaluate(self, *args, **params):
         return _stats.mean(*args, **params)
+    
     def object(self):
         return _stats.mean
     
@@ -96,8 +100,10 @@ class median(geometricMean):
         self.name = 'median'
         self.statName= 'median'
         self.minRequiredCols= 1
-    def evaluate(sef, *args, **params):
+        
+    def evaluate(self, *args, **params):
         return _stats.median(*args, **params)
+    
     def object(self):
         return _stats.median
     
@@ -107,8 +113,10 @@ class medianscore(geometricMean):
         self.name = 'medianscore'
         self.statName= 'medianscore'
         self.minRequiredCols= 1
-    def evaluate(sef, *args, **params):
+        
+    def evaluate(self, *args, **params):
         return _stats.medianscore(*args, **params)
+    
     def object(self):
         return _stats.medianscore
 
@@ -118,16 +126,18 @@ class mode(geometricMean):
         self.name = 'mode'
         self.statName= 'mode'
         self.minRequiredCols= 1
-    def evaluate(sef, *args, **params):
+        
+    def evaluate(self, *args, **params):
         return _stats.mode(*args, **params)
+    
     def _report(self, result):
         res1= ['var Name']
         res1.extend(self.colNameSelect)
-        self.outpuGrid.addColData(res1, self.name)
+        self.outputGrid.addColData(res1, self.name)
         res2= ['value']
         res2.extend([res[1][0] for res in result])
-        self.outpuGrid.addColData(res2)
+        self.outputGrid.addColData(res2)
         res3= ['frecuency']
         res3.extend([res[0][0] for res in result])
-        self.outpuGrid.addColData(res3)
+        self.outputGrid.addColData(res3)
         self.Logg.write(self.statName+ ' successfull')

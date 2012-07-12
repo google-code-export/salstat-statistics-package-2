@@ -14,7 +14,7 @@ class _genericFunc(object):
         self.inputGrid= self.app.inputGrid # to read the input data from the main grid
         self.dialog=    _dialog         # to create de dialod
         self.Logg=      self.app.Logg   # to report
-        self.outpuGrid= self.app.output # the usern can use the plot functions
+        self.outputGrid= self.app.output # the usern can use the plot functions
         self.plot=      self.app.plot   # acces to the plot system
         
     def _updateColsInfo(self):
