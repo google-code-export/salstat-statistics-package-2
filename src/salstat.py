@@ -1682,14 +1682,14 @@ class MainFrame(wx.Frame):
         self.log.write('data= [grid.GetColNumeric(cols) for cols in selectedcols]', False)
         
         plt= plot(parent = self,
-                  typePlot = 'AdaptiveBMS',
+                  typePlot = 'AdaptativeBMS',
                   data2plot = data,
                   xlabel = 'variable',
                   ylabel = 'value',
                   title= 'Adaptive BMS plot',
                   xtics=  [waste[i] for i in selectedcols])
         self.log.write('''plt= plot(parent = None,
-                  typePlot = 'AdaptiveBMS',
+                  typePlot = 'AdaptativeBMS',
                   data2plot = data,
                   xlabel = 'variable',
                   ylabel = 'value',
