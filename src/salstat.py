@@ -2261,6 +2261,7 @@ class MainFrame(wx.Frame):
         group = lambda x,y: (x,y)
         setting = self.defaultDialogSettings
         setting['Title'] = functionName
+        setting['_size'] = wx.Size(220, 200)
         ColumnList, colnums  = wx.GetApp().frame.grid.GetUsedCols()
         bt1= group('StaticText', ('Select the column to short',) )
         bt2 = group('Choice',    (ColumnList,))
