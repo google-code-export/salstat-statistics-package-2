@@ -867,7 +867,6 @@ class MainFrame(wx.Frame):
         editor= wx.grid.GridCellFloatEditor()
         attr.SetEditor(editor)
         renderer = floatRenderer( 4)
-        self.floatCellRenderer= renderer
         attr.SetRenderer( renderer)
         self.floatCellAttr= attr
         for colNumber in range( self.grid.NumberCols):
