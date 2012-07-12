@@ -10,6 +10,7 @@ from NewGrid import NewGrid # grid with context menu
 from imagenes import imageEmbed
 import wx.grid
 from slbTools import isnumeric, isiterable
+from gridCellRenderers import floatRenderer
 import wx.aui
 from numpy import ndarray, ravel
 
@@ -196,6 +197,7 @@ class NoteBookSheet(wx.Panel, object):
         self.currentPage = None
         self.pageNames= dict()
         self.Layout()
+        self._render= floatRenderer( 4)
         
     # implementing a wrap to the current grid
     def __getattribute__(self, name):
@@ -350,9 +352,9 @@ class NoteBookSheet(wx.Panel, object):
         #< setting the renderer
         try:
             attr= wx.grid.GridCellAttr()
-            floatCellRenderer= wx.GetApp().frame.floatCellRenderer
-            attr.SetRenderer( floatCellRenderer)
-            grid01.SetColAttr( grid01.NumberCols-1, attr)
+            attr.SetRenderer( self._render)
+            for colNumber in range( self.grid.NumberCols):
+                grid01.SetColAttr( grid01.NumberCols-1, attr)
         except AttributeError:
             # the renderer was not find
             pass
@@ -378,8 +380,7 @@ class NoteBookSheet(wx.Panel, object):
         #< setting the renderer
         try:
             attr= wx.grid.GridCellAttr()
-            floatCellRenderer= wx.GetApp().frame.floatCellRenderer
-            attr.SetRenderer(floatCellRenderer)
+            attr.SetRenderer( self._render)
             page.SetColAttr( page.NumberCols-1, attr)
         except AttributeError:
             # the renderer was not find
