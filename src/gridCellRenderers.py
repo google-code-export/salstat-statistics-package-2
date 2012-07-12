@@ -76,18 +76,18 @@ class floatRenderer(Grid.PyGridCellRenderer):
             text= float( text.replace( dp,'.'))
             text= round( text, self.decimalPoints)
             text= str( text)
-            text= text.replace( '.', self.decimalPoints)
+            text= text.replace( '.', dp)
         except:
             pass # allowing the non numerical values
 
         dc.DrawText( text, rect.x+1, rect.y+1)
 
-        width, height = dc.GetTextExtent(text)
+        width, height= dc.GetTextExtent( text)
         if width > rect.width-2:
-            width, height = dc.GetTextExtent(u'\u2026')
+            width, height = dc.GetTextExtent( u'\u2026')
             x = rect.x+1 + rect.width-2 - width
-            dc.DrawRectangle(x, rect.y+1, width+1, height)
-            dc.DrawText(u'\u2026', x, rect.y+1)
+            dc.DrawRectangle( x, rect.y+1, width+1, height)
+            dc.DrawText( u'\u2026', x, rect.y+1)
             
         dc.DestroyClippingRegion()
 
@@ -100,29 +100,31 @@ class AutoWrapStringRenderer(wx.grid.PyGridCellRenderer):
         wx.grid.PyGridCellRenderer.__init__(self)
 
     def Draw(self, grid, attr, dc, rect, row, col, isSelected):
-        text = grid.GetCellValue(row, col)
+        text= grid.GetCellValue( row, col)
         dc.SetFont( attr.GetFont() ) 
-        text = wordwrap.wordwrap(text, grid.GetColSize(col), dc, breakLongWords = False)
+        text= wordwrap.wordwrap( text, grid.GetColSize(col), dc,
+                                 breakLongWords = False)
         hAlign, vAlign = attr.GetAlignment()     
         if isSelected: 
-            bg = grid.GetSelectionBackground() 
-            fg = grid.GetSelectionForeground() 
+            bg= grid.GetSelectionBackground() 
+            fg= grid.GetSelectionForeground() 
         else: 
-            bg = attr.GetBackgroundColour()
-            fg = attr.GetTextColour() 
-        dc.SetTextBackground(bg) 
-        dc.SetTextForeground(fg)
-        dc.SetBrush(wx.Brush(bg, wx.SOLID))
-        dc.SetPen(wx.TRANSPARENT_PEN)
-        dc.DrawRectangleRect(rect)            
-        grid.DrawTextRectangle(dc, text, rect, hAlign, vAlign)
+            bg= attr.GetBackgroundColour()
+            fg= attr.GetTextColour() 
+        dc.SetTextBackground( bg) 
+        dc.SetTextForeground( fg)
+        dc.SetBrush( wx.Brush(bg, wx.SOLID))
+        dc.SetPen( wx.TRANSPARENT_PEN)
+        dc.DrawRectangleRect( rect)            
+        grid.DrawTextRectangle( dc, text, rect, hAlign, vAlign)
 
-    def GetBestSize(self, grid, attr, dc, row, col): 
-        text = grid.GetCellValue(row, col)
-        dc.SetFont(attr.GetFont())
-        text = wordwrap.wordwrap(text, grid.GetColSize(col), dc, breakLongWords = False)
-        w, h, lineHeight = dc.GetMultiLineTextExtent(text)                   
-        return wx.Size(w, h)        
+    def GetBestSize( self, grid, attr, dc, row, col): 
+        text= grid.GetCellValue( row, col)
+        dc.SetFont( attr.GetFont())
+        text= wordwrap.wordwrap( text, grid.GetColSize(col), dc,
+                                 breakLongWords = False)
+        w, h, lineHeight= dc.GetMultiLineTextExtent( text)
+        return wx.Size( w, h)        
 
     def Clone(self): 
         return CutomGridCellAutoWrapStringRenderer()

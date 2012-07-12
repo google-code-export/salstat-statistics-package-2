@@ -1216,7 +1216,7 @@ class MainFrame(wx.Frame):
             pane.MinimizeButton(True)
         
     def goOneConditionTest(self, evt):
-        evt.Skip()
+        oneConditionTest().showGui()
         
     def goTwoConditionTest(self, evt):
         evt.Skip()
@@ -2310,7 +2310,6 @@ class MainFrame(wx.Frame):
 
 
     def geometricmean(self,evt):
-        oneConditionTest().showGui()
         geometricMean().showGui()
 
     def harmonicmean(self,evt):
