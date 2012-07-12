@@ -254,7 +254,7 @@ class SimpleGrid(MyGrid):# wxGrid
                 dat = self.GetCellValue(row, col)
                 if dat != '':
                     tmp += 1
-                    break # it's just needed to serch by the first element 
+                    break # it's just needed to search by the first element
                 
             if tmp > 0:
                 ColsUsed.append(self.GetColLabelValue(col))
@@ -1098,7 +1098,7 @@ class MainFrame(wx.Frame):
               ('Linear Regression',       None, self.GoLinRegressPlot,     None),
               ('Ternary',                 None, self.GoTernaryplot,     None),
               ('Probability',             None, self.GoProbabilityplot,     None),
-              ('Adaptive BMS',            None, self.GoAdaptativeBMS,     None))),
+              ('Adaptive BMS',            None, self.GoAdaptiveBMS,     None))),
             ('Ctrl Process',
              (('Six Sigma Pac',           sixsigma, self.GoSixPack,     None),)),
             ('&Help',
@@ -1404,13 +1404,13 @@ class MainFrame(wx.Frame):
             return
         
         txt1= ['StaticText', ['Left Corner Label']]
-        txt2= ['StaticText', ['Rigth Corner Label']]
+        txt2= ['StaticText', ['Right Corner Label']]
         txt3= ['StaticText', ['Upper Corner Label']]
         btn1= ['TextCtrl',   ['A']]
         btn2= ['TextCtrl',   ['B']]
         btn3= ['TextCtrl',   ['C']]
         btn4= ['StaticText', ['Select the pairs of data by rows']]
-        btn5= ['makePairs',  [['A Left Corner','C Upper Corner', 'B Right Corener'], waste, 30]]
+        btn5= ['makePairs',  [['A Left Corner','C Upper Corner', 'B Right Corner'], waste, 30]]
         structure= list()
         structure.append( [btn1, txt1])
         structure.append( [btn2, txt2])
@@ -1478,7 +1478,7 @@ class MainFrame(wx.Frame):
             return
         
         colours= ['random', 'white', 'blue', 'black',
-                  'red', 'green', 'ligthgreen', 'darkblue',
+                  'red', 'green', 'lightgreen', 'darkblue',
                   'yellow', 'hsv']
         # getting all the available figures
         path=     os.path.split(sys.argv[0])[0] + '\\nicePlot\\images\\barplot\\'
@@ -1660,7 +1660,7 @@ class MainFrame(wx.Frame):
         plt.Show()
         self.log.write('plt.Show()', False)
         
-    def GoAdaptativeBMS(self,evt):
+    def GoAdaptiveBMS(self,evt):
         self.log.write('Adaptive BMS')
         waste, colnums = self.grid.GetUsedCols()
         self.log.write('waste, colnums = grid.GetUsedCols()', False)
@@ -1682,18 +1682,18 @@ class MainFrame(wx.Frame):
         self.log.write('data= [grid.GetColNumeric(cols) for cols in selectedcols]', False)
         
         plt= plot(parent = self,
-                  typePlot = 'AdaptativeBMS',
+                  typePlot = 'AdaptiveBMS',
                   data2plot = data,
                   xlabel = 'variable',
                   ylabel = 'value',
-                  title= 'Adaptative BMS plot',
+                  title= 'Adaptive BMS plot',
                   xtics=  [waste[i] for i in selectedcols])
         self.log.write('''plt= plot(parent = None,
-                  typePlot = 'AdaptativeBMS',
+                  typePlot = 'AdaptiveBMS',
                   data2plot = data,
                   xlabel = 'variable',
                   ylabel = 'value',
-                  title= 'Adaptative BMS plot',
+                  title= 'Adaptive BMS plot',
                   xtics=  [waste[i] for i in selectedcols])''', False)
         
         plt.Show()
@@ -1909,7 +1909,7 @@ class MainFrame(wx.Frame):
             wx.GetApp().output.addColData('Input Data',pageName= 'SixSigma')
             wx.GetApp().output.addColData(('UCL','LCL','target','k','group size'))
             wx.GetApp().output.addColData((UCL, LCL, Target, k, groupSize))
-            wx.GetApp().output.addColData('selcted columns',)
+            wx.GetApp().output.addColData('selected columns',)
             wx.GetApp().output.addColData(ColSelect)
             keys= list()
             desc= list()
@@ -2051,7 +2051,7 @@ class MainFrame(wx.Frame):
         setting = self.defaultDialogSettings
         setting['Title'] = functionName
         ColumnList, colnums  = grid.GetUsedCols()
-        bt1= ['StaticText', ('Select the columns to analyse',) ]
+        bt1= ['StaticText', ('Select the column(s) to analyse',) ]
         bt2= ['CheckListBox', (ColumnList,)]
         structure = list()
         structure.append([bt1,])
@@ -2071,7 +2071,7 @@ class MainFrame(wx.Frame):
             return
 
         if len(colNameSelect) < requiredcols:
-            self.logPanel.write("Uou have to select at least %i columns"%requiredcols)
+            self.logPanel.write("You have to select at least %i columns"%requiredcols)
             return
 
         values = [ [pos for pos, value in enumerate( ColumnList )
@@ -2642,7 +2642,7 @@ class MainFrame(wx.Frame):
                          texto2 = u"Y Column to analyse",
                          useNumpy = True,
                          nameCols= ("slope", "intercept", "r", "two-tailed prob",
-                                    "sterr-of-the-estimate", "n"))
+                                    "stderr-of-the-estimate", "n"))
 
     def ttest_1samp(self, evt):
         functionName = "ttest_1samp"
@@ -2800,7 +2800,7 @@ class MainFrame(wx.Frame):
 
         bt1= group('StaticText',   ('obs',) )
         bt2= group('Choice',       (ColumnList,))
-        bt3= group('StaticText',   ('frecuences',) )
+        bt3= group('StaticText',   ('frequencies',) )
 
         structure = list()
         structure.append([bt2, bt1])
@@ -3274,7 +3274,7 @@ def GetDataName(column):
 def PutData(column, data):
     """This routine takes a list of data, and puts it into the datagrid
     starting at row 0. The grid is resized if the list is too large. This
-    routine desparately needs to be updated to prevt errors"""
+    routine desperately needs to be updated to prevent errors"""
     frame = wx.GetApp().frame
     n = len(data)
     if (n > frame.grid.GetNumberRows()):
