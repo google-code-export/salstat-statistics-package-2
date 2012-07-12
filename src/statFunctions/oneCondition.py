@@ -58,7 +58,7 @@ class oneConditionTest(_genericFunc):
             self.logPanel.write("you have to select at least %i column(s)"%self.requiredcols)
             return
         
-        columns=  [numpy.ravel(self._convertColName2Values( colName )) for colName in self.colNameSelect]
+        columns=  [numpy.ravel(self._convertColName2Values( [colName] )) for colName in self.colNameSelect]
         self.tests= values[1]
         self.hypotesis= values[2]
         userMean=  values[3]
