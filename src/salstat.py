@@ -1097,7 +1097,7 @@ class MainFrame(wx.Frame):
               ('Linear Regression',       None, self.GoLinRegressPlot,     None),
               ('Ternary',                 None, self.GoTernaryplot,     None),
               ('Probability',             None, self.GoProbabilityplot,     None),
-              ('Adaptive BMS',            None, self.GoAdaptiveBMS,     None))),
+              ('Adaptative BMS',          None, self.GoAdaptativeBMS,     None))),
             ('Ctrl Process',
              (('Six Sigma Pac',           sixsigma, self.GoSixPack,     None),)),
             ('&Help',
@@ -1659,8 +1659,8 @@ class MainFrame(wx.Frame):
         plt.Show()
         self.log.write('plt.Show()', False)
         
-    def GoAdaptiveBMS(self,evt):
-        self.log.write('Adaptive BMS')
+    def GoAdaptativeBMS(self,evt):
+        self.log.write('Adaptative BMS')
         waste, colnums = self.grid.GetUsedCols()
         self.log.write('waste, colnums = grid.GetUsedCols()', False)
         if colnums == []:
@@ -1685,14 +1685,14 @@ class MainFrame(wx.Frame):
                   data2plot = data,
                   xlabel = 'variable',
                   ylabel = 'value',
-                  title= 'Adaptive BMS plot',
+                  title= 'Adaptative BMS plot',
                   xtics=  [waste[i] for i in selectedcols])
         self.log.write('''plt= plot(parent = None,
                   typePlot = 'AdaptativeBMS',
                   data2plot = data,
                   xlabel = 'variable',
                   ylabel = 'value',
-                  title= 'Adaptive BMS plot',
+                  title= 'Adaptative BMS plot',
                   xtics=  [waste[i] for i in selectedcols])''', False)
         
         plt.Show()
