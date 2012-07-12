@@ -4,6 +4,7 @@ import numpy
 # _genericFunc ist called from the __init__.py file
 from statFunctions import _genericFunc
 from wx import ID_OK as _OK
+from wx import Size
 
 class geometricMean(_genericFunc):
     ''''''
@@ -16,7 +17,8 @@ class geometricMean(_genericFunc):
         self.colNameSelect= ''
         
     def _dialog(self, *arg, **params):
-        setting= {'Title': self.name}
+        setting= {'Title': self.name,
+                  '_size': Size(220,300)}
         self._updateColsInfo() # update self.columnames and self.colnums
         bt1= ['StaticText',   ['Select the columns to analyse']]
         bt2= ['CheckListBox', [self.columnNames]]
