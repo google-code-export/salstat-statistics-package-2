@@ -353,7 +353,8 @@ class SimpleGrid(MyGrid):# wxGrid
         bt1= ('Choice',     [sheetNames])
         bt2= ('StaticText', ['Select a sheet to be loaded'])
         bt3= ('CheckBox',   ['Has header'])
-        setting = {'Title': 'Select a sheet'}
+        setting = {'Title': 'Select a sheet',
+                   '_size':  wx.Size(200,200)}
         
         dlg = dialog(self, struct=[[bt1,bt2],[bt3]], settings= setting)
         if dlg.ShowModal() != wx.ID_OK:
@@ -1218,10 +1219,10 @@ class MainFrame(wx.Frame):
         xConditionTest.oneConditionTest().showGui()
         
     def goTwoConditionTest(self, evt):
-        evt.Skip()
+        xConditionTest.twoConditionTest().showGui()
         
     def goThreeConditionTest(self, evt):
-        evt.Skip()
+        xConditionTest.threeConditionTest().showGui()
         
     def GoClearData(self, evt):
         if not self.grid.Saved:

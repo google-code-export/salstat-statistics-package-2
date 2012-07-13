@@ -197,7 +197,6 @@ class NoteBookSheet(wx.Panel, object):
         self.currentPage = None
         self.pageNames= dict()
         self.Layout()
-        self._render= floatRenderer( 4)
         
     # implementing a wrap to the current grid
     def __getattribute__(self, name):
@@ -352,7 +351,7 @@ class NoteBookSheet(wx.Panel, object):
         #< setting the renderer
         try:
             attr= wx.grid.GridCellAttr()
-            attr.SetRenderer( self._render)
+            attr.SetRenderer( floatRenderer( 4))
             for colNumber in range( self.grid.NumberCols):
                 grid01.SetColAttr( grid01.NumberCols-1, attr)
         except AttributeError:
@@ -380,7 +379,7 @@ class NoteBookSheet(wx.Panel, object):
         #< setting the renderer
         try:
             attr= wx.grid.GridCellAttr()
-            attr.SetRenderer( self._render)
+            attr.SetRenderer( floatRenderer( 4))
             page.SetColAttr( page.NumberCols-1, attr)
         except AttributeError:
             # the renderer was not find
