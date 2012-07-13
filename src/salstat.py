@@ -24,7 +24,7 @@ from slbTools import isiterable
 
 from statFunctions.centralTendency import geometricMean,\
      harmonicmean, mean, median, medianscore, mode
-from statFunctions.oneCondition import oneConditionTest
+from statFunctions import xConditionTest
 
 import wx.html
 import wx.lib.agw.aui as aui
@@ -1215,7 +1215,7 @@ class MainFrame(wx.Frame):
             pane.MinimizeButton(True)
         
     def goOneConditionTest(self, evt):
-        oneConditionTest().showGui()
+        xConditionTest.oneConditionTest().showGui()
         
     def goTwoConditionTest(self, evt):
         evt.Skip()
