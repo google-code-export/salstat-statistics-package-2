@@ -6,7 +6,7 @@ import numpy
 from statFunctions import _genericFunc
 from wx import ID_OK as _OK
 from wx import Size
-from openStats import OneSampleTests
+from openStats import OneSampleTests, twoSampleTests
         
 class oneConditionTest(_genericFunc):
     def __init__( self):
@@ -15,6 +15,8 @@ class oneConditionTest(_genericFunc):
         self.name=     'One condition test'
         self.statName= 'oneConditionTest'
         self.minRequiredCols= 1
+        self.aviableTest= ['t-test', 'Sign Test',
+                           'Chi square test for variance']
         self.colNameSelect= []
         self.tests= []
         self.hypotesis= 0
@@ -26,7 +28,7 @@ class oneConditionTest(_genericFunc):
         btn1= ['StaticText',   ['Select the columns to analyse']]
         btn2= ['CheckListBox', [self.columnNames]]
         btn3= ['StaticText',   ['Choose test(s)']]
-        btn4= ['CheckListBox',  [['t-test', 'Sign Test', 'Chi square test for variance'],]]
+        btn4= ['CheckListBox',  [self.aviableTest,]]
         btn5= ['RadioBox',     ['Select hypothesis',   ['One tailed','Two tailed'],]]
         btn6= ['StaticText',   ['User hypothesised mean']]
         btn7= ['NumTextCtrl',  []]
@@ -151,6 +153,7 @@ class twoConditionTest(oneConditionTest):
         self.name=     'Two condition test'
         self.statName= 'twoConditionTest'
         self.minRequiredCols= 2
+        self.aviableTest= []
         self.colNameSelect= []
         self.tests= []
         self.hypotesis= 0
@@ -159,15 +162,27 @@ class twoConditionTest(oneConditionTest):
         # computations here
         columns=   args[0]
         tests=     args[1]
-        hypotesis= args[2] #0== One Tailed, 1== two tailed
+        hypotesis= args[2] #0 == One Tailed, 1 == two tailed
         umean=     args[3]
         if umean == None or len(columns) == 0 or len(tests) == 0:
             raise StandardError('The input parameters are incorrect')
-        
-        TBase= [twoSampleTests(col, tests, umean) for col in columns]
-        return TBase
-    
+
+        # combining data
+        result= list()
+        for pos, varName in enumerate(self.colNameSelect[:-1]):
+            for pos2, var2Name in enumerate(self.colNameSelect[pos:]):
+                result1= [twoSampleTests( columns[pos],
+                                          columns[pos2],
+                                          tests, umean, varName, var2Name)
+                          for col in columns]
+                result.extend( result1)
+
+        return result
+
     def _report( self, result):
+        #####################################
+        ######  change this function  #######
+        #####################################
         if len(result) == 0:
             return
         
@@ -227,7 +242,7 @@ class twoConditionTest(oneConditionTest):
             
 #---------------------------------------------------------------------------
 # dialog for single factor tests with 3+ conditions
-class ThreeConditionTestFrame(wx.Dialog):
+class threeConditionTest(oneConditionTest):
     def __init__(self, parent, id, ColumnList):
         wx.Dialog.__init__(self, parent, id, "Three Condition Tests", \
                            size = (500,400+wind))
