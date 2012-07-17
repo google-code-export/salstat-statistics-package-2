@@ -48,14 +48,13 @@ from xml.dom import minidom
 # system of graphics
 from plotFrame import MpltFrame as plot
 from multiPlotDialog import data2Plotdiaglog, selectDialogData2plot, scatterDialog
-from ntbSheet import NoteBookSheet
+from ntbSheet import NoteBookSheet, SimpleGrid
 
 from openStats import statistics, normProb, normProbInv
 
 from slbTools import ReportaExcel, homogenize
 from easyDialog import Dialog as dialog
 from statlib import stats
-from ntbSheet import MyGridPanel as MyGrid
 
 from script import ScriptPanel
 from imagenes import imageEmbed
@@ -68,7 +67,7 @@ from dialogs import TransformFrame
 
 from gridCellRenderers import floatRenderer, AutoWrapStringRenderer
 
-APPNAME= 'SalStat2'
+APPNAME= 'S2'
 
 inits ={}    # dictionary to hold the config values
 ColsUsed= []
@@ -155,400 +154,6 @@ class LogPanel( wx.Panel ):
 
 #---------------------------------------------------------------------------
 # class to wx.GetApp().output the results of several "descriptives" in one table
-#---------------------------------------------------------------------------
-# class for grid - used as datagrid.
-class SimpleGrid(MyGrid):# wxGrid
-    def __init__(self, parent, log, size= (1000,100)):
-        self.NumSheetReport = 0
-        self.log = log
-        self.path = None
-        MyGrid.__init__(self, parent, -1, size)
-        self.Saved = True
-        self.moveTo = None
-        if wx.Platform == "__WXMAC__":
-            self.SetGridLineColour(wx.BLACK)
-        self.setPadreCallBack(self)
-        self.SetColLabelAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
-        #self.EnableDragColMove( True )
-        #for i in range(self.NumberCols):
-        #    self.SetColFormatFloat(i, 8, 4)
-        #self.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.AlterSaveStatus)
-        self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
-        self.m_grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.onCellChanged)
-        self.wildcard = "Any File (*.*)|*.*|" \
-            "S2 Format (*.xls)|*.xls"
-        
-    def onCellChanged(self, evt):
-        self.Saved = False
-
-    def RangeSelected(self, evt):
-        if evt.Selecting():
-            self.tl = evt.GetTopLeftCoords()
-            self.br = evt.GetBottomRightCoords()
-            
-    #def OnRangeChange(self, evt): #AlterSaveStatus
-        ## this is activated when the user enters some data
-        #self.Saved = False
-        ## also record in the history file
-        #col = self.GetGridCursorCol()
-        #row = self.GetGridCursorRow()
-        #value = self.GetCellValue(row, col)
-
-    def CutData(self, evt):
-        self.Delete()
-        self.Saved= False
-
-    def CopyData(self, evt):
-        self.Copy()
-
-
-    def PasteData(self, evt):
-        self.OnPaste()
-        self.Saved= False
-
-    #def Undo(self, evt):
-        #self.Undo()
-
-    #def Redo(self, evt):
-        #self.Redo()
-
-    #def EditGrid(self, evt, numrows):
-        #insert = self.AppendRows(numrows)
-
-    def DeleteCurrentCol(self, evt):
-        currentcol = self.GetGridCursorCol()
-        self.DeleteCols(currentcol, 1)
-        self.AdjustScrollbars()
-        self.Saved= False
-
-
-    def DeleteCurrentRow(self, evt):
-        currentrow = self.GetGridCursorRow()
-        self.DeleteRows(currentrow, 1)
-        self.AdjustScrollbars()
-        self.Saved= False
-
-    def SelectAllCells(self, evt):
-        self.SelectAll()
-
-    # adds columns and rows to the grid
-    def AddNCells(self, numcols, numrows, attr= None):
-        insert= self.AppendCols(numcols)
-        insert= self.AppendRows(numrows)
-        if attr != None:
-            for colNumber in range(self.GetNumberCols() - numcols, self.GetNumberCols(), 1):
-                #self.SetColLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_BOTTOM)
-                self.SetColAttr( colNumber, attr)
-        self.AdjustScrollbars()
-        self.Saved= False
-
-    # function finds out how many cols contain data - all in a list
-    #(ColsUsed) which has col #'s
-    def GetUsedCols(self):
-        ColsUsed = []
-        colnums = []
-        dat = ''
-        tmp = 0
-        for col in range(self.GetNumberCols()):
-            for row in range(self.GetNumberRows()):
-                dat = self.GetCellValue(row, col)
-                if dat != '':
-                    tmp += 1
-                    break # it's just needed to search by the first element
-                
-            if tmp > 0:
-                ColsUsed.append(self.GetColLabelValue(col))
-                colnums.append(col)
-                tmp = 0
-        return ColsUsed, colnums
-
-    def GetColsUsedList(self):
-        colsusedlist = []
-        for i in range(self.GetNumberCols()):
-            try:
-                tmp = float(self.GetCellValue(0,i))
-                colsusedlist.append(i)
-            except ValueError:
-                colsusedlist.append(0)
-        return colsusedlist
-
-    def GetUsedRows(self):
-        RowsUsed = []
-        for i in range(self.GetNumberCols()):
-            if (self.GetCellValue(0, i) != ''):
-                for j in range(self.GetNumberRows()):
-                    if (self.GetCellValue(j,i) == ''):
-                        RowsUsed.append(j)
-                        break
-        return RowsUsed
-
-    def SaveXlsAs(self, evt):
-        self.SaveXls(None, True)
-
-    def SaveXls(self, *args):
-        if len(args) == 1:
-            saveAs= False
-        elif len(args) == 0:
-            saveAs= True
-        else:
-            saveAs= args[1]
-        self.reportObj= ReportaExcel(cell_overwrite_ok = True)
-        if self.Saved == False or saveAs: # path del grid
-            # mostrar el dialogo para guardar el archivo
-            dlg= wx.FileDialog(self, "Save Data File", "" , "",\
-                               "Excel (*.xls)|*.xls| \
-                                    Any (*.*)| *.*", wx.SAVE)
-            if dlg.ShowModal() == wx.ID_OK:
-                self.path = dlg.GetPath()
-            else:
-                return
-            self.reportObj.path = self.path
-        else:
-            self.reportObj.path = self.path
-        cols, waste = self.GetUsedCols()
-        if len(cols) == 0:
-            pass
-        else:
-            rows = self.GetUsedRows()
-            totalResult = self.getByColumns(maxRow = max(rows))
-            result= list()
-            # reporting the header
-            allColNames= [self.GetColLabelValue(col) for col in range(self.NumberCols) ]
-            for posCol in range(waste[-1]+1):
-                header= [  ]
-                if posCol in waste:
-                    header.append(allColNames[posCol])
-                    header.extend(totalResult[posCol])
-                else:
-                    pass
-                result.append(header)
-            self.reportObj.writeByCols(result, self.NumSheetReport)
-        self.reportObj.save()
-        self.Saved = True
-        self.log.write("The file %s was successfully saved!" % self.reportObj.path)
-
-
-    def LoadXls(self, evt):
-        dlg = wx.FileDialog(self, "Load Data File", "","",
-                            wildcard= "Excel File (*.xls)|*.xls",
-                            style = wx.OPEN)
-        icon = imagenes.logo16()
-        dlg.SetIcon(icon)
-        if dlg.ShowModal() != wx.ID_OK: # ShowModal
-            dlg.Destroy()
-            return
-        self.log.write('import xlrd', None)
-        filename= dlg.GetPath()
-        filenamestr= filename.__str__()
-        self.log.write('# remember to write an  r   before the path', None)
-        self.log.write('filename= ' + "'" + filename.__str__() + "'", None)
-        dlg.Destroy()
-        # se lee el libro
-        wb= xlrd.open_workbook(filename)
-        self.log.write('wb = xlrd.open_workbook(filename)', None)
-        sheets= [wb.sheet_by_index(i) for i in range(wb.nsheets)]
-        self.log.write('sheets= [wb.sheet_by_index(i) for i in range(wb.nsheets)]', None)
-        sheetNames = [sheet.name for sheet in sheets]
-        self.log.write('sheetNames= ' + sheetNames.__str__(), None)
-        bt1= ('Choice',     [sheetNames])
-        bt2= ('StaticText', ['Select a sheet to be loaded'])
-        bt3= ('CheckBox',   ['Has header'])
-        setting = {'Title': 'Select a sheet',
-                   '_size':  wx.Size(200,200)}
-        
-        dlg = dialog(self, struct=[[bt1,bt2],[bt3]], settings= setting)
-        if dlg.ShowModal() != wx.ID_OK:
-            return
-        (sheetNameSelected, hasHeader)= dlg.GetValue()
-        if len(sheetNameSelected) == 0:
-            return
-        self.log.write('sheetNameSelected= ' + "'" + sheetNameSelected[0].__str__() + "'",None)
-        self.log.write('hasHeader= ' + hasHeader.__str__(), None)
-        sheetNameSelected= sheetNameSelected[0]
-        dlg.Destroy()
-        
-        if not ( sheetNameSelected in sheetNames):
-            return
-        
-        self._loadXls(sheetNameSelected= sheetNameSelected,
-                      sheets= sheets,
-                      sheetNames= sheetNames,
-                      filename= filename,
-                      hasHeader= hasHeader)
-        self.log.write('''grid._loadXls(sheetNameSelected= sheetNameSelected,
-                      sheets= sheets,
-                      sheetNames= sheetNames,
-                      filename= filename,
-                      hasHeader= hasHeader)''', None)
-        
-        self.log.write('Importing  : %s successful'%filename)
-        
-    def _loadXls( self, *args,**params):
-        sheets=         params.pop( 'sheets')
-        sheetNames=     params.pop( 'sheetNames')
-        sheetNameSelected= params.pop( 'sheetNameSelected')
-        filename=       params.pop( 'filename')
-        hasHeader=      params.pop( 'hasHeader')
-        for sheet, sheetname in zip(sheets, sheetNames):
-            if sheetname == sheetNameSelected:
-                sheetSelected= sheet
-                break
-            
-        #<p> updating the path related to the new open file
-        self.path= filename
-        self.Saved= True
-        # /<p>
-        
-        # se lee el tamanio del sheet seleccionado
-        #size = (sheetSelected.nrows, sheetSelected.ncols)
-        # se hace el grid de tamanio 1 celda y se redimensiona luego
-        self.ClearGrid()
-        size = (self.NumberRows, self.NumberCols)
-        # se lee el tamanio de la pagina y se ajusta las dimensiones
-        newSize = (sheetSelected.nrows, sheetSelected.ncols)
-        if newSize[0]-size[0] > 0:
-            self.AppendRows(newSize[0]-size[0])
-
-        if newSize[1]-size[1] > 0:
-            self.AppendCols(newSize[1]-size[1])
-
-        # se escribe los datos en el grid
-        DECIMAL_POINT= wx.GetApp().DECIMAL_POINT
-        star= 0
-        if hasHeader:
-            star= 1
-            for col in range( newSize[1]):
-                header= sheetSelected.cell_value(0, col)
-                if header != u'':
-                    self.SetColLabelValue(col, sheetSelected.cell_value(0, col))
-        
-        if hasHeader and newSize[0] < 2:
-            return
-        
-        for reportRow, row in enumerate(range( star, newSize[0])):
-            for col in range( newSize[1]):
-                newValue = sheetSelected.cell_value( row, col)
-                if isinstance( newValue, (str, unicode)):
-                    self.SetCellValue( reportRow, col, newValue)
-                elif sheetSelected.cell_type( row, col) in (2,3):
-                    self.SetCellValue( reportRow, col, str( newValue).replace('.', DECIMAL_POINT))
-                else:
-                    try:
-                        self.SetCellValue (reportRow, col, str(newValue))
-                    except:
-                        self.log.write( "Could not import the row,col (%i,%i)" % (row+1,col+1))
-
-    def getData(self, x):
-        for i in range(len(x)):
-            try:
-                row = int(x[i].attributes["row"].value)
-                col = int(x[i].attributes["column"].value)
-                datavalue = float(self.getText(x[i].childNodes))
-                self.SetCellValue(row, col, str(datavalue))
-            except ValueError:
-                print "Problem importing the xml"
-
-    def getText(self, nodelist):
-        rc = ""
-        for node in nodelist:
-            if node.nodeType == node.TEXT_NODE:
-                rc = rc + node.data
-        return rc
-
-    def CleanRowData(self, row):
-        indata = []
-        for i in range(self.GetNumberCols()):
-            datapoint = self.GetCellValue(row, i)
-            if (datapoint != ''):
-                value = float(datapoint)
-                if (value != missingvalue):
-                    indata.append(value)
-        return indata
-
-    # Routine to return a "clean" list of data from one column
-    def CleanData(self, coldata):
-        indata = []
-        self.missing = 0
-        dp= wx.GetApp().DECIMAL_POINT
-        if dp == '.':
-            for i in range(self.GetNumberRows()):
-                datapoint = self.GetCellValue(i, coldata).strip()
-                if (datapoint != u'' or datapoint.replace(' ','') != u'') and (datapoint != u'.'):
-                    try:
-                        value = float(datapoint)
-                        if (value != missingvalue):
-                            indata.append(value)
-                        else:
-                            self.missing = self.missing + 1
-                    except ValueError:
-                        pass
-        else:
-            for i in range(self.GetNumberRows()):
-                datapoint = self.GetCellValue(i, coldata).strip().replace(dp, '.')
-                if (datapoint != u'' or datapoint.replace(' ','') != u'') and (datapoint != u'.'):
-                    try:
-                        value = float(datapoint)
-                        if (value != missingvalue):
-                            indata.append(value)
-                        else:
-                            self.missing = self.missing + 1
-                    except ValueError:
-                        pass
-        return indata
-    
-    def _cleanData(self, data):
-        if isinstance(data, (str, unicode)):
-            data= [data]
-            
-        if not isiterable(data):
-            raise TypeError('Only iterable data allowed!')
-        
-        for pos in range(len(data)-1, -1, -1):
-            if data[pos] != u'':
-                break
-        
-        data= data[:pos+1]
-        # changing data into a numerical value
-        dp = wx.GetApp().DECIMAL_POINT
-        result= list()
-        for dat in data:
-            if dat == u'' or dat.replace(' ','') == u'': # to detect a cell of only space bar
-                dat = None
-            else:
-                try:
-                    dat= float(dat.replace(dp, '.'))
-                except:
-                    pass
-                
-            result.append(dat)
-        return result
-    
-    def GetCol(self, col):
-        return self._cleanData( self._getCol( col))
-    
-    def PutCol(self, colNumber, data):
-        try:
-            return self.putCol(colNumber, data)
-        except:
-            raise
-        finally:
-            self.Saved= False
-    
-    def GetEntireDataSet(self, numcols):
-        """Returns the data specified by a list 'numcols' in a Numeric
-        array"""
-        biglist = []
-        for i in range(len(numcols)):
-            smalllist = wx.GetApp().frame.grid.CleanData(numcols[i])
-            biglist.append(smalllist)
-        return numpy.array((biglist), numpy.float)
-    
-    def GetColNumeric(self, colNumber):
-        # return only the numeric values of a selected colNumber or col label
-        # all else values are drop
-        values= self._cleanData( self._getCol( colNumber))
-        return [val for val in values if not isinstance(val,(unicode, str)) and val != None ]
-        
 #---------------------------------------------------------------------------
 # grid preferences - set row & col sizes
 def GridPrefs(parent):
@@ -705,6 +310,7 @@ class SalStat2App(wx.App):
         # getting the os type
         self.OSNAME = os.name
         self.VERSION= '2.1 alpha'
+        self.missingvalue= missingvalue
         wx.SetDefaultPyEncoding("utf-8")
         self.SetAppName(APPNAME)
         try:
@@ -1417,7 +1023,9 @@ class MainFrame(wx.Frame):
         structure.append( [btn3, txt3])
         structure.append( [btn4,])
         structure.append( [btn5,])
-        dlg= dialog(self, struct= structure)
+        settings = {'Tile': 'Ternary plot dialog' ,
+                    '_size': wx.Size(410, 400),}
+        dlg= dialog(self, settings= settings, struct= structure)
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return

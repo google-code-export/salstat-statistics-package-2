@@ -25,7 +25,7 @@ class Dialog ( wx.Dialog ):
                     'icon': wxbitmap,
                     '_size': wx.Size(xsize, ysize) the size of the dialog ,
                     '_pos':  wx.Position(-1, -1) the position of the frame,
-                    '_style': wx.DIALOG__STYLE of the dialog ,
+                    '_style': wx.DIALOG__STYLE of the dialog ,}
         struct = list() information with the data
 
         allowed controls: 'StaticText',   'TextCtrl',    'Choice',
