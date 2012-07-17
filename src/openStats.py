@@ -113,4 +113,10 @@ def OneSampleTests(colData, tests, userMean):
     return result
 
 def twoSampleTests(colData, tests, userMean):
-    pass
+    posible={'t-test':     False,
+             'Sign Test':  False,
+             'Chi square test for variance':False}
+    
+    for test in tests:
+        if test in posible.keys():
+            posible[test]= True
