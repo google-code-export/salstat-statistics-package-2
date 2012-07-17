@@ -52,7 +52,7 @@ from ntbSheet import NoteBookSheet, SimpleGrid
 
 from openStats import statistics, normProb, normProbInv
 
-from slbTools import ReportaExcel, homogenize
+from slbTools import  homogenize
 from easyDialog import Dialog as dialog
 from statlib import stats
 

@@ -13,6 +13,7 @@ from slbTools import isnumeric, isiterable
 from gridCellRenderers import floatRenderer
 import wx.aui
 from numpy import ndarray, ravel
+from slbTools import ReportaExcel
 
 
 try:
@@ -659,7 +660,7 @@ class NoteBookSheet(wx.Panel, object):
         self.Layout()
         
     # implementing a wrap to the current grid
-    def __getattribute__(self, name):
+    def __getattribute__( self, name):
         '''wraps the funtions to the grid
         emulating a grid control'''
         try:
@@ -670,25 +671,25 @@ class NoteBookSheet(wx.Panel, object):
                 return currGrid.__getattribute__(name)
             raise AttributeError
 
-    def getGridAllValueByCols(self,pageName):
+    def getGridAllValueByCols( self,pageName):
         if not (pageName in self.pageNames.keys()):
             raise StandardError('The page does not exist')
         page= self.pageNames[pageName]
         return page.getByColumns()
 
-    def getPageNames(self):
+    def getPageNames( self):
         return self.pageNames.keys()
 
-    def getHeader(self,pageName):
+    def getHeader( self,pageName):
         if not (pageName in self.pageNames.keys()):
             raise StandardError('The page does not exist')
         page= self.pageNames[pageName]
         return page.getHeader()
 
-    def OnNotebookPageChange(self,evt):
+    def OnNotebookPageChange( self,evt):
         self.currentPage= evt.Selection
 
-    def addPage(self, data= dict()):
+    def addPage( self, data= dict()):
         defaultData = {'name': u'',
                        'size': (0,0),
                        'nameCol': list(),
@@ -722,7 +723,7 @@ class NoteBookSheet(wx.Panel, object):
 
         return grid # retorna el objeto MyGrid
 
-    def _cellSelectionChange(self, event):
+    def _cellSelectionChange( self, event):
         if self.GetPageCount() == 0:
             return
         row=  int(event.Row)
@@ -737,7 +738,7 @@ class NoteBookSheet(wx.Panel, object):
             pass
         event.Skip()
 
-    def __loadData__(self,selectedGrid,data, byRows = True):
+    def __loadData__( self,selectedGrid,data, byRows = True):
         # gridId, nombre de la hoja en la que se adicionaran los datos
         # data: iterable con los datos puntuales a cargar ej:
         #       data= ((1,2,3,5),(7,8,9,4))
@@ -763,12 +764,12 @@ class NoteBookSheet(wx.Panel, object):
                         selectedGrid.SetCellValue(rowNumber, colNumber, unicode(str(cellContent))) ## unicode(str(cellContent))
         # implementar cargar los datos
 
-    def GetPageCount(self):
+    def GetPageCount( self):
         # 21/04/2011
         # retorna el numero de paginas que hay en el notebook
         return self.m_notebook.PageCount
 
-    def delPage(self, page= None):
+    def delPage( self, page= None):
         # si no se ingresa un numero de pagina se
         #     considera que se va a borrar la pagina actual
         # las paginas se numeran mediante numeros desde el cero
@@ -787,7 +788,7 @@ class NoteBookSheet(wx.Panel, object):
         parent = self.pages[page].GetParent()
         parent.DeletePage(page)
 
-    def upData(self,  data):
+    def upData( self,  data):
         # It's used to upload data into a grid
         # where the grid it's an int number
         # that gives the page number into the NotebookSheet
@@ -820,7 +821,7 @@ class NoteBookSheet(wx.Panel, object):
         # setting the renderer />
         return grid01
 
-    def addColData(self, colData, pageName= None):
+    def addColData( self, colData, pageName= None):
         '''adiciona una columna con el contenido de un iterable'''
         if pageName == None:
             if len(self.getPageNames()) == 0:
@@ -870,6 +871,76 @@ class NoteBookSheet(wx.Panel, object):
             else:
                 colValue = str(colValue).replace('.', DECIMAL_POINT)
             page.SetCellValue(colPos, currCol, colValue)
+            
+    def addRowData( self, rowData, pageName= None, currRow = None):
+        '''adds a row with it's row content'''
+        # currRow is used to indicate if the user needs to insert
+        # the rowContent into a relative row
+        if not isnumeric(currRow) and currRow != None:
+            raise TypeError('currRow must be a numerical value')
+            
+        if pageName == None:
+            if len( self.getPageNames()) == 0:
+                # adding a new page into the notebook
+                page = self.addPage()
+            else:
+                page = self.currentPage
+        elif pageName in self.pageNames.keys():
+            page = self.pageNames[pageName]
+        else:
+            page = self.addPage( {'name': pageName})
+            
+        # check the size of the current page
+        size = (page.GetNumberRows(), page.GetNumberCols())
+        # check if it needs to add more columns
+        neededCols= size[1] - len( rowData)
+        if neededCols <  0:
+            neededCols= abs( neededCols)
+            page.AppendCols(neededCols)
+            #< setting the renderer
+            try:
+                attr= wx.grid.GridCellAttr()
+                attr.SetRenderer( floatRenderer( 4))
+                for colNum in range( page.NumberCols - neededCols - 1, page.NumberCols - 1 ):
+                    page.SetColAttr( colNum, attr)
+            except AttributeError:
+                # the renderer was not found
+                pass
+            # setting the renderer />
+            
+        # checking if the user input some currRow
+        if currRow  == None:
+            currRow = page.NumberRows
+        elif currRow > page.NumberCols:
+            raise StandardError('the maximumn allowed row to insert is the row %i'%(page.NumberCols))
+        elif currRow < 0:
+            raise StandardError('the minimum allowed row to insert is the row 0')
+        currRow = int(currRow)
+        
+        if currRow == page.NumberRows:
+            # append one row
+            page.AppendRows(1)
+        else:
+            # insert one row
+            page.InsertRows( pos = currRow, numRows = 1)
+
+        if isinstance( rowData, (str, unicode)):
+            rowData = [rowData]
+        else:
+            # check if it has more than one element
+            try:
+                len( rowData)
+            except TypeError:
+                rowData = [rowData]
+       
+        # populate with data
+        DECIMAL_POINT= wx.GetApp().DECIMAL_POINT
+        for colPos, rowValue in enumerate( rowData):
+            if isinstance( rowValue, (str, unicode)):
+                pass
+            else:
+                rowValue = str( rowValue).replace('.', DECIMAL_POINT)
+            page.SetCellValue( currRow, colPos, rowValue)
 
 class Test(wx.Frame):
     def __init__(self, parent, id, title):

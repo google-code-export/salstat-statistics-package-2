@@ -57,7 +57,7 @@ class MySTC(stc.StyledTextCtrl):
 
         # use Python code highlighting
         self.SetLexer(stc.STC_LEX_PYTHON)
-        keylist=['cls','plot','grid','show','dialog','OK']
+        keylist=['cls','plot','grid','show','dialog','OK','report']
         keylist.extend(keyword.kwlist)
         keylist.extend(keyword.__builtins__.keys())
         keyWordlist = " ".join(keylist)
