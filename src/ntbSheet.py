@@ -14,6 +14,7 @@ from gridCellRenderers import floatRenderer
 import wx.aui
 from numpy import ndarray, ravel
 
+
 try:
     from imagenes import imageEmbed
 except:
@@ -92,7 +93,7 @@ class MyGridPanel( wx.Panel, object ):
             raise StandardError('The maximum column allowed is %i, but you selected %i'%(self.GetNumberRows()-1, colNumber))
         
         return self._getColNumber(colNumber)
-     
+    
     def _getColNumber(self, colNumber):
         if not isnumeric(colNumber):
             raise TypeError('Only allow numeric values for the column, but you input '+ str(type(colNumber)))
@@ -102,6 +103,36 @@ class MyGridPanel( wx.Panel, object ):
             raise StandardError('The minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
         
         return [self.GetCellValue(row, colNumber) for row in range(self.GetNumberRows())]
+    
+    
+    def _getRow( self, rowNumber):
+        if isinstance( rowNumber, (str, unicode)):
+            # searching for a col with the name:
+            if not(rowNumber in self.rowNames):
+                raise TypeError('You can only use a numeric value, or the name of an existing row')
+            for pos, value in enumerate(self.rowNames):
+                if value == rowNumber:
+                    rowNumber= pos
+                    break
+                
+        if not isnumeric(rowNumber):
+            raise TypeError('You can only use a numeric value, or the name of an existing row')
+        
+        if rowNumber > self.GetNumberRows():
+            raise StandardError('The maximum row allowed is %i, but you selected %i'%(self.GetNumberRows()-1, rowNumber))
+        
+        return self._getRowNumber(rowNumber)
+    
+    
+    def _getRowNumber(self, rowNumber):
+        if not isnumeric( rowNumber):
+            raise TypeError('Only allow numeric values for the row, but you input '+ type(rowNumber).__str__())
+        
+        rowNumber= int(rowNumber)
+        if rowNumber < 0 or rowNumber > self.GetNumberRows():
+            raise StandardError('The minimum accepted row is 0, and the maximum is %i'%self.GetNumberRows()-1)
+        
+        return [self.GetCellValue(rowNumber, col) for col in range(self.GetNumberCols())]
     
     def putCol(self, colNumber, data):
         if isinstance(colNumber, (str, unicode)):
@@ -169,22 +200,40 @@ class MyGridPanel( wx.Panel, object ):
         for row in range(self.GetNumberRows()):
             self.SetCellValue(row, colNumber, u'')
      
+    
+    @property
+    def rowNames( self):
+        return [self.GetRowLabelValue(row) for row in range(self.GetNumberRows())]
+    @rowNames.setter
+    def rowNames( self, rowNames):
+        if isinstance(rowNames, (str, unicode)):
+            rolNames= [rowNames]
+            
+        if not isiterable(rowNames):
+            raise TypeError('rowNames must be an iterable object')
+        
+        if len(rowNames) == 0:
+            return
+        
+        for rownumber, rowname in enumerate(rowNames):
+            self.SetRowLabelValue(rownumber, rowname)
+    
     @property
     def colNames(self):
         return [self.GetColLabelValue(col) for col in range(self.GetNumberCols())]
     @colNames.setter
     def colNames(self, colNames):
-        if isinstance(colNames, (str,)):
+        if isinstance(colNames, (str, unicode)):
             colNames= [colNames]
             
-        if not isiterable(colName):
+        if not isiterable(colNames):
             raise TypeError('colNames must be an iterable object')
         
         if len(colNames) == 0:
             return
         
         for colnumber, colname in enumerate(colNames):
-            self.SetColLabelValue(pos, colname)
+            self.SetColLabelValue(colnumber, colname)
 
 class SimpleGrid(MyGridPanel):# wxGrid
     def __init__(self, parent, log, size= (1000,100)):
@@ -566,6 +615,9 @@ class SimpleGrid(MyGridPanel):# wxGrid
             raise
         finally:
             self.Saved= False
+        
+    def GetRow(self, row):
+        return self._cleanData( self._getRow( row))
     
     def GetEntireDataSet(self, numcols):
         """Returns the data specified by a list 'numcols' in a Numeric
