@@ -943,6 +943,7 @@ class MpltFrame( wx.Frame, object ):
             xmin= serieNumber-0.4
             xmax= serieNumber+0.4
             size= len(serieData)
+            if size == 0: continue
             step= 0.8/float(size)
             xdata= [ -0.4 + serieNumber + i*step for i in range(size)]
             self.gca().plot(xdata, serieData, marker= '.', linestyle= '_')
