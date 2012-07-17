@@ -111,3 +111,6 @@ def OneSampleTests(colData, tests, userMean):
         result.append(chisqtest)
     
     return result
+
+def twoSampleTests(colData, tests, userMean):
+    pass
