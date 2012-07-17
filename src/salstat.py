@@ -1647,7 +1647,7 @@ class MainFrame(wx.Frame):
         else:
             wx.GetApp().frame.Destroy()
 #------------------------------------------
-# definicion de las funciones estadisticas
+# statistical functions definition
 #------------------------------------------
     def _statsType1(self, functionName, grid, useNumpy = True,
                     requiredcols= None,allColsOneCalc = False,
@@ -1735,7 +1735,7 @@ class MainFrame(wx.Frame):
 
         self.logPanel.write(functionName + ' successful')
 
-    def _statsType2(self, functionName, texto = 'moment',spinData= (1,100,1),
+    def _statsType2(self, functionName, texto = 'moment', spinData= (1,100,1),
                     factor = 1, useNumpy = True, nameResults= None):
         ''''select plus spin crtl'''
         group = lambda x,y: (x,y)
@@ -1767,20 +1767,15 @@ class MainFrame(wx.Frame):
             colNameSelect = [colNameSelect]
             moment = [moment]
 
-        values = [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
-                   for val in colNameSelect
-                   ]
-        # -------------------
         if useNumpy:
             colums  = list()
-            for pos in values:
-                col = numpy.array(GetData(colnums[ pos ]))
-                col.shape = (len(col),1)
+            for selectedCol in colNameSelect:
+                col= numpy.array(self.grid.GetColNumeric( selectedCol))
+                col = numpy.ravel(col)
+                # col.shape = (len(col),1)
                 colums.append(col)
         else:
-            colums = [ GetData(colnums[ pos ]) for pos in values]
+            colums = [ self.grid.GetColNumeric(value) for value in colNameSelect]
         # se hace los calculos para cada columna
         result = [getattr(stats, functionName)( col, moment ) for col in colums]
         # se muestra los resultados
@@ -1788,6 +1783,12 @@ class MainFrame(wx.Frame):
         if nameResults != None:
             wx.GetApp().output.addColData(nameResults)
         wx.GetApp().output.addColData(numpy.ravel(result))
+        
+        # inserting information about the input data
+        wx.GetApp().output.addRowData(['Input Data'] , currRow= 0)
+        wx.GetApp().output.addRowData([texto+'=', moment ], currRow= 1)
+        wx.GetApp().output.addRowData(['Output Data'] , currRow= 2)
+        
         self.logPanel.write(functionName + ' successful')
 
     def _statsType3(self, functionName, texto1 = u'',
@@ -1858,6 +1859,11 @@ class MainFrame(wx.Frame):
             wx.GetApp().output.addColData(result)
         else:
             wx.GetApp().output.addColData(result, functionName)
+            
+        wx.GetApp().output.addRowData(['Input Data'] , currRow= 0)
+        wx.GetApp().output.addRowData([ 'x column=', xcolname[0], 'y column=', ycolname[0] ], currRow= 1)
+        wx.GetApp().output.addRowData(['Output Data'] , currRow= 2)
+        
         self.logPanel.write(functionName + ' successful')
 
 
@@ -1915,6 +1921,7 @@ class MainFrame(wx.Frame):
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(colums[0])
         wx.GetApp().output.addColData(colums[1])
+        wx.GetApp().output.addRowData(['','shorted Data','original position'], currRow= 0)
         self.logPanel.write(functionName + ' successful')
 
 
@@ -1938,7 +1945,7 @@ class MainFrame(wx.Frame):
         mode().showGui()
 
     def moment(self,evt):
-        self._statsType2("scoreatpercentile", texto = 'moment',
+        self._statsType2("moment", texto = 'moment',
                          spinData = (1,100,1))
 
     def variation(self,evt):
@@ -2027,7 +2034,8 @@ class MainFrame(wx.Frame):
         for i in range(len(result[0])):
             res1= [res[i] for res in result]
             wx.GetApp().output.addColData(res1)
-
+        
+        wx.GetApp().output.addRowData(['selected Column', 'item(s)', ' frequency'], currRow= 0)
         self.logPanel.write(functionName + ' successful')
 
 
@@ -2145,8 +2153,9 @@ class MainFrame(wx.Frame):
         # se hace los calculos para cada columna
         result = [getattr(stats, functionName)( col, threshmin, threshmax, newval ) for col in colums]
         # se muestra los resultados
-        wx.GetApp().output.addColData(colNameSelect, functionName)
-        wx.GetApp().output.addColData(numpy.ravel(result))
+        wx.GetApp().output.addColData( colNameSelect, functionName)
+        wx.GetApp().output.addColData( numpy.ravel( result))
+        wx.GetApp().output.addRowData( ['Selected column','Result'], currRow = 1)
         self.logPanel.write(functionName + ' successful')
 
     def trimboth(self,evt):
@@ -2253,11 +2262,11 @@ class MainFrame(wx.Frame):
                                     "stderr-of-the-estimate", "n"))
 
     def ttest_1samp(self, evt):
-        functionName = "ttest_1samp"
-        group = lambda x,y: (x,y)
-        setting = self.defaultDialogSettings
-        setting['Title'] = functionName
-        ColumnList, colnums  = wx.GetApp().frame.grid.GetUsedCols()
+        functionName= "ttest_1samp"
+        group= lambda x,y: (x,y)
+        setting= self.defaultDialogSettings
+        setting['Title']= functionName
+        ColumnList, colnums= wx.GetApp().frame.grid.GetUsedCols()
 
         bt1= group('StaticText',   ('Column to analyse',) )
         bt2= group('Choice',       (ColumnList,))
@@ -2280,22 +2289,21 @@ class MainFrame(wx.Frame):
         if len( colNameSelect ) == 0:
             self.logPanel.write("You haven't select any items!")
             return
-        values = [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
-                   for val in colNameSelect
-                   ]
 
         # -------------------
-        columns = [ GetData(colnums[ pos ]) for pos in values][0]
+        columns = self.grid.GetColNumeric(colNameSelect[0])
         # se hace los calculos para cada columna
         result = getattr(stats, functionName)( columns, popmean)
         # se muestra los resultados
         colNameSelect = ['t','two tailed prob']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
+        wx.GetApp().output.addRowData(['Input Data'], currRow= 0)
+        wx.GetApp().output.addRowData(['selected Col=', colNameSelect[0]], currRow= 1)
+        wx.GetApp().output.addRowData(['popmean=', popmean], currRow= 2)
+        wx.GetApp().output.addRowData(['Output', popmean], currRow= 3)
+        
         self.logPanel.write(functionName + ' successful')
-
 
     def ttest_ind(self, evt):
         functionName = "ttest_ind"
@@ -2345,8 +2353,10 @@ class MainFrame(wx.Frame):
         colNameSelect = ['t','two tailed prob']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
+        wx.GetApp().output.addRowData( 'Input Data', currRow= 0)
+        wx.GetApp().output.addRowData( ['x column=', xcolNameSelect, 'y column=', ycolNameSelect], currRow= 1)
+        wx.GetApp().output.addRowData( 'Output Data', currRow= 3)
         self.logPanel.write(functionName + ' successful')
-
 
     def ttest_rel(self, evt):
         functionName = "ttest_rel"
@@ -2395,6 +2405,9 @@ class MainFrame(wx.Frame):
         colNameSelect = ['t', 'two tailed prob']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
+        wx.GetApp().output.addRowData( 'Input Data', currRow= 0)
+        wx.GetApp().output.addRowData( ['x column=', xcolNameSelect, 'y column=', ycolNameSelect], currRow= 1)
+        wx.GetApp().output.addRowData( 'Output Data', currRow= 3)
         self.logPanel.write(functionName + ' successful')
 
 
@@ -2451,6 +2464,9 @@ class MainFrame(wx.Frame):
         colNameSelect = [ 'chisq', 'chisqprob(chisq, k-1)']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
+        wx.GetApp().output.addRowData( 'Input Data', currRow= 0)
+        wx.GetApp().output.addRowData( ['Obs=', xcolNameSelect, 'frequencies=', ycolNameSelect], currRow= 1)
+        wx.GetApp().output.addRowData( 'Output Data', currRow= 3)
         self.logPanel.write(functionName + ' successful')
 
     def ks_2samp(self, evt):
@@ -2500,6 +2516,9 @@ class MainFrame(wx.Frame):
         colNameSelect = ['KS D-value', 'associated p-value']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
+        wx.GetApp().output.addRowData( 'Input Data', currRow= 0)
+        wx.GetApp().output.addRowData( ['x column=', xcolNameSelect, 'y column=', ycolNameSelect], currRow= 1)
+        wx.GetApp().output.addRowData( 'Output Data', currRow= 3)
         self.logPanel.write(functionName + ' successful')
 
     def mannwhitneyu(self, evt):
@@ -2549,6 +2568,9 @@ class MainFrame(wx.Frame):
         colNameSelect = ['u-statistic', 'one-tailed p-value']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
+        wx.GetApp().output.addRowData( 'Input Data', currRow= 0)
+        wx.GetApp().output.addRowData( ['x column=', xcolNameSelect, 'y column=', ycolNameSelect], currRow= 1)
+        wx.GetApp().output.addRowData( 'Output Data', currRow= 3)
         self.logPanel.write(functionName + ' successful')
 
     def ranksums(self, evt):
@@ -2598,6 +2620,9 @@ class MainFrame(wx.Frame):
         colNameSelect = ['z-statistic', 'two-tailed p-value']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
+        wx.GetApp().output.addRowData( 'Input Data', currRow= 0)
+        wx.GetApp().output.addRowData( ['x column=', xcolNameSelect, 'y column=', ycolNameSelect], currRow= 1)
+        wx.GetApp().output.addRowData( 'Output Data', currRow= 3)
         self.logPanel.write(functionName + ' successful')
 
     def wilcoxont(self, evt):
@@ -2647,6 +2672,9 @@ class MainFrame(wx.Frame):
         colNameSelect = ['t-statistic', 'two-tail probability estimate']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
+        wx.GetApp().output.addRowData( 'Input Data', currRow= 0)
+        wx.GetApp().output.addRowData( ['x column=', xcolNameSelect, 'y column=', ycolNameSelect], currRow= 1)
+        wx.GetApp().output.addRowData( 'Output Data', currRow= 3)
         self.logPanel.write(functionName + ' successful')
 
     def kruskalwallish(self, evt):
