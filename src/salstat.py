@@ -1113,15 +1113,11 @@ class MainFrame(wx.Frame):
         colour=  values[1]
         selectedcols= values[2]
         
-        if len(barType) == 0:
+        if barType == None:
             barType= 'redunca'
-        else:
-            barType= barType[0]
             
-        if len(colour) == 0:
+        if colour == None:
             colour= 'random'
-        else:
-            colour= colour[0]
         
         dlg.Destroy()
         if len(selectedcols) == 0:
@@ -1400,15 +1396,15 @@ class MainFrame(wx.Frame):
         if selection.ShowModal() != wx.ID_OK:
             selection.Destroy()
             return
-        (selectedcols,) = selection.GetValue()
-        self.log.write('selectedcols= '+selectedcols.__str__(), False)
+        (selectedcol,) = selection.GetValue()
+        self.log.write('selectedcols= '+selectedcol.__str__(), False)
         
         selection.Destroy()
-        if len(selectedcols) == 0:
+        if selectedcol == None:
             self.SetStatusText('You need to select some data to draw a graph!')
             return
 
-        data = [self.grid.GetColNumeric(cols) for cols in selectedcols]
+        data = [self.grid.GetColNumeric(selectedcol)]
         self.log.write('data = [grid.GetColNumeric(cols) for cols in selectedcols]', False)
         
         plt= plot(parent = self, typePlot= 'probabilityPlot',
@@ -1825,31 +1821,19 @@ class MainFrame(wx.Frame):
         # -------------------
         # changing value strings to numbers
         (xcolname, ycolname) = values
-        if len( xcolname ) == 0 or len( ycolname ) == 0:
+        if xcolname == None or  ycolname == None:
             self.logPanel.write("You haven't selected any items!")
             return
-        if not isinstance(xcolname, (list, tuple)):
-            xcolname = [xcolname]
-            ycolname = [ycolname]
-        xvalue= [ [pos for pos, value in enumerate( ColumnList )
-                   if value == val
-                   ][0]
-                  for val in xcolname
-                  ][0]
-        yvalue= [ [pos for pos, value in enumerate( ColumnList )
-                   if value == val
-                   ][0]
-                  for val in ycolname
-                  ][0]
-        # -------------------
+        
+        xcolumn= self.grid.GetCol(xcolname)
+        ycolumn= self.grid.GetCol(ycolname)
+        (xcolumn, ycolumn)= homogenize(xcolumn, ycolumn)
+        
         if useNumpy:
-            xcolumn = numpy.array(GetData(colnums[ xvalue ]))
-            ycolumn = numpy.array(GetData(colnums[ yvalue ]))
+            xcolumn = numpy.array(xcolumn)
+            ycolumn = numpy.array(ycolumn)
             xcolumn.shape= (len(xcolumn), 1)
             ycolumn.shape= (len(ycolumn), 1)
-        else:
-            xcolumn = GetData(colnums[ xvalue ])
-            ycolumn = GetData(colnums[ yvalue ])
 
         # se hace los calculos
         result = getattr(stats, functionName)( xcolumn, ycolumn, **params)
@@ -1969,7 +1953,6 @@ class MainFrame(wx.Frame):
     def itemfreq(self,evt):
         functionName = "itemfreq"
         useNumpy = True
-        requiredcols= None
         allColsOneCalc = False,
         dataSquare= False
         group = lambda x,y: (x,y)
@@ -1991,29 +1974,19 @@ class MainFrame(wx.Frame):
         # -------------------
         # changing value strings to numbers
         colNameSelect = values[0]
-        if len( colNameSelect ) == 0:
+        if  colNameSelect  ==  None:
             self.logPanel.write("You haven't select any items!")
             return
 
-        if len(colNameSelect) < None:
-            self.logPanel.write("You have to select at least %i columns"%requiredcols)
-            return
-
-        values = [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
-                   for val in colNameSelect
-                   ]
+        values = stats.shellsort(self.grid.GetCol(colNameSelect))[0]
         # -------------------
         if useNumpy:
-            colums  = list()
-            for pos in values:
-                short = stats.shellsort( GetData(colnums[ pos ]) )[0]
-                col = numpy.array(short)
-                col.shape = (len(col),1)
-                colums.append(col)
+            colums=    list()
+            col=       numpy.array(values)
+            col.shape= (len(col),1)
+            colums.append(col)
         else:
-            colums = [ stats.shellsort(GetData(colnums[ pos ]))[0] for pos in values]
+            colums = [ stats.shellsort(GetData(colnums[ pos ])) for pos in values]
 
         if dataSquare:
             # identifica que las columnas seleccionadas deben tener igual
@@ -2128,28 +2101,23 @@ class MainFrame(wx.Frame):
         # -------------------
         # changing value strings to numbers
         (colNameSelect, threshmin, threshmax, newval) = values
-        if len( colNameSelect ) == 0:
+        if colNameSelect == None:
             self.logPanel.write("You haven't selected any items!")
             return
+        
         if threshmin == None or threshmax == None or newval == None:
             self.logPanel.write("You haven't entered all the required values!")
             return
-        values = [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
-                   for val in colNameSelect
-                   ]
+        
+        values= self.grid.GetColNumeric(colNameSelect)
         # -------------------
-        useNumpy = True
+        useNumpy= True
         if useNumpy:
-            colums  = list()
-            for pos in values:
-                col = numpy.array(GetData(colnums[ pos ]))
-                col.shape = (len(col),1)
-                colums.append(col)
-        else:
-            colums = [ GetData(colnums[ pos ]) for pos in values]
-
+            colums=    list()
+            col=       numpy.array( values)
+            col.shape= (len( col),1)
+            colums.append( col)
+        
         # se hace los calculos para cada columna
         result = [getattr(stats, functionName)( col, threshmin, threshmax, newval ) for col in colums]
         # se muestra los resultados
@@ -2169,14 +2137,14 @@ class MainFrame(wx.Frame):
         setting['Title'] = functionName
         ColumnList, colnums  = wx.GetApp().frame.grid.GetUsedCols()
 
-        bt1= group('StaticText',   ('Columns to analyse',) )
-        bt2= group('CheckListBox', (ColumnList,))
-        bt3= group('NumTextCtrl',  ())
-        bt4= group('StaticText',   ("proportiontocut",) )
-        bt5= group('Choice',       (("right","left"),) )
-        bt6= group('StaticText',   ("proportiontocut",) )
+        bt1= group( 'StaticText',   ('Columns to analyse',) )
+        bt2= group( 'CheckListBox', (ColumnList,))
+        bt3= group( 'NumTextCtrl',  ())
+        bt4= group( 'StaticText',   ("proportiontocut",) )
+        bt5= group( 'Choice',       (("right","left"),) )
+        bt6= group( 'StaticText',   ("proportiontocut",) )
 
-        structure = list()
+        structure= list()
         structure.append([bt2, bt1])
         structure.append([bt3, bt4])
         structure.append([bt5, bt6])
@@ -2190,19 +2158,14 @@ class MainFrame(wx.Frame):
         # -------------------
         # changing value strings to numbers
         (colNameSelect, proportiontocut, tail) = values
-        if len( colNameSelect ) == 0:
+        if colNameSelect == None:
             self.logPanel.write("You haven't selected any items!")
             return
-        values = [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
-                   for val in colNameSelect
-                   ]
+        column= self.grid.GetColNumeric(colNameSelect)
 
         # -------------------
-        colums = [ GetData(colnums[ pos ]) for pos in values]
         # se hace los calculos para cada columna
-        result = [getattr(stats, functionName)( col, proportiontocut, tail[0] ) for col in colums]
+        result = [getattr( stats, functionName)( column, proportiontocut, tail[0] )]
         # se muestra los resultados
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(numpy.ravel(result))
@@ -2286,20 +2249,19 @@ class MainFrame(wx.Frame):
         # -------------------
         # changing value strings to numbers
         (colNameSelect, popmean) = values
-        if len( colNameSelect ) == 0:
+        if colNameSelect  == None:
             self.logPanel.write("You haven't select any items!")
             return
 
         # -------------------
-        columns = self.grid.GetColNumeric(colNameSelect[0])
+        columns = self.grid.GetColNumeric(colNameSelect)
         # se hace los calculos para cada columna
         result = getattr(stats, functionName)( columns, popmean)
         # se muestra los resultados
-        colNameSelect = ['t','two tailed prob']
-        wx.GetApp().output.addColData(colNameSelect, functionName)
+        wx.GetApp().output.addColData(['t','two tailed prob'], functionName)
         wx.GetApp().output.addColData(result)
         wx.GetApp().output.addRowData(['Input Data'], currRow= 0)
-        wx.GetApp().output.addRowData(['selected Col=', colNameSelect[0]], currRow= 1)
+        wx.GetApp().output.addRowData(['selected Col=', colNameSelect], currRow= 1)
         wx.GetApp().output.addRowData(['popmean=', popmean], currRow= 2)
         wx.GetApp().output.addRowData(['Output', popmean], currRow= 3)
         
@@ -2329,24 +2291,14 @@ class MainFrame(wx.Frame):
         # -------------------
         # changing value strings to numbers
         (xcolNameSelect, ycolNameSelect) = values
-        if len( xcolNameSelect ) == 0 or len( ycolNameSelect ) == 0:
+        if xcolNameSelect == None or ycolNameSelect == None:
             self.logPanel.write("You haven't select any items!")
             return
         
-        xvalues = [ [pos for pos, value in enumerate( ColumnList )
-                     if value == val
-                     ][0]
-                    for val in xcolNameSelect
-                    ]
-        yvalues = [ [pos for pos, value in enumerate( ColumnList )
-                     if value == val
-                     ][0]
-                    for val in ycolNameSelect
-                    ]
-
         # -------------------
-        xcolumns = [ GetData(colnums[ pos ]) for pos in xvalues][0]
-        ycolumns = [ GetData(colnums[ pos ]) for pos in yvalues][0]
+        xcolumns= self.grid.GetCol(xcolNameSelect)
+        ycolumns= self.grid.GetCol(ycolNameSelect)
+        (xcolumns, ycolumns)= homogenize(xcolumns, ycolumns)
         # se hace los calculos para cada columna
         result = getattr(stats, functionName)( xcolumns, ycolumns)
         # se muestra los resultados
@@ -2354,7 +2306,7 @@ class MainFrame(wx.Frame):
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(result)
         wx.GetApp().output.addRowData( 'Input Data', currRow= 0)
-        wx.GetApp().output.addRowData( ['x column=', xcolNameSelect, 'y column=', ycolNameSelect], currRow= 1)
+        wx.GetApp().output.addRowData( ['X column=', xcolNameSelect, 'Y column=', ycolNameSelect], currRow= 1)
         wx.GetApp().output.addRowData( 'Output Data', currRow= 3)
         self.logPanel.write(functionName + ' successful')
 
@@ -2382,23 +2334,13 @@ class MainFrame(wx.Frame):
         # -------------------
         # changing value strings to numbers
         (xcolNameSelect, ycolNameSelect) = values
-        if len( xcolNameSelect ) == 0 or len( ycolNameSelect ) == 0:
+        if xcolNameSelect  == None or ycolNameSelect == None:
             self.logPanel.write("You haven't selected any items!")
             return
-        xvalues = [ [pos for pos, value in enumerate( ColumnList )
-                     if value == val
-                     ][0]
-                    for val in xcolNameSelect
-                    ]
-        yvalues = [ [pos for pos, value in enumerate( ColumnList )
-                     if value == val
-                     ][0]
-                    for val in ycolNameSelect
-                    ]
-
         # -------------------
-        xcolumns = [ GetData(colnums[ pos ]) for pos in xvalues][0]
-        ycolumns = [ GetData(colnums[ pos ]) for pos in yvalues][0]
+        xcolumns= self.grid.GetCol(xcolNameSelect)
+        ycolumns= self.grid.GetCol(ycolNameSelect)
+        (xcolumns, ycolumns)= homogenize(xcolumns, ycolumns)
         # se hace los calculos para cada columna
         result = getattr(stats, functionName)( xcolumns, ycolumns)
         # se muestra los resultados
@@ -2413,7 +2355,7 @@ class MainFrame(wx.Frame):
 
 
     def chisquare(self, evt):
-        functionName = "ttest_rel"
+        functionName = "chisquare"
         group = lambda x,y: (x,y)
         setting = self.defaultDialogSettings
         setting['Title'] = functionName
@@ -2436,7 +2378,7 @@ class MainFrame(wx.Frame):
         # -------------------
         # changing value strings to numbers
         (xcolNameSelect, ycolNameSelect) = values
-        if len( xcolNameSelect ) == 0 :
+        if xcolNameSelect == None :
             self.logPanel.write("You haven't selected any items!")
             return
         xvalues = [ [pos for pos, value in enumerate( ColumnList )
@@ -2447,7 +2389,7 @@ class MainFrame(wx.Frame):
         xcolumns = [ GetData(colnums[ pos ]) for pos in xvalues][0]
         if isinstance(ycolNameSelect, (str, unicode)):
             ycolNameSelect = [ycolNameSelect]
-        if len( ycolNameSelect ) == 0:
+        if ycolNameSelect == None:
             ycolumns = None
         else:
             yvalues = [ [pos for pos, value in enumerate( ColumnList )
@@ -2493,23 +2435,14 @@ class MainFrame(wx.Frame):
         # -------------------
         # changing value strings to numbers
         (xcolNameSelect, ycolNameSelect) = values
-        if len( xcolNameSelect ) == 0 or len( ycolNameSelect ) == 0:
+        if xcolNameSelect == None or ycolNameSelect == None:
             self.logPanel.write("You haven't selected any items!")
             return
-        xvalues = [ [pos for pos, value in enumerate( ColumnList )
-                     if value == val
-                     ][0]
-                    for val in xcolNameSelect
-                    ]
-        yvalues = [ [pos for pos, value in enumerate( ColumnList )
-                     if value == val
-                     ][0]
-                    for val in ycolNameSelect
-                    ]
-
-        # -------------------
-        xcolumns = [ GetData(colnums[ pos ]) for pos in xvalues][0]
-        ycolumns = [ GetData(colnums[ pos ]) for pos in yvalues][0]
+        
+        xcolumns= self.grid.GetCol(xcolNameSelect)
+        ycolumns= self.grid.GetCol(ycolNameSelect)
+        (xcolumns, ycolumns)= homogenize(xcolumns, ycolumns)
+        
         # se hace los calculos para cada columna
         result = getattr(stats, functionName)( xcolumns, ycolumns)
         # se muestra los resultados
@@ -2545,23 +2478,13 @@ class MainFrame(wx.Frame):
         # -------------------
         # changing value strings to numbers
         (xcolNameSelect, ycolNameSelect) = values
-        if len( xcolNameSelect ) == 0 or len( ycolNameSelect ) == 0:
+        if  xcolNameSelect == None or  ycolNameSelect == None:
             self.logPanel.write("You haven't selected any items!")
             return
-        xvalues = [ [pos for pos, value in enumerate( ColumnList )
-                     if value == val
-                     ][0]
-                    for val in xcolNameSelect
-                    ]
-        yvalues = [ [pos for pos, value in enumerate( ColumnList )
-                     if value == val
-                     ][0]
-                    for val in ycolNameSelect
-                    ]
-
-        # -------------------
-        xcolumns = [ GetData(colnums[ pos ]) for pos in xvalues][0]
-        ycolumns = [ GetData(colnums[ pos ]) for pos in yvalues][0]
+        
+        xcolumns= self.grid.GetCol(xcolNameSelect)
+        ycolumns= self.grid.GetCol(ycolNameSelect)
+        (xcolumns, ycolumns)= homogenize(xcolumns, ycolumns)
         # se hace los calculos para cada columna
         result = getattr(stats, functionName)( xcolumns, ycolumns)
         # se muestra los resultados
@@ -2597,23 +2520,13 @@ class MainFrame(wx.Frame):
         # -------------------
         # changing value strings to numbers
         (xcolNameSelect, ycolNameSelect) = values
-        if len( xcolNameSelect ) == 0 or len( ycolNameSelect ) == 0:
+        if xcolNameSelect == None or ycolNameSelect == None:
             self.logPanel.write("You haven't selected any items!")
             return
-        xvalues = [ [pos for pos, value in enumerate( ColumnList )
-                     if value == val
-                     ][0]
-                    for val in xcolNameSelect
-                    ]
-        yvalues = [ [pos for pos, value in enumerate( ColumnList )
-                     if value == val
-                     ][0]
-                    for val in ycolNameSelect
-                    ]
-
-        # -------------------
-        xcolumns = [ GetData(colnums[ pos ]) for pos in xvalues][0]
-        ycolumns = [ GetData(colnums[ pos ]) for pos in yvalues][0]
+        
+        xcolumns= self.grid.GetCol(xcolNameSelect)
+        ycolumns= self.grid.GetCol(ycolNameSelect)
+        (xcolumns, ycolumns)= homogenize(xcolumns, ycolumns)
         # se hace los calculos para cada columna
         result = getattr(stats, functionName)( xcolumns, ycolumns)
         # se muestra los resultados
@@ -2649,23 +2562,13 @@ class MainFrame(wx.Frame):
         # -------------------
         # changing value strings to numbers
         (xcolNameSelect, ycolNameSelect) = values
-        if len( xcolNameSelect ) == 0 or len( ycolNameSelect ) == 0:
+        if xcolNameSelect == None or ycolNameSelect == None:
             self.logPanel.write("You haven't selected any items!")
             return
-        xvalues = [ [pos for pos, value in enumerate( ColumnList )
-                     if value == val
-                     ][0]
-                    for val in xcolNameSelect
-                    ]
-        yvalues = [ [pos for pos, value in enumerate( ColumnList )
-                     if value == val
-                     ][0]
-                    for val in ycolNameSelect
-                    ]
-
-        # -------------------
-        xcolumns = [ GetData(colnums[ pos ]) for pos in xvalues][0]
-        ycolumns = [ GetData(colnums[ pos ]) for pos in yvalues][0]
+        
+        xcolumns= self.grid.GetCol(xcolNameSelect)
+        ycolumns= self.grid.GetCol(ycolNameSelect)
+        (xcolumns, ycolumns)= homogenize(xcolumns, ycolumns)
         # se hace los calculos para cada columna
         result = getattr(stats, functionName)( xcolumns, ycolumns)
         # se muestra los resultados
