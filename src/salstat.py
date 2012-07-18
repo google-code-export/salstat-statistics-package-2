@@ -588,6 +588,7 @@ class MainFrame(wx.Frame):
     def _autoCreateMenu(self):
         # automatically creates a menu related with an specified file
         import statFunctions
+        from statFunctions import *
         groups= statFunctions.__all__
         subgroup= list()
         for group in [groups[0]]:
