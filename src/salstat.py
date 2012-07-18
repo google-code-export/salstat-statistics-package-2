@@ -22,8 +22,6 @@ import os
 # automatically importing all the central tendency classes
 from slbTools import isiterable
 
-from statFunctions.centralTendency import geometricMean,\
-     harmonicmean, mean, median, medianscore, mode
 from statFunctions import xConditionTest
 
 import wx.html
@@ -347,13 +345,12 @@ class SalStat2App(wx.App):
         self.icon64= imagenes.logo64()
         self.frame = MainFrame(None, self)
         # let the main app known the input Grid
-        self.inputGrid = self.frame.grid
+        ### self.inputGrid = self.frame.grid
         self.SetTopWindow(self.frame)
         self.frame.grid.SetFocus()
-        self.Logg= self.frame.logPanel
-        self.output = self.frame.answerPanel
+        ###self.Logg= self.frame.logPanel
+        ###self.output = self.frame.answerPanel
         # referencing the plot system
-        self.plot = plot
         self.frame.ShowFullScreen(True,False)
         return True
 
@@ -457,7 +454,7 @@ class MainFrame(wx.Frame):
         self.m_notebook1= wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
         self.logPanel= LogPanel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         self.log = self.logPanel # self.log = self.logPanel
-
+        
         self.defaultDialogSettings = {'Title': None,
                                       'icon': imagenes.logo16()}
 
@@ -483,9 +480,7 @@ class MainFrame(wx.Frame):
             self.grid.SetLabelBackgroundColour("#d2d2d2")
             self.grid.SetLabelTextColour("#444444")
         #-----------------------
-        # create menubar
-        self._createMenu()
-
+        
         # response panel
         self.answerPanel= NoteBookSheet(self, fb = self.formulaBarPanel)
         self.answerPanel2= ScriptPanel(self, self.logPanel, self.grid, self.answerPanel)
@@ -498,6 +493,15 @@ class MainFrame(wx.Frame):
         self.scriptPanel= wx.py.shell.Shell(self.m_notebook1)
         self.scriptPanel.wrap(True)
         self.m_notebook1.AddPage( self.scriptPanel , u"Shell", False )
+        
+        # put the references into the main app
+        appname.inputGrid= self.grid
+        appname.Logg= self.logPanel
+        appname.output= self.answerPanel
+        appname.plot= plot
+        
+        # create menubar
+        self._createMenu()
 
         #------------------------
         # organizing panels
@@ -581,6 +585,20 @@ class MainFrame(wx.Frame):
         tb1.Realize()
         return tb1
 
+    def _autoCreateMenu(self):
+        # automatically creates a menu related with an specified file
+        import statFunctions
+        groups= statFunctions.__all__
+        subgroup= list()
+        for group in [groups[0]]:
+            attr= getattr( statFunctions, group) # central tendency
+            result= list()
+            for item in attr.__all__:
+                fnc= getattr( attr, item) 
+                result.append( (fnc.name, fnc.icon, getattr( fnc(), 'showGui'), fnc.id))
+            subgroup.append( (attr.__name__, result))
+        return subgroup
+    
     def _createMenu(self):
         # Get icons for toolbar
         imag = imageEmbed()
@@ -601,6 +619,8 @@ class MainFrame(wx.Frame):
         sixsigma =   imag.sixsigma16()
         #set up menus
         menuBar = wx.MenuBar()
+               
+        centralTendency= self._autoCreateMenu()[0]
         #add contents of menu
         dat1= (
             ('&File',
@@ -629,13 +649,7 @@ class MainFrame(wx.Frame):
               ('Transform Data',           None,  self.GoTransformData,     None),
               ('short data',               None,  self.shortData,     None),)),
             ('S&tatistics',
-             (('Central Tendency',
-               (('geometricmean', None, self.geometricmean,     None),
-                ('harmonicmean',  None, self.harmonicmean,     None),
-                ('mean',          None, self.mean,     None),
-                ('median',        None, self.median,     None),
-                ('medianscore',   None, self.medianscore,     None),
-                ('mode',          None, self.mode,     None),)),
+             (centralTendency,
               ('Moments',
                (('moment',        None, self.moment,     None),
                 ('variation',     None, self.variation,     None),
@@ -779,7 +793,10 @@ class MainFrame(wx.Frame):
         while 1:
             yield i
             i+= 1
-            
+    
+    def _evalstat(self, evt, stat):
+        stat().showGui()
+                
     def _gridRangeSelect(self, evt):
         # displays the count and the sum of selected values
         
@@ -1907,26 +1924,6 @@ class MainFrame(wx.Frame):
         wx.GetApp().output.addColData(colums[1])
         wx.GetApp().output.addRowData(['','shorted Data','original position'], currRow= 0)
         self.logPanel.write(functionName + ' successful')
-
-
-    def geometricmean(self,evt):
-        geometricMean().showGui()
-
-    def harmonicmean(self,evt):
-        harmonicmean().showGui()
-        #self._statsType1("harmonicmean", self.grid)
-
-    def mean(self,evt):
-        mean().showGui()
-
-    def median(self,evt):
-        median().showGui()
-
-    def medianscore(self,evt):
-        medianscore().showGui()
-
-    def mode(self,evt):
-        mode().showGui()
 
     def moment(self,evt):
         self._statsType2("moment", texto = 'moment',
