@@ -65,6 +65,11 @@ from dialogs import TransformFrame
 
 from gridCellRenderers import floatRenderer, AutoWrapStringRenderer
 
+# to be used for statistical menu autocreation
+import statFunctions
+from statFunctions import *
+
+
 APPNAME= 'S2'
 
 inits ={}    # dictionary to hold the config values
@@ -587,8 +592,6 @@ class MainFrame(wx.Frame):
 
     def _autoCreateMenu(self):
         # automatically creates a menu related with an specified file
-        import statFunctions
-        from statFunctions import *
         groups= statFunctions.__all__
         subgroup= list()
         for group in [groups[0]]:
