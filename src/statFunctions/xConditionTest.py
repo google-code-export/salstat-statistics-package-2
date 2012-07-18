@@ -1,5 +1,6 @@
 '''Some condition test'''
 __name__ = 'Condition tests'
+__all__ = ['oneConditionTest']
 from statlib import stats as _stats
 import numpy
 # _genericFunc ist called from the __init__.py file
@@ -9,6 +10,8 @@ from wx import Size
 from openStats import OneSampleTests, twoSampleTests
         
 class oneConditionTest(_genericFunc):
+    name= 'One condition test'
+    statName= 'oneConditionTest'
     def __init__( self):
         # getting all required methods
         _genericFunc.__init__(self)
@@ -53,11 +56,11 @@ class oneConditionTest(_genericFunc):
         self.colNameSelect= values[0]
         
         if len( self.colNameSelect ) == 0:
-            self.logPanel.write("you don't select any items")
+            self.Logg.write("you don't select any items")
             return
         
         if len( self.colNameSelect ) < self.minRequiredCols:
-            self.logPanel.write("you have to select at least %i column(s)"%self.requiredcols)
+            self.Logg.write("you have to select at least %i column(s)"%self.requiredcols)
             return
         
         columns=  [numpy.ravel(self._convertColName2Values( [colName] )) for colName in self.colNameSelect]
@@ -81,7 +84,7 @@ class oneConditionTest(_genericFunc):
         TBase= [OneSampleTests(col, tests, umean)  for col in columns]
         return TBase
 
-    def showGui( self):
+    def showGui( self, *args, **params):
         values= self._showGui_GetValues()
         if values== None:
             return None

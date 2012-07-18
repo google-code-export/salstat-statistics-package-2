@@ -22,8 +22,6 @@ import os
 # automatically importing all the central tendency classes
 from slbTools import isiterable
 
-from statFunctions import xConditionTest
-
 import wx.html
 import wx.lib.agw.aui as aui
 
@@ -594,7 +592,7 @@ class MainFrame(wx.Frame):
         # automatically creates a menu related with an specified file
         groups= statFunctions.__all__
         subgroup= list()
-        for group in [groups[0]]:
+        for group in groups:
             attr= getattr( statFunctions, group) # central tendency
             result= list()
             for item in attr.__all__:
@@ -624,7 +622,7 @@ class MainFrame(wx.Frame):
         #set up menus
         menuBar = wx.MenuBar()
                
-        centralTendency= self._autoCreateMenu()[0]
+        menus = self._autoCreateMenu()
         #add contents of menu
         dat1= (
             ('&File',
@@ -653,7 +651,8 @@ class MainFrame(wx.Frame):
               ('Transform Data',           None,  self.GoTransformData,     None),
               ('short data',               None,  self.shortData,     None),)),
             ('S&tatistics',
-             (centralTendency,
+             ( menus[0],
+               menus[1],
               ('Moments',
                (('moment',        None, self.moment,     None),
                 ('variation',     None, self.variation,     None),
@@ -709,10 +708,6 @@ class MainFrame(wx.Frame):
                 ('betai',        None, self.betai,     None)),), # 'fprob'
               ('Anova Functions',
                (( 'F_oneway',    None, self.F_oneway,     None),))),),
-            ('Analyse',
-             (('One Condition Test',      None, self.goOneConditionTest,     None),
-              ('Two Condition Test',      None, self.goTwoConditionTest,     None),
-              ('Three Condition Test',    None, self.goThreeConditionTest,     None))),
             ('&Graph',
              (('Line Chart of All Means', None, self.GoChartWindow,     None),
               ('Bar Chart of All Means',  None, self.GoMeanBarChartWindow,     None),
@@ -841,16 +836,7 @@ class MainFrame(wx.Frame):
             self.mm_mgr.MaximizePane(pane)
         else:
             pane.MinimizeButton(True)
-        
-    def goOneConditionTest(self, evt):
-        xConditionTest.oneConditionTest().showGui()
-        
-    def goTwoConditionTest(self, evt):
-        xConditionTest.twoConditionTest().showGui()
-        
-    def goThreeConditionTest(self, evt):
-        xConditionTest.threeConditionTest().showGui()
-        
+    
     def GoClearData(self, evt):
         if not self.grid.Saved:
             # display discard dialog
