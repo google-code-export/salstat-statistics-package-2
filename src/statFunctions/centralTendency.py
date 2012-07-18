@@ -14,8 +14,8 @@ class geometricMean(_genericFunc):
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
-        #self.name=     'geometric Mean'
-        #self.statName= 'geometricmean'
+        self.name=      'geometric Mean'
+        self.statName=  'geometricmean'
         self.minRequiredCols= 1
         self.colNameSelect= ''
         
@@ -79,6 +79,8 @@ class harmonicmean(geometricMean):
     def __init__(self):
         geometricMean.__init__(self)
         self.minRequiredCols= 1
+        self.name=      'harmonic mean'
+        self.statName=  'harmonicmean'
         
     def evaluate(self, *args, **params):
         return _stats.harmonicmean(*args, **params)
@@ -92,7 +94,8 @@ class mean(geometricMean):
     def __init__(self):
         geometricMean.__init__(self)
         self.minRequiredCols= 1
-        
+        self.name= 'mean'
+        self.statName= 'mean'
     def evaluate(self, *args, **params):
         return _stats.mean(*args, **params)
     
@@ -105,6 +108,8 @@ class median(geometricMean):
     def __init__(self):
         geometricMean.__init__(self)
         self.minRequiredCols= 1
+        self.name=  'median'
+        self.statName= 'median'
         
     def evaluate(self, *args, **params):
         return _stats.median(*args, **params)
@@ -118,7 +123,8 @@ class medianscore(geometricMean):
     def __init__(self):
         geometricMean.__init__(self)
         self.minRequiredCols= 1
-        
+        self.name=   'medianscore'
+        self.statName=  'medianscore'
     def evaluate(self, *args, **params):
         return _stats.medianscore(*args, **params)
     
@@ -131,7 +137,8 @@ class mode(geometricMean):
     def __init__(self):
         geometricMean.__init__(self)
         self.minRequiredCols= 1
-        
+        self.name= 'mode'
+        self.statName= 'mode'
     def evaluate(self, *args, **params):
         return _stats.mode(*args, **params)
     
