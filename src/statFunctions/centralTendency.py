@@ -1,18 +1,21 @@
 __name__ ='Central Tendency'
+__all__=  ['geometricMean', 'harmonicmean', 'mean', 'median', 'medianscore', 'mode']
+
 from statlib import stats as _stats
 import numpy
-# _genericFunc ist called from the __init__.py file
 from statFunctions import _genericFunc
 from wx import ID_OK as _OK
 from wx import Size
 
 class geometricMean(_genericFunc):
     ''''''
+    name=      'geometric Mean'
+    statName=  'geometricmean'
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
-        self.name=     'geometric Mean'
-        self.statName= 'geometricmean'
+        #self.name=     'geometric Mean'
+        #self.statName= 'geometricmean'
         self.minRequiredCols= 1
         self.colNameSelect= ''
         
@@ -58,7 +61,7 @@ class geometricMean(_genericFunc):
     def evaluate(self, *args, **params):
         return _stats.geometricmean(*args, **params)
     
-    def showGui(self):
+    def showGui(self, *args, **params):
         values= self._showGui_GetValues()
         if values== None:
             return None
@@ -71,10 +74,10 @@ class geometricMean(_genericFunc):
         self.Logg.write(self.statName+ ' successfull')
         
 class harmonicmean(geometricMean):
+    name=      'harmonic mean'
+    statName=  'harmonicmean'
     def __init__(self):
         geometricMean.__init__(self)
-        self.name = 'harmonic mean'
-        self.statName= 'harmonicmean'
         self.minRequiredCols= 1
         
     def evaluate(self, *args, **params):
@@ -84,10 +87,10 @@ class harmonicmean(geometricMean):
         return _stats.harmonicmean
     
 class mean(geometricMean):
+    name= 'mean'
+    statName= 'mean'
     def __init__(self):
         geometricMean.__init__(self)
-        self.name = 'mean'
-        self.statName= 'mean'
         self.minRequiredCols= 1
         
     def evaluate(self, *args, **params):
@@ -97,10 +100,10 @@ class mean(geometricMean):
         return _stats.mean
     
 class median(geometricMean):
+    name=  'median'
+    statName= 'median'
     def __init__(self):
         geometricMean.__init__(self)
-        self.name = 'median'
-        self.statName= 'median'
         self.minRequiredCols= 1
         
     def evaluate(self, *args, **params):
@@ -110,10 +113,10 @@ class median(geometricMean):
         return _stats.median
     
 class medianscore(geometricMean):
+    name=   'medianscore'
+    statName=  'medianscore'
     def __init__(self):
         geometricMean.__init__(self)
-        self.name = 'medianscore'
-        self.statName= 'medianscore'
         self.minRequiredCols= 1
         
     def evaluate(self, *args, **params):
@@ -123,10 +126,10 @@ class medianscore(geometricMean):
         return _stats.medianscore
 
 class mode(geometricMean):
+    name= 'mode'
+    statName= 'mode'
     def __init__(self):
         geometricMean.__init__(self)
-        self.name = 'mode'
-        self.statName= 'mode'
         self.minRequiredCols= 1
         
     def evaluate(self, *args, **params):

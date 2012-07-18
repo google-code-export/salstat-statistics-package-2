@@ -1,13 +1,17 @@
 '''a module thath will be used as a container of different functions'''
 version = "0.0.1"
+__all__ = ['centralTendency', 'xConditionTest']
 
 from easyDialog import Dialog as _dialog
 import wx
 import numpy
 
 class _genericFunc(object):
+    icon= None
+    id=   None
+    name= ''
     def __init__(self):
-        self.name = ""
+        self.name=  ""
         self.statName= ""
         self.setminRequiredCols= 0
         self.app=       wx.GetApp()
