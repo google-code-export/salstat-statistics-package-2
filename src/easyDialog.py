@@ -226,6 +226,8 @@ class Dialog ( wx.Dialog ):
 
                 elif typectrl == 'NumTextCtrl':
                     prevResult = ctrl.GetValue()
+                    if prevResult == u'':
+                        prevResult = None
                     if prevResult != None:
                         prevResult= float(prevResult.replace(self.DECIMAL_POINT,'.'))
                         if prevResult == int(prevResult):
