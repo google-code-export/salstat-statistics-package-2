@@ -139,6 +139,9 @@ class mode(geometricMean):
         self.minRequiredCols= 1
         self.name= 'mode'
         self.statName= 'mode'
+    def _calc(self, columns, *args, **params):
+        return [self.evaluate( map(None, col) ) for col in columns]
+          
     def evaluate(self, *args, **params):
         return _stats.mode(*args, **params)
     
@@ -147,9 +150,9 @@ class mode(geometricMean):
         res1.extend(self.colNameSelect)
         self.outputGrid.addColData(res1, self.name)
         res2= ['value']
-        res2.extend([res[1][0] for res in result])
+        res2.extend([numpy.ravel(res[1]) for res in result])
         self.outputGrid.addColData(res2)
         res3= ['frecuency']
-        res3.extend([res[0][0] for res in result])
+        res3.extend([numpy.ravel(res[0])[0] for res in result])
         self.outputGrid.addColData(res3)
         self.Logg.write(self.statName+ ' successfull')
