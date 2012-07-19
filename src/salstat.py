@@ -596,7 +596,7 @@ class MainFrame(wx.Frame):
             attr= getattr( statFunctions, group) # central tendency
             result= list()
             for item in attr.__all__:
-                fnc= getattr( attr, item) 
+                fnc= getattr( attr, item)
                 result.append( (fnc.name, fnc.icon, getattr( fnc(), 'showGui'), fnc.id))
             subgroup.append( (attr.__name__, result))
         return subgroup
@@ -654,13 +654,7 @@ class MainFrame(wx.Frame):
              ( menus[0],
                menus[1],
                menus[2],
-              ('Frequency Stats',
-               (('itemfreq',      None, self.itemfreq,     None),
-                ('scoreatpercentile',  None, self.scoreatpercentile,     None),
-                ('percentileofscore',  None, self.percentileofscore,     None),
-                ('histogram',     None, self.histogram,     None),
-                ('cumfreq',       None, self.cumfreq,     None),
-                ('relfreq',       None, self.relfreq,     None)),),
+               menus[3],
               ('Variability',
                (( 'samplevar',    None, self.samplevar,     None),
                 ('samplestdev',   None, self.samplestdev,     None), #'obrientransform'
@@ -1907,91 +1901,6 @@ class MainFrame(wx.Frame):
         wx.GetApp().output.addColData(colums[1])
         wx.GetApp().output.addRowData(['','shorted Data','original position'], currRow= 0)
         self.logPanel.write(functionName + ' successful')
-
-    def itemfreq(self,evt):
-        functionName = "itemfreq"
-        useNumpy = True
-        allColsOneCalc = False,
-        dataSquare= False
-        group = lambda x,y: (x,y)
-        setting = self.defaultDialogSettings
-        setting['Title'] = functionName
-        ColumnList, colnums  = wx.GetApp().frame.grid.GetUsedCols()
-        bt1= group('StaticText', ('Select the columns to analyse',) )
-        bt2 = group('Choice',    (ColumnList,))
-        structure = list()
-        structure.append([bt1,])
-        structure.append([bt2,])
-        dlg = dialog(settings = setting, struct= structure)
-        if dlg.ShowModal() == wx.ID_OK:
-            values = dlg.GetValue()
-            dlg.Destroy()
-        else:
-            dlg.Destroy()
-            return
-        # -------------------
-        # changing value strings to numbers
-        colNameSelect = values[0]
-        if  colNameSelect  ==  None:
-            self.logPanel.write("You haven't select any items!")
-            return
-
-        values = stats.shellsort(self.grid.GetCol(colNameSelect))[0]
-        # -------------------
-        if useNumpy:
-            colums=    list()
-            col=       numpy.array(values)
-            col.shape= (len(col),1)
-            colums.append(col)
-        else:
-            colums = [ stats.shellsort(GetData(colnums[ pos ])) for pos in values]
-
-        if dataSquare:
-            # identifica que las columnas seleccionadas deben tener igual
-            #  cantidad de elementos
-            lendata= [len(col) for col in colums]
-            if sum([1 for leni in lendata if leni == lendata[0]]) <> len(colums):
-                return "The data must have the same dimensions"
-
-        if allColsOneCalc:
-            result = getattr(stats, functionName)( *colums )
-        else:
-            # se hace los calculos para cada columna
-            result = [getattr(stats, functionName)( col ) for col in colums]
-
-        # se muestra los resultados
-        wx.GetApp().output.addColData(colNameSelect, functionName)
-
-        for i in range(len(result[0])):
-            res1= [res[i] for res in result]
-            wx.GetApp().output.addColData(res1)
-        
-        wx.GetApp().output.addRowData(['selected Column', 'item(s)', ' frequency'], currRow= 0)
-        self.logPanel.write(functionName + ' successful')
-
-
-
-    def scoreatpercentile(self,evt):
-        self._statsType2("scoreatpercentile", texto = ' %',
-                         spinData = (0,100,0))
-
-    def percentileofscore(self,evt):
-        #adiconar dos parametros pendientes
-        self._statsType2("scoreatpercentile", texto = 'Score',)
-
-    def histogram(self,evt):
-        #adiconar dos parametros pendientes
-        self._statsType2("histogram", texto = 'number of bins',
-                         spinData = (1,100,10))
-
-    def cumfreq(self,evt):
-        #adiconar un parametro pendiente
-        self._statsType2("cumfreq", texto = 'number of beans' )
-
-    def relfreq(self,evt):
-        #adiconar un parametro pendiente
-        self._statsType2("relfreq", texto = 'number of bins',
-                         spinData = (1,100,10))
 
     #def obrientransform(self,evt):
     #    self.logPanel.write('obrientransform')
