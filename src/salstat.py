@@ -653,14 +653,7 @@ class MainFrame(wx.Frame):
             ('S&tatistics',
              ( menus[0],
                menus[1],
-              ('Moments',
-               (('moment',        None, self.moment,     None),
-                ('variation',     None, self.variation,     None),
-                ('skew',          None, self.skew,     None),
-                ('kurtosis',      None, self.kurtosis,     None),
-                ('skewtest',      None, self.skewtest,     None),
-                ('kurtosistest',  None, self.kurtosistest,     None),
-                ('normaltest',    None, self.normaltest,     None),)),
+               menus[2],
               ('Frequency Stats',
                (('itemfreq',      None, self.itemfreq,     None),
                 ('scoreatpercentile',  None, self.scoreatpercentile,     None),
@@ -1914,28 +1907,6 @@ class MainFrame(wx.Frame):
         wx.GetApp().output.addColData(colums[1])
         wx.GetApp().output.addRowData(['','shorted Data','original position'], currRow= 0)
         self.logPanel.write(functionName + ' successful')
-
-    def moment(self,evt):
-        self._statsType2("moment", texto = 'moment',
-                         spinData = (1,100,1))
-
-    def variation(self,evt):
-        self._statsType1("variation", self.grid)
-
-    def skew(self,evt):
-        self._statsType1("skew", self.grid)
-
-    def kurtosis(self,evt):
-        self._statsType1("kurtosis", self.grid)
-
-    def skewtest(self,evt):
-        self._statsType1("skewtest", self.grid, useNumpy = False)
-
-    def kurtosistest(self,evt):
-        self._statsType1("kurtosistest", self.grid, useNumpy = False)
-
-    def normaltest(self,evt):
-        self._statsType1("normaltest", self.grid, useNumpy = True)
 
     def itemfreq(self,evt):
         functionName = "itemfreq"

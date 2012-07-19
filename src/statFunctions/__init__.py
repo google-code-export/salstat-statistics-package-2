@@ -1,6 +1,6 @@
 '''a module thath will be used as a container of different functions'''
 version = "0.0.1"
-__all__ = ['centralTendency', 'xConditionTest',] #moments
+__all__ = ['centralTendency', 'xConditionTest', 'moments']
 
 from easyDialog import Dialog as _dialog
 import wx
