@@ -587,12 +587,12 @@ class MainFrame(wx.Frame):
         tb1.Realize()
         return tb1
 
-    def _autoCreateMenu(self):
-        # automatically creates a menu related with an specified file
-        groups= statFunctions.__all__
+    def _autoCreateMenu(self, module):
+        # automatically creates a menu related with an specified module
+        groups= module.__all__
         subgroup= list()
         for group in groups:
-            attr= getattr( statFunctions, group) # central tendency
+            attr= getattr( module, group) # central tendency
             result= list()
             for item in attr.__all__:
                 fnc= getattr( attr, item)
@@ -621,74 +621,61 @@ class MainFrame(wx.Frame):
         #set up menus
         menuBar = wx.MenuBar()
                
-        menus = self._autoCreateMenu()
+        statisticalMenus = self._autoCreateMenu(statFunctions)
         #add contents of menu
         dat1= (
             ('&File',
-             (('&New Data\tCtrl-N',   NewIcon,    self.GoClearData,     wx.ID_NEW),
-              ('&Open...\tCtrl-O',    OpenIcon,   self.grid.LoadXls,     wx.ID_OPEN),
-              ('--',),
-              ('&Save\tCtrl-S',       SaveIcon,   self.grid.SaveXls,     wx.ID_SAVE),
-              ('Save &As...\tCtrl-Shift-S', SaveAsIcon, self.grid.SaveXlsAs,     wx.ID_SAVEAS),
-              ('&Print...\tCtrl-P',   PrintIcon,  None,     None),
-              ('--',),
-              ('E&xit\tCtrl-Q',       ExitIcon,   self.EndApplication,     wx.ID_EXIT),
+             (['&New Data\tCtrl-N',   NewIcon,    self.GoClearData,     wx.ID_NEW],
+              ['&Open...\tCtrl-O',    OpenIcon,   self.grid.LoadXls,     wx.ID_OPEN],
+              ['--'],
+              ['&Save\tCtrl-S',       SaveIcon,   self.grid.SaveXls,     wx.ID_SAVE],
+              ['Save &As...\tCtrl-Shift-S', SaveAsIcon, self.grid.SaveXlsAs,     wx.ID_SAVEAS],
+              ['&Print...\tCtrl-P',   PrintIcon,  None,     None],
+              ['--'],
+              ['E&xit\tCtrl-Q',       ExitIcon,   self.EndApplication,     wx.ID_EXIT],
               )),
             ('&Edit',
-             (('Cu&t',           CutIcon,         self.grid.CutData,     wx.ID_CUT),
-              ('&Copy',          CopyIcon,        self.grid.CopyData,     wx.ID_COPY),
-              ('&Paste',         PasteIcon,       self.grid.PasteData,     wx.ID_PASTE),
-              ('--',),
-              ('Select &All\tCtrl-A',    None,            self.grid.SelectAllCells,     wx.ID_SELECTALL),
-              ('&Find and Replace...\tCtrl-F',  FindRIcon,     self.GoFindDialog,     wx.ID_REPLACE),
-              ('--',),
-              ('Delete Current Column', None,  self.grid.DeleteCurrentCol,     None),
-              ('Delete Current Row',    None,  self.grid.DeleteCurrentRow,     None),)),
+             (['Cu&t',           CutIcon,         self.grid.CutData,     wx.ID_CUT],
+              ['&Copy',          CopyIcon,        self.grid.CopyData,     wx.ID_COPY],
+              ['&Paste',         PasteIcon,       self.grid.PasteData,     wx.ID_PASTE],
+              ['--'],
+              ['Select &All\tCtrl-A',    None,            self.grid.SelectAllCells,     wx.ID_SELECTALL],
+              ['&Find and Replace...\tCtrl-F',  FindRIcon,     self.GoFindDialog,     wx.ID_REPLACE],
+              ['--'],
+              ['Delete Current Column', None,  self.grid.DeleteCurrentCol,     None],
+              ['Delete Current Row',    None,  self.grid.DeleteCurrentRow,     None],)),
             ('&Preferences',
              (('Variables...',             None,  self.GoVariablesFrame,     None ),
-              ('Add Columns and Rows...',  None,  self.GoEditGrid,     None),
-              ('Change Cell Size...',      None,  self.GoGridPrefFrame,     None),
-              ('Change the Font...',       None,  self.GoFontPrefsDialog,     None),)),
+              ['Add Columns and Rows...',  None,  self.GoEditGrid,     None],
+              ['Change Cell Size...',      None,  self.GoGridPrefFrame,     None],
+              ['Change the Font...',       None,  self.GoFontPrefsDialog,     None],)),
             ('P&reparation',
-             (('Descriptive Statistics',   None,  self.GoContinuousDescriptives,     None),
-              ('Transform Data',           None,  self.GoTransformData,     None),
-              ('short data',               None,  self.shortData,     None),)),
-            ('S&tatistics',
-             ( menus[0],
-               menus[1],
-               menus[2],
-               menus[3],
-              ('Variability',
-               (( 'samplevar',    None, self.samplevar,     None),
-                ('samplestdev',   None, self.samplestdev,     None), #'obrientransform'
-                ('signaltonoise', None, self.signaltonoise,     None),
-                ('var',           None, self.var,     None),
-                ('stdev',         None, self.stdev,     None),
-                ('sterr',         None, self.sterr,     None),
-                ('sem',           None, self.sem,     None),
-                ('z',             None, self.z,     None),
-                ('zs',            None, self.zs,     None)),), # 'zmap'
-              ('Trimming Fcns',
-               (('threshold',     None, self.threshold,     None),)),#                 ('trimboth',      None, self.trimboth),                ('trim1',         None, self.trim1)),), #'round',
+             (['Descriptive Statistics',   None,  self.GoContinuousDescriptives,     None],
+              ['Transform Data',           None,  self.GoTransformData,     None],
+              ['short data',               None,  self.shortData,     None],)),
+            ('S&tatistics',  statisticalMenus),
+            ('S&tas',
+             (('Trimming Fcns',
+               (['threshold',     None, self.threshold,     None],)),#                 ('trimboth',      None, self.trimboth),                ('trim1',         None, self.trim1)),), #'round',
               ('Correlation Fcns',
-               (( 'paired',       None, self.paired,     None),
-                ('pearsonr',      None, self.pearsonr,     None),
-                ('covariance',    None, self.covariance,     None), # 'correlation'
-                ('spearmanr',     None, self.spearmanr,     None),
-                ('pointbiserialr', None, self.pointbiserialr,     None),
-                ('kendalltau',    None, self.kendalltau,     None),
-                ('linregress',    None, self.linregress,     None)),),
+               ([ 'paired',       None, self.paired,     None],
+                ['pearsonr',      None, self.pearsonr,     None],
+                ['covariance',    None, self.covariance,     None], # 'correlation'
+                ['spearmanr',     None, self.spearmanr,     None],
+                ['pointbiserialr', None, self.pointbiserialr,     None],
+                ['kendalltau',    None, self.kendalltau,     None],
+                ['linregress',    None, self.linregress,     None]),),
               ('Inferential Stats',
-               (('ttest_1samp',  None, self.ttest_1samp,     None),
-                ('ttest_ind',    None, self.ttest_ind,     None),
-                ('ttest_rel',    None, self.ttest_rel,     None),
-                ('chisquare',    None, self.chisquare,     None),
-                ('ks_2samp',     None, self.ks_2samp,     None),
-                ('mannwhitneyu', None, self.mannwhitneyu,     None),
-                ('ranksums',     None, self.ranksums,     None),
-                ('wilcoxont',    None, self.wilcoxont,     None),
-                ('kruskalwallish', None, self.kruskalwallish,     None),
-                ('friedmanchisquare', None, self.friedmanchisquare,     None)),),
+               (['ttest_1samp',  None, self.ttest_1samp,     None],
+                ['ttest_ind',    None, self.ttest_ind,     None],
+                ['ttest_rel',    None, self.ttest_rel,     None],
+                ['chisquare',    None, self.chisquare,     None],
+                ['ks_2samp',     None, self.ks_2samp,     None],
+                ['mannwhitneyu', None, self.mannwhitneyu,     None],
+                ['ranksums',     None, self.ranksums,     None],
+                ['wilcoxont',    None, self.wilcoxont,     None],
+                ['kruskalwallish', None, self.kruskalwallish,     None],
+                ['friedmanchisquare', None, self.friedmanchisquare,     None]),),
               ('Probability Calcs',
                (('chisqprob',    None, self.chisqprob,     None),
                 ('erfcc',        None, self.erfcc,     None),
@@ -1919,7 +1906,6 @@ class MainFrame(wx.Frame):
         
         self.logPanel.write(functionName + ' successful')
 
-
     def shortData(self,evt):
         functionName = "short"
         useNumpy = False
@@ -1979,38 +1965,6 @@ class MainFrame(wx.Frame):
 
     #def obrientransform(self,evt):
     #    self.logPanel.write('obrientransform')
-
-    def samplevar(self,evt):
-        self._statsType1("samplevar", self.grid)
-
-    def samplestdev(self,evt):
-        self._statsType1("samplestdev", self.grid)
-
-    def signaltonoise(self,evt):
-        self._statsType2("signaltonoise", texto = 'dimension',
-                         spinData = (0,100,0))
-
-    def var(self,evt):
-        self._statsType1("var", self.grid)
-
-    def stdev(self,evt):
-        self._statsType1("stdev", self.grid)
-
-    def sterr(self,evt):
-        self._statsType1("sterr", self.grid)
-
-    def sem(self,evt):
-        self._statsType1("sem", self.grid)
-
-    def z(self,evt):
-        self._statsType2("z", texto = 'score',
-                         spinData = (1,100, 1))
-
-    def zs(self,evt):
-        self._statsType1("zs", self.grid)
-
-    def zmap(self,evt):
-        self.logPanel.write('zmap')
 
     def threshold(self,evt):
         functionName= "threshold"

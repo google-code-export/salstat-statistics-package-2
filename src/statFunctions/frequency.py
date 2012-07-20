@@ -90,9 +90,11 @@ class scoreatpercentile(_genericFunc):
         _genericFunc.__init__(self)
         self.name=      'score at percentile'
         self.statName=  'scoreatpercentile'
+        self.nameStaticText= '%'
         self.minRequiredCols= 1
+        self.spindata= [0,100,0]
         self.colNameSelect= ''
-        self.percent= None
+        self._percent= None
         
     def _dialog(self, *arg, **params):
         setting= {'Title': self.name,
@@ -100,8 +102,8 @@ class scoreatpercentile(_genericFunc):
         self._updateColsInfo() # update self.columnames and self.colnums
         bt1= ['StaticText',   ['Columns to analyse',] ]
         bt2= ['CheckListBox', [self.columnNames]]
-        bt3= ['SpinCtrl',     [0,100,0]]
-        bt4= ['StaticText',   ['%',] ]
+        bt3= ['SpinCtrl',     self.spindata]
+        bt4= ['StaticText',   [self.nameStaticText,] ]
         structure = list()
         structure.append([bt2, bt1])
         structure.append([bt3, bt4])
@@ -117,21 +119,21 @@ class scoreatpercentile(_genericFunc):
             return
 
         # changing value strings to numbers
-        (self.colNameSelect, self.percent) = values
+        (self.colNameSelect, self._percent) = values
         if len( self.colNameSelect ) == 0:
             self.Logg.write("You haven't selected any items!")
             return
         
         if not isinstance(self.colNameSelect, (list, tuple)):
             self.colNameSelect = [self.colNameSelect]
-            self.percent = [self.percent]
+            self._percent = [self._percent]
 
         columns= list()
         for selectedCol in self.colNameSelect:
             col= numpy.array( self.inputGrid.GetColNumeric( selectedCol))
             col= numpy.ravel( col)
             columns.append( col)
-        return (columns, self.percent)
+        return (columns, self._percent)
     
     def _calc(self, columns, *args, **params):
         return [self.evaluate( col, *args, **params ) for col in columns]
@@ -154,9 +156,9 @@ class scoreatpercentile(_genericFunc):
         self.outputGrid.addColData(result)
         
         # inserting information about the input data
-        self.outputGrid.addRowData(['Input Data'] , currRow= 0)
-        self.outputGrid.addRowData(['%=',  self.percent], currRow= 1)
-        self.outputGrid.addRowData(['Output Data'] , currRow= 2)
+        self.outputGrid.addRowData( ['Input Data'] , currRow= 0)
+        self.outputGrid.addRowData( [self.nameStaticText+'=',  self._percent], currRow= 1)
+        self.outputGrid.addRowData( ['Output Data'] , currRow= 2)
         
         self.Logg.write( self.name + ' successful')
 
@@ -242,22 +244,11 @@ class histogram(scoreatpercentile):
         _genericFunc.__init__(self)
         self.name=      'histogram'
         self.statName=  'histogram'
+        self.nameStaticText= 'Number of Bins'
+        self.spindata= [1,1000,1]
         self.minRequiredCols= 1
         self.colNameSelect= ''
-        self.percent=   None  # self.percent == self.histbins
-        
-    def _dialog(self, *arg, **params):
-        setting= {'Title': self.name,
-                  '_size': Size(260,250)}
-        self._updateColsInfo() # update self.columnames and self.colnums
-        bt1= ['StaticText',   ['Columns to Analyse',] ]
-        bt2= ['CheckListBox', [self.columnNames]]
-        bt3= ['SpinCtrl',     [1,1000,1]]
-        bt4= ['StaticText',   ['Number of Bins',] ]
-        structure = list()
-        structure.append([bt2, bt1])
-        structure.append([bt3, bt4])
-        return self.dialog(settings = setting, struct= structure)
+        self._percent=   None  # self._percent == self.histbins
         
     def object(self):
         return _stats.histogram
@@ -278,7 +269,7 @@ class histogram(scoreatpercentile):
         
         # inserting information about the input data
         self.outputGrid.addRowData(['Input Data'] , currRow= 0)
-        self.outputGrid.addRowData(['histbins=',  self.percent], currRow= 1)
+        self.outputGrid.addRowData(['histbins=',  self._percent], currRow= 1)
         self.outputGrid.addRowData(['Output Data'] , currRow= 2)
         self.outputGrid.addRowData(['var name','bin values', 'lowerreallimit',
                                      'binsize', 'extrapoints']*len(result),
@@ -294,9 +285,10 @@ class cumfreq(histogram):
         histogram.__init__(self)
         self.name=      'cumulatyve frequency'
         self.statName=  'cumfreq'
+        self.nameStaticText= 'histbins'
         self.minRequiredCols= 1
         self.colNameSelect= ''
-        self.percent=   None  # self.percent == self.histbins
+        self._percent=   None  # self._percent == self.histbins
     
     def object(self):
         return _stats.cumfreq
@@ -317,7 +309,7 @@ class cumfreq(histogram):
         
         # inserting information about the input data
         self.outputGrid.addRowData( ['Input Data'] , currRow= 0)
-        self.outputGrid.addRowData( ['histbins=',  self.percent], currRow= 1)
+        self.outputGrid.addRowData( [self.nameStaticText+'=',  self._percent], currRow= 1)
         self.outputGrid.addRowData( ['Output Data'] , currRow= 2)
         self.outputGrid.addRowData( ['var name','cumfreq bin values', 'lowerreallimit',
                                      'binsize', 'extrapoints']*len(result),
@@ -333,10 +325,7 @@ class relfreq(histogram):
         histogram.__init__(self)
         self.name=      'relative frequency histogram'
         self.statName=  'relfreq'
-        self.minRequiredCols= 1
-        self.colNameSelect= ''
-        self.percent=   None  # self.percent == self.histbins
-    
+        
     def object(self):
         return _stats.relfreq
     
