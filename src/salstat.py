@@ -627,20 +627,21 @@ class MainFrame(wx.Frame):
             ('&File',
              (('&New Data\tCtrl-N',   NewIcon,    self.GoClearData,     wx.ID_NEW),
               ('&Open...\tCtrl-O',    OpenIcon,   self.grid.LoadXls,     wx.ID_OPEN),
-              ('--', None, None, None),
+              ('--',),
               ('&Save\tCtrl-S',       SaveIcon,   self.grid.SaveXls,     wx.ID_SAVE),
               ('Save &As...\tCtrl-Shift-S', SaveAsIcon, self.grid.SaveXlsAs,     wx.ID_SAVEAS),
               ('&Print...\tCtrl-P',   PrintIcon,  None,     None),
-              ('--', None, None, None),
+              ('--',),
               ('E&xit\tCtrl-Q',       ExitIcon,   self.EndApplication,     wx.ID_EXIT),
               )),
             ('&Edit',
              (('Cu&t',           CutIcon,         self.grid.CutData,     wx.ID_CUT),
               ('&Copy',          CopyIcon,        self.grid.CopyData,     wx.ID_COPY),
               ('&Paste',         PasteIcon,       self.grid.PasteData,     wx.ID_PASTE),
-              ('--', None, None, None),
+              ('--',),
               ('Select &All\tCtrl-A',    None,            self.grid.SelectAllCells,     wx.ID_SELECTALL),
               ('&Find and Replace...\tCtrl-F',  FindRIcon,     self.GoFindDialog,     wx.ID_REPLACE),
+              ('--',),
               ('Delete Current Column', None,  self.grid.DeleteCurrentCol,     None),
               ('Delete Current Row',    None,  self.grid.DeleteCurrentRow,     None),)),
             ('&Preferences',
@@ -708,20 +709,21 @@ class MainFrame(wx.Frame):
               ('Probability',             None, self.GoProbabilityplot,     None),
               ('Adaptative BMS',          None, self.GoAdaptativeBMS,     None))),
             ('Ctrl Process',
-             (('Six Sigma Pac',           sixsigma, self.GoSixPack,     None),)),
+             [('Six Sigma Pac',           sixsigma, self.GoSixPack,     None)]),
             ('&Help',
-             (('Help\tCtrl-H',       imag.about(), self.GoHelpSystem,     wx.ID_HELP),
-              ('&About...',  imag.icon16(), self.ShowAbout,     wx.ID_ABOUT),)),
+             (('Help\tCtrl-H',       imag.about(),  self.GoHelpSystem,  wx.ID_HELP),
+              ('&About...',          imag.icon16(), self.ShowAbout,     wx.ID_ABOUT),)),
         )
         self.__createMenu(dat1, menuBar)
         self.SetMenuBar(menuBar)
 
     def __createMenu(self,data,parent):
-        if len(data) == 4:
+        if len(data) == 1:
             if data[0] == u'--':
                 parent.AppendSeparator()
                 return
-            elif not isinstance(data[2], (list,tuple)):
+        elif len(data) == 4:
+            if not isinstance(data[2], (list,tuple)):
                 if data[3] != None:
                     item= wx.MenuItem(parent, data[3], data[0])
                 else:
@@ -735,7 +737,7 @@ class MainFrame(wx.Frame):
                 parent.AppendItem(item)
                 return
         for item in data:
-            if len(item) == 4:
+            if len(item) in [1,4]:
                 self.__createMenu(item, parent)
                 continue
             menu= wx.Menu()
