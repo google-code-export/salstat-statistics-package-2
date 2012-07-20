@@ -701,6 +701,7 @@ class MainFrame(wx.Frame):
             ('&Graph',
              (('Line Chart of All Means', None, self.GoChartWindow,     None),
               ('Bar Chart of All Means',  None, self.GoMeanBarChartWindow,     None),
+              ('Bar Chart',               None, self.GoBarChartWindow,     None),
               ('Lines',                   None, self.GoLinesPlot,     None),
               ('Scatter',                 None, self.GoScatterPlot,     None),
               ('Box & Whisker',           None, self.GoBoxWhiskerPlot,     None),
@@ -1145,7 +1146,74 @@ class MainFrame(wx.Frame):
                   title=   'Bar Chart of all means')
         plt.Show()
         self.log.write('plt.Show()', False)
-
+        
+    def GoBarChartWindow(self, evt):
+        '''this funtcion is used to plot the bar chart of the selected column'''
+        self.log.write('Bar Chart')
+        waste, colnums = self.grid.GetUsedCols()
+        self.log.write('''waste, colnums = grid.GetUsedCols()''', False)
+        if colnums == []:
+            self.SetStatusText('You need some data to draw a graph!')
+            return
+        colours= ['random', 'white', 'blue', 'black',
+                  'red', 'green', 'lightgreen', 'darkblue',
+                  'yellow', 'hsv']
+        # getting all the available figures
+        path=     os.path.split(sys.argv[0])[0] + '\\nicePlot\\images\\barplot\\'
+        figTypes= [fil[:-4] for fil in os.listdir(path) if fil.endswith('.png')]
+        txt1= ['StaticText', ['Bar type']]
+        txt2= ['StaticText', ['Colour']]
+        txt3= ['StaticText', ['Select data to plot']]
+        btn1= ['Choice', [figTypes]]
+        btn2= ['Choice', [colours]]
+        btn3= ['Choice', [waste]]
+        structure= list()
+        structure.append([btn1, txt1])
+        structure.append([btn2, txt2])
+        structure.append([txt3])
+        structure.append([btn3])
+        setting= {'Title':'Bar chart means of selected columns'}
+        dlg= dialog(self, settings= setting, struct= structure)
+        if dlg.ShowModal() != wx.ID_OK:
+            dlg.Destroy()
+            return
+        
+        values=  dlg.GetValue()
+        barType= values[0]
+        colour=  values[1]
+        selectedcol= values[2]
+        
+        if barType == None:
+            barType= 'redunca'
+            
+        if colour == None:
+            colour= 'random'
+        
+        dlg.Destroy()
+        if len(selectedcol) == 0:
+            self.SetStatusText('You need to select some data to draw a graph!')
+            return
+        
+        self.log.write('barType= '+ "'" + barType.__str__() + "'", False)
+        self.log.write('colour= '+ "'" + colour.__str__() + "'", False)
+        self.log.write('selectedcol= '+ selectedcol.__str__(), False)
+        data = self.grid.GetColNumeric(selectedcol)
+        self.log.write('''data= grid.GetColNumeric(selectedcol)''', False)
+        self.log.write('''plt= plot(parent=   None,
+                  typePlot= 'plotNiceBar',
+                  data2plot= (numpy.arange(1, len(data)+1), data,  None,  colour, barType,),
+                  xlabel=  'variable',
+                  ylabel=  'value',
+                  title=   'Bar Chart')''', False)
+        plt= plot(parent=   self,
+                  typePlot= 'plotNiceBar',
+                  data2plot= (numpy.arange(1, len(data)+1), data,  None,  colour, barType,),
+                  xlabel=  'variable',
+                  ylabel=  'value',
+                  title=   'Bar Chart')
+        plt.Show()
+        self.log.write('plt.Show()', False)
+    
     def GoHelpSystem(self, evt):
         # shows the "wizard" in the help box
         win= Navegator(wx.GetApp().frame,)
@@ -1226,7 +1294,7 @@ class MainFrame(wx.Frame):
         
         plt.Show()
         self.log.write('plt.Show()', False)
-
+        
     def GoBoxWhiskerPlot(self,evt):
         self.log.write('Box & Whisker')
         waste, colnums = self.grid.GetUsedCols()
