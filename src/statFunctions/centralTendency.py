@@ -1,5 +1,6 @@
 __name__ ='Central Tendency'
-__all__=  ['geometricMean', 'harmonicmean', 'mean', 'median', 'medianscore', 'mode']
+__all__=  ['geometricMean', 'harmonicmean', 'mean',
+           'median', 'medianscore', 'mode']
 
 from statlib import stats as _stats
 import numpy

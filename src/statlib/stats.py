@@ -4521,6 +4521,7 @@ try:
                    (az, (N.ndarray,)) )
     zs = Dispatch ( (lzs, (ListType, TupleType)),
                     (azs, (N.ndarray,)) )
+    zmap= Dispatch( (azmap, (N.ndarray,)) )
 
     ## TRIMMING FCNS:
     threshold = Dispatch( (athreshold, (N.ndarray,)),)
