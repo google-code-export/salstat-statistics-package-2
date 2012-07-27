@@ -66,8 +66,8 @@ class oneConditionTest(_genericFunc):
         columns=  [numpy.ravel(self._convertColName2Values( [colName] )) for colName in self.colNameSelect]
         self.tests= values[1]
         self.hypotesis= values[2]
-        userMean=  values[3]
-        return (columns, self.tests, self.hypotesis, userMean)
+        self.userMean=  values[3]
+        return (columns, self.tests, self.hypotesis, self.userMean)
     
     def _calc( self, columns, *args, **params):
         return self.evaluate( columns, *args, **params)
@@ -149,6 +149,7 @@ class oneConditionTest(_genericFunc):
                     col2report.extend( ['',result[0], result[1], prob])
                     
             self.outputGrid.addColData( col2report)
+        self.outputGrid.addRowData( ['user mean=' ,  self.userMean ], currRow= 0)
     
 class twoConditionTest(oneConditionTest):
     def __init__(self):

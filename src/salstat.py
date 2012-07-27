@@ -10,7 +10,7 @@ B4 = [0,0, 3.267, 2.568, 2.266, 2.089, 1.970, 1.882, 1.815, 1.761, 1.716, 1.678,
 B5 = [0,0,     0,     0,     0,     0, 0.029, 0.113, 0.179, 0.232, 0.276, 0.313, 0.346, 0.374, 0.399, 0.421]#, 0.504, 0.559]
 B6 = [0,0, 2.606, 2.276, 2.088, 1.964, 1.874, 1.806, 1.751, 1.707, 1.669, 1.637, 1.610, 1.585, 1.563, 1.544]#, 1.470, 1.420]
 
-""" Copyright 2012 Sebastian Lopez Buritica
+""" Copyright 2012 Sebastian Lopez Buritica licensed under GPL 3
 
 SalStat Statistics Package. Copyright 2002 Alan James Salmoni. Licensed
 under the GNU General Public License (GPL 2). See the file COPYING for full
@@ -18,9 +18,6 @@ details of this license. """
 
 import wx
 import os
-
-# automatically importing all the central tendency classes
-from slbTools import isiterable
 
 import wx.html
 import wx.lib.agw.aui as aui
@@ -65,7 +62,6 @@ from gridCellRenderers import floatRenderer, AutoWrapStringRenderer
 # to be used for statistical menu autocreation
 import statFunctions
 from statFunctions import *
-
 
 APPNAME= 'S2'
 
@@ -127,7 +123,7 @@ class LogPanel( wx.Panel ):
         self.Layout()
 
     def writeLine(self, lineaTexto, writem= True):
-        '''escribe una linea de texto'''
+        '''it writes a text line'''
         #texto= str(self.numLinea.next()) + " >> "
         texto= ''
         if writem:
@@ -654,9 +650,7 @@ class MainFrame(wx.Frame):
               ['short data',               None,  self.shortData,     None],)),
             ('S&tatistics',  statisticalMenus),
             ('S&tas',
-             (('Trimming Fcns',
-               (['threshold',     None, self.threshold,     None],)),#                 ('trimboth',      None, self.trimboth),                ('trim1',         None, self.trim1)),), #'round',
-              ('Correlation Fcns',
+             (('Correlation Fcns',
                ([ 'paired',       None, self.paired,     None],
                 ['pearsonr',      None, self.pearsonr,     None],
                 ['covariance',    None, self.covariance,     None], # 'correlation'
@@ -678,7 +672,7 @@ class MainFrame(wx.Frame):
               ('Probability Calcs',
                (('chisqprob',    None, self.chisqprob,     None),
                 ('erfcc',        None, self.erfcc,     None),
-                ('zprob',        None, self.zprob,     None),   # 'ksprob'
+             ('zprob',        None, self.zprob,     None),   # 'ksprob'
                 ('betacf',       None, self.betacf,     None),
                 ('gammln',       None, self.gammln,     None),
                 ('betai',        None, self.betai,     None)),), # 'fprob'
@@ -1965,61 +1959,6 @@ class MainFrame(wx.Frame):
     #def obrientransform(self,evt):
     #    self.logPanel.write('obrientransform')
 
-    def threshold(self,evt):
-        functionName= "threshold"
-        group= lambda x,y: (x,y)
-        setting= self.defaultDialogSettings
-        setting['Title']= functionName
-        ColumnList, colnums= wx.GetApp().frame.grid.GetUsedCols()
-
-        bt1= group('StaticText',   ('Columns to analyse',),)
-        bt2= group('Choice',       (ColumnList,),)
-        bt3= group('NumTextCtrl',  (),)
-        bt4= group('StaticText',   ("threshmin",),)
-        bt5= group('NumTextCtrl',  (), )
-        bt6= group('StaticText',   ("threshmax",),)
-        bt7= group('NumTextCtrl',  (),)
-        bt8= group('StaticText',   ("newval",),)
-
-        structure = list()
-        structure.append([bt2, bt1])
-        structure.append([bt3, bt4])
-        structure.append([bt5, bt6])
-        structure.append([bt7, bt8])
-        dlg = dialog(settings = setting, struct= structure)
-        if dlg.ShowModal() == wx.ID_OK:
-            values = dlg.GetValue()
-            dlg.Destroy()
-        else:
-            dlg.Destroy()
-            return
-        # -------------------
-        # changing value strings to numbers
-        (colNameSelect, threshmin, threshmax, newval) = values
-        if colNameSelect == None:
-            self.logPanel.write("You haven't selected any items!")
-            return
-        
-        if threshmin == None or threshmax == None or newval == None:
-            self.logPanel.write("You haven't entered all the required values!")
-            return
-        
-        values= self.grid.GetColNumeric(colNameSelect)
-        # -------------------
-        useNumpy= True
-        if useNumpy:
-            colums=    list()
-            col=       numpy.array( values)
-            col.shape= (len( col),1)
-            colums.append( col)
-        
-        # se hace los calculos para cada columna
-        result = [getattr(stats, functionName)( col, threshmin, threshmax, newval ) for col in colums]
-        # se muestra los resultados
-        wx.GetApp().output.addColData( colNameSelect, functionName)
-        wx.GetApp().output.addColData( numpy.ravel( result))
-        wx.GetApp().output.addRowData( ['Selected column','Result'], currRow = 1)
-        self.logPanel.write(functionName + ' successful')
 
     def trimboth(self,evt):
         self._statsType2("trimboth", texto = '% proportiontocut',
