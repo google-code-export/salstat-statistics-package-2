@@ -655,14 +655,9 @@ class MainFrame(wx.Frame):
               statisticalMenus[3],
               statisticalMenus[4],
               statisticalMenus[5],
+              statisticalMenus[6],
              ('Correlation Fcns',
-               ([ 'paired',       None, self.paired,     None],
-                ['pearsonr',      None, self.pearsonr,     None],
-                ['covariance',    None, self.covariance,     None], # 'correlation'
-                ['spearmanr',     None, self.spearmanr,     None],
-                ['pointbiserialr', None, self.pointbiserialr,     None],
-                ['kendalltau',    None, self.kendalltau,     None],
-                ['linregress',    None, self.linregress,     None]),),
+               ([ 'paired',       None, self.paired,     None],)),
               ('Inferential Stats',
                (['ttest_1samp',  None, self.ttest_1samp,     None],
                 ['ttest_ind',    None, self.ttest_ind,     None],
@@ -1841,69 +1836,6 @@ class MainFrame(wx.Frame):
         
         self.logPanel.write(functionName + ' successful')
 
-    def _statsType3(self, functionName, texto1 = u'',
-                    texto2 = u'', **params):
-        try:
-            useNumpy= params.pop('useNumpy')
-        except:
-            useNumpy= False
-
-        try:
-            nameCols= params.pop('nameCols')
-        except:
-            nameCols= None
-
-        group = lambda x,y: (x,y)
-        setting = self.defaultDialogSettings
-        setting['Title'] = functionName
-        ColumnList, colnums  = wx.GetApp().frame.grid.GetUsedCols()
-
-        bt1= group('StaticText',   (texto1,) )
-        bt2= group('Choice',       (ColumnList,))
-        bt3= group('StaticText',   (texto2,) )
-
-        structure = list()
-        structure.append([bt2, bt1])
-        structure.append([bt2, bt3])
-        dlg = dialog(settings = setting, struct= structure)
-        if dlg.ShowModal() == wx.ID_OK:
-            values = dlg.GetValue()
-            dlg.Destroy()
-        else:
-            dlg.Destroy()
-            return
-        # -------------------
-        # changing value strings to numbers
-        (xcolname, ycolname) = values
-        if xcolname == None or  ycolname == None:
-            self.logPanel.write("You haven't selected any items!")
-            return
-        
-        xcolumn= self.grid.GetCol(xcolname)
-        ycolumn= self.grid.GetCol(ycolname)
-        (xcolumn, ycolumn)= homogenize(xcolumn, ycolumn)
-        
-        if useNumpy:
-            xcolumn = numpy.array(xcolumn)
-            ycolumn = numpy.array(ycolumn)
-            xcolumn.shape= (len(xcolumn), 1)
-            ycolumn.shape= (len(ycolumn), 1)
-
-        # se hace los calculos
-        result = getattr(stats, functionName)( xcolumn, ycolumn, **params)
-        # se muestra los resultados
-        if nameCols != None:
-            wx.GetApp().output.addColData(nameCols, functionName)
-            wx.GetApp().output.addColData(result)
-        else:
-            wx.GetApp().output.addColData(result, functionName)
-            
-        wx.GetApp().output.addRowData(['Input Data'] , currRow= 0)
-        wx.GetApp().output.addRowData([ 'x column=', xcolname[0], 'y column=', ycolname[0] ], currRow= 1)
-        wx.GetApp().output.addRowData(['Output Data'] , currRow= 2)
-        
-        self.logPanel.write(functionName + ' successful')
-
     def shortData(self,evt):
         functionName = "short"
         useNumpy = False
@@ -2009,60 +1941,7 @@ class MainFrame(wx.Frame):
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(numpy.ravel(result))
         self.logPanel.write(functionName + ' successful')
-
-
-    def covariance(self, evt):
-        self._statsType3(functionName = "covariance",
-                         texto1 = u"X Column to analyse",
-                         texto2 = u"Y Column to analyse",
-                         useNumpy = True)
-
-    #def correlation(self, evt):
-    #    self.logPanel.write('correlation')
-
-    def paired(self, evt):
-        self._statsType3(functionName = "paired",
-                         texto1 = u"X Column to analyse",
-                         texto2 = u"Y Column to analyse",
-                         useNumpy = True, allData = True)
-
-    def pearsonr(self, evt):
-        self._statsType3(functionName = "pearsonr",
-                         texto1 = u"X Column to analyse",
-                         texto2 = u"Y Column to analyse",
-                         useNumpy = True,
-                         nameCols= ("Pearson's r"," two-tailed p-value"))
-
-
-    def spearmanr(self, evt):
-        self._statsType3(functionName = "spearmanr",
-                         texto1 = u"X Column to analyse",
-                         texto2 = u"Y Column to analyse",
-                         useNumpy = True,
-                         nameCols= ("Spearman's r","two-tailed p-value"))
-
-    def pointbiserialr(self, evt):
-        self._statsType3(functionName = "pointbiserialr",
-                         texto1 = u"X Column to analyse",
-                         texto2 = u"Y Column to analyse",
-                         useNumpy = True,
-                         nameCols= ("Point-biserial r","two-tailed p-value"))
-
-    def kendalltau(self, evt):
-        self._statsType3(functionName = "kendalltau",
-                         texto1 = u"X Column to analyse",
-                         texto2 = u"Y Column to analyse",
-                         useNumpy = True,
-                         nameCols = ("Kendall's tau"," two-tailed p-value"))
-
-    def linregress(self, evt):
-        self._statsType3(functionName = "linregress",
-                         texto1 = u"X Column to analyse",
-                         texto2 = u"Y Column to analyse",
-                         useNumpy = True,
-                         nameCols= ("slope", "intercept", "r", "two-tailed prob",
-                                    "stderr-of-the-estimate", "n"))
-
+  
     def ttest_1samp(self, evt):
         functionName= "ttest_1samp"
         group= lambda x,y: (x,y)
