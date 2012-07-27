@@ -502,7 +502,7 @@ class SimpleGrid(MyGridPanel):# wxGrid
             for col in range( newSize[1]):
                 header= sheetSelected.cell_value(0, col)
                 if header != u'':
-                    self.SetColLabelValue(col, sheetSelected.cell_value(0, col))
+                    self.SetColLabelValue(col, sheetSelected.cell_value(0, col).__str__())
         
         if hasHeader and newSize[0] < 2:
             return
