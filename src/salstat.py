@@ -31,7 +31,6 @@ import string, os, os.path, pickle
 from imagenes import imageEmbed
 import numpy, math
 import wx.py
-import xlrd
 import traceback
 
 # translation module

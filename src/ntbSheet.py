@@ -14,7 +14,8 @@ from gridCellRenderers import floatRenderer
 import wx.aui
 from numpy import ndarray, ravel
 from slbTools import ReportaExcel
-
+import xlrd
+from easyDialog import Dialog as dialog
 
 try:
     from imagenes import imageEmbed
@@ -442,11 +443,10 @@ class SimpleGrid(MyGridPanel):# wxGrid
         if dlg.ShowModal() != wx.ID_OK:
             return
         (sheetNameSelected, hasHeader)= dlg.GetValue()
-        if len(sheetNameSelected) == 0:
+        if sheetNameSelected == None:
             return
-        self.log.write('sheetNameSelected= ' + "'" + sheetNameSelected[0].__str__() + "'",None)
+        self.log.write('sheetNameSelected= ' + "'" + sheetNameSelected.__str__() + "'",None)
         self.log.write('hasHeader= ' + hasHeader.__str__(), None)
-        sheetNameSelected= sheetNameSelected[0]
         dlg.Destroy()
         
         if not ( sheetNameSelected in sheetNames):
