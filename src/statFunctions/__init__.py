@@ -1,7 +1,7 @@
 '''a module thath will be used as a container of different functions'''
 version = "0.0.1"
 __all__ = ['centralTendency', 'xConditionTest', 'moments',
-           'frequency', 'variability']
+           'frequency', 'variability','trimming']
 
 from easyDialog import Dialog as _dialog
 import wx
@@ -26,6 +26,16 @@ class _genericFunc(object):
         gridCol=            self.inputGrid.GetUsedCols()
         self.columnNames=   gridCol[0]
         self.columnNumbers= gridCol[1]
+
+    def showGui(self, *args, **params):
+        values= self._showGui_GetValues()
+        if values== None:
+            return None
+        result= self._calc(*values)
+        self._report(result)
+        
+    def _calc(self, columns, *args, **params):
+        return [self.evaluate( col, *args, **params ) for col in columns]
         
     def _convertColName2Values(self, colNamesSelected, *args, **params):
         '''geting the selected columns of the InputGrid'''

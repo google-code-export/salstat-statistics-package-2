@@ -911,8 +911,8 @@ class NoteBookSheet(wx.Panel, object):
         # checking if the user input some currRow
         if currRow  == None:
             currRow = page.NumberRows
-        elif currRow > page.NumberCols:
-            raise StandardError('the maximumn allowed row to insert is the row %i'%(page.NumberCols))
+        elif currRow > page.NumberRows:
+            raise StandardError('the maximumn allowed row to insert is the row %i'%(page.NumberRows))
         elif currRow < 0:
             raise StandardError('the minimum allowed row to insert is the row 0')
         currRow = int(currRow)
