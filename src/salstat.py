@@ -159,13 +159,13 @@ def GridPrefs(parent):
     btn3=  ['StaticText', ["Column Width"]]
     btn4=  ['StaticText', ["Row Height"]]
     setting= {'Title': 'Change the cell size'}
-    
+
     struct= list()
     struct.append([btn2])
     struct.append([btn1, btn3])
     struct.append([btn1, btn4])
     dlg= dialog(self, settings = setting, struct = struct)
-    
+
     if dlg.ShowModal() == wx.ID_OK:
         values= dlg.GetValue()
     else:
@@ -193,7 +193,7 @@ class formulaBar ( wx.Panel ):
                                         wx.TE_WORDWRAP ) #|wx.NO_BORDER
 
         self.m_textCtrl1.SetMinSize( wx.Size( 220,25 ) )
-        bSizer1.Add( self.m_textCtrl1, 0, 0, 5 ) 
+        bSizer1.Add( self.m_textCtrl1, 0, 0, 5 )
         self.SetSizer( bSizer1 )
         self.Layout()
         bSizer1.Fit( self )
@@ -396,8 +396,8 @@ class SalStat2App(wx.App):
         if preferenceKey is None:
             return preferences
 
-        optionVal= None        
-        if preferenceKey in preferences:            
+        optionVal= None
+        if preferenceKey in preferences:
             optionVal= preferences[preferenceKey]
         else:
             if default is not None:
@@ -413,14 +413,14 @@ class SalStat2App(wx.App):
 
         **Parameters:**
 
-        * 'newPreferences': the new preferences to save        
+        * 'newPreferences': the new preferences to save
         """
         preferences= self.LoadConfig()
         config= self.GetConfig()
         for key in newPreferences:
             preferences[key]= newPreferences[key]
 
-        config.Write("Preferences", str(preferences))     
+        config.Write("Preferences", str(preferences))
         config.Flush()
     def GetVersion(self):
         return '2.1'
@@ -451,7 +451,7 @@ class MainFrame(wx.Frame):
         self.m_notebook1= wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
         self.logPanel= LogPanel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         self.log = self.logPanel # self.log = self.logPanel
-        
+
         self.defaultDialogSettings = {'Title': None,
                                       'icon': imagenes.logo16()}
 
@@ -463,7 +463,7 @@ class MainFrame(wx.Frame):
         self.grid.SetDefaultColSize( 60, True)
         self.grid.SetRowLabelSize( 40)
         self.grid.SetDefaultCellAlignment( wx.ALIGN_RIGHT, wx.ALIGN_CENTER )
-        ## adjust the renderer 
+        ## adjust the renderer
         attr=   wx.grid.GridCellAttr()
         editor= wx.grid.GridCellFloatEditor()
         attr.SetEditor(editor)
@@ -477,7 +477,7 @@ class MainFrame(wx.Frame):
             self.grid.SetLabelBackgroundColour("#d2d2d2")
             self.grid.SetLabelTextColour("#444444")
         #-----------------------
-        
+
         # response panel
         self.answerPanel= NoteBookSheet(self, fb = self.formulaBarPanel)
         self.answerPanel2= ScriptPanel(self, self.logPanel, self.grid, self.answerPanel)
@@ -490,13 +490,13 @@ class MainFrame(wx.Frame):
         self.scriptPanel= wx.py.shell.Shell(self.m_notebook1)
         self.scriptPanel.wrap(True)
         self.m_notebook1.AddPage( self.scriptPanel , u"Shell", False )
-        
+
         # put the references into the main app
         appname.inputGrid= self.grid
         appname.Logg= self.logPanel
         appname.output= self.answerPanel
         appname.plot= plot
-        
+
         # create menubar
         self._createMenu()
 
@@ -505,7 +505,7 @@ class MainFrame(wx.Frame):
         self.m_mgr.AddPane( self.formulaBarPanel,
                             aui.AuiPaneInfo().Name("tb2").Caption("Inspection Tool").ToolbarPane().Top().Row(1).
                             Position(1).CloseButton( False ))
-        
+
         self.m_mgr.AddPane(self.grid,
                            aui.AuiPaneInfo().Centre().
                            CaptionVisible(True).Caption("Data Entry Panel").
@@ -520,7 +520,7 @@ class MainFrame(wx.Frame):
 
         self.m_mgr.AddPane( tb1, aui.AuiPaneInfo().Name("tb1").Caption("Basic Operations").
                             ToolbarPane().Top().Row(1).CloseButton( False ))
-        
+
         self.m_mgr.AddPane(self.answerPanel2,
                            aui.AuiPaneInfo().Centre().Right().
                            CaptionVisible(True).Caption(("Script Panel")).
@@ -535,7 +535,7 @@ class MainFrame(wx.Frame):
                                             Dock().Resizable().FloatingSize( wx.DefaultSize ).
                                             CaptionVisible(True).
                                             DockFixed( False ).BestSize(wx.Size(-1,150)))
-        
+
         self._BindEvents()
         self.m_mgr.Update()
         self.Center()
@@ -594,7 +594,7 @@ class MainFrame(wx.Frame):
                 result.append( (fnc.name, fnc.icon, getattr( fnc(), 'showGui'), fnc.id))
             subgroup.append( (attr.__name__, result))
         return subgroup
-    
+
     def _createMenu(self):
         # Get icons for toolbar
         imag = imageEmbed()
@@ -615,7 +615,7 @@ class MainFrame(wx.Frame):
         sixsigma =   imag.sixsigma16()
         #set up menus
         menuBar = wx.MenuBar()
-               
+
         statisticalMenus = self._autoCreateMenu(statFunctions)
         #add contents of menu
         dat1= (
@@ -656,19 +656,7 @@ class MainFrame(wx.Frame):
               statisticalMenus[4],
               statisticalMenus[5],
               statisticalMenus[6],
-             ('Correlation Fcns',
-               ([ 'paired',       None, self.paired,     None],)),
-              ('Inferential Stats',
-               (['ttest_1samp',  None, self.ttest_1samp,     None],
-                ['ttest_ind',    None, self.ttest_ind,     None],
-                ['ttest_rel',    None, self.ttest_rel,     None],
-                ['chisquare',    None, self.chisquare,     None],
-                ['ks_2samp',     None, self.ks_2samp,     None],
-                ['mannwhitneyu', None, self.mannwhitneyu,     None],
-                ['ranksums',     None, self.ranksums,     None],
-                ['wilcoxont',    None, self.wilcoxont,     None],
-                ['kruskalwallish', None, self.kruskalwallish,     None],
-                ['friedmanchisquare', None, self.friedmanchisquare,     None]),),
+              statisticalMenus[7],
               ('Probability Calcs',
                (('chisqprob',    None, self.chisqprob,     None),
                 ('erfcc',        None, self.erfcc,     None),
@@ -761,19 +749,19 @@ class MainFrame(wx.Frame):
         # self.Bind( wx.EVT_CLOSE, self.EndApplication )
         self.grid.setPadreCallBack(self)
         self.sig= self.siguiente()
-      
+
     def siguiente(self):
         i= 0
         while 1:
             yield i
             i+= 1
-    
+
     def _evalstat(self, evt, stat):
         stat().showGui()
-                
+
     def _gridRangeSelect(self, evt):
         # displays the count and the sum of selected values
-        
+
         selectedCells= self.grid.get_selection()
         # Count the selected cells
         # getting the cell values:
@@ -790,7 +778,7 @@ class MainFrame(wx.Frame):
                 pass
             selectedCellText.append( currText)
         self.StatusBar.SetStatusText( 'cells Selected: %.0f  count: %.0f  sum: %.4f '%(len(selectedCells),len(selectedCells)-emptyText,sum(selectedNumerical)),1 )
-        
+
     def _cellSelectionChange( self, evt):
         # se lee el contenido de la celda seleccionada
         row= evt.GetRow()
@@ -811,7 +799,7 @@ class MainFrame(wx.Frame):
             self.mm_mgr.MaximizePane(pane)
         else:
             pane.MinimizeButton(True)
-    
+
     def GoClearData(self, evt):
         if not self.grid.Saved:
             # display discard dialog
@@ -831,12 +819,12 @@ class MainFrame(wx.Frame):
             self.grid.DeleteCols( pos=0, numCols= int(self.grid.NumberCols))
         except wx._core.PyAssertionError:
             pass
-        
+
         try:
             self.grid.DeleteRows( pos=0, numRows= int(self.grid.NumberRows))
         except wx._core.PyAssertionError:
             pass
-        
+
         self.grid.AppendRows( 500)
         self.grid.AppendCols( 50)
         # <p> updating the renderer
@@ -851,14 +839,14 @@ class MainFrame(wx.Frame):
         for colNumber in range( self.grid.NumberCols):
             self.grid.SetColAttr( colNumber, self.floatCellAttr)
         # /<p>
-            
+
         self.grid.path= None
         self.grid.Saved = False
         self.m_mgr.Update()
         # /<p>
         # emptying the undo redo
 
-        
+
     def GoFindDialog(self, evt):
         # Shows the find & replace dialog
         # NOTE - this doesn't appear to work on the grid, so I might be missing something...
@@ -875,13 +863,13 @@ class MainFrame(wx.Frame):
         btn3=  ['StaticText', ["Add Columns"]]
         btn4=  ['StaticText', ["Add Rows"]]
         setting= {'Title': 'Change Grid size'}
-        
+
         struct= list()
         struct.append([btn2])
         struct.append([btn1, btn3])
         struct.append([btn1, btn4])
         dlg= dialog(self, settings = setting, struct = struct)
-        
+
         if dlg.ShowModal() == wx.ID_OK:
             values= dlg.GetValue()
         else:
@@ -904,13 +892,13 @@ class MainFrame(wx.Frame):
         btn3=  ['StaticText', ["Column Width"]]
         btn4=  ['StaticText', ["Row Height"]]
         setting= {'Title': 'Change the cell size'}
-        
+
         struct= list()
         struct.append([btn2])
         struct.append([btn1, btn3])
         struct.append([btn1, btn4])
         dlg= dialog(self, settings = setting, struct = struct)
-        
+
         if dlg.ShowModal() == wx.ID_OK:
             values= dlg.GetValue()
         else:
@@ -986,11 +974,11 @@ class MainFrame(wx.Frame):
         self.log.write('Ternary')
         waste, colnums= self.grid.GetUsedCols()
         self.log.write('waste, colnums= grid.GetUsedCols()', False)
-        
+
         if colnums == []:
             self.SetStatusText('You need some data to draw a graph!')
             return
-        
+
         txt1= ['StaticText', ['Left Corner Label']]
         txt2= ['StaticText', ['Right Corner Label']]
         txt3= ['StaticText', ['Upper Corner Label']]
@@ -1011,50 +999,50 @@ class MainFrame(wx.Frame):
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return
-        
+
         values= dlg.GetValue()
         dlg.Destroy()
-        
+
         Alabel= values[0]
         if Alabel == u'' or Alabel.replace(' ','') == u'':
             Alabel= u'A'
         self.log.write('Alabel= '+"'"+Alabel.__str__()+"'", False)
-        
+
         Blabel= values[1]
         if Blabel == u'' or Blabel.replace(' ','') == u'':
             Blabel= u'B'
         self.log.write('Blabel= '+"'"+ Blabel.__str__()+"'", False)
-        
+
         Clabel= values[2]
         if Clabel == u'' or Clabel.replace(' ','') == u'':
             Clabel= u'C'
         self.log.write('Clabel= '+"'"+ Clabel.__str__()+"'", False)
-        
+
         pairs= values[3]
         if len(pairs) == 0:
             return
         self.log.write('pairs= '+pairs.__str__(), False)
-        
+
         data= [(self.grid.GetCol(colLeft),
                 self.grid.GetCol(colUpper),
                 self.grid.GetCol(colRight),
-                colLeft+' - '+colUpper+' - '+colRight ) 
+                colLeft+' - '+colUpper+' - '+colRight )
                for (colLeft, colUpper, colRight) in pairs]
         self.log.write('''data= [(grid.GetCol(colLeft),
                 grid.GetCol(colUpper),
                 grid.GetCol(colRight),
-                colLeft+' - '+colUpper+' - '+colRight ) 
+                colLeft+' - '+colUpper+' - '+colRight )
                for (colLeft, colUpper, colRight) in pairs]''', False)
-        
+
         plt= plot(parent=    self,
                   typePlot=  'plotTrian',
-                  data2plot= (data, [Alabel, Blabel, Clabel]), 
+                  data2plot= (data, [Alabel, Blabel, Clabel]),
                   title=     'Ternary Plot')
         self.log.write('''plt= plot(parent=    None,
                   typePlot=  'plotTrian',
-                  data2plot= (data, [Alabel, Blabel, Clabel]), 
+                  data2plot= (data, [Alabel, Blabel, Clabel]),
                   title=     'Ternary Plot')''', False)
-        
+
         plt.Show()
         self.log.write('plt.Show()', False)
 
@@ -1066,7 +1054,7 @@ class MainFrame(wx.Frame):
         if colnums == []:
             self.SetStatusText('You need some data to draw a graph!')
             return
-        
+
         colours= ['random', 'white', 'blue', 'black',
                   'red', 'green', 'lightgreen', 'darkblue',
                   'yellow', 'hsv']
@@ -1089,26 +1077,26 @@ class MainFrame(wx.Frame):
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return
-        
+
         values=  dlg.GetValue()
         barType= values[0]
         colour=  values[1]
         selectedcols= values[2]
-        
+
         if barType == None:
             barType= 'redunca'
-            
+
         if colour == None:
             colour= 'random'
-        
+
         dlg.Destroy()
         if len(selectedcols) == 0:
             self.SetStatusText('You need to select some data to draw a graph!')
             return
-        
+
         self.log.write('barType= '+ "'" + barType.__str__() + "'", False)
         self.log.write('colour= '+ "'" + colour.__str__() + "'", False)
-        self.log.write('selectedcols= '+ selectedcols.__str__(), False)        
+        self.log.write('selectedcols= '+ selectedcols.__str__(), False)
         self.log.write('''data= [statistics( grid.GetColNumeric(col),'noname',None).mean for col in selectedcols]''', False)
         data = [statistics( self.grid.GetColNumeric(col),'noname',None).mean
                 for col in selectedcols]
@@ -1126,7 +1114,7 @@ class MainFrame(wx.Frame):
                   title=   'Bar Chart of all means')
         plt.Show()
         self.log.write('plt.Show()', False)
-        
+
     def GoBarChartWindow(self, evt):
         '''this funtcion is used to plot the bar chart of the selected column'''
         self.log.write('Bar Chart')
@@ -1157,23 +1145,23 @@ class MainFrame(wx.Frame):
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return
-        
+
         values=  dlg.GetValue()
         barType= values[0]
         colour=  values[1]
         selectedcol= values[2]
-        
+
         if barType == None:
             barType= 'redunca'
-            
+
         if colour == None:
             colour= 'random'
-        
+
         dlg.Destroy()
         if len(selectedcol) == 0:
             self.SetStatusText('You need to select some data to draw a graph!')
             return
-        
+
         self.log.write('barType= '+ "'" + barType.__str__() + "'", False)
         self.log.write('colour= '+ "'" + colour.__str__() + "'", False)
         self.log.write('selectedcol= '+ selectedcol.__str__(), False)
@@ -1193,7 +1181,7 @@ class MainFrame(wx.Frame):
                   title=   'Bar Chart')
         plt.Show()
         self.log.write('plt.Show()', False)
-    
+
     def GoHelpSystem(self, evt):
         # shows the "wizard" in the help box
         win= Navegator(wx.GetApp().frame,)
@@ -1229,7 +1217,7 @@ class MainFrame(wx.Frame):
 
         # Then we call wx.AboutBox giving it that info object
         wx.AboutBox(info)
-        
+
     def GoScatterPlot(self,evt):
         self.log.write('Scatter')
         waste, colnums = self.grid.GetUsedCols()
@@ -1237,7 +1225,7 @@ class MainFrame(wx.Frame):
         if colnums == []:
             self.SetStatusText('You need some data to draw a graph!')
             return
-        
+
         bt1= ['StaticText', ['Select pairs of data by rows']]
         bt2= ['makePairs',  [['X data to plot','Y data to plot'], waste, 20]]
         structure= list()
@@ -1247,18 +1235,18 @@ class MainFrame(wx.Frame):
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return
-        
+
         values= dlg.GetValue()
         dlg.Destroy()
-        
+
         pairs= values[0]
         if len(pairs) == 0:
             return
         self.log.write('pairs= '+ pairs.__str__(), False)
-        
+
         data= [(self.grid.GetCol(colX), self.grid.GetCol(colY), colX +' VS ' +colY) for (colX,colY) in pairs]
         self.log.write("data= [(grid.GetCol(colX), grid.GetCol(colY), colX +' VS ' +colY) for (colX,colY) in pairs]", False)
-        
+
         plt= plot(parent= self,
                   typePlot= 'plotScatter',
                   data2plot= data,
@@ -1271,10 +1259,10 @@ class MainFrame(wx.Frame):
                   xlabel= 'X data',
                   ylabel= 'Y data',
                   title= 'Scatter Plot')''', False)
-        
+
         plt.Show()
         self.log.write('plt.Show()', False)
-        
+
     def GoBoxWhiskerPlot(self,evt):
         self.log.write('Box & Whisker')
         waste, colnums = self.grid.GetUsedCols()
@@ -1286,17 +1274,17 @@ class MainFrame(wx.Frame):
         if selection.ShowModal() != wx.ID_OK:
             selection.Destroy()
             return
-        
-        selectedcols = selection.getData()        
+
+        selectedcols = selection.getData()
         selection.Destroy()
         if len(selectedcols) == 0:
             self.SetStatusText('You need to select some data to draw a graph!')
-            return        
+            return
         self.log.write('selectedcols= ' + selectedcols.__str__(), False)
-        
+
         data = [self.grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]]
         self.log.write('''data= [grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]]''', False)
-        
+
         plt= plot(parent = self, typePlot= 'boxPlot',
                   data2plot= data,
                   xlabel = 'variable',
@@ -1312,7 +1300,7 @@ class MainFrame(wx.Frame):
 
         plt.Show()
         self.log.write('plt.Show()', False)
-        
+
     def GoAdaptativeBMS(self,evt):
         self.log.write('Adaptative BMS')
         waste, colnums = self.grid.GetUsedCols()
@@ -1330,10 +1318,10 @@ class MainFrame(wx.Frame):
             self.SetStatusText('You need to select some data to draw a graph!')
             return
         self.log.write('selectedcols=  '+selectedcols.__str__(), False)
-        
+
         data= [self.grid.GetColNumeric(cols) for cols in selectedcols]
         self.log.write('data= [grid.GetColNumeric(cols) for cols in selectedcols]', False)
-        
+
         plt= plot(parent = self,
                   typePlot = 'AdaptativeBMS',
                   data2plot = data,
@@ -1348,7 +1336,7 @@ class MainFrame(wx.Frame):
                   ylabel = 'value',
                   title= 'Adaptative BMS plot',
                   xtics=  [waste[i] for i in selectedcols])''', False)
-        
+
         plt.Show()
         self.log.write('plt.Show()', False)
 
@@ -1369,13 +1357,13 @@ class MainFrame(wx.Frame):
         if len(selectedcols) == 0:
             self.SetStatusText('You need to select some data to draw a graph!')
             return
-        
+
         data = [self.grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]]
         self.log.write('''data = [grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]]''', False)
-        
+
         data = [(range(len(data[i])),data[i],waste[i]) for i in range(len(data))]
         self.log.write('''data = [(range(len(data[i])),data[i],waste[i]) for i in range(len(data))]''', False)
-        
+
         plt= plot(parent = self, typePlot= 'plotLine',
                   data2plot= data,
                   xlabel = '',
@@ -1402,19 +1390,19 @@ class MainFrame(wx.Frame):
             return
         (xcol, ycol)= selection.getData()
         self.log.write('(xcol, ycol)= '+ selection.getData().__str__(), False)
-        
+
         selection.Destroy()
-        
+
         data= homogenize(*[self.grid.CleanData(cols) for cols in [colnums[i] for i in (xcol,ycol)]])
         self.log.write('''data= homogenize(*[grid.CleanData(cols) for cols in [colnums[i] for i in (xcol,ycol)]])''', False)
-        
+
         # homogenize data
         data= homogenize(data[0],data[1])
         self.log.write('data= homogenize(data[0],data[1])', False)
         if len(data[0]) != len(data[1]):
             self.SetStatusText('X and Y data must have the same number of elements!')
             return
-        
+
         plt= plot(parent = self, typePlot= 'plotLinRegress',
                   data2plot= (data[0],data[1],waste[xcol] +u' Vs '+ waste[ycol]),
                   xlabel = waste[xcol], ylabel = waste[ycol],
@@ -1423,7 +1411,7 @@ class MainFrame(wx.Frame):
                   data2plot= (data[0],data[1],waste[xcol] +u' Vs '+ waste[ycol]),
                   xlabel = waste[xcol], ylabel = waste[ycol],
                   title= 'Linear Regression plot' )''', False)
-        
+
         plt.Show()
         self.log.write('plt.Show()', False)
         # lin regress removing most disperse data
@@ -1447,7 +1435,7 @@ class MainFrame(wx.Frame):
             return
         (selectedcol,) = selection.GetValue()
         self.log.write('selectedcols= '+selectedcol.__str__(), False)
-        
+
         selection.Destroy()
         if selectedcol == None:
             self.SetStatusText('You need to select some data to draw a graph!')
@@ -1455,7 +1443,7 @@ class MainFrame(wx.Frame):
 
         data = [self.grid.GetColNumeric(selectedcol)]
         self.log.write('data = [grid.GetColNumeric(cols) for cols in selectedcols]', False)
-        
+
         plt= plot(parent = self, typePlot= 'probabilityPlot',
                   data2plot= data,
                   title=     'Probability Plot',
@@ -1466,7 +1454,7 @@ class MainFrame(wx.Frame):
                   title=     'Probability Plot',
                   xlabel=    'Order Statistic Medians',
                   ylabel=    'Ordered Values')''', False)
-        
+
         plt.Show()
         self.log.write('plt.Show()', False)
 
@@ -1477,7 +1465,7 @@ class MainFrame(wx.Frame):
         2) http://en.wikipedia.org/wiki/Shewhart_individuals_control_chart
         3) http://www.statisticalprocesscontrol.info/glossary.html
         4) http://www.isixsigma.com/tools-templates/capability-indices-process-capability/process-capability-cp-cpk-and-process-performance-pp-ppk-what-difference/'''
-        
+
         ColumnList, colnums = wx.GetApp().frame.grid.GetUsedCols()
         if len(ColumnList) == 0:
             return
@@ -1509,7 +1497,7 @@ class MainFrame(wx.Frame):
             result= self._sixpack(columns[0], UCL, LCL, Target, k, n= groupSize)
             Xga= statistics(columns[0]).mean
         else:
-            # group homogenization in order to 
+            # group homogenization in order to
             # obtain comparable data
             columns= homogenize(*columns)
             # get the size of the group
@@ -1828,12 +1816,12 @@ class MainFrame(wx.Frame):
         if nameResults != None:
             wx.GetApp().output.addColData(nameResults)
         wx.GetApp().output.addColData(numpy.ravel(result))
-        
+
         # inserting information about the input data
         wx.GetApp().output.addRowData(['Input Data'] , currRow= 0)
         wx.GetApp().output.addRowData([texto+'=', moment ], currRow= 1)
         wx.GetApp().output.addRowData(['Output Data'] , currRow= 2)
-        
+
         self.logPanel.write(functionName + ' successful')
 
     def shortData(self,evt):
@@ -1941,18 +1929,17 @@ class MainFrame(wx.Frame):
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(numpy.ravel(result))
         self.logPanel.write(functionName + ' successful')
-  
+
     def ttest_1samp(self, evt):
         functionName= "ttest_1samp"
-        group= lambda x,y: (x,y)
         setting= self.defaultDialogSettings
         setting['Title']= functionName
         ColumnList, colnums= wx.GetApp().frame.grid.GetUsedCols()
 
-        bt1= group('StaticText',   ('Column to analyse',) )
-        bt2= group('Choice',       (ColumnList,))
-        bt3= group('NumTextCtrl',  ())
-        bt4= group('StaticText',   ("popmean",) )
+        bt1= ['StaticText',   ('Column to analyse',)]
+        bt2= ['Choice',       (ColumnList,)]
+        bt3= ['NumTextCtrl',  ()]
+        bt4= ['StaticText',   ("popmean",)]
 
         structure = list()
         structure.append([bt2, bt1])
@@ -1982,7 +1969,7 @@ class MainFrame(wx.Frame):
         wx.GetApp().output.addRowData(['selected Col=', colNameSelect], currRow= 1)
         wx.GetApp().output.addRowData(['popmean=', popmean], currRow= 2)
         wx.GetApp().output.addRowData(['Output', popmean], currRow= 3)
-        
+
         self.logPanel.write(functionName + ' successful')
 
     def ttest_ind(self, evt):
@@ -2012,7 +1999,7 @@ class MainFrame(wx.Frame):
         if xcolNameSelect == None or ycolNameSelect == None:
             self.logPanel.write("You haven't select any items!")
             return
-        
+
         # -------------------
         xcolumns= self.grid.GetCol(xcolNameSelect)
         ycolumns= self.grid.GetCol(ycolNameSelect)
@@ -2156,11 +2143,11 @@ class MainFrame(wx.Frame):
         if xcolNameSelect == None or ycolNameSelect == None:
             self.logPanel.write("You haven't selected any items!")
             return
-        
+
         xcolumns= self.grid.GetCol(xcolNameSelect)
         ycolumns= self.grid.GetCol(ycolNameSelect)
         (xcolumns, ycolumns)= homogenize(xcolumns, ycolumns)
-        
+
         # se hace los calculos para cada columna
         result = getattr(stats, functionName)( xcolumns, ycolumns)
         # se muestra los resultados
@@ -2199,7 +2186,7 @@ class MainFrame(wx.Frame):
         if  xcolNameSelect == None or  ycolNameSelect == None:
             self.logPanel.write("You haven't selected any items!")
             return
-        
+
         xcolumns= self.grid.GetCol(xcolNameSelect)
         ycolumns= self.grid.GetCol(ycolNameSelect)
         (xcolumns, ycolumns)= homogenize(xcolumns, ycolumns)
@@ -2241,7 +2228,7 @@ class MainFrame(wx.Frame):
         if xcolNameSelect == None or ycolNameSelect == None:
             self.logPanel.write("You haven't selected any items!")
             return
-        
+
         xcolumns= self.grid.GetCol(xcolNameSelect)
         ycolumns= self.grid.GetCol(ycolNameSelect)
         (xcolumns, ycolumns)= homogenize(xcolumns, ycolumns)
@@ -2283,7 +2270,7 @@ class MainFrame(wx.Frame):
         if xcolNameSelect == None or ycolNameSelect == None:
             self.logPanel.write("You haven't selected any items!")
             return
-        
+
         xcolumns= self.grid.GetCol(xcolNameSelect)
         ycolumns= self.grid.GetCol(ycolNameSelect)
         (xcolumns, ycolumns)= homogenize(xcolumns, ycolumns)
@@ -2321,7 +2308,7 @@ class MainFrame(wx.Frame):
                          factor = 1,
                          useNumpy = True,
                          nameResults= ('one tailed probability'))
-        
+
     def erfcc(self, evt):
         functionName = "erfcc"
         group = lambda x,y: (x,y)

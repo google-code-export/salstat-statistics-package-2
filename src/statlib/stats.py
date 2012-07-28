@@ -1367,7 +1367,7 @@ def lkruskalwallish(*args):
     if T == 0:
         raise ValueError, 'All numbers are identical in lkruskalwallish'
     h = h / float(T)
-    return h, chisqprob(h,df)
+    return h, chisqprob( h, df)
 
 
 def lfriedmanchisquare(*args):
@@ -3084,14 +3084,14 @@ def apaired(x,y, allData= True):
     while not any([True for sample in samples if sample in ['i','r','c','I','R','C']]):
         print 'Independent or related samples, or correlation (i,r,c): ',
         samples = raw_input()
-    
+
     if any([True for sample in samples if sample in ['i','I','r','R']]):
         result.append('Comparing variances ...')
         # USE O'BRIEN'S TEST FOR HOMOGENEITY OF VARIANCE, Maxwell & delaney, p.112
         r = obrientransform(x, y)
         f, p = F_oneway(pstat.colex(r,0), pstat.colex(r,1))
         if p < 0.05:
-            vartype='unequal, p='+str(round(p,4))            
+            vartype='unequal, p='+str(round(p,4))
         else:
             vartype='equal'
         result.append(vartype)
@@ -3105,7 +3105,7 @@ def apaired(x,y, allData= True):
             else:
                 if len(x)>20 or len(y)>20:
                     z,p = ranksums(x, y)
-                    result.extend(['Rank Sums test (NONparametric, n>20):  ', 
+                    result.extend(['Rank Sums test (NONparametric, n>20):  ',
                                    "a z-statistic",      round(z,4),
                                    "two-tailed p-value", round(p,4)])
                 else:
