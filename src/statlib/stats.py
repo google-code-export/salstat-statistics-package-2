@@ -3745,7 +3745,7 @@ def akruskalwallish(*args):
     Usage:   akruskalwallish(*args)     args are separate arrays for 3+ conditions
     Returns: H-statistic (corrected for ties), associated p-value
     """
-    assert len(args) == 3, "Need at least 3 groups in stats.akruskalwallish()"
+    assert len(args) > 2, "Need at least 3 groups in stats.akruskalwallish()"
     args = list(args)
     n = [0]*len(args)
     n = map(len,args)
