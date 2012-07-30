@@ -10,7 +10,7 @@ B4 = [0,0, 3.267, 2.568, 2.266, 2.089, 1.970, 1.882, 1.815, 1.761, 1.716, 1.678,
 B5 = [0,0,     0,     0,     0,     0, 0.029, 0.113, 0.179, 0.232, 0.276, 0.313, 0.346, 0.374, 0.399, 0.421]#, 0.504, 0.559]
 B6 = [0,0, 2.606, 2.276, 2.088, 1.964, 1.874, 1.806, 1.751, 1.707, 1.669, 1.637, 1.610, 1.585, 1.563, 1.544]#, 1.470, 1.420]
 
-""" Copyright 2012 Sebastian Lopez Buritica licensed under GPL 3
+""" Copyright 2012 Sebastian Lopez Buritica, S2 Team,  licensed under GPL 3
 
 SalStat Statistics Package. Copyright 2002 Alan James Salmoni. Licensed
 under the GNU General Public License (GPL 2). See the file COPYING for full
@@ -657,10 +657,11 @@ class MainFrame(wx.Frame):
               statisticalMenus[5],
               statisticalMenus[6],
               statisticalMenus[7],
+              statisticalMenus[8],
               ('Probability Calcs',
                (('chisqprob',    None, self.chisqprob,     None),
                 ('erfcc',        None, self.erfcc,     None),
-             ('zprob',        None, self.zprob,     None),   # 'ksprob'
+                ('zprob',        None, self.zprob,     None),   # 'ksprob'
                 ('betacf',       None, self.betacf,     None),
                 ('gammln',       None, self.gammln,     None),
                 ('betai',        None, self.betai,     None)),), # 'fprob'
@@ -1191,7 +1192,7 @@ class MainFrame(wx.Frame):
         info= wx.AboutDialogInfo()
         info.Name= "S2 SalStat Statistics Package 2"
         info.Version= "V" + wx.GetApp().VERSION
-        info.Copyright= "(C) 2012 Sebastian Lopez Buritica"
+        info.Copyright= "(C) 2012 Sebastian Lopez Buritica, S2 Team"
         info.Icon= wx.GetApp().icon64
         from wx.lib.wordwrap import wordwrap
         info.Description = wordwrap(
@@ -1211,7 +1212,7 @@ class MainFrame(wx.Frame):
             "and much more!",
             460, wx.ClientDC(self))
         info.WebSite = ("http://code.google.com/p/salstat-statistics-package-2/", "S2 home page")
-        info.Developers = [ "Mark Livingstone -- MAC & LINUX Translator\n","Sebastian Lopez Buritica",]
+        info.Developers = [ "Mark Livingstone -- MAC & LINUX Translator","\nSebastian Lopez Buritica",]
 
         info.License = wordwrap("GPL 2", 450, wx.ClientDC(self))
 
@@ -1929,377 +1930,6 @@ class MainFrame(wx.Frame):
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData(numpy.ravel(result))
         self.logPanel.write(functionName + ' successful')
-
-    def ttest_1samp(self, evt):
-        functionName= "ttest_1samp"
-        setting= self.defaultDialogSettings
-        setting['Title']= functionName
-        ColumnList, colnums= wx.GetApp().frame.grid.GetUsedCols()
-
-        bt1= ['StaticText',   ('Column to analyse',)]
-        bt2= ['Choice',       (ColumnList,)]
-        bt3= ['NumTextCtrl',  ()]
-        bt4= ['StaticText',   ("popmean",)]
-
-        structure = list()
-        structure.append([bt2, bt1])
-        structure.append([bt3, bt4])
-        dlg = dialog(settings = setting, struct= structure)
-        if dlg.ShowModal() == wx.ID_OK:
-            values = dlg.GetValue()
-            dlg.Destroy()
-        else:
-            dlg.Destroy()
-            return
-        # -------------------
-        # changing value strings to numbers
-        (colNameSelect, popmean) = values
-        if colNameSelect  == None:
-            self.logPanel.write("You haven't select any items!")
-            return
-
-        # -------------------
-        columns = self.grid.GetColNumeric(colNameSelect)
-        # se hace los calculos para cada columna
-        result = getattr(stats, functionName)( columns, popmean)
-        # se muestra los resultados
-        wx.GetApp().output.addColData(['t','two tailed prob'], functionName)
-        wx.GetApp().output.addColData(result)
-        wx.GetApp().output.addRowData(['Input Data'], currRow= 0)
-        wx.GetApp().output.addRowData(['selected Col=', colNameSelect], currRow= 1)
-        wx.GetApp().output.addRowData(['popmean=', popmean], currRow= 2)
-        wx.GetApp().output.addRowData(['Output', popmean], currRow= 3)
-
-        self.logPanel.write(functionName + ' successful')
-
-    def ttest_ind(self, evt):
-        functionName = "ttest_ind"
-        group = lambda x,y: (x,y)
-        setting = self.defaultDialogSettings
-        setting['Title'] = functionName
-        ColumnList, colnums  = wx.GetApp().frame.grid.GetUsedCols()
-
-        bt1= group('StaticText',   ('X Column to analyse',) )
-        bt2= group('Choice',       (ColumnList,))
-        bt3= group('StaticText',   ('Y Column to analyse',) )
-
-        structure = list()
-        structure.append([bt2, bt1])
-        structure.append([bt2, bt3])
-        dlg = dialog(settings = setting, struct= structure)
-        if dlg.ShowModal() == wx.ID_OK:
-            values = dlg.GetValue()
-            dlg.Destroy()
-        else:
-            dlg.Destroy()
-            return
-        # -------------------
-        # changing value strings to numbers
-        (xcolNameSelect, ycolNameSelect) = values
-        if xcolNameSelect == None or ycolNameSelect == None:
-            self.logPanel.write("You haven't select any items!")
-            return
-
-        # -------------------
-        xcolumns= self.grid.GetCol(xcolNameSelect)
-        ycolumns= self.grid.GetCol(ycolNameSelect)
-        (xcolumns, ycolumns)= homogenize(xcolumns, ycolumns)
-        # se hace los calculos para cada columna
-        result = getattr(stats, functionName)( xcolumns, ycolumns)
-        # se muestra los resultados
-        colNameSelect = ['t','two tailed prob']
-        wx.GetApp().output.addColData(colNameSelect, functionName)
-        wx.GetApp().output.addColData(result)
-        wx.GetApp().output.addRowData( 'Input Data', currRow= 0)
-        wx.GetApp().output.addRowData( ['X column=', xcolNameSelect, 'Y column=', ycolNameSelect], currRow= 1)
-        wx.GetApp().output.addRowData( 'Output Data', currRow= 3)
-        self.logPanel.write(functionName + ' successful')
-
-    def ttest_rel(self, evt):
-        functionName = "ttest_rel"
-        group = lambda x,y: (x,y)
-        setting = self.defaultDialogSettings
-        setting['Title'] = functionName
-        ColumnList, colnums  = wx.GetApp().frame.grid.GetUsedCols()
-
-        bt1= group('StaticText',   ('X Column to analyse',) )
-        bt2= group('Choice',       (ColumnList,))
-        bt3= group('StaticText',   ('Y Column to analyse',) )
-
-        structure = list()
-        structure.append([bt2, bt1])
-        structure.append([bt2, bt3])
-        dlg = dialog(settings = setting, struct= structure)
-        if dlg.ShowModal() == wx.ID_OK:
-            values = dlg.GetValue()
-            dlg.Destroy()
-        else:
-            dlg.Destroy()
-            return
-        # -------------------
-        # changing value strings to numbers
-        (xcolNameSelect, ycolNameSelect) = values
-        if xcolNameSelect  == None or ycolNameSelect == None:
-            self.logPanel.write("You haven't selected any items!")
-            return
-        # -------------------
-        xcolumns= self.grid.GetCol(xcolNameSelect)
-        ycolumns= self.grid.GetCol(ycolNameSelect)
-        (xcolumns, ycolumns)= homogenize(xcolumns, ycolumns)
-        # se hace los calculos para cada columna
-        result = getattr(stats, functionName)( xcolumns, ycolumns)
-        # se muestra los resultados
-        colNameSelect = ['t', 'two tailed prob']
-        wx.GetApp().output.addColData(colNameSelect, functionName)
-        wx.GetApp().output.addColData(result)
-        wx.GetApp().output.addRowData( 'Input Data', currRow= 0)
-        wx.GetApp().output.addRowData( ['x column=', xcolNameSelect, 'y column=', ycolNameSelect], currRow= 1)
-        wx.GetApp().output.addRowData( 'Output Data', currRow= 3)
-        self.logPanel.write(functionName + ' successful')
-
-
-
-    def chisquare(self, evt):
-        functionName = "chisquare"
-        group = lambda x,y: (x,y)
-        setting = self.defaultDialogSettings
-        setting['Title'] = functionName
-        ColumnList, colnums  = wx.GetApp().frame.grid.GetUsedCols()
-
-        bt1= group('StaticText',   ('obs',) )
-        bt2= group('Choice',       (ColumnList,))
-        bt3= group('StaticText',   ('frequencies',) )
-
-        structure = list()
-        structure.append([bt2, bt1])
-        structure.append([bt2, bt3])
-        dlg = dialog(settings = setting, struct= structure)
-        if dlg.ShowModal() == wx.ID_OK:
-            values = dlg.GetValue()
-            dlg.Destroy()
-        else:
-            dlg.Destroy()
-            return
-        # -------------------
-        # changing value strings to numbers
-        (xcolNameSelect, ycolNameSelect) = values
-        if xcolNameSelect == None :
-            self.logPanel.write("You haven't selected any items!")
-            return
-        xvalues = [ [pos for pos, value in enumerate( ColumnList )
-                     if value == val
-                     ][0]
-                    for val in xcolNameSelect
-                    ]
-        xcolumns = [ GetData(colnums[ pos ]) for pos in xvalues][0]
-        if isinstance(ycolNameSelect, (str, unicode)):
-            ycolNameSelect = [ycolNameSelect]
-        if ycolNameSelect == None:
-            ycolumns = None
-        else:
-            yvalues = [ [pos for pos, value in enumerate( ColumnList )
-                         if value == val
-                         ][0]
-                        for val in ycolNameSelect
-                        ]
-            ycolumns = [ GetData(colnums[ pos ]) for pos in yvalues][0]
-
-        # -------------------
-        # se hace los calculos para cada columna
-        result = getattr(stats, functionName)( xcolumns, ycolumns)
-        # se muestra los resultados
-        colNameSelect = [ 'chisq', 'chisqprob(chisq, k-1)']
-        wx.GetApp().output.addColData(colNameSelect, functionName)
-        wx.GetApp().output.addColData(result)
-        wx.GetApp().output.addRowData( 'Input Data', currRow= 0)
-        wx.GetApp().output.addRowData( ['Obs=', xcolNameSelect, 'frequencies=', ycolNameSelect], currRow= 1)
-        wx.GetApp().output.addRowData( 'Output Data', currRow= 3)
-        self.logPanel.write(functionName + ' successful')
-
-    def ks_2samp(self, evt):
-        functionName = "ks_2samp"
-        group = lambda x,y: (x,y)
-        setting = self.defaultDialogSettings
-        setting['Title'] = functionName
-        ColumnList, colnums  = wx.GetApp().frame.grid.GetUsedCols()
-
-        bt1= group('StaticText',   ('X Column to analyse',) )
-        bt2= group('Choice',       (ColumnList,))
-        bt3= group('StaticText',   ('Y Column to analyse',) )
-
-        structure = list()
-        structure.append([bt2, bt1])
-        structure.append([bt2, bt3])
-        dlg = dialog(settings = setting, struct= structure)
-        if dlg.ShowModal() == wx.ID_OK:
-            values = dlg.GetValue()
-            dlg.Destroy()
-        else:
-            dlg.Destroy()
-            return
-        # -------------------
-        # changing value strings to numbers
-        (xcolNameSelect, ycolNameSelect) = values
-        if xcolNameSelect == None or ycolNameSelect == None:
-            self.logPanel.write("You haven't selected any items!")
-            return
-
-        xcolumns= self.grid.GetCol(xcolNameSelect)
-        ycolumns= self.grid.GetCol(ycolNameSelect)
-        (xcolumns, ycolumns)= homogenize(xcolumns, ycolumns)
-
-        # se hace los calculos para cada columna
-        result = getattr(stats, functionName)( xcolumns, ycolumns)
-        # se muestra los resultados
-        colNameSelect = ['KS D-value', 'associated p-value']
-        wx.GetApp().output.addColData(colNameSelect, functionName)
-        wx.GetApp().output.addColData(result)
-        wx.GetApp().output.addRowData( 'Input Data', currRow= 0)
-        wx.GetApp().output.addRowData( ['x column=', xcolNameSelect, 'y column=', ycolNameSelect], currRow= 1)
-        wx.GetApp().output.addRowData( 'Output Data', currRow= 3)
-        self.logPanel.write(functionName + ' successful')
-
-    def mannwhitneyu(self, evt):
-        functionName = "mannwhitneyu"
-        group = lambda x,y: (x,y)
-        setting = self.defaultDialogSettings
-        setting['Title'] = functionName
-        ColumnList, colnums  = wx.GetApp().frame.grid.GetUsedCols()
-
-        bt1= group('StaticText',   ('X Column to analyse',) )
-        bt2= group('Choice',       (ColumnList,))
-        bt3= group('StaticText',   ('Y Column to analyse',) )
-
-        structure = list()
-        structure.append([bt2, bt1])
-        structure.append([bt2, bt3])
-        dlg = dialog(settings = setting, struct= structure)
-        if dlg.ShowModal() == wx.ID_OK:
-            values = dlg.GetValue()
-            dlg.Destroy()
-        else:
-            dlg.Destroy()
-            return
-        # -------------------
-        # changing value strings to numbers
-        (xcolNameSelect, ycolNameSelect) = values
-        if  xcolNameSelect == None or  ycolNameSelect == None:
-            self.logPanel.write("You haven't selected any items!")
-            return
-
-        xcolumns= self.grid.GetCol(xcolNameSelect)
-        ycolumns= self.grid.GetCol(ycolNameSelect)
-        (xcolumns, ycolumns)= homogenize(xcolumns, ycolumns)
-        # se hace los calculos para cada columna
-        result = getattr(stats, functionName)( xcolumns, ycolumns)
-        # se muestra los resultados
-        colNameSelect = ['u-statistic', 'one-tailed p-value']
-        wx.GetApp().output.addColData(colNameSelect, functionName)
-        wx.GetApp().output.addColData(result)
-        wx.GetApp().output.addRowData( 'Input Data', currRow= 0)
-        wx.GetApp().output.addRowData( ['x column=', xcolNameSelect, 'y column=', ycolNameSelect], currRow= 1)
-        wx.GetApp().output.addRowData( 'Output Data', currRow= 3)
-        self.logPanel.write(functionName + ' successful')
-
-    def ranksums(self, evt):
-        functionName = "ranksums"
-        group = lambda x,y: (x,y)
-        setting = self.defaultDialogSettings
-        setting['Title'] = functionName
-        ColumnList, colnums  = wx.GetApp().frame.grid.GetUsedCols()
-
-        bt1= group('StaticText',   ('X Column to analyse',) )
-        bt2= group('Choice',       (ColumnList,))
-        bt3= group('StaticText',   ('Y Column to analyse',) )
-
-        structure = list()
-        structure.append([bt2, bt1])
-        structure.append([bt2, bt3])
-        dlg = dialog(settings = setting, struct= structure)
-        if dlg.ShowModal() == wx.ID_OK:
-            values = dlg.GetValue()
-            dlg.Destroy()
-        else:
-            dlg.Destroy()
-            return
-        # -------------------
-        # changing value strings to numbers
-        (xcolNameSelect, ycolNameSelect) = values
-        if xcolNameSelect == None or ycolNameSelect == None:
-            self.logPanel.write("You haven't selected any items!")
-            return
-
-        xcolumns= self.grid.GetCol(xcolNameSelect)
-        ycolumns= self.grid.GetCol(ycolNameSelect)
-        (xcolumns, ycolumns)= homogenize(xcolumns, ycolumns)
-        # se hace los calculos para cada columna
-        result = getattr(stats, functionName)( xcolumns, ycolumns)
-        # se muestra los resultados
-        colNameSelect = ['z-statistic', 'two-tailed p-value']
-        wx.GetApp().output.addColData(colNameSelect, functionName)
-        wx.GetApp().output.addColData(result)
-        wx.GetApp().output.addRowData( 'Input Data', currRow= 0)
-        wx.GetApp().output.addRowData( ['x column=', xcolNameSelect, 'y column=', ycolNameSelect], currRow= 1)
-        wx.GetApp().output.addRowData( 'Output Data', currRow= 3)
-        self.logPanel.write(functionName + ' successful')
-
-    def wilcoxont(self, evt):
-        functionName = "wilcoxont"
-        group = lambda x,y: (x,y)
-        setting = self.defaultDialogSettings
-        setting['Title'] = functionName
-        ColumnList, colnums  = wx.GetApp().frame.grid.GetUsedCols()
-
-        bt1= group('StaticText',   ('X Column to analyse',) )
-        bt2= group('Choice',       (ColumnList,))
-        bt3= group('StaticText',   ('Y Column to analyse',) )
-
-        structure = list()
-        structure.append([bt2, bt1])
-        structure.append([bt2, bt3])
-        dlg = dialog(settings = setting, struct= structure)
-        if dlg.ShowModal() == wx.ID_OK:
-            values = dlg.GetValue()
-            dlg.Destroy()
-        else:
-            dlg.Destroy()
-            return
-        # -------------------
-        # changing value strings to numbers
-        (xcolNameSelect, ycolNameSelect) = values
-        if xcolNameSelect == None or ycolNameSelect == None:
-            self.logPanel.write("You haven't selected any items!")
-            return
-
-        xcolumns= self.grid.GetCol(xcolNameSelect)
-        ycolumns= self.grid.GetCol(ycolNameSelect)
-        (xcolumns, ycolumns)= homogenize(xcolumns, ycolumns)
-        # se hace los calculos para cada columna
-        result = getattr(stats, functionName)( xcolumns, ycolumns)
-        # se muestra los resultados
-        colNameSelect = ['t-statistic', 'two-tail probability estimate']
-        wx.GetApp().output.addColData(colNameSelect, functionName)
-        wx.GetApp().output.addColData(result)
-        wx.GetApp().output.addRowData( 'Input Data', currRow= 0)
-        wx.GetApp().output.addRowData( ['x column=', xcolNameSelect, 'y column=', ycolNameSelect], currRow= 1)
-        wx.GetApp().output.addRowData( 'Output Data', currRow= 3)
-        self.logPanel.write(functionName + ' successful')
-
-    def kruskalwallish(self, evt):
-        self._statsType1("kruskalwallish",
-                         self.grid,
-                         useNumpy = True,
-                         allColsOneCalc = True,
-                         nameResults= ('H-statistic (corrected for ties)', 'p-value'))
-
-
-    def friedmanchisquare(self, evt):
-        self._statsType1("friedmanchisquare",
-                         self.grid,
-                         useNumpy = True,
-                         allColsOneCalc = True,
-                         nameResults= ('chi-square statistic', 'p-value'),
-                         dataSquare= True)
 
     def chisqprob(self, evt):
         self._statsType2(functionName= "chisqprob",
