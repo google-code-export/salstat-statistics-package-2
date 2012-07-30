@@ -1,6 +1,6 @@
 __name__ ='Inferential stats'
 __all__=  ['ttest_1samp', 'ttest_ind','ttest_rel',
-           'chisquare', 'chisquare', 'mannwhitneyu',
+           'chisquare', 'ks_2samp', 'mannwhitneyu',
            'ranksums', 'wilcoxont','kruskalwallish',
            'friedmanchisquare']
 
@@ -235,7 +235,6 @@ class wilcoxont(pearsonr):
 
     def evaluate( self, *args, **params):
         return _stats.wilcoxont(*args, **params)
-
 
 class kruskalwallish(geometricMean):
     ''''''
