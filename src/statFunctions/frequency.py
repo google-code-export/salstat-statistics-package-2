@@ -92,22 +92,23 @@ class scoreatpercentile(_genericFunc):
         self.statName=  'scoreatpercentile'
         self.nameStaticText= '%'
         self.minRequiredCols= 1
-        self.spindata= [0,100,0]
+        self.spindata= [1,100,1]
         self.colNameSelect= ''
         self._percent= None
         
     def _dialog(self, *arg, **params):
         setting= {'Title': self.name,
-                  '_size': Size(260,250)}
+                  '_size': Size(220,300)}
         self._updateColsInfo() # update self.columnames and self.colnums
-        bt1= ['StaticText',   ['Columns to analyse',] ]
-        bt2= ['CheckListBox', [self.columnNames]]
-        bt3= ['SpinCtrl',     self.spindata]
-        bt4= ['StaticText',   [self.nameStaticText,] ]
+        bt1=  ['StaticText',   ['Select the column to analyse']]
+        bt2=  ['CheckListBox', [self.columnNames]]
+        btn3= ['SpinCtrl',     [0,100,0]]
+        btn4= ['StaticText',   [self.nameStaticText] ]
         structure = list()
-        structure.append([bt2, bt1])
-        structure.append([bt3, bt4])
-        return self.dialog(settings = setting, struct= structure)
+        structure.append([bt1,])
+        structure.append([bt2,])
+        structure.append([btn3, btn4 ])
+        return self.dialog(settings = setting, struct = structure)
         
     def _showGui_GetValues(self):
         dlg= self._dialog()
