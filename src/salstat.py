@@ -147,7 +147,6 @@ class LogPanel( wx.Panel ):
     def __del__( self ):
         pass
 
-
 #---------------------------------------------------------------------------
 # class to wx.GetApp().output the results of several "descriptives" in one table
 #---------------------------------------------------------------------------
@@ -234,7 +233,6 @@ def GetLocaleDict(loc_list, opt=0):
                 else:
                     lang_dict[loc_i.CanonicalName] = getattr(wx, lang)
     return lang_dict
-
 
 def GetLangId(installDir, lang_n):
     """
@@ -649,17 +647,7 @@ class MainFrame(wx.Frame):
               ['Transform Data',           None,  self.GoTransformData,     None],
               ['short data',               None,  self.shortData,     None],)),
             ('S&tatistics',
-             (statisticalMenus[0],
-              statisticalMenus[1],
-              statisticalMenus[2],
-              statisticalMenus[3],
-              statisticalMenus[4],
-              statisticalMenus[5],
-              statisticalMenus[6],
-              statisticalMenus[7],
-              statisticalMenus[8],
-              ('Anova Functions',
-               (( 'F_oneway',    None, self.F_oneway,     None),))),),
+              statisticalMenus),
             ('&Graph',
              (('Line Chart of All Means', None, self.GoChartWindow,     None),
               ('Bar Chart of All Means',  None, self.GoMeanBarChartWindow,     None),
@@ -839,7 +827,6 @@ class MainFrame(wx.Frame):
         self.m_mgr.Update()
         # /<p>
         # emptying the undo redo
-
 
     def GoFindDialog(self, evt):
         # Shows the find & replace dialog
@@ -1673,94 +1660,6 @@ class MainFrame(wx.Frame):
                 wx.GetApp().frame.Destroy()
         else:
             wx.GetApp().frame.Destroy()
-#------------------------------------------
-# statistical functions definition
-#------------------------------------------
-    def _statsType1(self, functionName, grid, useNumpy = True,
-                    requiredcols= None,allColsOneCalc = False,
-                    nameResults= None, dataSquare= False, *args, **params):
-        try:
-            requiredcols= params.pop('requiredcols')
-        except KeyError:
-            requiredcols= None
-        setting = self.defaultDialogSettings
-        setting['Title'] = functionName
-        ColumnList, colnums  = grid.GetUsedCols()
-        bt1= ['StaticText', ('Select the column(s) to analyse',) ]
-        bt2= ['CheckListBox', (ColumnList,)]
-        structure = list()
-        structure.append([bt1,])
-        structure.append([bt2,])
-        dlg = dialog(settings = setting, struct= structure)
-        if dlg.ShowModal() == wx.ID_OK:
-            values = dlg.GetValue()
-            dlg.Destroy()
-        else:
-            dlg.Destroy()
-            return
-        # -------------------
-        # changing value strings to numbers
-        colNameSelect = values[0]
-        if len( colNameSelect ) == 0:
-            self.logPanel.write("You haven't selected any items!")
-            return
-
-        if len(colNameSelect) < requiredcols:
-            self.logPanel.write("You have to select at least %i columns"%requiredcols)
-            return
-
-        values = [ [pos for pos, value in enumerate( ColumnList )
-                    if value == val
-                    ][0]
-                   for val in colNameSelect
-                   ]
-        # -------------------
-        if useNumpy:
-            colums  = list()
-            for pos in values:
-                col = numpy.array(GetData(colnums[ pos ]))
-                col.shape = (len(col),1)
-                colums.append(col)
-        else:
-            colums = [ GetData(colnums[ pos ]) for pos in values]
-
-        if dataSquare:
-            # identifica que las columnas seleccionadas deben tener igual
-            #  cantidad de elementos
-            lendata= [len(col) for col in colums]
-            if sum([1 for leni in lendata if leni == lendata[0]]) <> len(colums):
-                return "The data must have the same dimensions!"
-
-        if allColsOneCalc:
-            result = getattr(stats, functionName)( *colums )
-        else:
-            # se hace los calculos para cada columna
-            result = [getattr(stats, functionName)( col ) for col in colums]
-
-        # se muestra los resultados
-        if nameResults == None:
-            wx.GetApp().output.addColData(colNameSelect, functionName)
-        else:
-            wx.GetApp().output.addColData(nameResults, functionName)
-        if functionName in ['kurtosis','kurtosistest','skewtest',
-                            'normaltest','mode']:
-            opt = False
-            try:
-                len(result[0])
-            except:
-                opt = True
-
-            if opt:
-                wx.GetApp().output.addColData(result)
-            else:
-                for i in range(len(result[0])):
-                    res1= [res[i] for res in result]
-                    wx.GetApp().output.addColData(res1)
-
-        else:
-            wx.GetApp().output.addColData(result)
-
-        self.logPanel.write(functionName + ' successful')
 
     def shortData(self,evt):
         functionName = "short"
@@ -1819,16 +1718,7 @@ class MainFrame(wx.Frame):
         wx.GetApp().output.addRowData(['','shorted Data','original position'], currRow= 0)
         self.logPanel.write(functionName + ' successful')
 
-    #def obrientransform(self,evt):
-    #    self.logPanel.write('obrientransform')
 
-    def F_oneway(self, evt):
-        self._statsType1("F_oneway", self.grid, allColsOneCalc = True,
-                         nameResults= ("F","p-value"))
-
-    def F_value(self, evt):
-        self._statsType1("F_value",self.grid, allColsOneCalc = True,
-                         nameResults= ("F","p-value"))
 #---------------------------------------------------------------------------
 # Scripting API is defined here. So far, only basic (but usable!) stuff.
 def GetData(column):
