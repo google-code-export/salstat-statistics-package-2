@@ -616,7 +616,7 @@ class MainFrame(wx.Frame):
         #set up menus
         menuBar = wx.MenuBar()
 
-        statisticalMenus = self._autoCreateMenu(statFunctions)
+        statisticalMenus= self._autoCreateMenu(statFunctions)
         #add contents of menu
         dat1= (
             ('&File',
@@ -658,13 +658,6 @@ class MainFrame(wx.Frame):
               statisticalMenus[6],
               statisticalMenus[7],
               statisticalMenus[8],
-              ('Probability Calcs',
-               (('chisqprob',    None, self.chisqprob,     None),
-                ('erfcc',        None, self.erfcc,     None),
-                ('zprob',        None, self.zprob,     None),   # 'ksprob'
-                ('betacf',       None, self.betacf,     None),
-                ('gammln',       None, self.gammln,     None),
-                ('betai',        None, self.betai,     None)),), # 'fprob'
               ('Anova Functions',
                (( 'F_oneway',    None, self.F_oneway,     None),))),),
             ('&Graph',
@@ -1214,7 +1207,7 @@ class MainFrame(wx.Frame):
         info.WebSite = ("http://code.google.com/p/salstat-statistics-package-2/", "S2 home page")
         info.Developers = [ "Mark Livingstone -- MAC & LINUX Translator","\nSebastian Lopez Buritica",]
 
-        info.License = wordwrap("GPL 2", 450, wx.ClientDC(self))
+        info.License = wordwrap("GPL 3", 450, wx.ClientDC(self))
 
         # Then we call wx.AboutBox giving it that info object
         wx.AboutBox(info)
@@ -1931,87 +1924,6 @@ class MainFrame(wx.Frame):
         wx.GetApp().output.addColData(numpy.ravel(result))
         self.logPanel.write(functionName + ' successful')
 
-    def chisqprob(self, evt):
-        self._statsType2(functionName= "chisqprob",
-                         texto = 'dregrees of fredom',
-                         spinData= (1,100,1),
-                         factor = 1,
-                         useNumpy = True,
-                         nameResults= ('one tailed probability'))
-
-    def erfcc(self, evt):
-        functionName = "erfcc"
-        group = lambda x,y: (x,y)
-        setting = self.defaultDialogSettings
-        setting['Title'] = functionName
-        ColumnList, colnums  = wx.GetApp().frame.grid.GetUsedCols()
-
-        bt1= group('StaticText',   ('X value',) )
-        bt2= group('NumTextCtrl',  ())
-
-        structure = list()
-        structure.append([bt2, bt1])
-        dlg = dialog(settings = setting, struct= structure)
-        if dlg.ShowModal() == wx.ID_OK:
-            values = dlg.GetValue()
-            dlg.Destroy()
-        else:
-            dlg.Destroy()
-            return
-        # -------------------
-        # changing value strings to numbers
-        (xvalue,) = values
-        if xvalue == None:
-            self.logPanel.write("You haven't entered a valid value!")
-            return
-
-        # se hace los calculos
-        result = getattr(stats, functionName)( xvalue)
-        # se muestra los resultados
-        colNameSelect = ['x', 'erfc(x)']
-        wx.GetApp().output.addColData(colNameSelect, functionName)
-        wx.GetApp().output.addColData([xvalue ,result])
-        self.logPanel.write(functionName + ' successful')
-
-    def zprob(self, evt):
-        functionName = "zprob"
-        group = lambda x,y: (x,y)
-        setting = self.defaultDialogSettings
-        setting['Title'] = functionName
-        ColumnList, colnums  = wx.GetApp().frame.grid.GetUsedCols()
-
-        bt1= group('StaticText',   ('Z value',) )
-        bt2= group('NumTextCtrl',  ())
-        structure = list()
-        structure.append([bt2, bt1])
-        dlg = dialog(settings = setting, struct= structure)
-        if dlg.ShowModal() == wx.ID_OK:
-            values = dlg.GetValue()
-            dlg.Destroy()
-        else:
-            dlg.Destroy()
-            return
-        # -------------------
-        # changing value strings to numbers
-        (xvalue,) = values
-        if xvalue == None:
-            self.logPanel.write("You haven't entered a valid value!")
-            return
-
-        # se hace los calculos
-        result = getattr(stats, functionName)( xvalue)
-        # se muestra los resultados
-        colNameSelect = ['x', 'erfc(x)']
-        wx.GetApp().output.addColData(colNameSelect, functionName)
-        wx.GetApp().output.addColData([xvalue ,result])
-        self.logPanel.write(functionName + ' successful')
-
-    #def ksprob(self, evt):
-    #    self.logPanel.write('ksprob')
-
-    #def fprob(self, evt):
-    #    self.logPanel.write('fprob')
-
     def betacf(self, evt):
         functionName = "betacf"
         group = lambda x,y: (x,y)
@@ -2051,39 +1963,6 @@ class MainFrame(wx.Frame):
         colNameSelect = ['a', 'b','x','betacf(a,b,x)']
         wx.GetApp().output.addColData(colNameSelect, functionName)
         wx.GetApp().output.addColData([a, b, x, result])
-        self.logPanel.write(functionName + ' successful')
-
-    def gammln(self, evt):
-        functionName = "gammln"
-        group = lambda x,y: (x,y)
-        setting = self.defaultDialogSettings
-        setting['Title'] = functionName
-        ColumnList, colnums  = wx.GetApp().frame.grid.GetUsedCols()
-
-        bt1= group('StaticText',   ('xx',) )
-        bt2= group('NumTextCtrl',  ())
-        structure = list()
-        structure.append([bt2, bt1])
-        dlg = dialog(settings = setting, struct= structure)
-        if dlg.ShowModal() == wx.ID_OK:
-            values = dlg.GetValue()
-            dlg.Destroy()
-        else:
-            dlg.Destroy()
-            return
-        # -------------------
-        # changing value strings to numbers
-        (xvalue,) = values
-        if xvalue == None:
-            self.logPanel.write("You haven't entered a valid value!")
-            return
-
-        # se hace los calculos
-        result = getattr(stats, functionName)( xvalue)
-        # se muestra los resultados
-        colNameSelect = ['xx', 'lgammln(xx)']
-        wx.GetApp().output.addColData(colNameSelect, functionName)
-        wx.GetApp().output.addColData([xvalue ,result])
         self.logPanel.write(functionName + ' successful')
 
     def betai(self, evt):

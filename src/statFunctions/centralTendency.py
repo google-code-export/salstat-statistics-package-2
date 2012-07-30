@@ -43,11 +43,11 @@ class geometricMean(_genericFunc):
         self.colNameSelect= values[0]
         
         if len( self.colNameSelect ) == 0:
-            self.logPanel.write("you don't select any items")
+            self.Logg.write("you don't select any items")
             return
         
         if len( self.colNameSelect ) < self.minRequiredCols:
-            self.logPanel.write("you have to select at least %i column(s)"%self.requiredcols)
+            self.Logg.write("you have to select at least %i column(s)"%self.requiredcols)
             return
         
         columns= self._convertColName2Values( self.colNameSelect )

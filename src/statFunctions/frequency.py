@@ -92,7 +92,7 @@ class scoreatpercentile(_genericFunc):
         self.statName=  'scoreatpercentile'
         self.nameStaticText= '%'
         self.minRequiredCols= 1
-        self.spindata= [1,100,1]
+        self.spindata= [0,100,1]
         self.colNameSelect= ''
         self._percent= None
         
