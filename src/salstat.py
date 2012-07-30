@@ -533,6 +533,7 @@ class MainFrame(wx.Frame):
                                             Dock().Resizable().FloatingSize( wx.DefaultSize ).
                                             CaptionVisible(True).
                                             DockFixed( False ).BestSize(wx.Size(-1,150)))
+        self.currPanel = None
 
         self._BindEvents()
         self.m_mgr.Update()
@@ -1397,7 +1398,6 @@ class MainFrame(wx.Frame):
         self.log.write('plt.Show()', False)
         # lin regress removing most disperse data
 
-
     def GoProbabilityplot(self, evt):
         self.log.write('Probability')
         ColumnList, colnums= self.grid.GetUsedCols()
@@ -1725,21 +1725,6 @@ def GetData(column):
     """This function enables the user to extract the data from the data grid.
     The data are "clean" and ready for analysis."""
     return wx.GetApp().frame.grid.CleanData(column)
-def GetDataName(column):
-    """This function returns the name of the data variable - in other words,
-    the column label from the grid."""
-    return wx.GetApp().frame.grid.GetColLabelValue(column)
-def PutData(column, data):
-    """This routine takes a list of data, and puts it into the datagrid
-    starting at row 0. The grid is resized if the list is too large. This
-    routine desperately needs to be updated to prevent errors"""
-    frame = wx.GetApp().frame
-    n = len(data)
-    if (n > frame.grid.GetNumberRows()):
-        frame.grid.AddNCols(-1, (datawidth - gridwidth + 5))
-    for i in range(n):
-        frame.grid.SetCellValue(i, column, str(data[i]))
-
 #--------------------------------------------------------------------------
 # main loop
 if __name__ == '__main__':
