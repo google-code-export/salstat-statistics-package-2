@@ -217,12 +217,12 @@ class ranksums(pearsonr):
 
 class wilcoxont(pearsonr):
     ''''''
-    name=      'wilcoxont'
+    name=      'Wilcoxon T-test related samples'
     statName=  'wilcoxont'
     def __init__(self):
         # getting all required methods
         pearsonr.__init__(self)
-        self.name=      'wilcoxont'
+        self.name=      'Wilcoxon T-test related samples'
         self.statName=  'wilcoxont'
         self.txt1= "X Column to analyse"
         self.txt2= "Y Column to analyse"
