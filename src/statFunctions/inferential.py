@@ -247,9 +247,8 @@ class kruskalwallish(geometricMean):
         self.statName=  'kruskalwallish'
         self.minRequiredCols= 3
         self.colNameSelect= ''
-        self.labels= ['H-statistic (corrected for ties)',
+        self.nameResults= ['H-statistic (corrected for ties)',
                                      'associated p-value']
-
 
     def _calc(self, columns, *args, **params):
         return self.evaluate(*columns)
@@ -261,7 +260,7 @@ class kruskalwallish(geometricMean):
         return _stats.kruskalwallish(*args, **params)
 
     def _report(self, result):
-        self.outputGrid.addColData(self.labels, self.name)
+        self.outputGrid.addColData(self.nameResults, self.name)
         self.outputGrid.addColData(result)
 
         self.outputGrid.addRowData(['selected columns',], currRow= 0)
@@ -282,7 +281,7 @@ class friedmanchisquare(kruskalwallish):
         self.statName=  'friedmanchisquare'
         self.minRequiredCols= 3
         self.colNameSelect= ''
-        self.labels= ['chi-square statistic', 'associated p-value']
+        self.nameResults= ['chi-square statistic', 'associated p-value']
 
     def object(self):
         return _stats.friedmanchisquare
