@@ -1,6 +1,7 @@
 '''Some condition test'''
+
 __name__ = 'Condition tests'
-__all__ = ['oneConditionTest']
+__all__ = ['oneConditionTest','twoConditionTest']
 from statlib import stats as _stats
 import numpy
 # _genericFunc ist called from the __init__.py file
@@ -8,6 +9,10 @@ from statFunctions import _genericFunc
 from wx import ID_OK as _OK
 from wx import Size
 from openStats import OneSampleTests, twoSampleTests
+from slbTools import homogenize
+from statFunctions.inferential import chisquare, ks_2samp, mannwhitneyu
+from statFunctions.inferential import ranksums,ttest_ind,ttest_rel,wilcoxont
+from statFunctions.correlation import linregress
         
 class oneConditionTest(_genericFunc):
     name= 'One condition test'
@@ -89,7 +94,7 @@ class oneConditionTest(_genericFunc):
         if values== None:
             return None
         
-        result= self._calc( values[0], *values[1:])
+        result= self._calc( *values)
         self._report( result)
         
     def _report( self, result):
@@ -152,16 +157,47 @@ class oneConditionTest(_genericFunc):
         self.outputGrid.addRowData( ['user mean=' ,  self.userMean ], currRow= 0)
     
 class twoConditionTest(oneConditionTest):
-    def __init__(self):
+    name= 'Two condition test'
+    statName= 'twoConditionTest'
+    def __init__( self):
         oneConditionTest.__init__(self)
         self.name=     'Two condition test'
         self.statName= 'twoConditionTest'
         self.minRequiredCols= 2
-        self.aviableTest= []
+        self.aviableTest= ['chisquare', 'ks_2samp', 'linear regression',
+                           'Mann Whitneyu', 'ttest related', 'ttest independent',
+                           'Rank Sums', 'Wilcoxon t-test <signed ranks>']
         self.colNameSelect= []
         self.tests= []
-        self.hypotesis= 0
+        self.hypotesis= None
         
+    def _showGui_GetValues( self):
+        dlg= self._dialog()
+        if dlg.ShowModal() == _OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        
+        self.colNameSelect= values[0]
+        
+        if len( self.colNameSelect ) == 0:
+            self.Logg.write("you don't select any items")
+            return
+        
+        if len( self.colNameSelect ) != 2:
+            self.Logg.write("you have to select only two column(s)")
+            return
+        
+        columns=  [numpy.ravel(self._convertColName2Values( [colName] )) for colName in self.colNameSelect]
+        # se homogeniza las columnas
+        columns= homogenize(*columns)
+        self.tests=     values[1]
+        self.hypotesis= values[2]
+        self.userMean=  values[3]
+        return ( columns, self.tests, self.hypotesis, self.userMean)
+
     def evaluate( self, *args, **params):
         # computations here
         columns=   args[0]
@@ -169,80 +205,57 @@ class twoConditionTest(oneConditionTest):
         hypotesis= args[2] #0 == One Tailed, 1 == two tailed
         umean=     args[3]
         if umean == None or len(columns) == 0 or len(tests) == 0:
-            raise StandardError('The input parameters are incorrect')
+            raise StandardError( 'The input parameters are incorrect')
 
         # combining data
         result= list()
-        for pos, varName in enumerate(self.colNameSelect[:-1]):
-            for pos2, var2Name in enumerate(self.colNameSelect[pos:]):
-                result1= [twoSampleTests( columns[pos],
-                                          columns[pos2],
-                                          tests, umean, varName, var2Name)
-                          for col in columns]
-                result.extend( result1)
-
+        for test in tests:
+            if   test == 'chisquare':
+                fcn= chisquare()
+            
+            elif test == 'ks_2samp':
+                fcn= ks_2samp()
+            
+            elif test == 'linear regression':
+                fcn= linregress()
+            
+            elif test == 'Mann Whitneyu':
+                fcn= mannwhitneyu()
+            
+            elif test == 'ttest related':
+                fcn= ttest_rel()
+            
+            elif test == 'ttest independent':
+                fcn= ttest_ind()
+            
+            elif test == 'Rank Sums':
+                fcn= ranksums()
+            
+            elif test == 'Wilcoxon t-test <signed ranks>':
+                fcn= wilcoxont()
+            else:
+                continue
+            
+            res= [fcn.name]
+            try:
+                resultado= fcn.evaluate(*columns)
+                for  name, res1 in zip(fcn.nameResults, resultado):
+                    res.extend([name, res1])
+            except:
+                res.append('There is a runtime error')
+            res.append('')
+            result.append(res)           
+                
         return result
-
+        
     def _report( self, result):
-        #####################################
-        ######  change this function  #######
-        #####################################
-        if len(result) == 0:
-            return
         
-        # se hace el reporte por variables
-        coldescription= [u'test - variable']
-        for nameTest in self.tests:
-            coldescription.append( nameTest)
-            if nameTest == u't-test':
-                coldescription.extend( ['t', 'prob (approx)'])
-                
-            elif nameTest == u'Sign Test':
-                coldescription.extend( ['z', 'prob'])
-                
-            elif nameTest == u'Chi square test for variance':
-                coldescription.extend( ['df', 'chisquare', 'prob'])
-                
-        self.outputGrid.addColData( coldescription, self.name)
+       self.outputGrid.addColData( result[0], self.name)
+       if len(result) > 1:
+           for res in result[1:]:
+               self.outputGrid.addColData( res)
         
-        for name, testResults in zip( self.colNameSelect, result):
-            col2report= [name]
-            for nameTest in self.tests:
-                result= testResults.pop( 0)
-                if nameTest == u't-test':
-                    prob= result[1]
-                    if prob == -1.0:
-                        col2report.extend( ['All elements are the same', 'test not possible', ''])
-                    else:
-                        if self.hypotesis == 0:
-                            prob= result[1]/2.0
-                        col2report.append( '')
-                        col2report.append( result[0]) 
-                        col2report.append( prob)
-                        
-                elif nameTest == u'Sign Test':
-                    prob= result[1]
-                    if prob == -1.0:
-                        col2report.extend([ 'All data are the same','no analysis is possible',''])
-                    else:
-                        if self.hypotesis == 0:
-                            prob= prob/2.0
-                        col2report.append( '')
-                        col2report.append( result[0])
-                        col2report.append( prob)
-                        
-                elif nameTest == u'Chi square test for variance':
-                    prob= result[2]
-                    if prob == None:
-                        prob= 1.0
-                        
-                    if self.hypotesis == 0:
-                        continue
-                        # prob= prob / 2.0 # chisquare
-                    
-                    col2report.extend( ['',result[0], result[1], prob])
-                    
-            self.outputGrid.addColData( col2report)
+       self.Logg.write('Two sample test succesfull')
             
 #---------------------------------------------------------------------------
 # dialog for single factor tests with 3+ conditions
