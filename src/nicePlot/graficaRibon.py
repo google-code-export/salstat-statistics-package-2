@@ -224,12 +224,8 @@ def plotBar(ax=      None,
     if labels== None:
         labels = [None for i in ydata]
     if path == None:
-        wx.GetApp().Logg.write('path == NONE')
         path= os.path.join(IMAGESPATH,'barplot')
-        wx.GetApp().Logg.write(path)
-    else:
-        wx.GetApp().Logg.write('path != NONE')
-        wx.GetApp().Logg.write(path)
+
     for year, h, bc,label,figi in zip(xdata, ydata, box_colors,labels,figName):
         bbox0 = Bbox.from_extents(year-0.5, 0., year+0.5, h) # year-0.4, 0., year+0.4,
         bbox = TransformedBbox(bbox0, ax.transData)
