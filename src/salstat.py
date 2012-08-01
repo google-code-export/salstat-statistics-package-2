@@ -338,8 +338,6 @@ class SalStat2App(wx.App):
         ###self.output = self.frame.answerPanel
         # referencing the plot system
         self.frame.ShowFullScreen(True,False)
-        self.Logg.write(self.installDir)
-        ## self.plot= plot ## set under MainFrame class
         return True
 
     def getDataDir(self):
