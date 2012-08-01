@@ -49,10 +49,6 @@ from dialogs import TransformFrame
 
 from gridCellRenderers import floatRenderer, AutoWrapStringRenderer
 
-# to be used for statistical menu autocreation
-import statFunctions
-from statFunctions import *
-
 APPNAME= 'S2'
 
 inits ={}    # dictionary to hold the config values
@@ -606,7 +602,10 @@ class MainFrame(wx.Frame):
         sixsigma =   imag.sixsigma16()
         #set up menus
         menuBar = wx.MenuBar()
-
+        
+        # to be used for statistical menu autocreation
+        import statFunctions
+        from statFunctions import *
         statisticalMenus= self._autoCreateMenu(statFunctions)
         #add contents of menu
         dat1= (
