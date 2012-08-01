@@ -9,14 +9,24 @@ from matplotlib.transforms import Bbox, TransformedBbox
 from matplotlib.ticker import ScalarFormatter
 
 import os.path
+import sys
+import wx
+
 
 class _RibbonBox(object):
     def __init__(self, color, figName, 
-                 path='.//images//barplot//'):
+                 path= None):
         
-        print str(os.path.relpath(  path + figName + '.png'))
-        self.original_image = read_png( str(os.path.relpath(
-                    path + figName + '.png')))
+        if path == None:
+            try:
+                IMAGESPATH= os.path.join( wx.GetApp().installDir, 'nicePlot','images')
+            except:
+                IMAGESPATH= os.path.join(sys.argv[0], 'nicePlot','images')
+            self.original_image = read_png( str(os.path.relpath(
+                        os.path.join(IMAGESPATH, "barplot", figName + '.png'))))
+        else:
+            self.original_image = read_png( str(os.path.relpath(
+                        os.path.join(path, figName + '.png'))))
         
         self.cut_location = 70
         self.b_and_h= self.original_image[:,:,2]
@@ -98,7 +108,9 @@ def plothist(xdata= np.arange(4, 9), ydata= np.random.random(5), colors = 'rando
     for year, h, bc in zip(xdata, ydata, box_colors):
         bbox0 = Bbox.from_extents(year-0.48, 0.0, year+0.48, h) # year-0.4, 0., year+0.4, year-1 year+1
         bbox = TransformedBbox(bbox0, ax.transData)
-        rb_patch = _RibbonBoxImage(bbox, bc, figName, path= './/images//histplot//', interpolation="bicubic")
+        rb_patch = _RibbonBoxImage(bbox, bc, figName, 
+                                   path=  os.path.join(IMAGESPATH,'nicePlot','images','histplot'),
+                                   interpolation="bicubic")
         ax.add_artist(rb_patch)
         if 0:
             if type(h) == type(1):
@@ -188,6 +200,11 @@ def plotBar(ax=      None,
     '''box_colors: 'random'|'blue'|'red'|'green'|'ligthgreen'|'darkblue'|'hsv'
     figure: redunca02|blue|aluminio|cilindro| 
     ''' 
+    try:
+        IMAGESPATH= os.path.join(wx.GetApp().installDir, 'nicePlot','images')
+    except:
+        IMAGESPATH= os.path.join(sys.argv[0], 'nicePlot', 'images')
+        
     if len(xdata) != len(ydata):
         raise StandardError('xdata and ydata must have the same len()')
     
@@ -207,7 +224,12 @@ def plotBar(ax=      None,
     if labels== None:
         labels = [None for i in ydata]
     if path == None:
-        path= './/images//barplot//'
+        wx.GetApp().Logg.write('path == NONE')
+        path= os.path.join(IMAGESPATH,'barplot')
+        wx.GetApp().Logg.write(path)
+    else:
+        wx.GetApp().Logg.write('path != NONE')
+        wx.GetApp().Logg.write(path)
     for year, h, bc,label,figi in zip(xdata, ydata, box_colors,labels,figName):
         bbox0 = Bbox.from_extents(year-0.5, 0., year+0.5, h) # year-0.4, 0., year+0.4,
         bbox = TransformedBbox(bbox0, ax.transData)

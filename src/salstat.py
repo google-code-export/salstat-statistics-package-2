@@ -301,7 +301,7 @@ class SalStat2App(wx.App):
             installDir = os.path.dirname(os.path.abspath(__file__))
         except:
             installDir = os.path.dirname(os.path.abspath(sys.argv[0]))
-
+        self.installDir= installDir # to be used in the nice bar plot
         language = self.GetPreferences("Language")
         if not language:
             language = "Default"
@@ -338,6 +338,7 @@ class SalStat2App(wx.App):
         ###self.output = self.frame.answerPanel
         # referencing the plot system
         self.frame.ShowFullScreen(True,False)
+        self.Logg.write(self.installDir)
         ## self.plot= plot ## set under MainFrame class
         return True
 

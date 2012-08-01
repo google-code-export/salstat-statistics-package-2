@@ -12,7 +12,8 @@ opts = { "py2exe":
                            "matplotlib",
                            "matplotlib.backends",
                            "matplotlib.backends.backend_qt4agg",
-                           "PyQt4"
+                           "PyQt4",
+                           "statFunctions.*",  # importing the statistical functions
                            ],
               "excludes":['_gtkagg', '_tkagg', '_agg2', '_cairo', '_cocoaagg',
                           '_fltkagg', '_gtk', '_gtkcairo',
@@ -38,7 +39,7 @@ setup(name=         'salstat',
       version=      '2.1',
       description=  'Statistics Package',
       url=          'http://code.google.com/p/salstat-statistics-package-2/',
-      license=      'GPL 2',
+      license=      'GPL 3',
       windows=[
           {"script": 'salstat.py',
            "icon_resources": [(0, iconPath)]
