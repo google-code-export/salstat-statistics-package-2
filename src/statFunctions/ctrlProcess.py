@@ -33,7 +33,7 @@ import math
 from openStats import normProb, normProbInv
  
 class sixPack(_genericFunc):
-    ##icon= imageEmbed().sixsigma16()
+    icon= imageEmbed().sixsigma16()
     name=      'Six Sigma Pack'
     statName=  'sixpack'
     def __init__(self):
