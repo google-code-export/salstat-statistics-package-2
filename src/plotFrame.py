@@ -757,17 +757,16 @@ class MpltFrame( wx.Frame, object ):
         colour= data2plot[3]
         figNam= data2plot[4]
         self.gca().hold( True)
-        try:
-            plotBar(ax=      self.gca(),
-                    xdata=   xdat,
-                    ydata=   ydat,
-                    labels=  None,
-                    colors=  colour,
-                    figName= figNam,
-                    path= '.\\nicePlot\\images\\barplot\\')
-        except:
-            data2plot= (ydata,'Media')
-            plotBar(data2plot)
+        #try:
+        plotBar(ax=      self.gca(),
+                xdata=   xdat,
+                ydata=   ydat,
+                labels=  None,
+                colors=  colour,
+                figName= figNam)
+        #except:
+        #    data2plot= (ydat,'Media')
+        #plotBar(data2plot)
         self.gca().hold( False)
         self.figpanel.canvas.draw( )
 

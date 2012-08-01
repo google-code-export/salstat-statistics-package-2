@@ -54,7 +54,7 @@ Var vcredist2008set
 !insertmacro MUI_LANGUAGE SpanishInternational
 
 # Installer attributes
-OutFile "S2 V2.1 Alpha 4 setup.exe"
+OutFile "S2 V2.1 Alpha 5 setup.exe"
 InstallDir Salstat2
 CRCCheck on
 XPStyle on
