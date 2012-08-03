@@ -184,7 +184,7 @@ class MpltFrame( wx.Frame, object ):
         self.m_staticText281.Wrap( -1 )
         bSizer6.Add( self.m_staticText281, 0, wx.ALIGN_CENTER|wx.ALL, 5 )
         
-        self.m_spinCtrl2 = wx.SpinCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 60,-1 ), wx.SP_ARROW_KEYS, 0, 359, 0 )
+        self.m_spinCtrl2 = wx.SpinCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 60,-1 ), wx.SP_ARROW_KEYS, -90, 90, 0 )
         bSizer6.Add( self.m_spinCtrl2, 0, wx.ALL, 5 )
         
         
@@ -238,7 +238,7 @@ class MpltFrame( wx.Frame, object ):
         self.m_staticText291.Wrap( -1 )
         bSizer8.Add( self.m_staticText291, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
         
-        self.m_spinCtrl3 = wx.SpinCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 60,-1 ), wx.SP_ARROW_KEYS, 0, 359, 0 )
+        self.m_spinCtrl3 = wx.SpinCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 60,-1 ), wx.SP_ARROW_KEYS, -90, 90, 0 )
         bSizer8.Add( self.m_spinCtrl3, 0, wx.ALL, 5 )
         
         
