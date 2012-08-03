@@ -29,7 +29,7 @@ from matplotlib.backend_bases import MouseEvent
 from triplot import triplot, triang2xy
 
 from slbTools import homogenize
-from nicePlot.graficaRibon import plotBar # nice plot
+from nicePlot.graficaRibon import plotBar, plothist # nice plot
 
 PROPLEGEND= {'size':11}
 
@@ -69,16 +69,16 @@ class MpltFrame( wx.Frame, object ):
         '''
         self.log= wx.GetApp().Logg  # to write the actions
         self.graphParams= {'xlabel': '',
-                     'ylabel': '',
-                     'title': '',
-                     'xtics': []}
+                           'ylabel': '',
+                           'title': '',
+                           'xtics': []}
 
         for key in self.graphParams.keys():
             try:
                 self.graphParams[key] = params.pop(key)
             except KeyError:
                 continue
-        
+
         wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 642,465 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
 
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
@@ -567,7 +567,7 @@ class MpltFrame( wx.Frame, object ):
         self.plt_textCtr1.Bind( wx.EVT_TEXT, self._TitleChange )
         self.plt_textCtr2.Bind( wx.EVT_TEXT, self._xlabelChange )
         self.plt_textCtr3.Bind( wx.EVT_TEXT, self._ylabelChange )        
-        
+
         self.m_button3.Bind( wx.EVT_BUTTON, self._titleFontProp )
         self.m_button4.Bind( wx.EVT_BUTTON, self._xlabelFontProp )        
         self.m_button5.Bind( wx.EVT_BUTTON, self._ylabelFontProp )
@@ -609,7 +609,7 @@ class MpltFrame( wx.Frame, object ):
         self.figpanel.canvas.mpl_connect('motion_notify_event', self._UpdateStatusBar)
         ###
         ###
-        
+
         if typePlot == None:
             self._plotTest()
         else:
@@ -635,7 +635,7 @@ class MpltFrame( wx.Frame, object ):
         #
         ###
         ###
-        
+
         markerStyles= [ 'None', 'o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd']
         faceColors=   ['b', 'g', 'r', 'c', 'm', 'y', 'k']
         lineStyles=   ['_', '-', '--', ':']
@@ -658,7 +658,7 @@ class MpltFrame( wx.Frame, object ):
         self.m_choice12.SetSelection(0)
         self.m_choice10.SetSelection(0)
         self.m_choice11.SetSelection(0)
-           
+
     def OnActivate(self, evt):
         # read the actual axes
         if hasattr(self, 'axes'):
@@ -674,7 +674,7 @@ class MpltFrame( wx.Frame, object ):
                 self.plt_textCtr1.Value= self.gca().get_title()
                 # connect the cursor to current axes
                 self._connectCursor(self.gca()) 
-        
+
     def _clearTitles(self, evt):
         # clear xlabel ctrl
         self.plt_textCtr2.Value= u''
@@ -682,15 +682,15 @@ class MpltFrame( wx.Frame, object ):
         self.plt_textCtr3.Value= u''
         # clear title
         self.plt_textCtr1.Value= u''
-        
-    
+
+
     def _connectCursor(self, axes):
         # connect the cursor to the axes selected
         self.cursor= Cursor( axes, useblit = True, color = 'blue', linewidth = 1)
         self.cursor.horizOn= False
         self.cursor.vertOn=  False
-        
-        
+
+
     def __getattribute__(self, name):
         '''wraps the funtions to the grid
         emulating a plot frame control'''
@@ -698,7 +698,7 @@ class MpltFrame( wx.Frame, object ):
             return object.__getattribute__(self, name)
         except AttributeError:
             return self.figpanel.__getattribute__(name)
-        
+
     def _addLabels( self,labels):
         self.figpanel.gca().set_title(labels['title'])
         self.figpanel.gca().set_xlabel(labels['xlabel'])
@@ -749,7 +749,7 @@ class MpltFrame( wx.Frame, object ):
         legend.draggable( state = True)
         self.gca().hold( False)
         self.figpanel.canvas.draw()
-        
+
     def plotNiceBar( self, data2plot):
         xdat=  data2plot[0]
         ydat=  data2plot[1]
@@ -773,7 +773,7 @@ class MpltFrame( wx.Frame, object ):
     def plotBarH( self,data2plot):
         self.gca().hold(True)
         listLegend= list()
-        listPlot = list()
+        listPlot=   list()
         for y,texto in data2plot:
             listPlot.append(self.gca().barh(range(len(y)),y,align='center'))
             listLegend.append(texto)
@@ -800,10 +800,10 @@ class MpltFrame( wx.Frame, object ):
             text2anotate += str(round(line[1],4))
         text2anotate += "\n r = " + str(round(line[2],6))
         an1= self.gca().annotate(text2anotate, xy=(x[int(len(x)/2)],
-                                                  yfit(x[int(len(x)/2)])),  xycoords='data',
-                                              ha="center", va="center",
-                                              bbox=bbox_args,
-                                              arrowprops=arrow_args)
+                                                   yfit(x[int(len(x)/2)])),  xycoords='data',
+                                               ha="center", va="center",
+                                               bbox=bbox_args,
+                                               arrowprops=arrow_args)
         an1.draggable()
         self.figpanel.canvas.draw()
 
@@ -812,18 +812,30 @@ class MpltFrame( wx.Frame, object ):
         fracs = data2plot[1]#[15,30,45, 10]
         explode= data2plot[2]#(0, 0.05, 0, 0)
         plt = self.figpanel.gca().pie( fracs, explode=explode,
-                                         labels=labels,
-                                         autopct='%1.1f%%',
-                                         shadow=True)
+                                       labels=labels,
+                                       autopct='%1.1f%%',
+                                       shadow=True)
         self.figpanel.canvas.draw()
 
     def boxPlot(self,data2plot):
         plt= self.gca().boxplot(data2plot, notch=0, sym='+', vert=1, whis=1.5,
-                               positions=None, widths=None, patch_artist=False)
+                                positions=None, widths=None, patch_artist=False)
         self.figpanel.canvas.draw()
 
-    def plotHistogram(self,data2plot):
-        pass
+    def plotNiceHistogram(self, data2plot):
+        (xdat,ydat, labels, color, figName) = data2plot
+        labels= []
+        self.gca().hold( True)
+        plothist(ax=     self.gca(),
+                xdata=   xdat,
+                ydata=   ydat,
+                labels=  None,
+                colors=  color,
+                figName= figName)
+        self.gca().hold( False)
+        self.figpanel.canvas.draw( )
+
+
     def plotTrian(self,data2plot):
         '''data2plot = ((a,b,c,'legend'))'''
         legends= data2plot[1]
@@ -836,7 +848,7 @@ class MpltFrame( wx.Frame, object ):
         ax.set_xlim((-0.08, 1.08))
         ax.set_ylim((-0.08, 0.97))
         ax.set_axis_off()
-        
+
         ax.hold(True)
         #<p> plot the grid
         a= plotT.meshLines[-1]
@@ -844,14 +856,14 @@ class MpltFrame( wx.Frame, object ):
         for pos,lineGrid in enumerate(plotT.meshLines):
             if pos == 0:
                 ax.plot(lineGrid[0],lineGrid[1], 
-                    color= wx.Colour(0, 0, 0, 0.5),
-                    linestyle= '-',)
+                        color= wx.Colour(0, 0, 0, 0.5),
+                        linestyle= '-',)
             else:
                 ax.plot(lineGrid[0],lineGrid[1], 
-                    color= wx.Colour(0, 0, 0, 0.5),
-                    linestyle= '--',)
+                        color= wx.Colour(0, 0, 0, 0.5),
+                        linestyle= '--',)
         #plot the grid /<p>
-        
+
         #<p> generating a background patch
         # changing triangular coordinates to xy coordinates
         cord1= triang2xy(1,0,0)
@@ -868,7 +880,7 @@ class MpltFrame( wx.Frame, object ):
         patch = mpatches.PathPatch(path, facecolor='white', edgecolor='black', alpha=0.5)
         ax.add_patch(patch)
         #/<p>
-        
+
         # <p> adding Corner labels
         cordLeft=  (-0.06, -0.03)
         cordRigth= ( 1.06, -0.03)
@@ -876,24 +888,24 @@ class MpltFrame( wx.Frame, object ):
         stylename= 'round'
         fontsize= 13
         an1=ax.text( cordLeft[0], cordLeft[1], legends[0],
-                 ha= "right",
-                 va= 'top',
-                 size= fontsize, #                 transform= ax.figure.transFigure,
-                 bbox=dict(boxstyle=stylename, fc="w", ec="k")) #              bbox=dict(boxstyle=stylename, fc="w", ec="k")
-        
+                     ha= "right",
+                     va= 'top',
+                     size= fontsize, #                 transform= ax.figure.transFigure,
+                     bbox=dict(boxstyle=stylename, fc="w", ec="k")) #              bbox=dict(boxstyle=stylename, fc="w", ec="k")
+
         an2=ax.text( cordRigth[0], cordRigth[1],  legends[1],
-                 ha= "left",
-                 va= 'top',
-                 size= fontsize,#                 transform= ax.figure.transFigure,
-                 bbox=dict(boxstyle=stylename, fc="w", ec="k"))
-        
+                     ha= "left",
+                     va= 'top',
+                     size= fontsize,#                 transform= ax.figure.transFigure,
+                     bbox=dict(boxstyle=stylename, fc="w", ec="k"))
+
         an3=ax.text( cordUpper[0], cordUpper[1],  legends[2],
-                 ha= "center",
-                 va= 'baseline',
-                 size= fontsize, #                 transform= ax.figure.transFigure,
-                 bbox=dict(boxstyle=stylename, fc="w", ec="k"))
+                     ha= "center",
+                     va= 'baseline',
+                     size= fontsize, #                 transform= ax.figure.transFigure,
+                     bbox=dict(boxstyle=stylename, fc="w", ec="k"))
         # adding coordinates  /<p>
-        
+
         #<p> add a ruler
         for line in plotT.ruler:
             ax.plot(line[0],line[1], 
@@ -905,37 +917,37 @@ class MpltFrame( wx.Frame, object ):
                 for ((x,y), value) in zip(values, range(10,-1,-1)):
                     value = value/float(10)
                     ax.text(x, y, str(value),
-                        horizontalalignment= 'right',
-                        verticalalignment=   'bottom',
-                        fontsize=            10)
+                            horizontalalignment= 'right',
+                            verticalalignment=   'bottom',
+                            fontsize=            10)
                         #transform=           ax.transAxes)
             if key == 'CB':
                 for ((x,y), value) in zip(values, range(10,-1,-1)):
                     value = value/float(10)
                     ax.text(x, y, str(value),
-                        horizontalalignment= 'left',
-                        verticalalignment=   'bottom',
-                        fontsize=            10)
+                            horizontalalignment= 'left',
+                            verticalalignment=   'bottom',
+                            fontsize=            10)
             if key == 'AB':
                 for ((x,y), value) in zip(values, range(10,-1,-1)):
                     value = value/float(10)
                     ax.text(x, y, str(value),
-                        horizontalalignment= 'center',
-                        verticalalignment=   'top',
-                        fontsize=            10)
+                            horizontalalignment= 'center',
+                            verticalalignment=   'top',
+                            fontsize=            10)
         # add the ruler /<p>
-        
+
         listPlot = list()
         for data in plotT.xydata:
             listPlot.append( ax.plot( data[0],data[1],
-                                linestyle= '_', marker='d'))
-            
+                                      linestyle= '_', marker='d'))
+
         listLegend= [dat[3] for dat in data2plot]
         legend= self.figpanel.legend( listPlot, listLegend, prop = PROPLEGEND)
         legend.draggable( state= True)
         ax.hold(False)
         self.figpanel.canvas.draw(0)
-        
+
     def AdaptativeBMS(self, data, xlabel='', ylabel='', title=''):
         self.figpanel.gca().hold(True)
         for serieNumber, serieData in enumerate(data): 
@@ -952,15 +964,15 @@ class MpltFrame( wx.Frame, object ):
         self.figpanel.gca().set_ylabel(ylabel)
         self.figpanel.gca().hold(False)
         self.figpanel.canvas.draw()
-        
+
     def _TitleChange( self, evt ):
         #self.log.write('# Changing Title', False)
         self.figpanel.gca().set_title(evt.GetString())
         self.figpanel.canvas.draw()
-        
+
         #self.log.write('Title= ' + "'" + self.figpanel.gca().get_title().__str__()+ "'", False)
         #self.log.write('plt.gca().set_title(Title)', False)
-                
+
     def probabilityPlot(self, data2plot):
         import scipy.stats as stats2
         from numpy import amin, amax
@@ -976,7 +988,7 @@ class MpltFrame( wx.Frame, object ):
         posx, posy= xmin+0.70*(xmax-xmin), ymin+0.01*(ymax-ymin)
         ax.text(posx,posy, "r^2=%1.4f" % r)
         self.figpanel.canvas.draw()
-        
+
     def controlChart(self, data2plot):
         UCL= data2plot['UCL']
         LCL= data2plot['LCL']
@@ -991,8 +1003,8 @@ class MpltFrame( wx.Frame, object ):
                 posDataOutSide.append((pos,value))
         # then plot the violating points
         self.gca().plot([dat[0] for dat in posDataOutSide],
-                       [dat[1] for dat in posDataOutSide],
-                       linestyle= '_', color='r', marker='d')
+                        [dat[1] for dat in posDataOutSide],
+                        linestyle= '_', color='r', marker='d')
         # UCL, LCL  Lines
         self._OnAddRefHorzLine( evt= None, ypos= UCL, color= 'r')
         self._OnAddRefHorzLine( evt= None, ypos= LCL, color= 'r')
@@ -1021,7 +1033,7 @@ class MpltFrame( wx.Frame, object ):
         self.figpanel.gca().grid(value)
         self.figpanel.canvas.draw()
         self.log.write('plt.gca().grid('+value.__str__()+')', False)
- 
+
 
     def _OnXaxisScale( self, evt ):
         self.log.write('# changing x axis scale', False)
@@ -1080,7 +1092,7 @@ class MpltFrame( wx.Frame, object ):
         self.log.write('# changing y axis min value', False)
         axisValue = self.figpanel.gca().get_ybound()
         self.log.write('axisValue= plt.gca().get_ybound()', False)
-        
+
         try:
             float(evt.GetString())
         except:
@@ -1089,7 +1101,7 @@ class MpltFrame( wx.Frame, object ):
         self.figpanel.canvas.draw()
         self.log.write('plt.gca().set_ybound((float('+evt.GetString().__str__()+'),axisValue[1]))', False)
 
-        
+
     def _ymaxValue( self, evt ):
         self.log.write('# changing y axis max value', False)
         axisValue = self.figpanel.gca().get_ybound()
@@ -1102,7 +1114,7 @@ class MpltFrame( wx.Frame, object ):
         self.figpanel.canvas.draw()
         self.log.write('plt.gca().set_ybound((axisValue[0],float('+evt.GetString().__str__()+')))', False)
 
-        
+
     def _titleFontProp( self, evt ):
         fontprop= fontDialog(self)
         currtitle = self.figpanel.gca().get_title()
@@ -1138,7 +1150,7 @@ class MpltFrame( wx.Frame, object ):
         value = evt.Checked()
         if not value:
             self.statusbar.SetStatusText(( ""), 1)
-        
+
         self.cursor.horizOn = value
         self.cursor.vertOn = value
         self.figpanel.canvas.draw()
@@ -1281,7 +1293,7 @@ class MpltFrame( wx.Frame, object ):
             ypos = params.pop('ypos')
             self.gca().hold(True)
             #self.log.write('plt.gca().hold(True)', False)
-            
+
             line= self.gca().axhline(ypos)
             self.log.write('line= pltgca().axhline('+ypos.__str__()+')', False)
             self.gca().hold(False)
@@ -1304,7 +1316,7 @@ class MpltFrame( wx.Frame, object ):
             self.log.write('line.set_color('+"'"+params['color'].__str__()+"'"+')', False)
         self.figpanel.canvas.draw()
         #self.log.write('plt.draw()',False)
-        
+
     def _OnAddRefVertLine( self, evt ):
         self.log.write('# adding reference vertical line', False)
         try:
@@ -1313,7 +1325,7 @@ class MpltFrame( wx.Frame, object ):
             return
         self.gca().hold(True)
         self.log.write('plt.gca().hold(True)', False)
-        
+
         xpos= float(self.HorVerTxtCtrl.GetValue())
         self.gca().axvline(xpos)
         self.log.write('plt.gca().axvline('+xpos.__str__()+')', False)
@@ -1402,13 +1414,13 @@ class MpltFrame( wx.Frame, object ):
             return
         self.log.write('pos1= ' + pos1.__str__(), False)
         self.log.write('pos2= ' + pos2.__str__(), False)
-        
+
         faceColor= self.m_choice81.GetItems()[self.m_choice81.GetSelection()]
         self.log.write('faceColor= '+"'"+faceColor.__str__()+"'", False)
-        
+
         Alpha= float(self.m_choice12.GetItems()[self.m_choice12.GetSelection()])
         self.log.write('Alpha= '+Alpha.__str__(), False)
-        
+
         patch= self.figpanel.gca().axhspan(pos1,pos2, facecolor= faceColor, alpha= Alpha)
         self.log.write('patch= plt.gca().axhspan(pos1,pos2, facecolor= faceColor, alpha= Alpha)', False)
         patch.set_gid(wx.NewId())
@@ -1426,13 +1438,13 @@ class MpltFrame( wx.Frame, object ):
             return
         self.log.write('pos1= ' + pos1.__str__(), False)
         self.log.write('pos2= ' + pos2.__str__(), False)
-        
+
         faceColor= self.m_choice10.GetItems()[self.m_choice10.GetSelection()]
         self.log.write('faceColor= '+"'"+faceColor.__str__()+"'", False)
-        
+
         Alpha= str(self.m_choice11.GetItems()[self.m_choice11.GetSelection()])
         self.log.write('Alpha= '+Alpha.__str__(), False)
-        
+
         patch= self.figpanel.gca().axvspan(pos1,pos2,facecolor= faceColor, alpha= Alpha)
         self.log.write('patch= plt.gca().axvspan(pos1,pos2,facecolor= faceColor, alpha= Alpha)', False)
         patch.set_gid(wx.NewId())
@@ -1473,7 +1485,7 @@ class MpltFrame( wx.Frame, object ):
             self.patchListBox.SetSelection(0)
         self._patchListboxUpdate()
         self.figpanel.canvas.draw()
-        
+
     def _OnPatchFaceColorChange(self,event):
         items= self.patchListBox.GetItems()
         if len(items) == 0:

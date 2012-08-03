@@ -94,22 +94,33 @@ class _RibbonBoxImage(BboxImage):
             self._cached_ny = ny
         BboxImage.draw(self, renderer, *args, **kwargs)
 
-def plothist(xdata= np.arange(4, 9), ydata= np.random.random(5), colors = 'random',figName='redunca03'):
+def plothist(ax=      None,
+             xdata= np.arange(4, 9),
+             ydata= np.random.random(5),
+             labels= [],
+             colors = 'random',
+             figName='redunca03'):
     if len(xdata) != len(ydata):
         raise StandardError('xdata and ydata must have the same len()')
+    
+    try:
+        IMAGESPATH= os.path.join(wx.GetApp().installDir, 'nicePlot','images')
+    except:
+        IMAGESPATH= os.path.join(sys.argv[0], 'nicePlot', 'images')
+           
     # se generan los colores en forma aleatoria
     box_colors = _generatecolors(colors,len(xdata))   
     # se genera la figura
     fig = plt.gcf()
-    fig.clf()
-    ax = plt.subplot(111)
+    if ax == None:
+        ax = plt.gca()
     fmt = ScalarFormatter(useOffset=False)
     ax.xaxis.set_major_formatter(fmt)
     for year, h, bc in zip(xdata, ydata, box_colors):
-        bbox0 = Bbox.from_extents(year-0.48, 0.0, year+0.48, h) # year-0.4, 0., year+0.4, year-1 year+1
+        bbox0 = Bbox.from_extents(year-0.5, 0.0, year+0.5, h) # year-0.48, 0., year+0.48, year-1 year+1
         bbox = TransformedBbox(bbox0, ax.transData)
         rb_patch = _RibbonBoxImage(bbox, bc, figName, 
-                                   path=  os.path.join(IMAGESPATH,'nicePlot','images','histplot'),
+                                   path=  os.path.join(IMAGESPATH, 'histplot'),
                                    interpolation="bicubic")
         ax.add_artist(rb_patch)
         if 0:
