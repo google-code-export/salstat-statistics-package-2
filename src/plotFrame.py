@@ -9,6 +9,8 @@ License: GPL3
 import wx
 import wx.aui
 import wx.lib.agw.aui as aui
+import matplotlib.mlab as mlab
+from openStats import statistics
 # Matplotlib Figure object
 from matplotlib.figure import Figure
 from matplotlib import font_manager
@@ -30,6 +32,8 @@ from triplot import triplot, triang2xy
 
 from slbTools import homogenize
 from nicePlot.graficaRibon import plotBar, plothist # nice plot
+
+from numpy import array, ravel
 
 PROPLEGEND= {'size':11}
 
@@ -823,7 +827,7 @@ class MpltFrame( wx.Frame, object ):
         self.figpanel.canvas.draw()
 
     def plotNiceHistogram(self, data2plot):
-        (xdat,ydat, labels, color, figName) = data2plot
+        (xdat, ydat, labels, color, figName, showNormCurv) = data2plot
         labels= []
         self.gca().hold( True)
         plothist(ax=     self.gca(),
@@ -832,9 +836,34 @@ class MpltFrame( wx.Frame, object ):
                 labels=  None,
                 colors=  color,
                 figName= figName)
+        if showNormCurv:
+            # add a 'best fit' line
+            st= statistics(xdat)
+            sigma= st.stddev
+            mu= st.mean
+            ydat= array(ydat)
+            ydat= ravel(ydat)
+            y = mlab.normpdf( ydat, mu, sigma)
+            l = self.gca().plot(ydat, y, 'r--', linewidth=1)
+            
         self.gca().hold( False)
         self.figpanel.canvas.draw( )
 
+    def plotHistogram(self, data2plot):
+        (ydat, nbins, color, showNormCurv) = data2plot
+        dat= array(ydat)
+        ydat= ravel(ydat)
+        self.gca().hold( True)
+        n, bins, patches = self.gca().hist( ydat, nbins, normed= sum(ydat),facecolor= color) #, alpha=0.75
+        if showNormCurv:
+            # add a 'best fit' line
+            st= statistics( ydat)
+            sigma= st.stddev
+            mu= st.mean
+            y = mlab.normpdf( bins, mu, sigma)
+            l = self.gca().plot( bins, y, 'r--', linewidth=1)
+        self.gca().hold( False)
+        self.figpanel.canvas.draw( )
 
     def plotTrian(self,data2plot):
         '''data2plot = ((a,b,c,'legend'))'''
