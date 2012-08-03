@@ -34,6 +34,7 @@ from slbTools import homogenize
 from nicePlot.graficaRibon import plotBar, plothist # nice plot
 
 from numpy import array, ravel
+from pylab import setp
 
 PROPLEGEND= {'size':11}
 
@@ -155,43 +156,116 @@ class MpltFrame( wx.Frame, object ):
 
         bSizer2.Add( gSizer1, 0, 0, 5 )
 
-        sbSizer10 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow1, wx.ID_ANY, u"Xaxis" ), wx.HORIZONTAL )
 
+        sbSizer10 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow1, wx.ID_ANY, u"Xaxis" ), wx.VERTICAL )
+        
+        bSizer51 = wx.BoxSizer( wx.HORIZONTAL )
+        
         self.m_staticText1 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"min", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText1.Wrap( -1 )
-        sbSizer10.Add( self.m_staticText1, 0, wx.ALL, 5 )
-
-        self.plt_textCtr4 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
-        sbSizer10.Add( self.plt_textCtr4, 0, wx.ALL, 5 )
-
+        bSizer51.Add( self.m_staticText1, 0, wx.ALL, 5 )
+        
+        self.m_textCtrl4 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
+        bSizer51.Add( self.m_textCtrl4, 0, wx.ALL, 5 )
+        
         self.m_staticText2 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"max", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText2.Wrap( -1 )
-        sbSizer10.Add( self.m_staticText2, 0, wx.ALL, 5 )
-
-        self.plt_textCtr5 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
-        sbSizer10.Add( self.plt_textCtr5, 0, wx.ALL, 5 )
-
-
+        bSizer51.Add( self.m_staticText2, 0, wx.ALL, 5 )
+        
+        self.m_textCtrl5 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
+        bSizer51.Add( self.m_textCtrl5, 0, wx.ALL, 5 )
+        
+        
+        sbSizer10.Add( bSizer51, 1, wx.EXPAND, 5 )
+        
+        bSizer6 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self.m_staticText281 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"angle", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText281.Wrap( -1 )
+        bSizer6.Add( self.m_staticText281, 0, wx.ALIGN_CENTER|wx.ALL, 5 )
+        
+        self.m_spinCtrl2 = wx.SpinCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 60,-1 ), wx.SP_ARROW_KEYS, 0, 359, 0 )
+        bSizer6.Add( self.m_spinCtrl2, 0, wx.ALL, 5 )
+        
+        
+        sbSizer10.Add( bSizer6, 1, wx.EXPAND, 5 )
+        
+        
         bSizer2.Add( sbSizer10, 0, 0, 5 )
 
-        sbSizer11 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow1, wx.ID_ANY, u"Yaxis" ), wx.HORIZONTAL )
-
+##        sbSizer10 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow1, wx.ID_ANY, u"Xaxis" ), wx.HORIZONTAL )
+##
+##        self.m_staticText1 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"min", wx.DefaultPosition, wx.DefaultSize, 0 )
+##        self.m_staticText1.Wrap( -1 )
+##        sbSizer10.Add( self.m_staticText1, 0, wx.ALL, 5 )
+##
+##        self.plt_textCtr4 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
+##        sbSizer10.Add( self.plt_textCtr4, 0, wx.ALL, 5 )
+##
+##        self.m_staticText2 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"max", wx.DefaultPosition, wx.DefaultSize, 0 )
+##        self.m_staticText2.Wrap( -1 )
+##        sbSizer10.Add( self.m_staticText2, 0, wx.ALL, 5 )
+##
+##        self.plt_textCtr5 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
+##        sbSizer10.Add( self.plt_textCtr5, 0, wx.ALL, 5 )
+##
+##
+##        bSizer2.Add( sbSizer10, 0, 0, 5 )
+        
+        sbSizer11 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow1, wx.ID_ANY, u"Yaxis" ), wx.VERTICAL )
+        
+        bSizer7 = wx.BoxSizer( wx.HORIZONTAL )
+        
         self.m_staticText3 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"min", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText3.Wrap( -1 )
-        sbSizer11.Add( self.m_staticText3, 0, wx.ALL, 5 )
-
-        self.plt_textCtr6 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
-        sbSizer11.Add( self.plt_textCtr6, 0, wx.ALL, 5 )
-
+        bSizer7.Add( self.m_staticText3, 0, wx.ALL, 5 )
+        
+        self.m_textCtrl6 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
+        bSizer7.Add( self.m_textCtrl6, 0, wx.ALL, 5 )
+        
         self.m_staticText4 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"max", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText4.Wrap( -1 )
-        sbSizer11.Add( self.m_staticText4, 0, wx.ALL, 5 )
-
-        self.plt_textCtr7 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
-        sbSizer11.Add( self.plt_textCtr7, 0, wx.ALL, 5 )
-
-
+        bSizer7.Add( self.m_staticText4, 0, wx.ALL, 5 )
+        
+        self.m_textCtrl7 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
+        bSizer7.Add( self.m_textCtrl7, 0, wx.ALL, 5 )
+        
+        sbSizer11.Add( bSizer7, 1, wx.EXPAND, 5 )
+        
+        bSizer8 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self.m_staticText291 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"angle", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText291.Wrap( -1 )
+        bSizer8.Add( self.m_staticText291, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+        
+        self.m_spinCtrl3 = wx.SpinCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 60,-1 ), wx.SP_ARROW_KEYS, 0, 359, 0 )
+        bSizer8.Add( self.m_spinCtrl3, 0, wx.ALL, 5 )
+        
+        
+        sbSizer11.Add( bSizer8, 1, wx.EXPAND, 5 )
+        
+        
         bSizer2.Add( sbSizer11, 0, 0, 5 )
+
+##        sbSizer11 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow1, wx.ID_ANY, u"Yaxis" ), wx.HORIZONTAL )
+##
+##        self.m_staticText3 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"min", wx.DefaultPosition, wx.DefaultSize, 0 )
+##        self.m_staticText3.Wrap( -1 )
+##        sbSizer11.Add( self.m_staticText3, 0, wx.ALL, 5 )
+##
+##        self.plt_textCtr6 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
+##        sbSizer11.Add( self.plt_textCtr6, 0, wx.ALL, 5 )
+##
+##        self.m_staticText4 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"max", wx.DefaultPosition, wx.DefaultSize, 0 )
+##        self.m_staticText4.Wrap( -1 )
+##        sbSizer11.Add( self.m_staticText4, 0, wx.ALL, 5 )
+##
+##        self.plt_textCtr7 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
+##        sbSizer11.Add( self.plt_textCtr7, 0, wx.ALL, 5 )
+##
+##
+##        bSizer2.Add( sbSizer11, 0, 0, 5 )
+        
 
         sbSizer7 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow1, wx.ID_ANY, u"axis scale" ), wx.VERTICAL )
 
@@ -578,10 +652,12 @@ class MpltFrame( wx.Frame, object ):
         self.m_checkBox1.Bind( wx.EVT_CHECKBOX, self._OnGrid )
         self.m_checkBox3.Bind( wx.EVT_CHECKBOX, self._OnViewCursor )
         ##self.m_checkBox2.Bind( wx.EVT_CHECKBOX, self._OnLegend )# leggend callback
-        self.plt_textCtr4.Bind( wx.EVT_TEXT, self._xminValue )
-        self.plt_textCtr5.Bind( wx.EVT_TEXT, self._xmaxValue )
-        self.plt_textCtr6.Bind( wx.EVT_TEXT, self._yminValue )
-        self.plt_textCtr7.Bind( wx.EVT_TEXT, self._ymaxValue )
+        self.m_textCtrl4.Bind( wx.EVT_TEXT, self._xminValue )
+        self.m_textCtrl5.Bind( wx.EVT_TEXT, self._xmaxValue )
+        self.m_spinCtrl2.Bind( wx.EVT_SPINCTRL, self._xAngleChange )
+        self.m_textCtrl6.Bind( wx.EVT_TEXT, self._yminValue )
+        self.m_textCtrl7.Bind( wx.EVT_TEXT, self._ymaxValue )
+        self.m_spinCtrl3.Bind( wx.EVT_SPINCTRL, self._yAngleChange )
         self.m_choice2.Bind( wx.EVT_CHOICE, self._OnXaxisScale )
         self.m_choice1.Bind( wx.EVT_CHOICE, self._OnYaxisScale )
         self.m_listBox1.Bind( wx.EVT_LISTBOX, self._OnListLinesChange )
@@ -713,7 +789,19 @@ class MpltFrame( wx.Frame, object ):
         x = np.arange(0, 6, .01)
         y = np.sin(x**2)*np.exp(-x)
         self.gca().plot(x, y)
-
+    
+    def _xAngleChange( self, evt):
+        labels = self.gca().get_xticklabels()
+        currFontSize= self.gca().xaxis.get_label().get_fontsize()
+        setp( labels, rotation= evt.GetSelection(), fontsize= currFontSize)
+        self.figpanel.canvas.draw()
+    
+    def _yAngleChange( self, evt):
+        labels = ax.get_xticklabels()
+        currFontSize= currFontSize= self.gca().yaxis.get_label().get_fontsize()
+        setp( labels, rotation= evt.GetSelection(), fontsize= currFontSize)
+        self.figpanel.canvas.draw()
+    
     def plotLine( self,data2plot):
         self.gca().hold(True)
         listLegend= list()
