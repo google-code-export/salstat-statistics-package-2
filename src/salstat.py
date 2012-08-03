@@ -156,6 +156,7 @@ def GridPrefs(parent):
     else:
         dlg.Destroy()
         return
+    
     colwidth= values[0]
     rowheight= values[1]
     wx.GetApp().frame.grid.SetDefaultColSize(colwidth, True)
@@ -636,7 +637,7 @@ class MainFrame(wx.Frame):
               ['--'],
               ['&Save\tCtrl-S',       SaveIcon,   self.grid.SaveXls,     wx.ID_SAVE],
               ['Save &As...\tCtrl-Shift-S', SaveAsIcon, self.grid.SaveXlsAs,     wx.ID_SAVEAS],
-              ['&Print...\tCtrl-P',   PrintIcon,  None,     None],
+              ##['&Print...\tCtrl-P',   PrintIcon,  None,     None],
               ['--'],
               ['E&xit\tCtrl-Q',       ExitIcon,   self.EndApplication,     wx.ID_EXIT],
               )),
@@ -646,7 +647,7 @@ class MainFrame(wx.Frame):
               ['&Paste',         PasteIcon,       self.grid.PasteData,     wx.ID_PASTE],
               ['--'],
               ['Select &All\tCtrl-A',    None,            self.grid.SelectAllCells,     wx.ID_SELECTALL],
-              ['&Find and Replace...\tCtrl-F',  FindRIcon,     self.GoFindDialog,     wx.ID_REPLACE],
+              ##['&Find and Replace...\tCtrl-F',  FindRIcon,     self.GoFindDialog,     wx.ID_REPLACE],
               ['--'],
               ['Delete Current Column', None,  self.grid.DeleteCurrentCol,     None],
               ['Delete Current Row',    None,  self.grid.DeleteCurrentRow,     None],)),
@@ -674,7 +675,7 @@ class MainFrame(wx.Frame):
                ('Probability',             None, self.GoProbabilityplot,     None),
                ('Adaptative BMS',          None, self.GoAdaptativeBMS,     None),)),
             ('&Help',
-             (('Help\tCtrl-H',       imag.about(),  self.GoHelpSystem,  wx.ID_HELP),
+             (##('Help\tCtrl-H',       imag.about(),  self.GoHelpSystem,  wx.ID_HELP),
               ('&About...',          imag.icon16(), self.ShowAbout,     wx.ID_ABOUT),)),
         )
         self.__createMenu(dat1, menuBar)
