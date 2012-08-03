@@ -26,7 +26,7 @@ class _MyContextGrid(wx.Menu):
         eliminar =   wx.MenuItem(self, wx.NewId(), '&Del\tDel')
         deshacer =   wx.MenuItem(self, wx.NewId(), '&Undo\tCtrl+Z')
         rehacer =    wx.MenuItem(self, wx.NewId(), '&Redo\tCtrl+Y')
-        exportarCsv= wx.MenuItem(self, wx.NewId(), '&Export\tCtrl+E')
+        ##exportarCsv= wx.MenuItem(self, wx.NewId(), '&Export\tCtrl+E')
         
         imagenes = imageEmbed()
         cortar.SetBitmap(imagenes.edit_cut())
@@ -35,7 +35,7 @@ class _MyContextGrid(wx.Menu):
         eliminar.SetBitmap(imagenes.cancel())
         deshacer.SetBitmap(imagenes.edit_undo())
         rehacer.SetBitmap(imagenes.edit_redo())
-        exportarCsv.SetBitmap(imagenes.exporCsv())
+        ##exportarCsv.SetBitmap(imagenes.exporCsv())
 
         self.AppendSeparator()
         self.AppendItem(cortar)
@@ -47,7 +47,7 @@ class _MyContextGrid(wx.Menu):
         self.AppendItem(deshacer,)
         self.AppendItem(rehacer,)
         self.AppendSeparator()
-        self.AppendItem(exportarCsv,)
+        ##self.AppendItem(exportarCsv,)
         
         self.Bind(wx.EVT_MENU, self.OnCortar,      id= cortar.GetId())
         self.Bind(wx.EVT_MENU, self.OnCopiar,      id= copiar.GetId())
@@ -55,7 +55,7 @@ class _MyContextGrid(wx.Menu):
         self.Bind(wx.EVT_MENU, self.OnEliminar,    id= eliminar.GetId())
         self.Bind(wx.EVT_MENU, self.OnDeshacer,    id= deshacer.GetId())
         self.Bind(wx.EVT_MENU, self.OnRehacer,     id= rehacer.GetId())
-        self.Bind(wx.EVT_MENU, self.OnExportarCsv, id= exportarCsv.GetId())
+        ##self.Bind(wx.EVT_MENU, self.OnExportarCsv, id= exportarCsv.GetId())
         
     def OnCortar(self, event):
         self.parent.OnCut()
