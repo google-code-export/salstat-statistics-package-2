@@ -406,10 +406,10 @@ class SalStat2App(wx.App):
 
         config.Write("Preferences", str(preferences))
         config.Flush()
-        
+
     def GetVersion(self):
         return '2.1'
-    
+
 #---------------------------------------------------------------------------
 # This is main interface of application
 class MainFrame(wx.Frame):
@@ -420,7 +420,7 @@ class MainFrame(wx.Frame):
 
         self.m_mgr= aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
-
+        self.appname= appname
         #set icon for frame (needs x-platform separator!
         self.Icon= appname.icon24
         self.DECIMAL_POINT= appname.DECIMAL_POINT
@@ -522,11 +522,29 @@ class MainFrame(wx.Frame):
                                             CaptionVisible(True).
                                             DockFixed( False ).BestSize(wx.Size(-1,150)))
         self.currPanel = None
-
+        self._sendObj2Shell(self.scriptPanel)
         self._BindEvents()
         self.m_mgr.Update()
         self.Center()
-
+        
+    def _sendObj2Shell(self, shell):
+        # making available useful object to the shell
+        env= {'grid':  self.grid,
+              'Logg':       self.appname.Logg,
+              'plot':       self.appname.plot,
+              'outPutGrid': self.appname.output,
+              'numpy':      numpy,
+              'dialog':     dialog,
+              }
+        #'stats': self.stats,
+              #'report':self.showgrid,
+              #'dialog':Dialog,
+              #'OK':    wx.ID_OK,
+              #'statistics':statistics,
+              #'homogenize':homogenize,
+              
+        shell.interp.locals= env
+    
     def _createTb1(self):
         # Get icons for toolbar
         imag = imageEmbed()
@@ -545,10 +563,10 @@ class MainFrame(wx.Frame):
 
         if wx.version() < "2.9":
             tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
-                            style = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
+                                style = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
         else:
             tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize, style = 0,
-                agwStyle = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
+                                agwStyle = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
 
         self.bt1 = tb1.AddSimpleTool(10, "New",  NewIcon,"New")
         self.bt2 = tb1.AddSimpleTool(20, "Open", OpenIcon,"Open")
@@ -602,7 +620,7 @@ class MainFrame(wx.Frame):
         sixsigma =   imag.sixsigma16()
         #set up menus
         menuBar = wx.MenuBar()
-        
+
         # to be used for statistical menu autocreation
         import statFunctions
         from statFunctions import *
@@ -642,19 +660,19 @@ class MainFrame(wx.Frame):
               ['Transform Data',           None,  self.GoTransformData,     None],
               ['short data',               None,  self.shortData,     None],)),
             ('S&tatistics',
-              statisticalMenus),
+             statisticalMenus),
             ('&Graph',
              ( plotMenus[0],
-              ('Line Chart of All Means', None, self.GoChartWindow,     None),
-              ('Bar Chart of All Means',  None, self.GoMeanBarChartWindow,     None),
-              ('Bar Chart',               None, self.GoBarChartWindow,     None),
-              ('Lines',                   None, self.GoLinesPlot,     None),
-              ('Scatter',                 None, self.GoScatterPlot,     None),
-              ('Box & Whisker',           None, self.GoBoxWhiskerPlot,     None),
-              ('Linear Regression',       None, self.GoLinRegressPlot,     None),
-              ('Ternary',                 None, self.GoTernaryplot,     None),
-              ('Probability',             None, self.GoProbabilityplot,     None),
-              ('Adaptative BMS',          None, self.GoAdaptativeBMS,     None),)),
+               ('Line Chart of All Means', None, self.GoChartWindow,     None),
+               ('Bar Chart of All Means',  None, self.GoMeanBarChartWindow,     None),
+               ('Bar Chart',               None, self.GoBarChartWindow,     None),
+               ('Lines',                   None, self.GoLinesPlot,     None),
+               ('Scatter',                 None, self.GoScatterPlot,     None),
+               ('Box & Whisker',           None, self.GoBoxWhiskerPlot,     None),
+               ('Linear Regression',       None, self.GoLinRegressPlot,     None),
+               ('Ternary',                 None, self.GoTernaryplot,     None),
+               ('Probability',             None, self.GoProbabilityplot,     None),
+               ('Adaptative BMS',          None, self.GoAdaptativeBMS,     None),)),
             ('&Help',
              (('Help\tCtrl-H',       imag.about(),  self.GoHelpSystem,  wx.ID_HELP),
               ('&About...',          imag.icon16(), self.ShowAbout,     wx.ID_ABOUT),)),
@@ -780,7 +798,7 @@ class MainFrame(wx.Frame):
         if not self.grid.Saved:
             # display discard dialog
             dlg = wx.MessageDialog(None, 'Do you wish to save now?',
-                                    'You have Unsaved Data', wx.YES_NO | wx.CANCEL | wx.ICON_QUESTION)
+                                   'You have Unsaved Data', wx.YES_NO | wx.CANCEL | wx.ICON_QUESTION)
             response = dlg.ShowModal()
             if response == wx.ID_CANCEL:
                 return
@@ -936,15 +954,15 @@ class MainFrame(wx.Frame):
 
         # Then we call wx.AboutBox giving it that info object
         wx.AboutBox(info)
-    
+
     def GoCheckOutliers(self, evt):
         pass
-    
+
     def GoHelpSystem(self, evt):
         # shows the "wizard" in the help box
         win= Navegator(wx.GetApp().frame,)
         win.Show(True)
-        
+
     ################
     ### chart init
     ################
@@ -1434,7 +1452,7 @@ class MainFrame(wx.Frame):
 
         plt.Show()
         self.log.write('plt.Show()', False)
-        
+
     ################
     ### chart End
     ################
