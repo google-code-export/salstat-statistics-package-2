@@ -606,7 +606,10 @@ class MainFrame(wx.Frame):
         # to be used for statistical menu autocreation
         import statFunctions
         from statFunctions import *
-        statisticalMenus= self._autoCreateMenu(statFunctions)
+        statisticalMenus= self._autoCreateMenu( statFunctions)
+        import plotFunctions
+        from plotFunctions import *
+        plotMenus= self._autoCreateMenu( plotFunctions)
         #add contents of menu
         dat1= (
             ('&File',
@@ -641,7 +644,8 @@ class MainFrame(wx.Frame):
             ('S&tatistics',
               statisticalMenus),
             ('&Graph',
-             (('Line Chart of All Means', None, self.GoChartWindow,     None),
+             ( plotMenus[0],
+              ('Line Chart of All Means', None, self.GoChartWindow,     None),
               ('Bar Chart of All Means',  None, self.GoMeanBarChartWindow,     None),
               ('Bar Chart',               None, self.GoBarChartWindow,     None),
               ('Lines',                   None, self.GoLinesPlot,     None),
@@ -650,7 +654,7 @@ class MainFrame(wx.Frame):
               ('Linear Regression',       None, self.GoLinRegressPlot,     None),
               ('Ternary',                 None, self.GoTernaryplot,     None),
               ('Probability',             None, self.GoProbabilityplot,     None),
-              ('Adaptative BMS',          None, self.GoAdaptativeBMS,     None))),
+              ('Adaptative BMS',          None, self.GoAdaptativeBMS,     None),)),
             ('&Help',
              (('Help\tCtrl-H',       imag.about(),  self.GoHelpSystem,  wx.ID_HELP),
               ('&About...',          imag.icon16(), self.ShowAbout,     wx.ID_ABOUT),)),
@@ -902,9 +906,48 @@ class MainFrame(wx.Frame):
         win = TransformFrame(wx.GetApp().frame, -1)
         win.Show(True)
 
+    def ShowAbout(self, evt):
+        info= wx.AboutDialogInfo()
+        info.Name= "S2 SalStat Statistics Package 2"
+        info.Version= "V" + wx.GetApp().VERSION
+        info.Copyright= "(C) 2012 Sebastian Lopez Buritica, S2 Team"
+        info.Icon= wx.GetApp().icon64
+        from wx.lib.wordwrap import wordwrap
+        info.Description = wordwrap(
+            "This is a newer version of the SalStat Statistics Package "
+            "originally developed by Alan James Salmoni and Mark Livingstone. "
+            "There have been minor bug corrections, and new improvements:\n\n"
+            "*You can cut, copy, and paste multiple cells,\n"
+            "*You can undo and redo some actions.\n"
+            "*The calculations are faster than the original version.\n\n"
+            "The plot system can draw:\n\n"
+            "*Scatter charts\n*line chart of all means\n*bar chart of all means\n"
+            "*Line charts of the data,\n*box and whisker chart\n*Ternary chart\n"
+            "*Linear regression plot (show the equation and the correlation inside the chart),\n"
+            "The input data can be saved to, and loaded from an xls format file.\n\n"
+            "Salstat2 can be scripted by using Python.\n\n"
+            "All the numerical results are send to a sheet in a different panel where you can cut, copy, paste, and edit them.\n\n"
+            "and much more!",
+            460, wx.ClientDC(self))
+        info.WebSite = ("http://code.google.com/p/salstat-statistics-package-2/", "S2 home page")
+        info.Developers = [ "Mark Livingstone -- MAC & LINUX Translator","\nSebastian Lopez Buritica",]
+
+        info.License = wordwrap("GPL 3", 450, wx.ClientDC(self))
+
+        # Then we call wx.AboutBox giving it that info object
+        wx.AboutBox(info)
+    
     def GoCheckOutliers(self, evt):
         pass
-
+    
+    def GoHelpSystem(self, evt):
+        # shows the "wizard" in the help box
+        win= Navegator(wx.GetApp().frame,)
+        win.Show(True)
+        
+    ################
+    ### chart init
+    ################
     def GoChartWindow(self, evt):
         self.log.write('''Line chart of all means''')
         waste, colnums = self.grid.GetUsedCols()
@@ -1153,42 +1196,6 @@ class MainFrame(wx.Frame):
         plt.Show()
         self.log.write('plt.Show()', False)
 
-    def GoHelpSystem(self, evt):
-        # shows the "wizard" in the help box
-        win= Navegator(wx.GetApp().frame,)
-        win.Show(True)
-
-    def ShowAbout(self, evt):
-        info= wx.AboutDialogInfo()
-        info.Name= "S2 SalStat Statistics Package 2"
-        info.Version= "V" + wx.GetApp().VERSION
-        info.Copyright= "(C) 2012 Sebastian Lopez Buritica, S2 Team"
-        info.Icon= wx.GetApp().icon64
-        from wx.lib.wordwrap import wordwrap
-        info.Description = wordwrap(
-            "This is a newer version of the SalStat Statistics Package "
-            "originally developed by Alan James Salmoni and Mark Livingstone. "
-            "There have been minor bug corrections, and new improvements:\n\n"
-            "*You can cut, copy, and paste multiple cells,\n"
-            "*You can undo and redo some actions.\n"
-            "*The calculations are faster than the original version.\n\n"
-            "The plot system can draw:\n\n"
-            "*Scatter charts\n*line chart of all means\n*bar chart of all means\n"
-            "*Line charts of the data,\n*box and whisker chart\n*Ternary chart\n"
-            "*Linear regression plot (show the equation and the correlation inside the chart),\n"
-            "The input data can be saved to, and loaded from an xls format file.\n\n"
-            "Salstat2 can be scripted by using Python.\n\n"
-            "All the numerical results are send to a sheet in a different panel where you can cut, copy, paste, and edit them.\n\n"
-            "and much more!",
-            460, wx.ClientDC(self))
-        info.WebSite = ("http://code.google.com/p/salstat-statistics-package-2/", "S2 home page")
-        info.Developers = [ "Mark Livingstone -- MAC & LINUX Translator","\nSebastian Lopez Buritica",]
-
-        info.License = wordwrap("GPL 3", 450, wx.ClientDC(self))
-
-        # Then we call wx.AboutBox giving it that info object
-        wx.AboutBox(info)
-
     def GoScatterPlot(self,evt):
         self.log.write('Scatter')
         waste, colnums = self.grid.GetUsedCols()
@@ -1427,6 +1434,11 @@ class MainFrame(wx.Frame):
 
         plt.Show()
         self.log.write('plt.Show()', False)
+        
+    ################
+    ### chart End
+    ################
+
     def EndApplication(self, evt):
         if self.grid.Saved == False:
             # checking if there is a data to be saved

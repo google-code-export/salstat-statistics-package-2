@@ -34,6 +34,7 @@ class barChartAllMeans(histogram):
         return self.dialog(settings = setting, struct= structure)
     
     def _report(self, result):
+        pass
         # implementing the plot system
         # self.outputGrid.addColData( name)
         # self.outputGrid.addColData( map(None,res[0]))
