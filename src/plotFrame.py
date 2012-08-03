@@ -797,7 +797,7 @@ class MpltFrame( wx.Frame, object ):
         self.figpanel.canvas.draw()
     
     def _yAngleChange( self, evt):
-        labels = self.gca().get_xticklabels()
+        labels = self.gca().get_yticklabels()
         currFontSize= currFontSize= self.gca().yaxis.get_label().get_fontsize()
         setp( labels, rotation= evt.GetSelection(), fontsize= currFontSize)
         self.figpanel.canvas.draw()
