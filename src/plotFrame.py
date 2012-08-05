@@ -87,25 +87,25 @@ class MpltFrame( wx.Frame, object ):
         wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 642,465 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
 
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
+        
+        self.figpanel = MplCanvasFrame( self )
+        self.m_notebook1 = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
+        
+        # if the platform  is ubuntus then frame is not managed by the aui
         self.m_mgr = aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
-
-        self.figpanel = MplCanvasFrame( self )
         self.m_mgr.AddPane( self.figpanel, aui.AuiPaneInfo() .Left().
                             CloseButton( False ).MaximizeButton( True ).MinimizeButton( ).
                             Caption('Graph').CaptionVisible(True).
                             Dock().Resizable().FloatingSize( wx.DefaultSize ).DockFixed( True ).
                             CloseButton(False).Centre() )
-
-        self.m_notebook1 = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
-
         self.m_mgr.AddPane( self.m_notebook1, aui.AuiPaneInfo() .Left() .
                             CloseButton( False ).MaximizeButton( True ).
                             MinimizeButton().Dock().Resizable().
                             Caption('Graph Properties').CaptionVisible(True).
                             FloatingSize( wx.DefaultSize ).DockFixed( True ).
                             CloseButton(False). BestSize(wx.Size(200,-1)))
-
+        
         self.m_scrolledWindow1 = wx.ScrolledWindow( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL )
         self.m_scrolledWindow1.SetScrollRate( 5, 5 )
         bSizer2 = wx.BoxSizer( wx.VERTICAL )
@@ -638,6 +638,7 @@ class MpltFrame( wx.Frame, object ):
         self.statusbar = self.CreateStatusBar( 2, wx.ST_SIZEGRIP, wx.ID_ANY )
 
         self.m_mgr.Update()
+            
         self.Centre( wx.BOTH )
 
         # Connect Events
