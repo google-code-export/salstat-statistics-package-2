@@ -91,20 +91,24 @@ class MpltFrame( wx.Frame, object ):
         self.figpanel = MplCanvasFrame( self )
         self.m_notebook1 = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
         
-        # if the platform  is ubuntus then frame is not managed by the aui
-        self.m_mgr = aui.AuiManager()
-        self.m_mgr.SetManagedWindow( self )
-        self.m_mgr.AddPane( self.figpanel, aui.AuiPaneInfo() .Left().
-                            CloseButton( False ).MaximizeButton( True ).MinimizeButton( ).
-                            Caption('Graph').CaptionVisible(True).
-                            Dock().Resizable().FloatingSize( wx.DefaultSize ).DockFixed( True ).
-                            CloseButton(False).Centre() )
-        self.m_mgr.AddPane( self.m_notebook1, aui.AuiPaneInfo() .Left() .
-                            CloseButton( False ).MaximizeButton( True ).
-                            MinimizeButton().Dock().Resizable().
-                            Caption('Graph Properties').CaptionVisible(True).
-                            FloatingSize( wx.DefaultSize ).DockFixed( True ).
-                            CloseButton(False). BestSize(wx.Size(200,-1)))
+        if wx.Platform == '__WXGTK__':
+            mainSizer= wx.BoxSizer( wx.HORIZONTAL )
+            mainSizer.Add( self.m_notebook1, 1, wx.EXPAND |wx.ALL, 5 )
+            mainSizer.Add( self.figpanel, 3, wx.EXPAND |wx.ALL, 5 )
+        else:
+            self.m_mgr = aui.AuiManager()
+            self.m_mgr.SetManagedWindow( self )
+            self.m_mgr.AddPane( self.figpanel, aui.AuiPaneInfo() .Left().
+                                CloseButton( False ).MaximizeButton( True ).MinimizeButton( ).
+                                Caption('Graph').CaptionVisible(True).
+                                Dock().Resizable().FloatingSize( wx.DefaultSize ).DockFixed( True ).
+                                CloseButton(False).Centre() )
+            self.m_mgr.AddPane( self.m_notebook1, aui.AuiPaneInfo() .Left() .
+                                CloseButton( False ).MaximizeButton( True ).
+                                MinimizeButton().Dock().Resizable().
+                                Caption('Graph Properties').CaptionVisible(True).
+                                FloatingSize( wx.DefaultSize ).DockFixed( True ).
+                                CloseButton(False). BestSize(wx.Size(200,-1)))
         
         self.m_scrolledWindow1 = wx.ScrolledWindow( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL )
         self.m_scrolledWindow1.SetScrollRate( 5, 5 )
@@ -636,8 +640,13 @@ class MpltFrame( wx.Frame, object ):
         self.m_notebook1.AddPage( self.m_scrolledWindow4, u"patch", False )
 
         self.statusbar = self.CreateStatusBar( 2, wx.ST_SIZEGRIP, wx.ID_ANY )
-
-        self.m_mgr.Update()
+ 
+        if wx.Platform == '__WXGTK__':
+            self.SetSizer( mainSizer )
+            self.Fit()
+            self.Layout()
+        else:
+            self.m_mgr.Update()
             
         self.Centre( wx.BOTH )
 
@@ -688,6 +697,7 @@ class MpltFrame( wx.Frame, object ):
         self.m_button11.Bind( wx.EVT_BUTTON, self._patchListboxUpdate )
 
         self.figpanel.canvas.mpl_connect('motion_notify_event', self._UpdateStatusBar)
+        
         ###
         ###
 
@@ -754,8 +764,9 @@ class MpltFrame( wx.Frame, object ):
                 # clear title
                 self.plt_textCtr1.Value= self.gca().get_title()
                 # connect the cursor to current axes
-                self._connectCursor(self.gca()) 
-
+                self._connectCursor(self.gca())
+                
+        
     def _clearTitles(self, evt):
         # clear xlabel ctrl
         self.plt_textCtr2.Value= u''
