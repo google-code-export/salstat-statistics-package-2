@@ -380,6 +380,8 @@ class SimpleGrid(MyGridPanel):# wxGrid
                                     Any (*.*)| *.*", wx.SAVE)
             if dlg.ShowModal() == wx.ID_OK:
                 self.path = dlg.GetPath()
+                if not self.path.endswith('.xls'):
+                    self.path= self.path+'.xls'       
             else:
                 return
             self.reportObj.path = self.path
