@@ -530,10 +530,10 @@ class MainFrame(wx.Frame):
         
     def _sendObj2Shell(self, shell):
         # making available useful object to the shell
-        env= {'grid':  self.grid,
-              'Logg':       self.appname.Logg,
+        env= {'grid':       self.grid,
+              'show':       self.appname.Logg,
               'plot':       self.appname.plot,
-              'outPutGrid': self.appname.output,
+              'report':     self.appname.output,
               'numpy':      numpy,
               'dialog':     dialog,
               }
@@ -573,7 +573,7 @@ class MainFrame(wx.Frame):
         self.bt2 = tb1.AddSimpleTool(20, "Open", OpenIcon,"Open")
         self.bt3 = tb1.AddSimpleTool(30, "Save", SaveIcon,"Save")
         self.bt4 = tb1.AddSimpleTool(40, "Save As",SaveAsIcon,"Save As")
-        self.bt5 = tb1.AddSimpleTool(50, "Print",PrintIcon,"Print")
+        ##self.bt5 = tb1.AddSimpleTool(50, "Print",PrintIcon,"Print")
         tb1.AddSeparator()
         self.bt11= tb1.AddSimpleTool(wx.ID_ANY,"Undo",UndoIcon,"Undo")
         self.bt12= tb1.AddSimpleTool(wx.ID_ANY,"Redo",RedoIcon,"Redo")
@@ -583,7 +583,7 @@ class MainFrame(wx.Frame):
         self.bt8 = tb1.AddSimpleTool(80, "Paste",PasteIcon, "Paste")
         tb1.AddSeparator()
         self.bt9 = tb1.AddSimpleTool(85, "Preferences",PrefsIcon, "Preferences")
-        self.bt10= tb1.AddSimpleTool(90, "Help", HelpIcon, "Help")
+        ##self.bt10= tb1.AddSimpleTool(90, "Help", HelpIcon, "Help")
         tb1.SetToolBitmapSize((24,24))
         tb1.Realize()
         return tb1
@@ -735,7 +735,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.grid.CopyData,      id= self.bt7.GetId())
         self.Bind(wx.EVT_MENU, self.grid.PasteData,     id= self.bt8.GetId())
         self.Bind(wx.EVT_MENU, self.GoVariablesFrame,   id= self.bt9.GetId())
-        self.Bind(wx.EVT_MENU, self.GoHelpSystem,       id= self.bt10.GetId())
+        ##self.Bind(wx.EVT_MENU, self.GoHelpSystem,       id= self.bt10.GetId())
         self.Bind(wx.EVT_MENU, self.grid.Undo,          id= self.bt11.GetId())
         self.Bind(wx.EVT_MENU, self.grid.Redo,          id= self.bt12.GetId())
 
@@ -941,9 +941,10 @@ class MainFrame(wx.Frame):
             "*The calculations are faster than the original version.\n\n"
             "The plot system can draw:\n\n"
             "*Scatter charts\n*line chart of all means\n*bar chart of all means\n"
+            "*Histogram chart\n"
             "*Line charts of the data,\n*box and whisker chart\n*Ternary chart\n"
             "*Linear regression plot (show the equation and the correlation inside the chart),\n"
-            "The input data can be saved to, and loaded from an xls format file.\n\n"
+            "\nThe input data can be saved to, and loaded from an xls format file.\n\n"
             "Salstat2 can be scripted by using Python.\n\n"
             "All the numerical results are send to a sheet in a different panel where you can cut, copy, paste, and edit them.\n\n"
             "and much more!",

@@ -20,7 +20,7 @@ class Dialog ( wx.Dialog ):
 
         a function to easily create a wx dialog
 
-        paramteres
+        parameters
         settings = {'Title': String title of the wxdialog ,
                     'icon': wxbitmap,
                     '_size': wx.Size(xsize, ysize) the size of the dialog ,
