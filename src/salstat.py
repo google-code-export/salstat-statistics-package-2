@@ -334,7 +334,13 @@ class SalStat2App(wx.App):
         ###self.Logg= self.frame.logPanel
         ###self.output = self.frame.answerPanel
         # referencing the plot system
-        self.frame.ShowFullScreen(True,False)
+        
+        if wx.Platform == '__WXGTK__':
+            self.frame.Show()
+        elif wx.Platform == '__WXMSW__' :
+            self.frame.ShowFullScreen(True,False)
+        else: # mac platfomr
+            self.frame.ShowFullScreen(True,False)    
         return True
 
     def getDataDir(self):
@@ -1093,7 +1099,7 @@ class MainFrame(wx.Frame):
                   'red', 'green', 'lightgreen', 'darkblue',
                   'yellow', 'hsv']
         # getting all the available figures
-        path=     os.path.split(sys.argv[0])[0] + '\\nicePlot\\images\\barplot\\'
+        path=     os.path.join(os.path.split(sys.argv[0])[0], 'nicePlot', 'images', 'barplot')
         figTypes= [fil[:-4] for fil in os.listdir(path) if fil.endswith('.png')]
         txt1= ['StaticText', ['Bar type']]
         txt2= ['StaticText', ['Colour']]
@@ -1161,7 +1167,7 @@ class MainFrame(wx.Frame):
                   'red', 'green', 'lightgreen', 'darkblue',
                   'yellow', 'hsv']
         # getting all the available figures
-        path=     os.path.split(sys.argv[0])[0] + '\\nicePlot\\images\\barplot\\'
+        path=     os.path.join(os.path.split(sys.argv[0])[0], 'nicePlot','images','barplot')
         figTypes= [fil[:-4] for fil in os.listdir(path) if fil.endswith('.png')]
         txt1= ['StaticText', ['Bar type']]
         txt2= ['StaticText', ['Colour']]
