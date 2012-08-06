@@ -552,7 +552,7 @@ class MainFrame(wx.Frame):
                                             CaptionVisible(True).
                                             DockFixed( False ).BestSize(wx.Size(-1,150)))
         self.currPanel = None
-        ####self._sendObj2Shell(self.scriptPanel)
+        self._sendObj2Shell(self.scriptPanel)
         self._BindEvents()
         self.m_mgr.Update()
         self.Center()
