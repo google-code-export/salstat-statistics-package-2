@@ -12,6 +12,8 @@ import os
 import wx.html
 import wx.lib.agw.aui as aui
 
+import webbrowser # onlyne Help
+
 import wx.lib.wxpTag
 import string, os, os.path, pickle
 
@@ -477,11 +479,32 @@ class MainFrame(wx.Frame):
         #--------------------------------------------
         self.m_notebook1.AddPage( self.logPanel, u"Log", True )
         #--------------------------------
+        
+        #-----------------------------------
+        #-----------------------------------
+        #-----------------------------------
+        ###from IPython.Shell import IPShellEmbed
+        
+        ###cfg.InteractiveShellEmbed.prompt_in1="myprompt [\\#]> "
+        ###cfg.InteractiveShellEmbed.prompt_out="myprompt [\\#]: "
+        ###cfg.InteractiveShellEmbed.profile=ipythonprofile
+        #### directly open the shell
+        ###IPython.embed(config=cfg, user_ns=namespace, banner2=banner)
+        #### or get shell object and open it later
+        ###from IPython.frontend.terminal.embed import InteractiveShellEmbed
+        ###shell = InteractiveShellEmbed(config=cfg, user_ns=namespace, banner2=banner)
+        ###shell.user_ns = {}
+        ###shell()
+        #-----------------------------------
+        #-----------------------------------
+        #-----------------------------------
+        
         #from IPython.lib.inputhook import InputHookManager
         #shell= InputHookManager()
-        #shell.enable_wx(app = appname)
-        self.scriptPanel= wx.py.shell.Shell(self.m_notebook1)
-        self.scriptPanel.wrap(True)
+        #self.scriptPanel= wx.Panel( self.m_notebook1) 
+        #apanel = shell.enable_wx( self.scriptPanel)
+        self.scriptPanel= wx.py.shell.Shell( self.m_notebook1)
+        #self.scriptPanel.wrap( True)
         self.m_notebook1.AddPage( self.scriptPanel , u"Shell", False )
 
         # put the references into the main app
@@ -529,7 +552,7 @@ class MainFrame(wx.Frame):
                                             CaptionVisible(True).
                                             DockFixed( False ).BestSize(wx.Size(-1,150)))
         self.currPanel = None
-        self._sendObj2Shell(self.scriptPanel)
+        ####self._sendObj2Shell(self.scriptPanel)
         self._BindEvents()
         self.m_mgr.Update()
         self.Center()
@@ -590,6 +613,7 @@ class MainFrame(wx.Frame):
         tb1.AddSeparator()
         self.bt9 = tb1.AddSimpleTool(85, "Preferences",PrefsIcon, "Preferences")
         ##self.bt10= tb1.AddSimpleTool(90, "Help", HelpIcon, "Help")
+        self.bt10= tb1.AddSimpleTool(95, "OnlineHelp", HelpIcon, "Online Help")
         tb1.SetToolBitmapSize((24,24))
         tb1.Realize()
         return tb1
@@ -742,6 +766,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.grid.PasteData,     id= self.bt8.GetId())
         self.Bind(wx.EVT_MENU, self.GoVariablesFrame,   id= self.bt9.GetId())
         ##self.Bind(wx.EVT_MENU, self.GoHelpSystem,       id= self.bt10.GetId())
+        self.Bind(wx.EVT_MENU, self.GoOnlyneHelp,       id= self.bt10.GetId())
         self.Bind(wx.EVT_MENU, self.grid.Undo,          id= self.bt11.GetId())
         self.Bind(wx.EVT_MENU, self.grid.Redo,          id= self.bt12.GetId())
 
@@ -966,11 +991,14 @@ class MainFrame(wx.Frame):
     def GoCheckOutliers(self, evt):
         pass
 
-    def GoHelpSystem(self, evt):
+    def GoHelpSystem( self, evt):
         # shows the "wizard" in the help box
-        win= Navegator(wx.GetApp().frame,)
-        win.Show(True)
-
+        win= Navegator( wx.GetApp().frame,)
+        win.Show( True)
+        
+    def GoOnlyneHelp( self, evt):
+        webbrowser.open(r'http://code.google.com/p/salstat-statistics-package-2/wiki/Documentation?ts=1344287549&updated=Documentation')
+        
     ################
     ### chart init
     ################
