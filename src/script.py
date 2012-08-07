@@ -397,28 +397,22 @@ class ScriptPanel(wx.Panel):
                 self.log.writeLine(error.message)
 
     def runScript(self, event):
-        env= {'show': self.show,
-              'cls': self.clearLog,
-              'stats': self.stats,
-              'plot': self.plot,
-              'grid': self.grid,
-              'report':self.showgrid,
-              'dialog': Dialog,
-              'OK': wx.ID_OK,
-              'statistics':statistics,
-              'numpy': numpy,
-              'homogenize':homogenize,
-              'group':  GroupData ,
-              }
-        buildins = {}
-        buildins["locals"]   = None
-        buildins["__name__"] = None
-        buildins["__file__"] = None
+#        env= {'cls': self.clearLog,
+#              'stats': self.stats,
+#              'plot': self.plot,
+#              'OK': wx.ID_OK,
+#              'statistics':statistics,
+#              'homogenize':homogenize,
+#              }
+#        buildins = {}
+#        buildins["locals"]   = None
+#        buildins["__name__"] = None
+#        buildins["__file__"] = None
         # buildins["__builtins__"] = None
         try:
-            mainscript = self.answerPanel2.GetText()
+            mainscript= self.answerPanel2.GetText()
             #mainscript = mainscript.replace()
-            exec(mainscript,buildins,env)
+            wx.GetApp().frame.scriptPanel.interp.runcode(mainscript)
         except (Exception, TypeError) as e:
             traceback.print_exc(file= self.log)
 
