@@ -102,14 +102,7 @@ class NewGrid(wx.grid.Grid):
         the grid. All selection types are considered equal. If no 
         cells are selected, the current cell is returned.
         
-        
         from: http://trac.wxwidgets.org/ticket/9473"""
-
-        # GetSelectedCells: individual cells selected by ctrl-clicking
-        # GetSelectedRows: rows selected by clicking on the labels
-        # GetSelectedCols: cols selected by clicking on the labels
-        # GetSelectionBlockTopLeft
-        # GetSelectionBlockBottomRight: For blocks of cells selected by dragging across the grid cells.
 
         dimx, dimy = (self.NumberRows, self.NumberCols) #self.parent.grid.dimensions[:2]
         selection = []

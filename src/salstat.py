@@ -36,7 +36,7 @@ from ntbSheet import NoteBookSheet, SimpleGrid
 
 from openStats import statistics, normProb, normProbInv
 
-from slbTools import  homogenize
+from slbTools import  homogenize, GroupData # GroupData is used to treat data a a pivot table 
 from easyDialog import Dialog as dialog
 from statlib import stats
 
@@ -460,8 +460,8 @@ class MainFrame(wx.Frame):
         self.grid.SetDefaultCellAlignment( wx.ALIGN_RIGHT, wx.ALIGN_CENTER )
         ## adjust the renderer
         attr=   wx.grid.GridCellAttr()
-        editor= wx.grid.GridCellFloatEditor()
-        attr.SetEditor(editor)
+        #editor= wx.grid.GridCellFloatEditor()
+        #attr.SetEditor(editor)
         renderer = floatRenderer( 4)
         attr.SetRenderer( renderer)
         self.floatCellAttr= attr
@@ -478,31 +478,6 @@ class MainFrame(wx.Frame):
         self.answerPanel2= ScriptPanel(self, self.logPanel, self.grid, self.answerPanel)
         #--------------------------------------------
         self.m_notebook1.AddPage( self.logPanel, u"Log", True )
-        #--------------------------------
-        
-        #-----------------------------------
-        #-----------------------------------
-        #-----------------------------------
-        ###from IPython.Shell import IPShellEmbed
-        
-        ###cfg.InteractiveShellEmbed.prompt_in1="myprompt [\\#]> "
-        ###cfg.InteractiveShellEmbed.prompt_out="myprompt [\\#]: "
-        ###cfg.InteractiveShellEmbed.profile=ipythonprofile
-        #### directly open the shell
-        ###IPython.embed(config=cfg, user_ns=namespace, banner2=banner)
-        #### or get shell object and open it later
-        ###from IPython.frontend.terminal.embed import InteractiveShellEmbed
-        ###shell = InteractiveShellEmbed(config=cfg, user_ns=namespace, banner2=banner)
-        ###shell.user_ns = {}
-        ###shell()
-        #-----------------------------------
-        #-----------------------------------
-        #-----------------------------------
-        
-        #from IPython.lib.inputhook import InputHookManager
-        #shell= InputHookManager()
-        #self.scriptPanel= wx.Panel( self.m_notebook1) 
-        #apanel = shell.enable_wx( self.scriptPanel)
         self.scriptPanel= wx.py.shell.Shell( self.m_notebook1)
         #self.scriptPanel.wrap( True)
         self.m_notebook1.AddPage( self.scriptPanel , u"Shell", False )
@@ -565,13 +540,13 @@ class MainFrame(wx.Frame):
               'report':     self.appname.output,
               'numpy':      numpy,
               'dialog':     dialog,
+              'group':      GroupData,
               }
-        #'stats': self.stats,
-              #'report':self.showgrid,
-              #'dialog':Dialog,
-              #'OK':    wx.ID_OK,
-              #'statistics':statistics,
-              #'homogenize':homogenize,
+#'stats': self.stats,
+#'dialog':Dialog,
+#'OK':    wx.ID_OK,
+#'statistics':statistics,
+#'homogenize':homogenize,
               
         shell.interp.locals= env
     

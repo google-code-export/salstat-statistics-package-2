@@ -234,8 +234,9 @@ def plotBar(ax=      None,
     ax.xaxis.set_major_formatter(fmt)
     if labels== None:
         labels = [None for i in ydata]
+        
     if path == None:
-        path= os.path.join(IMAGESPATH,'barplot')
+        path= os.path.relpath(os.path.join(IMAGESPATH,'barplot'))
 
     for year, h, bc,label,figi in zip(xdata, ydata, box_colors,labels,figName):
         bbox0 = Bbox.from_extents(year-0.5, 0., year+0.5, h) # year-0.4, 0., year+0.4,

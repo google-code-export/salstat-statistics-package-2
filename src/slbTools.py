@@ -291,7 +291,7 @@ def homogenize(*args):
     for pos in range(maxlen):
         dat= [args[i][pos] for i in range(nelements)]
         if _allnumeric(dat):
-           passPos.append(pos)
+            passPos.append(pos)
     if sum([isinstance(arg,(np.ndarray,)) for arg in args])== len(args):
         return [np.array([arg[pos] for pos in passPos]) for arg in args]
     return [[arg[pos] for pos in passPos] for arg in args]
@@ -306,5 +306,182 @@ def isnumeric(data):
 def isiterable(data):
     '''check if the data is iterable'''
     if isinstance(data, collections.Iterable):
+        return True
+    return False
+########
+# grouping data 
+
+def _cols2dict( *cols):
+    '''convierte una serie de columnas en diccionario'''
+    # se determinan que todas las filas tengan igual cantidad de elementos
+    data = [len( col) for col in cols]
+    if False in map(lambda x,y:  x == y, data[1:] ,data[:-1]):
+        raise StandardError( 'Los argumentos deben tener igual cantidad de elementos')
+    # se convierte las columnas a filas
+    data = data[0]
+    result = ()
+    for pos in range( data):
+        result += ([col[pos] for col in cols],)
+    # se hace los calculos
+    return list( _fil2dict( list( result)))[0]
+
+def _fil2dict( data):
+    '''convierte una serie de filas en diccionario'''
+    result = dict()
+    for dato in data:
+        try:
+            key= dato[0]
+            if not isinstance(key, (str, unicode)):
+                key= key.__str__()
+        except IndexError:
+            break
+        try:
+            result[key] += (dato[1:],)
+        except KeyError:
+            result[key] = (dato[1:],)
+        except IndexError:
+            break
+        
+    for key in result.keys():
+        for key2 in _fil2dict(result[key]):
+            result[key] = key2
+            
+    yield result
+
+def __dict2list(diccionario):
+    '''convierte un diccionario como una lista de datos'''
+    try:
+        for key in diccionario.keys():
+            for key2 in __dict2list(diccionario[key]):
+                yield (key,) + key2
+    except:
+        yield (diccionario, )
+
+def dict2list( diccionario, maximo = None):
+    '''Dado un diccionario y un valor maximo de
+    nivel retorna un generador con filas de la
+    informacion.
+    '''
+    if maximo== None:
+        return __dict2list(diccionario)
+    return _newdict(diccionario,actual= 1,maximo = 3)
+
+def _newdict(diccionario,actual,maximo):
+    try:
+        if actual > maximo:
+            raise
+        for key in diccionario.keys():
+            for key2 in _newdict(diccionario[key],actual+1,maximo):
+                yield (key,) + key2
+    except:
+        yield (diccionario, )
+
+
+class GroupData(object):
+    '''Grouping data similar to a pivot table
+    xdata= [[col1], [col2], ..., [colU]]
+    ydata= [[yda1], [ydat2], ..., [[ydataN]]]
+    names= [ydata1name, ydata2name,..., ydataNname]
+    res= GroupData()
+    res.xdata= xdata
+    res.ydata= ydata
+    res.names= names
+    dictionary= res.calc()
+    listOfData= res.getAsList()
+    '''
+    def __init__( self, xdata= [], ydata= [], names= []):
+        # se verifica que la cantidad de datos
+        # ingresados sea los mismos
+        self.xdata = xdata
+        self.ydata = ydata
+        self.names = names
+        
+    def __test__( self, *data):
+        dimensiones = [len(datai) for datai in data]
+        if sum([1 for dimen in dimensiones if dimen == dimensiones[0]]) != len(dimensiones):
+            raise StandardError('all the data must have the same len')
+        
+    def __testAll( self):
+        self.__test__( self._xdata)
+        self.__test__( self._ydata)
+        self.__test__( (self._xdata[0], self._ydata[0]))
+
+    def __setdictValue( self, diccionario, keys, nombreCampo, value):
+        if not isinstance(keys,(list,tuple)):
+            return
+        
+        if len(keys) == 1:
+            try:
+                (nombreCampo[-1],value[-1])
+                for nombrei,valuei in zip(nombreCampo,value):
+                    try:
+                        diccionario[keys[0]][nombrei].append(valuei)
+                    except KeyError:
+                        diccionario[keys[0]][nombrei] = list()
+                        diccionario[keys[0]][nombrei].append(valuei)
+            except:
+                try:
+                    diccionario[keys[0]][nombreCampo].append(valuei)
+                except KeyError:
+                    diccionario[keys[0]][nombreCampo] = list()
+                    diccionario[keys[0]][nombreCampo].append(valuei)
+        else:
+            self.__setdictValue(diccionario[keys[0]],keys[1:],nombreCampo,value)
+
+    def calc( self):
+        self.__testAll()
+        diccionario = _cols2dict( *self.xdata)
+        for rowNumber in range( len( self.ydata[0])):
+            rowData = [ydata[rowNumber] for ydata in self.ydata]
+            # se convierte los caracteres u'' en None
+            for pos,data in enumerate( rowData):
+                if data == u'':
+                    rowData[pos] = None
+            self.__setdictValue( diccionario,
+                                 keys= [valor[rowNumber] for valor in self.xdata],
+                                 nombreCampo= self.names,
+                                 value= rowData)
+        return diccionario
+    
+    def getAsList(self, maximum= None):
+        return [lis for lis in self.getAsGen(maximum)]
+    
+    def getAsGen(self, maximum= None):
+        return dict2list(self.calc(), maximo= maximum)
+    @property
+    def xdata( self):
+        return self._xdata
+    @xdata.setter
+    def xdata( self,data):
+        self._xdata = data
+    
+    @property       
+    def ydata( self):
+        return self._ydata
+    @ydata.setter
+    def ydata( self, data):
+        self._ydata = data
+        
+    @property
+    def names( self):
+        return self._names
+    @names.setter
+    def names( self, names):
+        self._names = names
+    
+def test_GroupData():
+    xdata= (('colombia','colombia','colombia'),
+        ('pasto','pasto','manizales'),
+        ('casas','personas','hospitales'))
+    ydata = ((20, 21, 22,),('alta','media','baja'))
+    names =('temperatura','prerion')
+    resumen = GroupData(xdata, ydata,names)
+    data = resumen.calc()
+    if sum([data['colombia']['pasto']['casas'].has_key('temperatura'),
+            data['colombia']['pasto']['personas'].has_key('temperatura'),
+            data['colombia']['manizales']['hospitales'].has_key('temperatura'),
+            data['colombia']['pasto']['casas'].has_key('presion'),
+            data['colombia']['pasto']['personas'].has_key('presion'),
+            data['colombia']['manizales']['hospitales'].has_key('presion')]) == 6:
         return True
     return False

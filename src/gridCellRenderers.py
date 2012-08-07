@@ -25,7 +25,7 @@ class floatRendererSub(Grid.PyGridCellRenderer):
         self.fontsize = fontsize
 
     def __call__(self, table):
-        return _floatRendererSub(table, self.decimalPoints, self.color, self.font, self.fontsize)
+        return floatRendererSub(table, self.decimalPoints, self.color, self.font, self.fontsize)
 
 class floatRenderer(Grid.PyGridCellRenderer):
     def __init__(self, decimalPoints):
@@ -92,7 +92,6 @@ class floatRenderer(Grid.PyGridCellRenderer):
         dc.DestroyClippingRegion()
 
     def Clone(self):
-        print "it seem to be read"
         return floatRenderer()
 
 class AutoWrapStringRenderer(wx.grid.PyGridCellRenderer):   
