@@ -13,7 +13,7 @@ from easyDialog import Dialog
 import traceback
 from openStats import statistics
 import numpy
-from slbTools import homogenize
+from slbTools import homogenize, GroupData
 
 # styled text using wxPython's
 # wx.StyledTextCtrl(parent, id, pos, size, style, name)
@@ -408,6 +408,7 @@ class ScriptPanel(wx.Panel):
               'statistics':statistics,
               'numpy': numpy,
               'homogenize':homogenize,
+              'group':  GroupData ,
               }
         buildins = {}
         buildins["locals"]   = None

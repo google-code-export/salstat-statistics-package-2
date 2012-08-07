@@ -69,7 +69,7 @@ class MyGridPanel( wx.Panel, object ):
         # don't change this line/>
         self.SetSizer(self.sizer)
         self.Fit()
-        
+         
     def __getattribute__(self, name):
         '''wraps the funtions to the grid
         emulating a grid control'''
@@ -249,10 +249,6 @@ class SimpleGrid(MyGridPanel):# wxGrid
             self.SetGridLineColour(wx.BLACK)
         self.setPadreCallBack(self)
         self.SetColLabelAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
-        #self.EnableDragColMove( True )
-        #for i in range(self.NumberCols):
-        #    self.SetColFormatFloat(i, 8, 4)
-        #self.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.AlterSaveStatus)
         self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
         self.m_grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.onCellChanged)
         self.wildcard = "Any File (*.*)|*.*|" \
@@ -265,14 +261,6 @@ class SimpleGrid(MyGridPanel):# wxGrid
         if evt.Selecting():
             self.tl = evt.GetTopLeftCoords()
             self.br = evt.GetBottomRightCoords()
-            
-    #def OnRangeChange(self, evt): #AlterSaveStatus
-        ## this is activated when the user enters some data
-        #self.Saved = False
-        ## also record in the history file
-        #col = self.GetGridCursorCol()
-        #row = self.GetGridCursorRow()
-        #value = self.GetCellValue(row, col)
 
     def CutData(self, evt):
         self.Delete()
@@ -285,15 +273,6 @@ class SimpleGrid(MyGridPanel):# wxGrid
     def PasteData(self, evt):
         self.OnPaste()
         self.Saved= False
-
-    #def Undo(self, evt):
-        #self.Undo()
-
-    #def Redo(self, evt):
-        #self.Redo()
-
-    #def EditGrid(self, evt, numrows):
-        #insert = self.AppendRows(numrows)
 
     def DeleteCurrentCol(self, evt):
         currentcol = self.GetGridCursorCol()
@@ -636,12 +615,7 @@ class SimpleGrid(MyGridPanel):# wxGrid
         # all else values are drop
         values= self._cleanData( self._getCol( colNumber))
         return [val for val in values if not isinstance(val,(unicode, str)) and val != None ]
-        
-
-
-
-
-            
+                   
 class NoteBookSheet(wx.Panel, object):
     def __init__( self, parent, *args, **params):
         # se almacenan las paginas en un diccionario con llave el numero de pagina
