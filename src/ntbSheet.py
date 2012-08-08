@@ -426,7 +426,10 @@ class SimpleGrid(MyGridPanel):# wxGrid
         (sheetNameSelected, hasHeader)= dlg.GetValue()
         if sheetNameSelected == None:
             return
-        self.log.write('sheetNameSelected= ' + "'" + sheetNameSelected.__str__() + "'",None)
+        if not isinstance(sheetNameSelected, (str, unicode)):
+            self.log.write('sheetNameSelected= ' + "'" + sheetNameSelected.__str__() + "'",None)
+        else:
+            self.log.write('sheetNameSelected= ' + "'" + sheetNameSelected + "'",None)
         self.log.write('hasHeader= ' + hasHeader.__str__(), None)
         dlg.Destroy()
         

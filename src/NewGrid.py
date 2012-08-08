@@ -26,6 +26,8 @@ class _MyContextGrid(wx.Menu):
         eliminar =   wx.MenuItem(self, wx.NewId(), '&Del\tDel')
         deshacer =   wx.MenuItem(self, wx.NewId(), '&Undo\tCtrl+Z')
         rehacer =    wx.MenuItem(self, wx.NewId(), '&Redo\tCtrl+Y')
+        delRow=      wx.MenuItem(self, wx.NewId(), 'Del Row')
+        delCol=      wx.MenuItem(self, wx.NewId(), 'Del Col')
         ##exportarCsv= wx.MenuItem(self, wx.NewId(), '&Export\tCtrl+E')
         
         imagenes = imageEmbed()
@@ -47,6 +49,8 @@ class _MyContextGrid(wx.Menu):
         self.AppendItem(deshacer,)
         self.AppendItem(rehacer,)
         self.AppendSeparator()
+        self.AppendItem(delRow,)
+        self.AppendItem(delCol,)
         ##self.AppendItem(exportarCsv,)
         
         self.Bind(wx.EVT_MENU, self.OnCortar,      id= cortar.GetId())
@@ -55,29 +59,47 @@ class _MyContextGrid(wx.Menu):
         self.Bind(wx.EVT_MENU, self.OnEliminar,    id= eliminar.GetId())
         self.Bind(wx.EVT_MENU, self.OnDeshacer,    id= deshacer.GetId())
         self.Bind(wx.EVT_MENU, self.OnRehacer,     id= rehacer.GetId())
+        self.Bind(wx.EVT_MENU, self.OnDelRow,     id= delRow.GetId())
+        self.Bind(wx.EVT_MENU, self.OnDelCol,     id= delCol.GetId())
         ##self.Bind(wx.EVT_MENU, self.OnExportarCsv, id= exportarCsv.GetId())
         
-    def OnCortar(self, event):
+    def OnCortar(self, evt):
         self.parent.OnCut()
 
-    def OnCopiar(self, event):
+    def OnCopiar(self, evt):
         self.parent.Copy()
         
-    def OnPegar(self, event):
+    def OnPegar(self, evt):
         self.parent.OnPaste()
 
-    def OnEliminar(self, event):
+    def OnEliminar(self, evt):
         self.parent.Delete()
         
-    def OnRehacer(self, event):
+    def OnRehacer(self, evt):
         self.parent.Redo()
 
-    def OnDeshacer(self, event):
+    def OnDeshacer(self, evt):
         self.parent.Undo()
     
-    def OnExportarCsv(self,event):
+    def OnExportarCsv(self,evt):
         self.parent.OnExportCsv()
- 
+        
+    def OnDelRow(self, evt):
+        if hasattr(self.parent,'DeleteCurrentCol'):
+            self.parent.DeleteCurrentRow(evt= None)
+        else:
+            currentRow= self.parent.GetGridCursorCol()
+            self.parent.DeleteRows(currentRow, 1)
+            self.parent.AdjustScrollbars()
+    
+    def OnDelCol(self, evt):
+        if hasattr(self.parent,'DeleteCurrentRow'):
+            self.parent.DeleteCurrentCol(evt= None)
+        else:
+            currentcol= self.parent.GetGridCursorRow()
+            self.parent.DeleteCols(currentcol, 1)
+            self.parent.AdjustScrollbars()
+    
 ###########################################################################
 ## Class NewGrid
 ###########################################################################

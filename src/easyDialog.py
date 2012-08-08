@@ -31,7 +31,7 @@ class Dialog ( wx.Dialog ):
         allowed controls: 'StaticText',   'TextCtrl',    'Choice',
                           'CheckListBox', 'StaticLine',  'RadioBox',
                           'SpinCtrl',     'ToggleButton', 'NumTextCtrl',
-                          'CheckBox',      makePairs
+                          'CheckBox',      'makePairs'
 
         struct example:
 

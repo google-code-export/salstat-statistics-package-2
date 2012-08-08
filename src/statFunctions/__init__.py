@@ -2,7 +2,7 @@
 version = "0.0.1"
 __all__ = ['centralTendency', 'xConditionTest', 'moments',
            'frequency', 'variability','trimming','correlation',
-           'inferential','probability','anova','ctrlProcess']
+           'inferential','probability','anova','ctrlProcess',]
 
 from easyDialog import Dialog as _dialog
 import wx
