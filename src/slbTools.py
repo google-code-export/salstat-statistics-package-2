@@ -372,7 +372,7 @@ def _newdict(diccionario,actual,maximo):
             raise
         for key in diccionario.keys():
             for key2 in _newdict(diccionario[key],actual+1,maximo):
-                yield (key,) + key2
+                yield (key,) + key2 # (key,) + key2
     except:
         yield (diccionario, )
 

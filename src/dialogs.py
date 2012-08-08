@@ -18,21 +18,36 @@ class CustomDataTable( gridlib.PyGridTableBase):
     def __init__( self, columnNames, choiceNames, rowNumber):
         gridlib.PyGridTableBase.__init__( self)
         
-        if isinstance( choiceNames, (str,)):
-            choiceNames= [choiceNames]
+        if isinstance( choiceNames, (str, unicode)):
+            choiceNames= [choiceNames]*len( columnNames)
 
         self.colLabels = columnNames
         group= lambda x,y: x+','+y
         
-        if len( choiceNames)>1:
-            colsResume= reduce( group,  choiceNames[1:],  choiceNames[0])
+        if len( choiceNames) >= 1:
+            colsResume= list()
+            for choice in choiceNames:
+                try:
+                    if choice == None:
+                        # the selected form correspond to a text editor
+                        colsResume.append(None)
+                        continue
+                except:
+                    pass
+                colsResume.append( reduce( group,  choice[1:],  choice[0]))
+                
         elif len( choiceNames) == 1:
-            colsResume= choiceNames[0]
+            colsResume= choiceNames[0]*len(columnNames)
         else:
-            raise StandardError('You input bad type data as choiceNames variable')
+            raise StandardError( 'You input bad type data as choiceNames variable')
         
-        self.dataTypes = [gridlib.GRID_VALUE_CHOICE + ":,"+colsResume 
-                          for i in range(len(columnNames))]
+        gvalue= gridlib.GRID_VALUE_CHOICE 
+        self.dataTypes= list()
+        for colResume in colsResume:
+            if colResume != None:
+                self.dataTypes.append( [gvalue + ":,"+colResume for i in range(len(columnNames))])
+            else:
+                self.dataTypes.append('string')
         self.data= [[u'' for i in range(len(columnNames))] for j in range(rowNumber)]
 
     #--------------------------------------------------
@@ -83,19 +98,25 @@ class CustomDataTable( gridlib.PyGridTableBase):
 
     # Called when the grid needs to display labels
     def GetColLabelValue(self, col):
+        print col
         return self.colLabels[col]
 
     # Called to determine the kind of editor/renderer to use by
     # default, doesn't necessarily have to be the same type used
     # natively by the editor/renderer if they know how to convert.
     def GetTypeName(self, row, col):
-        return self.dataTypes[col]
+        return self.dataTypes[col][col]
 
     # Called to determine how the data can be fetched and stored by the
     # editor and renderer.  This allows you to enforce some type-safety
     # in the grid.
     def CanGetValueAs(self, row, col, typeName):
-        colType = self.dataTypes[col].split(':')[0]
+        prev= self.dataTypes[col]
+        if prev != 'string':
+            prev= prev[col]
+            colType = prev.split(':')[0]
+        else:
+            colTpe= 'string'
         if typeName == colType:
             return True
         else:
@@ -114,6 +135,7 @@ class CustTableGrid(gridlib.Grid):
         self.SetTable(table, True)
         # self.SetRowLabelSize(0)
         self.SetMargins(0,0)
+        self.SetRowLabelSize( 40 )
         self.AutoSizeColumns(False)
 
         gridlib.EVT_GRID_CELL_LEFT_DCLICK(self, self.OnLeftDClick)

@@ -412,9 +412,10 @@ class ScriptPanel(wx.Panel):
         try:
             mainscript= self.answerPanel2.GetText()
             #mainscript = mainscript.replace()
-            wx.GetApp().frame.scriptPanel.interp.runcode(mainscript)
+            rn= wx.GetApp().frame.scriptPanel.interp.runcode(mainscript)
         except (Exception, TypeError) as e:
             traceback.print_exc(file= self.log)
+        pass
 
     def loadScript(self, event):
         wildcard = 'TEXT files (*.txt)|*.txt|ALL files (*.*)|*.*'

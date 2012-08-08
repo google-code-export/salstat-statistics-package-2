@@ -956,7 +956,7 @@ class MainFrame(wx.Frame):
             "and much more!",
             460, wx.ClientDC(self))
         info.WebSite = ("http://code.google.com/p/salstat-statistics-package-2/", "S2 home page")
-        info.Developers = [ "Mark Livingstone -- MAC & LINUX Translator","\nSebastian Lopez Buritica",]
+        info.Developers = [ "Sebastian Lopez Buritica", "Mark Livingstone -- MAC & LINUX  Translator",]
 
         info.License = wordwrap("GPL 3", 450, wx.ClientDC(self))
 
@@ -1029,7 +1029,7 @@ class MainFrame(wx.Frame):
         btn2= ['TextCtrl',   ['B']]
         btn3= ['TextCtrl',   ['C']]
         btn4= ['StaticText', ['Select the pairs of data by rows']]
-        btn5= ['makePairs',  [['A Left Corner','C Upper Corner', 'B Right Corner'], waste, 30]]
+        btn5= ['makePairs',  [['A Left Corner','C Upper Corner', 'B Right Corner'], [waste]*3, 30]]
         structure= list()
         structure.append( [btn1, txt1])
         structure.append( [btn2, txt2])
@@ -1234,11 +1234,12 @@ class MainFrame(wx.Frame):
             return
 
         bt1= ['StaticText', ['Select pairs of data by rows']]
-        bt2= ['makePairs',  [['X data to plot','Y data to plot'], waste, 20]]
+        bt2= ['makePairs',  [['X data to plot','Y data to plot'], [waste]*2, 20]]
         structure= list()
         structure.append([bt1,])
         structure.append([bt2,])
-        dlg= dialog(self, struct= structure)
+        dlg= dialog(self,settings = {'Title': 'Scatter Chart Data' ,
+                                     '_size': wx.Size(300,500)},  struct= structure)
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return
