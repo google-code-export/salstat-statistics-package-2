@@ -195,13 +195,19 @@ class MyGridPanel( wx.Panel, object ):
             
         
             
-    def clearCol(self, colNumber):
+    def clearCol( self, colNumber):
         if colNumber < 0 or colNumber > self.GetNumberCols():
-            raise StandardError('The minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
+            raise StandardError( 'The minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
         
-        for row in range(self.GetNumberRows()):
-            self.SetCellValue(row, colNumber, u'')
-     
+        for row in range( self.GetNumberRows()):
+            self.SetCellValue( row, colNumber, u'')
+    
+    def clearRow( self, rowNumber):
+        if rowNumber < 0 or rowNumber > self.GetNumberRows():
+            raise StandardError( 'The minimum accepted row is 0, and the maximum is %i'%self.GetNumberRols()-1)
+        
+        for col in range( self.GetNumberCols()):
+            self.SetCellValue( rowNumber, col, u'')
     
     @property
     def rowNames( self):
@@ -596,6 +602,68 @@ class SimpleGrid(MyGridPanel):# wxGrid
     def PutCol(self, colNumber, data):
         try:
             return self.putCol(colNumber, data)
+        except:
+            raise
+        finally:
+            self.Saved= False
+            
+    def PutRow(self, rowNumber, data):
+        try: 
+            if isinstance(rowNumber, (str, unicode)):
+                if not(rowNumber in self.rowNames):
+                    raise TypeError('You can only use a numeric value, or the name of an existing column')
+                for pos, value in enumerate(self.rowNames):
+                    if value == rowNumber:
+                        rowNumber= pos
+                        break
+                    
+            if not isnumeric(rowNumber):
+                raise TypeError('You can only use a numeric value, or the name of an existing column')
+            
+            rowNumber= int(rowNumber)        
+            if rowNumber < 0 or rowNumber > self.GetNumberRows():
+                raise StandardError('The minimum accepted col is 0, and the maximum is %i'%self.GetNumberRows()-1)
+            
+            self.clearRow(rowNumber)
+            
+            if isinstance( data,(str, unicode)):
+                data= [data]
+            
+            if isinstance( data, (int, long, float)):
+                data= [data]
+            
+            if isinstance( data, (ndarray),):
+                data= ravel( data)
+            
+            cols2add= len( data) - self.GetNumberCols()
+            if cols2add > 0:
+                if len( data) > 16384:
+                    data= data[:16384]
+                    cols2add= len( data) - self.GetNumberCols()
+                self.AppendCols( cols2add) ############### TO TEST
+            
+            try:
+                dp= wx.GetApp().DECIMAL_POINT
+            except:
+                d= '.'
+                
+            newdat= list()
+            for row, dat in enumerate( data):
+                if isinstance( dat, (str, unicode)):
+                    try:
+                        dat= str(float(dat.replace(dp,'.'))).replace('.',dp)
+                    except:
+                        pass
+                else:
+                    try:
+                        dat= str(dat)
+                    except:
+                        dat= None
+                        
+                newdat.append(dat)
+                
+            for col, dat in enumerate(newdat):
+                self.SetCellValue(rowNumber, col, dat)
         except:
             raise
         finally:
