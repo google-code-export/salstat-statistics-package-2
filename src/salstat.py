@@ -532,6 +532,8 @@ class MainFrame(wx.Frame):
         self._sendObj2Shell(self.scriptPanel)
         self._BindEvents()
         self.m_mgr.Update()
+        # Saving the perspective
+        self._defaultPerspective= self.m_mgr.SavePerspective()
         self.Center()
         
     def _sendObj2Shell(self, shell):
@@ -662,7 +664,9 @@ class MainFrame(wx.Frame):
              (('Variables...',             None,  self.GoVariablesFrame,     None ),
               ['Add Columns and Rows...',  None,  self.GoEditGrid,     None],
               ['Change Cell Size...',      None,  self.GoGridPrefFrame,     None],
-              ['Change the Font...',       None,  self.GoFontPrefsDialog,     None],)),
+              ['Change the Font...',       None,  self.GoFontPrefsDialog,     None],
+              ['--'],
+              ['Load default perspective',      None, self.onDefaultPerspective, None],)),
             ('P&reparation',
              (['Descriptive Statistics',   None,  self.GoContinuousDescriptives,     None],
               ['Transform Data',           None,  self.GoTransformData,     None],
@@ -758,7 +762,6 @@ class MainFrame(wx.Frame):
         while 1:
             yield i
             i+= 1
-
     def _evalstat(self, evt, stat):
         stat().showGui()
 
@@ -802,7 +805,10 @@ class MainFrame(wx.Frame):
             self.mm_mgr.MaximizePane(pane)
         else:
             pane.MinimizeButton(True)
-
+    
+    def onDefaultPerspective(self, evt):
+        self.m_mgr.LoadPerspective(self._defaultPerspective)
+        
     def GoClearData(self, evt):
         if not self.grid.Saved:
             # display discard dialog
