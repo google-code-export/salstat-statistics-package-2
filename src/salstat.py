@@ -14,7 +14,7 @@ import wx.grid
 import wx.html
 import wx.lib.agw.aui as aui
 
-import webbrowser # onlyne Help
+import webbrowser # online Help
 
 import wx.lib.wxpTag
 import string, os, os.path, pickle
