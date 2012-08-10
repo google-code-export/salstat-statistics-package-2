@@ -372,6 +372,7 @@ class GroupData(object):
         self.xdata= xdata
         self.ydata= ydata
         self._homogenized= False
+        self.filterPos= []
         self.restrictions= restrictions
         
     def _cols2dict(self, *cols):
@@ -514,19 +515,32 @@ class GroupData(object):
             return dict()
         
         diccionario= self._cols2dict( *self.xdata)
-        for rowNumber in range( len( self.ydata[0])):
-            if not self.filterPos[rowNumber]: 
-                continue
-            
-            rowData= [ydata[rowNumber] for ydata in self.ydata]
-            # se convierte los caracteres u'' en None
-            for pos,data in enumerate( rowData):
-                if data == u'':
-                    rowData[pos] = None
-            self.__setdictValue( diccionario,
-                    keys= [valor[rowNumber] for valor in self.xdata],
-                    nombreCampo= self.yalias,
-                    value= rowData)
+        if len(self.filterPos) > 0:
+            for rowNumber in range( len( self.ydata[0])):
+                if not self.filterPos[rowNumber]: 
+                    continue
+                
+                rowData= [ydata[rowNumber] for ydata in self.ydata]
+                # se convierte los caracteres u'' en None
+                for pos,data in enumerate( rowData):
+                    if data == u'':
+                        rowData[pos] = None
+                self.__setdictValue( diccionario,
+                        keys= [valor[rowNumber] for valor in self.xdata],
+                        nombreCampo= self.yalias,
+                        value= rowData)
+        else:
+            for rowNumber in range( len( self.ydata[0])):
+                rowData= [ydata[rowNumber] for ydata in self.ydata]
+                # se convierte los caracteres u'' en None
+                for pos,data in enumerate( rowData):
+                    if data == u'':
+                        rowData[pos] = None
+                self.__setdictValue( diccionario,
+                        keys= [valor[rowNumber] for valor in self.xdata],
+                        nombreCampo= self.yalias,
+                        value= rowData)
+                
         return diccionario
     
     def dict2list(self, diccionario, maximo = None ):

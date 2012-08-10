@@ -9,6 +9,8 @@ details of this license. """
 import wx
 import os
 
+import wx.grid
+
 import wx.html
 import wx.lib.agw.aui as aui
 
@@ -283,7 +285,7 @@ def FormatTrace(etype, value, trace):
     """
 
     exc = traceback.format_exception(etype, value, trace)
-    exc.insert(0, "*** %s ***%s" % (now(), os.linesep))
+    exc.insert(0, "*** %s ***%s" % ( now(), os.linesep))
     return "".join(exc)
 
 
