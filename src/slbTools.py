@@ -285,14 +285,29 @@ def homogenize(*args):
     '''given a serie of vectors it check the values and 
     groups it depens on its value. 
     arg1: iterable with numerical data'''
-    maxlen= min([len(arg) for arg in args])
-    nelements= len(args)
+    maxlen= min( [len(arg) for arg in args])
+    nelements= len( args)
     passPos= list()
-    for pos in range(maxlen):
+    for pos in range( maxlen):
         dat= [args[i][pos] for i in range(nelements)]
         if _allnumeric(dat):
             passPos.append(pos)
-    if sum([isinstance(arg,(np.ndarray,)) for arg in args])== len(args):
+    if sum( [isinstance( arg,(np.ndarray,)) for arg in args]) == len(args):
+        return [np.array([arg[pos] for pos in passPos]) for arg in args]
+    return [[arg[pos] for pos in passPos] for arg in args]
+
+def homogenizeNonNumerical(*args):
+    '''given a serie of vectors it check the values and 
+    groups it depens on its value. 
+    arg1: iterable with numerical data'''
+    maxlen= min( [len(arg) for arg in args])
+    nelements= len( args)
+    passPos= list()
+    for pos in range( maxlen):
+        dat= [args[i][pos] for i in range(nelements)]
+        if not(None in dat or '' in dat):
+            passPos.append(pos)
+    if sum( [isinstance( arg,(np.ndarray,)) for arg in args]) == len(args):
         return [np.array([arg[pos] for pos in passPos]) for arg in args]
     return [[arg[pos] for pos in passPos] for arg in args]
         
@@ -309,45 +324,6 @@ def isiterable(data):
         return True
     return False
 ########
-# grouping data 
-
-def _cols2dict( *cols):
-    '''convierte una serie de columnas en diccionario'''
-    # se determinan que todas las filas tengan igual cantidad de elementos
-    data = [len( col) for col in cols]
-    if False in map(lambda x,y:  x == y, data[1:] ,data[:-1]):
-        raise StandardError( 'Los argumentos deben tener igual cantidad de elementos')
-    # se convierte las columnas a filas
-    data = data[0]
-    result = ()
-    for pos in range( data):
-        result += ([col[pos] for col in cols],)
-    # se hace los calculos
-    return list( _fil2dict( list( result)))[0]
-
-def _fil2dict( data):
-    '''convierte una serie de filas en diccionario'''
-    result = dict()
-    for dato in data:
-        try:
-            key= dato[0]
-            if not isinstance(key, (str, unicode)):
-                key= key.__str__()
-        except IndexError:
-            break
-        try:
-            result[key] += (dato[1:],)
-        except KeyError:
-            result[key] = (dato[1:],)
-        except IndexError:
-            break
-        
-    for key in result.keys():
-        for key2 in _fil2dict(result[key]):
-            result[key] = key2
-            
-    yield result
-
 def __dict2list(diccionario):
     '''convierte un diccionario como una lista de datos'''
     try:
@@ -381,21 +357,119 @@ class GroupData(object):
     '''Grouping data similar to a pivot table
     xdata= [[col1], [col2], ..., [colU]]
     ydata= [[yda1], [ydat2], ..., [[ydataN]]]
-    names= [ydata1name, ydata2name,..., ydataNname]
+    yalias= [ydata1name, ydata2name,..., ydataNname] # alias name for the ydata, it's optional
+    restictions = [' ydata1name > ydata2name ','ydataNname == 0']
     res= GroupData()
     res.xdata= xdata
     res.ydata= ydata
-    res.names= names
+    res.names= names # optional
     dictionary= res.calc()
     listOfData= res.getAsList()
     '''
-    def __init__( self, xdata= [], ydata= [], names= []):
+    def __init__( self, xdata= [], ydata= [], yalias= [], restrictions= []):
         # se verifica que la cantidad de datos
-        # ingresados sea los mismos
-        self.xdata = xdata
-        self.ydata = ydata
-        self.names = names
+        # ingresados sean los mismos
+        self.xdata= xdata
+        self.ydata= ydata
+        self._homogenized= False
+        self.restrictions= restrictions
         
+    def _cols2dict(self, *cols):
+        result= self._filterPos()
+        '''convierte una serie de columnas en diccionario'''
+        # se determinan que todas las filas tengan igual cantidad de elementos
+        data = [len( col) for col in cols]
+        if False in map( lambda x,y:  x == y, data[1:] ,data[:-1]):
+            raise StandardError( 'Los argumentos deben tener igual cantidad de elementos')
+        
+        # se identifica las posiciones que cumplen con las restricciones
+        if len(self.restrictions) != 0:
+            # Aplaying the restrictions to the data
+            cols= [np.array(col) for col in cols]
+            cols= [col[result] for col in cols]
+            data= len( cols[0])
+        else:
+            data= data[0]
+            
+        length= data
+        result= ()
+        for pos in range( length):
+            res1= [col[pos] for col in cols]
+            result += (res1,)
+        
+        # se hace los calculos
+        return list( self._fil2dict( list( result)))[0]
+    
+    def __homogenizeData(self):
+        # se homogeniza la informacion
+        if self._homogenized == True:
+            return
+        
+        alldata= list()
+        for xdat in self.xdata:
+            alldata.append(xdat)
+            
+        for ydat in self.ydata:
+            alldata.append(ydat)
+        
+        # homogenize numerical and non numerical data
+        cols= homogenizeNonNumerical( *alldata)
+        self._xdata= [cols.pop(0) for i in range(len(self.xdata))]
+        self._ydata= cols
+        self._homogenized == True
+    
+    def _fil2dict(self, data):
+        '''convierte una serie de filas en diccionario'''
+        result = dict()
+        for dato in data:
+            try:
+                key= dato[0]
+                if not isinstance(key, (str, unicode)):
+                    key= key.__str__()
+            except IndexError:
+                break
+            try:
+                result[key] += (dato[1:],)
+            except KeyError:
+                result[key] = (dato[1:],)
+            except IndexError:
+                break
+            
+        for key in result.keys():
+            for key2 in self._fil2dict(result[key]):
+                result[key] = key2
+                
+        yield result
+    
+    def _filterPos(self):
+        '''Filter the data by the given conditions'''
+        # se identifica las posiciones que cumplen con las restricciones
+        if len(self.restrictions) == 0:
+            return
+        
+        # joining the restrictions
+        restrictiones= ['('+rest+')' for rest in self.restrictions]
+        if len( self.restrictions) == 1:
+            restrictiones= restrictiones[0]
+        else:
+            u= lambda x,y: x+' & '+y
+            restrictiones= reduce( u, restrictiones[1:], restrictiones[0])
+        
+        self.filterPos= []
+        xcols= [np.array(x) for x in self.xdata]
+        ycols= [np.array(x) for x in self.ydata]
+        localsDict= dict( )
+        
+        for key, value in zip( self.xdataNames, xcols):
+            localsDict[key]= value
+        
+        for key, value in zip( self.ydataNames, ycols):
+            localsDict[key]= value
+            
+        self.filterPos= eval(restrictiones, {}, localsDict)
+        
+        return self.filterPos
+    
     def __test__( self, *data):
         dimensiones = [len(datai) for datai in data]
         if sum([1 for dimen in dimensiones if dimen == dimensiones[0]]) != len(dimensiones):
@@ -410,65 +484,118 @@ class GroupData(object):
         if not isinstance(keys,(list,tuple)):
             return
         
+        if len(keys) >= 1:
+            key0= keys[0]
+            if not isinstance( keys[0], (str,unicode)):
+                key0= keys[0].__str__()
+                
         if len(keys) == 1:
             try:
                 (nombreCampo[-1],value[-1])
                 for nombrei,valuei in zip(nombreCampo,value):
                     try:
-                        diccionario[keys[0]][nombrei].append(valuei)
+                        diccionario[key0][nombrei].append(valuei)
                     except KeyError:
-                        diccionario[keys[0]][nombrei] = list()
-                        diccionario[keys[0]][nombrei].append(valuei)
+                        diccionario[key0][nombrei] = list()
+                        diccionario[key0][nombrei].append(valuei)
             except:
                 try:
-                    diccionario[keys[0]][nombreCampo].append(valuei)
+                    diccionario[key0][nombreCampo].append(valuei)
                 except KeyError:
-                    diccionario[keys[0]][nombreCampo] = list()
-                    diccionario[keys[0]][nombreCampo].append(valuei)
+                    diccionario[key0][nombreCampo] = list()
+                    diccionario[key0][nombreCampo].append(valuei)
         else:
-            self.__setdictValue(diccionario[keys[0]],keys[1:],nombreCampo,value)
-
-    def calc( self):
+            self.__setdictValue(diccionario[key0],keys[1:],nombreCampo,value)
+    
+    def getAsDict( self):
         self.__testAll()
-        diccionario = _cols2dict( *self.xdata)
+        self.__homogenizeData()
+        if len(self.xdata[0]) == 0 or len(self.ydata[0]) == 0:
+            return dict()
+        
+        diccionario= self._cols2dict( *self.xdata)
         for rowNumber in range( len( self.ydata[0])):
-            rowData = [ydata[rowNumber] for ydata in self.ydata]
+            if not self.filterPos[rowNumber]: 
+                continue
+            
+            rowData= [ydata[rowNumber] for ydata in self.ydata]
             # se convierte los caracteres u'' en None
             for pos,data in enumerate( rowData):
                 if data == u'':
                     rowData[pos] = None
             self.__setdictValue( diccionario,
-                                 keys= [valor[rowNumber] for valor in self.xdata],
-                                 nombreCampo= self.names,
-                                 value= rowData)
+                    keys= [valor[rowNumber] for valor in self.xdata],
+                    nombreCampo= self.yalias,
+                    value= rowData)
         return diccionario
     
+    def dict2list(self, diccionario, maximo = None ):
+        if maximo== None:
+            return self.__dict2list(diccionario)
+        return _newdict(diccionario,actual= 1,maximo = 3)
+    
+    def __dict2list(self, diccionario):
+        '''convierte un diccionario como una lista de datos'''
+        try:
+            for key in diccionario.keys():
+                for key2 in self.__dict2list(diccionario[key]):
+                    yield (key,) + key2
+        except:
+            yield (diccionario, )
+        
     def getAsList(self, maximum= None):
         return [lis for lis in self.getAsGen(maximum)]
     
     def getAsGen(self, maximum= None):
-        return dict2list(self.calc(), maximo= maximum)
+        return self.dict2list(self.getAsDict(), maximo= maximum)
     @property
     def xdata( self):
         return self._xdata
     @xdata.setter
-    def xdata( self,data):
+    def xdata( self, data):
         self._xdata = data
-    
+        self.xdataNames= list()
+        for pos in range( len( self.xdata)):
+            xdat= self.xdata[pos].pop( 0)
+            if not( isinstance( xdat , (str, unicode))):
+                xdat= xdat.__str__()
+            self.xdataNames.append( xdat)
     @property       
     def ydata( self):
         return self._ydata
     @ydata.setter
     def ydata( self, data):
         self._ydata = data
+        self.ydataNames= list()
+        for pos in range( len( self._ydata)):
+            ydat= self._ydata[pos].pop( 0)
+            if not isinstance(ydat, (str, unicode)):
+                ydat= ydat.__str__()
+            self.ydataNames.append(ydat)
+        self.yalias= self.ydataNames
         
     @property
-    def names( self):
-        return self._names
-    @names.setter
-    def names( self, names):
-        self._names = names
-    
+    def yalias( self):
+        return self.ydataNames
+    @yalias.setter
+    def yalias( self, yalias):
+        if isinstance(yalias, (str, unicode)):
+            yalias= [yalias]
+        if len( yalias) == len(self.ydata):
+            self.ydataNames= yalias
+        else:
+            raise StandardError('the len of yalias = %i data is different from the ydata =%i'%
+                                (len( yalias), len( self.ydata)))
+    @property
+    def restrictions(self):
+        return self._restrictions
+    @restrictions.setter
+    def restrictions(self, data):
+        if isinstance(data, (str, unicode)):
+            self._restrictions= [data]
+        else:
+            self._restrictions= data
+            
 def test_GroupData():
     xdata= (('colombia','colombia','colombia'),
         ('pasto','pasto','manizales'),
