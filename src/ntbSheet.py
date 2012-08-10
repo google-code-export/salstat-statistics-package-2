@@ -78,11 +78,12 @@ class MyGridPanel( wx.Panel, object ):
         except AttributeError:
             return self.m_grid.__getattribute__(name)
         
-    def _getCol(self, colNumber):
+    def _getCol(self, colNumber, includeHeader= False):
         if isinstance(colNumber, (str, unicode)):
             # searching for a col with the name:
             if not(colNumber in self.colNames):
                 raise TypeError('You can only use a numeric value, or the name of an existing column')
+            
             for pos, value in enumerate(self.colNames):
                 if value == colNumber:
                     colNumber= pos
@@ -94,9 +95,9 @@ class MyGridPanel( wx.Panel, object ):
         if colNumber > self.GetNumberRows():
             raise StandardError('The maximum column allowed is %i, but you selected %i'%(self.GetNumberRows()-1, colNumber))
         
-        return self._getColNumber(colNumber)
+        return self._getColNumber(colNumber, includeHeader)
     
-    def _getColNumber(self, colNumber):
+    def _getColNumber(self, colNumber, includeHeader= False):
         if not isnumeric(colNumber):
             raise TypeError('Only allow numeric values for the column, but you input '+ str(type(colNumber)))
         
@@ -104,7 +105,10 @@ class MyGridPanel( wx.Panel, object ):
         if colNumber < 0 or colNumber > self.GetNumberCols():
             raise StandardError('The minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
         
-        return [self.GetCellValue(row, colNumber) for row in range(self.GetNumberRows())]
+        result = [self.GetCellValue(row, colNumber) for row in range(self.GetNumberRows())]
+        if includeHeader:
+            result.insert(0, self.GetColLabelValue(colNumber))
+        return result
     
     
     def _getRow( self, rowNumber):
@@ -596,8 +600,8 @@ class SimpleGrid(MyGridPanel):# wxGrid
             result.append(dat)
         return result
     
-    def GetCol(self, col):
-        return self._cleanData( self._getCol( col))
+    def GetCol(self, col, hasHeader= False):
+        return self._cleanData( self._getCol( col, hasHeader))
     
     def PutCol(self, colNumber, data):
         try:
