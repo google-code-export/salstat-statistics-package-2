@@ -250,7 +250,7 @@ class MyGridPanel( wx.Panel, object ):
 class SimpleGrid(MyGridPanel):# wxGrid
     def __init__(self, parent, log= None, size= (1000,100)):
         self.NumSheetReport = 0
-        if log != None:
+        if log == None:
             try:
                 self.log= wx.GetApp().Logg
             except:
