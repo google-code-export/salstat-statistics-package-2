@@ -248,9 +248,15 @@ class MyGridPanel( wx.Panel, object ):
             self.SetColLabelValue(colnumber, colname)
 
 class SimpleGrid(MyGridPanel):# wxGrid
-    def __init__(self, parent, log, size= (1000,100)):
+    def __init__(self, parent, log= None, size= (1000,100)):
         self.NumSheetReport = 0
-        self.log = log
+        if log != None:
+            try:
+                self.log= wx.GetApp().Logg
+            except:
+                pass
+        else:
+            self.log= log
         self.path = None
         MyGridPanel.__init__(self, parent, -1, size)
         self.Saved = True
@@ -264,6 +270,8 @@ class SimpleGrid(MyGridPanel):# wxGrid
         self.wildcard = "Any File (*.*)|*.*|" \
             "S2 Format (*.xls)|*.xls"
         
+    def setLog(self, log):
+        self.log= log
     def onCellChanged(self, evt):
         self.Saved = False
 
@@ -398,25 +406,59 @@ class SimpleGrid(MyGridPanel):# wxGrid
         self.Saved = True
         self.log.write("The file %s was successfully saved!" % self.reportObj.path)
 
-
-    def LoadXls(self, evt):
+    def LoadFile(self, evt):
+        '''check the file type selected and redirect
+        to the corresponding load function'''
+        wildcard= "Excel 2003 File (*.xls)|*.xls|" \
+            "Txt file (*.txt)|*.txt|"    \
+            "Csv file (*.csv)|*.csv"        
         dlg = wx.FileDialog(self, "Load Data File", "","",
-                            wildcard= "Excel File (*.xls)|*.xls",
+                            wildcard= wildcard,
                             style = wx.OPEN)
         try:
             icon = imageEmbed().logo16()
             dlg.SetIcon(icon)
         except:
             pass
-        if dlg.ShowModal() != wx.ID_OK: # ShowModal
+        
+        if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return
+        
+        filterIndexPos= dlg.GetFilterIndex()
+        filterIndex= ['xls','txt','csv'][filterIndexPos]
+        fileName= dlg.GetFilename()
+        fullPath= dlg.Path 
+        if not fileName.endswith(filterIndex):
+            fullPath+= '.' + filterIndex
+            
+        if filterIndex == 'xls':
+            return self.LoadXls(fullPath)
+        
+        elif filterIndex in ('txt', 'csv'):
+            return self.loadCsvTxt(fullPath)
+        
+    def LoadCsvTxt(self, fullPath):
+        '''use the numpy ibrary to load the data'''
+        btn1= []
+        btn2= []
+        btn3= []
+        btn4= []
+        structure= []
+        structure.append()
+        setting = {'Title': 'Select a sheet',
+                   '_size':  wx.Size(250,220)}
+        
+        dlg = dialog(self, struct= structure, settings= setting)
+        if dlg.ShowModal() != wx.ID_OK:
+            return
+    
+    def LoadXls(self, fullPath):
         self.log.write('import xlrd', None)
-        filename= dlg.GetPath()
+        filename= fullPath
         filenamestr= filename.__str__()
         self.log.write('# remember to write an  r   before the path', None)
         self.log.write('filename= ' + "'" + filename.__str__() + "'", None)
-        dlg.Destroy()
         # se lee el libro
         wb= xlrd.open_workbook(filename)
         self.log.write('wb = xlrd.open_workbook(filename)', None)
@@ -428,7 +470,7 @@ class SimpleGrid(MyGridPanel):# wxGrid
         bt2= ('StaticText', ['Select a sheet to be loaded'])
         bt3= ('CheckBox',   ['Has header'])
         setting = {'Title': 'Select a sheet',
-                   '_size':  wx.Size(200,200)}
+                   '_size':  wx.Size(250,220)}
         
         dlg = dialog(self, struct=[[bt1,bt2],[bt3]], settings= setting)
         if dlg.ShowModal() != wx.ID_OK:
