@@ -8,7 +8,7 @@ license: GPL3
 import collections
 import tempfile, xlwt , os
 import numpy as np
-
+from openStats import statistics
 try:
     import xlrd
 except:
@@ -366,13 +366,15 @@ class GroupData(object):
     dictionary= res.calc()
     listOfData= res.getAsList()
     '''
-    def __init__( self, xdata= [], ydata= [], yalias= [], restrictions= []):
+    def __init__( self, xdata= [], ydata= [], yalias= [], restrictions= [], yvalues= [], yvaluesAlias= []):
         # se verifica que la cantidad de datos
         # ingresados sean los mismos
         self.xdata= xdata
         self.ydata= ydata
         self._homogenized= False
         self.filterPos= []
+        self.yvalues = yvalues
+        self.yvaluesAlias = yvaluesAlias
         self.restrictions= restrictions
         
     def _cols2dict(self, *cols):
@@ -421,7 +423,7 @@ class GroupData(object):
     
     def _fil2dict(self, data):
         '''convierte una serie de filas en diccionario'''
-        result = dict()
+        dictionary = dict()
         for dato in data:
             try:
                 key= dato[0]
@@ -430,20 +432,20 @@ class GroupData(object):
             except IndexError:
                 break
             try:
-                result[key] += (dato[1:],)
+                dictionary[key] += (dato[1:],)
             except KeyError:
-                result[key] = (dato[1:],)
+                dictionary[key] = (dato[1:],)
             except IndexError:
                 break
             
-        for key in result.keys():
-            for key2 in self._fil2dict(result[key]):
-                result[key] = key2
+        for key in dictionary.keys():
+            for key2 in self._fil2dict(dictionary[key]):
+                dictionary[key] = key2
                 
-        yield result
+        yield dictionary
     
     def _filterPos(self):
-        '''Filter the data by the given conditions'''
+        '''applying the general initital filter to the data by the given conditions'''
         # se identifica las posiciones que cumplen con las restricciones
         if len(self.restrictions) == 0:
             return
@@ -466,7 +468,7 @@ class GroupData(object):
         
         for key, value in zip( self.ydataNames, ycols):
             localsDict[key]= value
-            
+        
         self.filterPos= eval(restrictiones, {}, localsDict)
         
         return self.filterPos
@@ -491,6 +493,8 @@ class GroupData(object):
                 key0= keys[0].__str__()
                 
         if len(keys) == 1:
+            if not diccionario.has_key(key0):
+                diccionario[key0]= dict()
             try:
                 (nombreCampo[-1],value[-1])
                 for nombrei,valuei in zip(nombreCampo,value):
@@ -501,52 +505,94 @@ class GroupData(object):
                         diccionario[key0][nombrei].append(valuei)
             except:
                 try:
-                    diccionario[key0][nombreCampo].append(valuei)
+                    diccionario[key0][nombreCampo].append(value)
                 except KeyError:
                     diccionario[key0][nombreCampo] = list()
-                    diccionario[key0][nombreCampo].append(valuei)
+                    diccionario[key0][nombreCampo].append(value)
         else:
-            self.__setdictValue(diccionario[key0],keys[1:],nombreCampo,value)
+            try:
+                self.__setdictValue(diccionario[key0],keys[1:],nombreCampo,value)
+            except KeyError:
+                diccionario[key0]= dict()
+                self.__setdictValue(diccionario[key0],keys[1:],nombreCampo,value)
+                
     
     def getAsDict( self):
         self.__testAll()
         self.__homogenizeData()
-        if len(self.xdata[0]) == 0 or len(self.ydata[0]) == 0:
+        if len( self.xdata[0]) == 0 or len( self.ydata[0]) == 0:
             return dict()
         
         diccionario= self._cols2dict( *self.xdata)
         if len(self.filterPos) > 0:
-            for rowNumber in range( len( self.ydata[0])):
+            for rowNumber in range( len( self.xdata[0])): # self.ydata[0]
                 if not self.filterPos[rowNumber]: 
                     continue
                 
                 rowData= [ydata[rowNumber] for ydata in self.ydata]
-                # se convierte los caracteres u'' en None
+                # changing empty string u'' to None
                 for pos,data in enumerate( rowData):
                     if data == u'':
                         rowData[pos] = None
-                self.__setdictValue( diccionario,
-                        keys= [valor[rowNumber] for valor in self.xdata],
-                        nombreCampo= self.yalias,
-                        value= rowData)
-        else:
-            for rowNumber in range( len( self.ydata[0])):
-                rowData= [ydata[rowNumber] for ydata in self.ydata]
-                # se convierte los caracteres u'' en None
-                for pos,data in enumerate( rowData):
-                    if data == u'':
-                        rowData[pos] = None
+                        
                 self.__setdictValue( diccionario,
                         keys= [valor[rowNumber] for valor in self.xdata],
                         nombreCampo= self.yalias,
                         value= rowData)
                 
-        return diccionario
+        else:
+            for rowNumber in range( len( self.xdata[0])): # self.ydata[0]
+                rowData= [ydata[rowNumber] for ydata in self.ydata]
+                # changing empty string u'' to None
+                for pos,data in enumerate( rowData):
+                    if data == u'':
+                        rowData[pos] = None
+        
+                self.__setdictValue( diccionario,
+                        keys= [valor[rowNumber] for valor in self.xdata],
+                        nombreCampo= self.yalias,
+                        value= rowData)
+        
+        # applying filters to obtain ydata
+        return self._applyYfilters(diccionario)
     
-    def dict2list(self, diccionario, maximo = None ):
-        if maximo== None:
+    def _applyYfilters(self, diccionario):
+        # defining the dictionary of variables to be used as
+        # local variables
+        if len(self.yvalues) == 0:
+            return diccionario
+        
+        if len( self.yvaluesAlias) != len( self.yvalues):
+            self.yvaluesAlias= self.yvalues[:]
+        
+        localdict= dict()
+        newdict= self.dict2list( diccionario, maximun= len( self.xdata))
+        responseDict= dict()
+        for dat in newdict:
+            xValues= dat[:-1]
+            dictValues= dat[-1]
+            for key, value in zip( self.xdataNames, xValues):
+                dictValues[key]= value
+            dictValues['statistics']= statistics
+            
+            # evaluating the conditions with the local dict
+            # for all values
+            for colY, alias in zip(self.yvalues, self.yvaluesAlias): # colY correspond
+                try:
+                    yvalues= eval( colY, {}, dictValues)
+                except:
+                    yvalues= ''
+   
+                # send the data to construct a dictionary
+                self.__setdictValue( responseDict, keys = xValues,
+                                     nombreCampo = alias, value= yvalues)
+            
+        return responseDict
+    
+    def dict2list(self, diccionario, maximun = None ):
+        if maximun== None:
             return self.__dict2list(diccionario)
-        return _newdict(diccionario,actual= 1,maximo = 3)
+        return _newdict(diccionario,actual= 1, maximo = maximun)
     
     def __dict2list(self, diccionario):
         '''convierte un diccionario como una lista de datos'''
@@ -560,8 +606,8 @@ class GroupData(object):
     def getAsList(self, maximum= None):
         return [lis for lis in self.getAsGen(maximum)]
     
-    def getAsGen(self, maximum= None):
-        return self.dict2list(self.getAsDict(), maximo= maximum)
+    def getAsGen(self, maximun= None):
+        return self.dict2list(self.getAsDict(), maximun= maximun)
     @property
     def xdata( self):
         return self._xdata
@@ -587,7 +633,6 @@ class GroupData(object):
                 ydat= ydat.__str__()
             self.ydataNames.append(ydat)
         self.yalias= self.ydataNames
-        
     @property
     def yalias( self):
         return self.ydataNames
@@ -600,6 +645,18 @@ class GroupData(object):
         else:
             raise StandardError('the len of yalias = %i data is different from the ydata =%i'%
                                 (len( yalias), len( self.ydata)))
+    @property
+    def yvalues(self):
+        return self._yvalues
+    @yvalues.setter
+    def yvalues(self, data):
+        self._yvalues= data
+    @property
+    def yvaluesAlias(self):
+        return self._yvaluesAlias
+    @yvaluesAlias.setter
+    def yvaluesAlias(self, data):
+        self._yvaluesAlias= data
     @property
     def restrictions(self):
         return self._restrictions

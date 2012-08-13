@@ -11,6 +11,12 @@ import os
 
 import wx.grid
 
+# -----------------
+# to use the sash
+import  wx.lib.multisash as sash
+import  wx.gizmos as gizmos
+# -----------------
+
 import wx.html
 import wx.lib.agw.aui as aui
 
@@ -452,27 +458,19 @@ class MainFrame(wx.Frame):
         self.defaultDialogSettings = {'Title': None,
                                       'icon': imagenes.logo16()}
 
+
+        #self.sash = gizmos.DynamicSashWindow(self, -1, style =  wx.CLIP_CHILDREN)
         #--------------------
         #< set up the datagrid
-        self.grid= SimpleGrid(self, self.logPanel, size = (500,50))
+        self.grid= SimpleGrid( self, self.log)
         # let />
         self.grid.Saved= True
         self.grid.SetDefaultColSize( 60, True)
         self.grid.SetRowLabelSize( 40)
         self.grid.SetDefaultCellAlignment( wx.ALIGN_RIGHT, wx.ALIGN_CENTER )
+        
         ## adjust the renderer
-        attr=   wx.grid.GridCellAttr()
-        #editor= wx.grid.GridCellFloatEditor()
-        #attr.SetEditor(editor)
-        renderer = floatRenderer( 4)
-        attr.SetRenderer( renderer)
-        self.floatCellAttr= attr
-        for colNumber in range( self.grid.NumberCols):
-            self.grid.SetColAttr( colNumber, self.floatCellAttr)
-        if wx.Platform == '__WXMAC__':
-            self.grid.SetGridLineColour("#b7b7b7")
-            self.grid.SetLabelBackgroundColour("#d2d2d2")
-            self.grid.SetLabelTextColour("#444444")
+        self._gridSetRenderer(self.grid)
         #-----------------------
 
         # response panel
@@ -535,6 +533,22 @@ class MainFrame(wx.Frame):
         # Saving the perspective
         self._defaultPerspective= self.m_mgr.SavePerspective()
         self.Center()
+        
+    def _gridSetRenderer(self, grid):
+        '''setting the renderer to the grid'''
+        attr=   wx.grid.GridCellAttr()
+        #editor= wx.grid.GridCellFloatEditor()
+        #attr.SetEditor(editor)
+        renderer = floatRenderer( 4)
+        attr.SetRenderer( renderer)
+        self.floatCellAttr= attr
+        for colNumber in range( grid.NumberCols):
+            grid.SetColAttr( colNumber, self.floatCellAttr)
+            
+        if wx.Platform == '__WXMAC__':
+            grid.SetGridLineColour("#b7b7b7")
+            grid.SetLabelBackgroundColour("#d2d2d2")
+            grid.SetLabelTextColour("#444444")
         
     def _sendObj2Shell(self, shell):
         # making available useful object to the shell
@@ -642,7 +656,7 @@ class MainFrame(wx.Frame):
         dat1= (
             ('&File',
              (['&New Data\tCtrl-N',   NewIcon,    self.GoClearData,     wx.ID_NEW],
-              ['&Open...\tCtrl-O',    OpenIcon,   self.grid.LoadXls,     wx.ID_OPEN],
+              ['&Open...\tCtrl-O',    OpenIcon,   self.grid.LoadFile,    wx.ID_OPEN], # LoadXls
               ['--'],
               ['&Save\tCtrl-S',       SaveIcon,   self.grid.SaveXls,     wx.ID_SAVE],
               ['Save &As...\tCtrl-Shift-S', SaveAsIcon, self.grid.SaveXlsAs,     wx.ID_SAVEAS],
@@ -738,7 +752,7 @@ class MainFrame(wx.Frame):
         #-----------------
         # para el toolbar
         self.Bind(wx.EVT_MENU, self.GoClearData,        id= self.bt1.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.LoadXls,       id= self.bt2.GetId())
+        self.Bind(wx.EVT_MENU, self.grid.LoadFile,       id= self.bt2.GetId())
         self.Bind(wx.EVT_MENU, self.grid.SaveXls,       id= self.bt3.GetId())
         self.Bind(wx.EVT_MENU, self.grid.SaveXlsAs,     id= self.bt4.GetId())
         ##self.Bind(wx.EVT_MENU, self.grid.PrintPage,    id = self.bt5.GetId())
@@ -837,16 +851,7 @@ class MainFrame(wx.Frame):
         self.grid.AppendRows( 500)
         self.grid.AppendCols( 50)
         # <p> updating the renderer
-        attr=   wx.grid.GridCellAttr()
-        editor= wx.grid.GridCellFloatEditor()
-        attr.SetEditor(editor)
-        renderer = floatRenderer( 4)
-        self.floatCellRenderer= renderer
-        attr.SetRenderer( renderer)
-        self.floatCellAttr= attr
-
-        for colNumber in range( self.grid.NumberCols):
-            self.grid.SetColAttr( colNumber, self.floatCellAttr)
+        self._gridSetRenderer(self.grid)
         # /<p>
 
         self.grid.path= None

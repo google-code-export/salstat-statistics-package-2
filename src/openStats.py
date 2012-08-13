@@ -7,16 +7,30 @@ Created on 14/05/2012
 from statlib import stats
 from scipy import stats as stats2
 import math
+import numpy as np
+
+def isnumeric(data):
+    if isinstance(data, (int, float, long, np.ndarray)):
+        return True
+    return False
 
 class statistics:
     def __init__(self, data, name= None, missing= None):
+        if isnumeric(data):
+            data= [data]
         self.missing=  missing
         self.Name=     name
         self.N=        len(data)
         self.suma=     sum(data)
         self.mean=     stats.mean(data)
-        self.variance= stats.var(data)
-        self.stderr=   stats.sterr(data)
+        if len(data) > 1:
+            self.variance= stats.var(data)
+            self.stderr=   stats.sterr(data)
+            self.stddev=    stats.stdev(data)
+        else:
+            self.variance= None
+            self.stderr=   None
+            self.stddev=   None
         self.sumsquares= stats.ss(data)
         self.minimum=  min(data)
         self.maximum=  max(data)
@@ -29,9 +43,9 @@ class statistics:
         self.skewness=  stats.skew(data)
         self.kurtosis=  stats.kurtosis(data)
         self.median=    stats.median(data)
-        self.stddev=    stats.stdev(data)
+        
         self.samplevar= stats.samplevar(data)
-        if self.mean !=0:
+        if self.mean !=0 and self.stddev != None:
             self.coeffvar= self.stddev/float(self.mean)
         else:
             self.coeffvar = None
