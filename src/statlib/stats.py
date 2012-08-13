@@ -711,7 +711,10 @@ def lvar (inlist):
     deviations = [0]*len(inlist)
     for i in range(len(inlist)):
         deviations[i] = inlist[i] - mn
-    return ss(deviations)/float(n-1)
+    try:
+        return ss(deviations)/float(n-1)
+    except ZeroDivisionError:
+        return None
 
 
 def lstdev (inlist):
