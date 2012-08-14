@@ -123,7 +123,7 @@ class LogPanel( wx.Panel ):
         #texto= str(self.numLinea.next()) + " >> "
         texto= ''
         if writem:
-            texto= str( ">>")
+            texto= str( ">> ")
         texto+= lineaTexto + "\n"
         # se escribe el texto indicado
         self.log.AppendText(texto)
@@ -300,7 +300,7 @@ class SalStat2App(wx.App):
     def OnInit(self):
         # getting the os type
         self.OSNAME = os.name
-        self.VERSION= '2.1 alpha'
+        self.VERSION= '2.1 beta 2'
         self.missingvalue= missingvalue
         wx.SetDefaultPyEncoding("utf-8")
         self.SetAppName(APPNAME)
@@ -478,7 +478,12 @@ class MainFrame(wx.Frame):
         self.answerPanel2= ScriptPanel(self, self.logPanel, self.grid, self.answerPanel)
         #--------------------------------------------
         self.m_notebook1.AddPage( self.logPanel, u"Log", True )
-        self.scriptPanel= wx.py.shell.Shell( self.m_notebook1)
+        # Redurecting the error messages to the logPanel
+        sys.stderr= self.logPanel
+        sys.stdout= self.logPanel
+        self.scriptPanel=  wx.py.crust.Shell( self.m_notebook1) # wx.py.shell.Shell( self.m_notebook1)
+        ##self.scriptPanel.stderr= self.logPanel
+        
         #self.scriptPanel.wrap( True)
         self.m_notebook1.AddPage( self.scriptPanel , u"Shell", False )
 
