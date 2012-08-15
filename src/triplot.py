@@ -5,7 +5,7 @@ Created on 29/05/2012
 '''
 
 from math import sqrt
-from slbTools import homogenize
+from slbTools import homogenize, isnumeric
 
 class triplot:
     def __init__(self, data2plot):
@@ -178,6 +178,18 @@ def triang2xy( a, b, c, triangle = 'equilater'):
     c= 100%  (1/2, sqrt(3)/2'''
     #if a < 0 or b < 0 or c < 0:
     #    raise StandardError('all input data must be positive')
+    # check if the data is numeric
+    def _orga(a):
+        if not isinstance(a, (str, unicode)):
+            a= a.__str__()
+            
+    if sum([isnumeric(i) for i in [a, b, c]]) != 3:
+        _orga(a)
+        _orga(b)
+        _orga(c)
+        wx.GetApp().Logg.write('the poin fail (%s,%s,%s)'%(a, b, c,), False)
+        return
+    
     total = a+b+c
     if total == 0:
         return 0,0
