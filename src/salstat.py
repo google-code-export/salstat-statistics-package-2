@@ -817,7 +817,7 @@ class MainFrame(wx.Frame):
         evt.Skip()
 
     def _OnNtbDbClick(self,evt):
-        for pane in self.mm_mgr.AllPanes:
+        for pane in self.m_mgr.AllPanes:
             if pane.name == 'Bottom Panel':
                 break
         if not pane.IsMaximized():
