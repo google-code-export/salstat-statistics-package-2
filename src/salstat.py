@@ -1159,17 +1159,17 @@ class MainFrame(wx.Frame):
             labels = None
 
         dlg.Destroy()
-        if len(selectedcols) == 0:
-            self.SetStatusText('You need to select some data to draw a graph!')
+        if len( selectedcols) == 0:
+            self.SetStatusText( 'You need to select some data to draw a graph!')
             return
 
-        self.log.write('barType= '+ "'" + barType.__str__() + "'", False)
-        self.log.write('colour= '+ "'" + colour.__str__() + "'", False)
-        self.log.write('selectedcols= '+ selectedcols.__str__(), False)
-        self.log.write('''data= [statistics( grid.GetColNumeric(col),'noname',None).mean for col in selectedcols]''', False)
-        data = [statistics( self.grid.GetColNumeric(col),'noname',None).mean
+        self.log.write( 'barType= '+ "'" + barType.__str__() + "'", False)
+        self.log.write( 'colour= '+ "'" + colour.__str__() + "'", False)
+        self.log.write( 'selectedcols= '+ selectedcols.__str__(), False)
+        self.log.write( '''data= [statistics( grid.GetColNumeric(col),'noname',None).mean for col in selectedcols]''', False)
+        data = [statistics( self.grid.GetColNumeric( col),'noname',None).mean
                 for col in selectedcols]
-        self.log.write('''plt= plot(parent=   None,
+        self.log.write( '''plt= plot(parent=   None,
                   typePlot= 'plotNiceBar',
                   data2plot= (numpy.arange(1, len(data)+1), data,  None,  colour, barType,),
                   xlabel=  'variable',
