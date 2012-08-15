@@ -1128,11 +1128,13 @@ class MainFrame(wx.Frame):
         btn1= ['Choice', [figTypes]]
         btn2= ['Choice', [colours]]
         btn3= ['CheckListBox', [waste]]
+        btn4= ['CheckBox', ['push the labels up to the bars'] ]
         structure= list()
         structure.append([btn1, txt1])
         structure.append([btn2, txt2])
         structure.append([txt3])
         structure.append([btn3])
+        structure.append([btn4])
         setting= {'Title':'Bar chart means of selected columns'}
         dlg= dialog(self, settings= setting, struct= structure)
         if dlg.ShowModal() != wx.ID_OK:
@@ -1143,12 +1145,18 @@ class MainFrame(wx.Frame):
         barType= values[0]
         colour=  values[1]
         selectedcols= values[2]
+        showLabels= values[3]
 
         if barType == None:
             barType= 'redunca'
 
         if colour == None:
             colour= 'random'
+        
+        if showLabels:
+            labels= selectedcols
+        else:
+            labels = None
 
         dlg.Destroy()
         if len(selectedcols) == 0:
@@ -1169,7 +1177,7 @@ class MainFrame(wx.Frame):
                   title=   'Bar Chart of all means')''', False)
         plt= plot(parent=   self,
                   typePlot= 'plotNiceBar',
-                  data2plot= (numpy.arange(1, len(data)+1), data,  None,  colour, barType,),
+                  data2plot= (numpy.arange(1, len(data)+1), data,  None,  colour, barType, labels),
                   xlabel=  'variable',
                   ylabel=  'value',
                   title=   'Bar Chart of all means')
@@ -1196,11 +1204,13 @@ class MainFrame(wx.Frame):
         btn1= ['Choice', [figTypes]]
         btn2= ['Choice', [colours]]
         btn3= ['Choice', [waste]]
+        btn4= ['CheckBox', ['push the labels up to the bars'] ]
         structure= list()
         structure.append([btn1, txt1])
         structure.append([btn2, txt2])
         structure.append([txt3])
         structure.append([btn3])
+        structure.append([btn4])
         setting= {'Title':'Bar chart means of selected columns'}
         dlg= dialog(self, settings= setting, struct= structure)
         if dlg.ShowModal() != wx.ID_OK:
@@ -1211,6 +1221,7 @@ class MainFrame(wx.Frame):
         barType= values[0]
         colour=  values[1]
         selectedcol= values[2]
+        showLabels= values[3]
 
         if barType == None:
             barType= 'redunca'
@@ -1222,26 +1233,42 @@ class MainFrame(wx.Frame):
         if len(selectedcol) == 0:
             self.SetStatusText('You need to select some data to draw a graph!')
             return
+        
+        if showLabels != False:
+            labels= selectedcol
+        else:
+            labels = None
 
-        self.log.write('barType= '+ "'" + barType.__str__() + "'", False)
-        self.log.write('colour= '+ "'" + colour.__str__() + "'", False)
-        self.log.write('selectedcol= '+ selectedcol.__str__(), False)
-        data = self.grid.GetColNumeric(selectedcol)
-        self.log.write('''data= grid.GetColNumeric(selectedcol)''', False)
-        self.log.write('''plt= plot(parent=   None,
+        self.log.write( 'barType= '+ "'" + barType.__str__() + "'", False)
+        self.log.write( 'colour= '+ "'" + colour.__str__() + "'", False)
+        self.log.write( 'selectedcol= '+ selectedcol.__str__(), False)
+        data = self.grid.GetColNumeric( selectedcol)
+        self.log.write( '''data= grid.GetColNumeric(selectedcol)''', False)
+        conc= lambda x,y: x + ', ' + y
+        newval= list()
+        for dat in data:
+            if not isinstance(dat, (str, unicode)):
+                dat= dat.__str__()
+            newval.append(dat)
+            
+        if len(newval)> 1:
+            self.log.write( "labels= " +"[" + reduce(conc, newval[1:], newval[0] ) + "]", False)
+        else:
+            self.log.write( "labels= " +"[" + newval[0] + "]", False)
+        self.log.write( '''plt= plot( parent=   None,
                   typePlot= 'plotNiceBar',
-                  data2plot= (numpy.arange(1, len(data)+1), data,  None,  colour, barType,),
+                  data2plot= ( numpy.arange(1, len(data)+1), data,  None,  colour, barType, labels),
                   xlabel=  'variable',
                   ylabel=  'value',
                   title=   'Bar Chart')''', False)
         plt= plot(parent=   self,
                   typePlot= 'plotNiceBar',
-                  data2plot= (numpy.arange(1, len(data)+1), data,  None,  colour, barType,),
+                  data2plot= ( numpy.arange(1, len( data)+1), data,  None,  colour, barType, newval),
                   xlabel=  'variable',
                   ylabel=  'value',
                   title=   'Bar Chart')
         plt.Show()
-        self.log.write('plt.Show()', False)
+        self.log.write( 'plt.Show()', False)
 
     def GoScatterPlot(self,evt):
         self.log.write('Scatter')

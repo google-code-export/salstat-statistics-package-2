@@ -227,9 +227,8 @@ def plotBar(ax=      None,
     # se generan los colores en forma aleatoria
     box_colors = _generatecolors(colors,len(xdata))           
     fig = plt.gcf()
-    ## fig.clf()
     if ax == None:
-        ax = plt.gca()## subplot(111)
+        ax = plt.gca()
     fmt = ScalarFormatter(useOffset=False)
     ax.xaxis.set_major_formatter(fmt)
     if labels== None:
