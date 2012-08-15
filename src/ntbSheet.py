@@ -266,7 +266,7 @@ class SimpleGrid(MyGridPanel):# wxGrid
         self.setPadreCallBack(self)
         self.SetColLabelAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
         self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
-        self.m_grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.onCellChanged)
+        ###### self.m_grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.onCellChanged)
         self.wildcard = "Any File (*.*)|*.*|" \
             "S2 Format (*.xls)|*.xls"
         
