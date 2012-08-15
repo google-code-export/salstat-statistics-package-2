@@ -5,6 +5,8 @@ import  wx
 from imagenes import imageEmbed
 from openStats import statistics # used in descriptives frame
 import math # to be used in transform pane
+import numpy
+import scipy
 
 if wx.Platform == '__WXMSW__':
     wind = 50
@@ -503,15 +505,22 @@ class TransformFrame(wx.Dialog):
         for i in range( len( self.colnums)):
             if self.ColChoice.IsChecked( i):
                 newColi= self.colnums[i]
-                oldcol= frame.grid.CleanData( newColi)
+                oldcol= frame.grid.GetCol( newColi)
                 newcol= [0]*len( oldcol)
-                for j in range( len( oldcol)):
-                    x= oldcol[j]
-                    try:
-                        newcol[j]= eval( self.transform)
-                    except: # which exception would this be?
-                        newcol[j]= u''
-
+                # trying to made the evaluation by using numpy
+                try:
+                    arr= numpy.array(oldcol)
+                    local= {'x': numpy.ravel(arr),'math': math,'scipy': scipy}
+                    # posibly change by wx.GetApp().frame.scriptPanel.interp.runcode( mainscript)
+                    newcol= eval( self.transform, {}, local)
+                except:    
+                    for j in range( len( oldcol)):
+                        x= oldcol[j]
+                        try:
+                            newcol[j]= eval( self.transform)
+                        except: # which exception would this be?
+                            newcol[j]= u''
+                
                 posNewCol= emptyCols.pop(0)
                 frame.grid.PutCol( posNewCol, newcol)
                 # put in a nice new heading
@@ -520,6 +529,7 @@ class TransformFrame(wx.Dialog):
                     self.transformName = ' ' + self.transform
                 oldHead= oldHead + self.transformName
                 frame.grid.SetColLabelValue(posNewCol, oldHead)
+                
         self.Close(True)
 
     def OnCloseFrame(self, evt):
