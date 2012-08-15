@@ -179,4 +179,6 @@ def triang2xy( a, b, c, triangle = 'equilater'):
     #if a < 0 or b < 0 or c < 0:
     #    raise StandardError('all input data must be positive')
     total = a+b+c
+    if total == 0:
+        return 0,0
     return (2*b+c)/float(2*total), c*sqrt(3)/float(2*total)
