@@ -860,17 +860,14 @@ class MpltFrame( wx.Frame, object ):
         label= data2plot[2]
         colour= data2plot[3]
         figNam= data2plot[4]
+        labelsBar= data2plot[5]
         self.gca().hold( True)
-        #try:
         plotBar(ax=      self.gca(),
                 xdata=   xdat,
                 ydata=   ydat,
-                labels=  None,
+                labels=  labelsBar,
                 colors=  colour,
                 figName= figNam)
-        #except:
-        #    data2plot= (ydat,'Media')
-        #plotBar(data2plot)
         self.gca().hold( False)
         self.figpanel.canvas.draw( )
 
