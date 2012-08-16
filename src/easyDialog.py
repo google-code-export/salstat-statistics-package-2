@@ -6,7 +6,7 @@ Created on 16/05/2012
 '''Easily create a dialog'''
 
 import wx
-from dialogs import CheckListBox, NumTextCtrl, makePairs
+from dialogs import CheckListBox, NumTextCtrl, makePairs, IntTextCtrl
 
 def _siguiente():
     i = 0
@@ -28,10 +28,10 @@ class Dialog ( wx.Dialog ):
                     '_style': wx.DIALOG__STYLE of the dialog ,}
         struct = list() information with the data
 
-        allowed controls: 'StaticText',   'TextCtrl',    'Choice',
-                          'CheckListBox', 'StaticLine',  'RadioBox',
+        allowed controls: 'StaticText',   'TextCtrl',     'Choice',
+                          'CheckListBox', 'StaticLine',   'RadioBox',
                           'SpinCtrl',     'ToggleButton', 'NumTextCtrl',
-                          'CheckBox',      'makePairs'
+                          'CheckBox',     'makePairs',    'IntTextCtrl'
 
         struct example:
 
@@ -64,8 +64,7 @@ class Dialog ( wx.Dialog ):
         >> structure.append( [bt11, ])
 
         to see an example run the class as a main script
-
-        }'''
+        '''
         self.ctrlNum = _siguiente()
         self.sizerNum= _siguiente()
 
@@ -109,11 +108,11 @@ class Dialog ( wx.Dialog ):
         self._allow= ['StaticText','TextCtrl','Choice',
                       'CheckListBox','StaticLine','RadioBox',
                       'SpinCtrl','ToggleButton','NumTextCtrl',
-                      'CheckBox', 'makePairs']
+                      'CheckBox', 'makePairs', 'IntTextCtrl']
         self._allow2get= ['TextCtrl','Choice',
                       'CheckListBox','RadioBox',
                       'SpinCtrl','ToggleButton','NumTextCtrl',
-                      'CheckBox', 'makePairs']
+                      'CheckBox', 'makePairs','IntTextCtrl']
         
         self.adding(bSizer3, struct)
 

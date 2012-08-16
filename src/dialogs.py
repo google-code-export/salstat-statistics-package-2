@@ -535,21 +535,19 @@ class TransformFrame(wx.Dialog):
     def OnCloseFrame(self, evt):
         self.Close(True)
 
-
-
 class NumTextCtrl(wx.TextCtrl):
     '''a text ctrl that only accepts numbers'''
-    def __init__(self, parent, *args, **params):
-        wx.TextCtrl.__init__(self, parent, *args, **params)
-        self.Bind(wx.EVT_TEXT, self._textChange)
+    def __init__( self, parent, *args, **params):
+        wx.TextCtrl.__init__( self, parent, *args, **params)
+        self.Bind( wx.EVT_TEXT, self._textChange)
+        self.allowed = [ str( x) for x in range( 10)]
+        self.allowed.extend([ wx.GetApp().DECIMAL_POINT, '-'])
 
     def _textChange(self,event):
         texto = self.GetValue()
         if len(texto) == 0:
             return
-        allowed= [ str(x) for x in range(11)]
-        allowed.extend([wx.GetApp().DECIMAL_POINT, '-'])
-        newstr= [x for x in texto if x in allowed]
+        newstr= [ x for x in texto if x in allowed]
         if len(newstr) == 0:
             newstr = u''
         else:
@@ -570,6 +568,20 @@ class NumTextCtrl(wx.TextCtrl):
             except:
                 prevResult = None
         return prevResult
+    
+    def GetValue(self):
+        return self.GetAsNumber()
+    
+    def GetValue(self):
+        return self.GetAsNumber()
+
+class IntTextCtrl(NumTextCtrl):
+    '''a text ctrl that only accepts numbers'''
+    def __init__(self, parent, *args, **params):
+        wx.TextCtrl.__init__(self, parent, *args, **params)
+        self.Bind(wx.EVT_TEXT, self._textChange)
+        self.allowed = [ str( x) for x in range( 10)]
+
     
 class CheckListBox( wx.Panel, object ):
     def __init__( self, parent , *args, **params):
