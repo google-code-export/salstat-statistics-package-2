@@ -138,10 +138,10 @@ class MyGridPanel( wx.Panel, object ):
         if rowNumber < 0 or rowNumber > self.GetNumberRows():
             raise StandardError('The minimum accepted row is 0, and the maximum is %i'%self.GetNumberRows()-1)
         
-        return [self.GetCellValue(rowNumber, col) for col in range(self.GetNumberCols())]
+        return [self.GetCellValue( rowNumber, col) for col in range( self.GetNumberCols())]
     
-    def putCol(self, colNumber, data):
-        if isinstance(colNumber, (str, unicode)):
+    def putCol( self, colNumber, data):
+        if isinstance( colNumber, (str, unicode)):
             if not(colNumber in self.colNames):
                 raise TypeError('You can only use a numeric value, or the name of an existing column')
             for pos, value in enumerate(self.colNames):
@@ -149,14 +149,14 @@ class MyGridPanel( wx.Panel, object ):
                     colNumber= pos
                     break
                 
-        if not isnumeric(colNumber):
+        if not isnumeric( colNumber):
             raise TypeError('You can only use a numeric value, or the name of an existing column')
         
         colNumber= int(colNumber)        
         if colNumber < 0 or colNumber > self.GetNumberCols():
             raise StandardError('The minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
         
-        self.clearCol(colNumber)
+        self.clearCol( colNumber)
         
         if isinstance( data,(str, unicode)):
             data= [data]
@@ -246,9 +246,33 @@ class MyGridPanel( wx.Panel, object ):
         
         for colnumber, colname in enumerate(colNames):
             self.SetColLabelValue(colnumber, colname)
+            
+class MyFileDropTarget(wx.FileDropTarget):
+    def __init__( self, wxPanel ):
+        wx.FileDropTarget.__init__(self)
+        self.window = wxPanel
 
-class SimpleGrid(MyGridPanel):# wxGrid
-    def __init__(self, parent, log= None, size= (1000,100)):
+    def OnDropFiles( self, x, y, filenames):
+        log= wx.GetApp().Logg
+        log.write( "\n%d file(s) dropped at %d,%d:" %
+                              (len( filenames), x, y))
+        for file in filenames:
+            log.write( file)
+            
+        # try to load the file
+        if isinstance(filenames, (str, unicode)):
+            filenames= [filenames]
+            
+        if len(filenames) == 0:
+            log.write("You don't select any file")
+            return
+        
+        # selecting just the first filename
+        filename= filenames[0]
+        self.window.LoadXls(filename)
+            
+class SimpleGrid( MyGridPanel):# wxGrid
+    def __init__( self, parent, log= None, size= (1000,100)):
         self.NumSheetReport = 0
         if log == None:
             try:
@@ -258,13 +282,16 @@ class SimpleGrid(MyGridPanel):# wxGrid
         else:
             self.log= log
         self.path = None
-        MyGridPanel.__init__(self, parent, -1, size)
+        MyGridPanel.__init__( self, parent, -1, size)
+        # allowing drop files into the sheet
+        dropTarget = MyFileDropTarget( self)
+        self.m_grid.SetDropTarget(dropTarget)
         self.Saved = True
         self.moveTo = None
         if wx.Platform == "__WXMAC__":
             self.SetGridLineColour(wx.BLACK)
-        self.setPadreCallBack(self)
-        self.SetColLabelAlignment(wx.ALIGN_CENTER, wx.ALIGN_CENTER)
+        self.setPadreCallBack( self)
+        self.SetColLabelAlignment( wx.ALIGN_CENTER, wx.ALIGN_CENTER)
         self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
         ###### self.m_grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.onCellChanged)
         self.wildcard = "Any File (*.*)|*.*|" \

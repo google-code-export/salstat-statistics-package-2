@@ -430,9 +430,12 @@ class SalStat2App(wx.App):
 
 #---------------------------------------------------------------------------
 # This is main interface of application
-class MainFrame(wx.Frame):
+class MainFrame(wx.Frame, wx.FileDropTarget):
     def __init__(self, parent, appname ):
         self.path= None
+        # to allow the user to drop allowed files into the Data Entry Panel
+        wx.FileDropTarget.__init__( self)
+        self.window= self
         wx.Frame.__init__(self,parent,-1,"S2",
                           size = wx.Size(640,480 ), pos = wx.DefaultPosition)
 
@@ -825,6 +828,18 @@ class MainFrame(wx.Frame):
             self.mm_mgr.MaximizePane(pane)
         else:
             pane.MinimizeButton(True)
+    
+    def OnDropFiles( self, x, y, filenames):
+        if isinstance( filenames, (str, unicode)):
+            filenames= [filenames]
+            
+        if len( fileames) == 0:
+            return
+        
+        # taking the first element as the selected file
+        filename= filenames[0]
+        self.log.write('the file %d  was droped'%filename)
+        
     
     def onDefaultPerspective(self, evt):
         self.m_mgr.LoadPerspective(self._defaultPerspective)
