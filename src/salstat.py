@@ -349,8 +349,9 @@ class SalStat2App(wx.App):
             self.frame.Show()
         elif wx.Platform == '__WXMSW__' :
             self.frame.ShowFullScreen(True,False)
-        else: # mac platfomr
-            self.frame.ShowFullScreen(True,False)    
+        else:   # mac platform
+            self.frame.Maximize()
+            self.frame.Show()
         return True
 
     def getDataDir(self):
