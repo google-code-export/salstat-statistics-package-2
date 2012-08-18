@@ -1,0 +1,15 @@
+Places where I have changed colours / styling:
+
+Salstat.py:
+
+VariablesFrame.__init__()
+MainFrame.__init__()
+SimpleGrid.__init__()
+
+Script.py:
+
+MySTC.__init__()
+
+ntbSheet.py:
+
+MyGridPanel.__init__()
