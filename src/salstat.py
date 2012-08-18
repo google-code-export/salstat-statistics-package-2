@@ -852,12 +852,12 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         if isinstance( filenames, (str, unicode)):
             filenames= [filenames]
             
-        if len( fileames) == 0:
+        if len( filenames) == 0:
             return
         
         # taking the first element as the selected file
         filename= filenames[0]
-        self.log.write('the file %d  was droped'%filename)
+        sys.stderr.write('the file %d was dropped'%filename)
         
     
     def onDefaultPerspective(self, evt):
