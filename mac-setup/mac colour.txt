@@ -13,3 +13,6 @@ MySTC.__init__()
 ntbSheet.py:
 
 MyGridPanel.__init__()
+
+I created the salstat.icns format icon file using http://www.macupdate.com/app/mac/18369/img2icns
+
