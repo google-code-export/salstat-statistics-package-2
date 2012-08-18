@@ -316,7 +316,16 @@ def FormatTrace(etype, value, trace):
 
 class SalStat2App(wx.App):
     # the main app
+    def __init__(self, *args, **kwargs):
+        wx.App.__init__(self, *args, **kwargs)
+
+        # This catches events on Mac OS X when the app is asked to activate by some other
+        # process
+        # TODO: Check if this interferes with non-OS X platforms. If so, wrap in __WXMAC__ block!
+        self.Bind(wx.EVT_ACTIVATE_APP, self.OnActivate)
+
     def OnInit(self):
+        import sys
         # getting the os type
         self.OSNAME = os.name
         self.VERSION= '2.1 beta 2'
@@ -371,7 +380,50 @@ class SalStat2App(wx.App):
         else:   # mac platform
             self.frame.Maximize()
             self.frame.Show()
+            for f in  sys.argv[1:]:
+                self.OpenFileMessage(f)
         return True
+
+    def BringWindowToFront(self):
+        try: # it's possible for this event to come when the frame is closed
+            wx.GetApp().GetTopWindow().Raise()
+        except:
+            pass
+
+    def OnActivate(self, event):
+        # if this is an activate event, rather than something else, like iconize.
+        if event.GetActive():
+            self.BringWindowToFront()
+        event.Skip()
+
+    def OpenFileMessage(self, filename):
+        self.BringWindowToFront()
+        filterIndex = filename[len(filename)-3:len(filename)]
+        fullPath=filename
+        if not filename.endswith(filterIndex):
+            fullPath+= '.' + filterIndex
+        if filterIndex == 'xls':
+            return self.frame.grid.LoadXls(fullPath)
+        elif filterIndex in ('txt', 'csv'):
+            return self.frame.grid.loadCsvTxt(fullPath)
+        else:
+            self.frame.logPanel.write("The file %s could not be opened. "
+                           "Please check file type and extension!" % filename)
+
+    def MacOpenFile(self, filename):
+        """Called for files dropped on dock icon, or opened via finders context menu"""
+        self.frame.logPanel.write("%s dropped on S2 dock icon"%(filename))
+        self.OpenFileMessage(filename)
+
+    def MacReopenApp(self):
+        """Called when the dock icon is clicked"""
+        self.BringWindowToFront()
+
+    def MacNewFile(self):
+        pass
+
+    def MacPrintFile(self, file_path):
+        pass
 
     def getDataDir(self):
         '''Getting the config directory'''
