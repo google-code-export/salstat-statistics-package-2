@@ -20,24 +20,25 @@ import  wx.gizmos as gizmos
 import wx.html
 import wx.lib.agw.aui as aui
 
-# -----------------
-# these imports just for py2app
-import wx.lib.agw.aui.aui_constants
-import wx.lib.agw.aui.aui_utilities
-import wx.lib.agw.aui.auibar
-import wx.py.buffer
-import wx.py.crust
-#import wx.py.crustslices
-import matplotlib.tri.triangulation
-import matplotlib.delaunay.triangulate
-import matplotlib.tri.tricontour
-import matplotlib.tri.tripcolor
-import matplotlib.projections.geo
-import matplotlib.projections.polar
-import matplotlib.backends.backend_macosx
-import matplotlib.backends._macosx
-
-# -----------------
+if wx.Platform != '__WXMSW__':
+    # -----------------
+    # these imports just for py2app
+    import wx.lib.agw.aui.aui_constants
+    import wx.lib.agw.aui.aui_utilities
+    import wx.lib.agw.aui.auibar
+    import wx.py.buffer
+    import wx.py.crust
+    #import wx.py.crustslices
+    import matplotlib.tri.triangulation
+    import matplotlib.delaunay.triangulate
+    import matplotlib.tri.tricontour
+    import matplotlib.tri.tripcolor
+    import matplotlib.projections.geo
+    import matplotlib.projections.polar
+    import matplotlib.backends.backend_macosx
+    import matplotlib.backends._macosx
+    
+    # -----------------
 
 import webbrowser # online Help
 
