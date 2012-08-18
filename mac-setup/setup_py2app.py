@@ -26,7 +26,7 @@ def BuildOSXApp():
     copyright = "Copyright %s %s" % (AUTHOR, YEAR)
     appid = "com.%s.%s" % (NAME, NAME)
     PLIST = dict(CFBundleName = NAME,
-            CFBundleIconFile = 'salstat.ico',
+            CFBundleIconFile = 'salstat.icns',
             CFBundleShortVersionString = VERSION,
             CFBundleGetInfoString = NAME + " " + VERSION,
             CFBundleExecutable = NAME,
@@ -35,9 +35,16 @@ def BuildOSXApp():
             CFBundleDevelopmentRegion = 'English',
             NSHumanReadableCopyright = copyright
     )
-    PY2APP_OPTS = dict(iconfile = "salstat.ico",
-    argv_emulation = True,
-    plist = PLIST)
+    PY2APP_OPTS = dict(iconfile = "salstat.icns",
+        argv_emulation = True,
+        frameworks = ["/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/matplotlib/backends/_macosx.so",
+                    "/System/Library/Frameworks/CoreText.framework/Versions/A/CoreText"],
+        excludes = ['_gtkagg', '_tkagg', '_agg2', '_cairo',
+                    '_fltkagg', '_gtk', '_gtkcairo',
+                    "pywin", "pywin.debugger", "pywin.debugger.dbgcon",
+                    "pywin.dialogs", "pywin.dialogs.list", "Tkconstants",
+                    "Tkinter", "tcl", "scipy.sparce", 'PyQt4.uic'],
+        plist = PLIST)
     setup(
         app = [APP,],
         version = VERSION,
