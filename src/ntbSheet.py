@@ -563,9 +563,18 @@ class SimpleGrid( MyGridPanel):# wxGrid
         if hasHeader:
             star= 1
             for col in range( newSize[1]):
-                header= sheetSelected.cell_value(0, col)
-                if not isinstance(header,(str, unicode)):
-                    self.SetColLabelValue(col, sheetSelected.cell_value(0, col).__str__())
+                header= sheetSelected.cell_value( 0, col)
+                if header == u'' or header == None:
+                    ## return the column to it's normal label value
+                    self.SetColLabelValue( self.generateLabel( col))
+                elif not isinstance( header,( str, unicode)):
+                    self.SetColLabelValue( col, sheetSelected.cell_value( 0, col).__str__())
+                else:
+                    self.SetColLabelValue( col, sheetSelected.cell_value( 0, col))
+        else:
+            # return all header to default normal value
+            for col in range( newSize[1]):
+                self.SetColLabelValue(col, self.generateLabel( col)) 
         
         if hasHeader and newSize[0] < 2:
             return
@@ -582,6 +591,30 @@ class SimpleGrid( MyGridPanel):# wxGrid
                         self.SetCellValue (reportRow, col, str(newValue))
                     except:
                         self.log.write( "Could not import the row,col (%i,%i)" % (row+1,col+1))
+                        
+    def generateLabel( self, colNumber):
+        colNumber+= 1
+        analyse = True
+        result= list()
+        while analyse:
+            res = colNumber/float( 26)
+            if res == 1:
+                result.append(26)
+                continue
+            
+            fp= res-int(res) # float Part
+            if fp !=0 :
+                fp= int( fp*26)
+            else:
+                fp= 1
+                
+            result.append(fp)
+            analyse= res > 1
+        
+        res = '' 
+        for caracter in result:
+            res += chr(caracter + 64) 
+        return res
 
     def getData(self, x):
         for i in range(len(x)):
