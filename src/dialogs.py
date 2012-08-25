@@ -7,6 +7,7 @@ from openStats import statistics # used in descriptives frame
 import math # to be used in transform pane
 import numpy
 import scipy
+from slbTools import isnumeric
 
 if wx.Platform == '__WXMSW__':
     wind = 50
@@ -543,11 +544,14 @@ class NumTextCtrl(wx.TextCtrl):
         self.allowed = [ str( x) for x in range( 10)]
         self.allowed.extend([ wx.GetApp().DECIMAL_POINT, '-'])
 
-    def _textChange(self,event):
-        texto = self.GetValue()
+    def _textChange(self, event):
+        texto = self.Value
+        
         if len(texto) == 0:
             return
-        newstr= [ x for x in texto if x in allowed]
+        
+        newstr= [ x for x in texto if x in self.allowed]
+        
         if len(newstr) == 0:
             newstr = u''
         else:
@@ -556,6 +560,7 @@ class NumTextCtrl(wx.TextCtrl):
         # prevent infinite recursion
         if texto == newstr:
             return
+        
         self.SetValue(newstr)
         
     def GetAsNumber(self):
@@ -571,18 +576,43 @@ class NumTextCtrl(wx.TextCtrl):
     
     def GetValue(self):
         return self.GetAsNumber()
-    
-    def GetValue(self):
-        return self.GetAsNumber()
 
-class IntTextCtrl(NumTextCtrl):
+class IntTextCtrl( NumTextCtrl):
     '''a text ctrl that only accepts numbers'''
-    def __init__(self, parent, *args, **params):
-        wx.TextCtrl.__init__(self, parent, *args, **params)
-        self.Bind(wx.EVT_TEXT, self._textChange)
+    def __init__( self, parent, *args, **params):
+        wx.TextCtrl.__init__( self, parent, *args, **params)
+        self.Bind( wx.EVT_TEXT, self._textChange)
         self.allowed = [ str( x) for x in range( 10)]
-
     
+    def _textChange( self, event):
+        texto = self.Value
+        
+        newstr= [ x for x in texto if x in self.allowed]
+        
+        if len( newstr) == 0:
+            newstr = u''
+        else:
+            func = lambda x,y: x+y
+            newstr= reduce( func, newstr)
+            
+        # prevent infinite recursion
+        if texto == newstr:
+            return
+        
+        self.SetValue( newstr)
+        
+    def GetAsNumber( self):
+        prevResult = self.Value
+        if len( prevResult) == 0:
+            prevResult = None
+        else:
+            try:
+                prevResult = int( prevResult)
+            except:
+                prevResult = None
+                
+        return prevResult
+            
 class CheckListBox( wx.Panel, object ):
     def __init__( self, parent , *args, **params):
         wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( -1, -1 ), style = wx.TAB_TRAVERSAL )
