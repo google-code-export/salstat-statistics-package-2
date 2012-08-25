@@ -7,6 +7,7 @@ Created on 16/05/2012
 
 import wx
 from dialogs import CheckListBox, NumTextCtrl, makePairs, IntTextCtrl
+from slbTools import isnumeric
 
 def _siguiente():
     i = 0
@@ -143,7 +144,7 @@ class Dialog ( wx.Dialog ):
             characters= wx.ALIGN_CENTER_VERTICAL | wx.ALL
             for key, args in row:
                 if hasattr(wx, key):
-                    nameCtrl= 'ctrl' + self.sizerNum.next()
+                    #nameCtrl= 'ctrl' + self.sizerNum.next()
                     if key in diferents:
                         data= [wx.DefaultPosition, wx.DefaultSize, ]
                         data.extend(list(args))
@@ -177,6 +178,10 @@ class Dialog ( wx.Dialog ):
 
                 elif key == 'NumTextCtrl':
                     self.ctrls.append((key, NumTextCtrl(self.m_scrolledWindow1, wx.ID_ANY, *args)))
+                    currCtrl= self.ctrls[-1][1]
+                    currSizer.Add(currCtrl, 0, characters , 5)
+                elif key  == 'IntTextCtrl':
+                    self.ctrls.append((key, IntTextCtrl(self.m_scrolledWindow1, wx.ID_ANY, *args)))
                     currCtrl= self.ctrls[-1][1]
                     currSizer.Add(currCtrl, 0, characters , 5)
                 elif key == 'makePairs':
@@ -226,13 +231,13 @@ class Dialog ( wx.Dialog ):
                 elif typectrl == 'NumTextCtrl':
                     prevResult = ctrl.GetValue()
                     if prevResult == u'':
-                        prevResult = None
-                    if prevResult != None:
-                        prevResult= float(prevResult.replace(self.DECIMAL_POINT,'.'))
+                        prevResult = None                        
+                    elif isnumeric(prevResult):
                         if prevResult == int(prevResult):
                             prevResult == int(prevResult)
                     else:
                         prevResult=  None
+                        
                 elif typectrl == 'makePairs':
                     prevResult = ctrl.GetValue()
                 else:
