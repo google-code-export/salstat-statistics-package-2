@@ -59,10 +59,32 @@ class random(_genericFunc):
         self._report(result)
         
     def _report(self, result):
-        self.outputGrid.addColData( result, self.name)
-        self.outputGrid.addRowData( ['Input data'], currRow = 0)
-        self.outputGrid.addRowData( ['Len Data', self.lenData],        currRow = 1)
-        self.outputGrid.addRowData( ['Results'],    currRow = 2)
+        cols= range(self.inputGrid.NumberCols)
+        emptyCols= []
+        self._updateColsInfo() # update the used columns
+        for i in cols:
+            if cols[i] not in self.columnNumbers:
+                emptyCols.append( cols[i])
+        
+        # count the number of needed columns 
+        neededCols= 1
+        cols2add=   len(self.columnNumbers) + neededCols - self.inputGrid.NumberCols
+        if cols2add > 0:
+            # adding the needed cols
+            editorRederer= frame.floatCellAttr
+            self.inputGrid.AddNCells(cols2add, 0, attr= editorRederer)
+            emptyCols.extend( range(len(cols), self.inputGrid.NumberCols))
+            cols= self.inputGrid.NumberCols
+            
+        # choose the first empty col
+        colReport= emptyCols[0]
+        self.inputGrid.PutCol( colReport, result)        
+        self.inputGrid.SetColLabelValue(colReport, self.statName)     
+                
+        #self.outputGrid.addColData( result, self.name)
+        #self.outputGrid.addRowData( ['Input data'], currRow = 0)
+        #self.outputGrid.addRowData( ['Len Data', self.lenData],        currRow = 1)
+        #self.outputGrid.addRowData( ['Results'],    currRow = 2)
         
         self.Logg.write(self.statName+ ' successfull')
         
