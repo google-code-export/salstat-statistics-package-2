@@ -153,8 +153,6 @@ class histogram(_genericFunc):
     def _dialog(self, *args, **params):
         '''this function is used to plot a histogram chart of the selected column'''
         self.Logg.write('Histogram Chart')
-        setting= {'Title': self.name,
-                  '_size': Size(200,250)}
         self._updateColsInfo()
         if len(self.columnNames) == 0:
             self.Logg.write('You need some data to draw a graph!')
@@ -177,7 +175,8 @@ class histogram(_genericFunc):
         structure.append([btn4])
         structure.append([btn5])
         structure.append([btn2, txt2])
-        setting= {'Title':'Histogram chart of selected columns'}
+        setting= {'Title':'Histogram chart of selected columns',
+                  '_size': Size(200,300)}
         return self.dialog(settings= setting, struct= structure)
     
     def _calc(self, columns, *args, **params):
@@ -235,8 +234,12 @@ class histogram(_genericFunc):
     
     def showGui(self, *args, **params):
         values= self._showGui_GetValues()
-        if values[0]== None:
+        if values == None:
             return None
+        
+        if values[0] == None:
+            return None
+        
         # it's not necessary because the
         # plot function itself make de calculations
         #res= self._calc(*values)
