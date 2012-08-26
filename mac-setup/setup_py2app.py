@@ -2,7 +2,7 @@ import wx
 import sys
 
 # Application Information
-APP = "salstat.py"
+APP = "../src/salstat.py"
 NAME = 'SalStat'
 VERSION = '2.2'
 PACKAGES = ['']
@@ -26,7 +26,6 @@ def BuildOSXApp():
     copyright = "Copyright %s %s" % (AUTHOR, YEAR)
     appid = "com.%s.%s" % (NAME, NAME)
     PLIST = dict(CFBundleName = NAME,
-            CFBundleIconFile = 'salstat.icns',
             CFBundleShortVersionString = VERSION,
             CFBundleGetInfoString = NAME + " " + VERSION,
             CFBundleExecutable = NAME,
@@ -35,10 +34,9 @@ def BuildOSXApp():
             CFBundleDevelopmentRegion = 'English',
             NSHumanReadableCopyright = copyright
     )
-    PY2APP_OPTS = dict(iconfile = "salstat.icns",
+    PY2APP_OPTS = dict(iconfile = "../src/salstat.icns",
         argv_emulation = True,
-        frameworks = ["/opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/matplotlib/backends/_macosx.so",
-                    "/System/Library/Frameworks/CoreText.framework/Versions/A/CoreText"],
+        includes = ['wx.py.editor', 'statFunctions.*', 'plotFunctions.*'],
         excludes = ['_gtkagg', '_tkagg', '_agg2', '_cairo',
                     '_fltkagg', '_gtk', '_gtkcairo',
                     "pywin", "pywin.debugger", "pywin.debugger.dbgcon",
@@ -54,6 +52,7 @@ def BuildOSXApp():
         author_email = AUTHOR_EMAIL,
         url = URL,
         setup_requires = ['py2app'],
+        install_requires = ['xlrd', 'xlwt'],
     )
 
 
