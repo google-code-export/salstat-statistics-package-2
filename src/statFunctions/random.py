@@ -1,8 +1,6 @@
 __name__ ='Random data'
-__all__=  ['random']
+__all__=  ['random','randomn']
 
-from statlib import stats as _stats
-from openStats import stats2
 import numpy
 from statFunctions import _genericFunc
 from wx import ID_OK as _OK
@@ -11,19 +9,19 @@ from wx import Size
 class random(_genericFunc):
     ''''''
     name=      'random'
-    statName=  'random'
+    statName=  'rand'
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
         self.name=      'random data'
-        self.statName=  'random'
-        self.colNameSelect= ''
+        self.statName=  'rand'
+        self.lenData= None
         
     def _dialog( self, *arg, **params):
         setting= {'Title': self.name,
-                  '_size': Size(250,260)}
+                  '_size': Size(270,260)}
         self._updateColsInfo() # update self.columnames and self.colnums
-        bt1= ['StaticText',   ['Select the columns to analyse']]
+        bt1= ['StaticText',   ['Select the number of elements to generate']]
         bt2= ['IntTextCtrl',  []]
         structure= list()
         structure.append( [ bt1,])
@@ -39,27 +37,19 @@ class random(_genericFunc):
             dlg.Destroy()
             return
         
-        self.colNameSelect= values[0]
-        
-        if len( self.colNameSelect ) == 0:
-            self.Logg.write("you don't select any items")
+        if values[0] == None:
             return
-        
-        if len( self.colNameSelect ) < self.minRequiredCols:
-            self.Logg.write("you have to select at least %i column(s)"%self.requiredcols)
-            return
-        
-        columns= [self.inputGrid.GetColNumeric( col) for col in self.colNameSelect]
-        return columns
+        self.lenData= values[0]
+        return values
         
     def _calc(self, columns, *args, **params):
         return self.evaluate(columns, *args, **params)
         
     def object(self):
-        return stats2.stats.F_oneway
+        return numpy.random.rand
     
     def evaluate(self, *args, **params):
-        return stats2.stats.f_oneway(*args, **params)
+        return numpy.random.rand(*args, **params)
     
     def showGui(self, *args, **params):
         values= self._showGui_GetValues()
@@ -69,16 +59,27 @@ class random(_genericFunc):
         self._report(result)
         
     def _report(self, result):
-        self.outputGrid.addColData( ["F","p-value"], self.name)
-        self.outputGrid.addColData( result)
-        self.outputGrid.addRowData( ['Input data'],        currRow = 0)
-        self.outputGrid.addRowData( ['Selected columns',], currRow = 1)
-        self.outputGrid.addRowData( self.colNameSelect, currRow = 2)
-        self.outputGrid.addRowData( ['Asumptions'],        currRow = 3 )
-        self.outputGrid.addRowData( ['1-The samples are independent.'], currRow = 4 )
-        self.outputGrid.addRowData( ['2-Each sample is from a normally distributed population.'], currRow = 5)
-        self.outputGrid.addRowData( [''''3-The population standard deviations of the groups are all equal.
-                                     This property is known as homoscedasticity.'''], currRow= 6)
-        self.outputGrid.addRowData( ['Results'],        currRow = 7)
+        self.outputGrid.addColData( result, self.name)
+        self.outputGrid.addRowData( ['Input data'], currRow = 0)
+        self.outputGrid.addRowData( ['Len Data', self.lenData],        currRow = 1)
+        self.outputGrid.addRowData( ['Results'],    currRow = 2)
         
         self.Logg.write(self.statName+ ' successfull')
+        
+class randomn(random):
+    ''''''
+    name=      'normal random'
+    statName=  'randn'
+    def __init__(self):
+        # getting all required methods
+        _genericFunc.__init__(self)
+        self.name=      'normal random'
+        self.statName=  'randn'
+        self.lenData= None
+        
+    def object(self):
+        return numpy.random.randn
+    
+    def evaluate(self, *args, **params):
+        return numpy.random.randn(*args, **params)
+       
