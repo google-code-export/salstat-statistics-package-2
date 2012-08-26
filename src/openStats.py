@@ -16,7 +16,7 @@ def isnumeric(data):
 
 class statistics:
     def __init__(self, data, name= None, missing= None):
-        if isnumeric(data):
+        if isnumeric(data) and not isinstance( data, (np.ndarray)):
             data= [data]
         self.missing=  missing
         self.Name=     name
