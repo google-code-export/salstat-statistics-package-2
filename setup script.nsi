@@ -40,7 +40,7 @@ Var vcredist2008set
 
 # Installer pages
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE "src\gnu license.txt"
+!insertmacro MUI_PAGE_LICENSE "src\license.txt"
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_STARTMENU Application $StartMenuGroup
 !insertmacro MUI_PAGE_INSTFILES
@@ -54,7 +54,7 @@ Var vcredist2008set
 !insertmacro MUI_LANGUAGE SpanishInternational
 
 # Installer attributes
-OutFile "S2 V2.1 Beta 1 setup.exe"
+OutFile "S2 V2.1 Beta 2 setup.exe"
 InstallDir Salstat2
 CRCCheck on
 XPStyle on

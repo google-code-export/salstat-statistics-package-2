@@ -36,7 +36,7 @@ opts = { "py2exe":
               }
           }
 
-setup(name=         'salstat',
+setup(name=         'S2',
       version=      '2.1',
       description=  'Statistics Package',
       url=          'http://code.google.com/p/salstat-statistics-package-2/',
