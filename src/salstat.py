@@ -13,8 +13,8 @@ import wx.grid
 
 # -----------------
 # to use the sash
-import  wx.lib.multisash as sash
-import  wx.gizmos as gizmos
+# import  wx.lib.multisash as sash
+# import  wx.gizmos as gizmos
 # -----------------
 
 import wx.html
@@ -1656,12 +1656,12 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         if useNumpy:
             colums  = list()
             for pos in values:
-                short = stats.shellsort( GetData(colnums[ pos ]) )[0]
+                short = stats.shellsort( self.grid.CleanData(colnums[ pos ]) )[0]
                 col = numpy.array(short)
                 col.shape = (len(col),1)
                 colums.append(col)
         else:
-            colums = stats.shellsort(GetData(colnums[ values[0] ]))
+            colums = stats.shellsort( self.grid.CleanData(colnums[ values[0] ]))
 
         # se muestra los resultados
         wx.GetApp().output.addColData(colNameSelect, functionName)
@@ -1669,14 +1669,6 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         wx.GetApp().output.addColData(colums[1])
         wx.GetApp().output.addRowData(['','shorted Data','original position'], currRow= 0)
         self.logPanel.write(functionName + ' successful')
-
-
-#---------------------------------------------------------------------------
-# Scripting API is defined here. So far, only basic (but usable!) stuff.
-def GetData(column):
-    """This function enables the user to extract the data from the data grid.
-    The data are "clean" and ready for analysis."""
-    return wx.GetApp().frame.grid.CleanData(column)
 #--------------------------------------------------------------------------
 # main loop
 if __name__ == '__main__':
