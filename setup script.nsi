@@ -89,7 +89,20 @@ SectionEnd
 Section "src" Section3
      SetOutPath $INSTDIR\src
      SetOverwrite on
-     File /r src\*
+     File /r src\*.py
+     File /r src\*.txt
+     File /r src\*.py
+     File /r src\salstat.icns
+     File /r src\salstat.ico
+     File /r src\salstat.icon.jpg
+     SetOutPath $INSTDIR\src\nicePlot
+     File /r src\nicePlot\*.py
+     SetOutPath $INSTDIR\src\plotFunctions
+     File /r src\plotFunctions\*.py
+     SetOutPath $INSTDIR\src\statFunctions
+     File /r src\statFunctions\*.py
+     SetOutPath $INSTDIR\src\statlib
+     File /r src\statlib\*.py
      SetOutPath $SMPROGRAMS\$StartMenuGroup
      CreateShortcut "$SMPROGRAMS\$StartMenuGroup\src.lnk" "$INSTDIR\src\"
 SectionEnd
