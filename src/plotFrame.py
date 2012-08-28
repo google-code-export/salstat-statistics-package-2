@@ -38,6 +38,325 @@ from pylab import setp
 
 PROPLEGEND= {'size':11}
 
+class scrolled1(wx.ScrolledWindow):
+    def __init__( self, *args, **params):
+        wx.ScrolledWindow.__init__(self, *args[1:], **params)
+        self.figpanel= self.Parent.Parent.figpanel
+        self.log= self.Parent.Parent.log
+        graphParams= args[0]
+        
+        if params.has_key('parent'):
+            parent= params['parent']
+        else:
+            parent = args[1]
+        
+        self.SetScrollRate( 5, 5 )
+        bSizer2 = wx.BoxSizer( wx.VERTICAL )
+
+        sbSizer3 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Title" ), wx.HORIZONTAL )
+        self.plt_textCtr1 = wx.TextCtrl( self, wx.ID_ANY, graphParams['title'], wx.DefaultPosition, wx.Size( 135,-1 ), 0 )
+        sbSizer3.Add( self.plt_textCtr1, 0, 0, 5 )
+        self.m_button3 = wx.Button( self, wx.ID_ANY, u"...", wx.DefaultPosition, wx.Size( 20,-1 ), 0 )
+        sbSizer3.Add( self.m_button3, 0, 0, 5 )
+
+        bSizer2.Add( sbSizer3, 0, 0, 5 )
+
+        sbSizer4 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Xlabel" ), wx.HORIZONTAL )
+
+        self.plt_textCtr2 = wx.TextCtrl( self, wx.ID_ANY, graphParams['xlabel'], wx.DefaultPosition, wx.Size( 135,-1 ), 0 )
+        sbSizer4.Add( self.plt_textCtr2, 0, 0, 5 )
+        self.m_button4 = wx.Button( self, wx.ID_ANY, u"...", wx.DefaultPosition, wx.Size( 20,-1 ), 0 )
+        sbSizer4.Add( self.m_button4, 0, 0, 5 )
+
+        bSizer2.Add( sbSizer4, 0, 0, 5 )
+
+        sbSizer5 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Ylabel" ), wx.HORIZONTAL )
+
+        self.plt_textCtr3 = wx.TextCtrl( self, wx.ID_ANY, graphParams['ylabel'], wx.DefaultPosition, wx.Size( 135,-1 ), 0 )
+        sbSizer5.Add( self.plt_textCtr3, 0, 0, 5 )
+        self.m_button5 = wx.Button( self, wx.ID_ANY, u"...", wx.DefaultPosition, wx.Size( 20,-1 ), 0 )
+        sbSizer5.Add( self.m_button5, 0, 0, 5 )
+
+        bSizer2.Add( sbSizer5, 0, 0, 5 )
+
+        gSizer1 = wx.GridSizer( 2, 2, 0, 0 )
+        self.m_checkBox1 = wx.CheckBox( self, wx.ID_ANY, u"Show Grid", wx.DefaultPosition, wx.DefaultSize, 0 )
+        gSizer1.Add( self.m_checkBox1, 0, wx.LEFT|wx.TOP, 5 )
+        self.m_checkBox3 = wx.CheckBox( self, wx.ID_ANY, u"View Cursor", wx.DefaultPosition, wx.DefaultSize, 0 )
+        gSizer1.Add( self.m_checkBox3, 0, wx.LEFT|wx.TOP, 5 )
+
+        #self.m_checkBox2 = wx.CheckBox( self, wx.ID_ANY, u"Legend", wx.DefaultPosition, wx.DefaultSize, 0 )
+        #gSizer1.Add( self.m_checkBox2, 0, wx.ALL, 5 )
+
+        bSizer2.Add( gSizer1, 0, 0, 5 )
+
+        sbSizer10 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Xaxis" ), wx.VERTICAL )
+        
+        bSizer51 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self.m_staticText1 = wx.StaticText( self, wx.ID_ANY, u"min", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText1.Wrap( -1 )
+        bSizer51.Add( self.m_staticText1, 0, wx.ALL, 5 )
+        self.m_textCtrl4 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
+        bSizer51.Add( self.m_textCtrl4, 0, wx.ALL, 5 )
+        
+        self.m_staticText2 = wx.StaticText( self, wx.ID_ANY, u"max", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText2.Wrap( -1 )
+        bSizer51.Add( self.m_staticText2, 0, wx.ALL, 5 )
+        self.m_textCtrl5 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
+        bSizer51.Add( self.m_textCtrl5, 0, wx.ALL, 5 )
+        
+        sbSizer10.Add( bSizer51, 1, wx.EXPAND, 5 )
+        
+        bSizer6 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self.m_staticText281 = wx.StaticText( self, wx.ID_ANY, u"angle", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText281.Wrap( -1 )
+        bSizer6.Add( self.m_staticText281, 0, wx.ALIGN_CENTER|wx.ALL, 5 )
+        self.m_spinCtrl2 = wx.SpinCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 60,-1 ), wx.SP_ARROW_KEYS, -90, 90, 0 )
+        bSizer6.Add( self.m_spinCtrl2, 0, wx.ALL, 5 )
+        
+        sbSizer10.Add( bSizer6, 1, wx.EXPAND, 5 )
+        
+        bSizer2.Add( sbSizer10, 0, 0, 5 )
+        
+        sbSizer11 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Yaxis" ), wx.VERTICAL )
+        
+        bSizer7 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self.m_staticText3 = wx.StaticText( self, wx.ID_ANY, u"min", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText3.Wrap( -1 )
+        bSizer7.Add( self.m_staticText3, 0, wx.ALL, 5 )
+        self.m_textCtrl6 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
+        bSizer7.Add( self.m_textCtrl6, 0, wx.ALL, 5 )
+        
+        self.m_staticText4 = wx.StaticText( self, wx.ID_ANY, u"max", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText4.Wrap( -1 )
+        bSizer7.Add( self.m_staticText4, 0, wx.ALL, 5 )
+        self.m_textCtrl7 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
+        bSizer7.Add( self.m_textCtrl7, 0, wx.ALL, 5 )
+        
+        sbSizer11.Add( bSizer7, 1, wx.EXPAND, 5 )
+        
+        bSizer8 = wx.BoxSizer( wx.HORIZONTAL )
+        
+        self.m_staticText291 = wx.StaticText( self, wx.ID_ANY, u"angle", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText291.Wrap( -1 )
+        bSizer8.Add( self.m_staticText291, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+        self.m_spinCtrl3 = wx.SpinCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 60,-1 ), wx.SP_ARROW_KEYS, -90, 90, 0 )
+        bSizer8.Add( self.m_spinCtrl3, 0, wx.ALL, 5 )
+        
+        sbSizer11.Add( bSizer8, 1, wx.EXPAND, 5 )
+        
+        bSizer2.Add( sbSizer11, 0, 0, 5 )
+        
+        sbSizer7 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"axis scale" ), wx.VERTICAL )
+
+        gSizer2 = wx.GridSizer( 0, 2, 0, 0 )
+
+        self.m_staticText5 = wx.StaticText( self, wx.ID_ANY, u"X axis", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText5.Wrap( -1 )
+        gSizer2.Add( self.m_staticText5, 0, wx.ALL, 5 )
+
+        self.m_staticText6 = wx.StaticText( self, wx.ID_ANY, u"Y axis", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText6.Wrap( -1 )
+        gSizer2.Add( self.m_staticText6, 0, wx.ALL, 5 )
+
+        m_choice2Choices = [ u"lin", u"log" ]
+        self.m_choice2 = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( 69,-1 ), m_choice2Choices, 0 )
+        self.m_choice2.SetSelection( 0 )
+        gSizer2.Add( self.m_choice2, 0, wx.LEFT|wx.RIGHT, 5 )
+
+        m_choice1Choices = [ u"lin", u"log" ]
+        self.m_choice1 = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( 69,-1 ), m_choice1Choices, 0 )
+        self.m_choice1.SetSelection( 0 )
+        gSizer2.Add( self.m_choice1, 0, wx.LEFT|wx.RIGHT, 5 )
+
+        sbSizer7.Add( gSizer2, 0, 0, 5 )
+
+        bSizer2.Add( sbSizer7, 0, 0, 5 )
+
+        self.SetSizer( bSizer2 )
+        self.Layout()
+        bSizer2.Fit( self )
+        # callbacks
+        self._BindEvents()
+        
+    def _BindEvents( self):
+        # scrolledWindow1
+        self.plt_textCtr1.Bind( wx.EVT_TEXT, self._TitleChange )
+        self.plt_textCtr2.Bind( wx.EVT_TEXT, self._xlabelChange )
+        self.plt_textCtr3.Bind( wx.EVT_TEXT, self._ylabelChange )        
+        self.m_button3.Bind( wx.EVT_BUTTON, self._titleFontProp )
+        self.m_button4.Bind( wx.EVT_BUTTON, self._xlabelFontProp )        
+        self.m_button5.Bind( wx.EVT_BUTTON, self._ylabelFontProp )
+        self.m_checkBox1.Bind( wx.EVT_CHECKBOX, self._OnGrid )
+        self.m_checkBox3.Bind( wx.EVT_CHECKBOX, self._OnViewCursor )
+        ##self.m_checkBox2.Bind( wx.EVT_CHECKBOX, self._OnLegend )# leggend callback
+        self.m_textCtrl4.Bind( wx.EVT_TEXT, self._xminValue )
+        self.m_textCtrl5.Bind( wx.EVT_TEXT, self._xmaxValue )
+        self.m_spinCtrl2.Bind( wx.EVT_SPINCTRL, self._xAngleChange )
+        self.m_textCtrl6.Bind( wx.EVT_TEXT, self._yminValue )
+        self.m_textCtrl7.Bind( wx.EVT_TEXT, self._ymaxValue )
+        self.m_spinCtrl3.Bind( wx.EVT_SPINCTRL, self._yAngleChange )
+        self.m_choice2.Bind( wx.EVT_CHOICE, self._OnXaxisScale )
+        self.m_choice1.Bind( wx.EVT_CHOICE, self._OnYaxisScale )
+        
+    def _TitleChange( self, evt ):
+        #self.log.write('# Changing Title', False)
+        self.figpanel.gca().set_title(evt.GetString())
+        self.figpanel.canvas.draw()
+
+        #self.log.write('Title= ' + "'" + self.figpanel.gca().get_title().__str__()+ "'", False)
+        #self.log.write('plt.gca().set_title(Title)', False)
+        
+    def _xlabelChange( self, evt ):
+        #self.log.write('# changing xlabel', False)
+        self.figpanel.gca().set_xlabel(evt.GetString())
+        self.figpanel.canvas.draw()
+        #self.log.write('xlabel= ' + "'" +  self.figpanel.gca().get_xlabel().__str__()+ "'" , False)
+        #self.log.write('plt.gca().set_xlabel(xlabel)', False)
+
+    def _ylabelChange( self, evt ):
+        #self.log.write('# changing ylabel', False)
+        self.figpanel.gca().set_ylabel(evt.GetString())
+        self.figpanel.canvas.draw()
+        #self.log.write('ylabel= ' + "'" + self.figpanel.gca().get_ylabel().__str__()+ "'" , False)
+        #self.log.write('plt.gca().set_xlabel(ylabel)', False)
+    
+    def _titleFontProp( self, evt ):
+        fontprop= fontDialog(self)
+        currtitle = self.figpanel.gca().get_title()
+        self.figpanel.gca().set_title(currtitle,fontprop)
+        self.figpanel.canvas.draw()
+        
+    def _xlabelFontProp( self, evt ):
+        fontprop= fontDialog(self)
+        currtitle = self.figpanel.gca().get_xlabel()
+        self.figpanel.gca().set_xlabel(currtitle,fontprop)
+        self.figpanel.canvas.draw()
+
+    def _ylabelFontProp( self, evt ):
+        fontprop= fontDialog(self)
+        currtitle = self.figpanel.gca().get_ylabel()
+        self.figpanel.gca().set_ylabel(currtitle,fontprop)
+        self.figpanel.canvas.draw()
+        
+    def _OnGrid( self, evt ):
+        self.log.write('# changing grid state', False)
+        value = evt.Checked()
+        self.figpanel.gca().grid(value)
+        self.figpanel.canvas.draw()
+        self.log.write('plt.gca().grid('+value.__str__()+')', False)
+        
+    def _OnViewCursor( self, evt ):
+        # verify the cursor property created with
+        # connectCursor
+        if not hasattr(self.Parent.Parent,'cursor'):
+            return
+        
+        value = evt.Checked()
+        if not value:
+            self.Parent.Parent.statusbar.SetStatusText(( ""), 1)
+
+        self.Parent.Parent.cursor.horizOn = value
+        self.Parent.Parent.cursor.vertOn = value
+        self.figpanel.canvas.draw()
+    
+    def _xminValue( self, evt ):
+        self.log.write('# changing x axis min value', False)
+        axisValue= self.figpanel.gca().get_xbound()
+        self.log.write('axisValue= plt.gca().get_xbound()', False)
+        try:
+            float(evt.GetString())
+        except:
+            return
+        self.figpanel.gca().set_xbound((float(evt.GetString()),axisValue[1]))
+        self.figpanel.canvas.draw()
+        self.log.write('plt.gca().set_xbound((float('+evt.GetString().__str__()+'),axisValue[1]))', False)
+
+    def _xmaxValue( self, evt ):
+        self.log.write('# changing x axis max value', False)
+        axisValue = self.figpanel.gca().get_xbound()
+        self.log.write('axisValue= plt.gca().get_xbound()', False)
+        try:
+            float(evt.GetString())
+        except:
+            return
+        self.figpanel.gca().set_xbound((axisValue[0],float(evt.GetString())))
+        self.figpanel.canvas.draw()
+        self.log.write('plt.gca().set_xbound((axisValue[0],float('+evt.GetString().__str__()+')))', False)
+
+    def _yminValue( self, evt ):
+        self.log.write('# changing y axis min value', False)
+        axisValue = self.figpanel.gca().get_ybound()
+        self.log.write('axisValue= plt.gca().get_ybound()', False)
+
+        try:
+            float(evt.GetString())
+        except:
+            return
+        self.figpanel.gca().set_ybound((float(evt.GetString()),axisValue[1]))
+        self.figpanel.canvas.draw()
+        self.log.write('plt.gca().set_ybound((float('+evt.GetString().__str__()+'),axisValue[1]))', False)
+
+    def _ymaxValue( self, evt ):
+        self.log.write('# changing y axis max value', False)
+        axisValue = self.figpanel.gca().get_ybound()
+        self.log.write('axisValue= plt.gca().get_ybound()', False)
+        try:
+            float(evt.GetString())
+        except:
+            return
+        self.figpanel.gca().set_ybound((axisValue[0],float(evt.GetString())))
+        self.figpanel.canvas.draw()
+
+        self.log.write('plt.gca().set_ybound((axisValue[0],float('+evt.GetString().__str__()+')))', False)
+    def _xAngleChange( self, evt):
+        labels = self.figpanel.gca().get_xticklabels()
+        currFontSize= self.figpanel.gca().xaxis.get_label().get_fontsize()
+        setp( labels, rotation= evt.GetSelection(), fontsize= currFontSize)
+        self.figpanel.canvas.draw()
+    
+    def _yAngleChange( self, evt):
+        labels = self.figpanel.gca().get_yticklabels()
+        currFontSize= currFontSize= self.figpanel.gca().yaxis.get_label().get_fontsize()
+        setp( labels, rotation= evt.GetSelection(), fontsize= currFontSize)
+        self.figpanel.canvas.draw()
+    
+    def _OnXaxisScale( self, evt ):
+        self.log.write('# changing x axis scale', False)
+        value = 'linear'
+        if evt.Selection == 1:
+            value = 'symlog'
+        self.figpanel.gca().set_xscale(value)
+        self.figpanel.canvas.draw()
+        self.log.write('plt.gca().set_xscale('+ "'" + value.__str__()+ "'" +')', False)
+
+    def _OnYaxisScale( self, evt ):
+        self.log.write('# changing y axis scale', False)
+        value = 'linear'
+        if evt.Selection == 1:
+            value = 'symlog'
+        self.figpanel.gca().set_yscale(value)
+        self.figpanel.canvas.draw()
+        self.log.write('plt.gca().set_yscale('+ "'" + value.__str__()+ "'" +')', False)
+        
+        
+class scrolled2(wx.ScrolledWindow):    
+    def __init__( self, *args, **params):
+        wx.ScrolledWindow.__init__(self, *args[1:], **params)
+        
+        graphParams= args[0]
+        
+        if params.has_key('parent'):
+            parent= params['parent']
+        else:
+            parent = args[1]
+        
+        
+        
+
 class MpltFrame( wx.Frame, object ):
     def __init__( self, parent, typePlot = None, data2plot= None, *args, **params):
         '''
@@ -52,7 +371,7 @@ class MpltFrame( wx.Frame, object ):
         * plotLinRegress
         * boxPlot
         * AdaptativeBMS
-        * plotHistogram <pendiente>
+        * plotHistogram
         * plotPareto <pendiente>
 
         data2plot:
@@ -88,8 +407,8 @@ class MpltFrame( wx.Frame, object ):
 
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
         
-        self.figpanel = MplCanvasFrame( self )
-        self.m_notebook1 = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.figpanel= MplCanvasFrame( self )
+        self.m_notebook1= wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
         
         if wx.Platform == '__WXGTK__':
             mainSizer= wx.BoxSizer( wx.HORIZONTAL )
@@ -110,197 +429,9 @@ class MpltFrame( wx.Frame, object ):
                                 FloatingSize( wx.DefaultSize ).DockFixed( True ).
                                 CloseButton(False). BestSize(wx.Size(200,-1)))
         
-        self.m_scrolledWindow1 = wx.ScrolledWindow( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL )
-        self.m_scrolledWindow1.SetScrollRate( 5, 5 )
-        bSizer2 = wx.BoxSizer( wx.VERTICAL )
-
-        sbSizer3 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow1, wx.ID_ANY, u"Title" ), wx.HORIZONTAL )
-
-        self.plt_textCtr1 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, self.graphParams['title'], wx.DefaultPosition, wx.Size( 135,-1 ), 0 )
-        sbSizer3.Add( self.plt_textCtr1, 0, 0, 5 )
-
-        self.m_button3 = wx.Button( self.m_scrolledWindow1, wx.ID_ANY, u"...", wx.DefaultPosition, wx.Size( 20,-1 ), 0 )
-        sbSizer3.Add( self.m_button3, 0, 0, 5 )
-
-
-        bSizer2.Add( sbSizer3, 0, 0, 5 )
-
-        sbSizer4 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow1, wx.ID_ANY, u"Xlabel" ), wx.HORIZONTAL )
-
-        self.plt_textCtr2 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, self.graphParams['xlabel'], wx.DefaultPosition, wx.Size( 135,-1 ), 0 )
-        sbSizer4.Add( self.plt_textCtr2, 0, 0, 5 )
-
-        self.m_button4 = wx.Button( self.m_scrolledWindow1, wx.ID_ANY, u"...", wx.DefaultPosition, wx.Size( 20,-1 ), 0 )
-        sbSizer4.Add( self.m_button4, 0, 0, 5 )
-
-
-        bSizer2.Add( sbSizer4, 0, 0, 5 )
-
-        sbSizer5 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow1, wx.ID_ANY, u"Ylabel" ), wx.HORIZONTAL )
-
-        self.plt_textCtr3 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, self.graphParams['ylabel'], wx.DefaultPosition, wx.Size( 135,-1 ), 0 )
-        sbSizer5.Add( self.plt_textCtr3, 0, 0, 5 )
-
-        self.m_button5 = wx.Button( self.m_scrolledWindow1, wx.ID_ANY, u"...", wx.DefaultPosition, wx.Size( 20,-1 ), 0 )
-        sbSizer5.Add( self.m_button5, 0, 0, 5 )
-
-
-        bSizer2.Add( sbSizer5, 0, 0, 5 )
-
-        gSizer1 = wx.GridSizer( 2, 2, 0, 0 )
-
-        self.m_checkBox1 = wx.CheckBox( self.m_scrolledWindow1, wx.ID_ANY, u"Show Grid", wx.DefaultPosition, wx.DefaultSize, 0 )
-        gSizer1.Add( self.m_checkBox1, 0, wx.LEFT|wx.TOP, 5 )
-
-        self.m_checkBox3 = wx.CheckBox( self.m_scrolledWindow1, wx.ID_ANY, u"View Cursor", wx.DefaultPosition, wx.DefaultSize, 0 )
-        gSizer1.Add( self.m_checkBox3, 0, wx.LEFT|wx.TOP, 5 )
-
-        #self.m_checkBox2 = wx.CheckBox( self.m_scrolledWindow1, wx.ID_ANY, u"Legend", wx.DefaultPosition, wx.DefaultSize, 0 )
-        #gSizer1.Add( self.m_checkBox2, 0, wx.ALL, 5 )
-
-        bSizer2.Add( gSizer1, 0, 0, 5 )
-
-
-        sbSizer10 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow1, wx.ID_ANY, u"Xaxis" ), wx.VERTICAL )
+        self.scrolledWindow1= scrolled1(self.graphParams, self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL)
+        self.m_notebook1.AddPage( self.scrolledWindow1, u"Main Options", True )
         
-        bSizer51 = wx.BoxSizer( wx.HORIZONTAL )
-        
-        self.m_staticText1 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"min", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText1.Wrap( -1 )
-        bSizer51.Add( self.m_staticText1, 0, wx.ALL, 5 )
-        
-        self.m_textCtrl4 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
-        bSizer51.Add( self.m_textCtrl4, 0, wx.ALL, 5 )
-        
-        self.m_staticText2 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"max", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText2.Wrap( -1 )
-        bSizer51.Add( self.m_staticText2, 0, wx.ALL, 5 )
-        
-        self.m_textCtrl5 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
-        bSizer51.Add( self.m_textCtrl5, 0, wx.ALL, 5 )
-        
-        
-        sbSizer10.Add( bSizer51, 1, wx.EXPAND, 5 )
-        
-        bSizer6 = wx.BoxSizer( wx.HORIZONTAL )
-        
-        self.m_staticText281 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"angle", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText281.Wrap( -1 )
-        bSizer6.Add( self.m_staticText281, 0, wx.ALIGN_CENTER|wx.ALL, 5 )
-        
-        self.m_spinCtrl2 = wx.SpinCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 60,-1 ), wx.SP_ARROW_KEYS, -90, 90, 0 )
-        bSizer6.Add( self.m_spinCtrl2, 0, wx.ALL, 5 )
-        
-        
-        sbSizer10.Add( bSizer6, 1, wx.EXPAND, 5 )
-        
-        
-        bSizer2.Add( sbSizer10, 0, 0, 5 )
-
-##        sbSizer10 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow1, wx.ID_ANY, u"Xaxis" ), wx.HORIZONTAL )
-##
-##        self.m_staticText1 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"min", wx.DefaultPosition, wx.DefaultSize, 0 )
-##        self.m_staticText1.Wrap( -1 )
-##        sbSizer10.Add( self.m_staticText1, 0, wx.ALL, 5 )
-##
-##        self.plt_textCtr4 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
-##        sbSizer10.Add( self.plt_textCtr4, 0, wx.ALL, 5 )
-##
-##        self.m_staticText2 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"max", wx.DefaultPosition, wx.DefaultSize, 0 )
-##        self.m_staticText2.Wrap( -1 )
-##        sbSizer10.Add( self.m_staticText2, 0, wx.ALL, 5 )
-##
-##        self.plt_textCtr5 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
-##        sbSizer10.Add( self.plt_textCtr5, 0, wx.ALL, 5 )
-##
-##
-##        bSizer2.Add( sbSizer10, 0, 0, 5 )
-        
-        sbSizer11 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow1, wx.ID_ANY, u"Yaxis" ), wx.VERTICAL )
-        
-        bSizer7 = wx.BoxSizer( wx.HORIZONTAL )
-        
-        self.m_staticText3 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"min", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText3.Wrap( -1 )
-        bSizer7.Add( self.m_staticText3, 0, wx.ALL, 5 )
-        
-        self.m_textCtrl6 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
-        bSizer7.Add( self.m_textCtrl6, 0, wx.ALL, 5 )
-        
-        self.m_staticText4 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"max", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText4.Wrap( -1 )
-        bSizer7.Add( self.m_staticText4, 0, wx.ALL, 5 )
-        
-        self.m_textCtrl7 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
-        bSizer7.Add( self.m_textCtrl7, 0, wx.ALL, 5 )
-        
-        sbSizer11.Add( bSizer7, 1, wx.EXPAND, 5 )
-        
-        bSizer8 = wx.BoxSizer( wx.HORIZONTAL )
-        
-        self.m_staticText291 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"angle", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText291.Wrap( -1 )
-        bSizer8.Add( self.m_staticText291, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
-        
-        self.m_spinCtrl3 = wx.SpinCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 60,-1 ), wx.SP_ARROW_KEYS, -90, 90, 0 )
-        bSizer8.Add( self.m_spinCtrl3, 0, wx.ALL, 5 )
-        
-        
-        sbSizer11.Add( bSizer8, 1, wx.EXPAND, 5 )
-        
-        
-        bSizer2.Add( sbSizer11, 0, 0, 5 )
-
-##        sbSizer11 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow1, wx.ID_ANY, u"Yaxis" ), wx.HORIZONTAL )
-##
-##        self.m_staticText3 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"min", wx.DefaultPosition, wx.DefaultSize, 0 )
-##        self.m_staticText3.Wrap( -1 )
-##        sbSizer11.Add( self.m_staticText3, 0, wx.ALL, 5 )
-##
-##        self.plt_textCtr6 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
-##        sbSizer11.Add( self.plt_textCtr6, 0, wx.ALL, 5 )
-##
-##        self.m_staticText4 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"max", wx.DefaultPosition, wx.DefaultSize, 0 )
-##        self.m_staticText4.Wrap( -1 )
-##        sbSizer11.Add( self.m_staticText4, 0, wx.ALL, 5 )
-##
-##        self.plt_textCtr7 = wx.TextCtrl( self.m_scrolledWindow1, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
-##        sbSizer11.Add( self.plt_textCtr7, 0, wx.ALL, 5 )
-##
-##
-##        bSizer2.Add( sbSizer11, 0, 0, 5 )
-        
-
-        sbSizer7 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow1, wx.ID_ANY, u"axis scale" ), wx.VERTICAL )
-
-        gSizer2 = wx.GridSizer( 0, 2, 0, 0 )
-
-        self.m_staticText5 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"X axis", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText5.Wrap( -1 )
-        gSizer2.Add( self.m_staticText5, 0, wx.ALL, 5 )
-
-        self.m_staticText6 = wx.StaticText( self.m_scrolledWindow1, wx.ID_ANY, u"Y axis", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText6.Wrap( -1 )
-        gSizer2.Add( self.m_staticText6, 0, wx.ALL, 5 )
-
-        m_choice2Choices = [ u"lin", u"log" ]
-        self.m_choice2 = wx.Choice( self.m_scrolledWindow1, wx.ID_ANY, wx.DefaultPosition, wx.Size( 69,-1 ), m_choice2Choices, 0 )
-        self.m_choice2.SetSelection( 0 )
-        gSizer2.Add( self.m_choice2, 0, wx.LEFT|wx.RIGHT, 5 )
-
-        m_choice1Choices = [ u"lin", u"log" ]
-        self.m_choice1 = wx.Choice( self.m_scrolledWindow1, wx.ID_ANY, wx.DefaultPosition, wx.Size( 69,-1 ), m_choice1Choices, 0 )
-        self.m_choice1.SetSelection( 0 )
-        gSizer2.Add( self.m_choice1, 0, wx.LEFT|wx.RIGHT, 5 )
-
-        sbSizer7.Add( gSizer2, 0, 0, 5 )
-
-        bSizer2.Add( sbSizer7, 0, 0, 5 )
-
-        self.m_scrolledWindow1.SetSizer( bSizer2 )
-        self.m_scrolledWindow1.Layout()
-        bSizer2.Fit( self.m_scrolledWindow1 )
-        self.m_notebook1.AddPage( self.m_scrolledWindow1, u"Main Options", True )
         self.m_scrolledWindow3 = wx.ScrolledWindow( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL )
         self.m_scrolledWindow3.SetScrollRate( 5, 5 )
         bSizer21 = wx.BoxSizer( wx.VERTICAL )
@@ -321,9 +452,7 @@ class MpltFrame( wx.Frame, object ):
         self.m_button41 = wx.Button( self.m_scrolledWindow3, wx.ID_ANY, u"Refresh lines", wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer5.Add( self.m_button41, 0, wx.ALIGN_RIGHT|wx.LEFT, 5 )
 
-
         sbSizer8.Add( bSizer5, 1, wx.EXPAND, 5 )
-
 
         bSizer21.Add( sbSizer8, 0, 0, 5 )
 
@@ -385,12 +514,10 @@ class MpltFrame( wx.Frame, object ):
         self.m_staticText13.Wrap( -1 )
         fgSizer2.Add( self.m_staticText13, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
-
         sbSizer71.Add( fgSizer2, 1, wx.EXPAND, 5 )
 
         self.m_checkBox4 = wx.CheckBox( self.m_scrolledWindow3, wx.ID_ANY, u" Visible", wx.DefaultPosition, wx.DefaultSize, 0 )
         sbSizer71.Add( self.m_checkBox4, 0, wx.ALL, 5 )
-
 
         bSizer21.Add( sbSizer71, 0, 0, 5 )
 
@@ -420,12 +547,9 @@ class MpltFrame( wx.Frame, object ):
         self.m_staticText14.Wrap( -1 )
         fgSizer1.Add( self.m_staticText14, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
-
         sbSizer9.Add( fgSizer1, 1, wx.EXPAND, 5 )
 
-
         bSizer21.Add( sbSizer9, 0, 0, 5 )
-
 
         self.m_scrolledWindow3.SetSizer( bSizer21 )
         self.m_scrolledWindow3.Layout()
@@ -455,9 +579,7 @@ class MpltFrame( wx.Frame, object ):
         self.m_button11 = wx.Button( self.m_scrolledWindow4, wx.ID_ANY, u"Refresh Patchs", wx.DefaultPosition, wx.DefaultSize, 0 )
         fgSizer6.Add( self.m_button11, 0, wx.LEFT, 5 )
 
-
         sbSizer15.Add( fgSizer6, 1, wx.EXPAND, 5 )
-
 
         bSizer3.Add( sbSizer15, 0, 0, 5 )
 
@@ -492,9 +614,7 @@ class MpltFrame( wx.Frame, object ):
         self.m_staticText30.Wrap( -1 )
         fgSizer7.Add( self.m_staticText30, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
-
         sbSizer16.Add( fgSizer7, 1, wx.EXPAND, 5 )
-
 
         bSizer3.Add( sbSizer16, 0, 0, 5 )
 
@@ -514,7 +634,6 @@ class MpltFrame( wx.Frame, object ):
         self.m_button7.SetMinSize( wx.Size( 20,-1 ) )
 
         fgSizer4.Add( self.m_button7, 0, wx.ALIGN_CENTER|wx.ALIGN_CENTER_VERTICAL, 5 )
-
 
         sbSizer13.Add( fgSizer4, 0, 0, 5 )
 
@@ -649,52 +768,36 @@ class MpltFrame( wx.Frame, object ):
             self.m_mgr.Update()
             
         self.Centre( wx.BOTH )
-
         # Connect Events
         self.Bind( wx.EVT_ACTIVATE, self.OnActivate )
-        self.plt_textCtr1.Bind( wx.EVT_TEXT, self._TitleChange )
-        self.plt_textCtr2.Bind( wx.EVT_TEXT, self._xlabelChange )
-        self.plt_textCtr3.Bind( wx.EVT_TEXT, self._ylabelChange )        
-
-        self.m_button3.Bind( wx.EVT_BUTTON, self._titleFontProp )
-        self.m_button4.Bind( wx.EVT_BUTTON, self._xlabelFontProp )        
-        self.m_button5.Bind( wx.EVT_BUTTON, self._ylabelFontProp )
-        self.m_checkBox1.Bind( wx.EVT_CHECKBOX, self._OnGrid )
-        self.m_checkBox3.Bind( wx.EVT_CHECKBOX, self._OnViewCursor )
-        ##self.m_checkBox2.Bind( wx.EVT_CHECKBOX, self._OnLegend )# leggend callback
-        self.m_textCtrl4.Bind( wx.EVT_TEXT, self._xminValue )
-        self.m_textCtrl5.Bind( wx.EVT_TEXT, self._xmaxValue )
-        self.m_spinCtrl2.Bind( wx.EVT_SPINCTRL, self._xAngleChange )
-        self.m_textCtrl6.Bind( wx.EVT_TEXT, self._yminValue )
-        self.m_textCtrl7.Bind( wx.EVT_TEXT, self._ymaxValue )
-        self.m_spinCtrl3.Bind( wx.EVT_SPINCTRL, self._yAngleChange )
-        self.m_choice2.Bind( wx.EVT_CHOICE, self._OnXaxisScale )
-        self.m_choice1.Bind( wx.EVT_CHOICE, self._OnYaxisScale )
-        self.m_listBox1.Bind( wx.EVT_LISTBOX, self._OnListLinesChange )
-        self.m_button87.Bind( wx.EVT_BUTTON, self._OnLineDel )
-        self.m_button41.Bind( wx.EVT_BUTTON, self._OnRefreshLines )
-        self.plt_textCtr8.Bind( wx.EVT_TEXT_ENTER, self._OnLineNameChange )
-        self.m_choice7.Bind( wx.EVT_CHOICE, self._OnLineWidthChange )
-        self.m_button12.Bind( wx.EVT_BUTTON, self._OnLineColourChange )
-        self.m_choice4.Bind( wx.EVT_CHOICE, self._OnLineStyleChange )
-        self.m_choice6.Bind( wx.EVT_CHOICE, self._OnLineMarkerStyleChange )
-        self.m_choice8.Bind( wx.EVT_CHOICE, self._OnLineMarkerSizeChange )
-        self.m_checkBox4.Bind( wx.EVT_CHECKBOX, self._OnLineVisibleChange )
-        self.HorLineTxtCtrl.Bind( wx.EVT_TEXT, self._OnTxtRefLineHorzChange )
-        self.m_button51.Bind( wx.EVT_BUTTON, self._OnAddRefHorzLine )
-        self.HorVerTxtCtrl.Bind( wx.EVT_TEXT, self._OnTxtRefLineVerChange )
-        self.m_button511.Bind( wx.EVT_BUTTON, self._OnAddRefVertLine )
-        self.patchListBox.Bind( wx.EVT_LISTBOX, self._OnPatchListboxChange )
-        self.m_button9.Bind( wx.EVT_BUTTON, self._OnDelPatch )
-        self.m_button13.Bind( wx.EVT_BUTTON, self._OnPatchFaceColorChange )
-        self.m_choice14.Bind( wx.EVT_CHOICE, self._OnPatchAlphaChange )
-        self.m_button7.Bind( wx.EVT_BUTTON, self._OnAddHorzSpan )
-        self.plt_textCtr11.Bind( wx.EVT_TEXT, self._Onm_textCtrl11Change )
-        self.plt_textCtr12.Bind( wx.EVT_TEXT, self._Onm_textCtrl12Change )
-        self.m_button8.Bind( wx.EVT_BUTTON, self._OnAddVerSpan )
-        self.plt_textCtr13.Bind( wx.EVT_TEXT, self._Onm_textCtrl13Change )
-        self.plt_textCtr14.Bind( wx.EVT_TEXT, self._Onm_textCtrl14Change )
-        self.m_button11.Bind( wx.EVT_BUTTON, self._patchListboxUpdate )
+        
+        
+        if 1:
+            self.m_listBox1.Bind( wx.EVT_LISTBOX, self._OnListLinesChange )
+            self.m_button87.Bind( wx.EVT_BUTTON, self._OnLineDel )
+            self.m_button41.Bind( wx.EVT_BUTTON, self._OnRefreshLines )
+            self.plt_textCtr8.Bind( wx.EVT_TEXT_ENTER, self._OnLineNameChange )
+            self.m_choice7.Bind( wx.EVT_CHOICE, self._OnLineWidthChange )
+            self.m_button12.Bind( wx.EVT_BUTTON, self._OnLineColourChange )
+            self.m_choice4.Bind( wx.EVT_CHOICE, self._OnLineStyleChange )
+            self.m_choice6.Bind( wx.EVT_CHOICE, self._OnLineMarkerStyleChange )
+            self.m_choice8.Bind( wx.EVT_CHOICE, self._OnLineMarkerSizeChange )
+            self.m_checkBox4.Bind( wx.EVT_CHECKBOX, self._OnLineVisibleChange )
+            self.HorLineTxtCtrl.Bind( wx.EVT_TEXT, self._OnTxtRefLineHorzChange )
+            self.m_button51.Bind( wx.EVT_BUTTON, self._OnAddRefHorzLine )
+            self.HorVerTxtCtrl.Bind( wx.EVT_TEXT, self._OnTxtRefLineVerChange )
+            self.m_button511.Bind( wx.EVT_BUTTON, self._OnAddRefVertLine )
+            self.patchListBox.Bind( wx.EVT_LISTBOX, self._OnPatchListboxChange )
+            self.m_button9.Bind( wx.EVT_BUTTON, self._OnDelPatch )
+            self.m_button13.Bind( wx.EVT_BUTTON, self._OnPatchFaceColorChange )
+            self.m_choice14.Bind( wx.EVT_CHOICE, self._OnPatchAlphaChange )
+            self.m_button7.Bind( wx.EVT_BUTTON, self._OnAddHorzSpan )
+            self.plt_textCtr11.Bind( wx.EVT_TEXT, self._Onm_textCtrl11Change )
+            self.plt_textCtr12.Bind( wx.EVT_TEXT, self._Onm_textCtrl12Change )
+            self.m_button8.Bind( wx.EVT_BUTTON, self._OnAddVerSpan )
+            self.plt_textCtr13.Bind( wx.EVT_TEXT, self._Onm_textCtrl13Change )
+            self.plt_textCtr14.Bind( wx.EVT_TEXT, self._Onm_textCtrl14Change )
+            self.m_button11.Bind( wx.EVT_BUTTON, self._patchListboxUpdate )
 
         self.figpanel.canvas.mpl_connect('motion_notify_event', self._UpdateStatusBar)
         
@@ -758,22 +861,22 @@ class MpltFrame( wx.Frame, object ):
                 self._cleartitles()
             else:
                 # update the title, x and ylabel contents
-                self.plt_textCtr2.Value= self.gca().get_xlabel()
+                self.scrolledWindow1.plt_textCtr2.Value= self.gca().get_xlabel()
                 # clear ylabel ctrl
-                self.plt_textCtr3.Value= self.gca().get_ylabel()
+                self.scrolledWindow1.plt_textCtr3.Value= self.gca().get_ylabel()
                 # clear title
-                self.plt_textCtr1.Value= self.gca().get_title()
+                self.scrolledWindow1.plt_textCtr1.Value= self.gca().get_title()
                 # connect the cursor to current axes
                 self._connectCursor(self.gca())
                 
         
     def _clearTitles(self, evt):
         # clear xlabel ctrl
-        self.plt_textCtr2.Value= u''
+        self.scrolledWindow1.plt_textCtr2.Value= u''
         # clear ylabel ctrl
-        self.plt_textCtr3.Value= u''
+        self.scrolledWindow1.plt_textCtr3.Value= u''
         # clear title
-        self.plt_textCtr1.Value= u''
+        self.scrolledWindow1.plt_textCtr1.Value= u''
 
 
     def _connectCursor(self, axes):
@@ -801,19 +904,6 @@ class MpltFrame( wx.Frame, object ):
         x = np.arange(0, 6, .01)
         y = np.sin(x**2)*np.exp(-x)
         self.gca().plot(x, y)
-    
-    def _xAngleChange( self, evt):
-        labels = self.gca().get_xticklabels()
-        currFontSize= self.gca().xaxis.get_label().get_fontsize()
-        setp( labels, rotation= evt.GetSelection(), fontsize= currFontSize)
-        self.figpanel.canvas.draw()
-    
-    def _yAngleChange( self, evt):
-        labels = self.gca().get_yticklabels()
-        currFontSize= currFontSize= self.gca().yaxis.get_label().get_fontsize()
-        setp( labels, rotation= evt.GetSelection(), fontsize= currFontSize)
-        self.figpanel.canvas.draw()
-    
     def plotLine( self,data2plot):
         self.gca().hold(True)
         listLegend= list()
@@ -1090,15 +1180,6 @@ class MpltFrame( wx.Frame, object ):
         self.figpanel.gca().set_ylabel(ylabel)
         self.figpanel.gca().hold(False)
         self.figpanel.canvas.draw()
-
-    def _TitleChange( self, evt ):
-        #self.log.write('# Changing Title', False)
-        self.figpanel.gca().set_title(evt.GetString())
-        self.figpanel.canvas.draw()
-
-        #self.log.write('Title= ' + "'" + self.figpanel.gca().get_title().__str__()+ "'", False)
-        #self.log.write('plt.gca().set_title(Title)', False)
-
     def probabilityPlot(self, data2plot):
         import scipy.stats as stats2
         from numpy import amin, amax
@@ -1139,48 +1220,6 @@ class MpltFrame( wx.Frame, object ):
         self.gca().hold(False)
         self.figpanel.canvas.draw()
 
-    def _xlabelChange( self, evt ):
-        #self.log.write('# changing xlabel', False)
-        self.figpanel.gca().set_xlabel(evt.GetString())
-        self.figpanel.canvas.draw()
-        #self.log.write('xlabel= ' + "'" +  self.figpanel.gca().get_xlabel().__str__()+ "'" , False)
-        #self.log.write('plt.gca().set_xlabel(xlabel)', False)
-
-    def _ylabelChange( self, evt ):
-        #self.log.write('# changing ylabel', False)
-        self.figpanel.gca().set_ylabel(evt.GetString())
-        self.figpanel.canvas.draw()
-        #self.log.write('ylabel= ' + "'" + self.figpanel.gca().get_ylabel().__str__()+ "'" , False)
-        #self.log.write('plt.gca().set_xlabel(ylabel)', False)
-
-    def _OnGrid( self, evt ):
-        self.log.write('# changing grid state', False)
-        value = evt.Checked()
-        self.figpanel.gca().grid(value)
-        self.figpanel.canvas.draw()
-        self.log.write('plt.gca().grid('+value.__str__()+')', False)
-
-
-    def _OnXaxisScale( self, evt ):
-        self.log.write('# changing x axis scale', False)
-        value = 'linear'
-        if evt.Selection == 1:
-            value = 'symlog'
-        self.gca().set_xscale(value)
-        self.figpanel.canvas.draw()
-        self.log.write('plt.gca().set_xscale('+ "'" + value.__str__()+ "'" +')', False)
-
-
-    def _OnYaxisScale( self, evt ):
-        self.log.write('# changing y axis scale', False)
-        value = 'linear'
-        if evt.Selection == 1:
-            value = 'symlog'
-        self.gca().set_yscale(value)
-        self.figpanel.canvas.draw()
-        self.log.write('plt.gca().set_yscale('+ "'" + value.__str__()+ "'" +')', False)
-
-
     def _OnLegend( self, evt ):
         value = evt.Checked()
         try:
@@ -1188,76 +1227,6 @@ class MpltFrame( wx.Frame, object ):
             legend.set_visible(value)
         except:
             pass
-
-    def _xminValue( self, evt ):
-        self.log.write('# changing x axis min value', False)
-        axisValue= self.figpanel.gca().get_xbound()
-        self.log.write('axisValue= plt.gca().get_xbound()', False)
-        try:
-            float(evt.GetString())
-        except:
-            return
-        self.figpanel.gca().set_xbound((float(evt.GetString()),axisValue[1]))
-        self.figpanel.canvas.draw()
-        self.log.write('plt.gca().set_xbound((float('+evt.GetString().__str__()+'),axisValue[1]))', False)
-
-
-    def _xmaxValue( self, evt ):
-        self.log.write('# changing x axis max value', False)
-        axisValue = self.figpanel.gca().get_xbound()
-        self.log.write('axisValue= plt.gca().get_xbound()', False)
-        try:
-            float(evt.GetString())
-        except:
-            return
-        self.figpanel.gca().set_xbound((axisValue[0],float(evt.GetString())))
-        self.figpanel.canvas.draw()
-        self.log.write('plt.gca().set_xbound((axisValue[0],float('+evt.GetString().__str__()+')))', False)
-
-    def _yminValue( self, evt ):
-        self.log.write('# changing y axis min value', False)
-        axisValue = self.figpanel.gca().get_ybound()
-        self.log.write('axisValue= plt.gca().get_ybound()', False)
-
-        try:
-            float(evt.GetString())
-        except:
-            return
-        self.figpanel.gca().set_ybound((float(evt.GetString()),axisValue[1]))
-        self.figpanel.canvas.draw()
-        self.log.write('plt.gca().set_ybound((float('+evt.GetString().__str__()+'),axisValue[1]))', False)
-
-
-    def _ymaxValue( self, evt ):
-        self.log.write('# changing y axis max value', False)
-        axisValue = self.figpanel.gca().get_ybound()
-        self.log.write('axisValue= plt.gca().get_ybound()', False)
-        try:
-            float(evt.GetString())
-        except:
-            return
-        self.figpanel.gca().set_ybound((axisValue[0],float(evt.GetString())))
-        self.figpanel.canvas.draw()
-        self.log.write('plt.gca().set_ybound((axisValue[0],float('+evt.GetString().__str__()+')))', False)
-
-
-    def _titleFontProp( self, evt ):
-        fontprop= fontDialog(self)
-        currtitle = self.figpanel.gca().get_title()
-        self.figpanel.gca().set_title(currtitle,fontprop)
-        self.figpanel.canvas.draw()
-
-    def _xlabelFontProp( self, evt ):
-        fontprop= fontDialog(self)
-        currtitle = self.figpanel.gca().get_xlabel()
-        self.figpanel.gca().set_xlabel(currtitle,fontprop)
-        self.figpanel.canvas.draw()
-
-    def _ylabelFontProp( self, evt ):
-        fontprop= fontDialog(self)
-        currtitle = self.figpanel.gca().get_ylabel()
-        self.figpanel.gca().set_ylabel(currtitle,fontprop)
-        self.figpanel.canvas.draw()
 
     def _OnLineDel(self,event):
         if len(self.gca().get_lines())== 0:
@@ -1268,21 +1237,8 @@ class MpltFrame( wx.Frame, object ):
         self._OnRefreshLines(None)
         self.figpanel.canvas.draw()
 
-    def _OnViewCursor( self, evt ):
-        # verify the cursor property created with
-        # connectCursor
-        if not hasattr(self,'cursor'):
-            return
-        value = evt.Checked()
-        if not value:
-            self.statusbar.SetStatusText(( ""), 1)
-
-        self.cursor.horizOn = value
-        self.cursor.vertOn = value
-        self.figpanel.canvas.draw()
-
     def _UpdateStatusBar(self, evt):
-        if evt.inaxes and self.m_checkBox3.GetValue():
+        if evt.inaxes and self.scrolledWindow1.m_checkBox3.GetValue():
             x, y = evt.xdata, evt.ydata
             self.statusbar.SetStatusText(( "x= " + str(x) +
                                            "  y=" +str(y) ),
@@ -1488,13 +1444,13 @@ class MpltFrame( wx.Frame, object ):
 
 
     def _Onm_textCtrl11Change( self,event):
-        self._txtNumerOnly( self.plt_textCtr11)
+        self._txtNumerOnly( self.scrolledWindow1.plt_textCtr11)
 
     def _Onm_textCtrl12Change( self,event):
         self._txtNumerOnly(self.plt_textCtr12)
 
     def _Onm_textCtrl13Change(self,event):
-        self._txtNumerOnly( self.plt_textCtr13)
+        self._txtNumerOnly( self.scrolledWindow1.plt_textCtr13)
 
     def _Onm_textCtrl14Change(self, evt):
         self._txtNumerOnly( self.plt_textCtr14)
