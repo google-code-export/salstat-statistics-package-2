@@ -18,7 +18,7 @@ from statFunctions.anova import oneway
 from statFunctions.correlation import linregress
         
 class oneConditionTest(_genericFunc):
-    name= 'One condition test'
+    name= u"One condition test"
     statName= 'oneConditionTest'
     def __init__( self):
         # getting all required methods
@@ -160,7 +160,7 @@ class oneConditionTest(_genericFunc):
         self.outputGrid.addRowData( ['user mean=' ,  self.userMean ], currRow= 0)
     
 class twoConditionTest(oneConditionTest):
-    name= 'Two condition test'
+    name= u'Two condition test'
     statName= 'twoConditionTest'
     def __init__( self):
         oneConditionTest.__init__(self)
@@ -287,11 +287,11 @@ class twoConditionTest(oneConditionTest):
 #---------------------------------------------------------------------------
 # dialog for single factor tests with 3+ conditions
 class threeConditionTest(oneConditionTest):
-    name= 'Three condition test'
+    name= u'Three or more condition test'
     statName= 'threeConditionTest'
     def __init__( self):
         oneConditionTest.__init__(self)
-        self.name=     'Three condition test'
+        self.name=     'Three or more condition test'
         self.statName= 'threeConditionTest'
         self.minRequiredCols= 3
         self.aviableTest= ['kruskawallish', 'friedmanchisquare']

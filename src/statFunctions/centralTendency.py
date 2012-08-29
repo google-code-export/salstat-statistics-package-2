@@ -10,8 +10,8 @@ from wx import Size
 
 class geometricMean(_genericFunc):
     ''''''
-    name=      'geometric Mean'
-    statName=  'geometricmean'
+    name=      u"geometric Mean"
+    statName=  u"geometricmean"
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
@@ -75,7 +75,7 @@ class geometricMean(_genericFunc):
         self.Logg.write(self.statName+ ' successfull')
         
 class harmonicmean(geometricMean):
-    name=      'harmonic mean'
+    name=      u"harmonic mean"
     statName=  'harmonicmean'
     def __init__(self):
         geometricMean.__init__(self)
@@ -90,7 +90,7 @@ class harmonicmean(geometricMean):
         return _stats.harmonicmean
     
 class mean(geometricMean):
-    name= 'mean'
+    name= u"mean"
     statName= 'mean'
     def __init__(self):
         geometricMean.__init__(self)
@@ -104,7 +104,7 @@ class mean(geometricMean):
         return _stats.mean
     
 class median(geometricMean):
-    name=  'median'
+    name=  u"median"
     statName= 'median'
     def __init__(self):
         geometricMean.__init__(self)
@@ -119,7 +119,7 @@ class median(geometricMean):
         return _stats.median
     
 class medianscore(geometricMean):
-    name=   'medianscore'
+    name=   u"medianscore"
     statName=  'medianscore'
     def __init__(self):
         geometricMean.__init__(self)
@@ -133,7 +133,7 @@ class medianscore(geometricMean):
         return _stats.medianscore
 
 class mode(geometricMean):
-    name= 'mode'
+    name= u"mode"
     statName= 'mode'
     def __init__(self):
         geometricMean.__init__(self)

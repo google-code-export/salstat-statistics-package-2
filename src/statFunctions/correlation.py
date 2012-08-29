@@ -11,7 +11,7 @@ from slbTools import homogenize
 
 class pearsonr( _genericFunc):
     ''''''
-    name=      'pearsonr'
+    name=      u'pearsonr'
     statName=  'pearsonr'
     def __init__( self):
         # getting all required methods
@@ -143,7 +143,7 @@ class kendalltau(pearsonr):
         return _stats.kendalltau(*args, **params)
         
 class linregress(pearsonr):
-    name=      'linregress'
+    name=      u'linregress'
     statName=  'linregress'
     def __init__(self):
         pearsonr.__init__(self)
@@ -161,7 +161,7 @@ class linregress(pearsonr):
         return _stats.linregress(*args, **params)
     
 class covariance(pearsonr):
-    name=      'covariance'
+    name=      u'covariance'
     statName=  'covariance'
     def __init__(self):
         pearsonr.__init__(self)
@@ -177,7 +177,7 @@ class covariance(pearsonr):
         return _stats.covariance(*args, **params)
 
 class paired(pearsonr):
-    name=      'paired'
+    name=      u'paired'
     statName=  'paired'
     def __init__(self):
         pearsonr.__init__(self)

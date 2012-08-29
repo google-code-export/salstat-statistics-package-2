@@ -90,7 +90,7 @@ class random(_genericFunc):
         
 class randomn(random):
     ''''''
-    name=      'normal random'
+    name=      u'normal random'
     statName=  'randn'
     def __init__(self):
         # getting all required methods
