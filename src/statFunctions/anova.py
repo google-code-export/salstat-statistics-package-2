@@ -1,4 +1,4 @@
-__name__ ='Anova functions'
+__name__ = u"Anova functions"
 __all__=  ['oneway']
 
 from statlib import stats as _stats

@@ -1,4 +1,4 @@
-__name__ ='Moments'
+__name__ = u"Moments"
 __all__=  ['moment', 'variation', 
            'skew', 'skewtest',
            'kurtosis', 'kurtosistest',

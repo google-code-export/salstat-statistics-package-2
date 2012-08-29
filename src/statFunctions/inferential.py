@@ -1,4 +1,4 @@
-__name__ ='Inferential stats'
+__name__ = u"Inferential stats"
 __all__=  ['ttest_1samp', 'ttest_ind','ttest_rel',
            'chisquare', 'ks_2samp', 'mannwhitneyu',
            'ranksums', 'wilcoxont','kruskalwallish',

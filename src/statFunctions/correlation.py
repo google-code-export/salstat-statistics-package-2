@@ -1,4 +1,4 @@
-__name__ ='Correlation'
+__name__ = u"Correlation"
 __all__=  ['paired', 'pearsonr', 'covariance', 'spearmanr',
            'pointbiserialr', 'kendalltau', 'linregress',]
 

@@ -1,4 +1,4 @@
-__name__ ='Random data'
+__name__ = u"Random data"
 __all__=  ['random','randomn']
 
 import numpy
