@@ -1,4 +1,4 @@
-__name__ ='Frequency Stats'
+__name__ = u"Frequency Stats"
 __all__=  ['itemfreq', 'scoreatpercentile', 'percentileofscore',
            'histogram', 'cumfreq', 'relfreq']
 

@@ -1,6 +1,6 @@
 '''Some condition test'''
 
-__name__ = 'Condition tests'
+__name__ = u"Condition tests"
 __all__ = ['oneConditionTest','twoConditionTest','threeConditionTest']
 
 import numpy

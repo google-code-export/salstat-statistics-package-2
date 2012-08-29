@@ -1,4 +1,4 @@
-__name__= 'Trimming Fcns'
+__name__= u"Trimming Fcns"
 __all__=  ['threshold',]
 
 from statlib import stats as _stats

@@ -378,6 +378,7 @@ class SalStat2App(wx.App):
         self.VERSION= '2.1 beta 2'
         self.missingvalue= missingvalue
         wx.SetDefaultPyEncoding( "utf-8")
+        self.translate= translate
         self.SetAppName( APPNAME)
         try:
             installDir = os.path.dirname( os.path.abspath( __file__))
@@ -571,6 +572,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.path= None
         # to allow the user to drop allowed files into the Data Entry Panel
         wx.FileDropTarget.__init__( self)
+        self.translate= translate
         self.window= self
         wx.Frame.__init__(self,parent,-1,"S2",
                           size = wx.Size(640,480 ), pos = wx.DefaultPosition)
@@ -777,12 +779,12 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         groups= module.__all__
         subgroup= list()
         for group in groups:
-            attr= getattr( module, group) # central tendency
+            attr= getattr( module, group)
             result= list()
             for item in attr.__all__:
                 fnc= getattr( attr, item)
-                result.append( (fnc.name, fnc.icon, getattr( fnc(), 'showGui'), fnc.id))
-            subgroup.append( (attr.__name__, result))
+                result.append( ( translate( fnc.name), fnc.icon, getattr( fnc(), 'showGui'), fnc.id))
+            subgroup.append( ( translate( attr.__name__), result))
         return subgroup
 
     def _createMenu(self):
@@ -899,7 +901,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
 
         if wx.Platform == "__WXMAC__":
             app = wx.GetApp()
-            wx.App_SetMacHelpMenuTitleName(u"&Help")
+            wx.App_SetMacHelpMenuTitleName(translate(u"&Help"))
             # Allow spell checking in cells
             # TODO Still need to add this to the Edit menu once we add Mac menu options
             spellcheck = u"mac.textcontrol-use-spell-checker"
@@ -958,7 +960,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
             except:
                 pass
             selectedCellText.append( currText)
-        self.StatusBar.SetStatusText( u"cells Selected: %.0f  count: %.0f  sum: %.4f "%(len(selectedCells),len(selectedCells)-emptyText,sum(selectedNumerical)),1 )
+        self.StatusBar.SetStatusText( translate(u"cells Selected: %.0f  count: %.0f  sum: %.4f ")%(len(selectedCells),len(selectedCells)-emptyText,sum(selectedNumerical)),1 )
 
     def _cellSelectionChange( self, evt):
         # se lee el contenido de la celda seleccionada
@@ -990,7 +992,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         
         # taking the first element as the selected file
         filename= filenames[0]
-        sys.stderr.write(u"the file %d was dropped"%filename)
+        sys.stderr.write( translate(u"the file %d was dropped")%filename)
         
     
     def onDefaultPerspective(self, evt):
@@ -999,8 +1001,8 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
     def GoClearData(self, evt):
         if not self.grid.Saved:
             # display discard dialog
-            dlg = wx.MessageDialog(None, u"Do you wish to save now?",
-                                   u"You have Unsaved Data", wx.YES_NO | wx.CANCEL | wx.ICON_QUESTION)
+            dlg = wx.MessageDialog(None, translate(u"Do you wish to save now?"),
+                                   translate(u"You have Unsaved Data"), wx.YES_NO | wx.CANCEL | wx.ICON_QUESTION)
             response = dlg.ShowModal()
             if response == wx.ID_CANCEL:
                 return
@@ -1037,7 +1039,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         # Shows the find & replace dialog
         # NOTE - this doesn"t appear to work on the grid, so I might be missing something...
         data = wx.FindReplaceData()
-        dlg = wx.FindReplaceDialog(self.grid, data, u"Find and Replace", \
+        dlg = wx.FindReplaceDialog(self.grid, data, translate(u"Find and Replace"), \
                                    wx.FR_REPLACEDIALOG)
         dlg.data = data
         dlg.Show(True)
@@ -1045,10 +1047,10 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
     def GoEditGrid(self, evt):
         #shows dialog for editing the data grid
         btn1=  ["SpinCtrl",   [0,5000,0]]
-        btn2=  ["StaticText", [u"Change Grid Size"]]
-        btn3=  ["StaticText", [u"Add Columns"]]
-        btn4=  ["StaticText", [u"Add Rows"]]
-        setting= {"Title": u"Change Grid size"}
+        btn2=  ["StaticText", [translate(u"Change Grid Size")]]
+        btn3=  ["StaticText", [translate(u"Add Columns")]]
+        btn4=  ["StaticText", [translate(u"Add Rows")]]
+        setting= {"Title": translate(u"Change Grid size")}
 
         struct= list()
         struct.append([btn2])
@@ -1074,10 +1076,10 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
     def GoGridPrefFrame(self, evt):
         # shows Grid Preferences form
         btn1=  ["SpinCtrl",   [5,90,5]]
-        btn2=  ["StaticText", [u"Change the cell Size"]]
-        btn3=  ["StaticText", [u"Column Width"]]
-        btn4=  ["StaticText", [u"Row Height"]]
-        setting= {"Title": u"Change the cell size"}
+        btn2=  ["StaticText", [translate(u"Change the cell Size")]]
+        btn3=  ["StaticText", [translate(u"Column Width")]]
+        btn4=  ["StaticText", [translate(u"Row Height")]]
+        setting= {"Title": translate(u"Change the cell size")}
 
         struct= list()
         struct.append([btn2])
@@ -1125,24 +1127,24 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         info.Icon= wx.GetApp().icon64
         from wx.lib.wordwrap import wordwrap
         info.Description = wordwrap(
-            u"This is a newer version of the SalStat Statistics Package "
-            u"originally developed by Alan James Salmoni and Mark Livingstone. "
-            u"There have been minor bug corrections, and new improvements:\n\n"
-            u"*You can cut, copy, and paste multiple cells,\n"
-            u"*You can undo and redo some actions.\n"
-            u"*The calculations are faster than the original version.\n\n"
-            u"The plot system can draw:\n\n"
-            u"*Scatter charts\n*line chart of all means\n*bar chart of all means\n"
-            u"*Histogram chart\n"
-            u"*Line charts of the data,\n*box and whisker chart\n*Ternary chart\n"
-            u"*Linear regression plot (show the equation and the correlation inside the chart),\n"
-            u"\nThe input data can be saved to, and loaded from an xls format file.\n\n"
-            u"Salstat2 can be scripted by using Python.\n\n"
-            u"All the numerical results are send to a sheet in a different panel where you can cut, copy, paste, and edit them.\n\n"
-            u"and much more!",
+            translate(u"This is a newer version of the SalStat Statistics Package ")+
+            translate(u"originally developed by Alan James Salmoni and Mark Livingstone. ")+
+            translate(u"There have been minor bug corrections, and new improvements:\n\n")+
+            translate(u"*You can cut, copy, and paste multiple cells,\n")+
+            translate(u"*You can undo and redo some actions.\n")+
+            translate(u"*The calculations are faster than the original version.\n\n")+
+            translate(u"The plot system can draw:\n\n")+
+            translate(u"*Scatter charts\n*line chart of all means\n*bar chart of all means\n")+
+            translate(u"*Histogram chart\n")+
+            translate(u"*Line charts of the data,\n*box and whisker chart\n*Ternary chart\n")+
+            translate(u"*Linear regression plot (show the equation and the correlation inside the chart),\n")+
+            translate(u"\nThe input data can be saved to, and loaded from an xls format file.\n\n")+
+            translate(u"Salstat2 can be scripted by using Python.\n\n")+
+            translate(u"All the numerical results are send to a sheet in a different panel where you can cut, copy, paste, and edit them.\n\n")+
+            translate(u"and much more!"),
             460, wx.ClientDC( self))
         info.WebSite = ( u"http://code.google.com/p/salstat-statistics-package-2/", u"S2 home page")
-        info.Developers = [ u"Sebastian Lopez Buritica", "Mark Livingstone -- MAC & LINUX  Translator",]
+        info.Developers = [ u"Sebastian Lopez Buritica", "Mark Livingstone --" + translate("MAC & LINUX  Translator"),]
 
         info.License = wordwrap(u"GPL 3", 450, wx.ClientDC(self))
 
@@ -1168,17 +1170,17 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         waste, colnums = self.grid.GetUsedCols()
         self.log.write('''waste, colnums = grid.GetUsedCols()''', False)
         if colnums == []:
-            self.SetStatusText( u"You need some data to draw a graph!")
+            self.SetStatusText( translate(u"You need some data to draw a graph!"))
             return
         selection= data2Plotdiaglog( self,waste)
         if selection.ShowModal() != wx.ID_OK:
             selection.Destroy()
             return
         selectedcols= selection.getData()
-        self.log.write( u"selectedcols=" + selectedcols.__str__(), False)
+        self.log.write( translate(u"selectedcols=") + selectedcols.__str__(), False)
         selection.Destroy()
         if len( selectedcols) == 0:
-            self.SetStatusText( u"You need to select some data to draw a graph!")
+            self.SetStatusText( translate(u"You need to select some data to draw a graph!"))
             return
         self.log.write('''data = [statistics(grid.CleanData(cols), 'noname',None) for cols in [colnums[m] for m in selectedcols]]''', False)
         data = [statistics(self.grid.CleanData(cols), "noname",None) for cols in [colnums[m] for m in selectedcols]]
@@ -1192,37 +1194,37 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
                   xtics= [waste[i] for i in selectedcols])''', False)
         plt= plot(parent = self, typePlot= "plotLine",
                   data2plot= ((range(len(data)),data,"Mean"),),
-                  xlabel = u"variable",
-                  ylabel= u"mean",
-                  title= u"Line Chart of all means",
+                  xlabel = translate(u"variable"),
+                  ylabel= translate(u"mean"),
+                  title= translate(u"Line Chart of all means"),
                   xtics= [waste[i] for i in selectedcols])
         self.log.write('''plt.Show()''', False)
         plt.Show()
 
     def GoTernaryplot(self, evt):
-        self.log.write( u"Ternary")
+        self.log.write( translate(u"Ternary"))
         waste, colnums= self.grid.GetUsedCols()
-        self.log.write( u"waste, colnums= grid.GetUsedCols()", False)
+        self.log.write( translate(u"waste, colnums= grid.GetUsedCols()"), False)
 
         if colnums == []:
-            self.SetStatusText( u"You need some data to draw a graph!")
+            self.SetStatusText( translate(u"You need some data to draw a graph!"))
             return
 
-        txt1= ["StaticText", [u"Left Corner Label"]]
-        txt2= ["StaticText", [u"Right Corner Label"]]
-        txt3= ["StaticText", [u"Upper Corner Label"]]
-        btn1= ["TextCtrl",   [u"A"]]
-        btn2= ["TextCtrl",   [u"B"]]
-        btn3= ["TextCtrl",   [u"C"]]
-        btn4= ["StaticText", [u"Select the pairs of data by rows"]]
-        btn5= ["makePairs",  [[u"A Left Corner",u"C Upper Corner", u"B Right Corner"], [waste]*3, 30]]
+        txt1= ["StaticText", [translate(u"Left Corner Label")]]
+        txt2= ["StaticText", [translate(u"Right Corner Label")]]
+        txt3= ["StaticText", [translate(u"Upper Corner Label")]]
+        btn1= ["TextCtrl",   [translate(u"A")]]
+        btn2= ["TextCtrl",   [translate(u"B")]]
+        btn3= ["TextCtrl",   [translate(u"C")]]
+        btn4= ["StaticText", [translate(u"Select the pairs of data by rows")]]
+        btn5= ["makePairs",  [[translate(u"A Left Corner",u"C Upper Corner", u"B Right Corner")], [waste]*3, 30]]
         structure= list()
         structure.append( [btn1, txt1])
         structure.append( [btn2, txt2])
         structure.append( [btn3, txt3])
         structure.append( [btn4,])
         structure.append( [btn5,])
-        settings = {"Tile": "Ternary plot dialog" ,
+        settings = {"Tile": translate(u"Ternary plot dialog") ,
                     "_size": wx.Size(410, 400),}
         dlg= dialog(self, settings= settings, struct= structure)
         if dlg.ShowModal() != wx.ID_OK:
@@ -1627,7 +1629,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         plt= plot(parent = self, typePlot= "plotLinRegress",
                   data2plot= (data[0],data[1],waste[xcol] +u" Vs "+ waste[ycol]),
                   xlabel = waste[xcol], ylabel = waste[ycol],
-                  title= "Linear Regression plot" )
+                  title= translate(u"Linear Regression plot") )
         self.log.write('''plt= plot(parent = None, typePlot= 'plotLinRegress',
                   data2plot= (data[0],data[1],waste[xcol] +u' Vs '+ waste[ycol]),
                   xlabel = waste[xcol], ylabel = waste[ycol],
@@ -1681,7 +1683,6 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
     ################
     ### chart End
     ################
-
     def EndApplication(self, evt):
         if self.grid.Saved == False:
             # checking if there is a data to be saved

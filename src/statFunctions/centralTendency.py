@@ -1,4 +1,4 @@
-__name__ ='Central Tendency'
+__name__ = u"Central Tendency"
 __all__=  ['geometricMean', 'harmonicmean', 'mean',
            'median', 'medianscore', 'mode']
 

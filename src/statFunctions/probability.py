@@ -1,4 +1,4 @@
-__name__ ='Probability calcs'
+__name__ = u"Probability calcs"
 __all__=  ['chisqprob', 'erfcc', 'zprob',
            'ksprob', 'fprob', 'gammln','betacf','betai']
 

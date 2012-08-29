@@ -1,4 +1,4 @@
-__name__ ='variability'
+__name__ = u"variability"
 __all__=  ['samplevar', 'samplestdev','signaltonoise',
            'var', 'stdev', 'sterr', 'sem', 'zs', 'z' ]
 
