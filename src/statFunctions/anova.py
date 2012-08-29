@@ -10,13 +10,13 @@ from wx import Size
 
 class oneway(_genericFunc):
     ''''''
-    name=      'one way anova'
-    statName=  'oneway'
+    name=      u"one way anova"
+    statName=  u"oneway"
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
-        self.name=      'one way anova'
-        self.statName=  'one way anova'
+        self.name=      u"one way anova"
+        self.statName=  u"one way anova"
         self.minRequiredCols= 2
         self.colNameSelect= ''
         

@@ -34,7 +34,7 @@ from openStats import normProb, normProbInv
  
 class sixPack(_genericFunc):
     icon= imageEmbed().sixsigma16()
-    name=      'Six Sigma Pack'
+    name=      u"Six Sigma Pack"
     statName=  'sixpack'
     def __init__(self):
         # getting all required methods

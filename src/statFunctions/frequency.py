@@ -10,7 +10,7 @@ from wx import Size
 
 class itemfreq(_genericFunc):
     ''''''
-    name=      'item frequency'
+    name=      u'item frequency'
     statName=  'itemfreq'
     def __init__(self):
         # getting all required methods
@@ -83,7 +83,7 @@ class itemfreq(_genericFunc):
 
 class scoreatpercentile(_genericFunc):
     ''''''
-    name=      'score at percentile'
+    name=      u'score at percentile'
     statName=  'scoreatpercentile'
     def __init__(self):
         # getting all required methods
@@ -164,7 +164,7 @@ class scoreatpercentile(_genericFunc):
         self.Logg.write( self.name + ' successful')
 
 class percentileofscore(scoreatpercentile):
-    name=      'percentile of score'
+    name=      u'percentile of score'
     statName=  'percentileofscore'
     def __init__(self):
         # getting all required methods
@@ -238,7 +238,7 @@ class percentileofscore(scoreatpercentile):
         self.Logg.write( self.name + ' successful')
             
 class histogram(scoreatpercentile):
-    name=      'histogram'
+    name=      u'histogram'
     statName=  'histogram'
     def __init__(self):
         # getting all required methods
@@ -279,7 +279,7 @@ class histogram(scoreatpercentile):
         self.Logg.write( self.name + ' successful')
 
 class cumfreq(histogram):
-    name=      'cumulative frequency'
+    name=      u'cumulative frequency'
     statName=  'cumfreq'
     def __init__(self):
         # getting all required methods
@@ -319,7 +319,7 @@ class cumfreq(histogram):
         self.Logg.write( self.name + ' successful')
 
 class relfreq(histogram):
-    name=      'relative frequency histogram'
+    name=      u'relative frequency histogram'
     statName=  'relfreq'
     def __init__(self):
         # getting all required methods
