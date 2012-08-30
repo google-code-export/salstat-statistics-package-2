@@ -1,4 +1,4 @@
-__name__ ='Histogram plot'
+__name__ = u'Histogram plot'
 __all__=  ['histogram', 'niceHistogram'] #'cumulativeFrecuency','relativefrequency'
 
 from statlib import stats as _stats
@@ -13,11 +13,11 @@ import os
 class niceHistogram( _genericFunc):
     '''this function is used to plot a nice histogram
     chart of the selected column'''   
-    name=     'Nice Histogram'
+    name=     u'Nice Histogram'
     statName=  'histogram'
     def __init__(self):
         _genericFunc.__init__(self)
-        self.name=     'Nine Histogram'
+        self.name=     u'Nine Histogram'
         self.statName= 'histogram'
         self.minRequiredCols= 1
         self.colNameSelect= ''
@@ -141,11 +141,11 @@ class niceHistogram( _genericFunc):
         self.Logg.write( self.name + ' successful')
 
 class histogram(_genericFunc):
-    name=     'Histogram'
+    name=     u'Histogram'
     statName=  'histogram'
     def __init__(self):
         _genericFunc.__init__(self)
-        self.name=      'Histogram'
+        self.name=      u'Histogram'
         self.statName=  'histogram'
         self.minRequiredCols= 1
         self.colNameSelect= ''
@@ -269,11 +269,11 @@ class histogram(_genericFunc):
         pass
         
 class cumulativeFrecuency( cumfreq):
-    name=     'Cumulative Frecuency'
+    name=     u'Cumulative Frecuency'
     statName= 'cumulativeFrecuency'
     def __init__(self):
         cumfreq.__init__(self)
-        self.name=     'Cumulative Frecuency'
+        self.name=     u'Cumulative Frecuency'
         self.statName= 'cumulativeFrecuency'
     
 #    def _report(self, result):
@@ -288,11 +288,11 @@ class cumulativeFrecuency( cumfreq):
 #        self.Loggg.write( self.name + ' successful')
         
 class relativefrequency( relfreq):
-    name=     'Realtive Frecuency'
+    name=     u'Realtive Frecuency'
     statName= 'relativeFrecuency'
     def __init__(self):
         relfreq.__init__(self)
-        self.name=     'Relative Frecuency'
+        self.name=     u'Relative Frecuency'
         self.statName= 'relativeFrecuency'
     
 #    def _report(self, result):

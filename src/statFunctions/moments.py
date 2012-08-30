@@ -12,7 +12,7 @@ from wx import Size
 
 class moment(_genericFunc):
     ''''''
-    name=      'moment'
+    name=      u'moment'
     statName=  'moment'
     def __init__(self):
         # getting all required methods
@@ -158,7 +158,7 @@ class variation(_genericFunc):
 
 class skew(variation):
     ''''''
-    name=      'skew'
+    name=      u'skew'
     statName=  'skew'
     def __init__(self):
         # getting all required methods
@@ -176,7 +176,7 @@ class skew(variation):
     
 class kurtosis(variation):
     ''''''
-    name=      'kurtosis'
+    name=      u'kurtosis'
     statName=  'kurtosis'
     def __init__(self):
         # getting all required methods
@@ -194,7 +194,7 @@ class kurtosis(variation):
 
 class skewtest(variation):
     ''''''
-    name=      'skew test'
+    name=      u'skew test'
     statName=  'skewtest'
     def __init__(self):
         # getting all required methods
@@ -223,7 +223,7 @@ class skewtest(variation):
 
 class kurtosistest(skewtest):
     ''''''
-    name=      'kurtosis test'
+    name=      u'kurtosis test'
     statName=  'kurtosistest'
     def __init__(self):
         # getting all required methods
@@ -241,7 +241,7 @@ class kurtosistest(skewtest):
     
 class normaltest(kurtosistest):
     ''''''
-    name=      'normal test'
+    name=      u'normal test'
     statName=  'normaltest'
     def __init__(self):
         # getting all required methods
