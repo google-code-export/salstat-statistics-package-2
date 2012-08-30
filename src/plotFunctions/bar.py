@@ -1,4 +1,4 @@
-__name__ ='bar plot'
+__name__ = u'Bar plot'
 __all__=  ['barChartAllMeans']
 
 from statlib import stats as _stats
@@ -10,12 +10,12 @@ from statFunctions.frequency import histogram
 
 class barChartAllMeans(histogram):
     ''''''
-    name=      'bar chart of all means'
+    name=      u'bar chart of all means'
     statName=  'barChartMeans'
     def __init__(self):
         # getting all required methods
         histogram.__init__(self)
-        self.name=      'bar chart of all means'
+        self.name=      u'bar chart of all means'
         self.statName=  'barChartMeans'
         self.minRequiredCols= 1
         self.colNameSelect= ''

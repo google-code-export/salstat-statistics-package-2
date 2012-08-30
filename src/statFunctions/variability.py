@@ -11,12 +11,12 @@ from wx import ID_OK as _OK
 
 class samplevar(geometricMean):
     ''''''
-    name=      'samplevar'
+    name=      u'sample variance'
     statName=  'samplevar'
     def __init__(self):
         # getting all required methods
         geometricMean.__init__(self)
-        self.name=      'samplevar'
+        self.name=      'sample variance'
         self.statName=  'samplevar'
         self.minRequiredCols= 1
         self.colNameSelect= ''
@@ -29,12 +29,12 @@ class samplevar(geometricMean):
 
 class samplestdev(geometricMean):
     ''''''
-    name=      'samplestdev'
+    name=      u'sample standar deviation'
     statName=  'samplestdev'
     def __init__(self):
         # getting all required methods
         geometricMean.__init__(self)
-        self.name=      'samplestdev'
+        self.name=      'sample standar deviation'
         self.statName=  'samplestdev'
         self.minRequiredCols= 1
         self.colNameSelect= ''
@@ -47,12 +47,12 @@ class samplestdev(geometricMean):
 
 class var(geometricMean):
     ''''''
-    name=      'var'
+    name=      u'variance'
     statName=  'var'
     def __init__(self):
         # getting all required methods
         geometricMean.__init__(self)
-        self.name=      'var'
+        self.name=      'variance'
         self.statName=  'var'
         self.minRequiredCols= 1
         self.colNameSelect= ''
@@ -65,12 +65,12 @@ class var(geometricMean):
 
 class stdev(geometricMean):
     ''''''
-    name=      'stdev'
+    name=      u'standar deviation'
     statName=  'stdev'
     def __init__(self):
         # getting all required methods
         geometricMean.__init__(self)
-        self.name=      'stdev'
+        self.name=      u'standar deviation'
         self.statName=  'stdev'
         self.minRequiredCols= 1
         self.colNameSelect= ''
@@ -83,12 +83,12 @@ class stdev(geometricMean):
 
 class sterr(geometricMean):
     ''''''
-    name=      'sterr'
+    name=      u'standar error'
     statName=  'sterr'
     def __init__(self):
         # getting all required methods
         geometricMean.__init__(self)
-        self.name=      'sterr'
+        self.name=      u'standar error'
         self.statName=  'sterr'
         self.minRequiredCols= 1
         self.colNameSelect= ''
@@ -101,12 +101,12 @@ class sterr(geometricMean):
 
 class sem(geometricMean):
     ''''''
-    name=      'sem'
+    name=      u'estimated standard error of the mean'
     statName=  'sem'
     def __init__(self):
         # getting all required methods
         geometricMean.__init__(self)
-        self.name=      'sem'
+        self.name=      u'estimated standard error of the mean'
         self.statName=  'sem'
         self.minRequiredCols= 1
         self.colNameSelect= ''
@@ -119,12 +119,12 @@ class sem(geometricMean):
 
 class zs(geometricMean):
     ''''''
-    name=      'zs'
+    name=      u"list of z-scores"
     statName=  'zs'
     def __init__(self):
         # getting all required methods
         geometricMean.__init__(self)
-        self.name=      'zs'
+        self.name=      u"list of z-scores"
         self.statName=  'zs'
         self.minRequiredCols= 1
         self.colNameSelect= ''
@@ -136,12 +136,12 @@ class zs(geometricMean):
         return _stats.zs(*args, **params)
 
 class signaltonoise(geometricMean):
-    name=      'signal to noise (mean/stdev)'
+    name=      u'signal to noise (mean/stdev)'
     statName=  'signaltonoise'
     def __init__(self):
         # getting all required methods
         geometricMean.__init__(self)
-        self.name=      'signal to noise (mean/stdev)'
+        self.name=      u'signal to noise (mean/stdev)'
         self.statName=  'signaltonoise'
         self.minRequiredCols= 1
         self.colNameSelect= ''
@@ -160,12 +160,12 @@ class signaltonoise(geometricMean):
         self.Logg.write(self.statName+ ' successfull')
 
 class z(scoreatpercentile):
-    name=      'z'
+    name=      u"z-score for a given input"
     statName=  'z'
     def __init__(self):
         # getting all required methods
         scoreatpercentile.__init__(self)
-        self.name=      'z'
+        self.name=      u"z-score for a given input"
         self.statName=  'z'
         self.nameStaticText= 'score'
         self.spindata= [1, 100, 1]

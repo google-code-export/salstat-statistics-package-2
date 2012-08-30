@@ -14,12 +14,12 @@ from statFunctions.centralTendency import geometricMean
 
 class ttest_1samp(_genericFunc):
     ''''''
-    name=      'ttest_1samp'
+    name=      u't-test one sample'
     statName=  'ttest_1samp'
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
-        self.name=      'ttest_1samp'
+        self.name=      't-test one sample'
         self.statName=  'ttest_1samp'
         self.minRequiredCols= 1
         self.colNameSelect= ''
@@ -91,12 +91,12 @@ class ttest_1samp(_genericFunc):
 
 class ttest_ind(pearsonr):
     ''''''
-    name=      'ttest_ind'
+    name=      u't-test independent'
     statName=  'ttest_ind'
     def __init__(self):
         # getting all required methods
         pearsonr.__init__(self)
-        self.name=      'ttest_ind'
+        self.name=      u't-test independent'
         self.statName=  'ttest_ind'
         self.txt1= "X Column to analyse"
         self.txt2= "Y Column to analyse"
@@ -112,12 +112,12 @@ class ttest_ind(pearsonr):
 
 class ttest_rel(pearsonr):
     ''''''
-    name=      'ttest_rel'
+    name=      u't-test related'
     statName=  'ttest_rel'
     def __init__(self):
         # getting all required methods
         pearsonr.__init__(self)
-        self.name=      'ttest_rel'
+        self.name=      u't-test related'
         self.statName=  'ttest_rel'
         self.txt1= "X Column to analyse"
         self.txt2= "Y Column to analyse"
@@ -133,12 +133,12 @@ class ttest_rel(pearsonr):
 
 class chisquare(pearsonr):
     ''''''
-    name=      'chisquare'
+    name=      u'chi-square test'
     statName=  'chisquare'
     def __init__(self):
         # getting all required methods
         pearsonr.__init__(self)
-        self.name=      'chisquare'
+        self.name=      u'chi-square test'
         self.statName=  'chisquare'
         self.txt1= "X Column to analyse"
         self.txt2= "Y Column to analyse"
@@ -154,12 +154,12 @@ class chisquare(pearsonr):
 
 class ks_2samp(pearsonr):
     ''''''
-    name=      'ks_2samp'
+    name=      u'Kolmogorov-Smirnof two samples'
     statName=  'ks_2samp'
     def __init__(self):
         # getting all required methods
         pearsonr.__init__(self)
-        self.name=      'ks_2samp'
+        self.name=      u'Kolmogorov-Smirnof two samples'
         self.statName=  'ks_2samp'
         self.txt1= "X Column to analyse"
         self.txt2= "Y Column to analyse"
@@ -175,12 +175,12 @@ class ks_2samp(pearsonr):
 
 class mannwhitneyu(pearsonr):
     ''''''
-    name=      'mannwhitneyu'
+    name=      u'Mann-Whitney U statistic'
     statName=  'mannwhitneyu'
     def __init__(self):
         # getting all required methods
         pearsonr.__init__(self)
-        self.name=      'mannwhitneyu'
+        self.name=      u'Mann-Whitney U statistic'
         self.statName=  'mannwhitneyu'
         self.txt1= "X Column to analyse"
         self.txt2= "Y Column to analyse"
@@ -196,12 +196,12 @@ class mannwhitneyu(pearsonr):
 
 class ranksums(pearsonr):
     ''''''
-    name=      'ranksums'
+    name=      u'rank sums statistic'
     statName=  'ranksums'
     def __init__(self):
         # getting all required methods
         pearsonr.__init__(self)
-        self.name=      'ranksums'
+        self.name=      u'rank sums statistic'
         self.statName=  'ranksums'
         self.txt1= "X Column to analyse"
         self.txt2= "Y Column to analyse"
@@ -217,12 +217,12 @@ class ranksums(pearsonr):
 
 class wilcoxont(pearsonr):
     ''''''
-    name=      'Wilcoxon T-test related samples'
+    name=      u'Wilcoxon T-test related samples'
     statName=  'wilcoxont'
     def __init__(self):
         # getting all required methods
         pearsonr.__init__(self)
-        self.name=      'Wilcoxon T-test related samples'
+        self.name=      u'Wilcoxon T-test related samples'
         self.statName=  'wilcoxont'
         self.txt1= "X Column to analyse"
         self.txt2= "Y Column to analyse"
@@ -238,12 +238,12 @@ class wilcoxont(pearsonr):
 
 class kruskalwallish(geometricMean):
     ''''''
-    name=      'kruskalwallish'
+    name=      u"Kruskal-Wallis H-test"
     statName=  'kruskalwallish'
     def __init__(self):
         # getting all required methods
         geometricMean.__init__(self)
-        self.name=      'kruskalwallish'
+        self.name=      u"Kruskal-Wallis H-test"
         self.statName=  'kruskalwallish'
         self.minRequiredCols= 3
         self.colNameSelect= ''
@@ -272,12 +272,12 @@ class kruskalwallish(geometricMean):
 
 class friedmanchisquare(kruskalwallish):
     ''''''
-    name=      'friedmanchisquare'
+    name=      u'Friedman Chi-Square test'
     statName=  'friedmanchisquare'
     def __init__(self):
         # getting all required methods
         kruskalwallish.__init__(self)
-        self.name=      'friedmanchisquare'
+        self.name=      u'Friedman Chi-Square test'
         self.statName=  'friedmanchisquare'
         self.minRequiredCols= 3
         self.colNameSelect= ''
