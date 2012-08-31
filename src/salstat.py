@@ -81,6 +81,9 @@ from gridCellRenderers import floatRenderer, AutoWrapStringRenderer
 from wx.combo import BitmapComboBox # translation control
 import wx.lib.langlistctrl as langlist
 
+import statsmodels.api as sm
+import scipy
+
 APPNAME= 'S2'
 
 inits ={}    # dictionary to hold the config values
@@ -708,6 +711,8 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
               'group':      GroupData,
               'OK':         wx.ID_OK,
               'homogenize': homogenize,
+              'sm':         sm,
+              'scipy':      scipy,
               }
 #'stats': self.stats,
 #'statistics':statistics,
