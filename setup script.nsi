@@ -103,6 +103,8 @@ Section "src" Section3
      File /r src\statFunctions\*.py
      SetOutPath $INSTDIR\src\statlib
      File /r src\statlib\*.py
+     SetOutPath $INSTDIR\src\locale
+     File /r src\locale\*.*
      SetOutPath $SMPROGRAMS\$StartMenuGroup
      CreateShortcut "$SMPROGRAMS\$StartMenuGroup\src.lnk" "$INSTDIR\src\"
 SectionEnd
