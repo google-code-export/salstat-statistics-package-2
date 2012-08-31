@@ -14,7 +14,9 @@ opts = { "py2exe":
                            "matplotlib.backends.backend_qt4agg",
                            "PyQt4",
                            "statFunctions.*",  # importing the statistical functions
-                           "plotFunctions.*"
+                           "plotFunctions.*",
+                           "statsmodels.*",
+                           "scipy.interpolate"
                            ],
               "excludes":['_gtkagg', '_tkagg', '_agg2', '_cairo', '_cocoaagg',
                           '_fltkagg', '_gtk', '_gtkcairo',
