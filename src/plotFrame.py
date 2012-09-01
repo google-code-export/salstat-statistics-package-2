@@ -10,14 +10,12 @@ import wx
 import wx.aui
 import wx.lib.agw.aui as aui
 import matplotlib.mlab as mlab
-from openStats import statistics
 # Matplotlib Figure object
 from matplotlib.figure import Figure
 from matplotlib import font_manager
 from matplotlib.widgets import Cursor
 # Numpy functions for image creation
 import numpy as np
-from statlib.stats import linregress
 import matplotlib.path as mpath
 import matplotlib.patches as mpatches
 
@@ -28,15 +26,26 @@ from matplotlib.backends.backend_wxagg import \
 from matplotlib.backends.backend_wx import NavigationToolbar2Wx
 from matplotlib.backends.backend_wx import StatusBarWx
 from matplotlib.backend_bases import MouseEvent
-from triplot import triplot, triang2xy
 
-from slbTools import homogenize
-from nicePlot.graficaRibon import plotBar, plothist # nice plot
-
-from numpy import array, ravel
 from pylab import setp
 
+from openStats import statistics
+from statlib.stats import linregress
+from triplot import triplot, triang2xy
+from slbTools import homogenize
+from nicePlot.graficaRibon import plotBar, plothist # nice plot
+from numpy import array, ravel
+
 PROPLEGEND= {'size':11}
+markerStyles= [ 'None', 'o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd']
+faceColors=   ['b', 'g', 'r', 'c', 'm', 'y', 'k']
+lineStyles=   ['_', '-', '--', ':']
+lineSizes=    [str( x*0.5) for x in range( 1, 15, 1)]
+markerSizes=  [str( x) for x in range( 1, 15, 1)]
+alpha=        [str( x/float( 10)) for x in range( 1, 11)]
+
+def passlog(data):
+    print data
 
 class scrolled1(wx.ScrolledWindow):
     def __init__( self, *args, **params):
@@ -346,18 +355,784 @@ class scrolled1(wx.ScrolledWindow):
 class scrolled2(wx.ScrolledWindow):    
     def __init__( self, *args, **params):
         wx.ScrolledWindow.__init__(self, *args[1:], **params)
-        
+        self.figpanel= self.Parent.Parent.figpanel
+        self.log= self.Parent.Parent.log
         graphParams= args[0]
+        self.gca= self.Parent.Parent.gca
+        
+        if params.has_key('parent'):
+            parent= params['parent']
+        else:
+            parent = args[1]
+            
+        ##self = wx.ScrolledWindow( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL )
+        self.SetScrollRate( 5, 5 )
+        bSizer21 = wx.BoxSizer( wx.VERTICAL )
+
+        sbSizer8 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Choose a line" ), wx.VERTICAL )
+
+        m_listBox1Choices = []
+        self.m_listBox1 = wx.ListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( 130,80 ), m_listBox1Choices, 0 )
+        sbSizer8.Add( self.m_listBox1, 0, wx.ALL, 5 )
+
+        bSizer5 = wx.BoxSizer( wx.HORIZONTAL )
+
+        self.m_button87 = wx.Button( self, wx.ID_ANY, u"-", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_button87.SetMinSize( wx.Size( 20,-1 ) )
+
+        bSizer5.Add( self.m_button87, 0, wx.LEFT|wx.RIGHT, 5 )
+
+        self.m_button41 = wx.Button( self, wx.ID_ANY, u"Refresh lines", wx.DefaultPosition, wx.DefaultSize, 0 )
+        bSizer5.Add( self.m_button41, 0, wx.ALIGN_RIGHT|wx.LEFT, 5 )
+
+        sbSizer8.Add( bSizer5, 1, wx.EXPAND, 5 )
+
+        bSizer21.Add( sbSizer8, 0, 0, 5 )
+
+        sbSizer71 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Some Properties" ), wx.VERTICAL )
+
+        self.m_staticText11 = wx.StaticText( self, wx.ID_ANY, u"Name", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText11.Wrap( -1 )
+        sbSizer71.Add( self.m_staticText11, 0, wx.LEFT, 5 )
+
+        self.plt_textCtr8 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 130,-1 ), 0 )
+        self.plt_textCtr8.Enable( False )
+
+        sbSizer71.Add( self.plt_textCtr8, 0, wx.BOTTOM|wx.LEFT|wx.TOP, 5 )
+
+        fgSizer2 = wx.FlexGridSizer( 0, 2, 0, 0 )
+        fgSizer2.SetFlexibleDirection( wx.BOTH )
+        fgSizer2.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+
+        m_choice7Choices = []
+        self.m_choice7 = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( 60,-1 ), m_choice7Choices, 0 )
+        self.m_choice7.SetSelection( 0 )
+        fgSizer2.Add( self.m_choice7, 0, wx.ALL, 5 )
+
+        self.m_staticText12 = wx.StaticText( self, wx.ID_ANY, u"Line Width", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText12.Wrap( -1 )
+        fgSizer2.Add( self.m_staticText12, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+
+        self.m_button12 = wx.Button( self, wx.ID_ANY, u"...", wx.DefaultPosition, wx.Size( 60,-1 ), 0 )
+        fgSizer2.Add( self.m_button12, 0, wx.ALL, 5 )
+
+        self.m_staticText7 = wx.StaticText( self, wx.ID_ANY, u"Line Colour", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText7.Wrap( -1 )
+        fgSizer2.Add( self.m_staticText7, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+
+        m_choice4Choices = []
+        self.m_choice4 = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( 60,-1 ), m_choice4Choices, 0 )
+        self.m_choice4.SetSelection( 0 )
+        fgSizer2.Add( self.m_choice4, 0, wx.ALL, 5 )
+
+        self.m_staticText8 = wx.StaticText( self, wx.ID_ANY, u"Line Style", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText8.Wrap( -1 )
+        fgSizer2.Add( self.m_staticText8, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+
+        m_choice6Choices = []
+        self.m_choice6 = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( 60,-1 ), m_choice6Choices, 0 )
+        self.m_choice6.SetSelection( 0 )
+        fgSizer2.Add( self.m_choice6, 0, wx.ALL, 5 )
+
+        self.m_staticText10 = wx.StaticText( self, wx.ID_ANY, u"Marker Style", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText10.Wrap( -1 )
+        fgSizer2.Add( self.m_staticText10, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+
+        m_choice8Choices = []
+        self.m_choice8 = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( 60,-1 ), m_choice8Choices, 0 )
+        self.m_choice8.SetSelection( 0 )
+        fgSizer2.Add( self.m_choice8, 0, wx.ALL, 5 )
+
+        self.m_staticText13 = wx.StaticText( self, wx.ID_ANY, u"Marker Size", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText13.Wrap( -1 )
+        fgSizer2.Add( self.m_staticText13, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+
+        sbSizer71.Add( fgSizer2, 1, wx.EXPAND, 5 )
+
+        self.m_checkBox4 = wx.CheckBox( self, wx.ID_ANY, u" Visible", wx.DefaultPosition, wx.DefaultSize, 0 )
+        sbSizer71.Add( self.m_checkBox4, 0, wx.ALL, 5 )
+
+        bSizer21.Add( sbSizer71, 0, 0, 5 )
+
+        sbSizer9 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Add ReferenceLine" ), wx.VERTICAL )
+
+        fgSizer1 = wx.FlexGridSizer( 0, 3, 0, 0 )
+        fgSizer1.SetFlexibleDirection( wx.BOTH )
+        fgSizer1.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+
+        self.HorLineTxtCtrl = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 50,-1 ), 0 )
+        fgSizer1.Add( self.HorLineTxtCtrl, 0, wx.ALL, 5 )
+
+        self.m_button51 = wx.Button( self, wx.ID_ANY, u"+", wx.DefaultPosition, wx.Size( 20,-1 ), 0 )
+        fgSizer1.Add( self.m_button51, 0, wx.TOP, 5 )
+
+        self.m_staticText131 = wx.StaticText( self, wx.ID_ANY, u"Horizontal", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText131.Wrap( -1 )
+        fgSizer1.Add( self.m_staticText131, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+
+        self.HorVerTxtCtrl = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 50,-1 ), 0 )
+        fgSizer1.Add( self.HorVerTxtCtrl, 0, wx.ALL, 5 )
+
+        self.m_button511 = wx.Button( self, wx.ID_ANY, u"+", wx.DefaultPosition, wx.Size( 20,-1 ), 0 )
+        fgSizer1.Add( self.m_button511, 0, wx.TOP, 5 )
+
+        self.m_staticText14 = wx.StaticText( self, wx.ID_ANY, u"Vertical", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText14.Wrap( -1 )
+        fgSizer1.Add( self.m_staticText14, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+
+        sbSizer9.Add( fgSizer1, 1, wx.EXPAND, 5 )
+
+        bSizer21.Add( sbSizer9, 0, 0, 5 )
+
+        self.SetSizer( bSizer21 )
+        self.Layout()
+        bSizer21.Fit( self )
+        self._OnRefreshLines( None)
+        self._BindEvents()
+        
+    def _BindEvents( self):
+        self.m_listBox1.Bind(   wx.EVT_LISTBOX,  self._OnListLinesChange )
+        self.m_button87.Bind(   wx.EVT_BUTTON,   self._OnLineDel )
+        self.m_button41.Bind(   wx.EVT_BUTTON,   self._OnRefreshLines )
+        self.plt_textCtr8.Bind( wx.EVT_TEXT_ENTER, self._OnLineNameChange )
+        self.m_choice7.Bind(    wx.EVT_CHOICE,   self._OnLineWidthChange )
+        self.m_button12.Bind(   wx.EVT_BUTTON,   self._OnLineColourChange )
+        self.m_choice4.Bind(    wx.EVT_CHOICE,   self._OnLineStyleChange )
+        self.m_choice6.Bind(    wx.EVT_CHOICE,   self._OnLineMarkerStyleChange )
+        self.m_choice8.Bind(    wx.EVT_CHOICE,   self._OnLineMarkerSizeChange )
+        self.m_checkBox4.Bind(  wx.EVT_CHECKBOX, self._OnLineVisibleChange )
+        self.HorLineTxtCtrl.Bind( wx.EVT_TEXT,   self._OnTxtRefLineHorzChange )
+        self.m_button51.Bind(   wx.EVT_BUTTON,   self._OnAddRefHorzLine )
+        self.HorVerTxtCtrl.Bind( wx.EVT_TEXT,    self._OnTxtRefLineVerChange )
+        self.m_button511.Bind(  wx.EVT_BUTTON,   self._OnAddRefVertLine )
+            
+    def _setItems(self):
+        lineListNames= [line.get_label() for line in self.gca().get_lines()]
+        self.m_listBox1.SetItems( lineListNames)
+        self.m_choice7.SetItems( lineSizes)
+        self.m_choice4.SetItems( lineStyles)
+        self.m_choice6.SetItems( markerStyles)
+        self.m_choice8.SetItems( markerSizes)
+    
+    def _updateLineSelectionPane(self, evt):
+        if len( self.m_listBox1.GetItems()) == 0:
+            self.plt_textCtr8.SetValue("")
+            return
+        if self.m_listBox1.GetSelection() == -1:
+            self.plt_textCtr8.SetValue("")
+            return
+        selectedLine= self.gca().get_lines()[self.m_listBox1.GetSelection()]
+        lineName = selectedLine.get_label()
+        lineWidht= float(selectedLine.get_linewidth())
+        lineColour= selectedLine.get_color()
+        lineStyle = selectedLine.get_linestyle()
+        markerStyle= selectedLine.get_marker()
+        markerSize= float(selectedLine.get_markersize())
+        visible = selectedLine.get_visible()
+        # pass all data an update the notebookpane
+        self.plt_textCtr8.SetValue(lineName)
+        for pos,value in enumerate(self.m_choice7.GetItems()):
+            if float(value) == lineWidht:
+                self.m_choice7.SetSelection(pos)
+                break
+        #for pos,value in enumerate(self.m_choice3.GetItems()):
+            #if value == lineColour:
+                #self.m_choice3.SetSelection(pos)
+                #break
+        for pos,value in enumerate(self.m_choice4.GetItems()):
+            if value == lineStyle:
+                self.m_choice4.SetSelection(pos)
+                break
+        for pos,value in enumerate(self.m_choice6.GetItems()):
+            if value == markerStyle:
+                self.m_choice6.SetSelection(pos)
+                break
+        for pos,value in enumerate(self.m_choice8.GetItems()):
+            if float(value) == markerSize:
+                self.m_choice8.SetSelection(pos)
+                break
+        self.m_checkBox4.SetValue(visible)
+        
+    def _OnListLinesChange( self, evt ):
+        self._updateLineSelectionPane(evt)
+        
+    def _OnLineDel(self,event):
+        if len(self.gca().get_lines())== 0:
+            return
+        selectedLine= self.figpanel.gca().get_lines()[self.m_listBox1.GetSelection()]
+        selectedLine.remove()
+        # se actualiza la linea seleccionada
+        self._OnRefreshLines(None)
+        self.figpanel.canvas.draw()
+        
+    def _OnRefreshLines( self, evt ):
+        if len(self.gca().get_lines())== 0:
+            self.m_listBox1.SetItems([])
+            return
+        lineListNames= [line.get_label() for line in self.gca().get_lines()]
+        self.m_listBox1.SetItems(lineListNames)
+        self.m_listBox1.SetSelection(0)
+        self._updateLineSelectionPane(self.m_listBox1)
+        
+    def _OnLineNameChange( self, evt ):
+        # pendeinte por implementar.. el evento wx.EVT_TEXT_TEXTENTER
+        evt.Skip()
+        
+    def _OnLineWidthChange( self, evt ):
+        if len(self.m_listBox1.Items) == 0 or \
+           self.m_listBox1.GetSelection() == -1:
+            return
+        newWidth= float(evt.String)
+        selectedLine= self.gca().get_lines()[self.m_listBox1.GetSelection()]
+        selectedLine.set_linewidth(newWidth)
+        self.figpanel.canvas.draw()
+        
+    def _OnLineColourChange( self, evt ):
+        if len(self.m_listBox1.Items) == 0 or \
+           self.m_listBox1.GetSelection() == -1:
+            return
+        dlg = wx.ColourDialog(self)
+        dlg.GetColourData().SetChooseFull(True)
+        if dlg.ShowModal() == wx.ID_OK:
+            # If the user selected OK, then the dialog's wx.ColourData will
+            # contain valid information. Fetch the data ...
+            data = dlg.GetColourData()
+        else:
+            return
+        actualLineNumber= self.m_listBox1.GetSelection()
+        lineSelected = self.gca().get_lines()[actualLineNumber]
+        colors = [getattr(data.Colour,param)/float(255) for param in ['red','green','blue','alpha']]
+        lineSelected.set_color(colors)
+        self.figpanel.canvas.draw()
+        
+    def _OnLineStyleChange( self, evt ):
+        if len(self.m_listBox1.Items) == 0 or \
+           self.m_listBox1.GetSelection() == -1:
+            return
+        actualLineNumber= self.m_listBox1.GetSelection()
+        lineSelected = self.gca().get_lines()[actualLineNumber]
+        newStyle = evt.GetString()
+        lineSelected.set_linestyle(newStyle)
+        self.figpanel.canvas.draw()
+
+    def _OnLineMarkerStyleChange( self, evt ):
+        if len(self.m_listBox1.Items) == 0 or \
+           self.m_listBox1.GetSelection() == -1:
+            return
+        actualLineNumber= self.m_listBox1.GetSelection()
+        lineSelected = self.gca().get_lines()[actualLineNumber]
+
+        newMarkerStyle = evt.GetString()
+        lineSelected.set_marker(newMarkerStyle)
+
+        self.figpanel.canvas.draw()
+
+    def _OnLineMarkerSizeChange( self, evt ):
+        if len(self.m_listBox1.Items) == 0 or \
+           self.m_listBox1.GetSelection() == -1:
+            return
+        actualLineNumber= self.m_listBox1.GetSelection()
+        lineSelected = self.gca().get_lines()[actualLineNumber]
+
+        newMarkerSize = float(evt.GetString())
+        lineSelected.set_markersize(newMarkerSize)
+
+        self.figpanel.canvas.draw()
+
+    def _OnLineVisibleChange( self, evt ):
+        if len(self.m_listBox1.Items) == 0 or \
+           self.m_listBox1.GetSelection() == -1:
+            return
+        actualLineNumber= self.m_listBox1.GetSelection()
+        lineSelected = self.gca().get_lines()[actualLineNumber]
+        visible = evt.Checked()
+        lineSelected.set_visible(visible)
+        self.figpanel.canvas.draw()
+
+    def _OnAddRefHorzLine( self, evt, **params ):
+        self.log.write('# adding reference horizontal line', False)
+        if params.has_key('ypos'):
+            ypos = params.pop('ypos')
+            self.gca().hold(True)
+            #self.log.write('plt.gca().hold(True)', False)
+
+            line= self.gca().axhline(ypos)
+            self.log.write('line= pltgca().axhline('+ypos.__str__()+')', False)
+            self.gca().hold(False)
+            #self.log.write('plt.gca().hold(False)', False)
+        else:
+            try:
+                ypos= float(self.HorLineTxtCtrl.GetValue())
+                self.gca().hold(True)
+                self.log.write('plt.gca().hold(True)', False)
+                line= self.gca().axhline(ypos)
+                self.log.write('plt.gca().axhline('+ypos.__str__()+')', False)
+                self.gca().hold(False)
+                self.log.write('plt.gca().hold(False)', False)
+                self.HorLineTxtCtrl.SetValue('')
+                self._OnRefreshLines(None)
+            except:
+                return
+        if params.has_key('color'):
+            line.set_color(params['color'])
+            self.log.write('line.set_color('+"'"+params['color'].__str__()+"'"+')', False)
+        self.figpanel.canvas.draw()
+        #self.log.write('plt.draw()',False)
+
+    def _OnAddRefVertLine( self, evt ):
+        self.log.write('# adding reference vertical line', False)
+        try:
+            float(self.HorVerTxtCtrl.GetValue())
+        except:
+            return
+        self.gca().hold(True)
+        self.log.write('plt.gca().hold(True)', False)
+
+        xpos= float(self.HorVerTxtCtrl.GetValue())
+        self.gca().axvline(xpos)
+        self.log.write('plt.gca().axvline('+xpos.__str__()+')', False)
+        self.gca().hold(False)
+        self.log.write('plt.gca().hold(False)', False)
+        self.figpanel.canvas.draw()
+        self.HorVerTxtCtrl.SetValue('')
+        self._OnRefreshLines(None)
+        self.figpanel.canvas.draw()
+        #self.log.write('plt.draw()',False)
+
+    def _OnTxtRefLineHorzChange( self, evt ):
+        self._txtNumerOnly( self.HorLineTxtCtrl)
+
+    def _OnTxtRefLineVerChange( self, evt ):
+        self._txtNumerOnly( self.HorVerTxtCtrl)   
+        
+class scrolled3(wx.ScrolledWindow):    
+    def __init__( self, *args, **params):
+        wx.ScrolledWindow.__init__(self, *args[1:], **params)
+        self.figpanel= self.Parent.Parent.figpanel
+        self.log= self.Parent.Parent.log
+        graphParams= args[0]
+        self.gca= self.Parent.Parent.gca
         
         if params.has_key('parent'):
             parent= params['parent']
         else:
             parent = args[1]
         
-        
-        
+        self.SetScrollRate( 5, 5 )
+        bSizer3 = wx.BoxSizer( wx.VERTICAL )
 
-class MpltFrame( wx.Frame, object ):
+        sbSizer15 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Choose a patchs" ), wx.VERTICAL )
+
+        patchListBoxChoices = []
+        self.patchListBox = wx.ListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, patchListBoxChoices, 0 )
+        self.patchListBox.SetMinSize( wx.Size( 140,60 ) )
+
+        sbSizer15.Add( self.patchListBox, 0, wx.ALL, 5 )
+
+        fgSizer6 = wx.FlexGridSizer( 0, 2, 0, 0 )
+        fgSizer6.SetFlexibleDirection( wx.BOTH )
+        fgSizer6.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+
+        self.m_button9 = wx.Button( self, wx.ID_ANY, u"-", wx.DefaultPosition, wx.DefaultSize, wx.BU_BOTTOM )
+        self.m_button9.SetMinSize( wx.Size( 20,-1 ) )
+
+        fgSizer6.Add( self.m_button9, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
+
+        self.m_button11 = wx.Button( self, wx.ID_ANY, u"Refresh Patchs", wx.DefaultPosition, wx.DefaultSize, 0 )
+        fgSizer6.Add( self.m_button11, 0, wx.LEFT, 5 )
+
+        sbSizer15.Add( fgSizer6, 1, wx.EXPAND, 5 )
+
+        bSizer3.Add( sbSizer15, 0, 0, 5 )
+
+        sbSizer16 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Some Properties" ), wx.VERTICAL )
+
+        self.m_staticText28 = wx.StaticText( self, wx.ID_ANY, u"Patch Name", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText28.Wrap( -1 )
+        sbSizer16.Add( self.m_staticText28, 0, wx.ALL, 5 )
+
+        self.textCtrlPatchName = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.textCtrlPatchName.Enable( False )
+
+        sbSizer16.Add( self.textCtrlPatchName, 0, wx.ALL, 5 )
+
+        fgSizer7 = wx.FlexGridSizer( 0, 2, 0, 0 )
+        fgSizer7.SetFlexibleDirection( wx.BOTH )
+        fgSizer7.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+
+        self.m_button13 = wx.Button( self, wx.ID_ANY, u"...", wx.DefaultPosition, wx.Size( 70,-1 ), 0 )
+        fgSizer7.Add( self.m_button13, 0, wx.ALL, 5 )
+
+        self.m_staticText29 = wx.StaticText( self, wx.ID_ANY, u"Face Colour", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText29.Wrap( -1 )
+        fgSizer7.Add( self.m_staticText29, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+
+        m_choice14Choices = []
+        self.m_choice14 = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( 70,-1 ), m_choice14Choices, 0 )
+        self.m_choice14.SetSelection( 0 )
+        fgSizer7.Add( self.m_choice14, 0, wx.ALL, 5 )
+
+        self.m_staticText30 = wx.StaticText( self, wx.ID_ANY, u"Alpha", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText30.Wrap( -1 )
+        fgSizer7.Add( self.m_staticText30, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
+
+        sbSizer16.Add( fgSizer7, 1, wx.EXPAND, 5 )
+
+        bSizer3.Add( sbSizer16, 0, 0, 5 )
+
+        sbSizer12 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"add Span" ), wx.VERTICAL )
+
+        sbSizer13 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, wx.EmptyString ), wx.VERTICAL )
+
+        fgSizer4 = wx.FlexGridSizer( 0, 2, 0, 0 )
+        fgSizer4.SetFlexibleDirection( wx.BOTH )
+        fgSizer4.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+
+        self.m_staticText15 = wx.StaticText( self, wx.ID_ANY, u"Horzontal", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText15.Wrap( -1 )
+        fgSizer4.Add( self.m_staticText15, 0, wx.ALL, 5 )
+
+        self.m_button7 = wx.Button( self, wx.ID_ANY, u"+", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_button7.SetMinSize( wx.Size( 20,-1 ) )
+
+        fgSizer4.Add( self.m_button7, 0, wx.ALIGN_CENTER|wx.ALIGN_CENTER_VERTICAL, 5 )
+
+        sbSizer13.Add( fgSizer4, 0, 0, 5 )
+
+        fgSizer3 = wx.FlexGridSizer( 0, 2, 0, 0 )
+        fgSizer3.SetFlexibleDirection( wx.BOTH )
+        fgSizer3.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+
+        self.plt_textCtr11 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.plt_textCtr11.SetMinSize( wx.Size( 60,-1 ) )
+
+        fgSizer3.Add( self.plt_textCtr11, 0, wx.ALL, 5 )
+
+        self.m_staticText17 = wx.StaticText( self, wx.ID_ANY, u"Y axis pos 2", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText17.Wrap( -1 )
+        fgSizer3.Add( self.m_staticText17, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
+
+        self.plt_textCtr12 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.plt_textCtr12.SetMinSize( wx.Size( 60,-1 ) )
+
+        fgSizer3.Add( self.plt_textCtr12, 0, wx.ALL, 5 )
+
+        self.m_staticText16 = wx.StaticText( self, wx.ID_ANY, u"Y axis pos 2", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText16.Wrap( -1 )
+        fgSizer3.Add( self.m_staticText16, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
+
+        m_choice81Choices = []
+        self.m_choice81 = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choice81Choices, 0 )
+        self.m_choice81.SetSelection( 0 )
+        self.m_choice81.SetMinSize( wx.Size( 60,-1 ) )
+
+        fgSizer3.Add( self.m_choice81, 0, wx.ALL, 5 )
+
+        self.m_staticText22 = wx.StaticText( self, wx.ID_ANY, u"Face Colour", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText22.Wrap( -1 )
+        fgSizer3.Add( self.m_staticText22, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
+
+        m_choice12Choices = []
+        self.m_choice12 = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choice12Choices, 0 )
+        self.m_choice12.SetSelection( 0 )
+        self.m_choice12.SetMinSize( wx.Size( 60,-1 ) )
+
+        fgSizer3.Add( self.m_choice12, 0, wx.ALL, 5 )
+
+        self.m_staticText26 = wx.StaticText( self, wx.ID_ANY, u"Alpha", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText26.Wrap( -1 )
+        fgSizer3.Add( self.m_staticText26, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
+
+
+        sbSizer13.Add( fgSizer3, 0, 0, 5 )
+
+
+        sbSizer12.Add( sbSizer13, 0, 0, 5 )
+
+        sbSizer14 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, wx.EmptyString ), wx.VERTICAL )
+
+        fgSizer5 = wx.FlexGridSizer( 0, 2, 0, 0 )
+        fgSizer5.SetFlexibleDirection( wx.BOTH )
+        fgSizer5.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+
+        self.m_staticText19 = wx.StaticText( self, wx.ID_ANY, u"Vertical", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText19.Wrap( -1 )
+        fgSizer5.Add( self.m_staticText19, 0, wx.ALL, 5 )
+
+        self.m_button8 = wx.Button( self, wx.ID_ANY, u"+", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_button8.SetMinSize( wx.Size( 20,-1 ) )
+
+        fgSizer5.Add( self.m_button8, 0, wx.ALIGN_CENTER_VERTICAL, 5 )
+
+
+        sbSizer14.Add( fgSizer5, 0, 0, 5 )
+
+        gSizer3 = wx.GridSizer( 0, 2, 0, 0 )
+
+        self.plt_textCtr13 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.plt_textCtr13.SetMinSize( wx.Size( 60,-1 ) )
+
+        gSizer3.Add( self.plt_textCtr13, 0, wx.ALL, 5 )
+
+        self.m_staticText20 = wx.StaticText( self, wx.ID_ANY, u"X axis pos 1", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText20.Wrap( -1 )
+        gSizer3.Add( self.m_staticText20, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5 )
+
+        self.plt_textCtr14 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.plt_textCtr14.SetMinSize( wx.Size( 60,-1 ) )
+
+        gSizer3.Add( self.plt_textCtr14, 0, wx.ALL, 5 )
+
+        self.m_staticText21 = wx.StaticText( self, wx.ID_ANY, u"X axis pos 2", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText21.Wrap( -1 )
+        gSizer3.Add( self.m_staticText21, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5 )
+
+        m_choice10Choices = []
+        self.m_choice10 = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choice10Choices, 0 )
+        self.m_choice10.SetSelection( 0 )
+        self.m_choice10.SetMinSize( wx.Size( 60,-1 ) )
+
+        gSizer3.Add( self.m_choice10, 0, wx.ALL, 5 )
+
+        self.m_staticText24 = wx.StaticText( self, wx.ID_ANY, u"Face Colour", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText24.Wrap( -1 )
+        gSizer3.Add( self.m_staticText24, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5 )
+
+        m_choice11Choices = []
+        self.m_choice11 = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choice11Choices, 0 )
+        self.m_choice11.SetSelection( 0 )
+        self.m_choice11.SetMinSize( wx.Size( 60,-1 ) )
+
+        gSizer3.Add( self.m_choice11, 0, wx.ALL, 5 )
+
+        self.m_staticText25 = wx.StaticText( self, wx.ID_ANY, u"Alpha", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText25.Wrap( -1 )
+        gSizer3.Add( self.m_staticText25, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5 )
+
+        sbSizer14.Add( gSizer3, 0, 0, 5 )
+
+        sbSizer12.Add( sbSizer14, 0, 0, 5 )
+
+        bSizer3.Add( sbSizer12, 0, 0, 5 )
+
+        self.SetSizer( bSizer3 )
+        self.Layout()
+        bSizer3.Fit( self )
+        self._patchListboxUpdate()
+        self._BindEvents()
+        
+    def _BindEvents(self):
+        self.patchListBox.Bind(  wx.EVT_LISTBOX, self._OnPatchListboxChange )
+        self.m_button9.Bind(     wx.EVT_BUTTON,  self._OnDelPatch )
+        self.m_button13.Bind(    wx.EVT_BUTTON,  self._OnPatchFaceColorChange )
+        self.m_choice14.Bind(    wx.EVT_CHOICE,  self._OnPatchAlphaChange )
+        self.m_button7.Bind(     wx.EVT_BUTTON,  self._OnAddHorzSpan )
+        self.plt_textCtr11.Bind( wx.EVT_TEXT,    self._Onm_textCtrl11Change )
+        self.plt_textCtr12.Bind( wx.EVT_TEXT,    self._Onm_textCtrl12Change )
+        self.m_button8.Bind(     wx.EVT_BUTTON,  self._OnAddVerSpan )
+        self.plt_textCtr13.Bind( wx.EVT_TEXT,    self._Onm_textCtrl13Change )
+        self.plt_textCtr14.Bind( wx.EVT_TEXT,    self._Onm_textCtrl14Change )
+        self.m_button11.Bind(    wx.EVT_BUTTON,  self._patchListboxUpdate )
+        
+    def _setItems(self):
+        self.m_choice14.SetItems(alpha)
+        self.m_choice81.SetItems(faceColors)
+        self.m_choice12.SetItems(alpha)
+        self.m_choice10.SetItems(faceColors)
+        self.m_choice11.SetItems(alpha)
+        self.m_choice14.SetSelection(0)
+        self.m_choice81.SetSelection(0)
+        self.m_choice12.SetSelection(0)
+        self.m_choice10.SetSelection(0)
+        self.m_choice11.SetSelection(0)
+        
+    def _txtNumerOnly(self,refObj):
+        texto = refObj.GetValue()
+        if len(texto) == 0:
+            return
+        allowed= [ str(x) for x in range(11)]
+        allowed.extend([wx.GetApp().DECIMAL_POINT,'-'])
+        newstr= [x for x in texto if x in allowed]
+        if len(newstr) == 0:
+            newstr = u''
+        else:
+            func = lambda x,y: x+y
+            newstr= reduce(func, newstr)
+        # prevent infinite recursion
+        if texto == newstr:
+            return
+        refObj.SetValue( newstr.replace( wx.GetApp().DECIMAL_POINT, '.'))
+        
+    def _Onm_textCtrl11Change( self,event):
+        self._txtNumerOnly( self.plt_textCtr11)
+
+    def _Onm_textCtrl12Change( self,event):
+        self._txtNumerOnly(self.plt_textCtr12)
+
+    def _Onm_textCtrl13Change(self,event):
+        self._txtNumerOnly( self.plt_textCtr13)
+
+    def _Onm_textCtrl14Change(self, evt):
+        self._txtNumerOnly( self.plt_textCtr14)
+
+    def _OnPatchListboxChange(self,event):
+        if len(self.patchListBox.GetItems()) == 0:
+            self.textCtrlPatchName.SetValue(u"")
+            return
+        if self.patchListBox.GetSelection() == -1:
+            self.textCtrlPatchName.SetValue(u"")
+            return
+        selectedPatch= self.patchListBox.GetItems()[self.patchListBox.GetSelection()]
+        currPatch= None
+        for patch in self.figpanel.gca().patches:
+            if str(patch.get_gid()) == selectedPatch:
+                currPatch= patch
+                break
+        if currPatch == None:
+            # se actualiza el patch actual
+            self._patchListboxUpdate()
+            return
+        Alpha = str(currPatch.get_alpha())
+        faceColor = currPatch.get_facecolor()
+        name = str(currPatch.get_gid())
+        self.textCtrlPatchName.SetValue(name)
+        for pos,value in enumerate(self.m_choice14.GetItems()):
+            if value == Alpha:
+                self.m_choice14.SetSelection(pos)
+                break
+        #for pos,value in enumerate(self.m_choice13.GetItems()):
+            #if value == faceColor:
+                #self.m_choice13.SetSelection(pos)
+                #break
+
+    def _OnAddHorzSpan(self,event):
+        self.log.write('# adding horizontal span', False)
+        pos1 = self.plt_textCtr11.GetValue()
+        pos2 = self.plt_textCtr12.GetValue()
+        try:
+            pos1= float(pos1)
+            pos2= float(pos2)
+        except:
+            return
+        self.log.write('pos1= ' + pos1.__str__(), False)
+        self.log.write('pos2= ' + pos2.__str__(), False)
+
+        faceColor= self.m_choice81.GetItems()[self.m_choice81.GetSelection()]
+        self.log.write('faceColor= '+"'"+faceColor.__str__()+"'", False)
+
+        Alpha= float(self.m_choice12.GetItems()[self.m_choice12.GetSelection()])
+        self.log.write('Alpha= '+Alpha.__str__(), False)
+
+        patch= self.figpanel.gca().axhspan(pos1,pos2, facecolor= faceColor, alpha= Alpha)
+        self.log.write('patch= plt.gca().axhspan(pos1,pos2, facecolor= faceColor, alpha= Alpha)', False)
+        patch.set_gid(wx.NewId())
+        self._patchListboxUpdate()
+        self.figpanel.canvas.draw()
+
+    def _OnAddVerSpan(self,event):
+        self.log.write('# adding vertical span', False)
+        pos1 = self.plt_textCtr13.GetValue()
+        pos2 = self.plt_textCtr14.GetValue()
+        try:
+            pos1= float(pos1)
+            pos2= float(pos2)
+        except:
+            return
+        self.log.write('pos1= ' + pos1.__str__(), False)
+        self.log.write('pos2= ' + pos2.__str__(), False)
+
+        faceColor= self.m_choice10.GetItems()[self.m_choice10.GetSelection()]
+        self.log.write('faceColor= '+"'"+faceColor.__str__()+"'", False)
+
+        Alpha= str(self.m_choice11.GetItems()[self.m_choice11.GetSelection()])
+        self.log.write('Alpha= '+Alpha.__str__(), False)
+
+        patch= self.figpanel.gca().axvspan(pos1,pos2,facecolor= faceColor, alpha= Alpha)
+        self.log.write('patch= plt.gca().axvspan(pos1,pos2,facecolor= faceColor, alpha= Alpha)', False)
+        patch.set_gid(wx.NewId())
+        self._patchListboxUpdate()
+        self.figpanel.canvas.draw()
+
+    def _patchListboxUpdate(self,*args):
+        # se lista todos los patch
+        patches = self.figpanel.gca().patches
+        if len(patches) == 0:
+            self.patchListBox.SetItems([])
+        # se agrega un id para los patches que no lo tengan
+        for patch in patches:
+            if patch.get_gid() == None:
+                patch.set_gid(wx.NewId())
+        # se crea un listado con los nombres de los patches
+        patches= [str(patch.get_gid()) for patch in patches]
+        # se acutaliza el listado
+        self.patchListBox.SetItems(patches)
+        # se actualiza el frame
+        if len(patches) > 0:
+            self.patchListBox.SetSelection(0)
+        self._OnPatchListboxChange(None)
+
+    def _OnDelPatch(self,event):
+        items = self.patchListBox.GetItems()
+        if len(items) == 0:
+            return
+        selected = self.patchListBox.GetSelection()
+        if selected == -1:
+            return
+        selectedPatch = items[selected]
+        for patch in self.figpanel.gca().patches:
+            if str(patch.get_gid()) == selectedPatch:
+                patch.remove()
+                break
+        if len(items) > 0:
+            self.patchListBox.SetSelection(0)
+        self._patchListboxUpdate()
+        self.figpanel.canvas.draw()
+
+    def _OnPatchFaceColorChange(self,event):
+        items= self.patchListBox.GetItems()
+        if len(items) == 0:
+            return
+        selected = self.patchListBox.GetSelection()
+        if  selected == -1:
+            return
+        selectedPatch= self.patchListBox.GetItems()[self.patchListBox.GetSelection()]
+        currPatch= None
+        for patch in self.figpanel.gca().patches:
+            if str(patch.get_gid()) == selectedPatch:
+                currPatch= patch
+                break
+        dlg = wx.ColourDialog(self)
+        dlg.GetColourData().SetChooseFull(True)
+        if dlg.ShowModal() == wx.ID_OK:
+            # If the user selected OK, then the dialog's wx.ColourData will
+            # contain valid information. Fetch the data ...
+            data = dlg.GetColourData()
+        else:
+            return
+        actualLineNumber= self.m_listBox1.GetSelection()
+        lineSelected = self.gca().get_lines()[actualLineNumber]
+        colors = [getattr(data.Colour,param)/float(255) for param in ['red','green','blue','alpha']]
+        currPatch.set_facecolor(colors)
+        self.figpanel.canvas.draw()
+
+    def _OnPatchAlphaChange(self,event):
+        items= self.patchListBox.GetItems()
+        if len(items) == 0:
+            return
+        selected = self.patchListBox.GetSelection()
+        if  selected == -1:
+            return
+        selectedPatch= self.patchListBox.GetItems()[self.patchListBox.GetSelection()]
+        currPatch= None
+        for patch in self.figpanel.gca().patches:
+            if str(patch.get_gid()) == selectedPatch:
+                currPatch= patch
+                break
+        alpha = float(self.m_choice14.GetItems()[self.m_choice14.GetSelection()])
+        currPatch.set_alpha(alpha)
+        self.figpanel.canvas.draw()
+
+class MpltFrame( wx.Frame, object ): # MpltFrame
     def __init__( self, parent, typePlot = None, data2plot= None, *args, **params):
         '''
         MpltFrame( parent, typePlot, data2plot)
@@ -391,7 +1166,11 @@ class MpltFrame( wx.Frame, object ):
         * plotPareto
         ((x1,x2,...,xn))
         '''
-        self.log= wx.GetApp().Logg  # to write the actions
+        if hasattr( wx.GetApp(), 'Logg'):
+            self.log= wx.GetApp().Logg  # to write the actions
+        else:
+            self.log= passlog
+            
         self.graphParams= {'xlabel': '',
                            'ylabel': '',
                            'title': '',
@@ -429,334 +1208,13 @@ class MpltFrame( wx.Frame, object ):
                                 FloatingSize( wx.DefaultSize ).DockFixed( True ).
                                 CloseButton(False). BestSize(wx.Size(200,-1)))
         
-        self.scrolledWindow1= scrolled1(self.graphParams, self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL)
-        self.m_notebook1.AddPage( self.scrolledWindow1, u"Main Options", True )
+        self.scrolledWindow1= scrolled1( self.graphParams, self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL)
+        self.scrolledWindow2= scrolled2( self.graphParams, self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL)
+        self.scrolledWindow3= scrolled3( self.graphParams, self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL)
         
-        self.m_scrolledWindow3 = wx.ScrolledWindow( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL )
-        self.m_scrolledWindow3.SetScrollRate( 5, 5 )
-        bSizer21 = wx.BoxSizer( wx.VERTICAL )
-
-        sbSizer8 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow3, wx.ID_ANY, u"Choose a line" ), wx.VERTICAL )
-
-        m_listBox1Choices = []
-        self.m_listBox1 = wx.ListBox( self.m_scrolledWindow3, wx.ID_ANY, wx.DefaultPosition, wx.Size( 130,80 ), m_listBox1Choices, 0 )
-        sbSizer8.Add( self.m_listBox1, 0, wx.ALL, 5 )
-
-        bSizer5 = wx.BoxSizer( wx.HORIZONTAL )
-
-        self.m_button87 = wx.Button( self.m_scrolledWindow3, wx.ID_ANY, u"-", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_button87.SetMinSize( wx.Size( 20,-1 ) )
-
-        bSizer5.Add( self.m_button87, 0, wx.LEFT|wx.RIGHT, 5 )
-
-        self.m_button41 = wx.Button( self.m_scrolledWindow3, wx.ID_ANY, u"Refresh lines", wx.DefaultPosition, wx.DefaultSize, 0 )
-        bSizer5.Add( self.m_button41, 0, wx.ALIGN_RIGHT|wx.LEFT, 5 )
-
-        sbSizer8.Add( bSizer5, 1, wx.EXPAND, 5 )
-
-        bSizer21.Add( sbSizer8, 0, 0, 5 )
-
-        sbSizer71 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow3, wx.ID_ANY, u"Some Properties" ), wx.VERTICAL )
-
-        self.m_staticText11 = wx.StaticText( self.m_scrolledWindow3, wx.ID_ANY, u"Name", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText11.Wrap( -1 )
-        sbSizer71.Add( self.m_staticText11, 0, wx.LEFT, 5 )
-
-        self.plt_textCtr8 = wx.TextCtrl( self.m_scrolledWindow3, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 130,-1 ), 0 )
-        self.plt_textCtr8.Enable( False )
-
-        sbSizer71.Add( self.plt_textCtr8, 0, wx.BOTTOM|wx.LEFT|wx.TOP, 5 )
-
-        fgSizer2 = wx.FlexGridSizer( 0, 2, 0, 0 )
-        fgSizer2.SetFlexibleDirection( wx.BOTH )
-        fgSizer2.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-
-        m_choice7Choices = []
-        self.m_choice7 = wx.Choice( self.m_scrolledWindow3, wx.ID_ANY, wx.DefaultPosition, wx.Size( 60,-1 ), m_choice7Choices, 0 )
-        self.m_choice7.SetSelection( 0 )
-        fgSizer2.Add( self.m_choice7, 0, wx.ALL, 5 )
-
-        self.m_staticText12 = wx.StaticText( self.m_scrolledWindow3, wx.ID_ANY, u"Line Width", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText12.Wrap( -1 )
-        fgSizer2.Add( self.m_staticText12, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
-
-        self.m_button12 = wx.Button( self.m_scrolledWindow3, wx.ID_ANY, u"...", wx.DefaultPosition, wx.Size( 60,-1 ), 0 )
-        fgSizer2.Add( self.m_button12, 0, wx.ALL, 5 )
-
-        self.m_staticText7 = wx.StaticText( self.m_scrolledWindow3, wx.ID_ANY, u"Line Colour", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText7.Wrap( -1 )
-        fgSizer2.Add( self.m_staticText7, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
-
-        m_choice4Choices = []
-        self.m_choice4 = wx.Choice( self.m_scrolledWindow3, wx.ID_ANY, wx.DefaultPosition, wx.Size( 60,-1 ), m_choice4Choices, 0 )
-        self.m_choice4.SetSelection( 0 )
-        fgSizer2.Add( self.m_choice4, 0, wx.ALL, 5 )
-
-        self.m_staticText8 = wx.StaticText( self.m_scrolledWindow3, wx.ID_ANY, u"Line Style", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText8.Wrap( -1 )
-        fgSizer2.Add( self.m_staticText8, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
-
-        m_choice6Choices = []
-        self.m_choice6 = wx.Choice( self.m_scrolledWindow3, wx.ID_ANY, wx.DefaultPosition, wx.Size( 60,-1 ), m_choice6Choices, 0 )
-        self.m_choice6.SetSelection( 0 )
-        fgSizer2.Add( self.m_choice6, 0, wx.ALL, 5 )
-
-        self.m_staticText10 = wx.StaticText( self.m_scrolledWindow3, wx.ID_ANY, u"Marker Style", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText10.Wrap( -1 )
-        fgSizer2.Add( self.m_staticText10, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
-
-        m_choice8Choices = []
-        self.m_choice8 = wx.Choice( self.m_scrolledWindow3, wx.ID_ANY, wx.DefaultPosition, wx.Size( 60,-1 ), m_choice8Choices, 0 )
-        self.m_choice8.SetSelection( 0 )
-        fgSizer2.Add( self.m_choice8, 0, wx.ALL, 5 )
-
-        self.m_staticText13 = wx.StaticText( self.m_scrolledWindow3, wx.ID_ANY, u"Marker Size", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText13.Wrap( -1 )
-        fgSizer2.Add( self.m_staticText13, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
-
-        sbSizer71.Add( fgSizer2, 1, wx.EXPAND, 5 )
-
-        self.m_checkBox4 = wx.CheckBox( self.m_scrolledWindow3, wx.ID_ANY, u" Visible", wx.DefaultPosition, wx.DefaultSize, 0 )
-        sbSizer71.Add( self.m_checkBox4, 0, wx.ALL, 5 )
-
-        bSizer21.Add( sbSizer71, 0, 0, 5 )
-
-        sbSizer9 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow3, wx.ID_ANY, u"Add ReferenceLine" ), wx.VERTICAL )
-
-        fgSizer1 = wx.FlexGridSizer( 0, 3, 0, 0 )
-        fgSizer1.SetFlexibleDirection( wx.BOTH )
-        fgSizer1.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-
-        self.HorLineTxtCtrl = wx.TextCtrl( self.m_scrolledWindow3, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 50,-1 ), 0 )
-        fgSizer1.Add( self.HorLineTxtCtrl, 0, wx.ALL, 5 )
-
-        self.m_button51 = wx.Button( self.m_scrolledWindow3, wx.ID_ANY, u"+", wx.DefaultPosition, wx.Size( 20,-1 ), 0 )
-        fgSizer1.Add( self.m_button51, 0, wx.TOP, 5 )
-
-        self.m_staticText131 = wx.StaticText( self.m_scrolledWindow3, wx.ID_ANY, u"Horizontal", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText131.Wrap( -1 )
-        fgSizer1.Add( self.m_staticText131, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
-
-        self.HorVerTxtCtrl = wx.TextCtrl( self.m_scrolledWindow3, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 50,-1 ), 0 )
-        fgSizer1.Add( self.HorVerTxtCtrl, 0, wx.ALL, 5 )
-
-        self.m_button511 = wx.Button( self.m_scrolledWindow3, wx.ID_ANY, u"+", wx.DefaultPosition, wx.Size( 20,-1 ), 0 )
-        fgSizer1.Add( self.m_button511, 0, wx.TOP, 5 )
-
-        self.m_staticText14 = wx.StaticText( self.m_scrolledWindow3, wx.ID_ANY, u"Vertical", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText14.Wrap( -1 )
-        fgSizer1.Add( self.m_staticText14, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
-
-        sbSizer9.Add( fgSizer1, 1, wx.EXPAND, 5 )
-
-        bSizer21.Add( sbSizer9, 0, 0, 5 )
-
-        self.m_scrolledWindow3.SetSizer( bSizer21 )
-        self.m_scrolledWindow3.Layout()
-        bSizer21.Fit( self.m_scrolledWindow3 )
-        self.m_notebook1.AddPage( self.m_scrolledWindow3, u"Lines", False )
-        self.m_scrolledWindow4 = wx.ScrolledWindow( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL )
-        self.m_scrolledWindow4.SetScrollRate( 5, 5 )
-        bSizer3 = wx.BoxSizer( wx.VERTICAL )
-
-        sbSizer15 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow4, wx.ID_ANY, u"Choose a patchs" ), wx.VERTICAL )
-
-        patchListBoxChoices = []
-        self.patchListBox = wx.ListBox( self.m_scrolledWindow4, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, patchListBoxChoices, 0 )
-        self.patchListBox.SetMinSize( wx.Size( 140,60 ) )
-
-        sbSizer15.Add( self.patchListBox, 0, wx.ALL, 5 )
-
-        fgSizer6 = wx.FlexGridSizer( 0, 2, 0, 0 )
-        fgSizer6.SetFlexibleDirection( wx.BOTH )
-        fgSizer6.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-
-        self.m_button9 = wx.Button( self.m_scrolledWindow4, wx.ID_ANY, u"-", wx.DefaultPosition, wx.DefaultSize, wx.BU_BOTTOM )
-        self.m_button9.SetMinSize( wx.Size( 20,-1 ) )
-
-        fgSizer6.Add( self.m_button9, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
-
-        self.m_button11 = wx.Button( self.m_scrolledWindow4, wx.ID_ANY, u"Refresh Patchs", wx.DefaultPosition, wx.DefaultSize, 0 )
-        fgSizer6.Add( self.m_button11, 0, wx.LEFT, 5 )
-
-        sbSizer15.Add( fgSizer6, 1, wx.EXPAND, 5 )
-
-        bSizer3.Add( sbSizer15, 0, 0, 5 )
-
-        sbSizer16 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow4, wx.ID_ANY, u"Some Properties" ), wx.VERTICAL )
-
-        self.m_staticText28 = wx.StaticText( self.m_scrolledWindow4, wx.ID_ANY, u"Patch Name", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText28.Wrap( -1 )
-        sbSizer16.Add( self.m_staticText28, 0, wx.ALL, 5 )
-
-        self.textCtrlPatchName = wx.TextCtrl( self.m_scrolledWindow4, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.textCtrlPatchName.Enable( False )
-
-        sbSizer16.Add( self.textCtrlPatchName, 0, wx.ALL, 5 )
-
-        fgSizer7 = wx.FlexGridSizer( 0, 2, 0, 0 )
-        fgSizer7.SetFlexibleDirection( wx.BOTH )
-        fgSizer7.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-
-        self.m_button13 = wx.Button( self.m_scrolledWindow4, wx.ID_ANY, u"...", wx.DefaultPosition, wx.Size( 70,-1 ), 0 )
-        fgSizer7.Add( self.m_button13, 0, wx.ALL, 5 )
-
-        self.m_staticText29 = wx.StaticText( self.m_scrolledWindow4, wx.ID_ANY, u"Face Colour", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText29.Wrap( -1 )
-        fgSizer7.Add( self.m_staticText29, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
-
-        m_choice14Choices = []
-        self.m_choice14 = wx.Choice( self.m_scrolledWindow4, wx.ID_ANY, wx.DefaultPosition, wx.Size( 70,-1 ), m_choice14Choices, 0 )
-        self.m_choice14.SetSelection( 0 )
-        fgSizer7.Add( self.m_choice14, 0, wx.ALL, 5 )
-
-        self.m_staticText30 = wx.StaticText( self.m_scrolledWindow4, wx.ID_ANY, u"Alpha", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText30.Wrap( -1 )
-        fgSizer7.Add( self.m_staticText30, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
-
-        sbSizer16.Add( fgSizer7, 1, wx.EXPAND, 5 )
-
-        bSizer3.Add( sbSizer16, 0, 0, 5 )
-
-        sbSizer12 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow4, wx.ID_ANY, u"add Span" ), wx.VERTICAL )
-
-        sbSizer13 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow4, wx.ID_ANY, wx.EmptyString ), wx.VERTICAL )
-
-        fgSizer4 = wx.FlexGridSizer( 0, 2, 0, 0 )
-        fgSizer4.SetFlexibleDirection( wx.BOTH )
-        fgSizer4.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-
-        self.m_staticText15 = wx.StaticText( self.m_scrolledWindow4, wx.ID_ANY, u"Horzontal", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText15.Wrap( -1 )
-        fgSizer4.Add( self.m_staticText15, 0, wx.ALL, 5 )
-
-        self.m_button7 = wx.Button( self.m_scrolledWindow4, wx.ID_ANY, u"+", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_button7.SetMinSize( wx.Size( 20,-1 ) )
-
-        fgSizer4.Add( self.m_button7, 0, wx.ALIGN_CENTER|wx.ALIGN_CENTER_VERTICAL, 5 )
-
-        sbSizer13.Add( fgSizer4, 0, 0, 5 )
-
-        fgSizer3 = wx.FlexGridSizer( 0, 2, 0, 0 )
-        fgSizer3.SetFlexibleDirection( wx.BOTH )
-        fgSizer3.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-
-        self.plt_textCtr11 = wx.TextCtrl( self.m_scrolledWindow4, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.plt_textCtr11.SetMinSize( wx.Size( 60,-1 ) )
-
-        fgSizer3.Add( self.plt_textCtr11, 0, wx.ALL, 5 )
-
-        self.m_staticText17 = wx.StaticText( self.m_scrolledWindow4, wx.ID_ANY, u"Y axis pos 2", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText17.Wrap( -1 )
-        fgSizer3.Add( self.m_staticText17, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
-
-        self.plt_textCtr12 = wx.TextCtrl( self.m_scrolledWindow4, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.plt_textCtr12.SetMinSize( wx.Size( 60,-1 ) )
-
-        fgSizer3.Add( self.plt_textCtr12, 0, wx.ALL, 5 )
-
-        self.m_staticText16 = wx.StaticText( self.m_scrolledWindow4, wx.ID_ANY, u"Y axis pos 2", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText16.Wrap( -1 )
-        fgSizer3.Add( self.m_staticText16, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
-
-        m_choice81Choices = []
-        self.m_choice81 = wx.Choice( self.m_scrolledWindow4, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choice81Choices, 0 )
-        self.m_choice81.SetSelection( 0 )
-        self.m_choice81.SetMinSize( wx.Size( 60,-1 ) )
-
-        fgSizer3.Add( self.m_choice81, 0, wx.ALL, 5 )
-
-        self.m_staticText22 = wx.StaticText( self.m_scrolledWindow4, wx.ID_ANY, u"Face Colour", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText22.Wrap( -1 )
-        fgSizer3.Add( self.m_staticText22, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
-
-        m_choice12Choices = []
-        self.m_choice12 = wx.Choice( self.m_scrolledWindow4, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choice12Choices, 0 )
-        self.m_choice12.SetSelection( 0 )
-        self.m_choice12.SetMinSize( wx.Size( 60,-1 ) )
-
-        fgSizer3.Add( self.m_choice12, 0, wx.ALL, 5 )
-
-        self.m_staticText26 = wx.StaticText( self.m_scrolledWindow4, wx.ID_ANY, u"Alpha", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText26.Wrap( -1 )
-        fgSizer3.Add( self.m_staticText26, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
-
-
-        sbSizer13.Add( fgSizer3, 0, 0, 5 )
-
-
-        sbSizer12.Add( sbSizer13, 0, 0, 5 )
-
-        sbSizer14 = wx.StaticBoxSizer( wx.StaticBox( self.m_scrolledWindow4, wx.ID_ANY, wx.EmptyString ), wx.VERTICAL )
-
-        fgSizer5 = wx.FlexGridSizer( 0, 2, 0, 0 )
-        fgSizer5.SetFlexibleDirection( wx.BOTH )
-        fgSizer5.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-
-        self.m_staticText19 = wx.StaticText( self.m_scrolledWindow4, wx.ID_ANY, u"Vertical", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText19.Wrap( -1 )
-        fgSizer5.Add( self.m_staticText19, 0, wx.ALL, 5 )
-
-        self.m_button8 = wx.Button( self.m_scrolledWindow4, wx.ID_ANY, u"+", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_button8.SetMinSize( wx.Size( 20,-1 ) )
-
-        fgSizer5.Add( self.m_button8, 0, wx.ALIGN_CENTER_VERTICAL, 5 )
-
-
-        sbSizer14.Add( fgSizer5, 0, 0, 5 )
-
-        gSizer3 = wx.GridSizer( 0, 2, 0, 0 )
-
-        self.plt_textCtr13 = wx.TextCtrl( self.m_scrolledWindow4, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.plt_textCtr13.SetMinSize( wx.Size( 60,-1 ) )
-
-        gSizer3.Add( self.plt_textCtr13, 0, wx.ALL, 5 )
-
-        self.m_staticText20 = wx.StaticText( self.m_scrolledWindow4, wx.ID_ANY, u"X axis pos 1", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText20.Wrap( -1 )
-        gSizer3.Add( self.m_staticText20, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5 )
-
-        self.plt_textCtr14 = wx.TextCtrl( self.m_scrolledWindow4, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.plt_textCtr14.SetMinSize( wx.Size( 60,-1 ) )
-
-        gSizer3.Add( self.plt_textCtr14, 0, wx.ALL, 5 )
-
-        self.m_staticText21 = wx.StaticText( self.m_scrolledWindow4, wx.ID_ANY, u"X axis pos 2", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText21.Wrap( -1 )
-        gSizer3.Add( self.m_staticText21, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5 )
-
-        m_choice10Choices = []
-        self.m_choice10 = wx.Choice( self.m_scrolledWindow4, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choice10Choices, 0 )
-        self.m_choice10.SetSelection( 0 )
-        self.m_choice10.SetMinSize( wx.Size( 60,-1 ) )
-
-        gSizer3.Add( self.m_choice10, 0, wx.ALL, 5 )
-
-        self.m_staticText24 = wx.StaticText( self.m_scrolledWindow4, wx.ID_ANY, u"Face Colour", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText24.Wrap( -1 )
-        gSizer3.Add( self.m_staticText24, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5 )
-
-        m_choice11Choices = []
-        self.m_choice11 = wx.Choice( self.m_scrolledWindow4, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choice11Choices, 0 )
-        self.m_choice11.SetSelection( 0 )
-        self.m_choice11.SetMinSize( wx.Size( 60,-1 ) )
-
-        gSizer3.Add( self.m_choice11, 0, wx.ALL, 5 )
-
-        self.m_staticText25 = wx.StaticText( self.m_scrolledWindow4, wx.ID_ANY, u"Alpha", wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText25.Wrap( -1 )
-        gSizer3.Add( self.m_staticText25, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5 )
-
-        sbSizer14.Add( gSizer3, 0, 0, 5 )
-
-        sbSizer12.Add( sbSizer14, 0, 0, 5 )
-
-        bSizer3.Add( sbSizer12, 0, 0, 5 )
-
-        self.m_scrolledWindow4.SetSizer( bSizer3 )
-        self.m_scrolledWindow4.Layout()
-        bSizer3.Fit( self.m_scrolledWindow4 )
-        self.m_notebook1.AddPage( self.m_scrolledWindow4, u"patch", False )
+        self.m_notebook1.AddPage( self.scrolledWindow1, u"Main Options", True )
+        self.m_notebook1.AddPage( self.scrolledWindow2, u"Lines", False )
+        self.m_notebook1.AddPage( self.scrolledWindow3, u"patch", False )
 
         self.statusbar = self.CreateStatusBar( 2, wx.ST_SIZEGRIP, wx.ID_ANY )
  
@@ -770,40 +1228,8 @@ class MpltFrame( wx.Frame, object ):
         self.Centre( wx.BOTH )
         # Connect Events
         self.Bind( wx.EVT_ACTIVATE, self.OnActivate )
-        
-        
-        if 1:
-            self.m_listBox1.Bind( wx.EVT_LISTBOX, self._OnListLinesChange )
-            self.m_button87.Bind( wx.EVT_BUTTON, self._OnLineDel )
-            self.m_button41.Bind( wx.EVT_BUTTON, self._OnRefreshLines )
-            self.plt_textCtr8.Bind( wx.EVT_TEXT_ENTER, self._OnLineNameChange )
-            self.m_choice7.Bind( wx.EVT_CHOICE, self._OnLineWidthChange )
-            self.m_button12.Bind( wx.EVT_BUTTON, self._OnLineColourChange )
-            self.m_choice4.Bind( wx.EVT_CHOICE, self._OnLineStyleChange )
-            self.m_choice6.Bind( wx.EVT_CHOICE, self._OnLineMarkerStyleChange )
-            self.m_choice8.Bind( wx.EVT_CHOICE, self._OnLineMarkerSizeChange )
-            self.m_checkBox4.Bind( wx.EVT_CHECKBOX, self._OnLineVisibleChange )
-            self.HorLineTxtCtrl.Bind( wx.EVT_TEXT, self._OnTxtRefLineHorzChange )
-            self.m_button51.Bind( wx.EVT_BUTTON, self._OnAddRefHorzLine )
-            self.HorVerTxtCtrl.Bind( wx.EVT_TEXT, self._OnTxtRefLineVerChange )
-            self.m_button511.Bind( wx.EVT_BUTTON, self._OnAddRefVertLine )
-            self.patchListBox.Bind( wx.EVT_LISTBOX, self._OnPatchListboxChange )
-            self.m_button9.Bind( wx.EVT_BUTTON, self._OnDelPatch )
-            self.m_button13.Bind( wx.EVT_BUTTON, self._OnPatchFaceColorChange )
-            self.m_choice14.Bind( wx.EVT_CHOICE, self._OnPatchAlphaChange )
-            self.m_button7.Bind( wx.EVT_BUTTON, self._OnAddHorzSpan )
-            self.plt_textCtr11.Bind( wx.EVT_TEXT, self._Onm_textCtrl11Change )
-            self.plt_textCtr12.Bind( wx.EVT_TEXT, self._Onm_textCtrl12Change )
-            self.m_button8.Bind( wx.EVT_BUTTON, self._OnAddVerSpan )
-            self.plt_textCtr13.Bind( wx.EVT_TEXT, self._Onm_textCtrl13Change )
-            self.plt_textCtr14.Bind( wx.EVT_TEXT, self._Onm_textCtrl14Change )
-            self.m_button11.Bind( wx.EVT_BUTTON, self._patchListboxUpdate )
-
         self.figpanel.canvas.mpl_connect('motion_notify_event', self._UpdateStatusBar)
         
-        ###
-        ###
-
         if typePlot == None:
             self._plotTest()
         else:
@@ -814,7 +1240,7 @@ class MpltFrame( wx.Frame, object ):
                 self._plotTest()
         self._addLabels(self.graphParams)
         #
-        # se actualiza el nombre de las escalas de las x
+        # updatign x axis names
         if self.graphParams.has_key( 'xtics'):
             xtics = self.graphParams['xtics']
             if len(xtics) != 0:
@@ -823,35 +1249,8 @@ class MpltFrame( wx.Frame, object ):
             self.gca().set_yticklabels( self.graphParams['ytics'])
         # connect cursos with a selected axes
         # self._connectCursor(self.gca())
-        # se actualiza las lineas del axes actual
-        lineListNames= [line.get_label() for line in self.gca().get_lines()]
-        self.m_listBox1.SetItems( lineListNames)
-        #
-        ###
-        ###
-
-        markerStyles= [ 'None', 'o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd']
-        faceColors=   ['b', 'g', 'r', 'c', 'm', 'y', 'k']
-        lineStyles=   ['_', '-', '--', ':']
-        lineSizes=    [str(x*0.5) for x in range(1,15,1)]
-        markerSizes=  [str(x) for x in range(1,15,1)]
-        alpha=        [str(x/float(10)) for x in range(1,11)]
-        self.m_choice7.SetItems(lineSizes)
-        self.m_choice4.SetItems(lineStyles)
-        self.m_choice6.SetItems(markerStyles)
-        self.m_choice8.SetItems(markerSizes)
-        self._updateLineSelectionPane(self.m_listBox1)
-        # se actualiza la informacion para la pestana de pach
-        self.m_choice14.SetItems(alpha)
-        self.m_choice81.SetItems(faceColors)
-        self.m_choice12.SetItems(alpha)
-        self.m_choice10.SetItems(faceColors)
-        self.m_choice11.SetItems(alpha)
-        self.m_choice14.SetSelection(0)
-        self.m_choice81.SetSelection(0)
-        self.m_choice12.SetSelection(0)
-        self.m_choice10.SetSelection(0)
-        self.m_choice11.SetSelection(0)
+        self.scrolledWindow2._setItems()
+        self.scrolledWindow3._setItems()
 
     def OnActivate(self, evt):
         # read the actual axes
@@ -887,7 +1286,7 @@ class MpltFrame( wx.Frame, object ):
 
 
     def __getattribute__(self, name):
-        '''wraps the funtions to the grid
+        '''wraps the funtions to the figure
         emulating a plot frame control'''
         try:
             return object.__getattribute__(self, name)
@@ -1227,391 +1626,13 @@ class MpltFrame( wx.Frame, object ):
             legend.set_visible(value)
         except:
             pass
-
-    def _OnLineDel(self,event):
-        if len(self.gca().get_lines())== 0:
-            return
-        selectedLine= self.figpanel.gca().get_lines()[self.m_listBox1.GetSelection()]
-        selectedLine.remove()
-        # se actualiza la linea seleccionada
-        self._OnRefreshLines(None)
-        self.figpanel.canvas.draw()
-
+    
     def _UpdateStatusBar(self, evt):
         if evt.inaxes and self.scrolledWindow1.m_checkBox3.GetValue():
             x, y = evt.xdata, evt.ydata
             self.statusbar.SetStatusText(( "x= " + str(x) +
                                            "  y=" +str(y) ),
                                          1)
-    def _OnListLinesChange( self, evt ):
-        self._updateLineSelectionPane(evt)
-
-    def _updateLineSelectionPane(self,evt):
-        if len(self.m_listBox1.GetItems()) == 0:
-            self.plt_textCtr8.SetValue("")
-            return
-        if self.m_listBox1.GetSelection() == -1:
-            self.plt_textCtr8.SetValue("")
-            return
-        selectedLine= self.gca().get_lines()[self.m_listBox1.GetSelection()]
-        lineName = selectedLine.get_label()
-        lineWidht= float(selectedLine.get_linewidth())
-        lineColour= selectedLine.get_color()
-        lineStyle = selectedLine.get_linestyle()
-        markerStyle= selectedLine.get_marker()
-        markerSize= float(selectedLine.get_markersize())
-        visible = selectedLine.get_visible()
-        # pass all data an update the notebookpane
-        self.plt_textCtr8.SetValue(lineName)
-        for pos,value in enumerate(self.m_choice7.GetItems()):
-            if float(value) == lineWidht:
-                self.m_choice7.SetSelection(pos)
-                break
-        #for pos,value in enumerate(self.m_choice3.GetItems()):
-            #if value == lineColour:
-                #self.m_choice3.SetSelection(pos)
-                #break
-        for pos,value in enumerate(self.m_choice4.GetItems()):
-            if value == lineStyle:
-                self.m_choice4.SetSelection(pos)
-                break
-        for pos,value in enumerate(self.m_choice6.GetItems()):
-            if value == markerStyle:
-                self.m_choice6.SetSelection(pos)
-                break
-        for pos,value in enumerate(self.m_choice8.GetItems()):
-            if float(value) == markerSize:
-                self.m_choice8.SetSelection(pos)
-                break
-        self.m_checkBox4.SetValue(visible)
-
-    def _OnLineWidthChange( self, evt ):
-        if len(self.m_listBox1.Items) == 0 or \
-           self.m_listBox1.GetSelection() == -1:
-            return
-        newWidth= float(evt.String)
-        selectedLine= self.gca().get_lines()[self.m_listBox1.GetSelection()]
-        selectedLine.set_linewidth(newWidth)
-        self.figpanel.canvas.draw()
-
-    def _OnRefreshLines( self, evt ):
-        if len(self.gca().get_lines())== 0:
-            self.m_listBox1.SetItems([])
-            return
-        lineListNames= [line.get_label() for line in self.gca().get_lines()]
-        self.m_listBox1.SetItems(lineListNames)
-        self.m_listBox1.SetSelection(0)
-        self._updateLineSelectionPane(self.m_listBox1)
-
-    def _OnLineNameChange( self, evt ):
-        # pendeinte por implementar.. el evento wx.EVT_TEXT_TEXTENTER
-        evt.Skip()
-
-    def _OnLineColourChange( self, evt ):
-        if len(self.m_listBox1.Items) == 0 or \
-           self.m_listBox1.GetSelection() == -1:
-            return
-        dlg = wx.ColourDialog(self)
-        dlg.GetColourData().SetChooseFull(True)
-        if dlg.ShowModal() == wx.ID_OK:
-            # If the user selected OK, then the dialog's wx.ColourData will
-            # contain valid information. Fetch the data ...
-            data = dlg.GetColourData()
-        else:
-            return
-        actualLineNumber= self.m_listBox1.GetSelection()
-        lineSelected = self.gca().get_lines()[actualLineNumber]
-        colors = [getattr(data.Colour,param)/float(255) for param in ['red','green','blue','alpha']]
-        lineSelected.set_color(colors)
-        self.figpanel.canvas.draw()
-
-    def _OnLineStyleChange( self, evt ):
-        if len(self.m_listBox1.Items) == 0 or \
-           self.m_listBox1.GetSelection() == -1:
-            return
-        actualLineNumber= self.m_listBox1.GetSelection()
-        lineSelected = self.gca().get_lines()[actualLineNumber]
-        newStyle = evt.GetString()
-        lineSelected.set_linestyle(newStyle)
-        self.figpanel.canvas.draw()
-
-    def _OnLineMarkerStyleChange( self, evt ):
-        if len(self.m_listBox1.Items) == 0 or \
-           self.m_listBox1.GetSelection() == -1:
-            return
-        actualLineNumber= self.m_listBox1.GetSelection()
-        lineSelected = self.gca().get_lines()[actualLineNumber]
-
-        newMarkerStyle = evt.GetString()
-        lineSelected.set_marker(newMarkerStyle)
-
-        self.figpanel.canvas.draw()
-
-    def _OnLineMarkerSizeChange( self, evt ):
-        if len(self.m_listBox1.Items) == 0 or \
-           self.m_listBox1.GetSelection() == -1:
-            return
-        actualLineNumber= self.m_listBox1.GetSelection()
-        lineSelected = self.gca().get_lines()[actualLineNumber]
-
-        newMarkerSize = float(evt.GetString())
-        lineSelected.set_markersize(newMarkerSize)
-
-        self.figpanel.canvas.draw()
-
-    def _OnLineVisibleChange( self, evt ):
-        if len(self.m_listBox1.Items) == 0 or \
-           self.m_listBox1.GetSelection() == -1:
-            return
-        actualLineNumber= self.m_listBox1.GetSelection()
-        lineSelected = self.gca().get_lines()[actualLineNumber]
-        visible = evt.Checked()
-        lineSelected.set_visible(visible)
-        self.figpanel.canvas.draw()
-
-    def _OnAddRefHorzLine( self, evt, **params ):
-        self.log.write('# adding reference horizontal line', False)
-        if params.has_key('ypos'):
-            ypos = params.pop('ypos')
-            self.gca().hold(True)
-            #self.log.write('plt.gca().hold(True)', False)
-
-            line= self.gca().axhline(ypos)
-            self.log.write('line= pltgca().axhline('+ypos.__str__()+')', False)
-            self.gca().hold(False)
-            #self.log.write('plt.gca().hold(False)', False)
-        else:
-            try:
-                ypos= float(self.HorLineTxtCtrl.GetValue())
-                self.gca().hold(True)
-                self.log.write('plt.gca().hold(True)', False)
-                line= self.gca().axhline(ypos)
-                self.log.write('plt.gca().axhline('+ypos.__str__()+')', False)
-                self.gca().hold(False)
-                self.log.write('plt.gca().hold(False)', False)
-                self.HorLineTxtCtrl.SetValue('')
-                self._OnRefreshLines(None)
-            except:
-                return
-        if params.has_key('color'):
-            line.set_color(params['color'])
-            self.log.write('line.set_color('+"'"+params['color'].__str__()+"'"+')', False)
-        self.figpanel.canvas.draw()
-        #self.log.write('plt.draw()',False)
-
-    def _OnAddRefVertLine( self, evt ):
-        self.log.write('# adding reference vertical line', False)
-        try:
-            float(self.HorVerTxtCtrl.GetValue())
-        except:
-            return
-        self.gca().hold(True)
-        self.log.write('plt.gca().hold(True)', False)
-
-        xpos= float(self.HorVerTxtCtrl.GetValue())
-        self.gca().axvline(xpos)
-        self.log.write('plt.gca().axvline('+xpos.__str__()+')', False)
-        self.gca().hold(False)
-        self.log.write('plt.gca().hold(False)', False)
-        self.figpanel.canvas.draw()
-        self.HorVerTxtCtrl.SetValue('')
-        self._OnRefreshLines(None)
-        self.figpanel.canvas.draw()
-        #self.log.write('plt.draw()',False)
-
-    def _OnTxtRefLineHorzChange( self, evt ):
-        self._txtNumerOnly( self.HorLineTxtCtrl)
-
-    def _OnTxtRefLineVerChange( self, evt ):
-        self._txtNumerOnly( self.HorVerTxtCtrl)
-
-    def _txtNumerOnly(self,refObj):
-        texto = refObj.GetValue()
-        if len(texto) == 0:
-            return
-        allowed= [ str(x) for x in range(11)]
-        allowed.extend(['.','-'])
-        newstr= [x for x in texto if x in allowed]
-        if len(newstr) == 0:
-            newstr = u''
-        else:
-            func = lambda x,y: x+y
-            newstr= reduce(func, newstr)
-        # prevent infinite recursion
-        if texto == newstr:
-            return
-        refObj.SetValue(newstr)
-
-
-    def _Onm_textCtrl11Change( self,event):
-        self._txtNumerOnly( self.scrolledWindow1.plt_textCtr11)
-
-    def _Onm_textCtrl12Change( self,event):
-        self._txtNumerOnly(self.plt_textCtr12)
-
-    def _Onm_textCtrl13Change(self,event):
-        self._txtNumerOnly( self.scrolledWindow1.plt_textCtr13)
-
-    def _Onm_textCtrl14Change(self, evt):
-        self._txtNumerOnly( self.plt_textCtr14)
-
-    def _OnPatchListboxChange(self,event):
-        if len(self.patchListBox.GetItems()) == 0:
-            self.textCtrlPatchName.SetValue(u"")
-            return
-        if self.patchListBox.GetSelection() == -1:
-            self.textCtrlPatchName.SetValue(u"")
-            return
-        selectedPatch= self.patchListBox.GetItems()[self.patchListBox.GetSelection()]
-        currPatch= None
-        for patch in self.figpanel.gca().patches:
-            if str(patch.get_gid()) == selectedPatch:
-                currPatch= patch
-                break
-        if currPatch == None:
-            # se actualiza el patch actual
-            self._patchListboxUpdate()
-            return
-        Alpha = str(currPatch.get_alpha())
-        faceColor = currPatch.get_facecolor()
-        name = str(currPatch.get_gid())
-        self.textCtrlPatchName.SetValue(name)
-        for pos,value in enumerate(self.m_choice14.GetItems()):
-            if value == Alpha:
-                self.m_choice14.SetSelection(pos)
-                break
-        #for pos,value in enumerate(self.m_choice13.GetItems()):
-            #if value == faceColor:
-                #self.m_choice13.SetSelection(pos)
-                #break
-
-    def _OnAddHorzSpan(self,event):
-        self.log.write('# adding horizontal span', False)
-        pos1 = self.plt_textCtr11.GetValue()
-        pos2 = self.plt_textCtr12.GetValue()
-        try:
-            pos1= float(pos1)
-            pos2= float(pos2)
-        except:
-            return
-        self.log.write('pos1= ' + pos1.__str__(), False)
-        self.log.write('pos2= ' + pos2.__str__(), False)
-
-        faceColor= self.m_choice81.GetItems()[self.m_choice81.GetSelection()]
-        self.log.write('faceColor= '+"'"+faceColor.__str__()+"'", False)
-
-        Alpha= float(self.m_choice12.GetItems()[self.m_choice12.GetSelection()])
-        self.log.write('Alpha= '+Alpha.__str__(), False)
-
-        patch= self.figpanel.gca().axhspan(pos1,pos2, facecolor= faceColor, alpha= Alpha)
-        self.log.write('patch= plt.gca().axhspan(pos1,pos2, facecolor= faceColor, alpha= Alpha)', False)
-        patch.set_gid(wx.NewId())
-        self._patchListboxUpdate()
-        self.figpanel.canvas.draw()
-
-    def _OnAddVerSpan(self,event):
-        self.log.write('# adding vertical span', False)
-        pos1 = self.plt_textCtr13.GetValue()
-        pos2 = self.plt_textCtr14.GetValue()
-        try:
-            pos1= float(pos1)
-            pos2= float(pos2)
-        except:
-            return
-        self.log.write('pos1= ' + pos1.__str__(), False)
-        self.log.write('pos2= ' + pos2.__str__(), False)
-
-        faceColor= self.m_choice10.GetItems()[self.m_choice10.GetSelection()]
-        self.log.write('faceColor= '+"'"+faceColor.__str__()+"'", False)
-
-        Alpha= str(self.m_choice11.GetItems()[self.m_choice11.GetSelection()])
-        self.log.write('Alpha= '+Alpha.__str__(), False)
-
-        patch= self.figpanel.gca().axvspan(pos1,pos2,facecolor= faceColor, alpha= Alpha)
-        self.log.write('patch= plt.gca().axvspan(pos1,pos2,facecolor= faceColor, alpha= Alpha)', False)
-        patch.set_gid(wx.NewId())
-        self._patchListboxUpdate()
-        self.figpanel.canvas.draw()
-
-    def _patchListboxUpdate(self,*args):
-        # se lista todos los patch
-        patches = self.figpanel.gca().patches
-        if len(patches) == 0:
-            self.patchListBox.SetItems([])
-        # se agrega un id para los patches que no lo tengan
-        for patch in patches:
-            if patch.get_gid() == None:
-                patch.set_gid(wx.NewId())
-        # se crea un listado con los nombres de los patches
-        patches= [str(patch.get_gid()) for patch in patches]
-        # se acutaliza el listado
-        self.patchListBox.SetItems(patches)
-        # se actualiza el frame
-        if len(patches) > 0:
-            self.patchListBox.SetSelection(0)
-        self._OnPatchListboxChange(None)
-
-    def _OnDelPatch(self,event):
-        items = self.patchListBox.GetItems()
-        if len(items) == 0:
-            return
-        selected = self.patchListBox.GetSelection()
-        if selected == -1:
-            return
-        selectedPatch = items[selected]
-        for patch in self.figpanel.gca().patches:
-            if str(patch.get_gid()) == selectedPatch:
-                patch.remove()
-                break
-        if len(items) > 0:
-            self.patchListBox.SetSelection(0)
-        self._patchListboxUpdate()
-        self.figpanel.canvas.draw()
-
-    def _OnPatchFaceColorChange(self,event):
-        items= self.patchListBox.GetItems()
-        if len(items) == 0:
-            return
-        selected = self.patchListBox.GetSelection()
-        if  selected == -1:
-            return
-        selectedPatch= self.patchListBox.GetItems()[self.patchListBox.GetSelection()]
-        currPatch= None
-        for patch in self.figpanel.gca().patches:
-            if str(patch.get_gid()) == selectedPatch:
-                currPatch= patch
-                break
-        dlg = wx.ColourDialog(self)
-        dlg.GetColourData().SetChooseFull(True)
-        if dlg.ShowModal() == wx.ID_OK:
-            # If the user selected OK, then the dialog's wx.ColourData will
-            # contain valid information. Fetch the data ...
-            data = dlg.GetColourData()
-        else:
-            return
-        actualLineNumber= self.m_listBox1.GetSelection()
-        lineSelected = self.gca().get_lines()[actualLineNumber]
-        colors = [getattr(data.Colour,param)/float(255) for param in ['red','green','blue','alpha']]
-        currPatch.set_facecolor(colors)
-        self.figpanel.canvas.draw()
-
-    def _OnPatchAlphaChange(self,event):
-        items= self.patchListBox.GetItems()
-        if len(items) == 0:
-            return
-        selected = self.patchListBox.GetSelection()
-        if  selected == -1:
-            return
-        selectedPatch= self.patchListBox.GetItems()[self.patchListBox.GetSelection()]
-        currPatch= None
-        for patch in self.figpanel.gca().patches:
-            if str(patch.get_gid()) == selectedPatch:
-                currPatch= patch
-                break
-        alpha = float(self.m_choice14.GetItems()[self.m_choice14.GetSelection()])
-        currPatch.set_alpha(alpha)
-        self.figpanel.canvas.draw()
-
 
 def fontDialog(parent):
     curClr = wx.Colour(0,0,0,0)#r,g,b,ALPHA
@@ -1691,7 +1712,7 @@ class test ( wx.Frame ):
         self.m_mgr.Update()
         self.Centre(wx.BOTH)
 
-class MplCanvasFrame(wx.Panel,Figure):
+class MplCanvasFrame( wx.Panel, Figure):
     """Class to represent a Matplotlib Figure as a wxPanel with Figure properties"""
     def __init__( self, parent, *args, **params):
         # initialize the superclass, the wx.Frame
