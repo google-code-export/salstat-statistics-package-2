@@ -11,12 +11,11 @@ from easyDialog import CheckListBox
 class data2Plotdiaglog( wx.Dialog ):
     def __init__( self, parent, lisOfColumns ):
         wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.Size( 253,184 ), style = wx.DEFAULT_DIALOG_STYLE )
-
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
 
         bSizer6 = wx.BoxSizer( wx.VERTICAL )
 
-        sbSizer16 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Select data to plot" ), wx.VERTICAL )
+        sbSizer16 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, wx.GetApp().translate(u"Select data to plot") ), wx.VERTICAL )
 
         m_checkList1Choices = []
         self.m_checkList1 = CheckListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_checkList1Choices,  wx.LB_MULTIPLE  )
@@ -49,13 +48,13 @@ class selectDialogData2plot(wx.Dialog):
 
         bSizer5 = wx.BoxSizer( wx.VERTICAL )
 
-        sbSizer15 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Select data to plot" ), wx.VERTICAL )
+        sbSizer15 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, wx.GetApp().translate(u"Select data to plot" )), wx.VERTICAL )
 
         fgSizer8 = wx.FlexGridSizer( 0, 2, 0, 0 )
         fgSizer8.SetFlexibleDirection( wx.BOTH )
         fgSizer8.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
 
-        self.m_staticText28 = wx.StaticText( self, wx.ID_ANY, u"X data", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText28 = wx.StaticText( self, wx.ID_ANY, wx.GetApp().translate(u"X data"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText28.Wrap( -1 )
         fgSizer8.Add( self.m_staticText28, 0, wx.ALL, 5 )
 
@@ -64,7 +63,7 @@ class selectDialogData2plot(wx.Dialog):
         self.m_choice14.SetSelection( 0 )
         fgSizer8.Add( self.m_choice14, 0, wx.ALL, 5 )
 
-        self.m_staticText29 = wx.StaticText( self, wx.ID_ANY, u"Y data", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText29 = wx.StaticText( self, wx.ID_ANY, wx.GetApp().translate(u"Y data"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText29.Wrap( -1 )
         fgSizer8.Add( self.m_staticText29, 0, wx.ALL, 5 )
 
@@ -119,10 +118,10 @@ class scatterDialog( wx.Dialog ):
         fgSizer2.SetFlexibleDirection( wx.BOTH )
         fgSizer2.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
 
-        self.m_button1 = wx.Button( self, wx.ID_ANY, u"Set X data", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_button1 = wx.Button( self, wx.ID_ANY, wx.GetApp().translate(u"X data"), wx.DefaultPosition, wx.DefaultSize, 0 )
         fgSizer2.Add( self.m_button1, 0, wx.ALL, 5 )
 
-        self.m_button2 = wx.Button( self, wx.ID_ANY, u"Set Y data", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_button2 = wx.Button( self, wx.ID_ANY, wx.GetApp().translate(u"Y data"), wx.DefaultPosition, wx.DefaultSize, 0 )
         fgSizer2.Add( self.m_button2, 0, wx.ALL, 5 )
 
 
@@ -131,18 +130,18 @@ class scatterDialog( wx.Dialog ):
 
         bSizer3.Add( bSizer4, 0, wx.EXPAND, 5 )
 
-        sbSizer2 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Selected data" ), wx.VERTICAL )
+        sbSizer2 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, wx.GetApp().translate(u"Selected data") ), wx.VERTICAL )
 
         bSizer5 = wx.BoxSizer( wx.HORIZONTAL )
 
-        self.m_staticText4 = wx.StaticText( self, wx.ID_ANY, u"Series Name", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText4 = wx.StaticText( self, wx.ID_ANY, wx.GetApp().translate(u"Series Name"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText4.Wrap( -1 )
         bSizer5.Add( self.m_staticText4, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
         self.m_textCtrl2 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer5.Add( self.m_textCtrl2, 1, wx.ALL, 5 )
 
-        self.m_button5 = wx.Button( self, wx.ID_ANY, u"add", wx.DefaultPosition, wx.Size( 30,-1 ), 0 )
+        self.m_button5 = wx.Button( self, wx.ID_ANY, wx.GetApp().translate(u"add"), wx.DefaultPosition, wx.Size( 30,-1 ), 0 )
         bSizer5.Add( self.m_button5, 0, wx.ALL, 5 )
 
 
@@ -150,7 +149,7 @@ class scatterDialog( wx.Dialog ):
 
         bSizer6 = wx.BoxSizer( wx.HORIZONTAL )
 
-        self.m_staticText6 = wx.StaticText( self, wx.ID_ANY, u"X data", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText6 = wx.StaticText( self, wx.ID_ANY, wx.GetApp().translate(u"X data"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText6.Wrap( -1 )
         bSizer6.Add( self.m_staticText6, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
@@ -164,7 +163,7 @@ class scatterDialog( wx.Dialog ):
 
         bSizer7 = wx.BoxSizer( wx.HORIZONTAL )
 
-        self.m_staticText7 = wx.StaticText( self, wx.ID_ANY, u"Y data", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText7 = wx.StaticText( self, wx.ID_ANY, wx.GetApp().translate(u"Y data"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText7.Wrap( -1 )
         bSizer7.Add( self.m_staticText7, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
@@ -179,13 +178,13 @@ class scatterDialog( wx.Dialog ):
 
         bSizer3.Add( sbSizer2, 0, wx.EXPAND, 5 )
 
-        sbSizer3 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Current List to plot" ), wx.HORIZONTAL )
+        sbSizer3 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, wx.GetApp().translate(u"Current List to plot") ), wx.HORIZONTAL )
 
         m_listBox1Choices = []
         self.m_listBox1 = wx.ListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,70 ), m_listBox1Choices, 0 )
         sbSizer3.Add( self.m_listBox1, 1, wx.ALL|wx.EXPAND, 5 )
 
-        self.m_button4 = wx.Button( self, wx.ID_ANY, u"del", wx.DefaultPosition, wx.Size( 30,-1 ), 0 )
+        self.m_button4 = wx.Button( self, wx.ID_ANY, wx.GetApp().translate(u"del"), wx.DefaultPosition, wx.Size( 30,-1 ), 0 )
         sbSizer3.Add( self.m_button4, 0, wx.ALIGN_CENTER|wx.ALL, 5 )
 
 

@@ -20,14 +20,15 @@ class _MyContextGrid(wx.Menu):
     def __init__(self,parent,*args,**params):
         wx.Menu.__init__(self)
         self.parent = parent
-        cortar =     wx.MenuItem(self, wx.NewId(), '&Cut\tCtrl+X')
-        copiar =     wx.MenuItem(self, wx.NewId(), 'C&opy\tCtrl+C')
-        pegar =      wx.MenuItem(self, wx.NewId(), '&Paste\tCtrl+V')
-        eliminar =   wx.MenuItem(self, wx.NewId(), '&Del\tDel')
-        deshacer =   wx.MenuItem(self, wx.NewId(), '&Undo\tCtrl+Z')
-        rehacer =    wx.MenuItem(self, wx.NewId(), '&Redo\tCtrl+Y')
-        delRow=      wx.MenuItem(self, wx.NewId(), 'Del Row')
-        delCol=      wx.MenuItem(self, wx.NewId(), 'Del Col')
+        translate= wx.GetApp().translate
+        cortar =     wx.MenuItem(self, wx.NewId(), translate('&Cut\tCtrl+X'))
+        copiar =     wx.MenuItem(self, wx.NewId(), translate('C&opy\tCtrl+C'))
+        pegar =      wx.MenuItem(self, wx.NewId(), translate('&Paste\tCtrl+V'))
+        eliminar =   wx.MenuItem(self, wx.NewId(), translate('&Del\tDel'))
+        deshacer =   wx.MenuItem(self, wx.NewId(), translate('&Undo\tCtrl+Z'))
+        rehacer =    wx.MenuItem(self, wx.NewId(), translate('&Redo\tCtrl+Y'))
+        delRow=      wx.MenuItem(self, wx.NewId(), translate('Del Row'))
+        delCol=      wx.MenuItem(self, wx.NewId(), translate('Del Col'))
         ##exportarCsv= wx.MenuItem(self, wx.NewId(), '&Export\tCtrl+E')
         
         imagenes = imageEmbed()
@@ -85,7 +86,7 @@ class _MyContextGrid(wx.Menu):
         self.parent.OnExportCsv()
         
     def OnDelRow(self, evt):
-        if hasattr(self.parent,'DeleteCurrentCol'):
+        if hasattr(self.parent, 'DeleteCurrentCol'):
             self.parent.DeleteCurrentRow(evt= None)
         else:
             currentRow= self.parent.GetGridCursorCol()
@@ -93,7 +94,7 @@ class _MyContextGrid(wx.Menu):
             self.parent.AdjustScrollbars()
     
     def OnDelCol(self, evt):
-        if hasattr(self.parent,'DeleteCurrentRow'):
+        if hasattr(self.parent, 'DeleteCurrentRow'):
             self.parent.DeleteCurrentCol(evt= None)
         else:
             currentcol= self.parent.GetGridCursorRow()
@@ -146,12 +147,12 @@ class NewGrid(wx.grid.Grid):
     def setColNames(self,names):
         # escribe los nombres de las columnas en el grid
         if not(type(names) == type(list()) or type(names) == type(tuple())):
-            raise TypeError('Solo se acepta una lista de iterable')
+            raise TypeError("It's allowed one list")
         [self.SetColLabelValue(colNumber, value) for colNumber, value in enumerate(names) ]
         
     def setRowNames(self,names):
         if not(type(names) == type(list()) or type(names) == type(tuple())):
-            raise TypeError('Solo se acepta una lista de iterable')
+            raise TypeError("It's allowed one iterable list")
         [self.SetRowLabelValue(rowNumber, value) for rowNumber, value in enumerate(names)]
         
     def updateGridbyRow(self,values):
