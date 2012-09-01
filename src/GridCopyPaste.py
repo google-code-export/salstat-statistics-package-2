@@ -167,7 +167,7 @@ class PyWXGridEditMixin():
         pCols = selCols ==1 and clipCols > 1 and clipCols or selCols
         return top, left, pRows, pCols
         
-        if clipRows ==1 and clipCols ==1: # constrain paste range by what's in clipboard
+        if clipRows == 1 and clipCols == 1: # constrain paste range by what's in clipboard
             pRows, pCols = clipRows, clipCols 
         else: # constrain paste range by current selection
             pRows, pCols = selRows, selCols
@@ -186,7 +186,7 @@ class PyWXGridEditMixin():
                     col = left + c
                     if self.CellInGrid(row, col): self.SetCellValue(row, col, data[r %dataRows][c % dataCols])
             return
-        except ZeroDivisionError: print "Division por cero: Num_col "  +str(dataRows)+ ", Num_Fil " + str(dataCols)
+        except ZeroDivisionError: print "Zero division: Num_col "  +str(dataRows)+ ", Num_Fil " + str(dataCols)
             
 
     def CellInGrid(self, r, c): # only paste data that actually falls on the table

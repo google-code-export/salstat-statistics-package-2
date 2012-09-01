@@ -184,7 +184,10 @@ class sixPack(_genericFunc):
         pltNorm.Show()
         # x-bar chart:
         xbar_data= (data[1:]+data[:-1])/2.0
-        xbar_UCL=  Xga + A2[groupSize]*Ra
+        try:
+            xbar_UCL=  Xga + A2[groupSize]*Ra
+        except NameError:
+            return
         xbar_LCL=  Xga - A2[groupSize]*Ra
         xbar_target= Xga
         data2plot= {'UCL':     xbar_UCL,
