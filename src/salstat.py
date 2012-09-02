@@ -859,15 +859,14 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
              ( plotMenus[0],
                plotMenus[1],
                plotMenus[2],
-               (translate(u"Line Chart of All Means"), None, self.GoChartWindow,     None),
-               (translate(u"Bar Chart of All Means"),  None, self.GoMeanBarChartWindow,     None),
+               (translate(u"Bar Chart of All Means"),  None, self.GoMeanBarChartWindow, None),
                (translate(u"Bar Chart"),               None, self.GoBarChartWindow,     None),
-               (translate(u"Scatter"),                 None, self.GoScatterPlot,     None),
+               (translate(u"Scatter"),                 None, self.GoScatterPlot,        None),
                (translate(u"Box & Whisker"),           None, self.GoBoxWhiskerPlot,     None),
                (translate(u"Linear Regression"),       None, self.GoLinRegressPlot,     None),
-               (translate(u"Ternary"),                 None, self.GoTernaryplot,     None),
-               (translate(u"Probability"),             None, self.GoProbabilityplot,     None),
-               (translate(u"Adaptative BMS"),          None, self.GoAdaptativeBMS,     None),)),
+               (translate(u"Ternary"),                 None, self.GoTernaryplot,        None),
+               (translate(u"Probability"),             None, self.GoProbabilityplot,    None),
+               (translate(u"Adaptative BMS"),          None, self.GoAdaptativeBMS,      None),)),
             (translate(u"&Help"),
              (##("Help\tCtrl-H",       imag.about(),  self.GoHelpSystem,  wx.ID_HELP),
               (translate(u"&About..."),          imag.icon16(), self.ShowAbout,     wx.ID_ABOUT),)),
@@ -1171,42 +1170,6 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
     ################
     ### chart init
     ################
-    def GoChartWindow(self, evt):
-        self.log.write('''Line chart of all means''')
-        waste, colnums = self.grid.GetUsedCols()
-        self.log.write('''waste, colnums = grid.GetUsedCols()''', False)
-        if colnums == []:
-            self.SetStatusText( translate(u"You need some data to draw a graph!"))
-            return
-        selection= data2Plotdiaglog( self,waste)
-        if selection.ShowModal() != wx.ID_OK:
-            selection.Destroy()
-            return
-        selectedcols= selection.getData()
-        self.log.write( translate(u"selectedcols=") + selectedcols.__str__(), False)
-        selection.Destroy()
-        if len( selectedcols) == 0:
-            self.SetStatusText( translate(u"You need to select some data to draw a graph!"))
-            return
-        self.log.write('''data = [statistics(grid.CleanData(cols), 'noname',None) for cols in [colnums[m] for m in selectedcols]]''', False)
-        data = [statistics(self.grid.CleanData(cols), "noname",None) for cols in [colnums[m] for m in selectedcols]]
-        self.log.write('''data = [data[i].mean for i in range(len(data))]''', False)
-        data = [data[i].mean for i in range(len(data))]
-        self.log.write('''plt= plot(parent = None, typePlot= 'plotLine',
-                  data2plot= ((range(len(data)),data,'Mean'),),
-                  xlabel = 'variable',
-                  ylabel= 'mean',
-                  title= 'Line Chart of all means',
-                  xtics= [waste[i] for i in selectedcols])''', False)
-        plt= plot(parent = self, typePlot= "plotLine",
-                  data2plot= ((range(len(data)),data,"Mean"),),
-                  xlabel = translate(u"variable"),
-                  ylabel= translate(u"mean"),
-                  title= translate(u"Line Chart of all means"),
-                  xtics= [waste[i] for i in selectedcols])
-        self.log.write('''plt.Show()''', False)
-        plt.Show()
-
     def GoTernaryplot(self, evt):
         self.log.write( translate(u"Ternary"))
         waste, colnums= self.grid.GetUsedCols()
