@@ -1,6 +1,6 @@
 __name__ = u"Generate data"
 __all__=  ['random','randomn','linespace','beta',
-           'chisquare','exponential']
+           'chisquare','exponential', 'integerSpace']
 
 import numpy
 from statFunctions import _genericFunc
@@ -401,6 +401,86 @@ class exponential(_genericFunc):
     
     def evaluate(self, *args, **params):
         return numpy.random.chisquare(*args, **params)
+    
+    def showGui(self, *args, **params):
+        values= self._showGui_GetValues()
+        if values== None:
+            return None
+        
+        result= self._calc(*values)
+        self._report(result)
+        
+    def _report(self, result):
+        cols= range(self.inputGrid.NumberCols)
+        emptyCols= []
+        self._updateColsInfo() # update the used columns
+        for i in cols:
+            if cols[i] not in self.columnNumbers:
+                emptyCols.append( cols[i])
+        
+        # count the number of needed columns 
+        neededCols= 1
+        cols2add=   len(self.columnNumbers) + neededCols - self.inputGrid.NumberCols
+        if cols2add > 0:
+            # adding the needed cols
+            editorRederer= frame.floatCellAttr
+            self.inputGrid.AddNCells(cols2add, 0, attr= editorRederer)
+            emptyCols.extend( range(len(cols), self.inputGrid.NumberCols))
+            cols= self.inputGrid.NumberCols
+            
+        # choose the first empty col
+        colReport= emptyCols[0]
+        self.inputGrid.PutCol( colReport, result)        
+        self.inputGrid.SetColLabelValue(colReport, self.statName)        
+        self.Logg.write(self.statName+ ' successfull')
+
+class integerSpace(_genericFunc):
+    ''''''
+    name=      u'integer space'
+    statName=  'integer'
+    def __init__(self):
+        # getting all required methods
+        _genericFunc.__init__(self)
+        self.name=      u'integer space'
+        self.statName=  'intege'
+        self.lenData= None
+        
+    def _dialog( self, *arg, **params):
+        setting= {'Title': self.name,
+                  '_size': Size(290,240)}
+        self._updateColsInfo() # update self.columnames and self.colnums
+        txt1= ['StaticText',  ['Lower Limit <include>']]
+        txt2= ['StaticText',  ['Upper Limit <include>']]
+        txt3= ['StaticText',  ['Number of elements to generate']]
+        btn1= ['IntTextCtrl', []]
+        structure= list()
+        structure.append( [ btn1, txt1])
+        structure.append( [ btn1, txt2])
+        structure.append( [ btn1, txt3])
+        return self.dialog( settings = setting, struct = structure)
+    
+    def _showGui_GetValues( self):
+        dlg= self._dialog()
+        if dlg.ShowModal() == _OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        
+        if None in values:
+            return
+        
+        return values
+        
+    def _calc(self, *args, **params):
+        return self.evaluate( *args, **params)
+        
+    def object(self):
+        return numpy.random.randint
+    
+    def evaluate(self, *args, **params):
+        return numpy.random.randint(*args, **params)
     
     def showGui(self, *args, **params):
         values= self._showGui_GetValues()
