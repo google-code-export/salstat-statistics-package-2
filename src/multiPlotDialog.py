@@ -39,6 +39,9 @@ class data2Plotdiaglog( wx.Dialog ):
 
     def getData(self):
         return self.m_checkList1.GetChecked()
+    
+    def GetValue(self):
+        return self.getData()
 
 class selectDialogData2plot(wx.Dialog):    
     def __init__( self, parent, lisOfColumns ):
