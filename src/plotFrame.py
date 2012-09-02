@@ -1435,22 +1435,6 @@ class MpltFrame( wx.Frame, object ): # MpltFrame
         self.gca().hold( False)
         self.figpanel.canvas.draw( )
 
-    def plotHistogram(self, data2plot):
-        (ydat, nbins, color, showNormCurv) = data2plot
-        dat= array(ydat)
-        ydat= ravel(ydat)
-        self.gca().hold( True)
-        n, bins, patches = self.gca().hist( ydat, nbins, normed= sum(ydat),facecolor= color) #, alpha=0.75
-        if showNormCurv:
-            # add a 'best fit' line
-            st= statistics( ydat)
-            sigma= st.stddev
-            mu= st.mean
-            y = mlab.normpdf( bins, mu, sigma)
-            l = self.gca().plot( bins, y, 'r--', linewidth=1)
-        self.gca().hold( False)
-        self.figpanel.canvas.draw( )
-
     def plotTrian(self,data2plot):
         '''data2plot = ((a,b,c,'legend'))'''
         legends= data2plot[1]
