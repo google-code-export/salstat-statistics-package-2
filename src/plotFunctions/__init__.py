@@ -1118,7 +1118,7 @@ class scrolled3(wx.ScrolledWindow):
             data = dlg.GetColourData()
         else:
             return
-        actualLineNumber= self.m_listBox1.GetSelection()
+        actualLineNumber= self.patchListBox.GetSelection() # m_listBox1
         lineSelected = self.gca().get_lines()[actualLineNumber]
         colors = [getattr(data.Colour,param)/float(255) for param in ['red','green','blue','alpha']]
         currPatch.set_facecolor(colors)
