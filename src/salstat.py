@@ -857,10 +857,11 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
              statisticalMenus),
             (translate(u"&Graph"),
              ( plotMenus[0],
+               plotMenus[1],
+               plotMenus[2],
                (translate(u"Line Chart of All Means"), None, self.GoChartWindow,     None),
                (translate(u"Bar Chart of All Means"),  None, self.GoMeanBarChartWindow,     None),
                (translate(u"Bar Chart"),               None, self.GoBarChartWindow,     None),
-               (translate(u"Lines"),                   None, self.GoLinesPlot,     None),
                (translate(u"Scatter"),                 None, self.GoScatterPlot,     None),
                (translate(u"Box & Whisker"),           None, self.GoBoxWhiskerPlot,     None),
                (translate(u"Linear Regression"),       None, self.GoLinRegressPlot,     None),
@@ -1222,7 +1223,8 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         btn2= ["TextCtrl",   [translate(u"B")]]
         btn3= ["TextCtrl",   [translate(u"C")]]
         btn4= ["StaticText", [translate(u"Select the pairs of data by rows")]]
-        btn5= ["makePairs",  [[translate(u"A Left Corner",u"C Upper Corner", u"B Right Corner")], [waste]*3, 30]]
+        btn5= ["makePairs",  [[translate(u"A Left Corner"),translate(u"C Upper Corner"),
+                               translate(u"B Right Corner")], [waste]*3, 30]]
         structure= list()
         structure.append( [btn1, txt1])
         structure.append( [btn2, txt2])
@@ -1567,44 +1569,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
 
         plt.Show()
         self.log.write("plt.Show()", False)
-
-    def GoLinesPlot(self, evt):
-        self.log.write("Lines")
-        waste, colnums = self.grid.GetUsedCols()
-        self.log.write('''waste, colnums = grid.GetUsedCols()''', False)
-        if colnums == []:
-            self.SetStatusText("You need some data to draw a graph!")
-            return
-        selection = data2Plotdiaglog(self,waste)
-        if selection.ShowModal() != wx.ID_OK:
-            selection.Destroy()
-            return
-        selectedcols = selection.getData()
-        self.log.write("selectedcols= " + selectedcols.__str__(), False)
-        selection.Destroy()
-        if len(selectedcols) == 0:
-            self.SetStatusText("You need to select some data to draw a graph!")
-            return
-
-        data = [self.grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]]
-        self.log.write('''data = [grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]]''', False)
-
-        data = [(range(len(data[i])),data[i],waste[i]) for i in range(len(data))]
-        self.log.write('''data = [(range(len(data[i])),data[i],waste[i]) for i in range(len(data))]''', False)
-
-        plt= plot(parent = self, typePlot= "plotLine",
-                  data2plot= data,
-                  xlabel = "",
-                  ylabel = "value",
-                  title= "Line plot")
-        self.log.write('''plt= plot(parent = None, typePlot= 'plotLine',
-                  data2plot= data,
-                  xlabel = '',
-                  ylabel = 'value',
-                  title= 'Line plot')''', False)
-        plt.Show()
-        self.log.write("plt.Show()", False)
-
+        
     def GoLinRegressPlot(self, evt):
         self.log.write("Linear Regression")
         waste, colnums = self.grid.GetUsedCols()
