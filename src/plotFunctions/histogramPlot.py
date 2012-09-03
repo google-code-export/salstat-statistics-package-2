@@ -7,8 +7,6 @@ from wx import ID_OK as _OK
 import wx
 from openStats import statistics
 
-from statlib import stats as _stats
-import numpy
 from statFunctions import _genericFunc
 from wx import Size, GetApp
 from statFunctions.frequency import histogram as _histogram
@@ -114,9 +112,7 @@ class histogram( _neededLibraries):
         plt= pltobj( None, xlabel= 'variable', ylabel= 'value', title= 'Histogram Chart of ' + self.colNameSelect[0] )
         plt.gca().hold( True)
         
-        dat= array(ydat)
-        ydat= ravel(ydat)
-        plt.gca().hold( True)
+        ydat= ravel(array(ydat))
         n, bins, patches = plt.gca().hist( ydat, nbins, normed= sum(ydat),facecolor= color) #, alpha=0.75
         if showNormCurv:
             # add a 'best fit' line
@@ -309,7 +305,7 @@ class cumulativeFrecuency( cumfreq, _neededLibraries):
         
         ydat= ravel( array( ydat))
         binsize= ydat[2] 
-        xdat= numpy.array( range( len( ydat[0])))*binsize + ydat[1]
+        xdat= array( range( len( ydat[0])))*binsize + ydat[1]
         
         plt.gca().bar( xdat, ydat[0], binsize) 
         plt.gca().hold( False)
