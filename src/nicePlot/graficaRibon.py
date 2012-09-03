@@ -253,6 +253,7 @@ def plotBar(ax=      None,
             elif str(type(labels)) == "<type 'numpy.int32'>":
                 ax.annotate(r"%d" % labels,
                         (year, labels), va="bottom", ha="center")
+                
     patch_gradient = BboxImage(ax.bbox,
                                interpolation= 'bicubic', # "bicubic"
                                zorder=0.1,
@@ -263,7 +264,7 @@ def plotBar(ax=      None,
     gradient[:,:,3] = [[0.2, 0.3],[0.2, 0.5]] # alpha channel
     patch_gradient.set_array(gradient)
     ax.add_artist(patch_gradient)
-    ax.set_xlim(xdata[0]-0.5, xdata[-1]+0.5)
+    ax.set_xlim( min(xdata)-0.5, max(xdata)+0.5)
     # se determinan los limites para el eje Y
     if max(ydata) > 0.0:
         maxYlimit = max(ydata)*1.05
