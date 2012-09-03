@@ -16,6 +16,7 @@ from statFunctions.frequency import cumfreq, relfreq
 import os
 from numpy import array, ravel
 import matplotlib.mlab as mlab
+from nicePlot.graficaRibon import plothist 
 
 class histogram( _neededLibraries):
     name=      u"Histogram"
@@ -140,26 +141,26 @@ class histogram( _neededLibraries):
         result.Show()
         self.log.write(self.plotName+ ' successfull')
 
-class niceHistogram( _genericFunc):
+class niceHistogram( _neededLibraries):
     '''this function is used to plot a nice histogram
     chart of the selected column'''   
     name=     u'Nice Histogram'
-    statName=  'histogram'
+    plotName=  'histogram'
     def __init__(self):
-        _genericFunc.__init__(self)
-        self.name=     u'Nine Histogram'
-        self.statName= 'histogram'
+        _neededLibraries.__init__(self)
+        self.name=     u'Nice Histogram'
+        self.plotName= 'histogram'
         self.minRequiredCols= 1
         self.colNameSelect= ''
         
     def _dialog(self, *args, **params):
         '''this function is used to plot a histogram chart of the selected column'''
-        self.Logg.write('Histogram Chart')
+        self.log.write('Histogram Chart')
         setting= {'Title': self.name,
                   '_size': Size(220,300)}
         self._updateColsInfo()
         if len(self.columnNames) == 0:
-            self.Logg.write('You need some data to draw a graph!')
+            self.log.write('You need some data to draw a graph!')
             return
         
         self.colours= ['random', 'blue', 'black',
@@ -198,7 +199,39 @@ class niceHistogram( _genericFunc):
         colData= args[0]
         numBins= args[1]
         # evaluating the histogram function to obtain the data to plot
-        return _histogram().evaluate(colData, numBins)  
+        result= [_histogram().evaluate( colData, numBins)]
+        plots = list()
+        for res, varName in zip( result, self.colNameSelect):
+            ydata= res[0]
+            incr=  res[2]/2.0
+            xdata= [x + incr for x in range( 1, len( res[0])+1)]
+            plt= pltobj( None, xlabel= 'variable', ylabel= 'value', title= 'Histogram Chart of ' + self.colNameSelect[0] )
+            plt.gca().hold( True)
+            labels= []
+            plt.gca().hold( True)
+            plothist(ax=     plt.gca(),
+                    xdata=   xdata,
+                    ydata=   ydata,
+                    labels=  None,
+                    colors=  self.colour,
+                    figName= self.histType)
+            
+            if 0:
+                # add a 'best fit' line
+                st= statistics(xdat)
+                sigma= st.stddev
+                mu= st.mean
+                ydat= array(ydat)
+                ydat= ravel(ydat)
+                y = mlab.normpdf( ydat, mu, sigma)
+                l = plt.gca().plot(ydat, y, 'r--', linewidth=1)
+            
+            plt.gca().hold( False)
+            plt.updateControls()
+            plt.canvas.draw()
+            plots.append( plt)
+            
+        return plots[0]
     
     def showGui(self, *args, **params):
         values= self._showGui_GetValues()
@@ -222,7 +255,7 @@ class niceHistogram( _genericFunc):
         self.colour=        values[3]
 
         if self.colNameSelect == None:
-            self.Logg.write("you have to select at least %i column"%self.minRequiredCols)
+            self.log.write("you have to select at least %i column"%self.minRequiredCols)
             return
         
         if self.histType == None:
@@ -239,36 +272,15 @@ class niceHistogram( _genericFunc):
             return
         
         # it only retrieves the numerical values
-        columns= [self.inputGrid.GetColNumeric( col) 
+        columns= [self.grid.GetColNumeric( col) 
                    for col in self.colNameSelect] 
         
         return (columns, numBins)
     
-    def _plot(self):
-        pass
-        
-    def _report(self, result):
-        plots = list()
-        for res, varName in zip( result, self.colNameSelect):
-            ydata= res[0]
-            incr=  res[2]/2.0
-            xdata= [x + incr for x in range( 1, len( res[0])+1)]
-            plt= self.plot(parent=    None,
-                      typePlot= 'plotNiceHistogram',
-                      data2plot= (xdata,
-                                  ydata,
-                                  None, # legend
-                                  self.colour,
-                                  self.histType,
-                                  False), # don't show the normal curve
-                      xlabel=  'variable',
-                      ylabel=  'value',
-                      title=   'Histogram Chart of ' + varName)
-            plots.append(plt)
-            
-        for plt in plots:
+    def _report(self, result): 
+        for plt in result:
             plt.Show()
-        self.Logg.write( self.name + ' successful')
+        self.log.write( self.name + ' successful')
 
        
 class cumulativeFrecuency( cumfreq, _neededLibraries):

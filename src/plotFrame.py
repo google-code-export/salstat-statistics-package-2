@@ -33,7 +33,7 @@ from openStats import statistics
 from statlib.stats import linregress
 from triplot import triplot, triang2xy
 from slbTools import homogenize
-from nicePlot.graficaRibon import plotBar, plothist # nice plot
+from nicePlot.graficaRibon import plotBar # nice plot
 from numpy import array, ravel
 
 PROPLEGEND= {'size':11}
@@ -1411,29 +1411,6 @@ class MpltFrame( wx.Frame, object ): # MpltFrame
         plt= self.gca().boxplot(data2plot, notch=0, sym='+', vert=1, whis=1.5,
                                 positions=None, widths=None, patch_artist=False)
         self.figpanel.canvas.draw()
-
-    def plotNiceHistogram(self, data2plot):
-        (xdat, ydat, labels, color, figName, showNormCurv) = data2plot
-        labels= []
-        self.gca().hold( True)
-        plothist(ax=     self.gca(),
-                xdata=   xdat,
-                ydata=   ydat,
-                labels=  None,
-                colors=  color,
-                figName= figName)
-        if showNormCurv:
-            # add a 'best fit' line
-            st= statistics(xdat)
-            sigma= st.stddev
-            mu= st.mean
-            ydat= array(ydat)
-            ydat= ravel(ydat)
-            y = mlab.normpdf( ydat, mu, sigma)
-            l = self.gca().plot(ydat, y, 'r--', linewidth=1)
-            
-        self.gca().hold( False)
-        self.figpanel.canvas.draw( )
 
     def plotTrian(self,data2plot):
         '''data2plot = ((a,b,c,'legend'))'''
