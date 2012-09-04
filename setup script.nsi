@@ -7,6 +7,7 @@ SetCompressor /SOLID LZMA
 
 # General Symbol Definitions
 !define CURRPATH "..\..\SalStatdist\"
+!define SRCPATH "src"
 !define REGKEY "SOFTWARE\$(^Name)"
 !define VERSION 2.1
 !define COMPANY "Sebastián López Buriticá"
@@ -54,12 +55,12 @@ Var vcredist2008set
 !insertmacro MUI_LANGUAGE SpanishInternational
 
 # Installer attributes
-OutFile "S2 V2.1 Beta 2 setup.exe"
-InstallDir Salstat2
+OutFile "S2 V2.1 Beta 3 setup.exe"
+InstallDir S2
 CRCCheck on
 XPStyle on
 ShowInstDetails nevershow
-VIProductVersion 2.0.0.0
+VIProductVersion 2.1.0.0
 VIAddVersionKey /LANG=${LANG_ENGLISH} ProductName "$(^Name)"
 VIAddVersionKey /LANG=${LANG_ENGLISH} ProductVersion "${VERSION}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} CompanyName "${COMPANY}"
@@ -75,7 +76,10 @@ Section -Main Section2
     SetOutPath $INSTDIR
     SetOverwrite on
     File /r ${CURRPATH}\*
-    #File ${CURRPATH}\salstat.exe
+    SetOutPath $INSTDIR\locale
+    File /r ${SRCPATH}\locale\*
+    SetOutPath $INSTDIR\nicePlot\images
+    FIle /r ${SRCPATH}\nicePlot\images\*
     SetOutPath $SMPROGRAMS\$StartMenuGroup
     CreateShortcut "$SMPROGRAMS\$StartMenuGroup\$(^Name).lnk" "$INSTDIR\salstat.exe" \
         "" "$INSTDIR\salstat.ico" 0 SW_SHOWNORMAL # "" "Paquete de e2stadistica"
@@ -89,22 +93,22 @@ SectionEnd
 Section "src" Section3
      SetOutPath $INSTDIR\src
      SetOverwrite on
-     File /r src\*.py
-     File /r src\*.txt
-     File /r src\*.py
-     File /r src\salstat.icns
-     File /r src\salstat.ico
-     File /r src\salstat.icon.jpg
+     File /r ${SRCPATH}\*.py
+     File /r ${SRCPATH}\*.txt
+     File /r ${SRCPATH}\*.py
+     File /r ${SRCPATH}\salstat.icns
+     File /r ${SRCPATH}\salstat.ico
+     File /r ${SRCPATH}\salstat.icon.jpg
      SetOutPath $INSTDIR\src\nicePlot
-     File /r src\nicePlot\*.py
+     File /r ${SRCPATH}\nicePlot\*.py
      SetOutPath $INSTDIR\src\plotFunctions
-     File /r src\plotFunctions\*.py
+     File /r ${SRCPATH}\plotFunctions\*.py
      SetOutPath $INSTDIR\src\statFunctions
-     File /r src\statFunctions\*.py
+     File /r ${SRCPATH}\statFunctions\*.py
      SetOutPath $INSTDIR\src\statlib
-     File /r src\statlib\*.py
+     File /r ${SRCPATH}\statlib\*.py
      SetOutPath $INSTDIR\src\locale
-     File /r src\locale\*.*
+     File /r ${SRCPATH}\locale\*.*
      SetOutPath $SMPROGRAMS\$StartMenuGroup
      CreateShortcut "$SMPROGRAMS\$StartMenuGroup\src.lnk" "$INSTDIR\src\"
 SectionEnd
@@ -112,7 +116,7 @@ SectionEnd
 Section "script examples" Section4
      SetOutPath $INSTDIR\scripts
      SetOverwrite on
-     File /r "script examples\*"
+     File /r "script examples\*.txt"
      SetOutPath $SMPROGRAMS\$StartMenuGroup
      CreateShortcut "$SMPROGRAMS\$StartMenuGroup\scripts.lnk" "$INSTDIR\scripts\"
 SectionEnd
@@ -153,15 +157,9 @@ Section /o -un.Main UNSEC0000
     SetOverwrite on
     Delete $DESKTOP\$(^Name).lnk ;/REBOOTOK
     RmDir /r $SMPROGRAMS\$StartMenuGroup
-    ;Delete $SMPROGRAMS\$StartMenuGroup\Salstat2.lnk
-    ;Delete $SMPROGRAMS\$StartMenuGroup\*.*
-    ;Delete $INSTDIR\salstat.exe
-    ;Delete $INSTDIR\help\*.*
     RmDir /r  $INSTDIR\help
-    ;Delete  $INSTDIR\src\*.*
     RmDir /r  $INSTDIR\src
     RmDir /r  $INSTDIR
-    ;RmDir /r  $INSTDIR
     DeleteRegValue HKLM "${REGKEY}\Components" Main
 SectionEnd
 
@@ -172,15 +170,13 @@ Section -un.post UNSEC0001
     DeleteRegKey /IfEmpty HKLM "${REGKEY}\Components"
     DeleteRegKey /IfEmpty HKLM "${REGKEY}"
     RmDir /r $SMPROGRAMS\$StartMenuGroup
-    ;RmDir /REBOOTOK $INSTDIR\src
-    RmDir /r $INSTDIR
-    ;RmDir /REBOOTOK SMPROGRAMS\$StartMenuGroup   
+    RmDir /r $INSTDIR  
 SectionEnd
 
 Function vcredist2008installer
   SetOutPath "$INSTDIR\Prerequisites"
   SetOverwrite on
-  File /r ${CURRPATH}\Prerequisites\*
+  File /r ${SRCPATH}\Prerequisites\*
   StrCmp $vcredist2008set "" 0 vcredist2008_done
   StrCpy $vcredist2008set "true"
   ;Check if VC++ 2008 runtimes are already installed.
