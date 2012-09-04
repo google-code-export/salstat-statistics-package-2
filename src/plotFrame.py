@@ -1329,32 +1329,7 @@ class MpltFrame( wx.Frame, object ): # MpltFrame
         self.gca().hold( False)
         self.figpanel.canvas.draw()
 
-    def plotBar( self,data2plot):
-        DeprecationWarning( 'Deprecated function')
-        # warnings.warn( 'Deprecated function', DeprecationWarning)
-        self.gca().hold(True)
-        listLegend= list()
-        listPlot = list()
-        for y,texto in data2plot:
-            listPlot.append(self.gca().bar(range(len(y)),y))
-            listLegend.append(texto)
-        legend= self.figpanel.legend(listPlot,listLegend, prop = PROPLEGEND)
-        legend.draggable( state = True)
-        self.gca().hold( False)
-        self.figpanel.canvas.draw()
         
-    def plotBarH( self,data2plot):
-        self.gca().hold(True)
-        listLegend= list()
-        listPlot=   list()
-        for y,texto in data2plot:
-            listPlot.append(self.gca().barh(range(len(y)),y,align='center'))
-            listLegend.append(texto)
-        legend= self.figpanel.legend(listPlot,listLegend,  prop = PROPLEGEND)
-        legend.draggable(state=True)
-        self.gca().hold(False)
-        self.figpanel.canvas.draw()
-
     def plotLinRegress( self,data2plot):
         x = data2plot[0]
         y = data2plot[1]

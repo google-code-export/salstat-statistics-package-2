@@ -1,5 +1,5 @@
 __name__ = u'Bar plot'
-__all__=  ['barChartAllMeans', 'barChartAllMeansNice']
+__all__=  ['barChart', 'HorizBarChart', 'barChartAllMeans', 'barChartAllMeansNice']
 
 from openStats import statistics
 
@@ -13,6 +13,185 @@ from pylab import xticks
 from nicePlot.graficaRibon import plotBar
 import os
 import sys
+
+class barChart( _neededLibraries):
+    ''''''
+    name=      u'Bar chart'
+    plotName=  'barChart'
+    def __init__(self):
+        # getting all required methods
+        _neededLibraries.__init__( self)
+        self.name=      u'Bar chart'
+        self.plotName=  'barChart'
+        self.minRequiredCols= 1
+        self.colNameSelect= ''
+        
+    def _dialog(self, *arg, **params):
+        '''this funtcion is used to plot the bar chart of all means'''
+        self.log.write("Bar Chart")
+        self._updateColsInfo()
+
+        self.colours= ["blue", "black",
+                  "red", "green", "lightgreen", "darkblue",
+                  "yellow", "white"]
+        txt2= ["StaticText",   ["Colour"]]
+        txt3= ["StaticText",   ["Select data to plot"]]
+        btn2= ["Choice",       [self.colours]]
+        btn3= ["CheckListBox", [self.columnNames]]
+        btn4= ["CheckBox",     ["push the values up to the bars"] ]
+        structure= list()
+        structure.append( [txt3])
+        structure.append( [btn3])
+        structure.append( [btn2, txt2])
+        structure.append( [btn4])
+        setting= {"Title": "Bar chart of selected columns"}
+        return self.dialog(settings= setting, struct= structure)        
+    
+    def _calc( self, columns, *args, **params):
+        return [self.evaluate( col, *args, **params) for col in columns]
+        
+    def object(self):
+        return self
+    
+    def _showGui_GetValues(self):
+        dlg= self._dialog()
+        if dlg.ShowModal() != _OK:
+            dlg.Destroy()
+            return
+        
+        values=   dlg.GetValue()
+        
+        self.colNameSelect=  values[0]
+        self.colour=         values[1]
+        showBarValues=       values[2]
+
+        if self.colour == None:
+            self.colour=  self.colours[0]
+            
+        if self.colNameSelect == None:
+            self.log.write("you have to select at least %i column"%self.minRequiredCols)
+            return
+        
+        if isinstance( self.colNameSelect, (str, unicode)):
+            self.colNameSelect= [self.colNameSelect]
+
+        if len( self.colNameSelect) < self.minRequiredCols:
+            self.SetStatusText( u'You need to select at least %i columns to draw a graph!'%self.minRequiredCols)
+            return
+        
+        # it only retrieves the numerical values
+        columns= [self.grid.GetColNumeric(col) for col in self.colNameSelect]
+        
+        return ( columns, self.colour, showBarValues)
+        
+    def _calc( self, *args, **params):
+        return self.evaluate( *args, **params)
+        
+    def object( self):
+        return self.evaluate
+    
+    def evaluate( self, *args, **params):
+        # extracting data from the result
+        ydata=         args[0]
+        color=         args[1]
+        showBarValues= args[2]
+        
+        # evaluating the histogram function to obtain the data to plot        
+        plots= list()
+        for ydat in ydata:
+            plots.append( pltobj( None, xlabel= 'variable', ylabel= 'value', title= 'Bar Chart of all means'))
+            plt= plots[-1]
+            plt.gca().hold( True)
+            xdat= numpy.arange(1, len( ydat)+1)
+            res= plt.gca().bar( xdat, ydat, color= color, align='center')
+            width= res[0]._width/2.0
+            plt.gca().set_xlim( min( xdat)-0.5, max( xdat)+width*2+0.5)
+            plt.gca().set_ylim( numpy.array( plt.gca().get_ylim())*numpy.array( [1, 1.05]))
+            if showBarValues:
+                ax= plt.gca()
+                for label, xpos, ypos in zip( ydat, xdat, ydat):
+                    if isinstance(label, (str,unicode)):
+                        ax.annotate(label, ( xpos, ypos), va="bottom", ha="center")
+                        
+                    elif int(label) == float(label):
+                        label = int(label)
+                        ax.annotate(r"%d" % label, ( xpos, label), va="bottom", ha="center")
+                        
+                    elif type(label) == type(1.1):
+                        ax.annotate(r"%f" % label, ( xpos, label), va="bottom", ha="center")
+                        
+                    elif str(type(label)) == "<type 'numpy.int32'>":
+                        ax.annotate(r"%d" % label, ( xpos, label), va="bottom", ha="center")
+            else:
+                plt.gca().set_xticks( xdat + width)
+                plt.gca().set_xticklabels( self.colNameSelect)
+       
+            plt.gca().hold( False)
+            plt.updateControls()
+            plt.canvas.draw()
+        return plots
+    
+    def showGui( self, *args, **params):
+        values= self._showGui_GetValues()
+        if values== None:
+            return None
+        result= self._calc( *values)
+        self._report( result)
+        
+    def _report( self, result):
+        [res.Show() for res in result]
+        self.log.write( self.plotName+ ' successfull')
+
+class HorizBarChart(barChart):
+    ''''''
+    name=      u'Horizontal bar chart'
+    plotName=  'barChart'
+    def __init__(self):
+        barChart.__init__(self)
+        name=      u'Horizontal bar chart'
+        plotName=  'barChart'
+    def evaluate( self, *args, **params):
+        # extracting data from the result
+        ydata=         args[0]
+        color=         args[1]
+        showBarValues= args[2]
+        
+        # evaluating the histogram function to obtain the data to plot        
+        plots = list()
+        for xdat in ydata:
+            plots.append( pltobj( None, xlabel= 'value', ylabel= 'variable', title= 'Bar Chart of all means'))
+            plt= plots[-1]
+            plt.gca().hold( True)
+            ydat= numpy.arange( 1, len( xdat)+1)
+            res= plt.gca().barh( ydat, xdat, color= color, align='center')
+            width= res[0]._width/2.0
+            plt.gca().set_xlim( numpy.array( plt.gca().get_xlim())*numpy.array( [1, 1.1]))
+            if showBarValues:
+                ax= plt.gca()
+                for label, xpos, ypos in zip( xdat, xdat, ydat):
+                    xpos+= 0.05* plt.gca().get_xlim()[-1]
+                    if isinstance( label, (str, unicode)):
+                        ax.annotate(label, (xpos, ypos), va="bottom", ha="center")
+                        
+                    elif int( label) == float( label):
+                        label = int(label)
+                        ax.annotate(r"%d" % label, ( xpos, ypos), va="bottom", ha="center")
+                        
+                    elif type( label) == type( 1.1):
+                        ax.annotate(r"%f" % label, ( xpos, ypos), va="bottom", ha="center")
+                        
+                    elif str( type( label)) == "<type 'numpy.int32'>":
+                        ax.annotate( r"%d" % label, ( xpos, ypos), va="bottom", ha="center")
+            else:
+                plt.gca().set_yticks( ydat + width)
+                plt.gca().set_yticklabels( self.colNameSelect)
+       
+            plt.gca().hold( False)
+            plt.updateControls()
+            plt.canvas.draw()
+        
+        return plots
+    
 class barChartAllMeans( _neededLibraries):
     ''''''
     name=      u'Bar chart of all means'
@@ -113,14 +292,15 @@ class barChartAllMeans( _neededLibraries):
                 if isinstance(label, (str,unicode)):
                     ax.annotate(label, (xpos, ypos), va="bottom", ha="center")
                     
-                elif type(labels) == type(1):
-                    ax.annotate(r"%d" % labels, (xpos, labels), va="bottom", ha="center")
+                elif int(label) == float(label):
+                    label = int(label)
+                    ax.annotate(r"%d" % label, (xpos, label), va="bottom", ha="center")
                     
-                elif type(labels) == type(1.1):
-                    ax.annotate(r"%f" % labels, (xpos, labels), va="bottom", ha="center")
+                elif type(label) == type(1.1):
+                    ax.annotate(r"%f" % label, (xpos, label), va="bottom", ha="center")
                     
-                elif str(type(labels)) == "<type 'numpy.int32'>":
-                    ax.annotate(r"%d" % labels, (xpos, labels), va="bottom", ha="center")
+                elif str(type(label)) == "<type 'numpy.int32'>":
+                    ax.annotate(r"%d" % label, (xpos, label), va="bottom", ha="center")
         else:
             plt.gca().set_xticks(xdat + width)
             plt.gca().set_xticklabels(self.colNameSelect)
