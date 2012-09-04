@@ -1342,24 +1342,7 @@ class MpltFrame( wx.Frame, object ): # MpltFrame
         legend.draggable( state = True)
         self.gca().hold( False)
         self.figpanel.canvas.draw()
-
-    def plotNiceBar( self, data2plot):
-        xdat=  data2plot[0]
-        ydat=  data2plot[1]
-        label= data2plot[2]
-        colour= data2plot[3]
-        figNam= data2plot[4]
-        labelsBar= data2plot[5]
-        self.gca().hold( True)
-        plotBar(ax=      self.gca(),
-                xdata=   xdat,
-                ydata=   ydat,
-                labels=  labelsBar,
-                colors=  colour,
-                figName= figNam)
-        self.gca().hold( False)
-        self.figpanel.canvas.draw( )
-
+        
     def plotBarH( self,data2plot):
         self.gca().hold(True)
         listLegend= list()
