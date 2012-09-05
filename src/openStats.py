@@ -35,7 +35,10 @@ class statistics:
         self.minimum=  min(data)
         self.maximum=  max(data)
         self.range=    self.maximum-self.minimum
-        self.geomean=  stats.geometricmean(data)
+        if any([dat < 0 for dat in data]):
+            self.geomean=  None
+        else:
+            self.geomean=  stats.geometricmean(data)
         try:
             self.harmmean= stats.harmonicmean(data)
         except ZeroDivisionError:
