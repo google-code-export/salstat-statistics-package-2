@@ -15,10 +15,13 @@ import os
 from numpy import array, ravel
 import matplotlib.mlab as mlab
 from nicePlot.graficaRibon import plothist 
+from imagenes import imageEmbed
+imag= imageEmbed()
 
 class histogram( _neededLibraries):
     name=      u"Histogram"
     plotName=  u"Histogram"
+    image =    imag.histogram()
     def __init__( self):
         _neededLibraries.__init__(self)
         self.name=      u'Histogram'
@@ -64,6 +67,9 @@ class histogram( _neededLibraries):
     
     def _showGui_GetValues(self):
         dlg= self._dialog()
+        if dlg == None:
+            return
+        
         if dlg.ShowModal() != _OK:
             dlg.Destroy()
             return
@@ -140,8 +146,9 @@ class histogram( _neededLibraries):
 class niceHistogram( _neededLibraries):
     '''this function is used to plot a nice histogram
     chart of the selected column'''   
-    name=     u'Nice Histogram'
+    name=      u'Nice Histogram'
     plotName=  'histogram'
+    image=     imag.niceHistogram()
     def __init__(self):
         _neededLibraries.__init__(self)
         self.name=     u'Nice Histogram'
@@ -238,6 +245,8 @@ class niceHistogram( _neededLibraries):
         
     def _showGui_GetValues(self):
         dlg= self._dialog()
+        if dlg == None:
+            return
         if dlg.ShowModal() != _OK:
             dlg.Destroy()
             return
@@ -282,6 +291,7 @@ class niceHistogram( _neededLibraries):
 class cumulativeFrecuency( cumfreq, _neededLibraries):
     name=     u'Cumulative Frecuency'
     plotName= 'cumulativeFrecuency'
+    image=    imag.cumulativeFrecuency()
     def __init__(self):
         cumfreq.__init__(self)
         _neededLibraries.__init__(self)

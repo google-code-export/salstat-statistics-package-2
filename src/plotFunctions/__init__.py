@@ -1145,6 +1145,7 @@ class scrolled3(wx.ScrolledWindow):
 class _neededLibraries(object):
     icon = None
     id= None
+    image= wx.NullBitmap
     name= ''
     def __init__(self):
         if hasattr( wx.GetApp(), 'Logg'):
