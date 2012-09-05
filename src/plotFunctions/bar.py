@@ -13,11 +13,14 @@ from pylab import xticks
 from nicePlot.graficaRibon import plotBar
 import os
 import sys
+from imagenes import imageEmbed
 
+imag = imageEmbed()
 class barChart( _neededLibraries):
     ''''''
     name=      u'Bar chart'
     plotName=  'barChart'
+    image=     imag.bars()
     def __init__(self):
         # getting all required methods
         _neededLibraries.__init__( self)
@@ -146,6 +149,7 @@ class HorizBarChart(barChart):
     ''''''
     name=      u'Horizontal bar chart'
     plotName=  'barChart'
+    image=     imag.HorizBarChart()
     def __init__(self):
         barChart.__init__(self)
         name=      u'Horizontal bar chart'
@@ -196,6 +200,7 @@ class barChartAllMeans( _neededLibraries):
     ''''''
     name=      u'Bar chart of all means'
     plotName=  'barChartMeans'
+    image=     imag.barChartAllMeans()
     def __init__(self):
         # getting all required methods
         _neededLibraries.__init__( self)
@@ -325,6 +330,7 @@ class barChartAllMeansNice( _neededLibraries):
     ''''''
     name=      u'Nice Bar chart of all means'
     plotName=  'barChartMeans'
+    image=     imag.barChartAllMeansNice()
     def __init__(self):
         # getting all required methods
         _neededLibraries.__init__( self)

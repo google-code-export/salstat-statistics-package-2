@@ -4,10 +4,13 @@ from plotFunctions import _neededLibraries, pltobj
 from wx import ID_OK as _OK
 import wx
 from openStats import statistics
+from imagenes import imageEmbed
+imag= imageEmbed()
 
 class lines( _neededLibraries):
     name=      u"lines"
     plotName=  u"lines"
+    image=     imag.lines()
     def __init__( self):
         self.name=      u"lines"
         self.plotName=  u"lines"
@@ -23,6 +26,8 @@ class lines( _neededLibraries):
     
     def _showGui_GetValues(self):
         dlg= self._dialog()
+        if dlg == None:
+            return
         if dlg.ShowModal() == _OK:
             selectedcols = dlg.GetValue()
             dlg.Destroy()
@@ -76,6 +81,7 @@ class lines( _neededLibraries):
 class linesOfMean( _neededLibraries):
     name=      u"lines of all means"
     plotName=  u"linesMean"
+    image=     imag.linesOfMean()
     def __init__( self):
         self.name=      u"lines of all means"
         self.plotName=  u"linesMean"
@@ -91,6 +97,8 @@ class linesOfMean( _neededLibraries):
     
     def _showGui_GetValues(self):
         dlg= self._dialog()
+        if dlg == None:
+            return
         if dlg.ShowModal() == _OK:
             selectedcols = dlg.GetValue()
             dlg.Destroy()
