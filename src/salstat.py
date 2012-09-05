@@ -8,7 +8,7 @@ details of this license. """
 
 import wx
 import os
-
+import sys
 import wx.grid
 
 # -----------------
@@ -53,7 +53,6 @@ import traceback
 # translation module
 import locale
 import glob
-import sys
 import time
 
 from xml.dom import minidom
@@ -76,6 +75,7 @@ from helpSystem import Navegator
 from dialogs import CheckListBox
 from dialogs import SaveDialog, VariablesFrame, DescriptivesFrame
 from dialogs import TransformFrame
+from dialogs import createPlotSelectionPanel
 
 from gridCellRenderers import floatRenderer, AutoWrapStringRenderer
 from wx.combo import BitmapComboBox # translation control
@@ -83,6 +83,9 @@ import wx.lib.langlistctrl as langlist
 
 import statsmodels.api as sm
 import scipy
+
+import plotFunctions
+import statFunctions
 
 APPNAME= 'S2'
 
@@ -375,10 +378,9 @@ class SalStat2App(wx.App):
         self.Bind(wx.EVT_ACTIVATE_APP, self.OnActivate)
 
     def OnInit(self):
-        import sys
         # getting the os type
         self.OSNAME = os.name
-        self.VERSION= '2.1 beta 2'
+        self.VERSION= '2.1 beta 3'
         self.missingvalue= missingvalue
         wx.SetDefaultPyEncoding( "utf-8")
         self.translate= translate
@@ -640,7 +642,15 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
 
         # create menubar
         self._createMenu()
-
+        
+        # create plot selection panel
+        grapHplotData= self._autoCreateMenu( plotFunctions, twoGraph= True)
+        # grapHplotData= [(label, image, callback, id), ]
+        self.plotSelection= createPlotSelectionPanel(self, size= wx.Size(320, 480) )
+        self.plotSelection.createPanels( grapHplotData)
+        #pltFrame.Show(True)
+        # grapHplotData= [(label, image, callback, id), ]
+        
         #------------------------
         # organizing panels
         self.m_mgr.AddPane( self.formulaBarPanel,
@@ -650,7 +660,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.m_mgr.AddPane(self.grid,
                            aui.AuiPaneInfo().Centre().
                            CaptionVisible(True).Caption(translate(u"Data Entry Panel")).
-                           MaximizeButton(True).MinimizeButton(True).
+                           MaximizeButton(True).MinimizeButton(False).
                            CloseButton( False ).MinSize( wx.Size( 240,-1 )))
 
         self.m_mgr.AddPane(self.answerPanel,
@@ -676,6 +686,13 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
                                             Dock().Resizable().FloatingSize( wx.DefaultSize ).
                                             CaptionVisible(True).
                                             DockFixed( False ).BestSize(wx.Size(-1,150)))
+        
+        
+        self.m_mgr.AddPane(self.plotSelection,
+                           aui.AuiPaneInfo().Centre().Left().
+                           CaptionVisible(True).Caption((translate(u"Plot selection"))).
+                           MinimizeButton().Resizable(True).MaximizeButton(True).
+                           CloseButton( True ).MinSize( wx.Size( 240,-1 )))
         self.currPanel = None
         self._sendObj2Shell(self.scriptPanel)
         self._BindEvents()
@@ -779,7 +796,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         print "you have to restart te app to see the changes"
         wx.GetApp().SetPreferences(allPreferences)
 
-    def _autoCreateMenu(self, module):
+    def _autoCreateMenu(self, module, twoGraph = False):
         # automatically creates a menu related with an specified module
         groups= module.__all__
         subgroup= list()
@@ -788,7 +805,10 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
             result= list()
             for item in attr.__all__:
                 fnc= getattr( attr, item)
-                result.append( ( translate( fnc.name), fnc.icon, getattr( fnc(), 'showGui'), fnc.id))
+                if twoGraph:
+                    result.append( ( translate( fnc.name), fnc.image, getattr( fnc(), 'showGui'), fnc.id))
+                else:
+                    result.append( ( translate( fnc.name), fnc.icon, getattr( fnc(), 'showGui'), fnc.id))
             subgroup.append( ( translate( attr.__name__), result))
         return subgroup
 
@@ -814,11 +834,10 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         menuBar = wx.MenuBar()
 
         # to be used for statistical menu autocreation
-        import statFunctions
         from statFunctions import *
-        statisticalMenus= self._autoCreateMenu( statFunctions)
-        import plotFunctions
         from plotFunctions import *
+        
+        statisticalMenus= self._autoCreateMenu( statFunctions)
         plotMenus= self._autoCreateMenu( plotFunctions)
         #add contents of menu
         dat1= (
@@ -864,7 +883,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
                (translate(u"Linear Regression"),       None, self.GoLinRegressPlot,     None),
                (translate(u"Ternary"),                 None, self.GoTernaryplot,        None),
                (translate(u"Probability"),             None, self.GoProbabilityplot,    None),
-               (translate(u"Adaptative BMS"),          None, self.GoAdaptativeBMS,      None),)),
+               (translate(u"Adaptative BMS"),          None, self.GoAdaptativeBMS,      None),) ),
             (translate(u"&Help"),
              (##("Help\tCtrl-H",       imag.about(),  self.GoHelpSystem,  wx.ID_HELP),
               (translate(u"&About..."),          imag.icon16(), self.ShowAbout,     wx.ID_ABOUT),)),
