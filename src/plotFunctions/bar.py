@@ -1,5 +1,7 @@
 __name__ = u'Bar plot'
-__all__=  ['barChart', 'HorizBarChart', 'barChartAllMeans', 'barChartAllMeansNice']
+__all__=  ['barChart', 'HorizBarChart',
+           'barChartAllMeans', 'barChartAllMeansNice',
+           'stakedBar']
 
 from openStats import statistics
 
@@ -14,8 +16,21 @@ from nicePlot.graficaRibon import plotBar
 import os
 import sys
 from imagenes import imageEmbed
+from slbTools import homogenize
+
 
 imag = imageEmbed()
+def generateColors():
+    opt= ['r','b','g','m','c','y','k']
+    newOpt= opt[:]
+    while True:
+        try:
+            value= newOpt.pop(0)
+        except IndexError:
+            newOpt= opt[:]
+            value= newOpt.pop(0)
+        yield value
+            
 class barChart( _neededLibraries):
     ''''''
     name=      u'Bar chart'
@@ -449,3 +464,116 @@ class barChartAllMeansNice( _neededLibraries):
     def _report(self, result):
         result.Show()
         self.log.write(self.plotName+ ' successfull')
+
+class stakedBar(_neededLibraries):
+    ''''''
+    name=      u'Staked bar chart'
+    plotName=  'barStaked'
+    image=     imag.staked()
+    def __init__(self):
+        # getting all required methods
+        _neededLibraries.__init__( self)
+        self.name=      u'Staked bar chart'
+        self.plotName=  'barStaked'
+        self.minRequiredCols= 1
+        self.colNameSelect= ''
+        
+    def _dialog(self, *arg, **params):
+        '''this funtcion is used to plot the bar chart of all means'''
+        self.log.write("Bar Chart")
+        self._updateColsInfo()
+
+        #self.colours= ["blue", "black",
+        #          "red", "green", "lightgreen", "darkblue",
+        #          "yellow", "white"]
+        txt2= ["StaticText",   ["xtics Labels"]]
+        txt3= ["StaticText",   ["Select data to plot"]]
+        btn2= ["Choice",       [self.columnNames]]
+        btn3= ["CheckListBox", [self.columnNames]]
+        structure= list()
+        structure.append( [txt3])
+        structure.append( [btn3])
+        structure.append( [txt2])
+        structure.append( [btn2])
+        setting= {"Title": "Bar chart of selected columns"}
+        return self.dialog(settings= setting, struct= structure)
+    
+    def _calc( self, columns, *args, **params):
+        return [self.evaluate( col, *args, **params) for col in columns]
+        
+    def object(self):
+        return self
+    
+    def _showGui_GetValues(self):
+        dlg= self._dialog()
+        if dlg.ShowModal() != _OK:
+            dlg.Destroy()
+            return
+        
+        values=   dlg.GetValue()
+        self.colNameSelect=  values[0]
+        if values[1] != None:
+            self.xticlabel=  self.grid.GetCol( values[1])
+            
+        if self.colNameSelect == None:
+            self.log.write("you have to select at least %i column"%self.minRequiredCols)
+            return
+        
+        if isinstance( self.colNameSelect, (str, unicode)):
+            self.colNameSelect= [self.colNameSelect]
+
+        if len( self.colNameSelect) < self.minRequiredCols:
+            self.SetStatusText( u'You need to select at least %i columns to draw a graph!'%self.minRequiredCols)
+            return
+        
+        # it only retrieves the numerical values
+        columns= [self.grid.GetColNumeric(col) for col in self.colNameSelect]
+        
+        return ( columns, self.xticlabel)# self.colour, showBarValues)
+        
+    def _calc( self, *args, **params):
+        return self.evaluate( *args, **params)
+        
+    def object( self):
+        return self.evaluate
+    
+    def evaluate( self, *args, **params):
+        # extracting data from the result
+        ydata, passPos =  homogenize( *args[0], returnPos= True)
+        if args[0] != None:
+            xticLabel=  numpy.array(args[1])[passPos]
+        else:
+            xticLabel= None
+                    
+        plt= pltobj( None, xlabel= 'variable', ylabel= 'value', title= 'Bar Chart of all means')
+        plt.gca().hold( True)
+        bars= list()
+        ydatInit= numpy.array( ydata[0])*0
+        xdat= numpy.arange( 1, len( ydatInit)+1)
+        colour= generateColors()
+        for ydat in ydata:
+            ydat= numpy.array( ydat)
+            bars.append( plt.gca().bar( xdat, ydat, bottom = ydatInit, color= colour.next())) #align = 'center',
+            ydatInit = ydatInit + ydat
+        width= bars[-1][0]._width/2.0
+        plt.gca().set_xlim( min( xdat)-0.5, max( xdat)+width*2+0.5)
+        plt.gca().set_ylim( numpy.array( plt.gca().get_ylim())*numpy.array( [1, 1.05]))
+        plt.gca().set_xticks( xdat + width)
+        plt.gca().set_xticklabels( xticLabel)
+        plt.gca().hold( False)
+        legend= plt.legend( [bar[0] for bar in bars], self.colNameSelect )
+        legend.draggable(True)
+        plt.updateControls()
+        plt.canvas.draw()
+        return [ plt]
+    
+    def showGui( self, *args, **params):
+        values= self._showGui_GetValues()
+        if values== None:
+            return None
+        result= self._calc( *values)
+        self._report( result)
+        
+    def _report( self, result):
+        [res.Show() for res in result]
+        self.log.write( self.plotName+ ' successfull')

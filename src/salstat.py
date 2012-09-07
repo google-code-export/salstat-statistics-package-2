@@ -653,6 +653,8 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         
         #------------------------
         # organizing panels
+        self.auiPanels = dict()
+        
         self.m_mgr.AddPane( self.formulaBarPanel,
                             aui.AuiPaneInfo().Name("tb2").Caption(translate(u"Inspection Tool")).ToolbarPane().Top().Row(1).
                             Position(1).CloseButton( False ))
@@ -689,8 +691,8 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         
         
         self.m_mgr.AddPane(self.plotSelection,
-                           aui.AuiPaneInfo().Centre().Left().
-                           CaptionVisible(True).Caption((translate(u"Plot selection"))).
+                           aui.AuiPaneInfo().Centre().Left().Show(False).
+                           CaptionVisible(True).Caption((translate(u"Plot selection panel"))).
                            MinimizeButton().Resizable(True).MaximizeButton(True).
                            CloseButton( True ).MinSize( wx.Size( 240,-1 )))
         self.currPanel = None
@@ -875,7 +877,8 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
             (translate(u"S&tatistics"),
              statisticalMenus),
             (translate(u"&Graph"),
-             ( plotMenus[0],
+             ( (translate(u"Show/Hide the plot panel"), None, self.showPlotPanel,       None),
+               plotMenus[0],
                plotMenus[1],
                plotMenus[2],
                (translate(u"Scatter"),                 None, self.GoScatterPlot,        None),
@@ -1184,6 +1187,19 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
     def GoOnlyneHelp( self, evt):
         webbrowser.open(r"http://code.google.com/p/salstat-statistics-package-2/wiki/Documentation?ts=1344287549&updated=Documentation")
         
+    def showPlotPanel(self, evt):
+        panels = self.m_mgr.GetAllPanes()
+        for panel in panels:
+            if panel.caption == translate(u"Plot selection"):
+                break
+        self.m_mgr.Update()
+        if not panel.IsShown():
+            panel.Show(True)
+            
+        else:
+            panel.Show(False)
+            
+        self.m_mgr.Update()    
     ################
     ### chart init
     ################

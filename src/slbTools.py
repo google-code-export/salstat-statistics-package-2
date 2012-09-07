@@ -281,10 +281,16 @@ def distinct(data):
             unicos.append(valor)
     return unicos
 
-def homogenize(*args):
+def homogenize(*args, **params):
     '''given a serie of vectors it check the values and 
     groups it depens on its value. 
     arg1: iterable with numerical data'''
+    returnPos= False
+    try:
+        returnPos= params['returnPos']
+    except KeyError:
+        pass
+    
     maxlen= min( [len(arg) for arg in args])
     nelements= len( args)
     passPos= list()
@@ -294,7 +300,10 @@ def homogenize(*args):
             passPos.append(pos)
     if sum( [isinstance( arg,(np.ndarray,)) for arg in args]) == len(args):
         return [np.array([arg[pos] for pos in passPos]) for arg in args]
-    return [[arg[pos] for pos in passPos] for arg in args]
+    if not returnPos:
+        return [[arg[pos] for pos in passPos] for arg in args]
+    else:
+        return ([[arg[pos] for pos in passPos] for arg in args], passPos)
 
 def homogenizeNonNumerical(*args):
     '''given a serie of vectors it check the values and 
