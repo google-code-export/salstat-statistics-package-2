@@ -1,10 +1,12 @@
-__name__ = u"Lines"
-__all__=  [u'lines', u'linesOfMean']
-from plotFunctions import _neededLibraries, pltobj
+__name__ = u"Lines and areas"
+__all__=  [u'lines', u'linesOfMean', 
+           u'shadowLines', u'areaPlot']
+from plotFunctions import _neededLibraries, pltobj, GaussianFilter, DropShadowFilter
 from wx import ID_OK as _OK
 import wx
 from openStats import statistics
 from imagenes import imageEmbed
+import matplotlib.transforms as mtransforms # used to generate the lines shadow
 imag= imageEmbed()
 
 class lines( _neededLibraries):
@@ -12,9 +14,10 @@ class lines( _neededLibraries):
     plotName=  u"lines"
     image=     imag.lines()
     def __init__( self):
+        _neededLibraries.__init__(self)
         self.name=      u"lines"
         self.plotName=  u"lines"
-        _neededLibraries.__init__(self)
+        
         
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
@@ -83,10 +86,10 @@ class linesOfMean( _neededLibraries):
     plotName=  u"linesMean"
     image=     imag.linesOfMean()
     def __init__( self):
+        _neededLibraries.__init__(self)
         self.name=      u"lines of all means"
         self.plotName=  u"linesMean"
-        _neededLibraries.__init__(self)
-        
+                
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
@@ -146,6 +149,122 @@ class linesOfMean( _neededLibraries):
         result.Show()
         self.log.write( self.plotName+ ' successfull')        
 
+class shadowLines(lines):
+    name=      u"lines with shadow"
+    plotName=  u"linesShadow"
+    image=     imag.shadowLines()
+    def __init__( self):
+        lines.__init__(self)
+        self.name=      u"lines with shadow"
+        self.plotName=  u"linesShadow"
+        
+    def evaluate( self, *args, **params):
+        # generate the chart
+        selectedcols= args
+        data= [self.grid.GetColNumeric(colName) for colName in selectedcols ]
+        data= [(range( len( data[i])), data[i], self.columnNames[i]) for i in range( len( data))]
+        plt= pltobj(None, xlabel = "", ylabel = "value", title= "Line plot" )
+        plt.gca().hold(True)
+        listLegend= list()
+        listPlot = list()
+        for x,y,texto in data:
+            listPlot.append( plt.gca().plot( x, y, mfc = "w", lw = 5, mew = 3, ms = 10,))
+            listLegend.append( texto)
+        gauss = DropShadowFilter( 4)
+        
+        for line in listPlot:
+            # draw shadows with same lines with slight offset.
+            line = line[0]
+            xx = line.get_xdata()
+            yy = line.get_ydata()
+            shadow, = plt.gca().plot( xx, yy)
+            shadow.update_from(line)
+            # offset transform
+            ot = mtransforms.offset_copy(line.get_transform(), plt.gca().figure,
+                                         x=4.0, y=-6.0, units='points')
+    
+            shadow.set_transform(ot)
+            # adjust zorder of the shadow lines so that it is drawn below the
+            # original lines
+            shadow.set_zorder(line.get_zorder()-0.5)
+            shadow.set_agg_filter(gauss)
+            shadow.set_rasterized(True) # to support mixed-mode renderers
+        legend= plt.legend( listPlot, listLegend)
+        legend.draggable( state = True)
+        plt.gca().hold(False)
+        plt.updateControls()
+        plt.canvas.draw()
+        return plt
+
+class areaPlot( lines):
+    name=      u"Area plot"
+    plotName=  u"arePlot"
+    image=     imag.areaPlot()
+    def __init__( self):
+        lines.__init__(self)
+        self.name=      u"Area plot"
+        self.plotName=  u"areaPlot"
+        
+    def _dialog(self, *arg, **params):
+        self._updateColsInfo()
+        if self.columnNames == []:
+            self.log.write("You need some data to draw a graph!")
+            return
+        
+        return self.data2Plotdiaglog( None, self.columnNames)
+    
+    def _showGui_GetValues(self):
+        dlg= self._dialog()
+        if dlg == None:
+            return
+        if dlg.ShowModal() == _OK:
+            selectedcols = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+
+        self.log.write("selectedcols= " + selectedcols.__str__(), False)
+        if len(selectedcols) == 0:
+            self.log.write("You need to select some data to draw a graph!")
+            return
+        
+        return selectedcols
+        
+    def _calc( self, *args, **params):
+        return self.evaluate( *args, **params)
+        
+    def object( self):
+        return self.evaluate
+    
+    def evaluate( self, *args, **params):
+        selectedcols= args
+        data= [ self.grid.GetColNumeric( colName) for colName in selectedcols ]
+        data= [( range( len(data[i])), data[i], self.columnNames[i]) for i in range( len( data))]
+        listPlot = list()
+        for x, y, texto in data:
+            listPlot.append( pltobj( None, xlabel = "", ylabel = "value", title= self.name ))
+            plt= listPlot[-1]
+            gca= plt.gca()
+            x= [x[0]] + x[:] + [x[-1]]
+            y= [0] + y[:] + [0]
+            gca.fill( x, y)
+            plt.updateControls()
+            plt.canvas.draw()
+        return listPlot
+    
+    def showGui(self, *args, **params):
+        values= self._showGui_GetValues()
+        if values== None:
+            return None
+        result= self._calc(*values)
+        self._report(result)
+        
+    def _report(self, result):
+        for res in result:
+            res.Show()
+        self.log.write(self.plotName+ ' successfull')
+     
 #class plotScatter( _genericFrame):
         #self.gca().hold(True)
         #listLegend= list()
@@ -451,4 +570,5 @@ class linesOfMean( _neededLibraries):
         #self.gca().hold(False)
         #self.figpanel.canvas.draw()
 
+    
     
