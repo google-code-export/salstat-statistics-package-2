@@ -82,6 +82,8 @@ class PyWXGridEditMixin():
             redo=(self.Paste, (box, newValue)))
         self._editOldValue = None
         self.Mixin_callbackChangeCell(box)
+        if self.padre != False:
+            self.padre.grid.hasChanged= True
     
     def GetSelectionBox(self):
         """Produce a set of selection boxes of the form (top, left, nrows, ncols)"""
@@ -160,6 +162,7 @@ class PyWXGridEditMixin():
         self.Paste(pBox, data)
         # se almacena el rango que se ha cambiado
         self.Mixin_callbackChangeCell(pBox)
+        self.padre.grid.hasChanged= True
         
     def _DeterminePasteArea(self, top, left, clipRows, clipCols, selRows, selCols):
         """paste area rules: if 1-d selection (either directon separately) and 2-d clipboard, use clipboard size, otherwise use selection size"""
@@ -186,7 +189,8 @@ class PyWXGridEditMixin():
                     col = left + c
                     if self.CellInGrid(row, col): self.SetCellValue(row, col, data[r %dataRows][c % dataCols])
             return
-        except ZeroDivisionError: print "Zero division: Num_col "  +str(dataRows)+ ", Num_Fil " + str(dataCols)
+        except ZeroDivisionError:
+            print "Zero division: Num_col "  +str(dataRows)+ ", Num_Fil " + str(dataCols)
             
 
     def CellInGrid(self, r, c): # only paste data that actually falls on the table
@@ -197,6 +201,7 @@ class PyWXGridEditMixin():
         box = self.GetSelectionBox()[0]
         self.Copy()
         self.Delete() #this takes care of undo/redo
+        self.padre.grid.hasChanged= True
 
     def Delete(self):
         """Clear Cell contents"""
@@ -207,7 +212,8 @@ class PyWXGridEditMixin():
                 redo=(self.Paste, (box, "\n")))
             self.Paste(box, "\n")
             self.Mixin_callbackChangeCell(box)
-
+        self.padre.grid.hasChanged= True
+        
     def AddUndo(self, undo, redo):
         """Add an undo/redo combination to the respective stack"""
         (meth, parms) = undo
@@ -233,7 +239,8 @@ class PyWXGridEditMixin():
             self.Mixin_callbackChangeCell(params[0])
             padre= self.GetParent() 
             #padre.m_grid.SetGridCursor(top, left) # se espera que el parent sea el grid
-
+            self.padre.grid.hasChanged= True
+            
     def Redo(self, evt = None):
         if self._stackPtr < len(self._redoStack):
             (funct, params) = self._redoStack[self._stackPtr]
@@ -247,6 +254,7 @@ class PyWXGridEditMixin():
             self.Mixin_callbackChangeCell(params[0])
             padre= self.GetParent() 
             #padre.m_grid.SetGridCursor(top, left) # se espera que el parent sea el grid
+            self.padre.grid.hasChanged= True
 
 if __name__ == '__main__':
         import sys
