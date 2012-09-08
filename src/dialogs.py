@@ -2,6 +2,7 @@
 # Colombia
 
 import  wx
+import wx.aui
 from imagenes import imageEmbed
 from openStats import statistics # used in descriptives frame
 import math # to be used in transform pane
@@ -210,7 +211,9 @@ class createPlotSelectionPanel( wx.Panel):
 	wx.Panel.__init__( self, *args, **params)
 	self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
 	bSizer1 = wx.BoxSizer( wx.VERTICAL )
-	self.notebook = wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
+	self.notebook = wx.aui.AuiNotebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,
+	                                    wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|wx.aui.AUI_NB_WINDOWLIST_BUTTON )
+	# wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
 
 	bSizer1.Add( self.notebook, 1, wx.EXPAND, 5 )
 	self.SetSizer( bSizer1 )
