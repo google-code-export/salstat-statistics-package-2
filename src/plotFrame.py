@@ -1303,33 +1303,6 @@ class MpltFrame( wx.Frame, object ): # MpltFrame
         x = np.arange(0, 6, .01)
         y = np.sin(x**2)*np.exp(-x)
         self.gca().plot(x, y)
-    def plotLine( self,data2plot):
-        self.gca().hold(True)
-        listLegend= list()
-        listPlot = list()
-        for x,y,texto in data2plot:
-            listPlot.append(self.gca().plot(x,y))
-            listLegend.append(texto)
-        legend= self.figpanel.legend(listPlot,listLegend)
-        legend.draggable(state=True)
-        self.gca().hold(False)
-        self.figpanel.canvas.draw()
-
-    def plotScatter( self,data2plot):
-        self.gca().hold(True)
-        listLegend= list()
-        listPlot = list()
-        for x,y,texto in data2plot:
-            # se homogeniza la informacion
-            (x, y) = homogenize( x, y)
-            listPlot.append( self.gca().plot( x, y, '.'))
-            listLegend.append( texto)
-        legend= self.figpanel.legend( listPlot, listLegend, prop = PROPLEGEND)
-        legend.draggable( state= True)
-        self.gca().hold( False)
-        self.figpanel.canvas.draw()
-
-        
     def plotLinRegress( self,data2plot):
         x = data2plot[0]
         y = data2plot[1]
@@ -1363,11 +1336,6 @@ class MpltFrame( wx.Frame, object ): # MpltFrame
                                        labels=labels,
                                        autopct='%1.1f%%',
                                        shadow=True)
-        self.figpanel.canvas.draw()
-
-    def boxPlot(self,data2plot):
-        plt= self.gca().boxplot(data2plot, notch=0, sym='+', vert=1, whis=1.5,
-                                positions=None, widths=None, patch_artist=False)
         self.figpanel.canvas.draw()
 
     def plotTrian(self,data2plot):
@@ -1481,38 +1449,6 @@ class MpltFrame( wx.Frame, object ): # MpltFrame
         legend.draggable( state= True)
         ax.hold(False)
         self.figpanel.canvas.draw(0)
-
-    def AdaptativeBMS(self, data, xlabel='', ylabel='', title=''):
-        self.figpanel.gca().hold(True)
-        for serieNumber, serieData in enumerate(data): 
-            xmin= serieNumber-0.4
-            xmax= serieNumber+0.4
-            size= len(serieData)
-            if size == 0: continue
-            step= 0.8/float(size)
-            xdata= [ -0.4 + serieNumber + i*step for i in range(size)]
-            self.gca().plot(xdata, serieData, marker= '.', linestyle= '_')
-        self.gca().set_xticks(range(len(data)))
-        self.figpanel.gca().set_title(title)
-        self.figpanel.gca().set_xlabel(xlabel)
-        self.figpanel.gca().set_ylabel(ylabel)
-        self.figpanel.gca().hold(False)
-        self.figpanel.canvas.draw()
-    def probabilityPlot(self, data2plot):
-        import scipy.stats as stats2
-        from numpy import amin, amax
-        if not isinstance(data2plot[0],(np.ndarray,)):
-            data2plot[0]= np.array(data2plot[0])
-        res=   stats2.probplot(data2plot[0],)
-        (osm,osr)=  res[0]
-        (slope, intercept, r)= res[1]
-        ax= self.figpanel.gca()
-        ax.plot(osm, osr, 'o', osm, slope*osm + intercept)
-        xmin, xmax= amin(osm),amax(osm)
-        ymin, ymax= amin(data2plot),amax(data2plot)
-        posx, posy= xmin+0.70*(xmax-xmin), ymin+0.01*(ymax-ymin)
-        ax.text(posx,posy, "r^2=%1.4f" % r)
-        self.figpanel.canvas.draw()
 
     def controlChart(self, data2plot):
         UCL= data2plot['UCL']
