@@ -6,7 +6,7 @@ __all__=  ['barChart', 'HorizBarChart',
 from openStats import statistics
 
 import numpy
-from plotFunctions import _neededLibraries, pltobj
+from plotFunctions import _neededLibraries, pltobj, generateColors
 from statFunctions import _genericFunc
 from wx import ID_OK as _OK
 from wx import Size
@@ -20,16 +20,6 @@ from slbTools import homogenize
 
 
 imag = imageEmbed()
-def generateColors():
-    opt= ['r','b','g','m','c','y','k']
-    newOpt= opt[:]
-    while True:
-        try:
-            value= newOpt.pop(0)
-        except IndexError:
-            newOpt= opt[:]
-            value= newOpt.pop(0)
-        yield value
             
 class barChart( _neededLibraries):
     ''''''
@@ -94,7 +84,7 @@ class barChart( _neededLibraries):
             self.colNameSelect= [self.colNameSelect]
 
         if len( self.colNameSelect) < self.minRequiredCols:
-            self.SetStatusText( u'You need to select at least %i columns to draw a graph!'%self.minRequiredCols)
+            self.log.write( u'You need to select at least %i columns to draw a graph!'%self.minRequiredCols)
             return
         
         # it only retrieves the numerical values
@@ -274,7 +264,7 @@ class barChartAllMeans( _neededLibraries):
             self.colNameSelect= [self.colNameSelect]
 
         if len( self.colNameSelect) < self.minRequiredCols:
-            self.SetStatusText( u'You need to select at least %i columns to draw a graph!'%self.minRequiredCols)
+            self.log.write( u'You need to select at least %i columns to draw a graph!'%self.minRequiredCols)
             return
         
         # it only retrieves the numerical values
@@ -409,7 +399,7 @@ class barChartAllMeansNice( _neededLibraries):
             self.colNameSelect= [self.colNameSelect]
 
         if len( self.colNameSelect) < self.minRequiredCols:
-            self.SetStatusText( u'You need to select at least %i columns to draw a graph!'%self.minRequiredCols)
+            self.log.write( u'You need to select at least %i columns to draw a graph!'%self.minRequiredCols)
             return
         
         # it only retrieves the numerical values
@@ -523,7 +513,7 @@ class stakedBar(_neededLibraries):
             self.colNameSelect= [self.colNameSelect]
 
         if len( self.colNameSelect) < self.minRequiredCols:
-            self.SetStatusText( u'You need to select at least %i columns to draw a graph!'%self.minRequiredCols)
+            self.log.write( u'You need to select at least %i columns to draw a graph!'%self.minRequiredCols)
             return
         
         # it only retrieves the numerical values

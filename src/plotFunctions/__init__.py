@@ -1,6 +1,8 @@
 '''a module thath will be used as a container of different functions'''
 version = "0.0.1"
-__all__ = ['histogramPlot','bar','lines']
+__all__ = ['histogramPlot','bar',
+           'lines','scatter',
+           'others']
 
 from easyDialog import Dialog as _dialog
 import wx
@@ -56,6 +58,16 @@ alpha=        [str( x/float( 10)) for x in range( 1, 11)]
 
 import matplotlib.cm as cm
 
+def generateColors():
+    opt= ['r','b','g','m','c','y','k']
+    newOpt= opt[:]
+    while True:
+        try:
+            value= newOpt.pop(0)
+        except IndexError:
+            newOpt= opt[:]
+            value= newOpt.pop(0)
+        yield value
 # <p/> INIT GAUSS FUNCTION
 def smooth1d(x, window_len):
     # copied from http://www.scipy.org/Cookbook/SignalSmooth
@@ -1348,7 +1360,8 @@ class pltobj( wx.Frame, object ):
         ((x1,x2,...,xn))
         '''
         self._requeridos()
-            
+        if parent == None:
+            parent= wx.GetApp().frame
         self.graphParams= {'xlabel': '',
                            'ylabel': '',
                            'title': '',

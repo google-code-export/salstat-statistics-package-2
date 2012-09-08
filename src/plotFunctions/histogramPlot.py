@@ -127,6 +127,8 @@ class histogram( _neededLibraries):
             mu= st.mean
             y = mlab.normpdf( bins, mu, sigma)
             l = plt.gca().plot( bins, y, 'r--', linewidth=1)
+            lg= plt.legend([l, patches[0]], ['fit', 'hist'])
+            lg.draggable(True)
         plt.gca().hold( False)
         plt.updateControls()
         plt.canvas.draw() #self.figpanel

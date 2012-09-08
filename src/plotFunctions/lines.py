@@ -1,12 +1,16 @@
 __name__ = u"Lines and areas"
-__all__=  [u'lines', u'linesOfMean', 
-           u'shadowLines', u'areaPlot']
-from plotFunctions import _neededLibraries, pltobj, GaussianFilter, DropShadowFilter
+__all__=  [u'lines', u'linesOfMean','stem', 
+           u'shadowLines', u'areaPlot',
+           u'multipleAreaPlot']
+from plotFunctions import _neededLibraries, pltobj, GaussianFilter
+from plotFunctions import DropShadowFilter, generateColors
 from wx import ID_OK as _OK
 import wx
 from openStats import statistics
 from imagenes import imageEmbed
+from numpy import array
 import matplotlib.transforms as mtransforms # used to generate the lines shadow
+from slbTools import homogenize
 imag= imageEmbed()
 
 class lines( _neededLibraries):
@@ -80,7 +84,74 @@ class lines( _neededLibraries):
     def _report(self, result):
         result.Show()
         self.log.write(self.plotName+ ' successfull')
+class stem( _neededLibraries):
+    name=      u"stem"
+    plotName=  u"stem"
+    image=     imag.stem()
+    def __init__( self):
+        _neededLibraries.__init__(self)
+        self.name=      u"stem"
+        self.plotName=  u"stem"
         
+    def _dialog(self, *arg, **params):
+        self._updateColsInfo()
+        if self.columnNames == []:
+            self.log.write("You need some data to draw a graph!")
+            return
+        
+        return self.data2Plotdiaglog( None, self.columnNames)
+    
+    def _showGui_GetValues(self):
+        dlg= self._dialog()
+        if dlg == None:
+            return
+        if dlg.ShowModal() == _OK:
+            selectedcols = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+
+        self.log.write("selectedcols= " + selectedcols.__str__(), False)
+        if len(selectedcols) == 0:
+            self.log.write("You need to select some data to draw a graph!")
+            return
+        
+        return selectedcols
+        
+    def _calc( self, *args, **params):
+        return self.evaluate( *args, **params)
+        
+    def object( self):
+        return self.evaluate
+    
+    def evaluate( self, *args, **params):
+        # generate the chart
+        selectedcols= args
+        data= [self.grid.GetColNumeric(colName) for colName in selectedcols ]
+        data= [(range( len( data[i])), data[i], self.columnNames[i]) for i in range( len( data))]
+        plotList= list()
+        for x,y,texto in data:
+            plotList.append( pltobj(None, xlabel = "", ylabel = "value", title= self.name ))
+            plt= plotList[-1]
+            plt.gca().stem( x, y)
+            plt.updateControls()
+            plt.canvas.draw() #self.figpanel
+            
+        return plotList
+    
+    def showGui(self, *args, **params):
+        values= self._showGui_GetValues()
+        if values== None:
+            return None
+        result= self._calc(*values)
+        self._report(result)
+        
+    def _report(self, result):
+        for res in result:
+            res.Show()
+        self.log.write(self.plotName+ ' successfull')
+         
 class linesOfMean( _neededLibraries):
     name=      u"lines of all means"
     plotName=  u"linesMean"
@@ -197,12 +268,12 @@ class shadowLines(lines):
         return plt
 
 class areaPlot( lines):
-    name=      u"Area plot"
+    name=      u"Area chart"
     plotName=  u"arePlot"
     image=     imag.areaPlot()
     def __init__( self):
         lines.__init__(self)
-        self.name=      u"Area plot"
+        self.name=      u"Area chart"
         self.plotName=  u"areaPlot"
         
     def _dialog(self, *arg, **params):
@@ -265,6 +336,81 @@ class areaPlot( lines):
             res.Show()
         self.log.write(self.plotName+ ' successfull')
      
+class multipleAreaPlot( lines):
+    name=      u"Multiple area chart"
+    plotName=  u"multiArePlot"
+    image=     imag.multipleAreaPlot()
+    def __init__( self):
+        lines.__init__(self)
+        self.name=      u"Multiple area chart"
+        self.plotName=  u"areaPlot"
+        
+    def _dialog(self, *arg, **params):
+        self._updateColsInfo()
+        if self.columnNames == []:
+            self.log.write("You need some data to draw a graph!")
+            return
+        
+        return self.data2Plotdiaglog( None, self.columnNames)
+    
+    def _showGui_GetValues(self):
+        dlg= self._dialog()
+        if dlg == None:
+            return
+        if dlg.ShowModal() == _OK:
+            self.colNameSelect = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+
+        self.log.write("selectedcols= " + self.colNameSelect.__str__(), False)
+        if len( self.colNameSelect) == 0:
+            self.log.write("You need to select some data to draw a graph!")
+            return
+        
+        return homogenize(*[ self.grid.GetColNumeric( colName) for colName in self.colNameSelect ])
+        
+    def _calc( self, *args, **params):
+        return self.evaluate( *args, **params)
+        
+    def object( self):
+        return self.evaluate
+    
+    def evaluate( self, *args, **params):
+        data= list( args)
+        ydat= array( data.pop( 0))
+        xdat= range( len( ydat))
+        line= list()
+        plt=  pltobj( None, xlabel = "", ylabel = "value", title= self.name )
+        gca= plt.gca()
+        colour= generateColors()
+        gca.fill_between( xdat, ydat*0, ydat, alpha=0.6, color= colour.next())
+        line.append( ydat[0])
+        if len(data) > 0:
+            for ydat1 in data:
+                ydat1= array( ydat1)
+                gca.fill_between( xdat, ydat, ydat+ydat1, alpha=0.6, color= colour.next())
+                ydat= ydat + ydat1
+                line.append( ydat[0])
+                
+        legend= plt.legend( [lin for lin in line], self.colNameSelect)
+        plt.updateControls()
+        plt.canvas.draw()
+        return plt
+    
+    def showGui(self, *args, **params):
+        values= self._showGui_GetValues()
+        if values== None:
+            return None
+        result= self._calc(*values)
+        self._report(result)
+        
+    def _report(self, result):
+        result.Show()
+        self.log.write(self.plotName+ ' successfull')
+        
+        
 #class plotScatter( _genericFrame):
         #self.gca().hold(True)
         #listLegend= list()
