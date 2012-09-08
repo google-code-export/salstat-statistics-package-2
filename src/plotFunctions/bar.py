@@ -38,6 +38,8 @@ class barChart( _neededLibraries):
         '''this funtcion is used to plot the bar chart of all means'''
         self.log.write("Bar Chart")
         self._updateColsInfo()
+        if len( self.columnNames) == 0:
+            return
 
         self.colours= ["blue", "black",
                   "red", "green", "lightgreen", "darkblue",
@@ -63,6 +65,9 @@ class barChart( _neededLibraries):
     
     def _showGui_GetValues(self):
         dlg= self._dialog()
+        if dlg == None:
+            return
+        
         if dlg.ShowModal() != _OK:
             dlg.Destroy()
             return
@@ -218,6 +223,8 @@ class barChartAllMeans( _neededLibraries):
         '''this funtcion is used to plot the bar chart of all means'''
         self.log.write("Bar Chart of All Means")
         self._updateColsInfo()
+        if len( self.columnNames) == 0:
+            return
 
         self.colours= ["blue", "black",
                   "red", "green", "lightgreen", "darkblue",
@@ -243,6 +250,9 @@ class barChartAllMeans( _neededLibraries):
     
     def _showGui_GetValues(self):
         dlg= self._dialog()
+        if dlg == None:
+            return
+        
         if dlg.ShowModal() != _OK:
             dlg.Destroy()
             return
@@ -348,6 +358,9 @@ class barChartAllMeansNice( _neededLibraries):
         '''this funtcion is used to plot the bar chart of all means'''
         self.log.write(u"Nice Bar Chart of All Means")
         self._updateColsInfo()
+        if len( self.columnNames) == 0:
+            return
+        
         self.colours= ["radom","blue", "black",
                   "red", "green", "lightgreen", "darkblue",
                   "yellow", "white", "hsv"]
@@ -377,6 +390,9 @@ class barChartAllMeansNice( _neededLibraries):
     
     def _showGui_GetValues(self):
         dlg= self._dialog()
+        if dlg == None:
+            return
+        
         if dlg.ShowModal() != _OK:
             dlg.Destroy()
             return
@@ -472,10 +488,9 @@ class stakedBar(_neededLibraries):
         '''this funtcion is used to plot the bar chart of all means'''
         self.log.write("Bar Chart")
         self._updateColsInfo()
+        if len( self.columnNames) == 0:
+            return
 
-        #self.colours= ["blue", "black",
-        #          "red", "green", "lightgreen", "darkblue",
-        #          "yellow", "white"]
         txt2= ["StaticText",   ["xtics Labels"]]
         txt3= ["StaticText",   ["Select data to plot"]]
         btn2= ["Choice",       [self.columnNames]]
@@ -496,6 +511,9 @@ class stakedBar(_neededLibraries):
     
     def _showGui_GetValues(self):
         dlg= self._dialog()
+        if dlg == None:
+            return
+        
         if dlg.ShowModal() != _OK:
             dlg.Destroy()
             return
