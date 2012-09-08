@@ -617,7 +617,6 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         
         ## adjust the renderer
         self._gridSetRenderer(self.grid)
-        self.dictColrender= dict() # to store the custom col renderes
         #-----------------------
 
         # response panel
@@ -702,15 +701,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         # Saving the perspective
         self._defaultPerspective= self.m_mgr.SavePerspective()
         self.Center()
-    
-    def _gridcolrender(self, col, dp):
-        # ,not working yet
-        attr=   wx.grid.GridCellAttr()
-        renderer = floatRenderer( dp)
-        attr.SetRenderer( renderer)
-        self.dictColrender[col.__str__()] = attr
-        self.grid.SetColAttr( col, self.dictColrender[col.__str__()])
-            
+        
     def _gridSetRenderer(self, grid):
         '''setting the renderer to the grid'''
         attr=   wx.grid.GridCellAttr()
