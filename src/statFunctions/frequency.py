@@ -100,6 +100,8 @@ class scoreatpercentile(_genericFunc):
         setting= {'Title': self.name,
                   '_size': Size(220,300)}
         self._updateColsInfo() # update self.columnames and self.colnums
+        if len( self.columnNames) == 0:
+            return
         bt1=  ['StaticText',   ['Select the column to analyse']]
         bt2=  ['CheckListBox', [self.columnNames]]
         btn3= ['SpinCtrl',     [0,100,0]]
@@ -112,6 +114,8 @@ class scoreatpercentile(_genericFunc):
         
     def _showGui_GetValues(self):
         dlg= self._dialog()
+        if dlg == None:
+            return
         if dlg.ShowModal() == _OK:
             values = dlg.GetValue()
             dlg.Destroy()
