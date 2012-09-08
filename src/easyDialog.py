@@ -167,8 +167,11 @@ class Dialog ( wx.Dialog ):
                         data.extend((args))
                         args= data
                     elif key == 'CheckBox':
-                        args.extend(data[:2])
-                        args.append(0)
+                        try:
+                            args.extend(data[:2])  ## posible there is a trouble here
+                            args.append(0)
+                        except NameError:
+                            args= [0]
                     if key == 'CheckListBox':
                         self.ctrls.append((key, CheckListBox(self.m_scrolledWindow1, wx.ID_ANY, *args)))
                     else:
