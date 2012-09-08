@@ -285,8 +285,8 @@ class SaveDialog(wx.Dialog):
 
 class VariablesFrame(wx.Dialog):
     def __init__(self,parent,id):
-	wx.Dialog.__init__(self, parent,id,"SalStat - Variables", \
-	                   size=(500,190+wind))
+	wx.Dialog.__init__(self, parent,id,"S2 - Variables", \
+	                   size=(380, 480,))
 	translate= wx.GetApp().translate
 	self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
 	self.m_mgr = wx.aui.AuiManager()
@@ -311,24 +311,29 @@ class VariablesFrame(wx.Dialog):
 	                    DockFixed( False ).LeftDockable( False ).RightDockable( False ).
 	                    MinSize( wx.Size( -1,30 ) ).Layer( 10 ) )
 
-	self.vargrid = wx.grid.Grid( self,-1,) #
-	self.vargrid.SetRowLabelSize( 120)
-	self.vargrid.SetDefaultRowSize( 27, True)
-	maxcols = wx.GetApp().frame.grid.GetNumberCols()
-	self.vargrid.CreateGrid( 3,maxcols)
-	for i in range( maxcols):
-	    oldlabel = wx.GetApp().frame.grid.GetColLabelValue( i)
-	    self.vargrid.SetDefaultCellAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
-	    if wx.Platform == '__WXMAC__':
-		self.vargrid.SetGridLineColour( "#b7b7b7")
-		self.vargrid.SetLabelBackgroundColour( "#d2d2d2")
-		self.vargrid.SetLabelTextColour( "#444444")
-	    self.vargrid.SetCellValue( 0, i, oldlabel)
-	self.vargrid.SetRowLabelValue( 0, translate( u"Variable Name"))
-	self.vargrid.SetRowLabelValue( 1, translate( u"Decimal Places"))
-	self.vargrid.SetRowLabelValue( 2, translate( u"Missing Value"))
+	self.vargrid = wx.grid.Grid( self,-1,)
+	self.vargrid.SetDefaultColSize( 140, True)
+	maxRows= wx.GetApp().frame.grid.GetNumberCols()
+	self.vargrid.CreateGrid( maxRows, 1) # 3->2 REMOVING THE MISSING VALUE CHANGE BY THE USER
+	inputGrid= wx.GetApp().frame.grid
+	for i in range( maxRows):
+	    oldlabel = inputGrid.GetColLabelValue( i)
+	    self.vargrid.SetCellValue( i, 0, oldlabel)
+	    
+	self.vargrid.SetDefaultCellAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
+	if wx.Platform == '__WXMAC__':
+	    self.vargrid.SetGridLineColour( "#b7b7b7")
+	    self.vargrid.SetLabelBackgroundColour( "#d2d2d2")
+	    self.vargrid.SetLabelTextColour( "#444444")
+	    
+	self.vargrid.SetColLabelValue( 0, translate( u"Variable Name"))
+	self.vargrid.SetColLabelValue( 1, translate( u"Decimal Places"))
 
-	self.m_mgr.AddPane( self.vargrid, wx.aui.AuiPaneInfo() .Left() .CaptionVisible( False ).PaneBorder( False ).Dock().Resizable().FloatingSize( wx.DefaultSize ).DockFixed( False ).CentrePane() )
+	self.m_mgr.AddPane( self.vargrid, 
+	                    wx.aui.AuiPaneInfo().Center().
+	                    CaptionVisible( False ).PaneBorder( False ).
+	                    Dock().Resizable().FloatingSize( wx.DefaultSize ).
+	                    DockFixed( True ))
 
 	self.m_mgr.Update()
 	self.Centre( wx.BOTH )
@@ -338,16 +343,17 @@ class VariablesFrame(wx.Dialog):
 
     # this method needs to work out the other variables too
     def OnOkayVariables(self, evt):
-	for i in range(wx.GetApp().frame.grid.GetNumberCols()-1):
-	    newlabel = self.vargrid.GetCellValue(0, i)
+	for i in range( wx.GetApp().frame.grid.GetNumberCols()-1):
+	    newlabel = self.vargrid.GetCellValue(i, 0)
 	    if (newlabel != ''):
-		wx.GetApp().frame.grid.SetColLabelValue(i, newlabel)
-	    newsig = self.vargrid.GetCellValue(1, i)
-	    if (newsig != ''):
-		try:
-		    wx.GetApp().frame.grid.SetColFormatFloat(i, -1, int(newsig))
-		except ZeroDivisionError:
-		    pass
+		wx.GetApp().frame.grid.SetColLabelValue( i, newlabel)
+	    #newsig = self.vargrid.GetCellValue( i, 1)
+	    #if  not (newsig in ('',u'')):
+		#try:
+		    #wx.GetApp().frame.grid.SetColFormatFloat( i, -1, int(newsig))
+		#except ZeroDivisionError:
+		    #pass
+		
 	wx.GetApp().frame.grid.ForceRefresh()
 	self.Close(True)
 
