@@ -296,6 +296,10 @@ class SimpleGrid( MyGridPanel):# wxGrid
         ###### self.m_grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.onCellChanged)
         self.wildcard = "Any File (*.*)|*.*|" \
             "S2 Format (*.xls)|*.xls"
+        #<p> used to check changes iin the grid
+        self.hasChanged = True 
+        self.usedCols= ([], [],)
+        # </p>
         
     def setLog(self, log):
         self.log= log
@@ -324,6 +328,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
         self.DeleteCols(currentcol, 1)
         self.AdjustScrollbars()
         self.Saved= False
+        self.hasChanged= True
 
 
     def DeleteCurrentRow(self, evt):
@@ -331,6 +336,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
         self.DeleteRows(currentrow, 1)
         self.AdjustScrollbars()
         self.Saved= False
+        self.hasChanged= True
 
     def SelectAllCells(self, evt):
         self.SelectAll()
@@ -345,10 +351,15 @@ class SimpleGrid( MyGridPanel):# wxGrid
                 self.SetColAttr( colNumber, attr)
         self.AdjustScrollbars()
         self.Saved= False
+        self.hasChanged= True
 
     # function finds out how many cols contain data - all in a list
     #(ColsUsed) which has col #'s
     def GetUsedCols(self):
+        # improving the performance
+        if not self.hasChanged:
+            return self.usedCols
+        
         ColsUsed = []
         colnums = []
         dat = ''
@@ -364,7 +375,9 @@ class SimpleGrid( MyGridPanel):# wxGrid
                 ColsUsed.append(self.GetColLabelValue(col))
                 colnums.append(col)
                 tmp = 0
-        return ColsUsed, colnums
+        self.usedCols= (ColsUsed, colnums)
+        self.hasChanged= False
+        return self.usedCols
 
     def GetColsUsedList(self):
         colsusedlist = []
@@ -458,12 +471,16 @@ class SimpleGrid( MyGridPanel):# wxGrid
         fullPath= dlg.Path 
         if not fileName.endswith(filterIndex):
             fullPath+= '.' + filterIndex
+        try:
+            if filterIndex == 'xls':
+                return self.LoadXls(fullPath)
             
-        if filterIndex == 'xls':
-            return self.LoadXls(fullPath)
-        
-        elif filterIndex in ('txt', 'csv'):
-            return self.loadCsvTxt(fullPath)
+            elif filterIndex in ('txt', 'csv'):
+                return self.loadCsvTxt(fullPath)
+        except (Exception, TypeError) as e:
+            traceback.print_exc( file = self.log)
+        finally:
+            self.hasChanged= True
         
     def LoadCsvTxt(self, fullPath):
         '''use the numpy ibrary to load the data'''
@@ -527,6 +544,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
                       hasHeader= hasHeader)''', None)
         
         self.log.write('Importing  : %s successful'%filename)
+        self.hasChanged= True
         
     def _loadXls( self, *args,**params):
         sheets=         params.pop( 'sheets')
@@ -712,6 +730,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
             raise
         finally:
             self.Saved= False
+            self.hasChanged= True
             
     def PutRow(self, rowNumber, data):
         try: 
@@ -774,6 +793,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
             raise
         finally:
             self.Saved= False
+            self.hasChanged= True
         
     def GetRow(self, row):
         return self._cleanData( self._getRow( row))
