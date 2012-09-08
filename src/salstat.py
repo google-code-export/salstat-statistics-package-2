@@ -3,8 +3,7 @@
 """ Copyright 2012 Sebastian Lopez Buritica, S2 Team,  licensed under GPL 3
 
 SalStat Statistics Package. Copyright 2002 Alan James Salmoni. Licensed
-under the GNU General Public License (GPL 2). See the file COPYING for full
-details of this license. """
+under the GNU General Public License (GPL 2) """
 
 import wx
 import os
@@ -618,6 +617,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         
         ## adjust the renderer
         self._gridSetRenderer(self.grid)
+        self.dictColrender= dict() # to store the custom col renderes
         #-----------------------
 
         # response panel
@@ -702,7 +702,15 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         # Saving the perspective
         self._defaultPerspective= self.m_mgr.SavePerspective()
         self.Center()
-        
+    
+    def _gridcolrender(self, col, dp):
+        # ,not working yet
+        attr=   wx.grid.GridCellAttr()
+        renderer = floatRenderer( dp)
+        attr.SetRenderer( renderer)
+        self.dictColrender[col.__str__()] = attr
+        self.grid.SetColAttr( col, self.dictColrender[col.__str__()])
+            
     def _gridSetRenderer(self, grid):
         '''setting the renderer to the grid'''
         attr=   wx.grid.GridCellAttr()
@@ -877,16 +885,10 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
             (translate(u"S&tatistics"),
              statisticalMenus),
             (translate(u"&Graph"),
-             ( (translate(u"Show/Hide the plot panel"), None, self.showPlotPanel,       None),
-               plotMenus[0],
-               plotMenus[1],
-               plotMenus[2],
-               (translate(u"Scatter"),                 None, self.GoScatterPlot,        None),
-               (translate(u"Box & Whisker"),           None, self.GoBoxWhiskerPlot,     None),
-               (translate(u"Linear Regression"),       None, self.GoLinRegressPlot,     None),
-               (translate(u"Ternary"),                 None, self.GoTernaryplot,        None),
-               (translate(u"Probability"),             None, self.GoProbabilityplot,    None),
-               (translate(u"Adaptative BMS"),          None, self.GoAdaptativeBMS,      None),) ),
+             [ (translate(u"Show/Hide the plot panel"), None, self.showPlotPanel,       None),] +
+               [plotMenu for plotMenu in plotMenus] +
+               [(translate(u"Linear Regression"),       None, self.GoLinRegressPlot,     None)] +
+               [(translate(u"Ternary"),                 None, self.GoTernaryplot,        None)]),
             (translate(u"&Help"),
              (##("Help\tCtrl-H",       imag.about(),  self.GoHelpSystem,  wx.ID_HELP),
               (translate(u"&About..."),          imag.icon16(), self.ShowAbout,     wx.ID_ABOUT),)),
@@ -1278,129 +1280,6 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
                   title=     'Ternary Plot')''', False)
 
         plt.Show()
-        self.log.write("plt.Show()", False)    
-    
-    def GoScatterPlot(self,evt):
-        self.log.write("Scatter")
-        waste, colnums = self.grid.GetUsedCols()
-        self.log.write('''waste, colnums = grid.GetUsedCols()''', False)
-        if colnums == []:
-            self.SetStatusText("You need some data to draw a graph!")
-            return
-
-        bt1= ["StaticText", ["Select pairs of data by rows"]]
-        bt2= ["makePairs",  [["X data to plot","Y data to plot"], [waste]*2, 20]]
-        structure= list()
-        structure.append([bt1,])
-        structure.append([bt2,])
-        dlg= dialog(self,settings = {"Title": "Scatter Chart Data" ,
-                                     "_size": wx.Size(300,500)},  struct= structure)
-        if dlg.ShowModal() != wx.ID_OK:
-            dlg.Destroy()
-            return
-
-        values= dlg.GetValue()
-        dlg.Destroy()
-
-        pairs= values[0]
-        if len(pairs) == 0:
-            return
-        self.log.write("pairs= "+ pairs.__str__(), False)
-
-        data= [(self.grid.GetCol(colX), self.grid.GetCol(colY), colX +" VS " +colY) for (colX,colY) in pairs]
-        self.log.write("data= [(grid.GetCol(colX), grid.GetCol(colY), colX +' VS ' +colY) for (colX,colY) in pairs]", False)
-
-        plt= plot(parent= self,
-                  typePlot= "plotScatter",
-                  data2plot= data,
-                  xlabel= "X data",
-                  ylabel= "Y data",
-                  title= "Scatter Plot")
-        self.log.write('''plt= plot(parent= None,
-                  typePlot= 'plotScatter',
-                  data2plot= data,
-                  xlabel= 'X data',
-                  ylabel= 'Y data',
-                  title= 'Scatter Plot')''', False)
-
-        plt.Show()
-        self.log.write("plt.Show()", False)
-
-    def GoBoxWhiskerPlot(self,evt):
-        self.log.write("Box & Whisker")
-        waste, colnums = self.grid.GetUsedCols()
-        self.log.write("waste, colnums = grid.GetUsedCols()", False)
-        if colnums == []:
-            self.SetStatusText("You need some data to draw a graph!")
-            return
-        selection = data2Plotdiaglog(self,waste)
-        if selection.ShowModal() != wx.ID_OK:
-            selection.Destroy()
-            return
-
-        selectedcols = selection.getData()
-        selection.Destroy()
-        if len(selectedcols) == 0:
-            self.SetStatusText("You need to select some data to draw a graph!")
-            return
-        self.log.write("selectedcols= " + selectedcols.__str__(), False)
-
-        data = [self.grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]]
-        self.log.write('''data= [grid.CleanData(cols) for cols in [colnums[m] for m in selectedcols]]''', False)
-
-        plt= plot(parent = self, typePlot= "boxPlot",
-                  data2plot= data,
-                  xlabel = "variable",
-                  ylabel = "value",
-                  title= "Box & whisker plot",
-                  xtics=  [waste[i] for i in selectedcols] )
-        self.log.write('''plt= plot(parent = None, typePlot= 'boxPlot',
-                  data2plot= data,
-                  xlabel = 'variable',
-                  ylabel = 'value',
-                  title= 'Box & whisker plot',
-                  xtics=  [waste[i] for i in selectedcols] )''', False)
-
-        plt.Show()
-        self.log.write("plt.Show()", False)
-
-    def GoAdaptativeBMS(self,evt):
-        self.log.write("Adaptative BMS")
-        waste, colnums = self.grid.GetUsedCols()
-        self.log.write("waste, colnums = grid.GetUsedCols()", False)
-        if colnums == []:
-            self.SetStatusText("You need some data to draw a graph!")
-            return
-        selection = data2Plotdiaglog(self,waste)
-        if selection.ShowModal() != wx.ID_OK:
-            selection.Destroy()
-            return
-        selectedcols = selection.getData()
-        selection.Destroy()
-        if len(selectedcols) == 0:
-            self.SetStatusText("You need to select some data to draw a graph!")
-            return
-        self.log.write("selectedcols=  "+selectedcols.__str__(), False)
-
-        data= [self.grid.GetColNumeric(cols) for cols in selectedcols]
-        self.log.write("data= [grid.GetColNumeric(cols) for cols in selectedcols]", False)
-
-        plt= plot(parent = self,
-                  typePlot = "AdaptativeBMS",
-                  data2plot = data,
-                  xlabel = "variable",
-                  ylabel = "value",
-                  title= "Adaptative BMS plot",
-                  xtics=  [waste[i] for i in selectedcols])
-        self.log.write('''plt= plot(parent = None,
-                  typePlot = 'AdaptativeBMS',
-                  data2plot = data,
-                  xlabel = 'variable',
-                  ylabel = 'value',
-                  title= 'Adaptative BMS plot',
-                  xtics=  [waste[i] for i in selectedcols])''', False)
-
-        plt.Show()
         self.log.write("plt.Show()", False)
         
     def GoLinRegressPlot(self, evt):
@@ -1441,47 +1320,6 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         plt.Show()
         self.log.write("plt.Show()", False)
         # lin regress removing most disperse data
-
-    def GoProbabilityplot(self, evt):
-        self.log.write("Probability")
-        ColumnList, colnums= self.grid.GetUsedCols()
-        self.log.write("ColumnList, colnums= grid.GetUsedCols()", False)
-        if colnums == []:
-            self.SetStatusText("You need some data to draw a graph!")
-            return
-        bt1= ("Choice",(ColumnList,))
-        bt2= ("StaticText",("Select The column to analyse",))
-        setting= {"Title": "Probability plot"}
-        structure= list()
-        structure.append([bt1, bt2])
-        selection= dialog(settings = setting, struct= structure)
-        if selection.ShowModal() != wx.ID_OK:
-            selection.Destroy()
-            return
-        (selectedcol,) = selection.GetValue()
-        self.log.write("selectedcols= "+selectedcol.__str__(), False)
-
-        selection.Destroy()
-        if selectedcol == None:
-            self.SetStatusText("You need to select some data to draw a graph!")
-            return
-
-        data = [self.grid.GetColNumeric(selectedcol)]
-        self.log.write("data = [grid.GetColNumeric(cols) for cols in selectedcols]", False)
-
-        plt= plot(parent = self, typePlot= "probabilityPlot",
-                  data2plot= data,
-                  title=     "Probability Plot",
-                  xlabel=    "Order Statistic Medians",
-                  ylabel=    "Ordered Values")
-        self.log.write('''plt= plot(parent = None, typePlot= 'probabilityPlot',
-                  data2plot= data,
-                  title=     'Probability Plot',
-                  xlabel=    'Order Statistic Medians',
-                  ylabel=    'Ordered Values')''', False)
-
-        plt.Show()
-        self.log.write("plt.Show()", False)
 
     ################
     ### chart End
