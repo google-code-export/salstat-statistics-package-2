@@ -1,8 +1,7 @@
 '''a module thath will be used as a container of different functions'''
 version = "0.0.1"
 __all__ = ['histogramPlot','bar',
-           'lines','scatter',
-           'others']
+           'lines','scatter']
 
 from easyDialog import Dialog as _dialog
 import wx
