@@ -872,7 +872,6 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
             (translate(u"&Graph"),
              [ (translate(u"Show/Hide the plot panel"), None, self.showPlotPanel,       None),] +
                [plotMenu for plotMenu in plotMenus] +
-               [(translate(u"Linear Regression"),       None, self.GoLinRegressPlot,     None)] +
                [(translate(u"Ternary"),                 None, self.GoTernaryplot,        None)]),
             (translate(u"&Help"),
              (##("Help\tCtrl-H",       imag.about(),  self.GoHelpSystem,  wx.ID_HELP),
@@ -1266,45 +1265,6 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
 
         plt.Show()
         self.log.write("plt.Show()", False)
-        
-    def GoLinRegressPlot(self, evt):
-        self.log.write("Linear Regression")
-        waste, colnums = self.grid.GetUsedCols()
-        self.log.write("waste, colnums = grid.GetUsedCols()", False)
-        if colnums == []:
-            self.SetStatusText("You need some data to draw a graph!")
-            return
-        selection = selectDialogData2plot(self,waste)
-        if selection.ShowModal() != wx.ID_OK:
-            selection.Destroy()
-            return
-        (xcol, ycol)= selection.getData()
-        self.log.write("(xcol, ycol)= "+ selection.getData().__str__(), False)
-
-        selection.Destroy()
-
-        data= homogenize(*[self.grid.CleanData(cols) for cols in [colnums[i] for i in (xcol,ycol)]])
-        self.log.write('''data= homogenize(*[grid.CleanData(cols) for cols in [colnums[i] for i in (xcol,ycol)]])''', False)
-
-        # homogenize data
-        data= homogenize(data[0],data[1])
-        self.log.write("data= homogenize(data[0],data[1])", False)
-        if len(data[0]) != len(data[1]):
-            self.SetStatusText("X and Y data must have the same number of elements!")
-            return
-
-        plt= plot(parent = self, typePlot= "plotLinRegress",
-                  data2plot= (data[0],data[1],waste[xcol] +u" Vs "+ waste[ycol]),
-                  xlabel = waste[xcol], ylabel = waste[ycol],
-                  title= translate(u"Linear Regression plot") )
-        self.log.write('''plt= plot(parent = None, typePlot= 'plotLinRegress',
-                  data2plot= (data[0],data[1],waste[xcol] +u' Vs '+ waste[ycol]),
-                  xlabel = waste[xcol], ylabel = waste[ycol],
-                  title= 'Linear Regression plot' )''', False)
-
-        plt.Show()
-        self.log.write("plt.Show()", False)
-        # lin regress removing most disperse data
 
     ################
     ### chart End
