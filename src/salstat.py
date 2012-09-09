@@ -871,8 +871,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
              statisticalMenus),
             (translate(u"&Graph"),
              [ (translate(u"Show/Hide the plot panel"), None, self.showPlotPanel,       None),] +
-               [plotMenu for plotMenu in plotMenus] +
-               [(translate(u"Ternary"),                 None, self.GoTernaryplot,        None)]),
+               [plotMenu for plotMenu in plotMenus]),
             (translate(u"&Help"),
              (##("Help\tCtrl-H",       imag.about(),  self.GoHelpSystem,  wx.ID_HELP),
               (translate(u"&About..."),          imag.icon16(), self.ShowAbout,     wx.ID_ABOUT),)),
@@ -1186,89 +1185,6 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
             panel.Show(False)
             
         self.m_mgr.Update()    
-    ################
-    ### chart init
-    ################
-    def GoTernaryplot(self, evt):
-        self.log.write( translate(u"Ternary"))
-        waste, colnums= self.grid.GetUsedCols()
-        self.log.write( translate(u"waste, colnums= grid.GetUsedCols()"), False)
-
-        if colnums == []:
-            self.SetStatusText( translate(u"You need some data to draw a graph!"))
-            return
-
-        txt1= ["StaticText", [translate(u"Left Corner Label")]]
-        txt2= ["StaticText", [translate(u"Right Corner Label")]]
-        txt3= ["StaticText", [translate(u"Upper Corner Label")]]
-        btn1= ["TextCtrl",   [translate(u"A")]]
-        btn2= ["TextCtrl",   [translate(u"B")]]
-        btn3= ["TextCtrl",   [translate(u"C")]]
-        btn4= ["StaticText", [translate(u"Select the pairs of data by rows")]]
-        btn5= ["makePairs",  [[translate(u"A Left Corner"),translate(u"C Upper Corner"),
-                               translate(u"B Right Corner")], [waste]*3, 30]]
-        structure= list()
-        structure.append( [btn1, txt1])
-        structure.append( [btn2, txt2])
-        structure.append( [btn3, txt3])
-        structure.append( [btn4,])
-        structure.append( [btn5,])
-        settings = {"Tile": translate(u"Ternary plot dialog") ,
-                    "_size": wx.Size(410, 400),}
-        dlg= dialog(self, settings= settings, struct= structure)
-        if dlg.ShowModal() != wx.ID_OK:
-            dlg.Destroy()
-            return
-
-        values= dlg.GetValue()
-        dlg.Destroy()
-
-        Alabel= values[0]
-        if Alabel == u'' or Alabel.replace(' ','') == u'':
-            Alabel= u'A'
-        self.log.write('Alabel= '+"'"+Alabel.__str__()+"'", False)
-
-        Blabel= values[1]
-        if Blabel == u'' or Blabel.replace(' ','') == u'':
-            Blabel= u'B'
-        self.log.write('Blabel= '+"'"+ Blabel.__str__()+"'", False)
-
-        Clabel= values[2]
-        if Clabel == u'' or Clabel.replace(' ','') == u'':
-            Clabel= u'C'
-        self.log.write('Clabel= '+"'"+ Clabel.__str__()+"'", False)
-
-        pairs= values[3]
-        if len(pairs) == 0:
-            return
-        self.log.write('pairs= '+pairs.__str__(), False)
-
-        data= [(self.grid.GetCol(colLeft),
-                self.grid.GetCol(colUpper),
-                self.grid.GetCol(colRight),
-                colLeft+' - '+colUpper+' - '+colRight )
-               for (colLeft, colUpper, colRight) in pairs]
-        self.log.write('''data= [(grid.GetCol(colLeft),
-                grid.GetCol(colUpper),
-                grid.GetCol(colRight),
-                colLeft+' - '+colUpper+' - '+colRight )
-               for (colLeft, colUpper, colRight) in pairs]''', False)
-
-        plt= plot(parent=    self,
-                  typePlot=  "plotTrian",
-                  data2plot= (data, [Alabel, Blabel, Clabel]),
-                  title=     "Ternary Plot")
-        self.log.write('''plt= plot(parent=    None,
-                  typePlot=  'plotTrian',
-                  data2plot= (data, [Alabel, Blabel, Clabel]),
-                  title=     'Ternary Plot')''', False)
-
-        plt.Show()
-        self.log.write("plt.Show()", False)
-
-    ################
-    ### chart End
-    ################
     def EndApplication(self, evt):
         if self.grid.Saved == False:
             # checking if there is a data to be saved
@@ -1336,6 +1252,9 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         wx.GetApp().output.addColData(colums[1])
         wx.GetApp().output.addRowData(['',"shorted Data","original position"], currRow= 0)
         self.logPanel.write(functionName + " successful")
+	
+    def __del__( self ):
+	pass
 #--------------------------------------------------------------------------
 # main loop
 if __name__ == '__main__':

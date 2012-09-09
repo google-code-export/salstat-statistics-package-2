@@ -1276,6 +1276,7 @@ class _neededLibraries(object):
         self.data2Plotdiaglog= data2Plotdiaglog
         self.selectDialogData2plot= selectDialogData2plot
         self.scatterDialog = scatterDialog
+        self.translate = self.app.translate
     
     def _updateColsInfo(self):
         gridCol=            wx.GetApp().inputGrid.GetUsedCols()
