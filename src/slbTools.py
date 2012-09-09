@@ -9,10 +9,7 @@ import collections
 import tempfile, xlwt , os
 import numpy as np
 from openStats import statistics
-try:
-    import xlrd
-except:
-    pass
+
 from  warnings import warn
 from copy import deepcopy
 

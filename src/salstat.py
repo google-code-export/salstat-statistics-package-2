@@ -52,15 +52,10 @@ import traceback
 # translation module
 import locale
 import glob
-import time
-
-from xml.dom import minidom
 # system of graphics
 from plotFrame import MpltFrame as plot
-from multiPlotDialog import data2Plotdiaglog, selectDialogData2plot, scatterDialog
+from multiPlotDialog import selectDialogData2plot
 from ntbSheet import NoteBookSheet, SimpleGrid
-
-from openStats import statistics, normProb, normProbInv
 
 from slbTools import  homogenize, GroupData # GroupData is used to treat data a a pivot table 
 from easyDialog import Dialog as dialog
@@ -71,12 +66,11 @@ from imagenes import imageEmbed
 
 from helpSystem import Navegator
 
-from dialogs import CheckListBox
 from dialogs import SaveDialog, VariablesFrame, DescriptivesFrame
 from dialogs import TransformFrame
 from dialogs import createPlotSelectionPanel
 
-from gridCellRenderers import floatRenderer, AutoWrapStringRenderer
+from gridCellRenderers import floatRenderer #, AutoWrapStringRenderer
 from wx.combo import BitmapComboBox # translation control
 import wx.lib.langlistctrl as langlist
 

@@ -8,7 +8,6 @@ from openStats import statistics # used in descriptives frame
 import math # to be used in transform pane
 import numpy
 import scipy
-from slbTools import isnumeric
 
 if wx.Platform == '__WXMSW__':
     wind = 50

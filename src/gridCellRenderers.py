@@ -5,7 +5,6 @@ copyright:  2012  Sebastian Lopez Buritica'''
 import wx
 import wx.grid as Grid
 from wx.lib import wordwrap
-import string
 
 
 from slbTools import isnumeric
