@@ -9,11 +9,7 @@ import wx.lib.agw.aui as aui
 from imagenes import imageEmbed
 from statlib import stats
 from plotFrame import MpltFrame as plot
-from easyDialog import Dialog
 import traceback
-from openStats import statistics
-import numpy
-from slbTools import homogenize, GroupData
 
 # styled text using wxPython's
 # wx.StyledTextCtrl(parent, id, pos, size, style, name)

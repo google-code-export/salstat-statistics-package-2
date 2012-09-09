@@ -17,11 +17,6 @@ from slbTools import ReportaExcel
 import xlrd
 from easyDialog import Dialog as dialog
 
-try:
-    from imagenes import imageEmbed
-except:
-    pass
-
 def numPage():
     i = 1
     while True:

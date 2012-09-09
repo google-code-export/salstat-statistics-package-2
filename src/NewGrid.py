@@ -7,12 +7,9 @@ Created on 09/12/2010
 
 import wx
 import wx.grid
-import tempfile
-import csv
+
 
 from imagenes import imageEmbed
-import os
-import subprocess
 from GridCopyPaste import PyWXGridEditMixin
 
 class _MyContextGrid(wx.Menu):
