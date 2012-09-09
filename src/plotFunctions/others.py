@@ -1,17 +1,12 @@
 __name__ = u"Another plots"
 __all__=  [u'linRegres','ternaryScatter']
-from plotFunctions import _neededLibraries, pltobj, GaussianFilter
-from plotFunctions import DropShadowFilter, generateColors
+from plotFunctions import _neededLibraries, pltobj
 from wx import ID_OK as _OK
 import wx
-from openStats import statistics
 from imagenes import imageEmbed
-from numpy import array
-import matplotlib.transforms as mtransforms # used to generate the lines shadow
 from slbTools import homogenize
 # import to be used to probability plot
-from scipy.stats import probplot
-from numpy import amin, amax, ndarray, array, arange
+from numpy import array, arange
 from pylab import axes
 from statlib.stats import linregress
 from triplot import triplot, triang2xy
