@@ -30,7 +30,6 @@ from matplotlib.backend_bases import MouseEvent
 from pylab import setp
 
 from openStats import statistics
-from statlib.stats import linregress
 from triplot import triplot, triang2xy
 from slbTools import homogenize
 from nicePlot.graficaRibon import plotBar # nice plot
@@ -1303,31 +1302,6 @@ class MpltFrame( wx.Frame, object ): # MpltFrame
         x = np.arange(0, 6, .01)
         y = np.sin(x**2)*np.exp(-x)
         self.gca().plot(x, y)
-    def plotLinRegress( self,data2plot):
-        x = data2plot[0]
-        y = data2plot[1]
-        line =  linregress(x,y)
-        yfit = lambda x: x*line[0]+line[1]
-        plt= self.gca().plot(x,y,'b.',x,[yfit(x1) for x1 in x],'r')
-        legend= self.figpanel.legend(plt,(data2plot[-1],'linRegressFit'), prop = PROPLEGEND)
-        legend.draggable(state=True)
-        arrow_args = dict(arrowstyle="->")
-        bbox_args = dict(boxstyle="round", fc="w")
-        text2anotate = "y="+str(round(line[0],4)) + \
-            "x"
-        if round(line[1],4) > 0:
-            text2anotate += "+" + str(round(line[1],4))
-        elif round(line[1],4) < 0:
-            text2anotate += str(round(line[1],4))
-        text2anotate += "\n r = " + str(round(line[2],6))
-        an1= self.gca().annotate(text2anotate, xy=(x[int(len(x)/2)],
-                                                   yfit(x[int(len(x)/2)])),  xycoords='data',
-                                               ha="center", va="center",
-                                               bbox=bbox_args,
-                                               arrowprops=arrow_args)
-        an1.draggable()
-        self.figpanel.canvas.draw()
-
     def plotPie( self, data2plot):
         labels = data2plot[0]#'Frogs', 'Hogs', 'Dogs', 'Logs'
         fracs = data2plot[1]#[15,30,45, 10]
