@@ -7,11 +7,7 @@ from openStats import statistics
 
 import numpy
 from plotFunctions import _neededLibraries, pltobj, generateColors
-from statFunctions import _genericFunc
 from wx import ID_OK as _OK
-from wx import Size
-from statFunctions.frequency import histogram
-from pylab import xticks
 from nicePlot.graficaRibon import plotBar
 import os
 import sys
