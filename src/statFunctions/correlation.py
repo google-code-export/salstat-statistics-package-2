@@ -18,19 +18,18 @@ class pearsonr( _genericFunc):
         _genericFunc.__init__(self)
         self.name=      'pearsonr'
         self.statName=  'pearsonr'
-        self.txt1= "X Column to analyse"
-        self.txt2= "Y Column to analyse"
-        self.nameResults= ["Pearson's r"," two-tailed p-value"]
+        self.txt1= self.translate(u"X Column to analyse")
+        self.txt2= self.translate(u"Y Column to analyse")
+        self.nameResults= [self.translate(u"Pearson's r"), self.translate(u" two-tailed p-value")]
         self.minRequiredCols= 2
         self.colNameSelect= ''
-        
         
     def _dialog( self, *arg, **params):
         setting= {'Title': self.name,
                   '_size': Size(280,250)}
         self._updateColsInfo() # update self.columnames and self.colnums
         
-        txt1=  ['StaticText',   ['Select the columns to analyse']]
+        txt1=  ['StaticText',   [self.translate(u'Select the columns to analyse')]]
         btn1=  ['Choice',       [self.columnNames]]
         txt2=  ['StaticText',   [self.txt1] ]
         txt3=  ['StaticText',   [self.txt2] ]
@@ -53,7 +52,7 @@ class pearsonr( _genericFunc):
         (self.xcolNameSelect, self.ycolNameSelect)= values
         
         if self.xcolNameSelect == None or self.ycolNameSelect == None:
-            self.logPanel.write("You haven't selected any items!")
+            self.logPanel.write(self.translate(u"You haven't selected any items!"))
             return
         
         xcolumn= self.inputGrid.GetCol( self.xcolNameSelect)
@@ -86,11 +85,11 @@ class pearsonr( _genericFunc):
     def _report( self, result):
         self.outputGrid.addColData( self.nameResults, self.name)
         self.outputGrid.addColData( result)
-        self.outputGrid.addRowData( ['Input Data'],  currRow= 0)
-        self.outputGrid.addRowData( [ 'x column=',   self.xcolNameSelect, 'y column=', self.ycolNameSelect ], currRow= 1)
-        self.outputGrid.addRowData( ['Output Data'], currRow= 2)
+        self.outputGrid.addRowData( [self.translate(u'Input Data')],  currRow= 0)
+        self.outputGrid.addRowData( [self.translate(u'x column='),   self.xcolNameSelect, 'y column=', self.ycolNameSelect ], currRow= 1)
+        self.outputGrid.addRowData( [self.translate(u'Output Data')], currRow= 2)
                 
-        self.Logg.write( self.statName+ ' successfull')
+        self.Logg.write( self.statName+ ' '+self.translate(u'successful'))
         
 class spearmanr(pearsonr):
     name=      'spearmanr'
@@ -99,7 +98,7 @@ class spearmanr(pearsonr):
         pearsonr.__init__(self)
         self.name=      'spearmanr'
         self.statName=  'spearmanr'
-        self.nameResults= ["Spearman's r","two-tailed p-value"]
+        self.nameResults= [self.translate(u"Spearman's r"), self.translate(u"two-tailed p-value")]
         self.minRequiredCols= 2
         self.colNameSelect= ''
         
@@ -116,7 +115,7 @@ class pointbiserialr(pearsonr):
         pearsonr.__init__(self)
         self.name=      'pointbiserialr'
         self.statName=  'pointbiserialr'
-        self.nameResults= ["Point-biserial r","two-tailed p-value"]
+        self.nameResults= [self.translate(u"Point-biserial r"), self.translate(u"two-tailed p-value")]
         self.minRequiredCols= 2
         self.colNameSelect= ''
         
@@ -133,7 +132,7 @@ class kendalltau(pearsonr):
         pearsonr.__init__(self)
         self.name=      'kendalltau'
         self.statName=  'kendalltau'
-        self.nameResults= ["Kendall's tau"," two-tailed p-value"]
+        self.nameResults= [self.translate(u"Kendall's tau"), self.translate(u" two-tailed p-value")]
         self.minRequiredCols= 2
         self.colNameSelect= ''
     def object( self):
@@ -149,8 +148,12 @@ class linregress(pearsonr):
         pearsonr.__init__(self)
         self.name=      'linregress'
         self.statName=  'linregress'
-        self.nameResults= ["slope", "intercept", "r", "two-tailed prob",
-                            "stderr-of-the-estimate", "n"]
+        self.nameResults= [self.translate(u"slope"),
+                           self.translate(u"intercept"),
+                           self.translate(u"r"),
+                           self.translate(u"two-tailed prob"),
+                           self.translate(u"stderr-of-the-estimate"),
+                           self.translate(u"n")]
         self.minRequiredCols= 2
         self.colNameSelect= ''
         
@@ -167,7 +170,7 @@ class covariance(pearsonr):
         pearsonr.__init__(self)
         self.name=      'covariance'
         self.statName=  'covariance'
-        self.nameResults= ['covariance']
+        self.nameResults= [self.translate(u'covariance')]
         self.minRequiredCols= 2
         self.colNameSelect= ''
     def object( self):

@@ -31,22 +31,22 @@ class histogram( _neededLibraries):
         
     def _dialog(self, *arg, **params):
         '''this function is used to plot a histogram chart of the selected column'''
-        self.log.write('Histogram Chart')
+        self.log.write(self.translate(u'Histogram Chart'))
         self._updateColsInfo()
         if len(self.columnNames) == 0:
-            self.log.write('You need some data to draw a graph!')
+            self.log.write(self.translate(u'You need some data to draw a graph!'))
             return
         
         self.colours= ['blue', 'black',
                   'red', 'green', 'lightgreen', 'darkblue',
                   'yellow', 'hsv', 'white']
-        txt2= ['StaticText',   ['Color']]
-        txt3= ['StaticText',   ['Select data to plot']]
-        txt4= ['StaticText',   ['number of bins']]
+        txt2= ['StaticText',   [self.translate(u'Colour')]]
+        txt3= ['StaticText',   [self.translate(u'Select data to plot')]]
+        txt4= ['StaticText',   [self.translate(u'number of bins')]]
         btn2= ['Choice',       [self.colours]]
         btn3= ['Choice',       [self.columnNames]] # trying to prevent out of memory error
         btn4= ['SpinCtrl',     [2,500,5]]
-        btn5= ['ToggleButton', ['Show best Normal Curve']]
+        btn5= ['ToggleButton', [self.translate(u'Show best Normal Curve')]]
         structure= list()
         structure.append([txt3])
         structure.append([btn3])
@@ -54,7 +54,7 @@ class histogram( _neededLibraries):
         structure.append([btn4])
         structure.append([btn5])
         structure.append([btn2, txt2])
-        setting= {'Title':'Histogram chart of selected columns',
+        setting= {'Title': self.translate(u'Histogram chart of selected columns'),
                   '_size': Size(200,300)}
         
         return self.dialog(settings= setting, struct= structure)
@@ -85,14 +85,14 @@ class histogram( _neededLibraries):
             self.colour=  self.colours[0]
             
         if self.colNameSelect == None:
-            self.Logg.write("you have to select at least %i column"%self.minRequiredCols)
+            self.Logg.write(self.translate(u"you have to select at least %i columns")%self.minRequiredCols)
             return
         
         if isinstance( self.colNameSelect, (str, unicode)):
             self.colNameSelect= [self.colNameSelect]
 
         if len( self.colNameSelect) < self.minRequiredCols:
-            self.SetStatusText( 'You need to select at least %i columns to draw a graph!'%self.minRequiredCols)
+            self.SetStatusText( self.translate(u'You have to select at least %i columns to draw a graph!')%self.minRequiredCols)
             return
         
         # it only retrieves the numerical values
@@ -115,7 +115,7 @@ class histogram( _neededLibraries):
         # evaluating the histogram function to obtain the data to plot
         data= _histogram().evaluate(ydat, nbins)
         
-        plt= pltobj( None, xlabel= 'variable', ylabel= 'value', title= 'Histogram Chart of ' + self.colNameSelect[0] )
+        plt= pltobj( None, xlabel= 'variable', ylabel= self.translate(u'value'), title= self.translate(u'Histogram Chart of ') + self.colNameSelect[0] )
         plt.gca().hold( True)
         
         ydat= ravel(array(ydat))
@@ -143,7 +143,7 @@ class histogram( _neededLibraries):
         
     def _report(self, result):
         result.Show()
-        self.log.write(self.plotName+ ' successfull')
+        self.log.write(self.plotName+ ' ' +self.translate('successful'))
 
 class niceHistogram( _neededLibraries):
     '''this function is used to plot a nice histogram
@@ -160,12 +160,12 @@ class niceHistogram( _neededLibraries):
         
     def _dialog(self, *args, **params):
         '''this function is used to plot a histogram chart of the selected column'''
-        self.log.write('Histogram Chart')
+        self.log.write(self.translate(u'Histogram Chart'))
         setting= {'Title': self.name,
                   '_size': Size(220,300)}
         self._updateColsInfo()
         if len(self.columnNames) == 0:
-            self.log.write('You need some data to draw a graph!')
+            self.log.write(self.translate(u'You need some data to draw a graph!'))
             return
         
         self.colours= ['random', 'blue', 'black',
@@ -174,10 +174,10 @@ class niceHistogram( _neededLibraries):
         # getting all the available figures
         path=  os.path.join( GetApp().installDir, 'nicePlot','images','histplot')
         self.figTypes= [fil[:-4] for fil in os.listdir(path) if fil.endswith('.png')]
-        txt1= ['StaticText',   ['Histogram type']]
-        txt2= ['StaticText',   ['Color']]
-        txt3= ['StaticText',   ['Select data to plot']]
-        txt4= ['StaticText',   ['number of bins']]
+        txt1= ['StaticText',   [self.translate(u'Histogram type')]]
+        txt2= ['StaticText',   [self.translate(u'Colour')]]
+        txt3= ['StaticText',   [self.translate(u'Select data to plot')]]
+        txt4= ['StaticText',   [self.translate(u'number of bins')]]
         btn1= ['Choice',       [self.figTypes]]
         btn2= ['Choice',       [self.colours]]
         btn3= ['Choice',       [self.columnNames]] # trying to prevent out of memory error
@@ -190,7 +190,7 @@ class niceHistogram( _neededLibraries):
         ##structure.append([btn5])
         structure.append([btn1, txt1])
         structure.append([btn2, txt2])
-        setting= {'Title':'Histogram chart of selected columns'}
+        setting= {'Title': self.translate(u'Histogram chart of selected columns')}
         return self.dialog(settings= setting, struct= structure)
     
     def _calc(self, columns, *args, **params):
@@ -210,7 +210,8 @@ class niceHistogram( _neededLibraries):
             ydata= res[0]
             incr=  res[2]/2.0
             xdata= [x + incr for x in range( 1, len( res[0])+1)]
-            plt= pltobj( None, xlabel= 'variable', ylabel= 'value', title= 'Histogram Chart of ' + self.colNameSelect[0] )
+            plt= pltobj( None, xlabel= 'variable', ylabel= self.translate(u'value'), 
+                         title= self.translate(u'Histogram Chart of ') + self.colNameSelect[0] )
             plt.gca().hold( True)
             labels= []
             plt.gca().hold( True)
@@ -262,7 +263,7 @@ class niceHistogram( _neededLibraries):
         self.colour=        values[3]
 
         if self.colNameSelect == None:
-            self.log.write("you have to select at least %i column"%self.minRequiredCols)
+            self.log.write(self.translate(u"you have to select at least %i columns")%self.minRequiredCols)
             return
         
         if self.histType == None:
@@ -275,7 +276,7 @@ class niceHistogram( _neededLibraries):
             self.colNameSelect= [self.colNameSelect]
 
         if len( self.colNameSelect) == 0:
-            self.SetStatusText( 'You need to select some data to draw a graph!')
+            self.SetStatusText( self.translate(u'You need to select some data to draw a graph!'))
             return
         
         # it only retrieves the numerical values
@@ -287,7 +288,7 @@ class niceHistogram( _neededLibraries):
     def _report(self, result): 
         for plt in result:
             plt.Show()
-        self.log.write( self.name + ' successful')
+        self.log.write( self.name + ' ' + self.translate('successful'))
 
        
 class cumulativeFrecuency( cumfreq, _neededLibraries):
@@ -312,7 +313,8 @@ class cumulativeFrecuency( cumfreq, _neededLibraries):
         # evaluating the histogram function to obtain the data to plot
         ydat= cumfreq().evaluate(ydat, nbins)
         
-        plt= pltobj( None, xlabel= 'variable', ylabel= 'value', title= 'Histogram Chart of ' + self.colNameSelect[0] )
+        plt= pltobj( None, xlabel= 'variable', ylabel= self.translate(u'value'), 
+                     title= self.translate(u'Histogram Chart of ') + self.colNameSelect[0] )
         plt.gca().hold( True)
         
         ydat= ravel( array( ydat))
@@ -334,7 +336,7 @@ class cumulativeFrecuency( cumfreq, _neededLibraries):
         
     def _report(self, result):
         [res.Show() for res in result]
-        self.log.write(self.plotName+ ' successfull')
+        self.log.write(self.plotName+ ' ' + self.translate('successful'))
 
         
 class relativefrequency( relfreq, _neededLibraries):
@@ -357,7 +359,8 @@ class relativefrequency( relfreq, _neededLibraries):
         # evaluating the histogram function to obtain the data to plot
         ydat= relfreq().evaluate(ydat, nbins)
         
-        plt= pltobj( None, xlabel= 'variable', ylabel= 'value', title= 'Histogram Chart of ' + self.colNameSelect[0] )
+        plt= pltobj( None, xlabel= 'variable', ylabel= self.translate(u'value'), 
+                     title= self.translate(u'Histogram Chart of ') + self.colNameSelect[0] )
         plt.gca().hold( True)
         
         dat= array(ydat)
@@ -378,16 +381,4 @@ class relativefrequency( relfreq, _neededLibraries):
         
     def _report(self, result):
         [res.Show() for res in result]
-        self.log.write(self.plotName+ ' successfull')
-
-    
-#    def _report(self, result):
-#        self.outputGrid.addColData(self.colNameSelect, self.name)
-#        self.outputGrid.addColData(result)
-#        
-#        # inserting information about the input data
-#        self.outputGrid.addRowData( ['Input Data'] , currRow= 0)
-#        self.outputGrid.addRowData( [self.nameStaticText+'=',  self._percent], currRow= 1)
-#        self.outputGrid.addRowData( ['Output Data'] , currRow= 2)
-#        
-#        self.Loggg.write( self.name + ' successful')
+        self.log.write(self.plotName+ ' ' + self.translate('successful'))

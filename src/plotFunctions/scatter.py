@@ -31,15 +31,16 @@ class scatter( _neededLibraries):
         self.log.write("Scatter")
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write("You need some data to draw a graph!")
+            self.log.write(self.translate(u"You need some data to draw a graph!"))
             return
 
-        bt1= ["StaticText", ["Select pairs of data by rows"]]
-        bt2= ["makePairs",  [["X data to plot", "Y data to plot"], [self.columnNames]*2, 20]]
+        bt1= ["StaticText", [self.translate(u"Select pairs of data by rows")]]
+        bt2= ["makePairs",  [[self.translate(u"X data to plot"), self.translate(u"Y data to plot")], [self.columnNames]*2, 20]]
         structure= list()
         structure.append([bt1,])
         structure.append([bt2,])
-        return self.dialog( struct= structure, settings = {"Title": "Scatter Chart Data" , "_size": wx.Size(300,500)},)
+        return self.dialog( struct= structure, settings = {"Title": self.translate(u"Scatter Chart Data") ,
+                                                           "_size": wx.Size(300,500)},)
 
     def _showGui_GetValues(self):
         dlg= self._dialog()
@@ -68,7 +69,7 @@ class scatter( _neededLibraries):
         return self.evaluate
     
     def evaluate( self, *args, **params):
-        plt= pltobj( None, xlabel= "X data", ylabel= "Y data", title= "Scatter Plot" )
+        plt= pltobj( None, xlabel= self.translate(u"X data"), ylabel= self.translate(u"Y data"), title= self.translate(self.name) )
         plt.gca().hold(True)
         listLegend= list()
         listPlot = list()
@@ -93,7 +94,7 @@ class scatter( _neededLibraries):
         
     def _report(self, result):
         result.Show()
-        self.log.write(self.plotName+ ' successfull')
+        self.log.write(self.plotName+ ' '+self.translate('successful'))
 
 class adaptative( _neededLibraries):
     name=      u"Adaptative"
@@ -107,14 +108,14 @@ class adaptative( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write("You need some data to draw a graph!")
+            self.log.write(self.translate(u"You need some data to draw a graph!"))
             return
-        txt1= ['StaticText',    [u"Select data to plot"]]
-        btn1= ['CheckListBox',    [self.columnNames]]
+        txt1= ['StaticText',    [self.translate(u"Select data to plot")]]
+        btn1= ['CheckListBox',  [self.columnNames]]
         structure= list()
         structure.append( [txt1])
         structure.append( [btn1])
-        setting= {'Title': 'Adaptative chart of selected columns',
+        setting= {'Title': self.translate(u'Adaptative chart of selected columns'),
                   '_size': wx.Size( 250,320)}
         
         return self.dialog(settings= setting, struct= structure)
@@ -133,7 +134,7 @@ class adaptative( _neededLibraries):
         self.columnNames = values[0]
         
         if len( self.columnNames) == 0:
-            self.log.write("You need to select some data to draw a graph!")
+            self.log.write(self.translate(u"You need to select some data to draw a graph!"))
             return
         
         return [self.grid.GetColNumeric(col) for col in self.columnNames]
@@ -145,8 +146,8 @@ class adaptative( _neededLibraries):
         return self.evaluate
     
     def evaluate( self, *args, **params):
-        plt= pltobj( None, xlabel = "variable",  ylabel = "value",
-                     title= "Adaptative plot")
+        plt= pltobj( None, xlabel = "variable",  ylabel = self.translate(u"value"),
+                     title= self.translate(u"Adaptative plot"))
         
         plt.gca().hold(True)
         for serieNumber, serieData in enumerate(args): 
@@ -173,7 +174,7 @@ class adaptative( _neededLibraries):
         
     def _report(self, result):
         result.Show()
-        self.log.write(self.plotName+ ' successfull')
+        self.log.write(self.plotName+ ' '+self.translate(u'successful'))
 
 class box_whisker(_neededLibraries):
     name= u"Box & Whisker"
@@ -187,14 +188,14 @@ class box_whisker(_neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write("You need some data to draw a graph!")
+            self.log.write(self.translate(u"You need some data to draw a graph!"))
             return
-        txt1= ['StaticText',    [u"Select data to plot"]]
-        btn1= ['CheckListBox',    [self.columnNames]]
+        txt1= ['StaticText',    [self.translate(u"Select data to plot")]]
+        btn1= ['CheckListBox',  [self.columnNames]]
         structure= list()
         structure.append( [txt1])
         structure.append( [btn1])
-        setting= {'Title': 'Adaptative chart of selected columns',
+        setting= {'Title': self.translate(u'Adaptative chart of selected columns'),
                   '_size': wx.Size( 250,320)}
         
         return self.dialog(settings= setting, struct= structure)
@@ -213,7 +214,7 @@ class box_whisker(_neededLibraries):
         self.columnNames = values[0]
         
         if len( self.columnNames) == 0:
-            self.log.write("You need to select some data to draw a graph!")
+            self.log.write(self.translate(u"You need to select some data to draw a graph!"))
             return
         
         return [self.grid.GetColNumeric(col) for col in self.columnNames]
@@ -225,7 +226,7 @@ class box_whisker(_neededLibraries):
         return self.evaluate
     
     def evaluate( self, *args, **params):
-        plt= pltobj( None, xlabel = "variable",  ylabel = "value",
+        plt= pltobj( None, xlabel = "variable",  ylabel = self.translate("value"),
                      title= self.name)
         
         plt.gca().boxplot( args, notch=0, sym='+', vert=1, whis=1.5,
@@ -244,7 +245,7 @@ class box_whisker(_neededLibraries):
         
     def _report(self, result):
         result.Show()
-        self.log.write(self.plotName+ ' successfull')
+        self.log.write(self.plotName+ ' '+self.translate('successful'))
         
 class normalProb( _neededLibraries):
     name=      u"Normal probability"
@@ -258,14 +259,14 @@ class normalProb( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write("You need some data to draw a graph!")
+            self.log.write(self.translate(u"You need some data to draw a graph!"))
             return
-        txt1= ['StaticText',    [u"Select data to plot"]]
-        btn1= ['CheckListBox',   [self.columnNames]]
+        txt1= ['StaticText',    [self.translate(u"Select data to plot")]]
+        btn1= ['CheckListBox',  [self.columnNames]]
         structure= list()
         structure.append( [txt1])
         structure.append( [btn1])
-        setting= {'Title': 'Adaptative chart of selected columns',
+        setting= {'Title': self.translate(u'Adaptative chart of selected columns'),
                   '_size': wx.Size( 250,320)}
         
         return self.dialog(settings= setting, struct= structure)
@@ -284,7 +285,7 @@ class normalProb( _neededLibraries):
         self.columnNames = values[0]
         
         if len( self.columnNames) == 0:
-            self.log.write("You need to select some data to draw a graph!")
+            self.log.write(self.translate(u"You need to select some data to draw a graph!"))
             return
         
         return [self.grid.GetColNumeric(col) for col in self.columnNames]
@@ -301,8 +302,8 @@ class normalProb( _neededLibraries):
             title=   self.name + u"of " + varName
                   
             listPlot.append( pltobj( None,
-                                     xlabel=  "Order Statistic Medians",
-                                     ylabel=  "Ordered Values",
+                                     xlabel=  self.translate(u"Order Statistic Medians"),
+                                     ylabel=  self.translate(u"Ordered Values"),
                                      title= title))
             plt= listPlot[-1]
             if not isinstance( ydat,(ndarray,)):
@@ -330,4 +331,4 @@ class normalProb( _neededLibraries):
     def _report(self, result):
         for res in result:
             res.Show()
-        self.log.write(self.plotName+ ' successfull')
+        self.log.write(self.plotName+ ' '+self.translate('successful'))

@@ -29,10 +29,10 @@ class table( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write("You need some data to draw a graph!")
+            self.log.write(self.translate(u"You need some data to draw a graph!"))
             return
-        txt1= ["StaticText",    ["Select data to plot"]]
-        txt2= ["StaticText",    ["Select the name of the rows"]]
+        txt1= ["StaticText",    [self.translate(u"Select data to plot")]]
+        txt2= ["StaticText",    [self.translate(u"Select the name of the rows")]]
         btn1= ["CheckListBox",  [self.columnNames] ]
         btn2= ["Choice",        [self.columnNames]]
         structure= list()
@@ -40,7 +40,8 @@ class table( _neededLibraries):
         structure.append( [btn1,])
         structure.append( [txt2,])
         structure.append( [btn2,])
-        return self.dialog( struct= structure, settings = {"Title": self.name, "_size": wx.Size( 300,500)},)
+        return self.dialog( struct= structure, settings = {"Title": self.translate(self.name),
+                                                           "_size": wx.Size( 300,500)},)
 
     def _showGui_GetValues(self):
         dlg= self._dialog()
@@ -60,7 +61,7 @@ class table( _neededLibraries):
         
         self.rowlabelsCol= values[1]
         if self.rowlabelsCol == None:
-            self.log.write('the user have to select a name colum to the rows')
+            self.log.write(self.translate(u'the user have to select a name colum to the rows'))
             return
 
         data, posvalid= homogenize(*[ self.grid.GetCol( colX) for colX in self.selectedColNames], returnPos= True )
@@ -78,7 +79,7 @@ class table( _neededLibraries):
         data = args[0]
         rowLabels= args[1]
         colLabels= self.selectedColNames
-        plt= pltobj( None, xlabel= "", ylabel= self.rowlabelsCol, title= "Table Plot" )
+        plt= pltobj( None, xlabel= "", ylabel= self.rowlabelsCol, title= self.translate(self.name) )
 
         plt.gca().hold(True)
         rows = len(data)
@@ -118,7 +119,7 @@ class table( _neededLibraries):
         
     def _report(self, result):
         result.Show()
-        self.log.write(self.plotName+ ' successfull')
+        self.log.write(self.plotName + ' ' + self.translate('successful'))
 
 class linRegres( _neededLibraries):
     name=      u"linear regression"
@@ -130,18 +131,19 @@ class linRegres( _neededLibraries):
         self.plotName=  u"linregres"
         
     def _dialog(self, *arg, **params):
-        self.log.write("Scatter")
+        self.log.write(self.translate(self.name))
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write("You need some data to draw a graph!")
+            self.log.write(self.translate(u"You need some data to draw a graph!"))
             return
 
-        bt1= ["StaticText", ["Select pairs of data by rows"]]
-        bt2= ["makePairs",  [["X data to plot", "Y data to plot"], [self.columnNames]*2, 20]]
+        bt1= ["StaticText", [self.translate(u"Select pairs of data by rows")]]
+        bt2= ["makePairs",  [[self.translate(u"X data to plot"), self.translate(u"Y data to plot")], [self.columnNames]*2, 20]]
         structure= list()
         structure.append([bt1,])
         structure.append([bt2,])
-        return self.dialog( struct= structure, settings = {"Title": "Scatter Chart Data" , "_size": wx.Size(300, 400)},)
+        return self.dialog( struct= structure, settings = {"Title": self.translate(u"Scatter Chart Data") ,
+                                                           "_size": wx.Size(300, 400)},)
 
     def _showGui_GetValues(self):
         dlg= self._dialog()
@@ -180,7 +182,7 @@ class linRegres( _neededLibraries):
             line=  linregress(x,y)
             yfit= lambda x: x*line[0]+line[1]
             plot= plt.gca().plot(x,y,'b.',x,[yfit(x1) for x1 in x],'r')
-            legend= plt.legend(plot,( title,'linRegressFit'), prop = PROPLEGEND)
+            legend= plt.legend(plot,( title,self.translate(u'linear Regression')), prop = PROPLEGEND)
             legend.draggable(state=True)
             arrow_args = dict(arrowstyle="->")
             bbox_args = dict(boxstyle="round", fc="w")
@@ -211,7 +213,7 @@ class linRegres( _neededLibraries):
     def _report(self, result):
         for res in result:
             res.Show()
-        self.log.write(self.plotName+ ' successfull')
+        self.log.write(self.plotName+ ' '+self.translate(u'successful'))
 
 class ternaryScatter( _neededLibraries):
     name=      u"Ternary scatter"
@@ -413,4 +415,4 @@ class ternaryScatter( _neededLibraries):
         
     def _report(self, result):
         result.Show()
-        self.log.write(self.plotName+ ' successfull')
+        self.log.write(self.plotName + ' ' + self.translate('successful'))
