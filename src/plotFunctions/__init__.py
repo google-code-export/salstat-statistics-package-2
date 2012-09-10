@@ -173,6 +173,7 @@ class scrolled1(wx.ScrolledWindow):
         wx.ScrolledWindow.__init__(self, *args[1:], **params)
         self.figpanel= self.Parent.Parent.figpanel
         self.log= self.Parent.Parent.log
+        self.translate = wx.GetApp().translate
         graphParams= args[0]
         
         if params.has_key('parent'):
@@ -183,7 +184,7 @@ class scrolled1(wx.ScrolledWindow):
         self.SetScrollRate( 5, 5 )
         bSizer2 = wx.BoxSizer( wx.VERTICAL )
 
-        sbSizer3 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Title" ), wx.HORIZONTAL )
+        sbSizer3 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, self.translate(u"Title") ), wx.HORIZONTAL )
         self.plt_textCtr1 = wx.TextCtrl( self, wx.ID_ANY, graphParams['title'], wx.DefaultPosition, wx.Size( 135,-1 ), 0 )
         sbSizer3.Add( self.plt_textCtr1, 0, 0, 5 )
         self.m_button3 = wx.Button( self, wx.ID_ANY, u"...", wx.DefaultPosition, wx.Size( 20,-1 ), 0 )
@@ -191,7 +192,7 @@ class scrolled1(wx.ScrolledWindow):
 
         bSizer2.Add( sbSizer3, 0, 0, 5 )
 
-        sbSizer4 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Xlabel" ), wx.HORIZONTAL )
+        sbSizer4 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, self.translate(u"X label") ), wx.HORIZONTAL )
 
         self.plt_textCtr2 = wx.TextCtrl( self, wx.ID_ANY, graphParams['xlabel'], wx.DefaultPosition, wx.Size( 135,-1 ), 0 )
         sbSizer4.Add( self.plt_textCtr2, 0, 0, 5 )
@@ -200,7 +201,7 @@ class scrolled1(wx.ScrolledWindow):
 
         bSizer2.Add( sbSizer4, 0, 0, 5 )
 
-        sbSizer5 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Ylabel" ), wx.HORIZONTAL )
+        sbSizer5 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, self.translate(u"Y label") ), wx.HORIZONTAL )
 
         self.plt_textCtr3 = wx.TextCtrl( self, wx.ID_ANY, graphParams['ylabel'], wx.DefaultPosition, wx.Size( 135,-1 ), 0 )
         sbSizer5.Add( self.plt_textCtr3, 0, 0, 5 )
@@ -210,9 +211,9 @@ class scrolled1(wx.ScrolledWindow):
         bSizer2.Add( sbSizer5, 0, 0, 5 )
 
         gSizer1 = wx.GridSizer( 2, 2, 0, 0 )
-        self.m_checkBox1 = wx.CheckBox( self, wx.ID_ANY, u"Show Grid", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_checkBox1 = wx.CheckBox( self, wx.ID_ANY, self.translate( u"Show Grid"), wx.DefaultPosition, wx.DefaultSize, 0 )
         gSizer1.Add( self.m_checkBox1, 0, wx.LEFT|wx.TOP, 5 )
-        self.m_checkBox3 = wx.CheckBox( self, wx.ID_ANY, u"View Cursor", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_checkBox3 = wx.CheckBox( self, wx.ID_ANY, self.translate( u"View Cursor"), wx.DefaultPosition, wx.DefaultSize, 0 )
         gSizer1.Add( self.m_checkBox3, 0, wx.LEFT|wx.TOP, 5 )
 
         #self.m_checkBox2 = wx.CheckBox( self, wx.ID_ANY, u"Legend", wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -220,17 +221,17 @@ class scrolled1(wx.ScrolledWindow):
 
         bSizer2.Add( gSizer1, 0, 0, 5 )
 
-        sbSizer10 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Xaxis" ), wx.VERTICAL )
+        sbSizer10 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, self.translate(u"X axis") ), wx.VERTICAL )
         
         bSizer51 = wx.BoxSizer( wx.HORIZONTAL )
         
-        self.m_staticText1 = wx.StaticText( self, wx.ID_ANY, u"min", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText1 = wx.StaticText( self, wx.ID_ANY, self.translate(u"min"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText1.Wrap( -1 )
         bSizer51.Add( self.m_staticText1, 0, wx.ALL, 5 )
         self.m_textCtrl4 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
         bSizer51.Add( self.m_textCtrl4, 0, wx.ALL, 5 )
         
-        self.m_staticText2 = wx.StaticText( self, wx.ID_ANY, u"max", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText2 = wx.StaticText( self, wx.ID_ANY, self.translate(u"max"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText2.Wrap( -1 )
         bSizer51.Add( self.m_staticText2, 0, wx.ALL, 5 )
         self.m_textCtrl5 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
@@ -240,7 +241,7 @@ class scrolled1(wx.ScrolledWindow):
         
         bSizer6 = wx.BoxSizer( wx.HORIZONTAL )
         
-        self.m_staticText281 = wx.StaticText( self, wx.ID_ANY, u"angle", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText281 = wx.StaticText( self, wx.ID_ANY, self.translate(u"angle"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText281.Wrap( -1 )
         bSizer6.Add( self.m_staticText281, 0, wx.ALIGN_CENTER|wx.ALL, 5 )
         self.m_spinCtrl2 = wx.SpinCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 60,-1 ), wx.SP_ARROW_KEYS, -90, 90, 0 )
@@ -250,17 +251,17 @@ class scrolled1(wx.ScrolledWindow):
         
         bSizer2.Add( sbSizer10, 0, 0, 5 )
         
-        sbSizer11 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Yaxis" ), wx.VERTICAL )
+        sbSizer11 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, self.translate(u"Y axis") ), wx.VERTICAL )
         
         bSizer7 = wx.BoxSizer( wx.HORIZONTAL )
         
-        self.m_staticText3 = wx.StaticText( self, wx.ID_ANY, u"min", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText3 = wx.StaticText( self, wx.ID_ANY, self.translate(u"min"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText3.Wrap( -1 )
         bSizer7.Add( self.m_staticText3, 0, wx.ALL, 5 )
         self.m_textCtrl6 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
         bSizer7.Add( self.m_textCtrl6, 0, wx.ALL, 5 )
         
-        self.m_staticText4 = wx.StaticText( self, wx.ID_ANY, u"max", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText4 = wx.StaticText( self, wx.ID_ANY, self.translate(u"max"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText4.Wrap( -1 )
         bSizer7.Add( self.m_staticText4, 0, wx.ALL, 5 )
         self.m_textCtrl7 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 40,-1 ), 0 )
@@ -270,7 +271,7 @@ class scrolled1(wx.ScrolledWindow):
         
         bSizer8 = wx.BoxSizer( wx.HORIZONTAL )
         
-        self.m_staticText291 = wx.StaticText( self, wx.ID_ANY, u"angle", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText291 = wx.StaticText( self, wx.ID_ANY, self.translate(u"angle"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText291.Wrap( -1 )
         bSizer8.Add( self.m_staticText291, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
         self.m_spinCtrl3 = wx.SpinCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 60,-1 ), wx.SP_ARROW_KEYS, -90, 90, 0 )
@@ -280,15 +281,15 @@ class scrolled1(wx.ScrolledWindow):
         
         bSizer2.Add( sbSizer11, 0, 0, 5 )
         
-        sbSizer7 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"axis scale" ), wx.VERTICAL )
+        sbSizer7 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, self.translate(u"axis scale") ), wx.VERTICAL )
 
         gSizer2 = wx.GridSizer( 0, 2, 0, 0 )
 
-        self.m_staticText5 = wx.StaticText( self, wx.ID_ANY, u"X axis", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText5 = wx.StaticText( self, wx.ID_ANY, self.translate(u"X axis"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText5.Wrap( -1 )
         gSizer2.Add( self.m_staticText5, 0, wx.ALL, 5 )
 
-        self.m_staticText6 = wx.StaticText( self, wx.ID_ANY, u"Y axis", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText6 = wx.StaticText( self, wx.ID_ANY, self.translate(u"Y axis"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText6.Wrap( -1 )
         gSizer2.Add( self.m_staticText6, 0, wx.ALL, 5 )
 
@@ -478,6 +479,7 @@ class scrolled2(wx.ScrolledWindow):
         wx.ScrolledWindow.__init__(self, *args[1:], **params)
         self.figpanel= self.Parent.Parent.figpanel
         self.log= self.Parent.Parent.log
+        self.translate = wx.GetApp().translate
         graphParams= args[0]
         self.gca= self.Parent.Parent.gca
         
@@ -490,7 +492,7 @@ class scrolled2(wx.ScrolledWindow):
         self.SetScrollRate( 5, 5 )
         bSizer21 = wx.BoxSizer( wx.VERTICAL )
 
-        sbSizer8 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Choose a line" ), wx.VERTICAL )
+        sbSizer8 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, self.translate( u"Choose a line") ), wx.VERTICAL )
 
         m_listBox1Choices = []
         self.m_listBox1 = wx.ListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( 130,80 ), m_listBox1Choices, 0 )
@@ -503,16 +505,16 @@ class scrolled2(wx.ScrolledWindow):
 
         bSizer5.Add( self.m_button87, 0, wx.LEFT|wx.RIGHT, 5 )
 
-        self.m_button41 = wx.Button( self, wx.ID_ANY, u"Refresh lines", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_button41 = wx.Button( self, wx.ID_ANY, self.translate( u"Refresh lines"), wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer5.Add( self.m_button41, 0, wx.ALIGN_RIGHT|wx.LEFT, 5 )
 
         sbSizer8.Add( bSizer5, 1, wx.EXPAND, 5 )
 
         bSizer21.Add( sbSizer8, 0, 0, 5 )
 
-        sbSizer71 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Some Properties" ), wx.VERTICAL )
+        sbSizer71 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, self.translate( u"Some Properties") ), wx.VERTICAL )
 
-        self.m_staticText11 = wx.StaticText( self, wx.ID_ANY, u"Name", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText11 = wx.StaticText( self, wx.ID_ANY, self.translate( u"Name"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText11.Wrap( -1 )
         sbSizer71.Add( self.m_staticText11, 0, wx.LEFT, 5 )
 
@@ -530,14 +532,14 @@ class scrolled2(wx.ScrolledWindow):
         self.m_choice7.SetSelection( 0 )
         fgSizer2.Add( self.m_choice7, 0, wx.ALL, 5 )
 
-        self.m_staticText12 = wx.StaticText( self, wx.ID_ANY, u"Line Width", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText12 = wx.StaticText( self, wx.ID_ANY, self.translate( u"Line Width"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText12.Wrap( -1 )
         fgSizer2.Add( self.m_staticText12, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
         self.m_button12 = wx.Button( self, wx.ID_ANY, u"...", wx.DefaultPosition, wx.Size( 60,-1 ), 0 )
         fgSizer2.Add( self.m_button12, 0, wx.ALL, 5 )
 
-        self.m_staticText7 = wx.StaticText( self, wx.ID_ANY, u"Line Colour", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText7 = wx.StaticText( self, wx.ID_ANY, self.translate( u"Line Colour"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText7.Wrap( -1 )
         fgSizer2.Add( self.m_staticText7, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
@@ -546,7 +548,7 @@ class scrolled2(wx.ScrolledWindow):
         self.m_choice4.SetSelection( 0 )
         fgSizer2.Add( self.m_choice4, 0, wx.ALL, 5 )
 
-        self.m_staticText8 = wx.StaticText( self, wx.ID_ANY, u"Line Style", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText8 = wx.StaticText( self, wx.ID_ANY, self.translate(u"Line Style"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText8.Wrap( -1 )
         fgSizer2.Add( self.m_staticText8, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
@@ -555,7 +557,7 @@ class scrolled2(wx.ScrolledWindow):
         self.m_choice6.SetSelection( 0 )
         fgSizer2.Add( self.m_choice6, 0, wx.ALL, 5 )
 
-        self.m_staticText10 = wx.StaticText( self, wx.ID_ANY, u"Marker Style", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText10 = wx.StaticText( self, wx.ID_ANY, self.translate(u"Marker Style"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText10.Wrap( -1 )
         fgSizer2.Add( self.m_staticText10, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
@@ -564,18 +566,18 @@ class scrolled2(wx.ScrolledWindow):
         self.m_choice8.SetSelection( 0 )
         fgSizer2.Add( self.m_choice8, 0, wx.ALL, 5 )
 
-        self.m_staticText13 = wx.StaticText( self, wx.ID_ANY, u"Marker Size", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText13 = wx.StaticText( self, wx.ID_ANY, self.translate(u"Marker Size"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText13.Wrap( -1 )
         fgSizer2.Add( self.m_staticText13, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
         sbSizer71.Add( fgSizer2, 1, wx.EXPAND, 5 )
 
-        self.m_checkBox4 = wx.CheckBox( self, wx.ID_ANY, u" Visible", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_checkBox4 = wx.CheckBox( self, wx.ID_ANY, self.translate(u"Shown"), wx.DefaultPosition, wx.DefaultSize, 0 )
         sbSizer71.Add( self.m_checkBox4, 0, wx.ALL, 5 )
 
         bSizer21.Add( sbSizer71, 0, 0, 5 )
 
-        sbSizer9 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Add ReferenceLine" ), wx.VERTICAL )
+        sbSizer9 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, self.translate(u"Add ReferenceLine") ), wx.VERTICAL )
 
         fgSizer1 = wx.FlexGridSizer( 0, 3, 0, 0 )
         fgSizer1.SetFlexibleDirection( wx.BOTH )
@@ -587,7 +589,7 @@ class scrolled2(wx.ScrolledWindow):
         self.m_button51 = wx.Button( self, wx.ID_ANY, u"+", wx.DefaultPosition, wx.Size( 20,-1 ), 0 )
         fgSizer1.Add( self.m_button51, 0, wx.TOP, 5 )
 
-        self.m_staticText131 = wx.StaticText( self, wx.ID_ANY, u"Horizontal", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText131 = wx.StaticText( self, wx.ID_ANY, self.translate(u"Horizontal"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText131.Wrap( -1 )
         fgSizer1.Add( self.m_staticText131, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
@@ -597,7 +599,7 @@ class scrolled2(wx.ScrolledWindow):
         self.m_button511 = wx.Button( self, wx.ID_ANY, u"+", wx.DefaultPosition, wx.Size( 20,-1 ), 0 )
         fgSizer1.Add( self.m_button511, 0, wx.TOP, 5 )
 
-        self.m_staticText14 = wx.StaticText( self, wx.ID_ANY, u"Vertical", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText14 = wx.StaticText( self, wx.ID_ANY, self.translate(u"Vertical"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText14.Wrap( -1 )
         fgSizer1.Add( self.m_staticText14, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
@@ -831,6 +833,7 @@ class scrolled3(wx.ScrolledWindow):
         wx.ScrolledWindow.__init__(self, *args[1:], **params)
         self.figpanel= self.Parent.Parent.figpanel
         self.log= self.Parent.Parent.log
+        self.translate = wx.GetApp().translate
         graphParams= args[0]
         self.gca= self.Parent.Parent.gca
         
@@ -842,7 +845,7 @@ class scrolled3(wx.ScrolledWindow):
         self.SetScrollRate( 5, 5 )
         bSizer3 = wx.BoxSizer( wx.VERTICAL )
 
-        sbSizer15 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Choose a patchs" ), wx.VERTICAL )
+        sbSizer15 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, self.translate( u"Choose a patchs") ), wx.VERTICAL )
 
         patchListBoxChoices = []
         self.patchListBox = wx.ListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, patchListBoxChoices, 0 )
@@ -859,16 +862,16 @@ class scrolled3(wx.ScrolledWindow):
 
         fgSizer6.Add( self.m_button9, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
 
-        self.m_button11 = wx.Button( self, wx.ID_ANY, u"Refresh Patchs", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_button11 = wx.Button( self, wx.ID_ANY, self.translate(u"Refresh Patchs"), wx.DefaultPosition, wx.DefaultSize, 0 )
         fgSizer6.Add( self.m_button11, 0, wx.LEFT, 5 )
 
         sbSizer15.Add( fgSizer6, 1, wx.EXPAND, 5 )
 
         bSizer3.Add( sbSizer15, 0, 0, 5 )
 
-        sbSizer16 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Some Properties" ), wx.VERTICAL )
+        sbSizer16 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, self.translate(u"Some Properties") ), wx.VERTICAL )
 
-        self.m_staticText28 = wx.StaticText( self, wx.ID_ANY, u"Patch Name", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText28 = wx.StaticText( self, wx.ID_ANY, self.translate(u"Patch Name"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText28.Wrap( -1 )
         sbSizer16.Add( self.m_staticText28, 0, wx.ALL, 5 )
 
@@ -884,7 +887,7 @@ class scrolled3(wx.ScrolledWindow):
         self.m_button13 = wx.Button( self, wx.ID_ANY, u"...", wx.DefaultPosition, wx.Size( 70,-1 ), 0 )
         fgSizer7.Add( self.m_button13, 0, wx.ALL, 5 )
 
-        self.m_staticText29 = wx.StaticText( self, wx.ID_ANY, u"Face Colour", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText29 = wx.StaticText( self, wx.ID_ANY, self.translate(u"Face Colour"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText29.Wrap( -1 )
         fgSizer7.Add( self.m_staticText29, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
@@ -893,7 +896,7 @@ class scrolled3(wx.ScrolledWindow):
         self.m_choice14.SetSelection( 0 )
         fgSizer7.Add( self.m_choice14, 0, wx.ALL, 5 )
 
-        self.m_staticText30 = wx.StaticText( self, wx.ID_ANY, u"Alpha", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText30 = wx.StaticText( self, wx.ID_ANY, self.translate(u"Alpha"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText30.Wrap( -1 )
         fgSizer7.Add( self.m_staticText30, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
@@ -901,7 +904,7 @@ class scrolled3(wx.ScrolledWindow):
 
         bSizer3.Add( sbSizer16, 0, 0, 5 )
 
-        sbSizer12 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"add Span" ), wx.VERTICAL )
+        sbSizer12 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, self.translate(u"add an span") ), wx.VERTICAL )
 
         sbSizer13 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, wx.EmptyString ), wx.VERTICAL )
 
@@ -909,7 +912,7 @@ class scrolled3(wx.ScrolledWindow):
         fgSizer4.SetFlexibleDirection( wx.BOTH )
         fgSizer4.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
 
-        self.m_staticText15 = wx.StaticText( self, wx.ID_ANY, u"Horzontal", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText15 = wx.StaticText( self, wx.ID_ANY, self.translate(u"Horizontal"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText15.Wrap( -1 )
         fgSizer4.Add( self.m_staticText15, 0, wx.ALL, 5 )
 
@@ -929,7 +932,7 @@ class scrolled3(wx.ScrolledWindow):
 
         fgSizer3.Add( self.plt_textCtr11, 0, wx.ALL, 5 )
 
-        self.m_staticText17 = wx.StaticText( self, wx.ID_ANY, u"Y axis pos 2", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText17 = wx.StaticText( self, wx.ID_ANY, self.translate(u"Y axis position 1"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText17.Wrap( -1 )
         fgSizer3.Add( self.m_staticText17, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
 
@@ -938,7 +941,7 @@ class scrolled3(wx.ScrolledWindow):
 
         fgSizer3.Add( self.plt_textCtr12, 0, wx.ALL, 5 )
 
-        self.m_staticText16 = wx.StaticText( self, wx.ID_ANY, u"Y axis pos 2", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText16 = wx.StaticText( self, wx.ID_ANY, self.translate(u"Y axis position 2"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText16.Wrap( -1 )
         fgSizer3.Add( self.m_staticText16, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
 
@@ -949,7 +952,7 @@ class scrolled3(wx.ScrolledWindow):
 
         fgSizer3.Add( self.m_choice81, 0, wx.ALL, 5 )
 
-        self.m_staticText22 = wx.StaticText( self, wx.ID_ANY, u"Face Colour", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText22 = wx.StaticText( self, wx.ID_ANY, self.translate(u"Face Colour"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText22.Wrap( -1 )
         fgSizer3.Add( self.m_staticText22, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
 
@@ -960,7 +963,7 @@ class scrolled3(wx.ScrolledWindow):
 
         fgSizer3.Add( self.m_choice12, 0, wx.ALL, 5 )
 
-        self.m_staticText26 = wx.StaticText( self, wx.ID_ANY, u"Alpha", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText26 = wx.StaticText( self, wx.ID_ANY, self.translate(u"Alpha"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText26.Wrap( -1 )
         fgSizer3.Add( self.m_staticText26, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
 
@@ -976,7 +979,7 @@ class scrolled3(wx.ScrolledWindow):
         fgSizer5.SetFlexibleDirection( wx.BOTH )
         fgSizer5.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
 
-        self.m_staticText19 = wx.StaticText( self, wx.ID_ANY, u"Vertical", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText19 = wx.StaticText( self, wx.ID_ANY, self.translate(u"Vertical"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText19.Wrap( -1 )
         fgSizer5.Add( self.m_staticText19, 0, wx.ALL, 5 )
 
@@ -988,25 +991,27 @@ class scrolled3(wx.ScrolledWindow):
 
         sbSizer14.Add( fgSizer5, 0, 0, 5 )
 
-        gSizer3 = wx.GridSizer( 0, 2, 0, 0 )
+        gSizer3 = wx.FlexGridSizer( 0, 2, 0, 0 )
+        gSizer3.SetFlexibleDirection( wx.BOTH )
+        gSizer3.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
 
         self.plt_textCtr13 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
         self.plt_textCtr13.SetMinSize( wx.Size( 60,-1 ) )
 
         gSizer3.Add( self.plt_textCtr13, 0, wx.ALL, 5 )
 
-        self.m_staticText20 = wx.StaticText( self, wx.ID_ANY, u"X axis pos 1", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText20 = wx.StaticText( self, wx.ID_ANY, self.translate(u"X axis position 1"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText20.Wrap( -1 )
-        gSizer3.Add( self.m_staticText20, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5 )
+        gSizer3.Add( self.m_staticText20, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
 
         self.plt_textCtr14 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
         self.plt_textCtr14.SetMinSize( wx.Size( 60,-1 ) )
 
         gSizer3.Add( self.plt_textCtr14, 0, wx.ALL, 5 )
 
-        self.m_staticText21 = wx.StaticText( self, wx.ID_ANY, u"X axis pos 2", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText21 = wx.StaticText( self, wx.ID_ANY, self.translate(u"X axis position 2"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText21.Wrap( -1 )
-        gSizer3.Add( self.m_staticText21, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5 )
+        gSizer3.Add( self.m_staticText21, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
 
         m_choice10Choices = []
         self.m_choice10 = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choice10Choices, 0 )
@@ -1015,9 +1020,9 @@ class scrolled3(wx.ScrolledWindow):
 
         gSizer3.Add( self.m_choice10, 0, wx.ALL, 5 )
 
-        self.m_staticText24 = wx.StaticText( self, wx.ID_ANY, u"Face Colour", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText24 = wx.StaticText( self, wx.ID_ANY, self.translate(u"Face Colour"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText24.Wrap( -1 )
-        gSizer3.Add( self.m_staticText24, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5 )
+        gSizer3.Add( self.m_staticText24, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
 
         m_choice11Choices = []
         self.m_choice11 = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choice11Choices, 0 )
@@ -1026,9 +1031,9 @@ class scrolled3(wx.ScrolledWindow):
 
         gSizer3.Add( self.m_choice11, 0, wx.ALL, 5 )
 
-        self.m_staticText25 = wx.StaticText( self, wx.ID_ANY, u"Alpha", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText25 = wx.StaticText( self, wx.ID_ANY, self.translate(u"Alpha"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText25.Wrap( -1 )
-        gSizer3.Add( self.m_staticText25, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT, 5 )
+        gSizer3.Add( self.m_staticText25, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
 
         sbSizer14.Add( gSizer3, 0, 0, 5 )
 
@@ -1319,6 +1324,7 @@ class pltobj( wx.Frame, object ):
         self.plotName= ""
         self.setminRequiredCols= 0
         self.app=       wx.GetApp()
+        self.translate= self.app.translate
         self.dialog=    _dialog         # to create de dialod
         self.grid=      self.app.inputGrid
         self.log=       self.app.Logg   # to report
@@ -1391,13 +1397,13 @@ class pltobj( wx.Frame, object ):
             self.m_mgr.SetManagedWindow( self )
             self.m_mgr.AddPane( self.figpanel, aui.AuiPaneInfo() .Left().
                                 CloseButton( False ).MaximizeButton( True ).MinimizeButton( ).
-                                Caption('Graph').CaptionVisible(True).
+                                Caption(self.translate(u"Graph")).CaptionVisible(True).
                                 Dock().Resizable().FloatingSize( wx.DefaultSize ).DockFixed( True ).
                                 CloseButton(False).Centre() )
             self.m_mgr.AddPane( self.m_notebook1, aui.AuiPaneInfo() .Left() .
                                 CloseButton( False ).MaximizeButton( True ).
                                 MinimizeButton().Dock().Resizable().
-                                Caption('Graph Properties').CaptionVisible(True).
+                                Caption(self.translate(u"Graph Properties")).CaptionVisible(True).
                                 FloatingSize( wx.DefaultSize ).DockFixed( True ).
                                 CloseButton(False). BestSize(wx.Size(200,-1)))
         
@@ -1405,9 +1411,9 @@ class pltobj( wx.Frame, object ):
         self.scrolledWindow2= scrolled2( self.graphParams, self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL)
         self.scrolledWindow3= scrolled3( self.graphParams, self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL)
         
-        self.m_notebook1.AddPage( self.scrolledWindow1, u"Main Options", True )
-        self.m_notebook1.AddPage( self.scrolledWindow2, u"Lines", False )
-        self.m_notebook1.AddPage( self.scrolledWindow3, u"patch", False )
+        self.m_notebook1.AddPage( self.scrolledWindow1, self.translate( u"Main Options"), True )
+        self.m_notebook1.AddPage( self.scrolledWindow2, self.translate( u"Lines"), False )
+        self.m_notebook1.AddPage( self.scrolledWindow3, self.translate( u"patches"), False )
 
         self.statusbar = self.CreateStatusBar( 2, wx.ST_SIZEGRIP, wx.ID_ANY )
  
