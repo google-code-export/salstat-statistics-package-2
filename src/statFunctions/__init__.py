@@ -16,15 +16,16 @@ class _genericFunc(object):
     id=   None
     name= ''
     def __init__(self):
-        self.name=  ""
-        self.statName= ""
+        self.name=        ""
+        self.statName=    ""
         self.setminRequiredCols= 0
-        self.app=       wx.GetApp()
-        self.inputGrid= self.app.inputGrid # to read the input data from the main grid
-        self.dialog=    _dialog         # to create de dialod
-        self.Logg=      self.app.Logg   # to report
-        self.outputGrid= self.app.output # the usern can use the plot functions
-        self.plot=      self.app.plot   # acces to the plot system
+        self.app=         wx.GetApp()
+        self.translate=   self.app.translate
+        self.inputGrid=   self.app.inputGrid # to read the input data from the main grid
+        self.dialog=      _dialog         # to create de dialod
+        self.Logg=        self.app.Logg   # to report
+        self.outputGrid=  self.app.output # the usern can use the plot functions
+        self.plot=        self.app.plot   # acces to the plot system
 
     def _updateColsInfo(self):
         gridCol=            self.inputGrid.GetUsedCols()

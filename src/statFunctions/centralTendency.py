@@ -24,7 +24,7 @@ class geometricMean(_genericFunc):
         setting= {'Title': self.name,
                   '_size': Size(220,300)}
         self._updateColsInfo() # update self.columnames and self.colnums
-        bt1= ['StaticText',   ['Select the columns to analyse']]
+        bt1= ['StaticText',   [self.translate(u'Select the columns to analyse')]]
         bt2= ['CheckListBox', [self.columnNames]]
         structure = list()
         structure.append([bt1,])
@@ -43,11 +43,11 @@ class geometricMean(_genericFunc):
         self.colNameSelect= values[0]
         
         if len( self.colNameSelect ) == 0:
-            self.Logg.write("you don't select any items")
+            self.Logg.write(self.translate(u"you don't select any items"))
             return
         
         if len( self.colNameSelect ) < self.minRequiredCols:
-            self.Logg.write("you have to select at least %i column(s)"%self.minRequiredCols)
+            self.Logg.write(self.translate(u"you have to select at least %i columns")%self.minRequiredCols)
             return
         
         columns= self._convertColName2Values( self.colNameSelect )
@@ -72,7 +72,7 @@ class geometricMean(_genericFunc):
     def _report(self, result):
         self.outputGrid.addColData(self.colNameSelect, self.name)
         self.outputGrid.addColData(result)
-        self.Logg.write(self.statName+ ' successfull')
+        self.Logg.write(self.statName+ ' '+self.translate('successful'))
         
 class harmonicmean(geometricMean):
     name=      u"harmonic mean"
@@ -147,13 +147,13 @@ class mode(geometricMean):
         return _stats.mode(*args, **params)
     
     def _report(self, result):
-        res1= ['var Name']
+        res1= [self.translate(u'variable name')]
         res1.extend(self.colNameSelect)
         self.outputGrid.addColData(res1, self.name)
-        res2= ['value']
+        res2= [self.translate(u'value')]
         res2.extend([numpy.ravel(res[1]) for res in result])
         self.outputGrid.addColData(res2)
-        res3= ['frecuency']
+        res3= [self.translate(u'frecuency')]
         res3.extend([numpy.ravel(res[0])[0] for res in result])
         self.outputGrid.addColData(res3)
-        self.Logg.write(self.statName+ ' successfull')
+        self.Logg.write(self.statName + ' ' + self.translate('successfull'))
