@@ -547,17 +547,17 @@ class TransformFrame(wx.Dialog):
     def logTransform(self, evt):
 	self.transform = "math.log(x)"
 	self.transformEdit.SetValue(self.transform)
-	self.transformName = parent.translate(u" Logarithm")
+	self.transformName = self.parent.translate(u" Logarithm")
 
     def reciprocalTransform(self, evt):
 	self.transform = "1 / x"
 	self.transformEdit.SetValue(self.transform)
-	self.transformName = parent.translate(u" Reciprocal")
+	self.transformName = self.parent.translate(u" Reciprocal")
 
     def squareTransform(self, evt):
 	self.transform = "x * x"
 	self.transformEdit.SetValue(self.transform)
-	self.transformName = parent.translate(u" Square")
+	self.transformName = self.parent.translate(u" Square")
 
     def OnOkayButton(self, evt):
 	# start transforming!
