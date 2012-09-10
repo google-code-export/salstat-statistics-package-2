@@ -985,13 +985,15 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         evt.Skip()
 
     def _OnNtbDbClick(self,evt):
-        for pane in self.m_mgr.AllPanes:
-            if pane.name == u"Bottom Panel":
+        for pane in self.m_mgr.GetAllPanes():
+            if pane.caption == self.translate(u"Log / Shell Panel"):
                 break
         if not pane.IsMaximized():
-            self.mm_mgr.MaximizePane(pane)
+            self.m_mgr.MaximizePane(pane)
         else:
-            pane.MinimizeButton(True)
+            self.m_mgr.RestorePane(pane)
+	    #pane.MinimizeButton(True)
+	self.m_mgr.Update()
     
     def OnDropFiles( self, x, y, filenames):
         if isinstance( filenames, (str, unicode)):
