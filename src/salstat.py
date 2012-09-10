@@ -42,9 +42,8 @@ if wx.Platform != '__WXMSW__':
 import webbrowser # online Help
 
 import wx.lib.wxpTag
-import string, os, os.path, pickle
+import string, os, os.path
 
-from imagenes import imageEmbed
 import numpy
 import wx.py
 import traceback
@@ -54,7 +53,6 @@ import locale
 import glob
 # system of graphics
 from plotFrame import MpltFrame as plot
-from multiPlotDialog import selectDialogData2plot
 from ntbSheet import NoteBookSheet, SimpleGrid
 
 from slbTools import  homogenize, GroupData # GroupData is used to treat data a a pivot table 
