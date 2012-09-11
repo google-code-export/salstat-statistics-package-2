@@ -1,5 +1,5 @@
 __name__ = u"Another plots"
-__all__=  [u'linRegres','ternaryScatter']
+__all__=  [u'linRegres','ternaryScatter','runChart']
 from plotFunctions import _neededLibraries, pltobj
 from wx import ID_OK as _OK
 import wx
@@ -416,3 +416,141 @@ class ternaryScatter( _neededLibraries):
     def _report(self, result):
         result.Show()
         self.log.write(self.plotName + ' ' + self.translate('successful'))
+
+class runChart( _neededLibraries):
+    name=      u"control chart"
+    plotName=  u"controlChart"
+    image=     imag.controlChart()
+    
+    def __init__( self):
+        _neededLibraries.__init__(self)
+        self.name=      u"control chart"
+        self.plotName=  u"controlChart"
+
+    def _dialog(self, *arg, **params):
+        self._updateColsInfo()
+        if self.columnNames == []:
+            self.log.write( self.translate( u"You need some data to draw a graph!"))
+            return
+
+        txt1= ["StaticText",    [self.translate( u"Select the columns to analyse")]]
+        btn1= ["CheckListBox",  [self.columnNames]]
+        txt2= ["StaticText",    [self.translate( u"Lower control limit")]]
+        txt3= ["StaticText",    [self.translate( u"Upper control limit")]]
+        txt4= ["StaticText",    [self.translate( u"Target value")]]
+        btn2= ["NumTextCtrl",   []]
+        
+        structure= list()
+        structure.append( [txt1,])
+        structure.append( [btn1,])
+        structure.append( [btn2, txt2])
+        structure.append( [btn2, txt3])
+        structure.append( [btn2, txt4])        
+        return self.dialog( struct= structure, settings = {"Title": self.translate( u"Run chart") ,
+                                                           "_size": wx.Size( 330, 350)},)
+    
+    def _showGui_GetValues(self):
+        dlg= self._dialog()
+        if dlg == None:
+            return
+        
+        if dlg.ShowModal() == _OK:
+            values= dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        
+        self.selectedcols, lcl, ucl, target  = values
+
+        self.log.write("selectedcols= " + self.selectedcols.__str__(), False)
+        if len( self.selectedcols) == 0:
+            self.log.write( self.translate( u"You need to select some data to draw a graph!"))
+            return
+        
+        if lcl == None or ucl == None:
+            self.log.write( self.translate( u"You have to input the lower and upper control limits"))
+            return
+        
+        if target == None:
+            self.log.write( self.translate( u"You have to input a target value"))
+            return
+        # transform the selected cols to numeric cols
+        colValues= [self.grid.GetColNumeric( col) for col in self.selectedcols]
+        
+        return (colValues, lcl, ucl, target)
+        
+    def _calc( self, *args, **params):
+        return self.evaluate( *args, **params)
+        
+    def object( self):
+        return self.evaluate
+    
+    def evaluate( self, *args, **params):
+        # generate the chart
+        colValues, lcl, ucl, target = args
+        listPlot = list()
+        for colValue, colName in zip(colValues, self.selectedcols):
+            listPlot.append( pltobj( None, xlabel = "", ylabel = self.translate( u"value"),
+                                     title = self.translate( self.name)))
+            xdat= range( len( colValue))
+            plt= listPlot[-1]
+            plt.gca().hold( True)
+            line=  plt.gca().plot( xdat, colValue, '.', markersize= 12)
+            lineucl= plt.gca().plot( [min( xdat), max( xdat)], [ucl]*2, 'r-', linewidth= 2)
+            linelcl= plt.gca().plot( [min( xdat), max( xdat)], [lcl]*2, 'r-', linewidth= 2)
+            linetarget= plt.gca().plot( [min( xdat), max( xdat)], [target]*2, 'b-', linewidth= 2)
+            # check the points out of control
+            posout= list()
+            for pos, element in enumerate( colValue):
+                if element > ucl or element < lcl:
+                    posout.append( pos)
+            
+            if len( posout) > 0:
+                xdat= [x for pos, x in enumerate( xdat) if pos in posout] 
+                ydat= [y for pos, y in enumerate( colValue) if pos in posout] 
+                pointsOut= plt.gca().plot( xdat, ydat, '*')
+                legend= plt.legend( [line, lineucl, linelcl, linetarget, pointsOut],
+                                [colName, self.translate( u"upper limmit"),
+                                 self.translate( u"lower limit"), self.translate(u"target"),
+                                 self.translate( u"out of control")], prop = PROPLEGEND)
+            else:    
+                legend= plt.legend( [line, lineucl, linelcl, linetarget],
+                                [colName, self.translate( u"upper limmit"),
+                                 self.translate( u"lower limit"), self.translate(u"target")],
+                                prop = PROPLEGEND)
+            legend.draggable( state = True)
+            plt.gca().hold(False)
+            plt.updateControls()
+            plt.canvas.draw()
+        return listPlot
+    
+    def showGui(self, *args, **params):
+        values= self._showGui_GetValues()
+        if values== None:
+            return None
+        result= self._calc(*values)
+        self._report(result)
+        
+    def _report(self, result):
+        for res in result:
+            res.Show()
+        self.log.write(self.plotName + ' ' + self.translate('successful'))
+        
+        #UCL= data2plot[self.'UCL']
+        #LCL= data2plot['LCL']
+        #target= data2plot['target']
+        #data= data2plot['data']
+        #posDataOutSide= list()
+        ## plot all data
+        #self.gca().plot(range(len(data)),data,marker= 'o')
+        #self.gca().hold(True)
+        #for pos, value in enumerate(data):
+            #if value > ucl or value < lcl:
+                #posDataOutSide.append((pos,value))
+        ## then plot the violating points
+        #self.gca().plot([dat[0] for dat in posDataOutSide],
+                        #[dat[1] for dat in posDataOutSide],
+                        #linestyle= '_', color='r', marker='d')
+        ## Target Line
+        #self._OnAddRefHorzLine( evt= None, ypos= target, color= 'k'
