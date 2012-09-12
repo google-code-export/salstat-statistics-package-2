@@ -341,23 +341,6 @@ def GetAvailLocales(installDir):
             avail_loc.append(os.path.basename(path))
     return avail_loc
 
-def FormatTrace(etype, value, trace):
-    """Formats the given traceback
-
-    **Returns:**
-
-    *  Formatted string of traceback with attached timestamp
-
-    **Note:**
-
-    *  from Editra.dev_tool
-    """
-
-    exc = traceback.format_exception(etype, value, trace)
-    exc.insert(0, "*** %s ***%s" % ( now(), os.linesep))
-    return "".join(exc)
-
-
 class SalStat2App(wx.App):
     # the main app
     def __init__(self, *args, **kwargs):
@@ -602,7 +585,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         #< set up the datagrid
         self.grid= SimpleGrid( self, self.log)
         # let />
-        self.grid.Saved= True
+        self.grid.hasSaved= True
         self.grid.SetDefaultColSize( 60, True)
         self.grid.SetRowLabelSize( 40)
         self.grid.SetDefaultCellAlignment( wx.ALIGN_RIGHT, wx.ALIGN_CENTER )
@@ -1009,7 +992,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.m_mgr.LoadPerspective(self._defaultPerspective)
         
     def GoClearData(self, evt):
-        if not self.grid.Saved:
+        if not self.grid.hasSaved:
             # display discard dialog
             dlg = wx.MessageDialog(None, translate(u"Do you wish to save now?"),
                                    translate(u"You have Unsaved Data"), wx.YES_NO | wx.CANCEL | wx.ICON_QUESTION)
@@ -1040,7 +1023,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         # /<p>
 
         self.grid.path= None
-        self.grid.Saved = False
+        self.grid.hasSaved = False
         self.m_mgr.Update()
         # /<p>
         # emptying the undo redo
@@ -1186,7 +1169,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
             
         self.m_mgr.Update()    
     def EndApplication(self, evt):
-        if self.grid.Saved == False:
+        if self.grid.hasSaved == False:
             # checking if there is a data to be saved
             if len(self.grid.GetUsedCols()[0]) != 0:
                 win = SaveDialog(self)
