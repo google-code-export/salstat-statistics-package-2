@@ -805,6 +805,22 @@ class SimpleGrid( MyGridPanel):# wxGrid
     def GetColNumeric(self, colNumber):
         # return only the numeric values of a selected colNumber or col label
         # all else values are drop
+        # add the ability to manage non numerical values
+        if isinstance(colNumber, (str, unicode)):
+            if not(colNumber in self.colNames):
+                raise TypeError('You can only use a numeric value, or the name of an existing column')
+            for pos, value in enumerate(self.colNames):
+                if value == colNumber:
+                    colNumber= pos
+                    break
+                    
+            if not isnumeric(colNumber):
+                raise TypeError('You can only use a numeric value, or the name of an existing column')
+            
+            colNumber= int(colNumber)        
+            if colNumber < 0 or colNumber > self.GetNumberCols():
+                raise StandardError('The minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
+            
         values= self._cleanData( self._getCol( colNumber))
         return [val for val in values if not isinstance(val,(unicode, str)) and val != None ]
                    
