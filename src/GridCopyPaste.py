@@ -83,7 +83,9 @@ class PyWXGridEditMixin():
         self._editOldValue = None
         self.Mixin_callbackChangeCell(box)
         if self.padre != False:
+            # to be checked
             self.padre.grid.hasChanged= True
+            self.padre.grid.hasSaved=   False
     
     def GetSelectionBox(self):
         """Produce a set of selection boxes of the form (top, left, nrows, ncols)"""
@@ -163,6 +165,7 @@ class PyWXGridEditMixin():
         # se almacena el rango que se ha cambiado
         self.Mixin_callbackChangeCell(pBox)
         self.padre.grid.hasChanged= True
+        self.padre.grid.hasSaved= False
         
     def _DeterminePasteArea(self, top, left, clipRows, clipCols, selRows, selCols):
         """paste area rules: if 1-d selection (either directon separately) and 2-d clipboard, use clipboard size, otherwise use selection size"""
@@ -202,6 +205,7 @@ class PyWXGridEditMixin():
         self.Copy()
         self.Delete() #this takes care of undo/redo
         self.padre.grid.hasChanged= True
+        self.padre.grid.hasSaved= False
 
     def Delete(self):
         """Clear Cell contents"""
@@ -213,6 +217,7 @@ class PyWXGridEditMixin():
             self.Paste(box, "\n")
             self.Mixin_callbackChangeCell(box)
         self.padre.grid.hasChanged= True
+        self.padre.grid.hasSaved= False
         
     def AddUndo(self, undo, redo):
         """Add an undo/redo combination to the respective stack"""
@@ -240,6 +245,7 @@ class PyWXGridEditMixin():
             padre= self.GetParent() 
             #padre.m_grid.SetGridCursor(top, left) # se espera que el parent sea el grid
             self.padre.grid.hasChanged= True
+            self.padre.grid.hasSaved= False
             
     def Redo(self, evt = None):
         if self._stackPtr < len(self._redoStack):
@@ -255,6 +261,7 @@ class PyWXGridEditMixin():
             padre= self.GetParent() 
             #padre.m_grid.SetGridCursor(top, left) # se espera que el parent sea el grid
             self.padre.grid.hasChanged= True
+            self.padre.grid.hasSaved= False
 
 if __name__ == '__main__':
         import sys
