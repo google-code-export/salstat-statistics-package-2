@@ -38,7 +38,7 @@ from matplotlib.backends.backend_wx import StatusBarWx
 from matplotlib.backend_bases import MouseEvent
 
 from pylab import setp
-from multiPlotDialog import data2Plotdiaglog, selectDialogData2plot, scatterDialog
+from multiPlotDialog import selectDialogData2plot, scatterDialog
 from dialogs import NumTextCtrl
 
 PROPLEGEND=   {'size':11}
@@ -162,6 +162,15 @@ class DropShadowFilter(BaseFilter):
 
 
 # EN GAUSS FUNCTIONS</p>
+
+def data2Plotdiaglog(parent, columnNames):
+    translate= wx.GetApp().translate
+    txt1= ['StaticText',   [translate(u"Select data to plot")]]
+    btn1= ['CheckListBox', [columnNames]]
+    structure= list()
+    structure.append( [txt1])
+    structure.append( [btn1])
+    return _dialog(parent = parent, struct= structure)
 
 def gene():
     u= 1
