@@ -56,7 +56,7 @@ class lines( _neededLibraries):
     
     def evaluate( self, *args, **params):
         # generate the chart
-        selectedcols= args
+        selectedcols= args[0]
         data= [self.grid.GetColNumeric(colName) for colName in selectedcols ]
         data= [(range( len( data[i])), data[i], self.columnNames[i]) for i in range( len( data))]
         plt= pltobj(None, xlabel = "", ylabel = self.translate(u"value"), title= self.translate(self.name) )
@@ -126,7 +126,7 @@ class stem( _neededLibraries):
     
     def evaluate( self, *args, **params):
         # generate the chart
-        selectedcols= args
+        selectedcols= args[0]
         data= [self.grid.GetColNumeric(colName) for colName in selectedcols ]
         data= [(range( len( data[i])), data[i], self.columnNames[i]) for i in range( len( data))]
         plotList= list()
@@ -193,7 +193,7 @@ class linesOfMean( _neededLibraries):
         return self.evaluate
     
     def evaluate( self, *args, **params):
-        selectedcols= args
+        selectedcols= args[0]
         data = [statistics( self.grid.GetColNumeric( cols), "noname", None).mean for cols in selectedcols]
         plt= pltobj( None, xlabel = "", ylabel = self.translate(u"value"), title= self.translate(self.name))
         plt.gca().hold( True)
@@ -230,7 +230,7 @@ class shadowLines(lines):
         
     def evaluate( self, *args, **params):
         # generate the chart
-        selectedcols= args
+        selectedcols= args[0]
         data= [self.grid.GetColNumeric(colName) for colName in selectedcols ]
         data= [(range( len( data[i])), data[i], self.columnNames[i]) for i in range( len( data))]
         plt= pltobj(None, xlabel = "", ylabel = self.translate(u"value"), 
@@ -309,7 +309,7 @@ class areaPlot( lines):
         return self.evaluate
     
     def evaluate( self, *args, **params):
-        selectedcols= args
+        selectedcols= args[0]
         data= [ self.grid.GetColNumeric( colName) for colName in selectedcols ]
         data= [( range( len(data[i])), data[i], self.columnNames[i]) for i in range( len( data))]
         listPlot = list()
@@ -358,7 +358,7 @@ class multipleAreaPlot( lines):
         if dlg == None:
             return
         if dlg.ShowModal() == _OK:
-            self.colNameSelect = dlg.GetValue()
+            self.colNameSelect = dlg.GetValue()[0]
             dlg.Destroy()
         else:
             dlg.Destroy()
