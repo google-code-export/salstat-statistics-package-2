@@ -8,6 +8,8 @@ Created on 09/12/2010
 import wx
 import wx.grid
 
+def translate(a):
+    return a
 
 from imagenes import imageEmbed
 from GridCopyPaste import PyWXGridEditMixin
@@ -228,6 +230,7 @@ def test():
     pass
 if __name__ == '__main__':    
         app = wx.PySimpleApp()
+        app.translate= translate
         frame = wx.Frame(None, -1, size=(700,500), title = "wx.Grid example")
         grid = NewGrid(frame)
         grid.CreateGrid(2000,60)
