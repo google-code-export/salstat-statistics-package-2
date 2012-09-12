@@ -12,6 +12,9 @@ SetCompressor /SOLID LZMA
 !define VERSION 2.1
 !define COMPANY "Sebastián López Buriticá"
 !define URL http://selobu.blogspot.com
+# to check if the app is running
+!define WNDCLASS "WindowClassOfYourApplication"
+!define WNDTITLE "S2"
 
 # MultiUser Symbol Definitions
 !define MULTIUSER_EXECUTIONLEVEL Standard
@@ -206,6 +209,12 @@ FunctionEnd
 
 # Installer functions
 Function .onInit
+    # check if the app is running
+    #FindWindow $0 "${WNDCLASS}" "${WNDTITLE}"
+    #StrCmp $0 0 unistall
+    #  MessageBox MB_ICONSTOP|MB_OK "The application you are trying to remove is running. Close it and try again."
+    #    Abort
+    #continueunistall:
     InitPluginsDir
     !insertmacro MULTIUSER_INIT
 FunctionEnd
