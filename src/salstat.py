@@ -72,7 +72,7 @@ from gridCellRenderers import floatRenderer #, AutoWrapStringRenderer
 from wx.combo import BitmapComboBox # translation control
 import wx.lib.langlistctrl as langlist
 
-import statsmodels.api as sm
+# import statsmodels.api as sm
 import scipy
 
 import plotFunctions
@@ -705,9 +705,9 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
               'group':      GroupData,
               'OK':         wx.ID_OK,
               'homogenize': homogenize,
-              'sm':         sm,
               'scipy':      scipy,
               }
+##'sm':         sm, stats models willbe included later
 #'stats': self.stats,
 #'statistics':statistics,
               
