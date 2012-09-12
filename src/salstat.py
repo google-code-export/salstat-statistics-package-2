@@ -373,7 +373,7 @@ class SalStat2App(wx.App):
         locale.setlocale( locale.LC_ALL, '')
         self.locale = wx.Locale( GetLangId( installDir, language))
         if self.locale.GetCanonicalName() in GetAvailLocales( installDir):
-            self.locale.AddCatalogLookupPathPrefix( os.path.join( installDir, "locale"))
+            self.locale.AddCatalogLookupPathPrefix( os.path.relpath( os.path.join( installDir, "locale")))
             self.locale.AddCatalog( APPNAME)
         else:
             del self.locale
