@@ -144,11 +144,11 @@ class sixPack(_genericFunc):
         LCU=    result['LCU']
         LCL=    result['LCL']
         # se muestra los resultados
-        self.outputGrid.addColData( self.translate(u'Input Data'), pageName= self.translate(u'SixSigma'))
+        self.outputGrid.addColData( [self.translate(u'Input Data')], pageName= self.translate(u'SixSigma'))
         self.outputGrid.addColData( [self.translate(u'UCL'), self.translate(u'LCL'),
                                      self.translate(u'target'), self.translate(u'k'), self.translate(u'group size')])
         self.outputGrid.addColData( [self.UCL, self.LCL, self.Target, self.k, self.groupSize])
-        self.outputGrid.addColData( self.translate(u'selected columns'),)
+        self.outputGrid.addColData( [self.translate(u'selected columns')],)
         self.outputGrid.addColData( self.ColSelect)
         keys= list()
         desc= list()
@@ -160,27 +160,28 @@ class sixPack(_genericFunc):
         self.outputGrid.addColData( desc)
         self.outputGrid.addColData( keys)
         self.outputGrid.addColData( values)
-        self.outputGrid.addColData( self.translate('xbar chart Limits'))
+        self.outputGrid.addColData( [self.translate('xbar chart Limits')])
         self.outputGrid.addColData( (self.translate(u'LCU'),self.translate(u'LCL')))
         self.outputGrid.addColData( (LCU, LCL))
         
         # control process chart
         data = self.columns[0]
-        data2plot= {'UCL':     self.UCL,
+        if 0:
+            data2plot= {'UCL':     self.UCL,
                     'LCL':     self.LCL,
                     'target':  self.Target,
                     'data':    data,
                     }
-        plt= self.plot(None, 'controlChart', data2plot,
+            plt= self.plot(None, 'controlChart', data2plot,
                   title=   "Control Chart",
                   xlabel=   self.ColSelect[0],
                   ylabel=   self.ColSelect[0] + " Value")
-        plt.Show()
-        # normal probability chart
-        pltNorm= self.plot(None, 'probabilityPlot', [data],
+            plt.Show()
+            # normal probability chart
+            pltNorm= self.plot(None, 'probabilityPlot', [data],
                       title=   "Normal probability plot",
                       )
-        pltNorm.Show()
+            pltNorm.Show()
         # x-bar chart:
         xbar_data= (data[1:]+data[:-1])/2.0
         try:
