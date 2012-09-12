@@ -88,7 +88,7 @@ class sixPack(_genericFunc):
             # obtain comparable data
             columns= homogenize(*columns)
             # get the size of the group
-            groupSize= len(Columns)
+            groupSize= len(columns)
             # calculating the averages, ranges and standard deviations
             from scipy import stats
             rows= [[columns[pos][fil] for pos in range(len(columns))]
