@@ -695,8 +695,9 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         
     def _sendObj2Shell(self, shell):
         # making available useful object to the shell
-        env= {'grid':       self.grid,
-              'show':       self.appname.Logg,
+        env= {'cls':        self.logPanel.clearLog,
+              'grid':       self.grid,
+              'show':       self.logPanel.write,
               'plot':       self.appname.plot,
               'report':     self.appname.output,
               'numpy':      numpy,
@@ -905,24 +906,24 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.grid.Bind( wx.grid.EVT_GRID_RANGE_SELECT, self._gridRangeSelect )
         #-----------------
         # para el toolbar
-        self.Bind(wx.EVT_MENU, self.GoClearData,        id= self.bt1.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.LoadFile,       id= self.bt2.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.SaveXls,       id= self.bt3.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.SaveXlsAs,     id= self.bt4.GetId())
-        ##self.Bind(wx.EVT_MENU, self.grid.PrintPage,    id = self.bt5.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.CutData,       id= self.bt6.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.CopyData,      id= self.bt7.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.PasteData,     id= self.bt8.GetId())
-        self.Bind(wx.EVT_MENU, self.GoVariablesFrame,   id= self.bt9.GetId())
-        ##self.Bind(wx.EVT_MENU, self.GoHelpSystem,       id= self.bt10.GetId())
-        self.Bind(wx.EVT_MENU, self.GoOnlyneHelp,       id= self.bt10.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.Undo,          id= self.bt11.GetId())
-        self.Bind(wx.EVT_MENU, self.grid.Redo,          id= self.bt12.GetId())
+        self.Bind( wx.EVT_MENU, self.GoClearData,        id= self.bt1.GetId())
+        self.Bind( wx.EVT_MENU, self.grid.LoadFile,      id= self.bt2.GetId())
+        self.Bind( wx.EVT_MENU, self.grid.SaveXls,       id= self.bt3.GetId())
+        self.Bind( wx.EVT_MENU, self.grid.SaveXlsAs,     id= self.bt4.GetId())
+        ##self.Bind( wx.EVT_MENU, self.grid.PrintPage,     id = self.bt5.GetId())
+        self.Bind( wx.EVT_MENU, self.grid.CutData,       id= self.bt6.GetId())
+        self.Bind( wx.EVT_MENU, self.grid.CopyData,      id= self.bt7.GetId())
+        self.Bind( wx.EVT_MENU, self.grid.PasteData,     id= self.bt8.GetId())
+        self.Bind( wx.EVT_MENU, self.GoVariablesFrame,   id= self.bt9.GetId())
+        ##self.Bind( wx.EVT_MENU, self.GoHelpSystem,        id= self.bt10.GetId())
+        self.Bind( wx.EVT_MENU, self.GoOnlyneHelp,       id= self.bt10.GetId())
+        self.Bind( wx.EVT_MENU, self.grid.Undo,          id= self.bt11.GetId())
+        self.Bind( wx.EVT_MENU, self.grid.Redo,          id= self.bt12.GetId())
 
         # controlling the expansion of the notebook
         self.m_notebook1.Bind( wx.EVT_LEFT_DCLICK, self._OnNtbDbClick )
         # self.Bind( wx.EVT_CLOSE, self.EndApplication )
-        self.grid.setPadreCallBack(self)
+        self.grid.setPadreCallBack( self)
         self.sig= self.siguiente()
 
     def siguiente(self):
@@ -935,7 +936,6 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
 
     def _gridRangeSelect(self, evt):
         # displays the count and the sum of selected values
-
         selectedCells= self.grid.get_selection()
         # Count the selected cells
         # getting the cell values:
@@ -987,7 +987,6 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         filename= filenames[0]
         sys.stderr.write( translate(u"the file %d was dropped")%filename)
         
-    
     def onDefaultPerspective(self, evt):
         self.m_mgr.LoadPerspective(self._defaultPerspective)
         
