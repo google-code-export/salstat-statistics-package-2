@@ -357,7 +357,10 @@ class barChartAllMeansNice( _neededLibraries):
         self.colours= ["radom","blue", "black",
                   "red", "green", "lightgreen", "darkblue",
                   "yellow", "white", "hsv"]
-        path=     os.path.join( os.path.split( sys.argv[0] )[0], "nicePlot", "images", "barplot")
+        path1= sys.argv[0]
+        path1= path1.decode( sys.getfilesystemencoding())
+        
+        path=     os.path.join( os.path.split( path1 )[0], "nicePlot", "images", "barplot")
         self.figTypes= [fil[:-4] for fil in os.listdir(path) if fil.endswith(".png")]
         txt1= ["StaticText",   [self.translate(u"Bar type")] ]
         txt2= ["StaticText",   [self.translate(u"Colour")] ]
