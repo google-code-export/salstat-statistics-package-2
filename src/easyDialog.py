@@ -9,6 +9,8 @@ import wx
 from dialogs import CheckListBox, NumTextCtrl, makePairs, IntTextCtrl
 from slbTools import isnumeric
 
+def translate(a):
+    return a
 def _siguiente():
     i = 0
     while 1:
@@ -130,6 +132,11 @@ class Dialog ( wx.Dialog ):
 
         bSizer1.Add( m_sdbSizer1, 0, wx.ALL|wx.EXPAND, 5 )
         self.SetSizer( bSizer1 )
+        size= self.m_scrolledWindow1.Size
+        maxSize= wx.GetDisplaySize()
+        allowSize= [min([size[0]+20, maxSize[0]-10]),
+                    min([size[1]+75, maxSize[1]-10]),]
+        self.SetSize(wx.Size(allowSize[0], allowSize[1]))
         self.Layout()
         self.Centre( wx.BOTH )
 
@@ -273,6 +280,7 @@ class _example( wx.Frame ):
     # Virtual event handlers, overide them in your derived class
     def showDialog( self, evt ):
         dic= {'Title': 'title'}
+        
         bt1= ('Button',     ['print'])
         bt2= ('StaticText', ['hoja a Imprimir'])
         bt3= ('Button',     ['nuevo'])
@@ -305,6 +313,8 @@ class _example( wx.Frame ):
 
 if __name__ == '__main__':
     app= wx.App()
+    app.translate= translate
     frame= _example(None)
+    app.DECIMALPOINT = '.'
     frame.Show()
     app.MainLoop()
