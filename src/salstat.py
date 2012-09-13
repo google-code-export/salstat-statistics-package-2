@@ -363,7 +363,8 @@ class SalStat2App(wx.App):
             installDir = os.path.dirname( os.path.abspath( __file__))
         except:
             installDir = os.path.dirname( os.path.abspath( sys.argv[0]))
-        self.installDir= installDir # to be used in the nice bar plot
+	    
+        self.installDir= installDir.decode(sys.getfilesystemencoding()) # to be used in the nice bar plot
         
         language = self.GetPreferences( "Language")
         if not language:
@@ -371,9 +372,9 @@ class SalStat2App(wx.App):
             
         # Setup Locale
         locale.setlocale( locale.LC_ALL, '')
-        self.locale = wx.Locale( GetLangId( installDir, language))
-        if self.locale.GetCanonicalName() in GetAvailLocales( installDir):
-            self.locale.AddCatalogLookupPathPrefix( os.path.relpath( os.path.join( installDir, "locale")))
+        self.locale = wx.Locale( GetLangId( self.installDir, language))
+        if self.locale.GetCanonicalName() in GetAvailLocales( self.installDir):
+            self.locale.AddCatalogLookupPathPrefix( os.path.join( self.installDir, "locale"))
             self.locale.AddCatalog( APPNAME)
         else:
             del self.locale

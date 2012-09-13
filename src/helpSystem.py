@@ -50,7 +50,9 @@ if __name__ == '__main__':
     app= wx.App(0)
     from wx.html import HtmlHelpData
     import os
-    path= os.path.abspath(os.path.join(os.path.split(sys.argv[0])[0], 'help'))
+    path1= sys.argv[0]
+    path1= path1.decode(sys.getfilesystemencoding())
+    path= os.path.abspath(os.path.join(os.path.split(path1)[0], 'help'))
     fileName= os.path.join(path, "help.hhp")
     app.HELPDATA= HtmlHelpData()
     app.HELPDATA.AddBook(fileName)

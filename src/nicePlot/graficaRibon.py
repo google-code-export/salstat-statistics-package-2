@@ -21,8 +21,10 @@ class _RibbonBox(object):
             try:
                 IMAGESPATH= os.path.join( wx.GetApp().installDir, 'nicePlot','images')
             except:
-                IMAGESPATH= os.path.join(sys.argv[0], 'nicePlot','images')
-            self.original_image = read_png( str(os.path.relpath(
+                path1= sys.argv[0]
+                path1= path1.decode( sys.getfilesystemencoding())
+                IMAGESPATH= os.path.join( path1, 'nicePlot','images')
+            self.original_image = read_png( str( os.path.relpath(
                         os.path.join(IMAGESPATH, "barplot", figName + '.png'))))
         else:
             self.original_image = read_png( str(os.path.relpath(
@@ -106,7 +108,9 @@ def plothist(ax=      None,
     try:
         IMAGESPATH= os.path.join(wx.GetApp().installDir, 'nicePlot','images')
     except:
-        IMAGESPATH= os.path.join(sys.argv[0], 'nicePlot', 'images')
+        path1= sys.argv[0]
+        path1= path1.decode( sys.getfilesystemencoding())
+        IMAGESPATH= os.path.join( path1, 'nicePlot', 'images')
            
     # se generan los colores en forma aleatoria
     box_colors = _generatecolors(colors,len(xdata))   
@@ -214,7 +218,9 @@ def plotBar(ax=      None,
     try:
         IMAGESPATH= os.path.join(wx.GetApp().installDir, 'nicePlot','images')
     except:
-        IMAGESPATH= os.path.join(sys.argv[0], 'nicePlot', 'images')
+        path1= sys.argv[0]
+        path1= path1.decode( sys.getfilesystemencoding())
+        IMAGESPATH= os.path.join( path1, 'nicePlot', 'images')
         
     if len(xdata) != len(ydata):
         raise StandardError('xdata and ydata must have the same len()')
