@@ -30,7 +30,7 @@ class ttest_1samp(_genericFunc):
         self._updateColsInfo() # update self.columnames and self.colnums
         bt1=  ['StaticText',   ['Select the columns to analyse']]
         bt2=  ['CheckListBox', [self.columnNames]]
-        btn3= ['NumTextCtrl',  []]
+        bt3= ['NumTextCtrl',  []]
         txt2= ['StaticText',    ['popmean']]
         structure = list()
         structure.append([bt1,])
