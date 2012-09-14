@@ -573,8 +573,9 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.StatusBar.SetStatusText( 'cells Selected:   '+'count:      '+'sum:    ', 1 )
         self.StatusBar.SetStatusText( 'S2', 2)
 
-        self.m_notebook1= wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.logPanel= LogPanel( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        #self.m_notebook1= wx.aui.AuiNotebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,
+	#                                    wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_TAB_SPLIT )
+	self.logPanel= LogPanel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL ) # self.m_notebook1
         self.log = self.logPanel # self.log = self.logPanel
 
         self.defaultDialogSettings = {'Title': None,
@@ -591,7 +592,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.grid.SetRowLabelSize( 40)
         self.grid.SetDefaultCellAlignment( wx.ALIGN_RIGHT, wx.ALIGN_CENTER )
         
-        ## adjust the renderer
+        # adjust the renderer
         self._gridSetRenderer(self.grid)
         #-----------------------
 
@@ -599,15 +600,10 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.answerPanel= NoteBookSheet(self, fb = self.formulaBarPanel)
         self.answerPanel2= ScriptPanel(self, self.logPanel, self.grid, self.answerPanel)
         #--------------------------------------------
-        self.m_notebook1.AddPage( self.logPanel, translate(u"Log"), True )
-        # Redurecting the error messages to the logPanel
+        # Redirecting the error messages to the logPanel
         sys.stderr= self.logPanel
         sys.stdout= self.logPanel
-        self.scriptPanel=  wx.py.crust.Shell( self.m_notebook1) # wx.py.shell.Shell( self.m_notebook1)
-        ##self.scriptPanel.stderr= self.logPanel
-        
-        #self.scriptPanel.wrap( True)
-        self.m_notebook1.AddPage( self.scriptPanel , translate(u"Shell"), False )
+        self.scriptPanel=  wx.py.crust.Shell( self) # self.m_notebook1 # wx.py.shell.Shell( self.m_notebook1)
 
         # put the references into the main app
         appname.inputGrid= self.grid
@@ -623,8 +619,6 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         # grapHplotData= [(label, image, callback, id), ]
         self.plotSelection= createPlotSelectionPanel(self, size= wx.Size(320, 480) )
         self.plotSelection.createPanels( grapHplotData)
-        #pltFrame.Show(True)
-        # grapHplotData= [(label, image, callback, id), ]
         
         #------------------------
         # organizing panels
@@ -654,22 +648,31 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
                            CaptionVisible(True).Caption((translate(u"Script Panel"))).
                            MinimizeButton().Resizable(True).MaximizeButton(True).
                            CloseButton( False ).MinSize( wx.Size( 240,-1 )))
-
-        self.panelNtb = self.m_mgr.AddPane( self.m_notebook1,
+        
+        self.panelNtb = self.m_mgr.AddPane( self.scriptPanel,
                                             aui.AuiPaneInfo() .Bottom() .
                                             CloseButton( False ).MaximizeButton( True ).
-                                            Caption((translate(u"Log / Shell Panel"))).
+                                            Caption((translate(u"Shell Panel"))).
+                                            MinimizeButton().PinButton( False ).
+                                            Dock().Resizable().FloatingSize( wx.DefaultSize ).
+                                            CaptionVisible(True).
+                                            DockFixed( False ).BestSize(wx.Size(-1,150)))
+	
+	self.panelNtbLog = self.m_mgr.AddPane( self.logPanel,
+                                            aui.AuiPaneInfo() .Bottom() .
+                                            CloseButton( False ).MaximizeButton( True ).
+                                            Caption((translate(u"Log Panel"))).
                                             MinimizeButton().PinButton( False ).
                                             Dock().Resizable().FloatingSize( wx.DefaultSize ).
                                             CaptionVisible(True).
                                             DockFixed( False ).BestSize(wx.Size(-1,150)))
         
-        
         self.m_mgr.AddPane(self.plotSelection,
                            aui.AuiPaneInfo().Centre().Left().Show(False).
-                           CaptionVisible(True).Caption((translate(u"Plot selection panel"))).
+                           CaptionVisible(True).Caption((translate(u"Chart selection panel"))).
                            MinimizeButton().Resizable(True).MaximizeButton(True).
                            CloseButton( True ).MinSize( wx.Size( 240,-1 )))
+	
         self.currPanel = None
         self._sendObj2Shell(self.scriptPanel)
         self._BindEvents()
@@ -923,7 +926,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.Bind( wx.EVT_MENU, self.grid.Redo,          id= self.bt12.GetId())
 
         # controlling the expansion of the notebook
-        self.m_notebook1.Bind( wx.EVT_LEFT_DCLICK, self._OnNtbDbClick )
+        ##self.m_notebook1.Bind( wx.EVT_LEFT_DCLICK, self._OnNtbDbClick )
         self.Bind( wx.EVT_CLOSE, self.EndApplication )
         self.grid.setPadreCallBack( self)
         self.sig= self.siguiente()
@@ -967,16 +970,15 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.formulaBarPanel.m_textCtrl1.SetValue( texto)
         evt.Skip()
 
-    def _OnNtbDbClick(self,evt):
-        for pane in self.m_mgr.GetAllPanes():
-            if pane.caption == self.translate(u"Log / Shell Panel"):
-                break
-        if not pane.IsMaximized():
-            self.m_mgr.MaximizePane(pane)
-        else:
-            self.m_mgr.RestorePane(pane)
-	    #pane.MinimizeButton(True)
-	self.m_mgr.Update()
+    ##def _OnNtbDbClick(self,evt):
+        ##for pane in self.m_mgr.GetAllPanes():
+            ##if pane.caption == self.translate(u"Log / Shell Panel"):
+                ##break
+        ##if not pane.IsMaximized():
+            ##self.m_mgr.MaximizePane(pane)
+        ##else:
+            ##self.m_mgr.RestorePane(pane)
+	##self.m_mgr.Update()
     
     def OnDropFiles( self, x, y, filenames):
         if isinstance( filenames, (str, unicode)):
