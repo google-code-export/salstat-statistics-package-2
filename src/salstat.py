@@ -924,7 +924,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
 
         # controlling the expansion of the notebook
         self.m_notebook1.Bind( wx.EVT_LEFT_DCLICK, self._OnNtbDbClick )
-        # self.Bind( wx.EVT_CLOSE, self.EndApplication )
+        self.Bind( wx.EVT_CLOSE, self.EndApplication )
         self.grid.setPadreCallBack( self)
         self.sig= self.siguiente()
 

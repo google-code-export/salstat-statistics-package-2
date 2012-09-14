@@ -271,7 +271,7 @@ class SaveDialog(wx.Dialog):
 	self.Bind(wx.EVT_BUTTON, self.CancelDialog, id = self.m_button3.GetId())
 
     def SaveData(self, evt):
-	wx.GetApp().frame.grid.Saved = True
+	wx.GetApp().frame.grid.hasSaved = True
 	wx.GetApp().frame.grid.SaveXlsAs(self) # will it be ASCII or XML?
 	# wx.GetApp().output.Close(True)
 	self.Close(True)
@@ -279,6 +279,7 @@ class SaveDialog(wx.Dialog):
 
     def DiscardData(self, evt):
 	self.Close(True)
+	wx.GetApp().frame.grid.hasSaved = True
 	wx.GetApp().frame.Close(True)
 
 
