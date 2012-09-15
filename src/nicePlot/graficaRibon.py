@@ -19,11 +19,12 @@ class _RibbonBox(object):
         
         if path == None:
             try:
-                IMAGESPATH= os.path.join( wx.GetApp().installDir, 'nicePlot','images')
+                path1= wx.GetApp().installDir
             except:
                 path1= sys.argv[0]
                 path1= path1.decode( sys.getfilesystemencoding())
-                IMAGESPATH= os.path.join( path1, 'nicePlot','images')
+                
+            IMAGESPATH= os.path.join( path1, 'nicePlot','images')
             self.original_image = read_png( str( os.path.relpath(
                         os.path.join(IMAGESPATH, "barplot", figName + '.png'))))
         else:
@@ -235,7 +236,7 @@ def plotBar(ax=      None,
     fig = plt.gcf()
     if ax == None:
         ax = plt.gca()
-    fmt = ScalarFormatter(useOffset=False)
+    fmt = ScalarFormatter(useOffset= True) #False
     ax.xaxis.set_major_formatter(fmt)
     if labels== None:
         labels = [None for i in ydata]
@@ -244,6 +245,7 @@ def plotBar(ax=      None,
         path= os.path.relpath(os.path.join(IMAGESPATH,'barplot'))
 
     for year, h, bc,label,figi in zip(xdata, ydata, box_colors,labels,figName):
+        if h < 0: continue
         bbox0 = Bbox.from_extents(year-0.5, 0., year+0.5, h) # year-0.4, 0., year+0.4,
         bbox = TransformedBbox(bbox0, ax.transData)
         rb_patch = _RibbonBoxImage(bbox, bc, figi, path, interpolation='bicubic') #bicubic
@@ -278,7 +280,7 @@ def plotBar(ax=      None,
         maxYlimit = 1.0
     else:
         maxYlimit = max(ydata)*(1-0.05)
-    ax.set_ylim(0, maxYlimit)
+    ax.set_ylim(min(ydata)*(-0.05), maxYlimit)
     return (fig, plt)
 
 if __name__ == '__main__':
