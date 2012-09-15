@@ -52,7 +52,7 @@ import traceback
 import locale
 import glob
 # system of graphics
-from plotFrame import MpltFrame as plot
+from plotFunctions import pltobj as plot
 from ntbSheet import NoteBookSheet, SimpleGrid
 
 from slbTools import  homogenize, GroupData # GroupData is used to treat data a a pivot table 
@@ -1238,9 +1238,6 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         wx.GetApp().output.addColData(colums[1])
         wx.GetApp().output.addRowData(['',"shorted Data","original position"], currRow= 0)
         self.logPanel.write(functionName + " successful")
-	
-    def __del__( self ):
-	pass
 #--------------------------------------------------------------------------
 # main loop
 if __name__ == '__main__':
