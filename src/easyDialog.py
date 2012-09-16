@@ -18,6 +18,10 @@ def _siguiente():
         yield str(i)
 
 class Dialog ( wx.Dialog ):
+    ALLOWED= ['StaticText',   'TextCtrl',     'Choice',
+              'CheckListBox', 'StaticLine',   'RadioBox',
+              'SpinCtrl',     'ToggleButton', 'NumTextCtrl',
+              'CheckBox',     'makePairs',    'IntTextCtrl']
     def __init__( self, parent = None , settings= dict(), struct = []):
         '''Dialog( parent, settings, struct)
 
@@ -68,6 +72,10 @@ class Dialog ( wx.Dialog ):
 
         to see an example run the class as a main script
         '''
+        self.ALLOWED= ['StaticText',   'TextCtrl',     'Choice',
+                       'CheckListBox', 'StaticLine',   'RadioBox',
+                       'SpinCtrl',     'ToggleButton', 'NumTextCtrl',
+                       'CheckBox',     'makePairs',    'IntTextCtrl']
         self.ctrlNum = _siguiente()
         self.sizerNum= _siguiente()
 
@@ -108,10 +116,7 @@ class Dialog ( wx.Dialog ):
         bSizer3 = wx.BoxSizer( wx.VERTICAL )
         self.sisers= list()
         self.ctrls= list()
-        self._allow= ['StaticText','TextCtrl','Choice',
-                      'CheckListBox','StaticLine','RadioBox',
-                      'SpinCtrl','ToggleButton','NumTextCtrl',
-                      'CheckBox', 'makePairs', 'IntTextCtrl']
+        self._allow= self.ALLOWED
         self._allow2get= ['TextCtrl','Choice',
                       'CheckListBox','RadioBox',
                       'SpinCtrl','ToggleButton','NumTextCtrl',
@@ -136,6 +141,8 @@ class Dialog ( wx.Dialog ):
         maxSize= wx.GetDisplaySize()
         allowSize= [min([size[0]+20, maxSize[0]-10]),
                     min([size[1]+75, maxSize[1]-10]),]
+        minAllowed= [180,50]
+        allowSize= [max([minAllowed[0], allowSize[0]]), max([minAllowed[1], allowSize[1]])]
         self.SetSize(wx.Size(allowSize[0], allowSize[1]))
         self.Layout()
         self.Centre( wx.BOTH )
@@ -184,6 +191,9 @@ class Dialog ( wx.Dialog ):
                     else:
                         self.ctrls.append((key, getattr(wx, key)(self.m_scrolledWindow1, wx.ID_ANY, *args)))
                     currCtrl= self.ctrls[-1][1]
+                    # setting default values    
+                    if self.ctrls[-1][0] == 'Choice':
+                        currCtrl.Selection= 0
                     currSizer.Add(currCtrl, 0, characters , 5)
 
                 elif key == 'NumTextCtrl':
