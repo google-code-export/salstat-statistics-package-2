@@ -8,7 +8,7 @@ import wx
 import wx.lib.agw.aui as aui
 from imagenes import imageEmbed
 from statlib import stats
-from plotFrame import MpltFrame as plot
+from plotFunctions import pltobj as plot
 import traceback
 
 # styled text using wxPython's
