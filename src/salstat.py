@@ -363,7 +363,7 @@ class SalStat2App(wx.App):
             installDir = os.path.dirname( os.path.abspath( __file__))
         except:
             installDir = os.path.dirname( os.path.abspath( sys.argv[0]))
-	    
+            
         self.installDir= installDir.decode(sys.getfilesystemencoding()) # to be used in the nice bar plot
         
         language = self.GetPreferences( "Language")
@@ -574,8 +574,8 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.StatusBar.SetStatusText( 'S2', 2)
 
         #self.m_notebook1= wx.aui.AuiNotebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,
-	#                                    wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_TAB_SPLIT )
-	self.logPanel= LogPanel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL ) # self.m_notebook1
+        #                                    wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_TAB_SPLIT )
+        self.logPanel= LogPanel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL ) # self.m_notebook1
         self.log = self.logPanel # self.log = self.logPanel
 
         self.defaultDialogSettings = {'Title': None,
@@ -657,8 +657,8 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
                                             Dock().Resizable().FloatingSize( wx.DefaultSize ).
                                             CaptionVisible(True).
                                             DockFixed( False ).BestSize(wx.Size(-1,150)))
-	
-	self.panelNtbLog = self.m_mgr.AddPane( self.logPanel,
+        
+        self.panelNtbLog = self.m_mgr.AddPane( self.logPanel,
                                             aui.AuiPaneInfo() .Bottom() .
                                             CloseButton( False ).MaximizeButton( True ).
                                             Caption((translate(u"Log Panel"))).
@@ -672,7 +672,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
                            CaptionVisible(True).Caption((translate(u"Chart selection panel"))).
                            MinimizeButton().Resizable(True).MaximizeButton(True).
                            CloseButton( True ).MinSize( wx.Size( 240,-1 )))
-	
+        
         self.currPanel = None
         self._sendObj2Shell(self.scriptPanel)
         self._BindEvents()
@@ -725,7 +725,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         OpenIcon =   imag.folder()
         SaveIcon =   imag.disk()
         SaveAsIcon = imag.save2disk()
-        PrintIcon =  imag.printer()
+        #PrintIcon =  imag.printer()
         CutIcon =    imag.edit_cut()
         CopyIcon =   imag.edit_copy()
         PasteIcon =  imag.edit_paste()
@@ -801,17 +801,17 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         OpenIcon =   imag.folder()
         SaveIcon =   imag.disk()
         SaveAsIcon = imag.save2disk()
-        PrintIcon =  imag.printer()
+        #PrintIcon =  imag.printer()
         CutIcon =    imag.edit_cut()
         CopyIcon =   imag.edit_copy()
         PasteIcon =  imag.edit_paste()
-        PrefsIcon =  imag.preferences()
-        HelpIcon =   imag.about()
-        UndoIcon =   imag.edit_undo()
-        RedoIcon =   imag.edit_redo()
+        #PrefsIcon =  imag.preferences()
+        #HelpIcon =   imag.about()
+        #UndoIcon =   imag.edit_undo()
+        #RedoIcon =   imag.edit_redo()
         ExitIcon =   imag.stop()
-        FindRIcon =  imag.findr()
-        sixsigma =   imag.sixsigma16()
+        #FindRIcon =  imag.findr()
+        #sixsigma =   imag.sixsigma16()
         #set up menus
         menuBar = wx.MenuBar()
 
@@ -978,7 +978,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
             ##self.m_mgr.MaximizePane(pane)
         ##else:
             ##self.m_mgr.RestorePane(pane)
-	##self.m_mgr.Update()
+        ##self.m_mgr.Update()
     
     def OnDropFiles( self, x, y, filenames):
         if isinstance( filenames, (str, unicode)):
@@ -1186,8 +1186,8 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         functionName = "short"
         useNumpy = False
         requiredcols= None
-        allColsOneCalc = False,
-        dataSquare= False
+        #allColsOneCalc = False,
+        #dataSquare= False
         group = lambda x,y: (x,y)
         setting = self.defaultDialogSettings
         setting["Title"] = functionName

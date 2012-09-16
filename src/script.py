@@ -7,8 +7,8 @@ Created on 14/05/2012
 import wx
 import wx.lib.agw.aui as aui
 from imagenes import imageEmbed
-from statlib import stats
-from plotFrame import MpltFrame as plot
+# from statlib import stats
+# from plotFrame import MpltFrame as plot
 import traceback
 
 # styled text using wxPython's
@@ -316,9 +316,9 @@ class ScriptPanel(wx.Panel):
     def __init__(self, parent,*args):
         '''ScriptPanel parent, log, grid, *args'''
         self.log=   args[0]
-        self.grid=  args[1]
-        self.stats= stats
-        self.plot=  plot
+        # self.grid=  args[1]
+        #self.stats= stats
+        #self.plot=  plot
         self.showgrid= args[2]
         try:
             wx.Panel.__init__(self, parent, wx.ID_ANY, *args[1:])
