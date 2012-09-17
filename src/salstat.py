@@ -428,10 +428,8 @@ class SalStat2App(wx.App):
 
     def OpenFileMessage(self, filename):
         self.BringWindowToFront()
-        filterIndex = filename[len(filename)-3:len(filename)]
+        junk, filterIndex = os.path.splitext(filename)
         fullPath=filename
-        if not filename.endswith(filterIndex):
-            fullPath+= '.' + filterIndex
         if filterIndex == 'xls':
             return self.frame.grid.LoadXls(fullPath)
         elif filterIndex in ('txt', 'csv'):
@@ -442,8 +440,13 @@ class SalStat2App(wx.App):
 
     def MacOpenFile(self, filename):
         """Called for files dropped on dock icon, or opened via finders context menu"""
-        self.frame.logPanel.write(translate(u"%s dropped on S2 dock icon")%(filename))
-        self.OpenFileMessage(filename)
+        if (os.path.basename(filename).lower()) == "salstat.py":
+            # don't activate when salstat is booting up and initial dock activation sees salstat.py itself!
+            # or at any other time, pointing salstat at itself is pointless!
+            pass
+        else:
+            self.frame.logPanel.write(translate(u"%s dropped on S2 dock icon")%(filename))
+            self.OpenFileMessage(filename)
 
     def MacReopenApp(self):
         """Called when the dock icon is clicked"""
