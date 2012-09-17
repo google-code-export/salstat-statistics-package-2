@@ -125,4 +125,4 @@ class AutoWrapStringRenderer(wx.grid.PyGridCellRenderer):
         return wx.Size( w, h)        
 
     def Clone(self): 
-        return CutomGridCellAutoWrapStringRenderer()
+        return AutoWrapStringRenderer()
