@@ -17,6 +17,7 @@ import traceback
 from slbTools import ReportaExcel
 import xlrd
 from easyDialog import Dialog as dialog
+import os
 
 def numPage():
     i = 1
@@ -67,7 +68,7 @@ class MyGridPanel( wx.Panel, object ):
         self.Fit()
          
     def __getattribute__(self, name):
-        '''wraps the funtions to the grid
+        '''wraps the functions to the grid
         emulating a grid control'''
         try:
             return object.__getattribute__(self, name)
@@ -461,18 +462,15 @@ class SimpleGrid( MyGridPanel):# wxGrid
             dlg.Destroy()
             return
         
-        filterIndexPos= dlg.GetFilterIndex()
-        filterIndex= ['xls','txt','csv'][filterIndexPos]
         fileName= dlg.GetFilename()
         fullPath= dlg.Path 
-        if not fileName.endswith(filterIndex):
-            fullPath+= '.' + filterIndex
+        junk, filterIndex = os.path.splitext(fileName)
         try:
-            if filterIndex == 'xls':
+            if filterIndex == '.xls':
                 return self.LoadXls(fullPath)
             
-            elif filterIndex in ('txt', 'csv'):
-                return self.loadCsvTxt(fullPath)
+            elif filterIndex in ('.txt', '.csv'):
+                return self.LoadCsvTxt(fullPath)
         except (Exception, TypeError) as e:
             traceback.print_exc( file = self.log)
         finally:
