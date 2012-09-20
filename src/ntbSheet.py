@@ -300,8 +300,8 @@ class SimpleGrid( MyGridPanel):# wxGrid
         
     def setLog(self, log):
         self.log= log
-    def onCellChanged(self, evt):
-        self.Saved = False
+    #def onCellChanged(self, evt):
+    #    self.Saved = False
 
     def RangeSelected(self, evt):
         if evt.Selecting():
@@ -310,7 +310,6 @@ class SimpleGrid( MyGridPanel):# wxGrid
 
     def CutData(self, evt):
         self.Delete()
-        self.Saved= False
 
     def CopyData(self, evt):
         self.Copy()
@@ -318,13 +317,11 @@ class SimpleGrid( MyGridPanel):# wxGrid
 
     def PasteData(self, evt):
         self.OnPaste()
-        self.Saved= False
 
     def DeleteCurrentCol(self, evt):
         currentcol = self.GetGridCursorCol()
         self.DeleteCols(currentcol, 1)
         self.AdjustScrollbars()
-        self.Saved= False
         self.hasChanged= True
 
 
@@ -332,7 +329,6 @@ class SimpleGrid( MyGridPanel):# wxGrid
         currentrow = self.GetGridCursorRow()
         self.DeleteRows(currentrow, 1)
         self.AdjustScrollbars()
-        self.Saved= False
         self.hasChanged= True
 
     def SelectAllCells(self, evt):
@@ -347,7 +343,6 @@ class SimpleGrid( MyGridPanel):# wxGrid
                 #self.SetColLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_BOTTOM)
                 self.SetColAttr( colNumber, attr)
         self.AdjustScrollbars()
-        self.Saved= False
         self.hasChanged= True
 
     # function finds out how many cols contain data - all in a list
@@ -440,7 +435,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
                 result.append(header)
             self.reportObj.writeByCols(result, self.NumSheetReport)
         self.reportObj.save()
-        self.Saved = True
+        self.hasSaved = True
         self.log.write("The file %s was successfully saved!" % self.reportObj.path)
 
     def LoadFile(self, evt):
@@ -475,6 +470,10 @@ class SimpleGrid( MyGridPanel):# wxGrid
             traceback.print_exc( file = self.log)
         finally:
             self.hasChanged= True
+            self.hasSaved= True
+            # emptying the undo - redo buffer
+            self.emptyTheBuffer()
+            
         
     def LoadCsvTxt(self, fullPath):
         '''use the numpy library to load the data'''
