@@ -170,8 +170,6 @@ class LogPanel( wx.Panel ):
         pass
 
 #---------------------------------------------------------------------------
-# class to wx.GetApp().output the results of several "descriptives" in one table
-#---------------------------------------------------------------------------
 # grid preferences - set row & col sizes
 def GridPrefs(parent):
 #shows dialog for editing the data grid
