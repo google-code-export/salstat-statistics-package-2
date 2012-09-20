@@ -262,7 +262,10 @@ class PyWXGridEditMixin():
             #padre.m_grid.SetGridCursor(top, left) # se espera que el parent sea el grid
             self.padre.grid.hasChanged= True
             self.padre.grid.hasSaved= False
-
+    def emptyTheBuffer(self):
+        self._undoStack= list()
+        self._redoStack= list()
+        
 if __name__ == '__main__':
         import sys
         app = wx.PySimpleApp()
