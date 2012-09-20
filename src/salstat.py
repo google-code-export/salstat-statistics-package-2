@@ -900,12 +900,10 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
             self.__createMenu(item[1], menu)
 
         if wx.Platform == "__WXMAC__":
-            app = wx.GetApp()
-            wx.App_SetMacHelpMenuTitleName(translate(u"&Help"))
+            wx.GetApp().SetMacHelpMenuTitleName(translate(u"&Help"))
             # Allow spell checking in cells
             # TODO Still need to add this to the Edit menu once we add Mac menu options
-            spellcheck = u"mac.textcontrol-use-spell-checker"
-            wx.SystemOptions.SetOptionInt(spellcheck, 1)
+            wx.SystemOptions.SetOptionInt(u"mac.textcontrol-use-spell-checker", 1)
 
     def _BindEvents(self):
         # grid callback
