@@ -13,6 +13,7 @@ from slbTools import isnumeric, isiterable
 from gridCellRenderers import floatRenderer
 import wx.aui
 from numpy import ndarray, ravel
+import traceback
 from slbTools import ReportaExcel
 import xlrd
 from easyDialog import Dialog as dialog
@@ -478,7 +479,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
             self.hasChanged= True
         
     def LoadCsvTxt(self, fullPath):
-        '''use the numpy ibrary to load the data'''
+        '''use the numpy library to load the data'''
         btn1= []
         btn2= []
         btn3= []
@@ -648,6 +649,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
 
     def CleanRowData(self, row):
         indata = []
+        missingvalue= wx.GetApp().missingvalue
         for i in range(self.GetNumberCols()):
             datapoint = self.GetCellValue(row, i)
             if (datapoint != ''):
@@ -794,8 +796,9 @@ class SimpleGrid( MyGridPanel):# wxGrid
         return self._cleanData( self._getRow( row))
     
     def GetEntireDataSet(self, numcols):
-        """Returns the data specified by a list 'numcols' in a Numeric
+        """Returns the data specified by a list 'numcols' in a Numpy
         array"""
+        import numpy.array
         biglist = []
         for i in range(len(numcols)):
             smalllist = wx.GetApp().frame.grid.CleanData(numcols[i])
