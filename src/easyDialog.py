@@ -208,6 +208,8 @@ class Dialog ( wx.Dialog ):
                     self.ctrls.append((key, makePairs(self.m_scrolledWindow1, wx.ID_ANY, *args)))
                     currCtrl= self.ctrls[-1][1]
                     currSizer.Add(currCtrl, 0, characters , 5)
+                else:
+                    raise StandardError("unknow control %s : type .ALLOWED to view all available controls"%key)
 
                 #elif key == 'in':  # not used
                 #    self.adding(parentSizer, [args])
@@ -290,7 +292,6 @@ class _example( wx.Frame ):
     # Virtual event handlers, overide them in your derived class
     def showDialog( self, evt ):
         dic= {'Title': 'title'}
-        
         bt1= ('Button',     ['print'])
         bt2= ('StaticText', ['hoja a Imprimir'])
         bt3= ('Button',     ['nuevo'])
