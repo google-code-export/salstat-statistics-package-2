@@ -6,7 +6,10 @@ license: GPL3
 '''
 
 import collections
-import tempfile, xlwt , os
+import tempfile, xlwt
+import os
+import sys
+import wx
 import numpy as np
 from openStats import statistics
 

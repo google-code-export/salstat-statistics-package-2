@@ -6,6 +6,7 @@ Created on 29/05/2012
 
 from math import sqrt
 from slbTools import homogenize, isnumeric
+import wx
 
 class triplot:
     def __init__(self, data2plot):
@@ -187,7 +188,7 @@ def triang2xy( a, b, c, triangle = 'equilater'):
         _orga(a)
         _orga(b)
         _orga(c)
-        wx.GetApp().Logg.write('the poin fail (%s,%s,%s)'%(a, b, c,), False)
+        wx.GetApp().Logg.write('the point failed (%s,%s,%s)'%(a, b, c,), False)
         return
     
     total = a+b+c
