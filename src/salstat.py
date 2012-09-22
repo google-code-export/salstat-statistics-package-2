@@ -403,10 +403,13 @@ class SalStat2App(wx.App):
         if wx.Platform == '__WXGTK__':
             self.frame.Show()
         elif wx.Platform == '__WXMSW__' :
-            self.frame.Show() # ShowFullScreen(True,False)
+            self.frame.Show()
         else:   # mac platform
             self.frame.Maximize()
             self.frame.Show()
+        # check if the len of sys.argv and trying to open a
+        # file for all platforms
+        if len(sys.argv) > 1:
             for f in  sys.argv[1:]:
                 self.OpenFileMessage(f)
         return True
@@ -427,9 +430,9 @@ class SalStat2App(wx.App):
         self.BringWindowToFront()
         junk, filterIndex = os.path.splitext(filename)
         fullPath=filename
-        if filterIndex == 'xls':
+        if filterIndex == '.xls':
             return self.frame.grid.LoadXls(fullPath)
-        elif filterIndex in ('txt', 'csv'):
+        elif filterIndex in ('.txt', '.csv'):
             return self.frame.grid.loadCsvTxt(fullPath)
         else:
             self.frame.logPanel.write(translate(u"The file %s could not be opened. ")%filename +
@@ -554,15 +557,16 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         wx.FileDropTarget.__init__( self)
         self.translate= translate
         self.window= self
+        
         #-----
         # setting an apropiate size
         dp= wx.Display()
         ca= dp.GetClientArea()
-        #---
         wx.Frame.__init__(self,parent,-1,"S2",
                         size = wx.Size(ca[2], ca[-1] ),
                         pos = (ca[0],ca[1]) )
-
+        #---
+        
         self.m_mgr= aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
         self.appname= appname
@@ -574,19 +578,16 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         tb1= self._createTb1()
         self.formulaBarPanel= formulaBar( self, wx.ID_ANY)
         #------------------------
-        # create small status bar
+        # create the status bar
         self.StatusBar= self.CreateStatusBar( 3)
         self.StatusBar.SetStatusText( 'cells Selected:   '+'count:      '+'sum:    ', 1 )
         self.StatusBar.SetStatusText( 'S2', 2)
 
-        #self.m_notebook1= wx.aui.AuiNotebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,
-        #                                    wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_TAB_SPLIT )
         self.logPanel= LogPanel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL ) # self.m_notebook1
-        self.log = self.logPanel # self.log = self.logPanel
+        self.log = self.logPanel
 
         self.defaultDialogSettings = {'Title': None,
                                       'icon': imagenes.logo16()}
-
 
         #self.sash = gizmos.DynamicSashWindow(self, -1, style =  wx.CLIP_CHILDREN)
         #--------------------
@@ -606,10 +607,10 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.answerPanel= NoteBookSheet(self, fb = self.formulaBarPanel)
         self.answerPanel2= ScriptPanel(self, self.logPanel, self.grid, self.answerPanel)
         #--------------------------------------------
-        # Redirecting the error messages to the logPanel
+        # Redirecting the error messages and the std outpout to the logPanel
         sys.stderr= self.logPanel
         sys.stdout= self.logPanel
-        self.scriptPanel=  wx.py.crust.Shell( self) # self.m_notebook1 # wx.py.shell.Shell( self.m_notebook1)
+        self.scriptPanel=  wx.py.crust.Shell( self)
 
         # put the references into the main app
         appname.inputGrid= self.grid
@@ -622,7 +623,6 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         
         # create plot selection panel
         grapHplotData= self._autoCreateMenu( plotFunctions, twoGraph= True)
-        # grapHplotData= [(label, image, callback, id), ]
         self.plotSelection= createPlotSelectionPanel(self, size= wx.Size(320, 480) )
         self.plotSelection.createPanels( grapHplotData)
         
@@ -680,7 +680,9 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
                            CloseButton( True ).MinSize( wx.Size( 240,-1 )))
         
         self.currPanel = None
+        # allowing the shell acces to the selected objects 
         self._sendObj2Shell(self.scriptPanel)
+        
         self._BindEvents()
         self.m_mgr.Update()
         # Saving the perspective
