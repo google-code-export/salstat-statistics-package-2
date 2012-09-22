@@ -558,11 +558,10 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         # setting an apropiate size
         dp= wx.Display()
         ca= dp.GetClientArea()
-        [ca[2]-ca[0], ca[-1]-ca[1]]
         #---
         wx.Frame.__init__(self,parent,-1,"S2",
-                        size = wx.Size(ca[2]-ca[0], ca[-1]-ca[1] ),
-                        pos = (ca[0],ca[1]) )#wx.DefaultPosition
+                        size = wx.Size(ca[2], ca[-1] ),
+                        pos = (ca[0],ca[1]) )
 
         self.m_mgr= aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
