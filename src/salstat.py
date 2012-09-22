@@ -400,11 +400,10 @@ class SalStat2App(wx.App):
         ###self.Logg= self.frame.logPanel
         ###self.output = self.frame.answerPanel
         # referencing the plot system
-        
         if wx.Platform == '__WXGTK__':
             self.frame.Show()
         elif wx.Platform == '__WXMSW__' :
-            self.frame.ShowFullScreen(True,False)
+            self.frame.Show() # ShowFullScreen(True,False)
         else:   # mac platform
             self.frame.Maximize()
             self.frame.Show()
@@ -555,8 +554,15 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         wx.FileDropTarget.__init__( self)
         self.translate= translate
         self.window= self
+        #-----
+        # setting an apropiate size
+        dp= wx.Display()
+        ca= dp.GetClientArea()
+        [ca[2]-ca[0], ca[-1]-ca[1]]
+        #---
         wx.Frame.__init__(self,parent,-1,"S2",
-                          size = wx.Size(640,480 ), pos = wx.DefaultPosition)
+                        size = wx.Size(ca[2]-ca[0], ca[-1]-ca[1] ),
+                        pos = (ca[0],ca[1]) )#wx.DefaultPosition
 
         self.m_mgr= aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
