@@ -17,7 +17,7 @@ def _siguiente():
         i+= 1
         yield str(i)
 
-class Dialog ( wx.Dialog ):
+class Dialog ( wx.Dialog, wx.Frame ):
     ALLOWED= ['StaticText',   'TextCtrl',     'Choice',
               'CheckListBox', 'StaticLine',   'RadioBox',
               'SpinCtrl',     'ToggleButton', 'NumTextCtrl',
@@ -95,8 +95,9 @@ class Dialog ( wx.Dialog ):
                              id=     wx.ID_ANY,
                              title=  params.pop('Title'),
                              pos=    params.pop('_pos'),
-                             size=   params.pop('_size'),
+                             size=   wx.Size(0,0),
                              style=  params.pop('_style') )
+        
         #< setting the icon
         icon= params.pop('icon')
         if icon == None:
@@ -127,21 +128,26 @@ class Dialog ( wx.Dialog ):
         self.m_scrolledWindow1.SetSizer( bSizer3 )
         self.m_scrolledWindow1.Layout()
         bSizer3.Fit( self.m_scrolledWindow1 )
-        bSizer1.Add( self.m_scrolledWindow1, 1, wx.EXPAND |wx.ALL, 5 )
+        bSizer1.Add( self.m_scrolledWindow1, 1, wx.EXPAND, 5 )
         m_sdbSizer1 = wx.StdDialogButtonSizer()
         self.m_sdbSizer1OK = wx.Button( self, wx.ID_OK )
         m_sdbSizer1.AddButton( self.m_sdbSizer1OK )
         self.m_sdbSizer1Cancel = wx.Button( self, wx.ID_CANCEL )
         m_sdbSizer1.AddButton( self.m_sdbSizer1Cancel )
         m_sdbSizer1.Realize()
-
-        bSizer1.Add( m_sdbSizer1, 0, wx.ALL|wx.EXPAND, 5 )
+        
+        depthSize=  wx.GetDisplayDepth()
+        buttonOkCancelSize= (self.m_sdbSizer1Cancel.Size[0] + self.m_sdbSizer1OK.Size[0] + depthSize,
+                             max(self.m_sdbSizer1Cancel.Size[1], self.m_sdbSizer1OK.Size[1]) + depthSize)
+        
+        bSizer1.Add( m_sdbSizer1, 0, wx.EXPAND|wx.ALL, 5 )# 
         self.SetSizer( bSizer1 )
         size= self.m_scrolledWindow1.Size
+        # getting the border size
         maxSize= wx.GetDisplaySize()
-        allowSize= [min([size[0]+20, maxSize[0]-10]),
-                    min([size[1]+75, maxSize[1]-10]),]
-        minAllowed= [180,50]
+        allowSize= [min([size[0] + 25 , maxSize[0]-10]),
+                    min([size[1] + buttonOkCancelSize[1] + 15, maxSize[1]-10]),]
+        minAllowed= [buttonOkCancelSize[0], buttonOkCancelSize[1]]
         allowSize= [max([minAllowed[0], allowSize[0]]), max([minAllowed[1], allowSize[1]])]
         self.SetSize(wx.Size(allowSize[0], allowSize[1]))
         self.Layout()
