@@ -297,6 +297,8 @@ class SimpleGrid( MyGridPanel):# wxGrid
         self.hasChanged = True 
         self.usedCols= ([], [],)
         # </p>
+        self.m_grid.Bind(wx.grid.EVT_GRID_EDITOR_CREATED, self.onCellEdit)
+
         
     def setLog(self, log):
         self.log= log
@@ -823,7 +825,35 @@ class SimpleGrid( MyGridPanel):# wxGrid
             
         values= self._cleanData( self._getCol( colNumber))
         return [val for val in values if not isinstance(val,(unicode, str)) and val != None ]
-                   
+    def onCellEdit(self, event):
+        '''
+        When cell is edited, get a handle on the editor widget
+        and bind it to EVT_KEY_DOWN
+        '''        
+        editor = event.GetControl()        
+        editor.Bind(wx.EVT_KEY_DOWN, self.onEditorKey)
+        event.Skip()
+ 
+    #----------------------------------------------------------------------
+    def onEditorKey(self, event):
+        '''
+        Handler for the wx.grid's cell editor widget's keystrokes. Checks for specific
+        keystrokes, such as arrow up or arrow down, and responds accordingly. Allows
+        all other key strokes to pass through the handler.
+        '''
+        keycode = event.GetKeyCode() 
+        if keycode == wx.WXK_UP:
+            self.MoveCursorUp(False)
+        elif keycode == wx.WXK_DOWN:
+            self.MoveCursorDown(False)
+        elif keycode == wx.WXK_LEFT:
+            self.MoveCursorLeft(False)
+        elif keycode == wx.WXK_RIGHT:
+            self.MoveCursorRight(False)
+        else:
+            pass
+        event.Skip()
+               
 class NoteBookSheet(wx.Panel, object):
     def __init__( self, parent, *args, **params):
         # se almacenan las paginas en un diccionario con llave el numero de pagina
