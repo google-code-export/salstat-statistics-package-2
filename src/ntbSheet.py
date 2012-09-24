@@ -832,9 +832,10 @@ class NoteBookSheet(wx.Panel, object):
 
         wx.Panel.__init__ ( self, parent, *args, **params)
         bSizer = wx.BoxSizer( wx.VERTICAL )
-        self.m_notebook = wx.aui.AuiNotebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.aui.AUI_NB_DEFAULT_STYLE )
+        self.m_notebook = wx.aui.AuiNotebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,
+                                              wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|wx.aui.AUI_NB_WINDOWLIST_BUTTON )
         ## wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.NB_BOTTOM )
-        # self.m_notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED,self.OnNotebookPageChange)
+        self.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChange)
         bSizer.Add( self.m_notebook, 1, wx.EXPAND |wx.ALL, 5 )
         self.SetSizer( bSizer )
         # se inicia el generador para el numero de pagina
@@ -851,7 +852,7 @@ class NoteBookSheet(wx.Panel, object):
             return object.__getattribute__(self, name)
         except AttributeError:
             if self.GetPageCount() != 0:
-                currGrid= self.m_notebook.GetSelection()
+                currGrid=  self.currentPage ##self.m_notebook.GetSelection()
                 return currGrid.__getattribute__(name)
             raise AttributeError
 
@@ -871,7 +872,7 @@ class NoteBookSheet(wx.Panel, object):
         return page.getHeader()
 
     def OnNotebookPageChange( self,evt):
-        self.currentPage= evt.Selection
+        self.currentPage= self.m_notebook.GetPage(evt.Selection)
 
     def addPage( self, data= dict()):
         defaultData = {'name': u'',
