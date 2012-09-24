@@ -346,7 +346,7 @@ class ScriptPanel( wx.Panel):
         
         self.m_notebook= wx.aui.AuiNotebook( self, wx.ID_ANY,
                                            wx.DefaultPosition, wx.DefaultSize,
-                                           wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|wx.aui.AUI_NB_WINDOWLIST_BUTTON )
+                                           wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|wx.aui.AUI_NB_WINDOWLIST_BUTTON)
         
         
         self.m_mgr.AddPane( self.m_notebook, aui.AuiPaneInfo().CenterPane().Dock().
@@ -408,7 +408,7 @@ class ScriptPanel( wx.Panel):
         self.m_mgr.Update()
         self.Center( )
 
-    # implementing a wrap to the current grid
+    # implementing a wrap to the current notebook
     def __getattribute__( self, name):
         '''wraps the funtions to the grid
         emulating a grid control'''
@@ -416,6 +416,9 @@ class ScriptPanel( wx.Panel):
             return object.__getattribute__( self, name)
         except AttributeError:
             if self.GetPageCount( ) != 0:
+                if str(type(self.currentPage)) == "<class 'wx._core._wxPyDeadObject'>":
+                    self.currentPage == None
+                    return
                 currPage= self.currentPage
                 return currPage.__getattribute__( name)
             raise AttributeError
@@ -436,26 +439,6 @@ class ScriptPanel( wx.Panel):
         # 21/04/2011
         # retorna el numero de paginas que hay en el notebook
         return self.m_notebook.PageCount
-    
-    def delPage( self, page= None):
-        # si no se ingresa un numero de pagina se
-        #     considera que se va a borrar la pagina actual
-        # las paginas se numeran mediante numeros desde el cero
-        if page == None:
-            # se considera que la pagina a borrar es la pagina actual
-            #self.m_notebook.GetCurrentPage().Destroy() # borra el contenido de la pagina
-            self.m_notebook.DeletePage(self.m_notebook.GetSelection())
-            # se borra la pagina
-
-            return
-        page = int(page)
-        if page <0:
-            return
-        if page > self.GetPageCount():
-            raise IndexError("Page doesn't exist")
-        parent = self.pages[page].GetParent()
-        parent.DeletePage(page)
-    
     def addPage( self, data= dict()):
         defaultData = {'name': u''}
         for key, value in data.items():
@@ -489,6 +472,7 @@ class ScriptPanel( wx.Panel):
         self.Bind( wx.EVT_TOOL, self.redo,           id = self.bt9.GetId())
         self.Bind( wx.EVT_TOOL, self.delPage,        id = self.bt10.GetId())
         self.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChange)
+        self.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.delPage)
 
     def clearLog(self,):
         self.log.clearLog()
@@ -518,10 +502,8 @@ class ScriptPanel( wx.Panel):
         if page == None:
             # se considera que la pagina a borrar es la pagina actual
             #self.m_notebook.GetCurrentPage().Destroy() # borra el contenido de la pagina
-            if self.m_notebook.GetSelection() > -1: 
+            if self.m_notebook.GetSelection() > -1:
                 self.m_notebook.DeletePage(self.m_notebook.GetSelection())
-            # se borra la pagina
-
             return
         page = int(page)
         if page <0:
@@ -536,6 +518,8 @@ class ScriptPanel( wx.Panel):
         dlg = wx.FileDialog(self, "Open Script File", "","",\
                             wildcard, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
+            # open a new stc
+            self.addPage()
             filename = dlg.GetPath()
             self.SetText('')
             import os.path
@@ -551,11 +535,18 @@ class ScriptPanel( wx.Panel):
         dlg = wx.FileDialog(self, "Open Script File", "","",\
                             wildcard, wx.SAVE)
         if dlg.ShowModal() == wx.ID_OK:
-            filename = dlg.GetPath()
-            fout = open(filename, "wb")
+            fullPath = dlg.GetPath()
+            fout = open(fullPath, "wb")
             for line in self.GetText().split('\n'):
                 fout.writelines(line)
             fout.close()
+            # changing the name of the notebook
+            filename= dlg.GetFilename()[:-4]
+            if len( filename) > 8:
+                filename= filename[:8]+u'\u2026'
+            self.SetText= filename
+            dlg.Destroy()
+            
 
     def undo(self,event):
         self.Undo()
