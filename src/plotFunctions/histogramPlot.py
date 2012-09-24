@@ -54,7 +54,7 @@ class histogram( _neededLibraries):
         structure.append([btn4])
         structure.append([btn5])
         structure.append([btn2, txt2])
-        setting= {'Title': self.translate(u'Histogram chart of selected columns'),
+        setting= {'Title': self.translate(self.name),
                   '_size': Size(200,300)}
         
         return self.dialog(settings= setting, struct= structure)
@@ -190,7 +190,7 @@ class niceHistogram( _neededLibraries):
         ##structure.append([btn5])
         structure.append([btn1, txt1])
         structure.append([btn2, txt2])
-        setting= {'Title': self.translate(u'Histogram chart of selected columns')}
+        setting= {'Title': self.translate(self.name)}
         return self.dialog(settings= setting, struct= structure)
     
     def _calc(self, columns, *args, **params):

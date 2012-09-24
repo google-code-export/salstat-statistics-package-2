@@ -142,7 +142,7 @@ class linRegres( _neededLibraries):
         structure= list()
         structure.append([bt1,])
         structure.append([bt2,])
-        return self.dialog( struct= structure, settings = {"Title": self.translate(u"Scatter Chart Data") ,
+        return self.dialog( struct= structure, settings = {"Title": self.translate(self.name) ,
                                                            "_size": wx.Size(300, 400)},)
 
     def _showGui_GetValues(self):
@@ -246,7 +246,7 @@ class ternaryScatter( _neededLibraries):
         structure.append( [btn3, txt3])
         structure.append( [btn4,])
         structure.append( [btn5,])
-        settings = {"Tile": self.translate(u"Ternary plot dialog") ,
+        settings = {"Tile": self.translate(self.name) ,
                     "_size": wx.Size(410, 400),}
         return self.dialog( settings= settings, struct= structure)
 
@@ -446,7 +446,7 @@ class runChart( _neededLibraries):
         structure.append( [btn2, txt2])
         structure.append( [btn2, txt3])
         structure.append( [btn2, txt4])        
-        return self.dialog( struct= structure, settings = {"Title": self.translate( u"Run chart") ,
+        return self.dialog( struct= structure, settings = {"Title": self.translate(self.name) ,
                                                            "_size": wx.Size( 330, 350)},)
     
     def _showGui_GetValues(self):
