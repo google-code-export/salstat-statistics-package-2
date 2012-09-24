@@ -624,7 +624,7 @@ class NumTextCtrl(wx.TextCtrl):
 	self.allowed = [ str( x) for x in range( 10)]
 	self.allowed.extend([ wx.GetApp().DECIMAL_POINT, '-'])
 
-    def _textChange(self, event):
+    def _textChange(self, evt):
 	texto = self.Value
 
 	if len(texto) == 0:
@@ -642,7 +642,7 @@ class NumTextCtrl(wx.TextCtrl):
 	    return
 
 	self.SetValue(newstr)
-
+	evt.Skip()
     def GetAsNumber(self):
 	prevResult = self.Value
 	if len(prevResult) == 0:
@@ -664,7 +664,7 @@ class IntTextCtrl( NumTextCtrl):
 	self.Bind( wx.EVT_TEXT, self._textChange)
 	self.allowed = [ str( x) for x in range( 10)]
 
-    def _textChange( self, event):
+    def _textChange( self, evt):
 	texto = self.Value
 
 	newstr= [ x for x in texto if x in self.allowed]
@@ -680,7 +680,8 @@ class IntTextCtrl( NumTextCtrl):
 	    return
 
 	self.SetValue( newstr)
-
+	evt.Skip()
+	
     def GetAsNumber( self):
 	prevResult = self.Value
 	if len( prevResult) == 0:
