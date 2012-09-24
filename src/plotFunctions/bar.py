@@ -49,7 +49,7 @@ class barChart( _neededLibraries):
         structure.append( [btn3])
         structure.append( [btn2, txt2])
         structure.append( [btn4])
-        setting= {"Title": self.translate(u"Bar chart of selected columns")}
+        setting= {"Title": self.translate(self.name)}
         return self.dialog(settings= setting, struct= structure)        
     
     def _calc( self, columns, *args, **params):
@@ -234,7 +234,7 @@ class barChartAllMeans( _neededLibraries):
         structure.append( [btn3])
         structure.append( [btn2, txt2])
         structure.append( [btn4])
-        setting= {"Title": self.translate(u"Bar chart means of selected columns")}
+        setting= {"Title": self.translate(self.name)}
         return self.dialog(settings= setting, struct= structure)        
     
     def _calc( self, columns, *args, **params):
@@ -375,7 +375,7 @@ class barChartAllMeansNice( _neededLibraries):
         structure.append( [btn4])
         structure.append( [btn1, txt1])
         structure.append( [btn2, txt2])
-        setting= {"Title": self.translate(u"Bar chart means of selected columns")}
+        setting= {"Title": self.translate(self.name)}
         return self.dialog( settings = setting, struct = structure)        
     
     def _calc( self, columns, *args, **params):
@@ -496,7 +496,7 @@ class stakedBar(_neededLibraries):
         structure.append( [btn3])
         structure.append( [txt2])
         structure.append( [btn2])
-        setting= {"Title": self.translate(u"Bar chart of selected columns")}
+        setting= {"Title": self.translate(self.name)}
         return self.dialog(settings= setting, struct= structure)
     
     def _calc( self, columns, *args, **params):

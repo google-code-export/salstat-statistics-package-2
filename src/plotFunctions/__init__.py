@@ -163,14 +163,15 @@ class DropShadowFilter(BaseFilter):
 
 # EN GAUSS FUNCTIONS</p>
 
-def data2Plotdiaglog(parent, columnNames):
+def data2Plotdiaglog(parent, columnNames, title= None):
     translate= wx.GetApp().translate
     txt1= ['StaticText',   [translate(u"Select data to plot")]]
     btn1= ['CheckListBox', [columnNames]]
+    setting= {'Title': translate(title)}
     structure= list()
     structure.append( [txt1])
     structure.append( [btn1])
-    return _dialog(parent = parent, struct= structure)
+    return _dialog(parent = parent, struct= structure, settings= setting)
 
 def gene():
     u= 1
