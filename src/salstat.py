@@ -36,7 +36,7 @@ if wx.Platform != '__WXMSW__':
     import matplotlib.projections.polar
     import matplotlib.backends.backend_macosx
     import matplotlib.backends._macosx
-    
+
     # -----------------
 
 import webbrowser # online Help
@@ -190,7 +190,7 @@ def GridPrefs(parent):
     else:
         dlg.Destroy()
         return
-    
+
     colwidth= values[0]
     rowheight= values[1]
     wx.GetApp().frame.grid.SetDefaultColSize(colwidth, True)
@@ -201,51 +201,71 @@ def GridPrefs(parent):
 # user can change settings like variable names, decimal places, missing no.s
 # using a SimpleGrid Need evt handler - when new name entered, must be
 #checked against others so no match each other
-class formulaBar ( wx.Panel ):
-
+class formulaBar ( aui.AuiToolBar ):
     def __init__( self, parent , *args,**params):
-        wx.Panel.__init__ ( self, parent, *args, **params)
+        aui.AuiToolBar.__init__(self, parent, id= wx.ID_ANY,
+                                pos= wx.DefaultPosition, 
+                                size= wx.DefaultSize,
+                                style = 0,
+                                agwStyle = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
 
-        bSizer1 = wx.BoxSizer( wx.HORIZONTAL )
         self.m_textCtrl1 = wx.TextCtrl( self, wx.ID_ANY,
                                         wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
                                         wx.TE_CHARWRAP|wx.TE_MULTILINE|wx.TE_RICH2|
-                                        wx.TE_WORDWRAP ) #|wx.NO_BORDER
+                                        wx.TE_WORDWRAP|wx.NO_BORDER )
+        self.m_textCtrl1.SetMinSize( wx.Size( 320, 30 ) )
+        self.m_textCtrl1.SetSize( wx.Size( 320, 30 ) )
+        self.AddControl( self.m_textCtrl1, label= "Text control")
 
-        self.m_textCtrl1.SetMinSize( wx.Size( 220,25 ) )
-        bSizer1.Add( self.m_textCtrl1, 0, 0, 5 )
-        self.SetSizer( bSizer1 )
-        self.Layout()
-        bSizer1.Fit( self )
+        #self.m_toggleBtn1 = wx.ToggleButton( self, wx.ID_ANY, u"v", wx.DefaultPosition, wx.DefaultSize, 0 )
+        #self.m_toggleBtn1.SetValue( False ) 
+        #self.AddControl(self.m_toggleBtn1, label= "v")
+
+        #self.m_toggleBtn1.Bind( wx.EVT_TOGGLEBUTTON, self._ontogle )
+        self.originalSize= self.Size
+
+    #def _ontogle(self, evt):
+    #    value= self.m_toggleBtn1.GetValue()
+    #    if value:
+    #        self.SetSize( wx.Size(self.originalSize[0], self.originalSize[1]+25*2))
+    #        self.m_textCtrl1.SetMinSize( wx.Size( 320, 25*2 ) )
+    #        self.m_textCtrl1.SetSize( wx.Size( 320, 25*2 ) )
+    #
+    #    else:
+    #        self.SetSize( wx.Size(self.originalSize[0], self.originalSize[1]))
+    #        self.m_textCtrl1.SetMinSize( wx.Size( 320,25 ) )
+    #        self.m_textCtrl1.SetSize( wx.Size( 320,25 ) )
+    #    self    
+        #self.Update()
 
 #---------------------------------------------------------------------------
 #---- Language List Combo Box----#
 class LangListCombo(BitmapComboBox):
     """
     Combines a langlist and a BitmapComboBox.
-    
+
     **Note:**
 
     *  from Editra.dev_tool
     """
-    
+
     def __init__(self, parent, default=None):
         """
         Creates a combobox with a list of all translations for S2
         as well as displaying the countries flag next to the item
         in the list.
 
-        
+
         **Parameters:**
 
         * default: The default item to show in the combo box
         """
 
         self.MainFrame = parent.Parent.Parent
-        
+
         lang_ids = GetLocaleDict( GetAvailLocales( wx.GetApp().installDir)).values()
         lang_items = langlist.CreateLanguagesResourceLists( langlist.LC_ONLY, \
-                                                           lang_ids)
+                                                            lang_ids)
         BitmapComboBox.__init__( self, parent,
                                  size = wx.Size( 150, 26),
                                  style = wx.CB_READONLY)
@@ -255,7 +275,7 @@ class LangListCombo(BitmapComboBox):
 
         if default:
             self.SetValue(default)
-            
+
 def GetLocaleDict(loc_list, opt=0):
     """
     Takes a list of canonical locale names and by default returns a
@@ -361,13 +381,13 @@ class SalStat2App(wx.App):
             installDir = os.path.dirname( os.path.abspath( __file__))
         except:
             installDir = os.path.dirname( os.path.abspath( sys.argv[0]))
-            
+
         self.installDir= installDir.decode(sys.getfilesystemencoding()) # to be used in the nice bar plot
-        
+
         language = self.GetPreferences( "Language")
         if not language:
             language = "Default"
-            
+
         # Setup Locale
         locale.setlocale( locale.LC_ALL, '')
         self.locale = wx.Locale( GetLangId( self.installDir, language))
@@ -436,7 +456,7 @@ class SalStat2App(wx.App):
             return self.frame.grid.loadCsvTxt(fullPath)
         else:
             self.frame.logPanel.write(translate(u"The file %s could not be opened. ")%filename +
-                           translate(u"Please check file type and extension!") )
+                                      translate(u"Please check file type and extension!") )
 
     def MacOpenFile(self, filename):
         """Called for files dropped on dock icon, or opened via finders context menu"""
@@ -528,20 +548,20 @@ class SalStat2App(wx.App):
 
         config.Write("Preferences", str(preferences))
         config.Flush()
-        
+
     def GetConfig(self):
         """ Returns the configuration for GUI2Exe. """
-        
+
         if not os.path.exists(self.GetDataDir()):
             # Create the data folder, it still doesn't exist
             os.makedirs(self.GetDataDir())
 
         config = wx.FileConfig( localFilename = os.path.join( self.GetDataDir(), "options"))
         return config
-    
+
     def GetDataDir(self):
         """ Returns the option directory for GUI2Exe. """
-        
+
         sp = wx.StandardPaths.Get()
         return sp.GetUserDataDir()
 
@@ -557,16 +577,16 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         wx.FileDropTarget.__init__( self)
         self.translate= translate
         self.window= self
-        
+
         #-----
         # setting an apropiate size
         dp= wx.Display()
         ca= dp.GetClientArea()
         wx.Frame.__init__(self,parent,-1,"S2",
-                        size = wx.Size(ca[2], ca[-1] ),
-                        pos = (ca[0],ca[1]) )
+                          size = wx.Size(ca[2], ca[-1] ),
+                          pos = (ca[0],ca[1]) )
         #---
-        
+
         self.m_mgr= aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
         self.appname= appname
@@ -576,7 +596,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         #----------------------
         # create toolbars
         tb1= self._createTb1()
-        self.formulaBarPanel= formulaBar( self, wx.ID_ANY)
+        self.formulaBarPanel= formulaBar( self, -1)
         #------------------------
         # create the status bar
         self.StatusBar= self.CreateStatusBar( 3)
@@ -598,7 +618,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.grid.SetDefaultColSize( 60, True)
         self.grid.SetRowLabelSize( 40)
         self.grid.SetDefaultCellAlignment( wx.ALIGN_RIGHT, wx.ALIGN_CENTER )
-        
+
         # adjust the renderer
         self._gridSetRenderer(self.grid)
         #-----------------------
@@ -620,18 +640,18 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
 
         # create menubar
         self._createMenu()
-        
+
         # create plot selection panel
         grapHplotData= self._autoCreateMenu( plotFunctions, twoGraph= True)
         self.plotSelection= createPlotSelectionPanel(self, size= wx.Size(320, 480) )
         self.plotSelection.createPanels( grapHplotData)
-        
+
         #------------------------
         # organizing panels
         self.auiPanels = dict()
-        
+
         self.m_mgr.AddPane( self.formulaBarPanel,
-                            aui.AuiPaneInfo().Name("tb2").Caption(translate(u"Inspection Tool")).ToolbarPane().Top().Row(1).
+                            aui.AuiPaneInfo().Name("tb2").Caption(translate(u"Inspection Tool")).ToolbarPane().Top().Row(1). #.()
                             Position(1).CloseButton( False ))
 
         self.m_mgr.AddPane(self.grid,
@@ -654,7 +674,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
                            CaptionVisible(True).Caption((translate(u"Script Panel"))).
                            MinimizeButton().Resizable(True).MaximizeButton(True).
                            CloseButton( False ).MinSize( wx.Size( 240,-1 )))
-        
+
         self.panelNtb = self.m_mgr.AddPane( self.scriptPanel,
                                             aui.AuiPaneInfo() .Bottom() .
                                             CloseButton( False ).MaximizeButton( True ).
@@ -663,32 +683,32 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
                                             Dock().Resizable().FloatingSize( wx.DefaultSize ).
                                             CaptionVisible(True).
                                             DockFixed( False ).BestSize(wx.Size(-1,150)))
-        
+
         self.panelNtbLog = self.m_mgr.AddPane( self.logPanel,
-                                            aui.AuiPaneInfo() .Bottom() .
-                                            CloseButton( False ).MaximizeButton( True ).
-                                            Caption((translate(u"Log Panel"))).
-                                            MinimizeButton().PinButton( False ).
-                                            Dock().Resizable().FloatingSize( wx.DefaultSize ).
-                                            CaptionVisible(True).
-                                            DockFixed( False ).BestSize(wx.Size(-1,150)))
-        
+                                               aui.AuiPaneInfo() .Bottom() .
+                                               CloseButton( False ).MaximizeButton( True ).
+                                               Caption((translate(u"Log Panel"))).
+                                               MinimizeButton().PinButton( False ).
+                                               Dock().Resizable().FloatingSize( wx.DefaultSize ).
+                                               CaptionVisible(True).
+                                               DockFixed( False ).BestSize(wx.Size(-1,150)))
+
         self.m_mgr.AddPane(self.plotSelection,
                            aui.AuiPaneInfo().Centre().Left().Show(False).
                            CaptionVisible(True).Caption((translate(u"Chart selection panel"))).
                            MinimizeButton().Resizable(True).MaximizeButton(True).
                            CloseButton( True ).MinSize( wx.Size( 240,-1 )))
-        
+
         self.currPanel = None
         # allowing the shell acces to the selected objects 
         self._sendObj2Shell(self.scriptPanel)
-        
+
         self._BindEvents()
         self.m_mgr.Update()
         # Saving the perspective
         self._defaultPerspective= self.m_mgr.SavePerspective()
         self.Center()
-        
+
     def _gridSetRenderer(self, grid):
         '''setting the renderer to the grid'''
         attr=   wx.grid.GridCellAttr()
@@ -699,12 +719,12 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.floatCellAttr= attr
         for colNumber in range( grid.NumberCols):
             grid.SetColAttr( colNumber, self.floatCellAttr)
-            
+
         if wx.Platform == '__WXMAC__':
             grid.SetGridLineColour("#b7b7b7")
             grid.SetLabelBackgroundColour("#d2d2d2")
             grid.SetLabelTextColour("#444444")
-        
+
     def _sendObj2Shell(self, shell):
         # making available useful object to the shell
         env= {'cls':        self.logPanel.clearLog,
@@ -718,14 +738,14 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
               'OK':         wx.ID_OK,
               'homogenize': homogenize,
               'scipy':      scipy,
-	      'stats':      stats
+              'stats':      stats
               }
 ##'sm':         sm, stats models willbe included later
 #'stats': self.stats,
 #'statistics':statistics,
-              
+
         shell.interp.locals= env
-    
+
     def _createTb1(self):
         # Get icons for toolbar
         imag = imageEmbed()
@@ -765,21 +785,21 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.bt9 = tb1.AddSimpleTool(85, translate(u"Preferences"),PrefsIcon, translate(u"Preferences"))
         ##self.bt10= tb1.AddSimpleTool(90, "Help", HelpIcon, "Help")
         self.bt10= tb1.AddSimpleTool(95, translate(u"OnlineHelp"), HelpIcon, translate(u"Online Help"))
-        
+
         # to the languaje
         language = wx.GetApp().GetPreferences( "Language")
         if not language:
             language = "Default"
-            
+
         self.languages= LangListCombo( tb1 , language)
         self.translateBtn= tb1.AddControl( self.languages, label= "Languaje")
 
         tb1.SetToolBitmapSize( (24,24))
         tb1.Realize()
-        
+
         self.languages.Bind( wx.EVT_COMBOBOX, self._changeLanguaje) # id= self.languages.GetId()
         return tb1
-    
+
     def _changeLanguaje(self, evt):
         allPreferences= dict()
         allPreferences["Language"] = self.languages.GetValue()
@@ -826,7 +846,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         # to be used for statistical menu autocreation
         from statFunctions import *
         from plotFunctions import *
-        
+
         statisticalMenus= self._autoCreateMenu( statFunctions)
         plotMenus= self._autoCreateMenu( plotFunctions)
         #add contents of menu
@@ -866,7 +886,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
              statisticalMenus),
             (translate(u"&Graph"),
              [ (translate(u"Show/Hide the plot panel"), None, self.showPlotPanel,       None),] +
-               [plotMenu for plotMenu in plotMenus]),
+             [plotMenu for plotMenu in plotMenus]),
             (translate(u"&Help"),
              (##("Help\tCtrl-H",       imag.about(),  self.GoHelpSystem,  wx.ID_HELP),
               (translate(u"&About..."),          imag.icon16(), self.ShowAbout,     wx.ID_ABOUT),)),
@@ -985,21 +1005,21 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         ##else:
             ##self.m_mgr.RestorePane(pane)
         ##self.m_mgr.Update()
-    
+
     def OnDropFiles( self, x, y, filenames):
         if isinstance( filenames, (str, unicode)):
             filenames= [filenames]
-            
+
         if len( filenames) == 0:
             return
-        
+
         # taking the first element as the selected file
         filename= filenames[0]
         sys.stderr.write( translate(u"the file %d was dropped")%filename)
-        
+
     def onDefaultPerspective(self, evt):
         self.m_mgr.LoadPerspective(self._defaultPerspective)
-        
+
     def GoClearData(self, evt):
         if not self.grid.hasSaved:
             # display discard dialog
@@ -1160,10 +1180,10 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         # shows the "wizard" in the help box
         win= Navegator( wx.GetApp().frame,)
         win.Show( True)
-        
+
     def GoOnlyneHelp( self, evt):
         webbrowser.open(r"http://code.google.com/p/salstat-statistics-package-2/wiki/Documentation?ts=1344287549&updated=Documentation")
-        
+
     def showPlotPanel(self, evt):
         panels = self.m_mgr.GetAllPanes()
         for panel in panels:
@@ -1172,10 +1192,10 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.m_mgr.Update()
         if not panel.IsShown():
             panel.Show(True)
-            
+
         else:
             panel.Show(False)
-            
+
         self.m_mgr.Update()    
     def EndApplication(self, evt):
         if self.grid.hasSaved == False:
