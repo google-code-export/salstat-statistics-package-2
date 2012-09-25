@@ -67,7 +67,7 @@ from helpSystem import Navegator
 from dialogs import SaveDialog, VariablesFrame, DescriptivesFrame
 from dialogs import TransformFrame
 from dialogs import createPlotSelectionPanel
-
+from dialogs import auiNotebookWrap
 from gridCellRenderers import floatRenderer #, AutoWrapStringRenderer
 from wx.combo import BitmapComboBox # translation control
 import wx.lib.langlistctrl as langlist
@@ -568,8 +568,44 @@ class SalStat2App(wx.App):
     def GetVersion(self):
         return '2.1'
 
+class Grids(auiNotebookWrap):
+    def __init__(self, parent, id= wx.ID_ANY, *args, **params):
+        auiNotebookWrap.__init__(self, parent, id, *args, **params)
+	
+    def _gridSetRenderer(self, grid):
+        '''setting the renderer to the grid'''
+        attr=   wx.grid.GridCellAttr()
+        #editor= wx.grid.GridCellFloatEditor()
+        #attr.SetEditor(editor)
+        renderer = floatRenderer( 4)
+        attr.SetRenderer( renderer)
+        self.floatCellAttr= attr
+        for colNumber in range( grid.NumberCols):
+            grid.SetColAttr( colNumber, self.floatCellAttr)
+
+        if wx.Platform == '__WXMAC__':
+            grid.SetGridLineColour("#b7b7b7")
+            grid.SetLabelBackgroundColour("#d2d2d2")
+            grid.SetLabelTextColour("#444444")
+	    
+    def addOnePage(self, id= wx.ID_ANY):
+        #overwrite this method to create your own custom widget
+	grid=  SimpleGrid( self, size= (500,20))
+        grid.hasSaved= True
+	grid.hasChanged= False
+        grid.SetDefaultColSize( 60, True)
+        grid.SetRowLabelSize( 40)
+        grid.SetDefaultCellAlignment( wx.ALIGN_RIGHT, wx.ALIGN_CENTER )
+        # adjust the renderer
+        self._gridSetRenderer(grid)
+	return grid
+    
+    def Bindded(self):
+	# some callbacks
+	pass
+        
 #---------------------------------------------------------------------------
-# This is main interface of application
+# This is the main interface of application
 class MainFrame(wx.Frame, wx.FileDropTarget):
     def __init__(self, parent, appname ):
         self.path= None
@@ -611,18 +647,11 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
 
         #self.sash = gizmos.DynamicSashWindow(self, -1, style =  wx.CLIP_CHILDREN)
         #--------------------
-        #< set up the datagrid
-        self.grid= SimpleGrid( self, self.log)
-        # let />
-        self.grid.hasSaved= True
-        self.grid.SetDefaultColSize( 60, True)
-        self.grid.SetRowLabelSize( 40)
-        self.grid.SetDefaultCellAlignment( wx.ALIGN_RIGHT, wx.ALIGN_CENTER )
-
-        # adjust the renderer
-        self._gridSetRenderer(self.grid)
-        #-----------------------
-
+        #<p> set up the datagrid
+        self.grid=  Grids(self, -1)
+	self.grid.addPage()
+        # set up the datagrid  /<p>
+        
         # response panel
         self.answerPanel= NoteBookSheet(self, fb = self.formulaBarPanel)
         self.answerPanel2= ScriptPanel(self, self.logPanel, self.grid, self.answerPanel)
@@ -651,29 +680,31 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.auiPanels = dict()
 
         self.m_mgr.AddPane( self.formulaBarPanel,
-                            aui.AuiPaneInfo().Name("tb2").Caption(translate(u"Inspection Tool")).ToolbarPane().Top().Row(1). #.()
+                            aui.AuiPaneInfo().Name("tb2").Caption(translate(u"Inspection Tool")).
+	                    ToolbarPane().Top().Row(1).
                             Position(1).CloseButton( False ))
 
         self.m_mgr.AddPane(self.grid,
                            aui.AuiPaneInfo().Centre().
                            CaptionVisible(True).Caption(translate(u"Data Entry Panel")).
-                           MaximizeButton(True).MinimizeButton(False).
+                           MaximizeButton(True).MinimizeButton(False).PaneBorder( False ).
                            CloseButton( False ).MinSize( wx.Size( 240,-1 )))
 
         self.m_mgr.AddPane(self.answerPanel,
                            aui.AuiPaneInfo().Centre().Right().
                            CaptionVisible(True).Caption(translate(u"Output Panel")).
                            MinimizeButton(True).Resizable(True).MaximizeButton(True).
-                           CloseButton( False ).MinSize( wx.Size( 240,-1 )))
+                           PaneBorder( False ).CloseButton( False ).MinSize( wx.Size( 240,-1 )))
 
-        self.m_mgr.AddPane( tb1, aui.AuiPaneInfo().Name("tb1").Caption(translate(u"Basic Operations")).
+        self.m_mgr.AddPane( tb1, aui.AuiPaneInfo().Name("tb1").
+	                    Caption(translate(u"Basic Operations")).
                             ToolbarPane().Top().Row(1).CloseButton( False ))
 
         self.m_mgr.AddPane(self.answerPanel2,
                            aui.AuiPaneInfo().Centre().Right().
                            CaptionVisible(True).Caption((translate(u"Script Panel"))).
                            MinimizeButton().Resizable(True).MaximizeButton(True).
-                           CloseButton( False ).MinSize( wx.Size( 240,-1 )))
+                           PaneBorder( False ).CloseButton( False ).MinSize( wx.Size( 240,-1 )))
 
         self.panelNtb = self.m_mgr.AddPane( self.scriptPanel,
                                             aui.AuiPaneInfo() .Bottom() .
@@ -681,7 +712,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
                                             Caption((translate(u"Shell Panel"))).
                                             MinimizeButton().PinButton( False ).
                                             Dock().Resizable().FloatingSize( wx.DefaultSize ).
-                                            CaptionVisible(True).
+                                            PaneBorder( False ).CaptionVisible(True).
                                             DockFixed( False ).BestSize(wx.Size(-1,150)))
 
         self.panelNtbLog = self.m_mgr.AddPane( self.logPanel,
@@ -690,14 +721,14 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
                                                Caption((translate(u"Log Panel"))).
                                                MinimizeButton().PinButton( False ).
                                                Dock().Resizable().FloatingSize( wx.DefaultSize ).
-                                               CaptionVisible(True).
+                                               PaneBorder( False ).CaptionVisible(True).
                                                DockFixed( False ).BestSize(wx.Size(-1,150)))
 
         self.m_mgr.AddPane(self.plotSelection,
                            aui.AuiPaneInfo().Centre().Left().Show(False).
                            CaptionVisible(True).Caption((translate(u"Chart selection panel"))).
                            MinimizeButton().Resizable(True).MaximizeButton(True).
-                           CloseButton( True ).MinSize( wx.Size( 240,-1 )))
+                           PaneBorder( False ).CloseButton( True ).MinSize( wx.Size( 240,-1 )))
 
         self.currPanel = None
         # allowing the shell acces to the selected objects 
@@ -761,6 +792,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         HelpIcon =   imag.about()
         UndoIcon =   imag.edit_undo()
         RedoIcon =   imag.edit_redo()
+	closePage=   imag.cancel()
 
         if wx.version() < "2.9":
             tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
@@ -785,6 +817,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.bt9 = tb1.AddSimpleTool(85, translate(u"Preferences"),PrefsIcon, translate(u"Preferences"))
         ##self.bt10= tb1.AddSimpleTool(90, "Help", HelpIcon, "Help")
         self.bt10= tb1.AddSimpleTool(95, translate(u"OnlineHelp"), HelpIcon, translate(u"Online Help"))
+	self.bt13= tb1.AddSimpleTool(100, translate(u"Close"), closePage, translate(u"Close Current Page"))
 
         # to the languaje
         language = wx.GetApp().GetPreferences( "Language")
@@ -936,27 +969,63 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.grid.Bind( wx.grid.EVT_GRID_SELECT_CELL, self._cellSelectionChange )
         self.grid.Bind( wx.grid.EVT_GRID_RANGE_SELECT, self._gridRangeSelect )
         #-----------------
-        # para el toolbar
-        self.Bind( wx.EVT_MENU, self.GoClearData,        id= self.bt1.GetId())
-        self.Bind( wx.EVT_MENU, self.grid.LoadFile,      id= self.bt2.GetId())
-        self.Bind( wx.EVT_MENU, self.grid.SaveXls,       id= self.bt3.GetId())
-        self.Bind( wx.EVT_MENU, self.grid.SaveXlsAs,     id= self.bt4.GetId())
+        # tb1 toolbar callbacks
+        self.Bind( wx.EVT_MENU, self.tb1_NewPage,       id= self.bt1.GetId())
+        self.Bind( wx.EVT_MENU, self.tb1_LoadFile,      id= self.bt2.GetId())
+        self.Bind( wx.EVT_MENU, self.tb1_SaveXls,       id= self.bt3.GetId())
+        self.Bind( wx.EVT_MENU, self.tb1_SaveXlsAs,     id= self.bt4.GetId())
         ##self.Bind( wx.EVT_MENU, self.grid.PrintPage,     id = self.bt5.GetId())
-        self.Bind( wx.EVT_MENU, self.grid.CutData,       id= self.bt6.GetId())
-        self.Bind( wx.EVT_MENU, self.grid.CopyData,      id= self.bt7.GetId())
-        self.Bind( wx.EVT_MENU, self.grid.PasteData,     id= self.bt8.GetId())
-        self.Bind( wx.EVT_MENU, self.GoVariablesFrame,   id= self.bt9.GetId())
+        self.Bind( wx.EVT_MENU, self.tb1_CutData,       id= self.bt6.GetId())
+        self.Bind( wx.EVT_MENU, self.tb1_CopyData,      id= self.bt7.GetId())
+        self.Bind( wx.EVT_MENU, self.tb1_PasteData,     id= self.bt8.GetId())
+        self.Bind( wx.EVT_MENU, self.GoVariablesFrame,  id= self.bt9.GetId())
         ##self.Bind( wx.EVT_MENU, self.GoHelpSystem,        id= self.bt10.GetId())
-        self.Bind( wx.EVT_MENU, self.GoOnlyneHelp,       id= self.bt10.GetId())
-        self.Bind( wx.EVT_MENU, self.grid.Undo,          id= self.bt11.GetId())
-        self.Bind( wx.EVT_MENU, self.grid.Redo,          id= self.bt12.GetId())
+        self.Bind( wx.EVT_MENU, self.GoOnlyneHelp,      id= self.bt10.GetId())
+        self.Bind( wx.EVT_MENU, self.tb1_Undo,          id= self.bt11.GetId())
+        self.Bind( wx.EVT_MENU, self.tb1_Redo,          id= self.bt12.GetId())
+	self.Bind( wx.EVT_MENU, self.tb1_closePage,     id= self.bt13.GetId())
 
         # controlling the expansion of the notebook
         ##self.m_notebook1.Bind( wx.EVT_LEFT_DCLICK, self._OnNtbDbClick )
         self.Bind( wx.EVT_CLOSE, self.EndApplication )
         self.grid.setPadreCallBack( self)
         self.sig= self.siguiente()
-
+	
+    def tb1_LoadFile(self, evt):
+	self.grid.addPage()
+	self.grid.LoadFile(evt)
+	evt.Skip()
+	
+    def tb1_closePage(self, evt):
+	self.grid.delPage(evt)
+	evt.Skip()
+	
+    def tb1_SaveXls(self, evt):
+	self.grid.SaveXls()
+	evt.Skip()
+    def tb1_SaveXlsAs(self, evt):
+	self.grid.SaveXlsAs(evt)
+	evt.Skip()
+    def tb1_CutData(self, evt):
+	self.grid.CutData(evt)
+	evt.Skip()
+    def tb1_CopyData(self, evt):
+	self.grid.CopyData(evt)
+	evt.Skip()
+    def tb1_PasteData(self, evt):
+	self.grid.PasteData(evt)
+	evt.Skip()
+    def tb1_Undo(self, evt):
+	self.grid.Undo(evt)
+	evt.Skip()
+    def tb1_Redo(self, evt):
+	self.grid.Redo(evt)
+	evt.Skip()
+	
+    def tb1_NewPage(self, evt):
+	self.grid.addPage( )
+	evt.Skip()
+    
     def siguiente(self):
         i= 0
         while 1:
@@ -1019,7 +1088,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
 
     def onDefaultPerspective(self, evt):
         self.m_mgr.LoadPerspective(self._defaultPerspective)
-
+	
     def GoClearData(self, evt):
         if not self.grid.hasSaved:
             # display discard dialog
@@ -1032,25 +1101,25 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
                 self.grid.SaveXls()
             elif response == wx.ID_NO:
                 pass
-
+	
         #<p> shows a new data entry frame
         # resizing the grid
         try:
             self.grid.DeleteCols( pos=0, numCols= int(self.grid.NumberCols))
         except wx._core.PyAssertionError:
             pass
-
+	
         try:
             self.grid.DeleteRows( pos=0, numRows= int(self.grid.NumberRows))
         except wx._core.PyAssertionError:
             pass
-
+	
         self.grid.AppendRows( 500)
         self.grid.AppendCols( 50)
         # <p> updating the renderer
         self._gridSetRenderer(self.grid)
         # /<p>
-
+	
         self.grid.path= None
         self.grid.hasSaved = False
         self.m_mgr.Update()

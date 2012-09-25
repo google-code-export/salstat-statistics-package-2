@@ -269,7 +269,7 @@ class MyFileDropTarget(wx.FileDropTarget):
         self.window.LoadXls(filename)
             
 class SimpleGrid( MyGridPanel):# wxGrid
-    def __init__( self, parent, log= None, size= (1000,100)):
+    def __init__( self, parent, log= None, size= (800,20)):
         self.NumSheetReport = 0
         if log == None:
             try:
@@ -290,7 +290,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
         self.setPadreCallBack( self)
         self.SetColLabelAlignment( wx.ALIGN_CENTER, wx.ALIGN_CENTER)
         self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
-        ###### self.m_grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.onCellChanged)
+        self.m_grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.onCellChanged)
         self.wildcard = "Any File (*.*)|*.*|" \
             "S2 Format (*.xls)|*.xls"
         #<p> used to check changes iin the grid
@@ -302,8 +302,10 @@ class SimpleGrid( MyGridPanel):# wxGrid
         
     def setLog(self, log):
         self.log= log
-    #def onCellChanged(self, evt):
-    #    self.Saved = False
+    def onCellChanged(self, evt):
+        self.hasChanged= True
+        self.hasSaved=   False
+        evt.Skip()
 
     def RangeSelected(self, evt):
         if evt.Selecting():
@@ -312,6 +314,9 @@ class SimpleGrid( MyGridPanel):# wxGrid
 
     def CutData(self, evt):
         self.Delete()
+        self.hasChanged= True
+        self.hasSaved=   False
+        evt.Skip()
 
     def CopyData(self, evt):
         self.Copy()
@@ -319,19 +324,25 @@ class SimpleGrid( MyGridPanel):# wxGrid
 
     def PasteData(self, evt):
         self.OnPaste()
-
+        self.hasChanged= True
+        self.hasSaved=   False
+        evt.Skip()
+        
     def DeleteCurrentCol(self, evt):
         currentcol = self.GetGridCursorCol()
         self.DeleteCols(currentcol, 1)
         self.AdjustScrollbars()
         self.hasChanged= True
-
+        self.hasSaved=   False
+        evt.Skip()
 
     def DeleteCurrentRow(self, evt):
         currentrow = self.GetGridCursorRow()
         self.DeleteRows(currentrow, 1)
         self.AdjustScrollbars()
         self.hasChanged= True
+        self.hasSaved=   False
+        evt.Skip()
 
     def SelectAllCells(self, evt):
         self.SelectAll()
@@ -346,6 +357,8 @@ class SimpleGrid( MyGridPanel):# wxGrid
                 self.SetColAttr( colNumber, attr)
         self.AdjustScrollbars()
         self.hasChanged= True
+        self.hasSaved=   False
+        evt.Skip()
 
     # function finds out how many cols contain data - all in a list
     #(ColsUsed) which has col #'s
@@ -438,7 +451,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
             self.reportObj.writeByCols(result, self.NumSheetReport)
         self.reportObj.save()
         self.hasSaved = True
-        self.log.write("The file %s was successfully saved!" % self.reportObj.path)
+        print "The file %s was successfully saved!" % self.reportObj.path
 
     def LoadFile(self, evt):
         '''check the file type selected and redirect
@@ -475,7 +488,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
             self.hasSaved= True
             # emptying the undo - redo buffer
             self.emptyTheBuffer()
-            
+            evt.Skip()
         
     def LoadCsvTxt(self, fullPath):
         '''use the numpy library to load the data'''
@@ -493,18 +506,18 @@ class SimpleGrid( MyGridPanel):# wxGrid
             return
     
     def LoadXls(self, fullPath):
-        self.log.write('import xlrd', None)
+        print 'import xlrd'
         filename= fullPath
         filenamestr= filename.__str__()
-        self.log.write('# remember to write an  r   before the path', None)
-        self.log.write('filename= ' + "'" + filename.__str__() + "'", None)
+        print '# remember to write an  r   before the path'
+        print 'filename= ' + "'" + filename.__str__() + "'"
         # se lee el libro
         wb= xlrd.open_workbook(filename)
-        self.log.write('wb = xlrd.open_workbook(filename)', None)
+        print 'wb = xlrd.open_workbook(filename)', None
         sheets= [wb.sheet_by_index(i) for i in range(wb.nsheets)]
-        self.log.write('sheets= [wb.sheet_by_index(i) for i in range(wb.nsheets)]', None)
+        print 'sheets= [wb.sheet_by_index(i) for i in range(wb.nsheets)]'
         sheetNames = [sheet.name for sheet in sheets]
-        self.log.write('sheetNames= ' + sheetNames.__str__(), None)
+        print 'sheetNames= ' + sheetNames.__str__()
         bt1= ('Choice',     [sheetNames])
         bt2= ('StaticText', ['Select a sheet to be loaded'])
         bt3= ('CheckBox',   ['Has header'])
@@ -518,10 +531,10 @@ class SimpleGrid( MyGridPanel):# wxGrid
         if sheetNameSelected == None:
             return
         if not isinstance(sheetNameSelected, (str, unicode)):
-            self.log.write('sheetNameSelected= ' + "'" + sheetNameSelected.__str__() + "'",None)
+            print 'sheetNameSelected= ' + "'" + sheetNameSelected.__str__() + "'"
         else:
-            self.log.write('sheetNameSelected= ' + "'" + sheetNameSelected + "'",None)
-        self.log.write('hasHeader= ' + hasHeader.__str__(), None)
+            print 'sheetNameSelected= ' + "'" + sheetNameSelected + "'"
+        print 'hasHeader= ' + hasHeader.__str__()
         dlg.Destroy()
         
         if not ( sheetNameSelected in sheetNames):
@@ -532,14 +545,16 @@ class SimpleGrid( MyGridPanel):# wxGrid
                       sheetNames= sheetNames,
                       filename= filename,
                       hasHeader= hasHeader)
-        self.log.write('''grid._loadXls(sheetNameSelected= sheetNameSelected,
+        print '''grid._loadXls(sheetNameSelected= sheetNameSelected,
                       sheets= sheets,
                       sheetNames= sheetNames,
                       filename= filename,
-                      hasHeader= hasHeader)''', None)
+                      hasHeader= hasHeader)'''
         
-        self.log.write('Importing  : %s successful'%filename)
+        print 'Importing  : %s successful'%filename
         self.hasChanged= True
+        self.hasSaved=   True
+        evt.Skip()
         
     def _loadXls( self, *args,**params):
         sheets=         params.pop( 'sheets')
@@ -603,7 +618,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
                     try:
                         self.SetCellValue (reportRow, col, str(newValue))
                     except:
-                        self.log.write( "Could not import the row,col (%i,%i)" % (row+1,col+1))
+                        print  "Could not import the row,col (%i,%i)" % (row+1,col+1)
                         
     def generateLabel( self, colNumber):
         colNumber+= 1
@@ -863,7 +878,8 @@ class NoteBookSheet(wx.Panel, object):
         wx.Panel.__init__ ( self, parent, *args, **params)
         bSizer = wx.BoxSizer( wx.VERTICAL )
         self.m_notebook = wx.aui.AuiNotebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,
-                                              wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|wx.aui.AUI_NB_WINDOWLIST_BUTTON )
+                                              wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|
+                                              wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_CLOSE_BUTTON )
         ## wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.NB_BOTTOM )
         self.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChange)
         bSizer.Add( self.m_notebook, 1, wx.EXPAND |wx.ALL, 5 )
@@ -1163,7 +1179,7 @@ class Test(wx.Frame):
         customPanel = NoteBookSheet(self,-1)
         # se adicionan 4 paginas al sheet
         for i in range(4):
-            customPanel.addPage(size=(15,10))
+            customPanel.addPage()
         #customPanel.delPage(2)
         self.Centre()
         self.Show(True)

@@ -29,9 +29,9 @@ class PyWXGridEditMixin():
         self._undoStack = []
         self._redoStack = []
         self._stackPtr = 0
-        self.padre= padre
+        self.padre= padre# to be erased
         
-    def setPadreCallBack(self,padreObj):
+    def setPadreCallBack(self,padreObj): # to be erased
         self.padre = padreObj
         
     def OnMixinKeypress(self, event):
@@ -82,10 +82,10 @@ class PyWXGridEditMixin():
             redo=(self.Paste, (box, newValue)))
         self._editOldValue = None
         self.Mixin_callbackChangeCell(box)
-        if self.padre != False:
-            # to be checked
-            self.padre.grid.hasChanged= True
-            self.padre.grid.hasSaved=   False
+        #if self.padre != False:
+        #    # to be checked
+        #    self.padre.grid.hasChanged= True
+        #    self.padre.grid.hasSaved=   False
     
     def GetSelectionBox(self):
         """Produce a set of selection boxes of the form (top, left, nrows, ncols)"""
@@ -164,8 +164,8 @@ class PyWXGridEditMixin():
         self.Paste(pBox, data)
         # se almacena el rango que se ha cambiado
         self.Mixin_callbackChangeCell(pBox)
-        self.padre.grid.hasChanged= True
-        self.padre.grid.hasSaved= False
+        #self.padre.grid.hasChanged= True
+        #self.padre.grid.hasSaved= False
         
     def _DeterminePasteArea(self, top, left, clipRows, clipCols, selRows, selCols):
         """paste area rules: if 1-d selection (either directon separately) and 2-d clipboard, use clipboard size, otherwise use selection size"""
@@ -194,7 +194,9 @@ class PyWXGridEditMixin():
             return
         except ZeroDivisionError:
             print "Zero division: Num_col "  +str(dataRows)+ ", Num_Fil " + str(dataCols)
-            
+        finally:
+            self.hasChanged= True
+            self.hasSaved= False    
 
     def CellInGrid(self, r, c): # only paste data that actually falls on the table
         return r >=0 and c >=0 and r < self.GetNumberRows() and c < self.GetNumberCols()
@@ -204,8 +206,8 @@ class PyWXGridEditMixin():
         box = self.GetSelectionBox()[0]
         self.Copy()
         self.Delete() #this takes care of undo/redo
-        self.padre.grid.hasChanged= True
-        self.padre.grid.hasSaved= False
+        self.hasChanged= True
+        self.hasSaved= False
 
     def Delete(self):
         """Clear Cell contents"""
@@ -216,8 +218,8 @@ class PyWXGridEditMixin():
                 redo=(self.Paste, (box, "\n")))
             self.Paste(box, "\n")
             self.Mixin_callbackChangeCell(box)
-        self.padre.grid.hasChanged= True
-        self.padre.grid.hasSaved= False
+        self.hasChanged= True
+        self.hasSaved= False
         
     def AddUndo(self, undo, redo):
         """Add an undo/redo combination to the respective stack"""
@@ -242,10 +244,10 @@ class PyWXGridEditMixin():
             self.SelectBlock(top, left, top+rows-1, left+cols-1)
             self.SetGridCursor(top,left)
             self.Mixin_callbackChangeCell(params[0])
-            padre= self.GetParent() 
+            #padre= self.GetParent() 
             #padre.m_grid.SetGridCursor(top, left) # se espera que el parent sea el grid
-            self.padre.grid.hasChanged= True
-            self.padre.grid.hasSaved= False
+            self.hasChanged= True
+            self.hasSaved= False
             
     def Redo(self, evt = None):
         if self._stackPtr < len(self._redoStack):
@@ -258,10 +260,10 @@ class PyWXGridEditMixin():
             self.SelectBlock(top, left, top+rows-1, left+cols-1)
             self._stackPtr += 1
             self.Mixin_callbackChangeCell(params[0])
-            padre= self.GetParent() 
+            #padre= self.GetParent() 
             #padre.m_grid.SetGridCursor(top, left) # se espera que el parent sea el grid
-            self.padre.grid.hasChanged= True
-            self.padre.grid.hasSaved= False
+            self.hasChanged= True
+            self.hasSaved= False
     def emptyTheBuffer(self):
         self._undoStack= list()
         self._redoStack= list()
