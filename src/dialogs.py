@@ -174,6 +174,121 @@ class makePairs(wx.Panel):
 
 #  END MAKE PAIRS /<p>
 
+# aui notebook wrapper
+class auiNotebookWrap( wx.Panel):
+    def numPage(self):
+	i=1
+	while True:
+	    yield i
+	    i+= 1
+    def __init__( self, parent,id= wx.ID_ANY, *args, **params):
+        '''parent, *args of the panel'''
+	wx.Panel.__init__(self, parent, id, *args, **params)
+            
+        self.m_mgr = wx.aui.AuiManager()
+        self.m_mgr.SetManagedWindow( self )
+        
+        self.m_notebook= wx.aui.AuiNotebook( self, wx.ID_ANY,
+                                           wx.DefaultPosition, wx.DefaultSize,
+                                           wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|
+	                                   wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_BOTTOM|
+	                                   wx.aui.AUI_NB_TAB_SPLIT)
+        
+        
+        self.m_mgr.AddPane( self.m_notebook, wx.aui.AuiPaneInfo().CenterPane().Dock().
+                            Resizable(True).FloatingSize( wx.DefaultSize ).
+                            DockFixed( True ).Centre().
+                            CloseButton(False ) )
+        self.npage = self.numPage()
+        self.currentPage = None
+        self.pageNames= dict()
+	
+	self.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChange)
+        self.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.delPage)
+	
+        self.Bindded() # call your custom callbacks
+        self.Layout()
+        self.m_mgr.Update()
+        self.Center( )
+	
+    # <p> you should override this
+    def Bindded(self):
+	# add some custom callbacks
+	pass 
+    def addOnePage(self, id= wx.ID_ANY):
+        #overwrite this method to create your own custom widget
+	return wx.TextCtrl( self, id)
+    # end override this /<p>
+    
+    # implementing a wrap to the current notebook
+    def __getattribute__( self, name):
+        '''wraps the funtions to the grid
+        emulating a grid control'''
+        try:
+            return object.__getattribute__( self, name)
+        except AttributeError:
+            if self.GetPageCount( ) != 0:
+                if str(type(self.currentPage)) == "<class 'wx._core._wxPyDeadObject'>":
+                    self.currentPage == None
+                    return
+                currPage= self.currentPage
+                return currPage.__getattribute__( name)
+            raise AttributeError
+    
+    def getPageNames( self):
+        return self.pageNames.keys()
+
+    def getHeader( self,pageName):
+        if not (pageName in self.pageNames.keys()):
+            raise StandardError('The page does not exist')
+        page= self.pageNames[pageName]
+        return page.getHeader()
+
+    def OnNotebookPageChange( self,evt):
+        self.currentPage= self.m_notebook.GetPage( evt.Selection)
+        
+    def GetPageCount( self):
+        # 21/04/2011
+        # retorna el numero de paginas que hay en el notebook
+        return self.m_notebook.PageCount
+    
+    def addPage( self, data= dict()):
+        defaultData = {'name': u''}
+        for key, value in data.items():
+            if defaultData.has_key(key):
+                defaultData[key] = value
+        # adiciona una pagina al notebook grid
+        newName= defaultData['name'] +'_'+ str(self.npage.next())
+        self.pageNames[newName]= self.addOnePage( )
+        self.currentPage=  self.pageNames[newName]
+        ntb= self.pageNames[newName]
+        self.m_notebook.AddPage(ntb, newName, False )
+        # se hace activo la pagina adicionada
+        self.m_notebook.SetSelection(self.m_notebook.GetPageCount()-1)
+        return ntb # retorna el objeto ntb
+    
+    def delPage( self, evt, page= None):
+        # si no se ingresa un numero de pagina se
+        #     considera que se va a borrar la pagina actual
+        # las paginas se numeran mediante numeros desde el cero
+        if page == None:
+            # se considera que la pagina a borrar es la pagina actual
+            #self.m_notebook.GetCurrentPage().Destroy() # borra el contenido de la pagina
+            if self.m_notebook.GetSelection() > -1:
+                self.m_notebook.DeletePage(self.m_notebook.GetSelection())
+            return
+        page = int(page)
+        if page <0:
+            return
+        if page > self.GetPageCount():
+            raise IndexError("Page doesn't exist")
+        parent = self.pages[page].GetParent()
+        parent.DeletePage(page)
+        
+    def newScript(self, event):
+        self.addPage()
+#
+
 #<p> INIT SELECT A TYPE OF CHART
 class _panelSubPlot(wx.ScrolledWindow):
     def __init__(self, *args, **param):
