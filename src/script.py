@@ -346,8 +346,8 @@ class ScriptPanel( wx.Panel):
         
         self.m_notebook= wx.aui.AuiNotebook( self, wx.ID_ANY,
                                            wx.DefaultPosition, wx.DefaultSize,
-                                           wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|wx.aui.AUI_NB_WINDOWLIST_BUTTON)
-        
+                                           wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|
+                                           wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_BOTTOM)
         
         self.m_mgr.AddPane( self.m_notebook, aui.AuiPaneInfo().CenterPane().Dock().
                             Resizable(True).FloatingSize( wx.DefaultSize ).
