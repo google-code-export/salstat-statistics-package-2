@@ -333,9 +333,8 @@ def numPage():
 
 class ScriptPanel( wx.Panel):
     def __init__( self, parent,*args):
-        '''ScriptPanel parent, log, grid, *args'''
+        '''ScriptPanel parent, log, *args'''
         self.log=   args[0]
-        self.showgrid= args[2]
         try:
             wx.Panel.__init__(self, parent, wx.ID_ANY, *args[1:])
         except:
