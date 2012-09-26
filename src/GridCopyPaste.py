@@ -1,7 +1,7 @@
 '''
 Created on 27/10/2010
 # 08 de nov de 2010:
--> llamado a GrandParent para el momentn en que se deba hacer una operacion con EVT_GRID_CELL_CHANGE
+-> llamado a GrandParent para el momento en que se deba hacer una operacion con EVT_GRID_CELL_CHANGE
 #    el metodo dentro del parent se debe llamar GrandParent.OnRangeChange(self,range)
 #    range=(top, left, #rows, #cols)
 -> adicion de cambio en la posicion del cursor cuando se realiza un cambio en el grid
@@ -29,10 +29,6 @@ class PyWXGridEditMixin():
         self._undoStack = []
         self._redoStack = []
         self._stackPtr = 0
-        self.padre= padre# to be erased
-        
-    def setPadreCallBack(self,padreObj): # to be erased
-        self.padre = padreObj
         
     def OnMixinKeypress(self, event):
         """Keystroke handler."""
@@ -55,19 +51,6 @@ class PyWXGridEditMixin():
         elif key == ord("Y"): self.Redo() # elif key == ord(" "): self.SelectCol(self.GetGridCursorCol())
         elif key:  event.Skip()
         
-    def Mixin_callbackChangeCell(self,rango):
-        # realiza el llamado a la funcion OnRangeChange del respectivo parent
-        # asignado indicando el rango que se ha modificado
-        # range= (celltop, cellLeft, NumRows,NumCols)
-        # se rehubica la posicion del cursor para que sean mas ovios los cambios
-        if self.padre != False:
-            try:
-                self.padre.OnRangeChange(rango)
-                # self.GrandParent.OnRangeChange(rango)
-            except:
-                return
-                # print "la funcion padre no implementa OnRangeChange"
-            
     def Mixin_OnCellEditor(self, evt=None):
         """this method saves the value of cell before it's edited (when that value disappears)"""
         top, left, rows, cols = self.GetSelectionBox()[0]
@@ -81,11 +64,6 @@ class PyWXGridEditMixin():
         self.AddUndo(undo=(self.Paste, (box, self._editOldValue)),
             redo=(self.Paste, (box, newValue)))
         self._editOldValue = None
-        self.Mixin_callbackChangeCell(box)
-        #if self.padre != False:
-        #    # to be checked
-        #    self.padre.grid.hasChanged= True
-        #    self.padre.grid.hasSaved=   False
     
     def GetSelectionBox(self):
         """Produce a set of selection boxes of the form (top, left, nrows, ncols)"""
@@ -162,10 +140,6 @@ class PyWXGridEditMixin():
         self.AddUndo(undo=(self.Paste, (pBox, self.Box2String(*pBox))),
             redo=(self.Paste, (pBox, data)))
         self.Paste(pBox, data)
-        # se almacena el rango que se ha cambiado
-        self.Mixin_callbackChangeCell(pBox)
-        #self.padre.grid.hasChanged= True
-        #self.padre.grid.hasSaved= False
         
     def _DeterminePasteArea(self, top, left, clipRows, clipCols, selRows, selCols):
         """paste area rules: if 1-d selection (either directon separately) and 2-d clipboard, use clipboard size, otherwise use selection size"""
@@ -217,7 +191,6 @@ class PyWXGridEditMixin():
             self.AddUndo(undo=(self.Paste, (box, self.Box2String(*box))),
                 redo=(self.Paste, (box, "\n")))
             self.Paste(box, "\n")
-            self.Mixin_callbackChangeCell(box)
         self.hasChanged= True
         self.hasSaved= False
         
@@ -243,7 +216,6 @@ class PyWXGridEditMixin():
             top, left, rows, cols = params[0]
             self.SelectBlock(top, left, top+rows-1, left+cols-1)
             self.SetGridCursor(top,left)
-            self.Mixin_callbackChangeCell(params[0])
             #padre= self.GetParent() 
             #padre.m_grid.SetGridCursor(top, left) # se espera que el parent sea el grid
             self.hasChanged= True
@@ -259,7 +231,6 @@ class PyWXGridEditMixin():
             self.SetGridCursor(top, left)
             self.SelectBlock(top, left, top+rows-1, left+cols-1)
             self._stackPtr += 1
-            self.Mixin_callbackChangeCell(params[0])
             #padre= self.GetParent() 
             #padre.m_grid.SetGridCursor(top, left) # se espera que el parent sea el grid
             self.hasChanged= True
