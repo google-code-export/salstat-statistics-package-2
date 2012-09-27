@@ -64,10 +64,10 @@ from imagenes import imageEmbed
 
 from helpSystem import Navegator
 
-from dialogs import SaveDialog, VariablesFrame, DescriptivesFrame
+from dialogs import SaveDialog, SaveOneGridDialog, VariablesFrame, DescriptivesFrame
 from dialogs import TransformFrame
 from dialogs import createPlotSelectionPanel
-from dialogs import auiNotebookWrap
+from ntbSheet import NoteBookSheet
 from gridCellRenderers import floatRenderer #, AutoWrapStringRenderer
 from wx.combo import BitmapComboBox # translation control
 import wx.lib.langlistctrl as langlist
@@ -80,12 +80,12 @@ import statFunctions
 
 APPNAME= 'S2'
 
-inits ={}    # dictionary to hold the config values
+inits= {}    # dictionary to hold the config values
 ColsUsed= []
 RowsUsed= []
 missingvalue= None
 HOME= os.getcwd()
-imagenes = imageEmbed()
+imagenes= imageEmbed()
 
 # Define the translation class
 class translate(unicode):
@@ -412,13 +412,8 @@ class SalStat2App(wx.App):
         self.icon16= imagenes.logo16()
         self.icon24= imagenes.logo24()
         self.icon64= imagenes.logo64()
-        self.frame = MainFrame(None, self)
-        # let the main app known the input Grid
-        ### self.inputGrid = self.frame.grid
+	self.frame= self.getMainFrame(None, self)
         self.SetTopWindow(self.frame)
-        self.frame.grid.SetFocus()
-        ###self.Logg= self.frame.logPanel
-        ###self.output = self.frame.answerPanel
         # referencing the plot system
         if wx.Platform == '__WXGTK__':
             self.frame.Show()
@@ -433,7 +428,11 @@ class SalStat2App(wx.App):
             for f in  sys.argv[1:]:
                 self.OpenFileMessage(f)
         return True
-
+    def getMainFrame(self, *args):
+	frame = MainFrame( *args)
+	frame.grid.SetFocus()
+	return frame
+	
     def BringWindowToFront(self):
         try: # it's possible for this event to come when the frame is closed
             wx.GetApp().GetTopWindow().Raise()
@@ -568,15 +567,13 @@ class SalStat2App(wx.App):
     def GetVersion(self):
         return '2.1'
 
-class Grids(auiNotebookWrap):
+class Grids(NoteBookSheet):
     def __init__(self, parent, id= wx.ID_ANY, *args, **params):
-        auiNotebookWrap.__init__(self, parent, id, *args, **params)
+        NoteBookSheet.__init__(self, parent, id, *args, **params)
 	
     def _gridSetRenderer(self, grid):
         '''setting the renderer to the grid'''
         attr=   wx.grid.GridCellAttr()
-        #editor= wx.grid.GridCellFloatEditor()
-        #attr.SetEditor(editor)
         renderer = floatRenderer( 4)
         attr.SetRenderer( renderer)
         self.floatCellAttr= attr
@@ -587,23 +584,7 @@ class Grids(auiNotebookWrap):
             grid.SetGridLineColour("#b7b7b7")
             grid.SetLabelBackgroundColour("#d2d2d2")
             grid.SetLabelTextColour("#444444")
-	    
-    def addOnePage(self, id= wx.ID_ANY):
-        #overwrite this method to create your own custom widget
-	grid=  SimpleGrid( self, size= (500,20))
-        grid.hasSaved= True
-	grid.hasChanged= False
-        grid.SetDefaultColSize( 60, True)
-        grid.SetRowLabelSize( 40)
-        grid.SetDefaultCellAlignment( wx.ALIGN_RIGHT, wx.ALIGN_CENTER )
-        # adjust the renderer
-        self._gridSetRenderer(grid)
-	return grid
-    
-    def Bindded(self):
-	# some callbacks
-	pass
-        
+	            
 #---------------------------------------------------------------------------
 # This is the main interface of application
 class MainFrame(wx.Frame, wx.FileDropTarget):
@@ -615,7 +596,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.window= self
 
         #-----
-        # setting an apropiate size
+        # setting an apropiate size to the frame
         dp= wx.Display()
         ca= dp.GetClientArea()
         wx.Frame.__init__(self,parent,-1,"S2",
@@ -649,13 +630,13 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         #--------------------
         #<p> set up the datagrid
         self.grid=  Grids(self, -1)
-	self.grid.addPage()
+	self.grid.addPage( gridSize= (200,20))
         # set up the datagrid  /<p>
         
         # response panel
         self.answerPanel= NoteBookSheet(self, fb = self.formulaBarPanel)
-        self.answerPanel2= ScriptPanel(self, self.logPanel, self.grid, self.answerPanel)
-        #--------------------------------------------
+        self.answerPanel2= ScriptPanel(self, self.logPanel)
+        #---------------------------g-----------------
         # Redirecting the error messages and the std outpout to the logPanel
         sys.stderr= self.logPanel
         sys.stdout= self.logPanel
@@ -895,15 +876,15 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
               [translate(u"E&xit\tCtrl-Q"),       ExitIcon,   self.EndApplication,     wx.ID_EXIT],
               )),
             (translate(u"&Edit"),
-             ([translate(u"Cu&t"),           CutIcon,         self.grid.CutData,     wx.ID_CUT],
-              [translate(u"&Copy"),          CopyIcon,        self.grid.CopyData,     wx.ID_COPY],
-              [translate(u"&Paste"),         PasteIcon,       self.grid.PasteData,     wx.ID_PASTE],
+             ([translate(u"Cu&t"),           CutIcon,         self.tb1_CutData,     wx.ID_CUT],
+              [translate(u"&Copy"),          CopyIcon,        self.tb1_CopyData,     wx.ID_COPY],
+              [translate(u"&Paste"),         PasteIcon,       self.tb1_PasteData,     wx.ID_PASTE],
               [u"--"],
-              [translate(u"Select &All\tCtrl-A"),    None,            self.grid.SelectAllCells,     wx.ID_SELECTALL],
+              [translate(u"Select &All\tCtrl-A"),    None,    self.tb1_SelectAllCells,     wx.ID_SELECTALL],
               ##["&Find and Replace...\tCtrl-F",  FindRIcon,     self.GoFindDialog,     wx.ID_REPLACE],
               [u"--"],
-              [translate(u"Delete Current Column"), None,  self.grid.DeleteCurrentCol,     None],
-              [translate(u"Delete Current Row"),    None,  self.grid.DeleteCurrentRow,     None],)),
+              [translate(u"Delete Current Column"), None,     self.tb1_DeleteCurrentCol,     None],
+              [translate(u"Delete Current Row"),    None,     self.tb1_DeleteCurrentRow,     None],)),
             (translate(u"&Preferences"),
              ((translate(u"Variables..."),             None,  self.GoVariablesFrame,     None ),
               [translate(u"Add Columns and Rows..."),  None,  self.GoEditGrid,     None],
@@ -965,8 +946,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
 
     def _BindEvents(self):
         # grid callback
-        self.grid.Bind( wx.grid.EVT_GRID_CMD_SELECT_CELL, self._cellSelectionChange )
-        self.grid.Bind( wx.grid.EVT_GRID_SELECT_CELL, self._cellSelectionChange )
+	self.grid.Bind( wx.grid.EVT_GRID_SELECT_CELL, self._cellSelectionChange )
         self.grid.Bind( wx.grid.EVT_GRID_RANGE_SELECT, self._gridRangeSelect )
         #-----------------
         # tb1 toolbar callbacks
@@ -974,58 +954,87 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.Bind( wx.EVT_MENU, self.tb1_LoadFile,      id= self.bt2.GetId())
         self.Bind( wx.EVT_MENU, self.tb1_SaveXls,       id= self.bt3.GetId())
         self.Bind( wx.EVT_MENU, self.tb1_SaveXlsAs,     id= self.bt4.GetId())
-        ##self.Bind( wx.EVT_MENU, self.grid.PrintPage,     id = self.bt5.GetId())
+        ##self.Bind( wx.EVT_MENU, self.grid.PrintPage,    id = self.bt5.GetId())
         self.Bind( wx.EVT_MENU, self.tb1_CutData,       id= self.bt6.GetId())
         self.Bind( wx.EVT_MENU, self.tb1_CopyData,      id= self.bt7.GetId())
         self.Bind( wx.EVT_MENU, self.tb1_PasteData,     id= self.bt8.GetId())
         self.Bind( wx.EVT_MENU, self.GoVariablesFrame,  id= self.bt9.GetId())
-        ##self.Bind( wx.EVT_MENU, self.GoHelpSystem,        id= self.bt10.GetId())
+        ##self.Bind( wx.EVT_MENU, self.GoHelpSystem,      id= self.bt10.GetId())
         self.Bind( wx.EVT_MENU, self.GoOnlyneHelp,      id= self.bt10.GetId())
         self.Bind( wx.EVT_MENU, self.tb1_Undo,          id= self.bt11.GetId())
         self.Bind( wx.EVT_MENU, self.tb1_Redo,          id= self.bt12.GetId())
 	self.Bind( wx.EVT_MENU, self.tb1_closePage,     id= self.bt13.GetId())
 
         # controlling the expansion of the notebook
-        ##self.m_notebook1.Bind( wx.EVT_LEFT_DCLICK, self._OnNtbDbClick )
+        self.grid.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_BG_DCLICK, self._OnNtbDbClick )
         self.Bind( wx.EVT_CLOSE, self.EndApplication )
-        self.grid.setPadreCallBack( self)
         self.sig= self.siguiente()
 	
     def tb1_LoadFile(self, evt):
-	self.grid.addPage()
+	self.grid.addPage( gridSize= (200,20))
 	self.grid.LoadFile(evt)
 	evt.Skip()
-	
     def tb1_closePage(self, evt):
-	self.grid.delPage(evt)
+	# check if there are pages
+	if len(self.grid.pageNames) == 0:
+	    return
+	if self.grid.hasSaved:
+	    self.grid.delPage()
+	else:
+            # checking if there is a data to be saved
+            if len(self.grid.GetUsedCols()[0]) != 0:
+                win = SaveOneGridDialog(self.grid)
+                win.Show(True)
 	evt.Skip()
 	
     def tb1_SaveXls(self, evt):
+	if len(self.grid.pageNames) == 0:
+	    return
 	self.grid.SaveXls()
 	evt.Skip()
     def tb1_SaveXlsAs(self, evt):
+	if len(self.grid.pageNames) == 0:
+	    return
 	self.grid.SaveXlsAs(evt)
 	evt.Skip()
     def tb1_CutData(self, evt):
+	if len(self.grid.pageNames) == 0:
+	    return
 	self.grid.CutData(evt)
 	evt.Skip()
     def tb1_CopyData(self, evt):
+	if len(self.grid.pageNames) == 0:
+	    return
 	self.grid.CopyData(evt)
 	evt.Skip()
     def tb1_PasteData(self, evt):
+	if len(self.grid.pageNames) == 0:
+	    return
 	self.grid.PasteData(evt)
 	evt.Skip()
     def tb1_Undo(self, evt):
+	if len(self.grid.pageNames) == 0:
+	    return
 	self.grid.Undo(evt)
 	evt.Skip()
     def tb1_Redo(self, evt):
+	if len(self.grid.pageNames) == 0:
+	    return
 	self.grid.Redo(evt)
 	evt.Skip()
-	
     def tb1_NewPage(self, evt):
-	self.grid.addPage( )
+	self.grid.addPage( gridSize= (200,20))
 	evt.Skip()
-    
+    def tb1_DeleteCurrentCol(self, evt):
+	self.grid.DeleteCurrentCol(evt)
+	evt.Skip()
+    def tb1_DeleteCurrentRow(self, evt):
+	self.grid.DeleteCurrentRow(evt)
+	evt.Skip()
+    def tb1_SelectAllCells(self, evt):
+	self.grid.SelectAllCells(evt)
+	evt.Skip()
+	
     def siguiente(self):
         i= 0
         while 1:
@@ -1035,6 +1044,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         stat().showGui()
 
     def _gridRangeSelect(self, evt):
+	evt.Skip()
         # displays the count and the sum of selected values
         selectedCells= self.grid.get_selection()
         # Count the selected cells
@@ -1065,15 +1075,15 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.formulaBarPanel.m_textCtrl1.SetValue( texto)
         evt.Skip()
 
-    ##def _OnNtbDbClick(self,evt):
-        ##for pane in self.m_mgr.GetAllPanes():
-            ##if pane.caption == self.translate(u"Log / Shell Panel"):
-                ##break
-        ##if not pane.IsMaximized():
-            ##self.m_mgr.MaximizePane(pane)
-        ##else:
-            ##self.m_mgr.RestorePane(pane)
-        ##self.m_mgr.Update()
+    def _OnNtbDbClick(self, evt):
+        for pane in self.m_mgr.GetAllPanes():
+            if pane.caption == self.translate(u"Data Entry Panel"):
+                break
+        if not pane.IsMaximized():
+            self.m_mgr.MaximizePane(pane)
+        else:
+            self.m_mgr.RestorePane(pane)
+        self.m_mgr.Update()
 
     def OnDropFiles( self, x, y, filenames):
         if isinstance( filenames, (str, unicode)):
@@ -1267,6 +1277,9 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
 
         self.m_mgr.Update()    
     def EndApplication(self, evt):
+	if len(self.grid.pageNames) == 0:
+	    wx.GetApp().frame.Destroy()
+	    return
         if self.grid.hasSaved == False:
             # checking if there is a data to be saved
             if len(self.grid.GetUsedCols()[0]) != 0:
