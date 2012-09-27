@@ -331,8 +331,14 @@ class SimpleGrid( MyGridPanel):# wxGrid
         currentRow, currentCol, rows,cols = self.GetSelectionBox()[0]
         if cols < 1:
             return
-        self.m_grid.DeleteCols(currentCol, 1)
-        self.AdjustScrollbars()
+	# A wxpython bug was detected
+	# the app crash when trying to delete a colum
+	# with a custom attr
+	# deleting all data
+	self.clearCol(currentCol)
+	self.SetColLabelValue(currentCol, self.generateLabel( currentCol))
+	#self.DeleteCols( pos = currentCol, numCols = 1)
+        self.AdjustScrollbars( )
         self.hasChanged= True
         self.hasSaved=   False
         evt.Skip()
@@ -420,7 +426,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
         else:
             saveAs= args[1]
         self.reportObj= ReportaExcel(cell_overwrite_ok = True)
-        if self.Saved == False or saveAs: # path del grid
+        if self.hasSaved == False or saveAs: # path del grid
             # mostrar el dialogo para guardar el archivo
             dlg= wx.FileDialog(self, "Save Data File", "" , "",\
                                "Excel (*.xls)|*.xls| \
@@ -571,7 +577,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
             
         #<p> updating the path related to the new open file
         self.path= filename
-        self.Saved= True
+        self.hasSaved= True
         # /<p>
         
         # se lee el tamanio del sheet seleccionado
@@ -742,7 +748,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
         except:
             raise
         finally:
-            self.Saved= False
+            self.hasSaved= False
             self.hasChanged= True
             
     def PutRow(self, rowNumber, data):
@@ -805,7 +811,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
         except:
             raise
         finally:
-            self.Saved= False
+            self.hasSaved= False
             self.hasChanged= True
         
     def GetRow(self, row):
@@ -970,27 +976,6 @@ class NoteBookSheet(wx.Panel, object):
         # 21/04/2011
         # retorna el numero de paginas que hay en el notebook
         return self.m_notebook.PageCount
-
-    def delPage( self, page= None):
-        # si no se ingresa un numero de pagina se
-        #     considera que se va a borrar la pagina actual
-        # las paginas se numeran mediante numeros desde el cero
-        if page == None:
-            # se considera que la pagina a borrar es la pagina actual
-            #self.m_notebook.GetCurrentPage().Destroy() # borra el contenido de la pagina
-            
-            self.m_notebook.DeletePage(self.m_notebook.GetSelection())
-            # se borra la pagina
-
-            return
-        page = int(page)
-        if page <0:
-            return
-        if page > self.GetPageCount():
-            raise IndexError("Page doesn't exist")
-        parent = self.pages[page].GetParent()
-        parent.DeletePage(page)
-
     def upData( self,  data):
         # It's used to upload data into a grid
         # where the grid it's an int number
@@ -1175,7 +1160,7 @@ class NoteBookSheet(wx.Panel, object):
         self.m_notebook.SetSelection(self.m_notebook.GetPageCount()-1)
         return ntb # retorna el objeto ntb
     
-    def delPage( self, evt, page= None):
+    def delPage( self, evt = None, page= None):
         # si no se ingresa un numero de pagina se
         #     considera que se va a borrar la pagina actual
         # las paginas se numeran mediante numeros desde el cero
@@ -1183,15 +1168,24 @@ class NoteBookSheet(wx.Panel, object):
             # se considera que la pagina a borrar es la pagina actual
             #self.m_notebook.GetCurrentPage().Destroy() # borra el contenido de la pagina
             if self.m_notebook.GetSelection() > -1:
-                self.m_notebook.DeletePage(self.m_notebook.GetSelection())
+                page = self.m_notebook.GetSelection()
+	    else:
+		return
+        pageNumber = int(page)
+        if pageNumber <0:
             return
-        page = int(page)
-        if page <0:
-            return
-        if page > self.GetPageCount():
+        if pageNumber > self.GetPageCount():
             raise IndexError("Page doesn't exist")
-        parent = self.pages[page].GetParent()
-        parent.DeletePage(page)
+	currPageObj= self.m_notebook.GetPage(pageNumber)
+	# delete de erased page from the pages list
+	pageName = None
+	for pageName, pageObj in self.pageNames.items():
+	    if pageObj == currPageObj:
+		break
+	if pageName == None:
+	    return
+	self.pageNames.pop( pageName)
+        self.m_notebook.DeletePage( pageNumber)
         
     
 class Test(wx.Frame):
