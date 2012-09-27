@@ -389,22 +389,52 @@ class SaveDialog(wx.Dialog):
 	wx.GetApp().frame.grid.hasSaved = True
 	wx.GetApp().frame.grid.SaveXlsAs(self) # will it be ASCII or XML?
 	# wx.GetApp().output.Close(True)
-	self.Close(True)
+	self.Destroy()
 	wx.GetApp().frame.Close(True)
 
     def DiscardData(self, evt):
-	self.Close(True)
+	self.Destroy()
 	wx.GetApp().frame.grid.hasSaved = True
 	wx.GetApp().frame.Close(True)
 
 
     def CancelDialog(self, evt):
+	self.Destroy()
+	
+class SaveOneGridDialog(SaveDialog):
+    def __init__(self, *args, **params):
+	self.grid= args[0]
+	SaveDialog.__init__(self, *args, **params)
+	
+    def SaveData(self, evt):
+	try:
+	    wx.GetApp().frame.grid.hasSaved = True
+	    wx.GetApp().frame.grid.SaveXlsAs(self)
+	    self.grid.delPage()
+	except:
+	    raise
+	finally:
+	    self.Close(True)
+	    
+    def DiscardData(self, evt):
+	try:
+	    self.grid.delPage()
+	except:
+	    raise
+	finally:
+	    self.Close(True)
+	    
+    def CancelDialog(self, evt):
 	self.Close(True)
+    
 
 class VariablesFrame(wx.Dialog):
     def __init__(self,parent,id):
 	wx.Dialog.__init__(self, parent,id,"S2 - Variables", \
 	                   size=(380, 480,))
+	if len(wx.GetApp().frame.grid.pageNames) == 0:
+	    self.Close(True)
+	    return
 	translate= wx.GetApp().translate
 	self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
 	self.m_mgr = wx.aui.AuiManager()
