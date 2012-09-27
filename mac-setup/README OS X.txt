@@ -1,9 +1,28 @@
-S2 Statistics Package v2.1 Beta 2 
+S2 Statistics Package v2.1 Beta 3 
 
 OS X version for x86_64 platform Macs
 
 
 Website for bug reports, feature requests, etc:	http://code.google.com/p/salstat-statistics-package-2/
+
+------ Prerequisite Libraries: ------
+
+It should not be necessary to install these if you install from one of the online installers, but will be required if
+installing from Source Code. Some can be installed using the Python "pip" or "easy_install" installation utilities.
+
+Library Name			Website
+------------			-------------
+
+xlrd					http://www.python-excel.org
+xlwt					http://www.python-excel.org
+numpy					http://numpy.scipy.org
+scipy					http://www.scipy.org
+wxython 2.94			http://www.wxpython.org
+PIL						http://www.pythonware.com/products/pil/
+PyQT4					http://www.riverbankcomputing.co.uk/software/pyqt/download
+
+You can save yourself some time by loading up the Free Enthought Python Distribution (http://enthought.com) which should
+install most of the above for you except for {xlrd, xlwt}
 
 
 ------ Installation Notes: ----------
@@ -25,3 +44,4 @@ Website for bug reports, feature requests, etc:	http://code.google.com/p/salstat
 	package, or clone our Mercurial repository. It has been tested on 64 bit Mountain Lion, and 32-bit Snow Leopard and Lion
 	using either Mac Ports, or the Enthought Python Distribution.)
 3)	Help and documentation will be coming in future versions. 
+
