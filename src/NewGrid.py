@@ -97,8 +97,14 @@ class _MyContextGrid(wx.Menu):
         evt.Skip()
         
     def OnDelRow(self, evt):
-        if hasattr(self.parent, 'DeleteCurrentRow'):
-            self.parent.DeleteCurrentRow(evt)
+        try:
+            # searching for the parent in the simplegrid parent
+            parent= self.parent.Parent
+        except AttributeError:
+            parent= None
+            
+        if hasattr(parent, 'DeleteCurrentRow'):
+            parent.DeleteCurrentRow(evt)
         else:
             currentRow, left, rows,cols = self.parent.GetSelectionBox()[0]
             if rows < 1:
@@ -111,8 +117,14 @@ class _MyContextGrid(wx.Menu):
         evt.Skip()
     
     def OnDelCol(self, evt):
-        if hasattr(self.parent, 'DeleteCurrentCol'):
-            self.parent.DeleteCurrentCol(evt)
+        try:
+            # searching for the parent in the simplegrid parent
+            parent= self.parent.Parent
+        except AttributeError:
+            parent= None
+            
+        if hasattr(parent,  'DeleteCurrentCol'):
+            parent.DeleteCurrentCol(evt)
         else:
             currentRow, currentCol, rows,cols = self.parent.GetSelectionBox()[0]
             if cols < 1:
