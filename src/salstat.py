@@ -630,7 +630,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         #--------------------
         #<p> set up the datagrid
         self.grid=  Grids(self, -1)
-	self.grid.addPage( gridSize= (200,20))
+	self.grid.addPage( gridSize= (256,64))
         # set up the datagrid  /<p>
         
         # response panel
@@ -971,7 +971,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.sig= self.siguiente()
 	
     def tb1_LoadFile(self, evt):
-	self.grid.addPage( gridSize= (200,20))
+	self.grid.addPage( gridSize= (256,64))
 	self.grid.LoadFile(evt)
 	evt.Skip()
     def tb1_closePage(self, evt):
@@ -1023,7 +1023,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
 	self.grid.Redo(evt)
 	evt.Skip()
     def tb1_NewPage(self, evt):
-	self.grid.addPage( gridSize= (200,20))
+	self.grid.addPage( gridSize= (256,64))
 	evt.Skip()
     def tb1_DeleteCurrentCol(self, evt):
 	self.grid.DeleteCurrentCol(evt)
