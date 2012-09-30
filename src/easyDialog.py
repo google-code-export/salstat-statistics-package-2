@@ -72,6 +72,7 @@ class Dialog ( wx.Dialog, wx.Frame ):
 
         to see an example run the class as a main script
         '''
+            
         self.ALLOWED= ['StaticText',   'TextCtrl',     'Choice',
                        'CheckListBox', 'StaticLine',   'RadioBox',
                        'SpinCtrl',     'ToggleButton', 'NumTextCtrl',
@@ -81,9 +82,9 @@ class Dialog ( wx.Dialog, wx.Frame ):
 
         params = {'Title':  wx.EmptyString,
                   'icon':   None,
-                  '_size':  wx.Size(-1,-1), #260,320
+                  'size':   wx.DefaultSize,
                   '_pos':   wx.DefaultPosition,
-                  '_style': wx.DEFAULT_DIALOG_STYLE}
+                  '_style': wx.wx.DEFAULT_DIALOG_STYLE}
 
         for key, value in params.items():
             try:
@@ -95,7 +96,7 @@ class Dialog ( wx.Dialog, wx.Frame ):
                              id=     wx.ID_ANY,
                              title=  params.pop('Title'),
                              pos=    params.pop('_pos'),
-                             size=   wx.Size(0,0),
+                             size=   params.pop('size'),
                              style=  params.pop('_style') )
         
         #< setting the icon
@@ -110,6 +111,11 @@ class Dialog ( wx.Dialog, wx.Frame ):
 
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
         bSizer1 = wx.BoxSizer( wx.VERTICAL )
+        
+        # getting the horizontal border size
+        bSizer1.Fit( self )
+        xBorderSize= self.Size[0]
+        
         self.m_scrolledWindow1 = wx.ScrolledWindow( self, wx.ID_ANY,
                                      wx.DefaultPosition, wx.DefaultSize,
                                       wx.DOUBLE_BORDER|wx.HSCROLL|wx.VSCROLL )
@@ -123,12 +129,9 @@ class Dialog ( wx.Dialog, wx.Frame ):
                       'SpinCtrl','ToggleButton','NumTextCtrl',
                       'CheckBox', 'makePairs','IntTextCtrl']
         
-        self.adding(bSizer3, struct)
-
-        self.m_scrolledWindow1.SetSizer( bSizer3 )
-        self.m_scrolledWindow1.Layout()
-        bSizer3.Fit( self.m_scrolledWindow1 )
         bSizer1.Add( self.m_scrolledWindow1, 1, wx.EXPAND, 5 )
+        
+        # ok cancel buttoms
         m_sdbSizer1 = wx.StdDialogButtonSizer()
         self.m_sdbSizer1OK = wx.Button( self, wx.ID_OK )
         m_sdbSizer1.AddButton( self.m_sdbSizer1OK )
@@ -142,13 +145,36 @@ class Dialog ( wx.Dialog, wx.Frame ):
         
         bSizer1.Add( m_sdbSizer1, 0, wx.EXPAND|wx.ALL, 5 )# 
         self.SetSizer( bSizer1 )
-        size= self.m_scrolledWindow1.Size
+        
+        # getting the actual size of the dialog
+        bSizer1.Fit( self )
+        sizeDialog= self.Size
+        
+        # adding the custom controls into the scroll dialog
+        self.adding(bSizer3, struct)
+        self.m_scrolledWindow1.SetSizer( bSizer3 )
+        self.m_scrolledWindow1.Layout()
+        bSizer3.Fit( self.m_scrolledWindow1 )
+        # getting the size of the scrolldialog
+        sizeScroll= self.m_scrolledWindow1.Size
+        
+        # getting the required size
+        requiredSize= (sizeScroll[0] + xBorderSize,
+                       sizeDialog[1] + sizeScroll[1]+ 0)
+        
         # getting the border size
         maxSize= wx.GetDisplaySize()
-        allowSize= [min([size[0] + 25 , maxSize[0]-10]),
-                    min([size[1] + buttonOkCancelSize[1] + 15, maxSize[1]-10]),]
+        allowSize= [min([requiredSize[0], maxSize[0]-10]),
+                    min([requiredSize[1], maxSize[1]-10]),]
         minAllowed= [buttonOkCancelSize[0], buttonOkCancelSize[1]]
         allowSize= [max([minAllowed[0], allowSize[0]]), max([minAllowed[1], allowSize[1]])]
+        
+        # adpat the dialog if needed
+        if allowSize[1] == maxSize[1]-10 and allowSize[0] <= maxSize[0]-20:
+            allowSize[0]= allowSize[0]+10
+        elif allowSize[0] == maxSize[0]-10 and allowSize[1] <= maxSize[1]-20:
+            allowSize[1]= allowSize[1]+10
+            
         self.SetSize(wx.Size(allowSize[0], allowSize[1]))
         self.Layout()
         self.Centre( wx.BOTH )
@@ -278,7 +304,7 @@ class _example( wx.Frame ):
     def __init__( self, parent ):
         wx.Frame.__init__ ( self, parent, id = wx.ID_ANY,
                      title = wx.EmptyString, pos = wx.DefaultPosition,
-                     size = wx.Size( -1, -1 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
+                     size = wx.Size( 200, 200 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
 
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
 
