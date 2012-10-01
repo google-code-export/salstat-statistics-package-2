@@ -224,20 +224,6 @@ class formulaBar ( aui.AuiToolBar ):
         #self.m_toggleBtn1.Bind( wx.EVT_TOGGLEBUTTON, self._ontogle )
         self.originalSize= self.Size
 
-    #def _ontogle(self, evt):
-    #    value= self.m_toggleBtn1.GetValue()
-    #    if value:
-    #        self.SetSize( wx.Size(self.originalSize[0], self.originalSize[1]+25*2))
-    #        self.m_textCtrl1.SetMinSize( wx.Size( 320, 25*2 ) )
-    #        self.m_textCtrl1.SetSize( wx.Size( 320, 25*2 ) )
-    #
-    #    else:
-    #        self.SetSize( wx.Size(self.originalSize[0], self.originalSize[1]))
-    #        self.m_textCtrl1.SetMinSize( wx.Size( 320,25 ) )
-    #        self.m_textCtrl1.SetSize( wx.Size( 320,25 ) )
-    #    self    
-        #self.Update()
-
 #---------------------------------------------------------------------------
 #---- Language List Combo Box----#
 class LangListCombo(BitmapComboBox):
