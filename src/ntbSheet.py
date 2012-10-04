@@ -909,7 +909,7 @@ class NoteBookSheet(wx.Panel, object):
                 if str(type(self.currentPage)) == "<class 'wx._core._wxPyDeadObject'>":
                     self.currentPage == None
                     return
-                currGrid=  self.currentPage ##self.m_notebook.GetSelection()
+                currGrid=  self.currentPage
                 return currGrid.__getattribute__(name)
             raise AttributeError
 
@@ -941,7 +941,7 @@ class NoteBookSheet(wx.Panel, object):
         grid= self.m_notebook.GetPage(pageSelectNumber)
         try:
             texto= grid.GetCellValue(row, col)
-            self.fb.m_textCtrl1.SetValue(texto)
+            self.fb.value= texto
         except:
             pass
         event.Skip()
@@ -1140,8 +1140,48 @@ class NoteBookSheet(wx.Panel, object):
         grid.SetDefaultCellAlignment( wx.ALIGN_RIGHT, wx.ALIGN_CENTER )
         # adjust the renderer
         self._gridSetRenderer(grid)
+	# setting the callback to the range change
+	grid.Bind( wx.grid.EVT_GRID_SELECT_CELL, self._cellSelectionChange)
+	grid.Bind( wx.grid.EVT_GRID_RANGE_SELECT, self._gridRangeSelect)
 	return grid
     
+    def _gridRangeSelect(self, evt):
+	grid= evt.GetEventObject()
+        # displays the count and the sum of selected values
+        selectedCells= grid.get_selection()
+        # Count the selected cells
+        # getting the cell values:
+        selectedCellText= list()
+        selectedNumerical= list()
+        emptyText= 0
+	DECIMAL_POINT= wx.GetApp().DECIMAL_POINT
+        for rowi, coli in selectedCells:
+            currText= grid.GetCellValue( rowi, coli)
+            if currText == u"":
+                emptyText+= 1
+            try:
+                selectedNumerical.append( float( currText.replace( DECIMAL_POINT, ".")))
+            except:
+                pass
+            selectedCellText.append( currText)
+	statusBar= wx.GetApp().frame.StatusBar
+        statusBar.SetStatusText( wx.GetApp().translate(u"cells Selected: %.0f  count: %.0f  sum: %.4f ")%(len(selectedCells),len(selectedCells)-emptyText,sum(selectedNumerical)),1 )
+	evt.Skip()
+	
+    def _cellSelectionChange( self, evt):
+	# se lee el contenido de la celda seleccionada
+        row= evt.GetRow()
+        col= evt.GetCol()
+        texto= u""
+	grid= evt.GetEventObject()
+	try:
+            texto= grid.GetCellValue( row, col)
+        except wx._core.PyAssertionError:
+            pass
+	formulaBar= wx.GetApp().frame.formulaBarPanel
+        formulaBar.value= texto
+	evt.Skip()
+	
     def _gridSetRenderer(self, grid):
 	pass
     

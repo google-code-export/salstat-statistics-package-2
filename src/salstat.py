@@ -208,14 +208,14 @@ class formulaBar ( aui.AuiToolBar ):
                                 size= wx.DefaultSize,
                                 style = 0,
                                 agwStyle = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
-
-        self.m_textCtrl1 = wx.TextCtrl( self, wx.ID_ANY,
+	self._text= u''
+        self.textCtrl1 = wx.TextCtrl( self, wx.ID_ANY,
                                         wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
                                         wx.TE_CHARWRAP|wx.TE_MULTILINE|wx.TE_RICH2|
                                         wx.TE_WORDWRAP|wx.NO_BORDER )
-        self.m_textCtrl1.SetMinSize( wx.Size( 320, 30 ) )
-        self.m_textCtrl1.SetSize( wx.Size( 320, 30 ) )
-        self.AddControl( self.m_textCtrl1, label= "Text control")
+        self.textCtrl1.SetMinSize( wx.Size( 320, 30 ) )
+        self.textCtrl1.SetSize( wx.Size( 320, 30 ) )
+        self.AddControl( self.textCtrl1, label= "Text control")
 
         #self.m_toggleBtn1 = wx.ToggleButton( self, wx.ID_ANY, u"v", wx.DefaultPosition, wx.DefaultSize, 0 )
         #self.m_toggleBtn1.SetValue( False ) 
@@ -223,7 +223,17 @@ class formulaBar ( aui.AuiToolBar ):
 
         #self.m_toggleBtn1.Bind( wx.EVT_TOGGLEBUTTON, self._ontogle )
         self.originalSize= self.Size
-
+	self.value= u'texto'
+	
+    @property
+    def value(self):
+	return self._text
+    @value.setter
+    def value(self, texto):
+	if not isinstance( texto, (str, unicode)):
+	    raise StandardError("only acepted numerical values")
+	self._text= texto
+	self.textCtrl1.SetValue(texto)
 #---------------------------------------------------------------------------
 #---- Language List Combo Box----#
 class LangListCombo(BitmapComboBox):
@@ -931,9 +941,6 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
             wx.SystemOptions.SetOptionInt(u"mac.textcontrol-use-spell-checker", 1)
 
     def _BindEvents(self):
-        # grid callback
-	self.grid.Bind( wx.grid.EVT_GRID_SELECT_CELL, self._cellSelectionChange )
-        self.grid.Bind( wx.grid.EVT_GRID_RANGE_SELECT, self._gridRangeSelect )
         #-----------------
         # tb1 toolbar callbacks
         self.Bind( wx.EVT_MENU, self.tb1_NewPage,       id= self.bt1.GetId())
@@ -1028,39 +1035,6 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
             i+= 1
     def _evalstat(self, evt, stat):
         stat().showGui()
-
-    def _gridRangeSelect(self, evt):
-	evt.Skip()
-        # displays the count and the sum of selected values
-        selectedCells= self.grid.get_selection()
-        # Count the selected cells
-        # getting the cell values:
-        selectedCellText= list()
-        selectedNumerical= list()
-        emptyText= 0
-        for rowi, coli in selectedCells:
-            currText= self.grid.GetCellValue( rowi, coli)
-            if currText == u"":
-                emptyText+= 1
-            try:
-                selectedNumerical.append( float( currText.replace( self.DECIMAL_POINT, ".")))
-            except:
-                pass
-            selectedCellText.append( currText)
-        self.StatusBar.SetStatusText( translate(u"cells Selected: %.0f  count: %.0f  sum: %.4f ")%(len(selectedCells),len(selectedCells)-emptyText,sum(selectedNumerical)),1 )
-
-    def _cellSelectionChange( self, evt):
-        # se lee el contenido de la celda seleccionada
-        row= evt.GetRow()
-        col= evt.GetCol()
-        texto= u""
-        try:
-            texto= self.grid.GetCellValue( row, col)
-        except wx._core.PyAssertionError:
-            pass
-        self.formulaBarPanel.m_textCtrl1.SetValue( texto)
-        evt.Skip()
-
     def _OnNtbDbClick(self, evt):
         for pane in self.m_mgr.GetAllPanes():
             if pane.caption == self.translate(u"Data Entry Panel"):
@@ -1272,9 +1246,9 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
                 win = SaveDialog(self)
                 win.Show(True)
             else:
-                wx.GetApp().frame.Destroy()
+                self.Destroy() # wx.GetApp().frame.Destroy()
         else:
-            wx.GetApp().frame.Destroy()
+            self.Destroy() # wx.GetApp().frame.Destroy()
 
     def shortData(self,evt):
         functionName = "short"
@@ -1332,6 +1306,9 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         wx.GetApp().output.addColData(colums[1])
         wx.GetApp().output.addRowData(['',"shorted Data","original position"], currRow= 0)
         self.logPanel.write(functionName + " successful")
+    
+    def Destroy(self):
+	super(MainFrame, self).Destroy()
 #--------------------------------------------------------------------------
 # main loop
 if __name__ == '__main__':
