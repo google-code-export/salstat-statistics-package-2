@@ -224,20 +224,6 @@ class formulaBar ( aui.AuiToolBar ):
         #self.m_toggleBtn1.Bind( wx.EVT_TOGGLEBUTTON, self._ontogle )
         self.originalSize= self.Size
 
-    #def _ontogle(self, evt):
-    #    value= self.m_toggleBtn1.GetValue()
-    #    if value:
-    #        self.SetSize( wx.Size(self.originalSize[0], self.originalSize[1]+25*2))
-    #        self.m_textCtrl1.SetMinSize( wx.Size( 320, 25*2 ) )
-    #        self.m_textCtrl1.SetSize( wx.Size( 320, 25*2 ) )
-    #
-    #    else:
-    #        self.SetSize( wx.Size(self.originalSize[0], self.originalSize[1]))
-    #        self.m_textCtrl1.SetMinSize( wx.Size( 320,25 ) )
-    #        self.m_textCtrl1.SetSize( wx.Size( 320,25 ) )
-    #    self    
-        #self.Update()
-
 #---------------------------------------------------------------------------
 #---- Language List Combo Box----#
 class LangListCombo(BitmapComboBox):
@@ -630,7 +616,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         #--------------------
         #<p> set up the datagrid
         self.grid=  Grids(self, -1)
-	self.grid.addPage( gridSize= (200,20))
+	self.grid.addPage( gridSize= (256,64))
         # set up the datagrid  /<p>
         
         # response panel
@@ -971,7 +957,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         self.sig= self.siguiente()
 	
     def tb1_LoadFile(self, evt):
-	self.grid.addPage( gridSize= (200,20))
+	self.grid.addPage( gridSize= (256,64))
 	self.grid.LoadFile(evt)
 	evt.Skip()
     def tb1_closePage(self, evt):
@@ -1023,7 +1009,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
 	self.grid.Redo(evt)
 	evt.Skip()
     def tb1_NewPage(self, evt):
-	self.grid.addPage( gridSize= (200,20))
+	self.grid.addPage( gridSize= (256,64))
 	evt.Skip()
     def tb1_DeleteCurrentCol(self, evt):
 	self.grid.DeleteCurrentCol(evt)
