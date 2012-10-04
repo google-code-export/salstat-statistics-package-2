@@ -1020,7 +1020,7 @@ class NoteBookSheet(wx.Panel, object):
         elif pageName in self.pageNames.keys():
             page = self.pageNames[pageName]
         else:
-            page = self.addPage({'name': pageName})
+            page = self.addPage('name', pageName)
         # se procede a verificar las dimensiones de la pagina actual
         size = (page.GetNumberRows(), page.GetNumberCols())
         # adding one column
@@ -1146,7 +1146,7 @@ class NoteBookSheet(wx.Panel, object):
 	pass
     
     def addPage( self, **params):
-        defaultData = {'name': u'', 'gridSize': (10,10)}
+        defaultData = {'name': u'', 'gridSize': (0,0)}
         for key, value in params.items():
             if defaultData.has_key(key):
                 defaultData[key] = value
