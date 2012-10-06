@@ -4,14 +4,19 @@ Created on 09/12/2010
 
 @author: usuario
 """
-
+__all__ = ['NewGrid']
 import wx
 import wx.grid
 
 def translate(a):
     return a
-
-from imagenes import imageEmbed
+ECXISTIMAGES = True
+try:
+    from imagenes import imageEmbed
+    EXISTIMAGES = True
+except ImportError:
+    EXISTIMAGES = False
+    
 from GridCopyPaste import PyWXGridEditMixin
 
 def Translate(obj):
@@ -35,13 +40,14 @@ class _MyContextGrid(wx.Menu):
         delCol=      wx.MenuItem(self, wx.NewId(), translate('Del Col'))
         ##exportarCsv= wx.MenuItem(self, wx.NewId(), '&Export\tCtrl+E')
         
-        imagenes = imageEmbed()
-        cortar.SetBitmap(imagenes.edit_cut())
-        copiar.SetBitmap(imagenes.edit_copy())
-        pegar.SetBitmap(imagenes.edit_paste())
-        eliminar.SetBitmap(imagenes.cancel())
-        deshacer.SetBitmap(imagenes.edit_undo())
-        rehacer.SetBitmap(imagenes.edit_redo())
+        if EXISTIMAGES:
+            imagenes = imageEmbed()
+            cortar.SetBitmap(imagenes.edit_cut())
+            copiar.SetBitmap(imagenes.edit_copy())
+            pegar.SetBitmap(imagenes.edit_paste())
+            eliminar.SetBitmap(imagenes.cancel())
+            deshacer.SetBitmap(imagenes.edit_undo())
+            rehacer.SetBitmap(imagenes.edit_redo())
         ##exportarCsv.SetBitmap(imagenes.exporCsv())
 
         self.AppendSeparator()

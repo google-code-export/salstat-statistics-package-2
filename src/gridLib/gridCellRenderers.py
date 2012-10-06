@@ -1,6 +1,7 @@
 '''custom grid cell renderers
 
 copyright:  2012  Sebastian Lopez Buritica'''
+__all__= ['floatRendererSub', 'floatRenderer', 'AutoWrapStringRenderer']
 
 import wx
 import wx.grid as Grid
