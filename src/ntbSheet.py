@@ -6,11 +6,11 @@ Created on 25/10/2010
 '''
 
 import wx
-from NewGrid import NewGrid # grid with context menu
+from gridLib import NewGrid # grid with context menu
 from imagenes import imageEmbed
 import wx.grid
 from slbTools import isnumeric, isiterable
-from gridCellRenderers import floatRenderer
+from gridLib import floatRenderer
 import wx.aui
 from numpy import ndarray, ravel
 import traceback
@@ -18,6 +18,8 @@ from slbTools import ReportaExcel
 import xlrd
 from easyDialog import Dialog as dialog
 import os
+
+DECIMAL_POINT = '.' # default value
 
 def numPage():
     i = 1
@@ -174,7 +176,7 @@ class MyGridPanel( wx.Panel, object ):
         try:
             dp= wx.GetApp().DECIMAL_POINT
         except:
-            d= '.'
+            dp= DECIMAL_POINT
             
         newdat= list()
         for row, dat in enumerate( data):
@@ -594,7 +596,10 @@ class SimpleGrid( MyGridPanel):# wxGrid
             self.AppendCols(newSize[1]-size[1])
 
         # se escribe los datos en el grid
-        DECIMAL_POINT= wx.GetApp().DECIMAL_POINT
+	try:
+	    DECIMAL_POINT= wx.GetApp().DECIMAL_POINT
+	except AttributeError:
+	    pass
         star= 0
         if hasHeader:
             star= 1
@@ -684,7 +689,10 @@ class SimpleGrid( MyGridPanel):# wxGrid
     def CleanData(self, coldata):
         indata = []
         self.missing = 0
-        dp= wx.GetApp().DECIMAL_POINT
+	try:
+	    dp= wx.GetApp().DECIMAL_POINT
+	except AttributeError:
+	    dp= DECIMAL_POINT
         missingvalue= wx.GetApp().missingvalue 
         if dp == '.':
             for i in range(self.GetNumberRows()):
@@ -725,7 +733,10 @@ class SimpleGrid( MyGridPanel):# wxGrid
         
         data= data[:pos+1]
         # changing data into a numerical value
-        dp = wx.GetApp().DECIMAL_POINT
+	try:
+	    dp = wx.GetApp().DECIMAL_POINT
+	except AttributeError:
+	    dp= DECIMAL_POINT
         result= list()
         for dat in data:
             if dat == u'' or dat.replace(' ','') == u'': # to detect a cell of only space bar
@@ -788,8 +799,8 @@ class SimpleGrid( MyGridPanel):# wxGrid
             
             try:
                 dp= wx.GetApp().DECIMAL_POINT
-            except:
-                d= '.'
+            except AttributeError:
+                dp= DECIMAL_POINT
                 
             newdat= list()
             for row, dat in enumerate( data):
@@ -1052,7 +1063,10 @@ class NoteBookSheet(wx.Panel, object):
             # adding the required rows
             page.AppendRows(diffColNumber)
         # populate with data
-        DECIMAL_POINT= wx.GetApp().DECIMAL_POINT
+	try:
+	    DECIMAL_POINT= wx.GetApp().DECIMAL_POINT
+	except AttributeError:
+	    pass
         for colPos, colValue in enumerate(colData):
             if isinstance(colValue, (str,unicode)):
                 pass
@@ -1154,7 +1168,10 @@ class NoteBookSheet(wx.Panel, object):
         selectedCellText= list()
         selectedNumerical= list()
         emptyText= 0
-	DECIMAL_POINT= wx.GetApp().DECIMAL_POINT
+	try:
+	    DECIMAL_POINT= wx.GetApp().DECIMAL_POINT
+	except AttributeError:
+	    pass
         for rowi, coli in selectedCells:
             currText= grid.GetCellValue( rowi, coli)
             if currText == u"":
@@ -1164,8 +1181,11 @@ class NoteBookSheet(wx.Panel, object):
             except:
                 pass
             selectedCellText.append( currText)
-	statusBar= wx.GetApp().frame.StatusBar
-        statusBar.SetStatusText( wx.GetApp().translate(u"cells Selected: %.0f  count: %.0f  sum: %.4f ")%(len(selectedCells),len(selectedCells)-emptyText,sum(selectedNumerical)),1 )
+	try:
+	    statusBar= wx.GetApp().frame.StatusBar
+	    statusBar.SetStatusText( wx.GetApp().translate(u"cells Selected: %.0f  count: %.0f  sum: %.4f ")%(len(selectedCells),len(selectedCells)-emptyText,sum(selectedNumerical)),1 )
+	except AttributeError:
+	    pass
 	evt.Skip()
 	
     def _cellSelectionChange( self, evt):
@@ -1178,8 +1198,11 @@ class NoteBookSheet(wx.Panel, object):
             texto= grid.GetCellValue( row, col)
         except wx._core.PyAssertionError:
             pass
-	formulaBar= wx.GetApp().frame.formulaBarPanel
-        formulaBar.value= texto
+	try:
+	    formulaBar= wx.GetApp().frame.formulaBarPanel
+	    formulaBar.value= texto
+	except AttributeError:
+	    pass
 	evt.Skip()
 	
     def _gridSetRenderer(self, grid):

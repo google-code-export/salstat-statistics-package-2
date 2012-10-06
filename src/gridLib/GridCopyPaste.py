@@ -7,7 +7,7 @@ Created on 27/10/2010
 -> adicion de cambio en la posicion del cursor cuando se realiza un cambio en el grid
 @author: Administrator
 '''
-
+__all__= ['PyWXGridEditMixin']
 import wx
 import wx.grid
 

@@ -68,7 +68,7 @@ from dialogs import SaveDialog, SaveOneGridDialog, VariablesFrame, DescriptivesF
 from dialogs import TransformFrame
 from dialogs import createPlotSelectionPanel
 from ntbSheet import NoteBookSheet
-from gridCellRenderers import floatRenderer #, AutoWrapStringRenderer
+from gridLib import floatRenderer #, AutoWrapStringRenderer
 from wx.combo import BitmapComboBox # translation control
 import wx.lib.langlistctrl as langlist
 

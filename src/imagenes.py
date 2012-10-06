@@ -1,7 +1,7 @@
 # references http://www.daniweb.com/code/snippet216634.html#
 # retorna un bitmap dado el nombre de la clase especifica
 # se modificara
-
+__all__ =['imageEmbed']
 from cStringIO import StringIO
 from base64 import b64decode, encodestring
 from os.path import exists
