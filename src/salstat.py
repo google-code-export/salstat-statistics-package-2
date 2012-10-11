@@ -368,7 +368,7 @@ class SalStat2App(wx.App):
     def OnInit(self):
         # getting the os type
         self.OSNAME = os.name
-        self.VERSION= '2.1 beta 3'
+        self.VERSION= '2.1 beta 4'
         self.missingvalue= missingvalue
         wx.SetDefaultPyEncoding( "utf-8")
         self.translate= translate
@@ -862,7 +862,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
         #add contents of menu
         dat1= (
             (translate(u"&File"),
-             ([translate(u"&New Data\tCtrl-N"),   NewIcon,    self.GoClearData,     wx.ID_NEW],
+             ([translate(u"&New Data\tCtrl-N"),   NewIcon,    self.tb1_NewPage,     wx.ID_NEW],
               [translate(u"&Open...\tCtrl-O"),    OpenIcon,   self.grid.LoadFile,    wx.ID_OPEN], # LoadXls
               [u"--"],
               [translate(u"&Save\tCtrl-S"),       SaveIcon,   self.grid.SaveXls,     wx.ID_SAVE],
@@ -965,7 +965,10 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
 	
     def tb1_LoadFile(self, evt):
 	self.grid.addPage( gridSize= (256,64))
-	self.grid.LoadFile(evt)
+	(HasLoad, SheetName)= self.grid.LoadFile(evt)
+	if not HasLoad:
+	    return
+	self.grid.changeLabel(newLabel= SheetName)
 	evt.Skip()
     def tb1_closePage(self, evt):
 	# check if there are pages
