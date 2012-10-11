@@ -58,7 +58,7 @@ Var vcredist2008set
 !insertmacro MUI_LANGUAGE SpanishInternational
 
 # Installer attributes
-OutFile "S2 V2.1 Beta 3 setup.exe"
+OutFile "S2 V2.1 Beta 4 setup.exe"
 InstallDir S2
 CRCCheck on
 XPStyle on
