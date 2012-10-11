@@ -299,7 +299,6 @@ class SimpleGrid( MyGridPanel):# wxGrid
         self.usedCols= ([], [],)
         # </p>
         self.m_grid.Bind(wx.grid.EVT_GRID_EDITOR_CREATED, self.onCellEdit)
-
         
     def setLog(self, log):
         self.log= log
@@ -418,7 +417,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
         return RowsUsed
 
     def SaveXlsAs(self, evt):
-        self.SaveXls(None, True)
+        return self.SaveXls(None, True)
 
     def SaveXls(self, *args):
         if len(args) == 1:
@@ -438,7 +437,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
                 if not self.path.endswith('.xls'):
                     self.path= self.path+'.xls'       
             else:
-                return
+                return (False, None)
             self.reportObj.path = self.path
         else:
             self.reportObj.path = self.path
@@ -462,7 +461,11 @@ class SimpleGrid( MyGridPanel):# wxGrid
             self.reportObj.writeByCols(result, self.NumSheetReport)
         self.reportObj.save()
         self.hasSaved = True
+	filename= os.path.split(self.path)[-1]
+	if len( filename) > 8:
+	    filename = filename[:8]
         print "The file %s was successfully saved!" % self.reportObj.path
+	return (True, filename)
 
     def LoadFile(self, evt):
         '''check the file type selected and redirect
@@ -481,7 +484,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
         
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
-            return
+            return (False, None)
         
         fileName= dlg.GetFilename()
         fullPath= dlg.Path 
@@ -537,19 +540,21 @@ class SimpleGrid( MyGridPanel):# wxGrid
         
         dlg = dialog(self, struct=[[bt1,bt2],[bt3]], settings= setting)
         if dlg.ShowModal() != wx.ID_OK:
-            return
+            return (False, None)
+	
         (sheetNameSelected, hasHeader)= dlg.GetValue()
         if sheetNameSelected == None:
-            return
+            return (False, None)
+	
         if not isinstance(sheetNameSelected, (str, unicode)):
-            print 'sheetNameSelected= ' + "'" + sheetNameSelected.__str__() + "'"
-        else:
-            print 'sheetNameSelected= ' + "'" + sheetNameSelected + "'"
+	    sheetNameSelected = sheetNameSelected.__str__()
+	
+        print 'sheetNameSelected= ' + "'" + sheetNameSelected + "'"
         print 'hasHeader= ' + hasHeader.__str__()
         dlg.Destroy()
         
         if not ( sheetNameSelected in sheetNames):
-            return
+            return (False, None)
         
         self._loadXls(sheetNameSelected= sheetNameSelected,
                       sheets= sheets,
@@ -565,6 +570,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
         print 'Importing  : %s successful'%filename
         self.hasChanged= True
         self.hasSaved=   True
+	return (True, sheetNameSelected)
         
     def _loadXls( self, *args,**params):
         sheets=         params.pop( 'sheets')
@@ -625,13 +631,13 @@ class SimpleGrid( MyGridPanel):# wxGrid
                 newValue = sheetSelected.cell_value( row, col)
                 if isinstance( newValue, (str, unicode)):
                     self.SetCellValue( reportRow, col, newValue)
-                elif sheetSelected.cell_type( row, col) in (2,3):
+                elif sheetSelected.cell_type( row, col) in ( 2, 3):
                     self.SetCellValue( reportRow, col, str( newValue).replace('.', DECIMAL_POINT))
                 else:
                     try:
                         self.SetCellValue (reportRow, col, str(newValue))
                     except:
-                        print  "Could not import the row,col (%i,%i)" % (row+1,col+1)
+                        print  "Could not import the row,col (%i,%i)" % (row+1, col+1)
                         
     def generateLabel( self, colNumber):
         colNumber+= 1
@@ -908,7 +914,14 @@ class NoteBookSheet(wx.Panel, object):
         self.currentPage = None
         self.pageNames= dict()
         self.Layout()
-        
+	self.numberPage= self._generador()
+	
+    def _generador(self):
+	i= 1
+	while True:
+	    yield i
+	    i+= 1
+	    
     # implementing a wrap to the current grid
     def __getattribute__( self, name):
         '''wraps the funtions to the grid
@@ -919,6 +932,7 @@ class NoteBookSheet(wx.Panel, object):
             if self.GetPageCount() != 0:
                 if str(type(self.currentPage)) == "<class 'wx._core._wxPyDeadObject'>":
                     self.currentPage == None
+		    self.currentPageNumber= None
                     return
                 currGrid=  self.currentPage
                 return currGrid.__getattribute__(name)
@@ -940,7 +954,8 @@ class NoteBookSheet(wx.Panel, object):
         return page.getHeader()
 
     def OnNotebookPageChange( self,evt):
-        self.currentPage= self.m_notebook.GetPage(evt.Selection)
+        self.currentPage= self.m_notebook.GetPage( evt.Selection)
+	self.currentPageNumber= evt.Selection
 
     def _cellSelectionChange( self, event):
         if self.GetPageCount() == 0:
@@ -1250,7 +1265,38 @@ class NoteBookSheet(wx.Panel, object):
 	self.pageNames.pop( pageName)
         self.m_notebook.DeletePage( pageNumber)
         
-    
+    def changeLabel(self, page= None, newLabel= None):
+	if self.GetPageCount() < 1:
+	    return
+	
+	if page== None:
+	    # check for the current sheet
+	    pageNumber= self.currentPageNumber
+	    
+	if not isinstance(pageNumber, (int, long, float, ndarray)):
+	    return
+	pageNumber= int(pageNumber)
+	if newLabel== None:
+	    newlabel= self.numberPage.next().__str__()
+	
+	elif not isinstance(newLabel, (str, unicode)):
+	    return
+	
+	newLabel= newLabel.replace(' ', '')
+	if newLabel== '':
+	    newlabel= self.numberPage.next().__str__()
+	
+	self.m_notebook.SetPageText(pageNumber, newLabel)
+	
+    def SaveXlsAs(self, evt):
+	currGrid=  self.currentPage
+	if currGrid == None:
+	    return
+	(HasSaved, fileName)= currGrid.__getattribute__( 'SaveXlsAs')(evt)
+	if not HasSaved:
+	    return
+	self.changeLabel( newLabel= fileName)
+	
 class Test(wx.Frame):
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size=(480, 520))
