@@ -905,7 +905,7 @@ class NoteBookSheet(wx.Panel, object):
         self.m_notebook = wx.aui.AuiNotebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,
 	                                      wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|
 	                                      wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_BOTTOM|
-	                                      wx.aui.AUI_NB_TAB_SPLIT)
+	                                      wx.aui.AUI_NB_TAB_SPLIT|wx.aui.AUI_NB_CLOSE_BUTTON)
         self.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChange)
         bSizer.Add( self.m_notebook, 1, wx.EXPAND |wx.ALL, 5 )
         self.SetSizer( bSizer )
