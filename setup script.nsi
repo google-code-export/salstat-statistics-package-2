@@ -10,7 +10,7 @@ SetCompressor /SOLID LZMA
 !define SRCPATH "src"
 !define REGKEY "SOFTWARE\$(^Name)"
 !define VERSION 2.1
-!define COMPANY "Sebastián López Buriticá"
+!define COMPANY "Sebastian Lopez Buritica"
 !define URL http://selobu.blogspot.com
 # to check if the app is running
 !define WNDCLASS "WindowClassOfYourApplication"
@@ -18,10 +18,10 @@ SetCompressor /SOLID LZMA
 
 # MultiUser Symbol Definitions
 !define MULTIUSER_EXECUTIONLEVEL Standard
+!define MULTIUSER_INSTALLMODE_INSTDIR_REGISTRY_VALUE "Path"
 !define MULTIUSER_INSTALLMODE_COMMANDLINE
 !define MULTIUSER_INSTALLMODE_INSTDIR $(^Name)
 !define MULTIUSER_INSTALLMODE_INSTDIR_REGISTRY_KEY "${REGKEY}"
-!define MULTIUSER_INSTALLMODE_INSTDIR_REGISTRY_VALUE "Path"
 
 # MUI Symbol Definitions
 !define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install-colorful.ico"
@@ -48,7 +48,7 @@ Var vcredist2008set
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_STARTMENU Application $StartMenuGroup
 !insertmacro MUI_PAGE_INSTFILES
-!insertmacro MUI_PAGE_COMPONENTS
+# !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_FINISH
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
@@ -57,8 +57,11 @@ Var vcredist2008set
 !insertmacro MUI_LANGUAGE English
 !insertmacro MUI_LANGUAGE SpanishInternational
 
+# display a window to be as an user admin
+RequestExecutionLevel admin
+
 # Installer attributes
-OutFile "S2 V2.1 Beta 4 setup.exe"
+OutFile "S2 V2.1 Beta 5 setup.exe"
 InstallDir S2
 CRCCheck on
 XPStyle on
@@ -74,15 +77,20 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} LegalCopyright ""
 InstallDirRegKey HKLM "${REGKEY}" Path
 ShowUninstDetails show
 
-Section -Main Section2
+Section "-Main" SI_1
+    # install vc++
     call vcredist2008installer
+    # icons
     SetOutPath $INSTDIR
     SetOverwrite on
+    File /r ${SRCPATH}\salstat.ico
+    File /r ${SRCPATH}\salstat.icns
+    # main files including translation files
     File /r ${CURRPATH}\*
-    SetOutPath $INSTDIR\locale
-    File /r ${SRCPATH}\locale\*
+    # niceplot required images
     SetOutPath $INSTDIR\nicePlot\images
     FIle /r ${SRCPATH}\nicePlot\images\*
+    # shortcuts
     SetOutPath $SMPROGRAMS\$StartMenuGroup
     CreateShortcut "$SMPROGRAMS\$StartMenuGroup\$(^Name).lnk" "$INSTDIR\salstat.exe" \
         "" "$INSTDIR\salstat.ico" 0 SW_SHOWNORMAL # "" "Paquete de e2stadistica"
@@ -90,17 +98,18 @@ Section -Main Section2
     SetOutPath $DESKTOP
     CreateShortcut "$DESKTOP\$(^Name).lnk" "$INSTDIR\salstat.exe" "" \
                 "$INSTDIR\salstat.ico" 0
+    # registry keys
     WriteRegStr HKLM "${REGKEY}\Components" Main 1
+    # deleting cv++ installer
+    RmDir /r  $INSTDIR\Prerequisites
 SectionEnd
 
-Section "src" Section3
+Section "-source code" SI_2
      SetOutPath $INSTDIR\src
      SetOverwrite on
      File /r ${SRCPATH}\*.py
      File /r ${SRCPATH}\*.txt
      File /r ${SRCPATH}\*.py
-     File /r ${SRCPATH}\salstat.icns
-     File /r ${SRCPATH}\salstat.ico
      File /r ${SRCPATH}\salstat.icon.jpg
      SetOutPath $INSTDIR\src\nicePlot
      File /r ${SRCPATH}\nicePlot\*.py
@@ -111,12 +120,12 @@ Section "src" Section3
      SetOutPath $INSTDIR\src\statlib
      File /r ${SRCPATH}\statlib\*.py
      SetOutPath $INSTDIR\src\locale
-     File /r ${SRCPATH}\locale\*.*
+     File /r ${SRCPATH}\locale\*.mo
      SetOutPath $SMPROGRAMS\$StartMenuGroup
      CreateShortcut "$SMPROGRAMS\$StartMenuGroup\src.lnk" "$INSTDIR\src\"
 SectionEnd
 
-Section "script examples" Section4
+Section "-script examples" SI_3
      SetOutPath $INSTDIR\scripts
      SetOverwrite on
      File /r "script examples\*.txt"
@@ -155,10 +164,12 @@ done${UNSECTION_ID}:
     Pop $R0
 !macroend
 
-# Uninstaller sections
+########################
+# Uninstaller sections #
+########################
 Section /o -un.Main UNSEC0000
     SetOverwrite on
-    Delete $DESKTOP\$(^Name).lnk ;/REBOOTOK
+    Delete $DESKTOP\$(^Name).lnk
     RmDir /r $SMPROGRAMS\$StartMenuGroup
     RmDir /r  $INSTDIR\help
     RmDir /r  $INSTDIR\src
@@ -210,7 +221,7 @@ FunctionEnd
 # Installer functions
 Function .onInit
     # check if the app is running
-    #FindWindow $0 "${WNDCLASS}" "${WNDTITLE}"
+    #FindWindow $0 "${WNDCLASS}" "${S2}"
     #StrCmp $0 0 unistall
     #  MessageBox MB_ICONSTOP|MB_OK "The application you are trying to remove is running. Close it and try again."
     #    Abort
