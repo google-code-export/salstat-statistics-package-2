@@ -4,10 +4,11 @@ Created on 16/05/2012
 @author: USUARIO
 '''
 '''Easily create a dialog'''
+__all__= ['Dialog']
 
 import wx
 from dialogs import CheckListBox, NumTextCtrl, makePairs, IntTextCtrl
-from slbTools import isnumeric
+from slbTools import isnumeric, getPath
 
 def translate(a):
     return a
@@ -17,11 +18,59 @@ def _siguiente():
         i+= 1
         yield str(i)
 
+class FilePath( wx.Panel, object ):
+    def __init__( self, parent, id , *args, **params):
+	wx.Panel.__init__ ( self, parent, id,
+	                    pos = wx.DefaultPosition,
+	                    size = wx.Size( -1,-1 ),
+	                    style = wx.TAB_TRAVERSAL )
+	if len(args) > 0:
+	    self.path= args[0]
+	else:
+	    self.path= None
+	bSizer1 = wx.BoxSizer( wx.HORIZONTAL )
+	self.txtCtrl = wx.TextCtrl( self, wx.ID_ANY,
+	                            wx.EmptyString, wx.DefaultPosition,
+	                            wx.Size( 150,-1 ), 0 )
+	bSizer1.Add( self.txtCtrl, 0, wx.ALL, 5 )
+	if self.path:
+	    self.txtCtrl.SetValue( self.path)
+	self.button = wx.Button( self, wx.ID_ANY, u'\u2026',
+	                          wx.DefaultPosition, wx.DefaultSize,
+	                          wx.BU_EXACTFIT )
+	bSizer1.Add( self.button, 0, wx.ALL, 5 )
+	self.SetSizer( bSizer1 )
+	self.Layout()
+	self.Bind(wx.EVT_BUTTON, self._onSelectFile, id= self.button.GetId())
+	self.txtCtrl.Bind( wx.EVT_TEXT, self._textChange)
+	
+    def _textChange(self, evt):
+	if self.path== None:
+	    txt= (u'')
+	else:
+	    txt= self.path
+	self.txtCtrl.SetValue(txt)
+	evt.Skip()
+    
+    def _onSelectFile(self, evt):
+	self.path= getPath()
+	
+	if self.path== None:
+	    txt= (u'')
+	else:
+	    txt= self.path
+	self.txtCtrl.SetValue(txt)
+	evt.Skip()
+	
+    def GetValue(self ):
+	return self.path
+    
 class Dialog ( wx.Dialog, wx.Frame ):
     ALLOWED= ['StaticText',   'TextCtrl',     'Choice',
               'CheckListBox', 'StaticLine',   'RadioBox',
               'SpinCtrl',     'ToggleButton', 'NumTextCtrl',
-              'CheckBox',     'makePairs',    'IntTextCtrl']
+              'CheckBox',     'makePairs',    'IntTextCtrl',
+              'FilePath']
     def __init__( self, parent = None , settings= dict(), struct = []):
         '''Dialog( parent, settings, struct)
 
@@ -38,7 +87,8 @@ class Dialog ( wx.Dialog, wx.Frame ):
         allowed controls: 'StaticText',   'TextCtrl',     'Choice',
                           'CheckListBox', 'StaticLine',   'RadioBox',
                           'SpinCtrl',     'ToggleButton', 'NumTextCtrl',
-                          'CheckBox',     'makePairs',    'IntTextCtrl'
+                          'CheckBox',     'makePairs',    'IntTextCtrl',
+			  'FilePath'
 
         struct example:
 
@@ -76,7 +126,8 @@ class Dialog ( wx.Dialog, wx.Frame ):
         self.ALLOWED= ['StaticText',   'TextCtrl',     'Choice',
                        'CheckListBox', 'StaticLine',   'RadioBox',
                        'SpinCtrl',     'ToggleButton', 'NumTextCtrl',
-                       'CheckBox',     'makePairs',    'IntTextCtrl']
+                       'CheckBox',     'makePairs',    'IntTextCtrl',
+	               'FilePath']
         self.ctrlNum = _siguiente()
         self.sizerNum= _siguiente()
 
@@ -127,7 +178,8 @@ class Dialog ( wx.Dialog, wx.Frame ):
         self._allow2get= ['TextCtrl','Choice',
                       'CheckListBox','RadioBox',
                       'SpinCtrl','ToggleButton','NumTextCtrl',
-                      'CheckBox', 'makePairs','IntTextCtrl']
+                      'CheckBox', 'makePairs','IntTextCtrl', 
+	              'FilePath']
         
         bSizer1.Add( self.m_scrolledWindow1, 1, wx.EXPAND, 5 )
         
@@ -213,11 +265,7 @@ class Dialog ( wx.Dialog, wx.Frame ):
                         data.extend((args))
                         args= data
                     elif key == 'CheckBox':
-                        try:
-                            args.extend(data[:2])  ## posible there is a trouble here
-                            args.append(0)
-                        except NameError:
-                            args= [0]
+                        pass
                     if key == 'CheckListBox':
                         self.ctrls.append((key, CheckListBox(self.m_scrolledWindow1, wx.ID_ANY, *args)))
                     else:
@@ -238,6 +286,15 @@ class Dialog ( wx.Dialog, wx.Frame ):
                     currSizer.Add(currCtrl, 0, characters , 5)
                 elif key == 'makePairs':
                     self.ctrls.append((key, makePairs(self.m_scrolledWindow1, wx.ID_ANY, *args)))
+                    currCtrl= self.ctrls[-1][1]
+                    currSizer.Add(currCtrl, 0, characters , 5)
+                    currCtrl.Fit()
+                    # limiting the maximun size of the ctrl
+                    maxAllowedSize= (300, 350)
+                    currCtrl.SetSize(wx.Size(min([currCtrl.GetSize()[0], maxAllowedSize[0]]),
+                                     min([currCtrl.GetSize()[1], maxAllowedSize[1]])))
+		elif key == 'FilePath':
+		    self.ctrls.append((key, FilePath( self.m_scrolledWindow1, wx.ID_ANY, *args)))
                     currCtrl= self.ctrls[-1][1]
                     currSizer.Add(currCtrl, 0, characters , 5)
                 else:
@@ -337,6 +394,7 @@ class _example( wx.Frame ):
         bt8= ('SpinCtrl',     [ 0, 100, 5 ]) # (min, max, start)
         bt9= ('ToggleButton', ['toggle'])
         bt10= ['makePairs',[['column '+str(i) for i in range(2)],['opt1','opt2'],5]]
+	bt11= ['FilePath', []]
         
         structure= list()
         structure.append( [bt6, bt2] )
@@ -347,6 +405,7 @@ class _example( wx.Frame ):
         structure.append( [bt7, ])
         structure.append( [bt8, ])
         structure.append( [bt10, ])
+	structure.append( [bt11, ])
 
         dlg= Dialog(self, settings = dic, struct= structure)
         if dlg.ShowModal() == wx.ID_OK:

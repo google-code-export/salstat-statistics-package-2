@@ -12,7 +12,7 @@ import wx.grid
 from slbTools import isnumeric, isiterable
 from gridLib import floatRenderer
 import wx.aui
-from numpy import ndarray, ravel
+from numpy import ndarray, ravel, genfromtxt
 import traceback
 from slbTools import ReportaExcel
 import xlrd
@@ -470,8 +470,9 @@ class SimpleGrid( MyGridPanel):# wxGrid
     def LoadFile(self, evt):
         '''check the file type selected and redirect
         to the corresponding load function'''
-        wildcard= "Excel 2003 File (*.xls)|*.xls|" \
-            "Txt file (*.txt)|*.txt|"    \
+        wildcard=  "Suported files (*.txt;*.csv;*.xls)|*.txt;*.csv;*.xls|" \
+	    "Excel 2003 File (*.xls)|*.xls|" \
+            "Txt file (*.txt)|*.txt|" \
             "Csv file (*.csv)|*.csv"        
         dlg = wx.FileDialog(self, "Load Data File", "","",
                             wildcard= wildcard,
@@ -506,18 +507,73 @@ class SimpleGrid( MyGridPanel):# wxGrid
         
     def LoadCsvTxt(self, fullPath):
         '''use the numpy library to load the data'''
-        btn1= []
-        btn2= []
-        btn3= []
-        btn4= []
+        # comments='#', delimiter=None, skiprows=0, skip_header=0, skip_footer=0, converters=None, missing='', missing_values=None, filling_values=None, usecols=None, names=None, excludelist=None, deletechars=None, replace_space='_', autostrip=False, case_sensitive=True, defaultfmt='f%i', unpack=None, usemask=False, loose=True, invalid_raise=True
+        btn1= ['FilePath',    [fullPath] ]
+	txt1= ['StaticText',  ['comments symbol'] ]
+        btn2= ['TextCtrl',    [] ]
+	txt2= ['StaticText',  ['delimiter symbol']]
+	txt3= ['StaticText',  ['Number of header lines to skip']]
+	btn3= ['IntTextCtrl', []]
+	txt4= ['StaticText',  ['Number of footer lines to skip']]
+	btn4= ['CheckBox',    ['Has Heater']]
+	
         structure= []
-        structure.append()
-        setting = {'Title': 'Select a sheet',
-                   '_size':  wx.Size(250,220)}
+        structure.append([btn1 ])
+	structure.append([btn2, txt1])
+	structure.append([btn2, txt2])
+	structure.append([btn3, txt3])
+	structure.append([btn3, txt4])
+	structure.append([btn4])
+	
+        setting = {'Title': 'Select a sheet'}
         
         dlg = dialog(self, struct= structure, settings= setting)
         if dlg.ShowModal() != wx.ID_OK:
-            return
+	    dlg.Destroy()
+            return False, None
+		
+        (f_name, comments, delimiter, header2skip, footer2skip, hasHeader)= dlg.GetValue()
+	if delimiter== u'':
+	    delimiter= None
+	    
+	if header2skip == None:
+	    header2skip= 0
+	    
+	if footer2skip == None:
+	    footer2skip= 0
+	    
+	if comments == u'':
+	    comments= '#'
+	    
+        dlg.Destroy()
+	# reading the data
+	data = genfromtxt(f_name, comments= comments,
+	                    dtype= None,
+	                    delimiter=  delimiter,
+	                    skip_header= header2skip,
+	                    skip_footer= footer2skip)
+	# putting the data inito the Data Entry Panel
+	if hasHeader:
+	    initRow= 1
+	else:
+	    initRow= 0
+	    
+	grid= wx.GetApp().inputGrid    
+	for col in range(data.shape[1]):
+	    grid.PutCol( col, data[initRow:,col])
+	    
+	# Renaming the column of the Data Entry Panel
+	if hasHeader:
+	    headerData= [data[0, col] for col in range(data.shape[1]) ]
+	    for pos,x in enumerate(headerData):
+		if not isinstance( x, (str, unicode)):
+		    x.__str__()
+		# writing the data
+		grid.SetColLabelValue(pos, x)
+
+        self.hasChanged= True
+        self.hasSaved=   True
+	return (True, os.path.split(f_name)[-1])
     
     def LoadXls(self, fullPath):
         print 'import xlrd'
