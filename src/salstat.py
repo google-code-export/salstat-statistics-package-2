@@ -78,6 +78,7 @@ import scipy
 import plotFunctions
 import statFunctions
 
+
 APPNAME= 'S2'
 
 inits= {}    # dictionary to hold the config values
@@ -735,6 +736,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
 
     def _sendObj2Shell(self, shell):
         # making available useful object to the shell
+	from slbTools import getPath
         env= {'cls':        self.logPanel.clearLog,
               'grid':       self.grid,
               'show':       self.logPanel.write,
@@ -746,7 +748,8 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
               'OK':         wx.ID_OK,
               'homogenize': homogenize,
               'scipy':      scipy,
-              'stats':      stats
+              'stats':      stats,
+	      'getPath':    getPath,
               }
 ##'sm':         sm, stats models willbe included later
 #'stats': self.stats,
@@ -967,6 +970,7 @@ class MainFrame(wx.Frame, wx.FileDropTarget):
 	self.grid.addPage( gridSize= (256,64))
 	(HasLoad, SheetName)= self.grid.LoadFile(evt)
 	if not HasLoad:
+	    # delete the current sheet
 	    return
 	self.grid.changeLabel(newLabel= SheetName)
 	evt.Skip()
