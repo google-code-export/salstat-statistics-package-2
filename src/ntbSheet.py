@@ -268,7 +268,8 @@ class MyFileDropTarget(wx.FileDropTarget):
         
         # selecting just the first filename
         filename= filenames[0]
-        self.window.LoadXls(filename)
+        # self.window.LoadXls(filename)
+	self.window.LoadFile(evt= None, fullpath= filename)
             
 class SimpleGrid( MyGridPanel):# wxGrid
     def __init__( self, parent, log= None, size= (800,20)):
@@ -467,7 +468,16 @@ class SimpleGrid( MyGridPanel):# wxGrid
         print "The file %s was successfully saved!" % self.reportObj.path
 	return (True, filename)
 
-    def LoadFile(self, evt):
+    def LoadFile(self, evt, **params):
+	try:
+	    fullpath= params.pop('fullpath')
+	    if fullpath.endswith('xls'):
+		return self.LoadXls(fullpath)
+	    elif fullpath.endswith('csv') or fullpath.endswith('txt'):
+		return self.LoadCsvTxt(fullpath)
+	    
+	except KeyError:
+	    pass
         '''check the file type selected and redirect
         to the corresponding load function'''
         wildcard=  "Suported files (*.txt;*.csv;*.xls)|*.txt;*.csv;*.xls|" \

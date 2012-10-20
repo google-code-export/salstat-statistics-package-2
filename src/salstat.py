@@ -449,7 +449,7 @@ class SalStat2App(wx.App):
         if filterIndex == '.xls':
             return self.frame.grid.LoadXls(fullPath)
         elif filterIndex in ('.txt', '.csv'):
-            return self.frame.grid.loadCsvTxt(fullPath)
+            return self.frame.grid.LoadCsvTxt(fullPath)
         else:
             self.frame.logPanel.write(translate(u"The file %s could not be opened. ")%filename +
                                       translate(u"Please check file type and extension!") )
@@ -584,11 +584,11 @@ class Grids(NoteBookSheet):
 	            
 #---------------------------------------------------------------------------
 # This is the main interface of application
-class MainFrame(wx.Frame, wx.FileDropTarget):
+class MainFrame(wx.Frame): #  wx.FileDropTarget
     def __init__(self, parent, appname ):
         self.path= None
         # to allow the user to drop allowed files into the Data Entry Panel
-        wx.FileDropTarget.__init__( self)
+        # wx.FileDropTarget.__init__( self)
         self.translate= translate
         self.window= self
 
