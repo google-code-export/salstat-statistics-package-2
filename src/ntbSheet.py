@@ -525,7 +525,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
 	txt3= ['StaticText',  ['Number of header lines to skip']]
 	btn3= ['IntTextCtrl', []]
 	txt4= ['StaticText',  ['Number of footer lines to skip']]
-	btn4= ['CheckBox',    ['Has Heater']]
+	btn4= ['CheckBox',    ['Has Header']]
 	
         structure= []
         structure.append([btn1 ])
