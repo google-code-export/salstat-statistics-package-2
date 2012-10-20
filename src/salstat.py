@@ -446,7 +446,7 @@ class SalStat2App(wx.App):
         self.BringWindowToFront()
         junk, filterIndex = os.path.splitext(filename)
         fullPath=filename
-        if filterIndex == '.xls':
+        if filterIndex in ('.xls', '.xlsx'):
             return self.frame.grid.LoadXls(fullPath)
         elif filterIndex in ('.txt', '.csv'):
             return self.frame.grid.LoadCsvTxt(fullPath)

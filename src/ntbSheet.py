@@ -471,7 +471,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
     def LoadFile(self, evt, **params):
 	try:
 	    fullpath= params.pop('fullpath')
-	    if fullpath.endswith('xls'):
+	    if fullpath.endswith('xls') or fullpath.endswith('xlsx'):
 		return self.LoadXls(fullpath)
 	    elif fullpath.endswith('csv') or fullpath.endswith('txt'):
 		return self.LoadCsvTxt(fullpath)
@@ -480,7 +480,9 @@ class SimpleGrid( MyGridPanel):# wxGrid
 	    pass
         '''check the file type selected and redirect
         to the corresponding load function'''
-        wildcard=  "Suported files (*.txt;*.csv;*.xls)|*.txt;*.csv;*.xls|" \
+        wildcard=  "Suported files (*.txt;*.csv;*.xls;*.xlsx)|*.txt;*.csv;*.xls;*.xlsx|" \
+	    "Excel Files (*xlsx;*xlsm;*.xls)|*.xlsx;*.xlsm;*.xls|"\
+	    "Excel 2007 File (*xlsx)|*.xlsx|"\
 	    "Excel 2003 File (*.xls)|*.xls|" \
             "Txt file (*.txt)|*.txt|" \
             "Csv file (*.csv)|*.csv"        
@@ -501,10 +503,9 @@ class SimpleGrid( MyGridPanel):# wxGrid
         fullPath= dlg.Path 
         junk, filterIndex = os.path.splitext(fileName)
         try:
-            if filterIndex == '.xls':
+            if filterIndex in ('.xls','.xlsx',):
                 return self.LoadXls(fullPath)
-            
-            elif filterIndex in ('.txt', '.csv'):
+            elif filterIndex in ('.txt', '.csv',):
                 return self.LoadCsvTxt(fullPath)
         except (Exception, TypeError) as e:
             traceback.print_exc( file = self.log)
@@ -513,7 +514,8 @@ class SimpleGrid( MyGridPanel):# wxGrid
             self.hasSaved= True
             # emptying the undo - redo buffer
             self.emptyTheBuffer()
-            evt.Skip()
+	    if evt != None:
+		evt.Skip()
         
     def LoadCsvTxt(self, fullPath):
         '''use the numpy library to load the data'''
