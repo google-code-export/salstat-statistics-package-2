@@ -18,7 +18,7 @@ from slbTools import ReportaExcel
 import xlrd
 from easyDialog import Dialog as dialog
 import os
-
+DEFAULT_FONT_SIZE = 12
 DECIMAL_POINT = '.' # default value
 
 def numPage():
@@ -273,6 +273,8 @@ class MyFileDropTarget(wx.FileDropTarget):
             
 class SimpleGrid( MyGridPanel):# wxGrid
     def __init__( self, parent, log= None, size= (800,20)):
+	self.rowsizes= dict()
+	self.colsizes= dict()
         self.NumSheetReport = 0
         if log == None:
             try:
@@ -286,6 +288,8 @@ class SimpleGrid( MyGridPanel):# wxGrid
         # allowing drop files into the sheet
         dropTarget = MyFileDropTarget( self)
         self.m_grid.SetDropTarget(dropTarget)
+	self.grid = self.m_grid # adding some compatibility
+	self.m_grid.zoom= 1.0
         self.moveTo = None
         if wx.Platform == "__WXMAC__":
             self.SetGridLineColour(wx.BLACK)
@@ -300,7 +304,66 @@ class SimpleGrid( MyGridPanel):# wxGrid
         self.usedCols= ([], [],)
         # </p>
         self.m_grid.Bind(wx.grid.EVT_GRID_EDITOR_CREATED, self.onCellEdit)
-        
+	self.m_grid.Bind(wx.EVT_MOUSEWHEEL, self.OnMouseWheel)
+	
+    def zoom_rows(self):
+        """Zooms grid rows"""
+        for rowno in xrange(self.grid.GetNumberRows()):
+            if rowno not in self.rowsizes.keys():
+                self.rowsizes[rowno] = self.GetRowSize(rowno)
+             
+            self.grid.SetRowSize(rowno, self.rowsizes[rowno]*self.m_grid.zoom)
+         
+        if "label" not in self.rowsizes:
+            self.rowsizes["label"] = self.GetRowLabelSize()
+        self.SetRowLabelSize(self.rowsizes["label"] * self.m_grid.zoom)
+         
+    def zoom_cols(self):
+        """Zooms grid columns"""
+         
+        tabno = 1 #self.current_table
+        for colno in xrange(self.grid.GetNumberCols()):
+            if colno not in self.colsizes.keys():
+                self.colsizes[colno] = self.grid.GetColSize(colno)
+             
+            self.grid.SetColSize(colno, self.colsizes[colno]*self.m_grid.zoom)
+         
+        if "label" not in self.colsizes:
+            self.colsizes["label"] = self.grid.GetColLabelSize()
+        self.grid.SetColLabelSize(self.colsizes["label"] * self.m_grid.zoom)
+     
+    def zoom_labels(self):
+        """Zooms grid labels"""
+         
+        labelfont = self.grid.GetLabelFont()
+        labelfont.SetPointSize(max(1, int(DEFAULT_FONT_SIZE * self.m_grid.zoom)))
+        self.SetLabelFont(labelfont)
+	
+    def OnMouseWheel(self, event):
+        """Event handler for mouse wheel actions
+         
+        Invokes zoom when mouse when Ctrl is also pressed
+         
+        """
+         
+        if event.ControlDown():
+            zoomstep = 0.05 * event.LinesPerAction
+             
+            if event.WheelRotation > 0:
+                self.m_grid.zoom += zoomstep
+            else:
+                if self.m_grid.zoom > 0.6:
+                    self.m_grid.zoom -= zoomstep
+             
+ 
+            self.zoom_rows()
+            self.zoom_cols()
+            self.zoom_labels()
+             
+            self.ForceRefresh()
+        else:
+            event.Skip()
+	    
     def setLog(self, log):
         self.log= log
     def onCellChanged(self, evt):

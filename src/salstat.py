@@ -15,7 +15,6 @@ import wx.grid
 # import  wx.lib.multisash as sash
 # import  wx.gizmos as gizmos
 # -----------------
-
 import wx.html
 import wx.lib.agw.aui as aui
 
@@ -960,12 +959,11 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         self.Bind( wx.EVT_MENU, self.tb1_Undo,          id= self.bt11.GetId())
         self.Bind( wx.EVT_MENU, self.tb1_Redo,          id= self.bt12.GetId())
 	self.Bind( wx.EVT_MENU, self.tb1_closePage,     id= self.bt13.GetId())
-
         # controlling the expansion of the notebook
         self.grid.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_BG_DCLICK, self._OnNtbDbClick )
         self.Bind( wx.EVT_CLOSE, self.EndApplication )
         self.sig= self.siguiente()
-	
+	    
     def tb1_LoadFile(self, evt):
 	self.grid.addPage( gridSize= (256,64))
 	(HasLoad, SheetName)= self.grid.LoadFile(evt)
