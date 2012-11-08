@@ -1,0 +1,1 @@
+from os import path# full path to the filepath= r'd:\reporte.txt' # reading the data from the filedata = numpy.genfromtxt(path, delimiter=',')nrows, ncols= data.shapefor col in range(ncols):	grid.PutCol(col, data[col,:])
