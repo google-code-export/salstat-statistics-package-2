@@ -223,7 +223,7 @@ class formulaBar ( aui.AuiToolBar ):
 
         #self.m_toggleBtn1.Bind( wx.EVT_TOGGLEBUTTON, self._ontogle )
         self.originalSize= self.Size
-        self.value= u'texto'
+        self.value= u'text'
 	
     @property
     def value(self):
@@ -231,7 +231,7 @@ class formulaBar ( aui.AuiToolBar ):
     @value.setter
     def value(self, texto):
         if not isinstance( texto, (str, unicode)):
-            raise StandardError("only acepted numerical values")
+            raise StandardError("only accept numerical values")
         self._text= texto
         self.textCtrl1.SetValue(texto)
 #---------------------------------------------------------------------------
@@ -418,8 +418,7 @@ class SalStat2App(wx.App):
         else:   # mac platform
             self.frame.Maximize()
             self.frame.Show()
-        # check if the len of sys.argv and trying to open a
-        # file for all platforms
+        # check the len of sys.argv and try to open a file for all platforms
         if len(sys.argv) > 1:
             for f in  sys.argv[1:]:
                 self.OpenFileMessage(f)
@@ -592,7 +591,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         self.window= self
 
         #-----
-        # setting an apropiate size to the frame
+        # setting an appropriate size to the frame
         dp= wx.Display()
         ca= dp.GetClientArea()
         wx.Frame.__init__(self,parent,-1,"S2",
@@ -633,7 +632,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         self.answerPanel= NoteBookSheet(self, fb = self.formulaBarPanel)
         self.answerPanel2= ScriptPanel(self, self.logPanel)
         #---------------------------g-----------------
-        # Redirecting the error messages and the std outpout to the logPanel
+        # Redirecting the error messages and the std output to the logPanel
         sys.stderr= self.logPanel
         sys.stdout= self.logPanel
         self.scriptPanel=  wx.py.crust.Shell( self)
@@ -708,7 +707,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
                            PaneBorder( False ).CloseButton( True ).MinSize( wx.Size( 240,-1 )))
 
         self.currPanel = None
-        # allowing the shell acces to the selected objects 
+        # allowing the shell access to the selected objects
         self._sendObj2Shell(self.scriptPanel)
 
         self._BindEvents()
@@ -750,7 +749,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
               'stats':      stats,
 	      'getPath':    getPath,
               }
-##'sm':         sm, stats models willbe included later
+##'sm':         sm, stats models will be included later
 #'stats': self.stats,
 #'statistics':statistics,
 
@@ -773,6 +772,8 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         RedoIcon =   imag.edit_redo()
         closePage=   imag.cancel()
 
+        # Using versions of wx Widgets prior to 2.9 are known to cause problems since we now depend on 2.9 features
+        # going forward
         if wx.version() < "2.9":
             tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
                                 style = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
@@ -798,28 +799,28 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         self.bt10= tb1.AddSimpleTool(95, translate(u"OnlineHelp"), HelpIcon, translate(u"Online Help"))
         self.bt13= tb1.AddSimpleTool(100, translate(u"Close"), closePage, translate(u"Close Current Page"))
 
-        # to the languaje
+        # to the language
         language = wx.GetApp().GetPreferences( "Language")
         if not language:
             language = "Default"
 
         self.languages= LangListCombo( tb1 , language)
-        self.translateBtn= tb1.AddControl( self.languages, label= "Languaje")
+        self.translateBtn= tb1.AddControl( self.languages, label= "Language")
 
         tb1.SetToolBitmapSize( (24,24))
         tb1.Realize()
 
-        self.languages.Bind( wx.EVT_COMBOBOX, self._changeLanguaje) # id= self.languages.GetId()
+        self.languages.Bind( wx.EVT_COMBOBOX, self._changeLanguage) # id= self.languages.GetId()
         return tb1
 
-    def _changeLanguaje(self, evt):
+    def _changeLanguage(self, evt):
         allPreferences= dict()
         allPreferences["Language"] = self.languages.GetValue()
-        print "you have to restart te app to see the changes"
+        print "you have to restart the app to see the changes"
         wx.GetApp().SetPreferences(allPreferences)
 
     def _autoCreateMenu(self, module, twoGraph = False):
-        # automatically creates a menu related with an specified module
+        # automatically creates a menu related with a specified module
         groups= module.__all__
         subgroup= list()
         for group in groups:
@@ -938,8 +939,10 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
 
         if wx.Platform == "__WXMAC__":
             wx.GetApp().SetMacHelpMenuTitleName(translate(u"&Help"))
-            # Allow spell checking in cells
-            # TODO Still need to add this to the Edit menu once we add Mac menu options
+            # Allow spell checking in cells. While enabled by a wx configuration, this is done by Mac OS X, and appears
+            # to have been deprecated by Apple in OS X Mountain Lion according to wxPython Devs. It had been left in
+            # since it is still useful for pre-Mountain Lion users. It appears to have been replaced at the OS X level
+            # by voice entry (which works well using Siri!)
             wx.SystemOptions.SetOptionInt(u"mac.textcontrol-use-spell-checker", 1)
 
     def _BindEvents(self):
@@ -979,7 +982,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         if self.grid.hasSaved:
             self.grid.delPage()
         else:
-            # checking if there is a data to be saved
+            # checking if there is data to be saved
             if len(self.grid.GetUsedCols()[0]) != 0:
                 win = SaveOneGridDialog(self.grid)
                 win.Show(True)
@@ -1103,7 +1106,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
 
     def GoFindDialog(self, evt):
         # Shows the find & replace dialog
-        # NOTE - this doesn"t appear to work on the grid, so I might be missing something...
+        # NOTE - this doesn't appear to work on the grid, so I might be missing something...
         data = wx.FindReplaceData()
         dlg = wx.FindReplaceDialog(self.grid, data, translate(u"Find and Replace"), \
                                    wx.FR_REPLACEDIALOG)
@@ -1246,7 +1249,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
             wx.GetApp().frame.Destroy()
             return
         if self.grid.hasSaved == False:
-            # checking if there is a data to be saved
+            # checking if there is data to be saved
             if len(self.grid.GetUsedCols()[0]) != 0:
                 win = SaveDialog(self)
                 win.Show(True)
