@@ -208,7 +208,7 @@ class formulaBar ( aui.AuiToolBar ):
                                 size= wx.DefaultSize,
                                 style = 0,
                                 agwStyle = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
-	self._text= u''
+        self._text= u''
         self.textCtrl1 = wx.TextCtrl( self, wx.ID_ANY,
                                         wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
                                         wx.TE_CHARWRAP|wx.TE_MULTILINE|wx.TE_RICH2|
@@ -223,17 +223,17 @@ class formulaBar ( aui.AuiToolBar ):
 
         #self.m_toggleBtn1.Bind( wx.EVT_TOGGLEBUTTON, self._ontogle )
         self.originalSize= self.Size
-	self.value= u'texto'
+        self.value= u'texto'
 	
     @property
     def value(self):
-	return self._text
+        return self._text
     @value.setter
     def value(self, texto):
-	if not isinstance( texto, (str, unicode)):
-	    raise StandardError("only acepted numerical values")
-	self._text= texto
-	self.textCtrl1.SetValue(texto)
+        if not isinstance( texto, (str, unicode)):
+            raise StandardError("only acepted numerical values")
+        self._text= texto
+        self.textCtrl1.SetValue(texto)
 #---------------------------------------------------------------------------
 #---- Language List Combo Box----#
 class LangListCombo(BitmapComboBox):
@@ -408,7 +408,7 @@ class SalStat2App(wx.App):
         self.icon16= imagenes.logo16()
         self.icon24= imagenes.logo24()
         self.icon64= imagenes.logo64()
-	self.frame= self.getMainFrame(None, self)
+        self.frame= self.getMainFrame(None, self)
         self.SetTopWindow(self.frame)
         # referencing the plot system
         if wx.Platform == '__WXGTK__':
@@ -425,9 +425,9 @@ class SalStat2App(wx.App):
                 self.OpenFileMessage(f)
         return True
     def getMainFrame(self, *args):
-	frame = MainFrame( *args)
-	frame.grid.SetFocus()
-	return frame
+        frame = MainFrame( *args)
+        frame.grid.SetFocus()
+        return frame
 	
     def BringWindowToFront(self):
         try: # it's possible for this event to come when the frame is closed
@@ -626,7 +626,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         #--------------------
         #<p> set up the datagrid
         self.grid=  Grids(self, -1)
-	self.grid.addPage( gridSize= (256,64))
+        self.grid.addPage( gridSize= (256,64))
         # set up the datagrid  /<p>
         
         # response panel
@@ -771,7 +771,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         HelpIcon =   imag.about()
         UndoIcon =   imag.edit_undo()
         RedoIcon =   imag.edit_redo()
-	closePage=   imag.cancel()
+        closePage=   imag.cancel()
 
         if wx.version() < "2.9":
             tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
@@ -796,7 +796,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         self.bt9 = tb1.AddSimpleTool(85, translate(u"Preferences"),PrefsIcon, translate(u"Preferences"))
         ##self.bt10= tb1.AddSimpleTool(90, "Help", HelpIcon, "Help")
         self.bt10= tb1.AddSimpleTool(95, translate(u"OnlineHelp"), HelpIcon, translate(u"Online Help"))
-	self.bt13= tb1.AddSimpleTool(100, translate(u"Close"), closePage, translate(u"Close Current Page"))
+        self.bt13= tb1.AddSimpleTool(100, translate(u"Close"), closePage, translate(u"Close Current Page"))
 
         # to the languaje
         language = wx.GetApp().GetPreferences( "Language")
@@ -958,80 +958,80 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         self.Bind( wx.EVT_MENU, self.GoOnlyneHelp,      id= self.bt10.GetId())
         self.Bind( wx.EVT_MENU, self.tb1_Undo,          id= self.bt11.GetId())
         self.Bind( wx.EVT_MENU, self.tb1_Redo,          id= self.bt12.GetId())
-	self.Bind( wx.EVT_MENU, self.tb1_closePage,     id= self.bt13.GetId())
+        self.Bind( wx.EVT_MENU, self.tb1_closePage,     id= self.bt13.GetId())
         # controlling the expansion of the notebook
         self.grid.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_BG_DCLICK, self._OnNtbDbClick )
         self.Bind( wx.EVT_CLOSE, self.EndApplication )
         self.sig= self.siguiente()
 	    
     def tb1_LoadFile(self, evt):
-	self.grid.addPage( gridSize= (256,64))
-	(HasLoad, SheetName)= self.grid.LoadFile(evt)
-	if not HasLoad:
-	    # delete the current sheet
-	    return
-	self.grid.changeLabel(newLabel= SheetName)
-	evt.Skip()
+        self.grid.addPage( gridSize= (256,64))
+        (HasLoad, SheetName)= self.grid.LoadFile(evt)
+        if not HasLoad:
+            # delete the current sheet
+	        return
+        self.grid.changeLabel(newLabel= SheetName)
+        evt.Skip()
     def tb1_closePage(self, evt):
-	# check if there are pages
-	if len(self.grid.pageNames) == 0:
-	    return
-	if self.grid.hasSaved:
-	    self.grid.delPage()
-	else:
+        # check if there are pages
+        if len(self.grid.pageNames) == 0:
+            return
+        if self.grid.hasSaved:
+            self.grid.delPage()
+        else:
             # checking if there is a data to be saved
             if len(self.grid.GetUsedCols()[0]) != 0:
                 win = SaveOneGridDialog(self.grid)
                 win.Show(True)
-	evt.Skip()
+                evt.Skip()
 	
     def tb1_SaveXls(self, evt):
-	if len(self.grid.pageNames) == 0:
-	    return
-	self.grid.SaveXls()
-	evt.Skip()
+        if len(self.grid.pageNames) == 0:
+            return
+        self.grid.SaveXls()
+        evt.Skip()
     def tb1_SaveXlsAs(self, evt):
-	if len(self.grid.pageNames) == 0:
-	    return
-	self.grid.SaveXlsAs(evt)
-	evt.Skip()
+        if len(self.grid.pageNames) == 0:
+            return
+        self.grid.SaveXlsAs(evt)
+        evt.Skip()
     def tb1_CutData(self, evt):
-	if len(self.grid.pageNames) == 0:
-	    return
-	self.grid.CutData(evt)
-	evt.Skip()
+        if len(self.grid.pageNames) == 0:
+            return
+        self.grid.CutData(evt)
+        evt.Skip()
     def tb1_CopyData(self, evt):
-	if len(self.grid.pageNames) == 0:
-	    return
-	self.grid.CopyData(evt)
-	evt.Skip()
+        if len(self.grid.pageNames) == 0:
+            return
+        self.grid.CopyData(evt)
+        evt.Skip()
     def tb1_PasteData(self, evt):
-	if len(self.grid.pageNames) == 0:
-	    return
-	self.grid.PasteData(evt)
-	evt.Skip()
+        if len(self.grid.pageNames) == 0:
+            return
+        self.grid.PasteData(evt)
+        evt.Skip()
     def tb1_Undo(self, evt):
-	if len(self.grid.pageNames) == 0:
-	    return
-	self.grid.Undo(evt)
-	evt.Skip()
+        if len(self.grid.pageNames) == 0:
+            return
+        self.grid.Undo(evt)
+        evt.Skip()
     def tb1_Redo(self, evt):
-	if len(self.grid.pageNames) == 0:
-	    return
-	self.grid.Redo(evt)
-	evt.Skip()
+        if len(self.grid.pageNames) == 0:
+            return
+        self.grid.Redo(evt)
+        evt.Skip()
     def tb1_NewPage(self, evt):
-	self.grid.addPage( gridSize= (256,64))
-	evt.Skip()
+        self.grid.addPage( gridSize= (256,64))
+        evt.Skip()
     def tb1_DeleteCurrentCol(self, evt):
-	self.grid.DeleteCurrentCol(evt)
-	evt.Skip()
+        self.grid.DeleteCurrentCol(evt)
+        evt.Skip()
     def tb1_DeleteCurrentRow(self, evt):
-	self.grid.DeleteCurrentRow(evt)
-	evt.Skip()
+        self.grid.DeleteCurrentRow(evt)
+        evt.Skip()
     def tb1_SelectAllCells(self, evt):
-	self.grid.SelectAllCells(evt)
-	evt.Skip()
+        self.grid.SelectAllCells(evt)
+        evt.Skip()
 	
     def siguiente(self):
         i= 0
@@ -1242,9 +1242,9 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
 
         self.m_mgr.Update()    
     def EndApplication(self, evt):
-	if len(self.grid.pageNames) == 0:
-	    wx.GetApp().frame.Destroy()
-	    return
+        if len(self.grid.pageNames) == 0:
+            wx.GetApp().frame.Destroy()
+            return
         if self.grid.hasSaved == False:
             # checking if there is a data to be saved
             if len(self.grid.GetUsedCols()[0]) != 0:
@@ -1313,7 +1313,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         self.logPanel.write(functionName + " successful")
     
     def Destroy(self):
-	super(MainFrame, self).Destroy()
+        super(MainFrame, self).Destroy()
 #--------------------------------------------------------------------------
 # main loop
 if __name__ == '__main__':
