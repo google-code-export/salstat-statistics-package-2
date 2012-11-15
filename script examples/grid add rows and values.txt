@@ -1,0 +1,1 @@
+cls()filas= 200000show('adicionando %s filas'%filas)grid.AppendRows(filas)show('llenando las filas')for row in range(grid.GetNumberRows()):	grid.SetCellValue(row, 0, str(row))show('it runs successful')
