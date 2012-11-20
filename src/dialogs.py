@@ -520,14 +520,18 @@ DescList= [u'N',
            u'Sum of Squares',#'Sum of Squared Devs',
            u'Coefficient of Variation',
            u'Minimum',
+           u'First Quartile',
+           u'Third Quartile',
+           u'Interquartile Range',
            u'Maximum',
            u'Range',
            u'Number Missing',
            u'Geometric Mean',
            u'Harmonic Mean',
-           u'Skewness',u'Kurtosis', 
+           u'Skewness',
+           u'Kurtosis',
            u'Median',        #'Median Absolute Deviation',
-           u'Mode', ] #'Interquartile Range', 'Number of Unique Levels']
+           u'Mode', ] #'Number of Unique Levels']
 
 class ManyDescriptives:
     def __init__(self, source, ds):
@@ -551,7 +555,9 @@ class ManyDescriptives:
 	             (u'Sum of Squared Devs', 'ssdevs'),
 	             (u'Coefficient of Variation', 'coeffvar'),
 	             (u'Minimum', 'minimum'),
-	             (u'Maximum', 'maximum'),
+                 (u'First Quartile', 'firstquartilescore'),
+                 (u'Third Quartile', 'thirdquartilescore'),
+                 (u'Maximum', 'maximum'),
 	             (u'Range', 'range'),
 	             (u'Number Missing', 'missing'),
 	             (u'Geometric Mean', 'geomean'),
@@ -560,7 +566,8 @@ class ManyDescriptives:
 	             (u'Kurtosis', 'kurtosis'),
 	             (u'Median', 'median'),
 	             (u'Median Absolute Deviation', 'mad'),
-	             (u'Mode', 'mode'),#    'Interquartile Range', None,
+	             (u'Mode', 'mode'),
+                 (u'Interquartile Range', 'interquartilerange',),
 	             (u'Number of Unique Levels', 'numberuniques')
 	             )
 	funcTrans= dict()

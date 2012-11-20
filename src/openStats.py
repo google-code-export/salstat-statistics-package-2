@@ -33,6 +33,9 @@ class statistics:
             self.stddev=   None
         self.sumsquares= stats.ss(data)
         self.minimum=  min(data)
+        self.firstquartile= stats.firstquartilescore(data)
+        self.thirdquartile= stats.thirdquartilescore(data)
+        self.interquartilerange= self.thirdquartile - self.firstquartile
         self.maximum=  max(data)
         self.range=    self.maximum-self.minimum
         if any([dat < 0 for dat in data]):
