@@ -12,6 +12,7 @@ import sys
 import wx
 import numpy as np
 from openStats import statistics
+import traceback
 
 from  warnings import warn
 from copy import deepcopy

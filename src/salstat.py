@@ -747,7 +747,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
               'homogenize': homogenize,
               'scipy':      scipy,
               'stats':      stats,
-	      'getPath':    getPath,
+              'getPath':    getPath,
               }
 ##'sm':         sm, stats models will be included later
 #'stats': self.stats,

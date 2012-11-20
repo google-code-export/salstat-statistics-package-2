@@ -17,7 +17,7 @@ C{stats.mean(numpy.arange(20))} will call L{stats.amean}.
 
 This is a handy way to keep consistent function names when different
 argument types require different functions to be called. Having
-implementated the L{Dispatch} class, however, means that to get info on
+implemented the L{Dispatch} class, however, means that to get info on
 a given function, you must use the REAL function name ... that is
 C{print stats.lmean.__doc__} or C{print stats.amean.__doc__} work fine,
 while C{print stats.mean.__doc__} will print the doc for the L{Dispatch}
@@ -33,7 +33,10 @@ Central Tendency
     - geometricmean
     - harmonicmean
     - mean
+    - firstquartilescore
     - median
+    - thirdquartilescore
+    - interquartilerange
     - medianscore
     - mode
 
@@ -326,7 +329,7 @@ def lharmonicmean (inlist):
 
 def lmean (inlist):
     """
-    Returns the arithematic mean of the values in the passed list.
+    Returns the arithmetic mean of the values in the passed list.
     Assumes a '1D' list, but will function on the 1st dim of an array(!).
 
     Usage:   lmean(inlist)
@@ -347,7 +350,7 @@ def lmedian (inlist,numbins=1000):
     Usage:   lmedian (inlist, numbins=1000)
     """
     # ordering the data
-    (hist, smallest, binsize, extras) = histogram(inlist,numbins,[min(inlist),max(inlist)]) # make histog
+    (hist, smallest, binsize, extras) = histogram(inlist,numbins,[min(inlist),max(inlist)]) # make histogram
     if binsize == 0:
         return None
     cumhist = cumsum(hist)              # make cumulative histogram
@@ -378,9 +381,53 @@ def lmedianscore (inlist):
         index = len(newlist)/2  # integer division correct
         median = float(newlist[index] + newlist[index-1]) /2
     else:
-        index = len(newlist)/2  # int divsion gives mid value when count from 0
+        index = len(newlist)/2  # int division gives mid value when count from 0
         median = newlist[index]
     return median
+
+
+def lfirstquartilescore(inlist):
+    """
+    Returns the 'first' quartile score of the passed list. If there is an even
+    number of scores, the mean of the two 25 percentile scores is returned.
+
+    Usage:  lfirstquartile(inlist)
+    """
+
+    newlist = copy.deepcopy(inlist)
+    newlist.sort()
+    if len(newlist) == 5:
+        firstquartile = newlist[1]
+    else:
+        if len(newlist) % 2 == 0:    # even number of scores
+            firstquartile = (newlist[((len(newlist) + 1) / 4) - 1] + newlist[((len(newlist) + 1) / 4)]) / 2.0
+        else:                   # odd number of scores
+            firstquartile = (newlist[(len(newlist) / 4)] + newlist[(len(newlist) / 4) + 1]) / 2
+    #print "First quartile =", firstquartile
+    return firstquartile
+
+
+def lthirdquartilescore(inlist):
+    """
+    Returns the 'third' quartile score of the passed list. If there is an even
+    number of scores, the mean of the two 75 percentile scores is returned.
+
+    Usage:  lthirdquartile(inlist)
+    """
+
+    newlist = copy.deepcopy(inlist)
+    newlist.sort()
+    if len(newlist) == 5:
+        thirdquartile = newlist[3]
+    else:
+        if len(newlist) % 2 == 0:    # even number of scores
+            print "even length =", len(newlist)
+            thirdquartile = (newlist[3 * ((len(newlist) + 1) / 4) - 1] + newlist[3 * ((len(newlist) + 1) / 4)]) / 2.0
+        else:                   # odd number of scores
+            print "odd length =", len(newlist)
+            thirdquartile = (newlist[(3 * (len(newlist)) / 4)] + newlist[((3 * len(newlist)) / 4) + 1]) / 2
+    print "Third quartile =", thirdquartile
+    return thirdquartile
 
 
 def lmode(inlist):
@@ -448,7 +495,7 @@ def lvariation(inlist):
 def lskew(inlist):
     """
     Returns the skewness of a distribution, as defined in Numerical
-    Recipies (alternate defn in CRC Standard Probability and Statistics, p.6.)
+    Recipes (alternate defn in CRC Standard Probability and Statistics, p.6.)
 
     Usage:   lskew(inlist)
     """
@@ -461,7 +508,7 @@ def lskew(inlist):
 def lkurtosis(inlist):
     """
     Returns the kurtosis of a distribution, as defined in Numerical
-    Recipies (alternate defn in CRC Standard Probability and Statistics, p.6.)
+    Recipes (alternate defn in CRC Standard Probability and Statistics, p.6.)
 
     Usage:   lkurtosis(inlist)
     """
@@ -1180,7 +1227,7 @@ def lchisquare(f_obs,f_exp=None):
 
 def lks_2samp (data1,data2):
     """
-    Computes the Kolmogorov-Smirnof statistic on 2 samples.  From
+    Computes the Kolmogorov-Smirnov statistic on 2 samples.  From
     Numerical Recipes in C, page 493.
 
     Usage:   lks_2samp(data1,data2)   data1&2 are lists of values for 2 conditions
@@ -1855,7 +1902,7 @@ def lshellsort(inlist):
 
 def lrankdata(inlist):
     """
-    Ranks the data in inlist, dealing with ties appropritely.  Assumes
+    Ranks the data in inlist, dealing with ties appropriately.  Assumes
     a 1D inlist.  Adapted from Gary Perlman's |Stat ranksort.
 
     Usage:   lrankdata(inlist)
@@ -1967,7 +2014,9 @@ def lfindwithin (data):
 geometricmean = Dispatch ( (lgeometricmean, (ListType, TupleType)), )
 harmonicmean = Dispatch ( (lharmonicmean, (ListType, TupleType)), )
 mean = Dispatch ( (lmean, (ListType, TupleType)), )
+firstquartilescore = Dispatch( (lfirstquartilescore, (ListType, TupleType)), )
 median = Dispatch ( (lmedianscore, (ListType, TupleType)), )  # replacing the media function to medianScore  lmedian
+thirdquartilescore = Dispatch( (lthirdquartilescore, (ListType, TupleType)), )
 medianscore = Dispatch ( (lmedianscore, (ListType, TupleType)), )
 mode = Dispatch ( (lmode, (ListType, TupleType)), )
 
@@ -2174,7 +2223,7 @@ def aharmonicmean (inarray,dimension=None,keepdims=0):
 
 def amean (inarray,dimension=None,keepdims=0):
     """
-    Calculates the arithmatic mean of the values in the passed array.
+    Calculates the arithmetic mean of the values in the passed array.
     That is:  1/n * (x1 + x2 + ... + xn).  Defaults to ALL values in the
     passed array.  Use dimension=None to flatten array first.  REMEMBER: if
     dimension=0, it collapses over dimension 0 ('rows' in a 2D array) only, and
@@ -2183,7 +2232,7 @@ def amean (inarray,dimension=None,keepdims=0):
     inarray, with only 1 'level' per dim that was collapsed over.
 
     Usage:   amean(inarray,dimension=None,keepdims=0)
-    Returns: arithematic mean calculated over dim(s) in dimension
+    Returns: arithmetic mean calculated over dim(s) in dimension
     """
     if inarray.dtype in [N.int_, N.short,N.ubyte]:
         inarray = inarray.astype(N.float_)
@@ -2262,6 +2311,54 @@ def amedianscore (inarray,dimension=None):
             median = median[0]
     return median
 
+def afirstquartilescore (inarray,dimension=None):
+    """
+    Returns the 'first' quartile score of the passed array.  If there is an even
+    number of scores, the mean of the 2 middle scores is returned.  Can function
+    with 1D arrays, or on the FIRST dimension of 2D arrays (i.e., dimension can
+    be None, to pre-flatten the array, or else dimension must equal 0).
+
+    Usage:   afirstquartilescore(inarray,dimension=None)
+    Returns: 'first' quartile score of the array, or the mean of the two 25 percentile scores
+    """
+    if dimension == None:
+        inarray = N.ravel(inarray)
+        dimension = 0
+    inarray = N.sort(inarray,dimension)
+    if inarray.shape[dimension] % 2 == 0:   # if even number of elements
+        indx = inarray.shape[dimension]/2   # integer division correct
+        median = N.asarray(inarray[indx]+inarray[indx-1]) / 2.0
+    else:
+        indx = inarray.shape[dimension] / 2 # integer division correct
+        median = N.take(inarray,[indx],dimension)
+        if median.shape == (1,):
+            median = median[0]
+    return median
+
+
+def athirdquartilescore (inarray,dimension=None):
+    """
+    Returns the 'third' quartile score of the passed array.  If there is an even
+    number of scores, the mean of the 2 middle scores is returned.  Can function
+    with 1D arrays, or on the FIRST dimension of 2D arrays (i.e., dimension can
+    be None, to pre-flatten the array, or else dimension must equal 0).
+
+    Usage:   athirdquartilescore(inarray,dimension=None)
+    Returns: 'third' percentile score of the array, or the mean of the two 75 percentile scores
+    """
+    if dimension == None:
+        inarray = N.ravel(inarray)
+        dimension = 0
+    inarray = N.sort(inarray,dimension)
+    if inarray.shape[dimension] % 2 == 0:   # if even number of elements
+        indx = inarray.shape[dimension]/2   # integer division correct
+        median = N.asarray(inarray[indx]+inarray[indx-1]) / 2.0
+    else:
+        indx = inarray.shape[dimension] / 2 # integer division correct
+        median = N.take(inarray,[indx],dimension)
+        if median.shape == (1,):
+            median = median[0]
+    return median
 
 def amode(a, dimension=None):
     """
@@ -3594,7 +3691,7 @@ def achisquare(f_obs,f_exp=None):
 
 def aks_2samp (data1,data2):
     """
-    Computes the Kolmogorov-Smirnof statistic on 2 samples.  Modified from
+    Computes the Kolmogorov-Smirnov statistic on 2 samples.  Modified from
     Numerical Recipes in C, page 493.  Returns KS D-value, prob.  Not ufunc-
     like.
 
@@ -4400,7 +4497,7 @@ def ashellsort(inarray):
 
 def arankdata(inarray):
     """
-    Ranks the data in inarray, dealing with ties appropritely.  Assumes
+    Ranks the data in inarray, dealing with ties appropriately.  Assumes
     a 1D inarray.  Adapted from Gary Perlman's |Stat ranksort.
 
     Usage:   arankdata(inarray)
@@ -4460,6 +4557,10 @@ try:
                       (amean, (N.ndarray,)) )
     median = Dispatch ( (lmedianscore, (ListType, TupleType)),  # changing the median to medianscore lmedian, amedian
                         (amedianscore, (N.ndarray,)) )
+    firstquartilescore = Dispatch ( (lfirstquartilescore, (ListType, TupleType)),
+                                    (afirstquartilescore, (N.ndarray,)) )
+    thirdquartilescore = Dispatch ( (lthirdquartilescore, (ListType, TupleType)),
+                                    (athirdquartilescore, (N.ndarray,)) )
     medianscore = Dispatch ( (lmedianscore, (ListType, TupleType)),
                              (amedianscore, (N.ndarray,)) )
     mode = Dispatch ( (lmode, (ListType, TupleType)),
