@@ -2333,7 +2333,7 @@ def afirstquartilescore (inarray,dimension=None):
         median = N.take(inarray,[indx],dimension)
         if median.shape == (1,):
             median = median[0]
-    return median
+    return firstquartilescore
 
 
 def athirdquartilescore (inarray,dimension=None):
@@ -2358,7 +2358,7 @@ def athirdquartilescore (inarray,dimension=None):
         median = N.take(inarray,[indx],dimension)
         if median.shape == (1,):
             median = median[0]
-    return median
+    return thirdquartilescore
 
 def amode(a, dimension=None):
     """
@@ -4538,7 +4538,7 @@ def afindwithin(data):
 
 
 try:
-    # DEFINE THESE *ONLY* IF NUMERIC IS AVAILABLE
+    # DEFINE THESE *ONLY* IF NUMPY IS AVAILABLE
     import numpy as N
     import numpy.linalg as LA
     import operator
