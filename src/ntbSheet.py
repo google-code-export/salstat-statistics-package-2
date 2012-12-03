@@ -20,7 +20,7 @@ from easyDialog import Dialog as dialog
 import os
 DEFAULT_FONT_SIZE = 12
 DECIMAL_POINT = '.' # default value
-
+	
 def numPage():
     i = 1
     while True:
@@ -719,18 +719,17 @@ class SimpleGrid( MyGridPanel):# wxGrid
         self.hasSaved= True
         # /<p>
         
-        # se lee el tamanio del sheet seleccionado
-        #size = (sheetSelected.nrows, sheetSelected.ncols)
         # se hace el grid de tamanio 1 celda y se redimensiona luego
         self.ClearGrid()
-        size = (self.NumberRows, self.NumberCols)
+	# reading the size of the needed sheet
+        currentSize= (self.NumberRows, self.NumberCols)
         # se lee el tamanio de la pagina y se ajusta las dimensiones
-        newSize = (sheetSelected.nrows, sheetSelected.ncols)
-        if newSize[0]-size[0] > 0:
-            self.AppendRows(newSize[0]-size[0])
+        neededSize = (sheetSelected.nrows, sheetSelected.ncols)
+        if neededSize[0]-currentSize[0] > 0:
+            self.AppendRows(neededSize[0]-currentSize[0])
 
-        if newSize[1]-size[1] > 0:
-            self.AppendCols(newSize[1]-size[1])
+        if neededSize[1]-currentSize[1] > 0:
+            self.AppendCols(neededSize[1]-currentSize[1])
 
         # se escribe los datos en el grid
 	try:
@@ -740,25 +739,25 @@ class SimpleGrid( MyGridPanel):# wxGrid
         star= 0
         if hasHeader:
             star= 1
-            for col in range( newSize[1]):
+            for col in range( neededSize[1]):
                 header= sheetSelected.cell_value( 0, col)
                 if header == u'' or header == None:
                     ## return the column to it's normal label value
-                    self.SetColLabelValue( self.generateLabel( col))
+                    self.SetColLabelValue( col, self.generateLabel( col))
                 elif not isinstance( header,( str, unicode)):
                     self.SetColLabelValue( col, sheetSelected.cell_value( 0, col).__str__())
                 else:
                     self.SetColLabelValue( col, sheetSelected.cell_value( 0, col))
         else:
             # return all header to default normal value
-            for col in range( newSize[1]):
-                self.SetColLabelValue(col, self.generateLabel( col)) 
+            for col in range( neededSize[1]):
+		self.SetColLabelValue(col, self.generateLabel( col))
         
-        if hasHeader and newSize[0] < 2:
+        if hasHeader and neededSize[0] < 2:
             return
         
-        for reportRow, row in enumerate(range( star, newSize[0])):
-            for col in range( newSize[1]):
+        for reportRow, row in enumerate(range( star, neededSize[0])):
+            for col in range( neededSize[1]):
                 newValue = sheetSelected.cell_value( row, col)
                 if isinstance( newValue, (str, unicode)):
                     self.SetCellValue( reportRow, col, newValue)
@@ -772,27 +771,31 @@ class SimpleGrid( MyGridPanel):# wxGrid
                         
     def generateLabel( self, colNumber):
         colNumber+= 1
-        analyse = True
-        result= list()
-        while analyse:
-            res = colNumber/float( 26)
-            if res == 1:
-                result.append(26)
-                continue
-            
-            fp= res-int(res) # float Part
-            if fp !=0 :
-                fp= int( fp*26)
-            else:
-                fp= 1
-                
-            result.append(fp)
-            analyse= res > 1
-        
-        res = '' 
-        for caracter in result:
-            res += chr(caracter + 64) 
-        return res
+	analyse = True
+	result= list()
+	while analyse:
+	    res = colNumber/26.0
+	    if res == int(res):
+		result.append(26)
+		colNumber= colNumber/26-1
+		analyse= res > 1
+		continue
+	    
+	    fp= res-int(res) # float Part
+	    # deleting fix by rounding
+	    if fp !=0 :
+		fp= int(round(fp*26.0,0))
+	    else:
+		fp= 1
+    
+	    result.append(fp)
+	    colNumber= colNumber/26
+	    analyse= res > 1
+	
+	res = '' 
+	while len(result):
+	    res += chr(result.pop(-1) + 64) 
+	return res
 
     def getData(self, x):
         for i in range(len(x)):
