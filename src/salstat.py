@@ -598,7 +598,6 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
                           size = wx.Size(ca[2], ca[-1] ),
                           pos = (ca[0],ca[1]) )
         #---
-
         self.m_mgr= aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
         self.appname= appname
@@ -631,10 +630,12 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         # response panel
         self.answerPanel= NoteBookSheet(self, fb = self.formulaBarPanel)
         self.answerPanel2= ScriptPanel(self, self.logPanel)
-        #---------------------------g-----------------
+        #--------------------------------------------
         # Redirecting the error messages and the std output to the logPanel
-        sys.stderr= self.logPanel
-        sys.stdout= self.logPanel
+	if not __debug__:
+	    sys.stderr= self.logPanel
+	    sys.stdout= self.logPanel
+	
         self.scriptPanel=  wx.py.crust.Shell( self)
 
         # put the references into the main app
