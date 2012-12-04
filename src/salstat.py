@@ -422,6 +422,8 @@ class SalStat2App(wx.App):
         if len(sys.argv) > 1:
             for f in  sys.argv[1:]:
                 self.OpenFileMessage(f)
+	# check for updates
+	self._checkUpdates()
         return True
     def getMainFrame(self, *args):
         frame = MainFrame( *args)
@@ -433,6 +435,44 @@ class SalStat2App(wx.App):
             wx.GetApp().GetTopWindow().Raise()
         except:
             pass
+    
+    def _checkUpdates(self,*args, **params):
+        ## extracted from iep the Interactive Editor for Python
+        """ Check whether a newer version of S2 is available. """
+        # Get versions available
+	from urllib import urlopen
+        import re
+        url = "http://code.google.com/p/salstat-statistics-package-2/downloads/list"
+        text = str( urlopen(url).read() )
+        results = []
+        for pattern in ['S2 [V|v](.{1,9}?)\.(.{1,9}?)' ]: #\.exe\.zip
+            results.extend( re.findall(pattern, text) )
+	results= [(res[0] + '.' + res[-1]) for res in results]
+        # Produce single string with all versions ...
+        versions = ', '.join(set(results))
+        if not versions:
+            versions = '?'
+        # Define message
+        text = "Your version of S2 is: {}\n" 
+        text += "Available versions are: {}\n\n"         
+        text = text.format(self.GetVersion(), versions)
+	
+	
+        # Create a message box
+	structure = list()
+	btn1 = ('StaticText', (text,))
+	structure.append( [btn1] )
+	Settings = {'Title': translate(u"Check for the latest version.")}
+	dlg= dialog(parent= None, struct= structure, settings= Settings)
+	toUpdate= False
+	if dlg.ShowModal() == wx.ID_OK:
+	    toUpdate= True
+	    pass
+	dlg.Destroy()
+	## Goto webpage if user chose to
+        if toUpdate:
+            import webbrowser
+            webbrowser.open("http://code.google.com/p/salstat-statistics-package-2/downloads/list")
 
     def OnActivate(self, event):
         # if this is an activate event, rather than something else, like iconize.
@@ -903,7 +943,8 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
              [plotMenu for plotMenu in plotMenus]),
             (translate(u"&Help"),
              (##("Help\tCtrl-H",       imag.about(),  self.GoHelpSystem,  wx.ID_HELP),
-              (translate(u"&About..."),          imag.icon16(), self.ShowAbout,     wx.ID_ABOUT),)),
+              (translate(u"Check for a new version"), None, wx.GetApp()._checkUpdates, None),
+	      (translate(u"&About..."),          imag.icon16(), self.ShowAbout,     wx.ID_ABOUT),)),
         )
         self.__createMenu(dat1, menuBar)
         self.SetMenuBar(menuBar)
