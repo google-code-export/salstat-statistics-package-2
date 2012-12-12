@@ -23,13 +23,18 @@ import glob
 
 ##-----------------------------
 ## EXTERNAL LIBRARY DEPENDENCES
+#----
+# http://www.pyinstaller.org/ticket/596
+from scipy.sparse.csgraph import _validation
+#----
 try:
     sys.modules['wx']
 except KeyError:
     # check the required version
     try:
-	import wxversion
-	wxversion.select(['2.9.4'])
+	import wx
+	if wx.__version__ < '2.9.4':
+	    raise ImportError("Required wx 2.9.4 at least")
     except ImportError:
 	raise ImportError("Required wx 2.9.4")
 # -----------------
@@ -844,7 +849,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         self.answerPanel=   NoteBookSheet(self, fb = self.formulaBarPanel)
         self.answerPanel2=  ScriptPanel(self, self.logPanel)
         # Redirecting the error messages and the std output to the logPanel
-	if not __debug__:
+	if not __debug__ or 1:
 	    sys.stderr= self.logPanel
 	    sys.stdout= self.logPanel
 	
