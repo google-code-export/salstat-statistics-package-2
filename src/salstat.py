@@ -104,7 +104,7 @@ from script     import ScriptPanel
 from imagenes   import imageEmbed
 from helpSystem import Navegator
 
-from dialogs import SaveDialog, SaveOneGridDialog, VariablesFrame, DescriptivesFrame
+from dialogs import SaveDialog, SaveOneGridDialog, VariablesFrame #, DescriptivesFrame
 from dialogs import TransformFrame
 from dialogs import createPlotSelectionPanel
 
@@ -844,7 +844,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         self.answerPanel=   NoteBookSheet(self, fb = self.formulaBarPanel)
         self.answerPanel2=  ScriptPanel(self, self.logPanel)
         # Redirecting the error messages and the std output to the logPanel
-	if not __debug__ or 1:
+	if not __debug__:
 	    sys.stderr= self.logPanel
 	    sys.stdout= self.logPanel
 	
@@ -1044,8 +1044,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
               [u"--"],
               [translate(u"Load default perspective"),      None, self.onDefaultPerspective, None],)),
             (translate(u"P&reparation"),
-             ([translate(u"Descriptive Statistics"),   None,  self.GoContinuousDescriptives,     None],
-              [translate(u"Transform Data"),           None,  self.GoTransformData,     None],
+             ([translate(u"Transform Data"),           None,  self.GoTransformData,     None],
               [translate(u"short data"),               None,  self.shortData,     None],)),
             (translate(u"S&tatistics"),
              statisticalMenus),
@@ -1262,12 +1261,6 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
             self.grid.SetDefaultCellTextColour(data.GetColour())
             self.grid.SetDefaultCellFont(data.GetChosenFont())
         dlg.Destroy()
-
-    def GoContinuousDescriptives(self, evt):
-        # shows the continuous descriptives dialog
-        win = DescriptivesFrame(wx.GetApp().frame, -1)
-        win.Show(True)
-
     def GoTransformData(self, evt):
         win = TransformFrame(wx.GetApp().frame, -1)
         win.Show(True)
@@ -1275,7 +1268,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
     def ShowAbout(self, evt):
         info= wx.AboutDialogInfo()
         info.Name= u"S2 SalStat Statistics Package 2"
-        info.Version= u"V" + wx.GetApp().VERSION
+        info.Version= u"V" + wx.GetApp().__version__
         info.Copyright= u"(C) 2012 Sebastian Lopez Buritica, S2 Team"
         info.Icon= wx.GetApp().icon64
         from wx.lib.wordwrap import wordwrap
@@ -1297,7 +1290,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
             translate(u"and much more!"),
             460, wx.ClientDC( self))
         info.WebSite = ( u"http://code.google.com/p/salstat-statistics-package-2/", u"S2 home page")
-        info.Developers = [ u"Sebastian Lopez Buritica", "Mark Livingstone --" + translate("MAC & LINUX  Translator"),]
+        info.Developers = [ u"Sebastian Lopez Buritica", "Mark Livingstone --",]
 
         info.License = wordwrap(u"GPL 3", 450, wx.ClientDC(self))
 
