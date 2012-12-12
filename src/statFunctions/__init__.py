@@ -1,6 +1,7 @@
 '''a module thath will be used as a container of different functions'''
 version = "0.0.1"
-__all__ = ["centralTendency", "xConditionTest",
+__all__ = ["descriptiveStatistics",
+           "centralTendency", "xConditionTest",
            "moments",     "frequency",
            "variability", "trimming",
            "correlation", "inferential", 
@@ -21,7 +22,7 @@ class _genericFunc(object):
         self.setminRequiredCols= 0
         self.app=         wx.GetApp()
         self.translate=   self.app.translate
-        self.inputGrid=   self.app.inputGrid # to read the input data from the main grid
+        self.grid= self.inputGrid=   self.app.grid # to read the input data from the main grid
         self.dialog=      _dialog         # to create de dialod
         self.Logg=        self.app.Logg   # to report
         self.outputGrid=  self.app.output # the usern can use the plot functions

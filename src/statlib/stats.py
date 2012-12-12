@@ -394,7 +394,8 @@ def lfirstquartilescore(inlist):
     Usage:  lfirstquartile(inlist)
     """
 
-    newlist = copy.deepcopy(inlist)
+    #newlist = copy.deepcopy(inlist) ## the memory could be deprecated by a large amount of data
+    newlist = inlist
     newlist.sort()
     if len(newlist) == 5:
         firstquartile = newlist[1]
@@ -2333,7 +2334,7 @@ def afirstquartilescore (inarray,dimension=None):
         median = N.take(inarray,[indx],dimension)
         if median.shape == (1,):
             median = median[0]
-    return firstquartilescore
+    return median
 
 
 def athirdquartilescore (inarray,dimension=None):
@@ -2358,7 +2359,7 @@ def athirdquartilescore (inarray,dimension=None):
         median = N.take(inarray,[indx],dimension)
         if median.shape == (1,):
             median = median[0]
-    return thirdquartilescore
+    return median
 
 def amode(a, dimension=None):
     """

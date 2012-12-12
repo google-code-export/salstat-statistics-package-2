@@ -19,7 +19,7 @@ class statistics(object):
         if isnumeric(data) and not isinstance( data, (np.ndarray)):
             data= [data]
         self.data=     data
-        self.missing=  missing
+        # self.missing=  missing # deprecated
         self.Name=     name
         
         # initializing values
@@ -32,7 +32,18 @@ class statistics(object):
         
         for prop in listOfProperties:
             setattr(self, prop, None)
-    
+        self.missing= len(self.data)
+        self.data= self._filterdata(data)
+        self.missing= self.missing - len(self.data)
+        self.data= self._filterNonNumerical(self.data)
+        # deleting non numerical data
+    def _filterNonNumerical(self,data):
+        return [dat for dat in data if isnumeric(dat) ]
+        
+    def _filterdata(self, data):
+        return [dat for dat in data if dat != None ]
+
+        
     # optimizing speed:
     @property
     def N(self):
