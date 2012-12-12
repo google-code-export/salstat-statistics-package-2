@@ -1429,7 +1429,7 @@ class _neededLibraries(object):
         self.setminRequiredCols= 0
         self.app=       wx.GetApp()
         self.dialog=    _dialog         # to create de dialod
-        self.grid=      self.app.inputGrid
+        self.grid=      self.app.grid
         self.log=       self.app.Logg   # to report
         self.outputGrid= self.app.output # the usern can use the plot functions
         self.data2Plotdiaglog= data2Plotdiaglog
@@ -1438,7 +1438,7 @@ class _neededLibraries(object):
         self.translate = self.app.translate
     
     def _updateColsInfo( self):
-        gridCol=            wx.GetApp().inputGrid.GetUsedCols()
+        gridCol=            self.grid.GetUsedCols()
         self.columnNames=   gridCol[0]
         self.columnNumbers= gridCol[1]
         
@@ -1478,7 +1478,7 @@ class pltobj( wx.Frame, object ):
         self.translate=  wx.GetApp().translate
         if 0:
             self.dialog= _dialog         # to create de dialod
-            self.grid=   self.app.inputGrid
+            self.grid=   self.app.grid
             self.outputGrid=     self.app.output # the usern can use the plot functions
         self.data2Plotdiaglog=   data2Plotdiaglog
         self.selectDialogData2plot= selectDialogData2plot
@@ -1627,7 +1627,7 @@ class pltobj( wx.Frame, object ):
         '''geting the selected columns of the InputGrid'''
         columns  = list()
         for colName in colNamesSelected:
-            col= numpy.array( wx.GetApp().inputGrid.GetColNumeric( colName))
+            col= numpy.array( self.grid.GetColNumeric( colName))
             col.shape = ( len(col),1)
             columns.append( col)
         
