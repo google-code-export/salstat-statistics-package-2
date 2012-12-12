@@ -119,7 +119,7 @@ import plotFunctions
 ##---------------------------------
 
 APPNAME= 'S2'
-__version__= '2.1 rc 1'
+__version__= '2.1 beta 5'
 inits= {}    # dictionary to hold the config values
 missingvalue= None ## It's not used
 imagenes= imageEmbed()
