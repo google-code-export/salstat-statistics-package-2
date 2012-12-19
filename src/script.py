@@ -415,7 +415,7 @@ class ScriptPanel( wx.Panel):
             return object.__getattribute__( self, name)
         except AttributeError:
             if self.GetPageCount( ) != 0:
-                if str(type(self.currentPage)) == "<class 'wx._core._wxPyDeadObject'>":
+                if str( type( self.currentPage)) == "<class 'wx._core._wxPyDeadObject'>":
                     self.currentPage == None
                     return
                 currPage= self.currentPage
@@ -517,13 +517,13 @@ class ScriptPanel( wx.Panel):
         dlg = wx.FileDialog(self, "Open Script File", "","",\
                             wildcard, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
-            # open a new stc
-            self.addPage()
             filename = dlg.GetPath()
-            self.SetText('')
             import os.path
             if not os.path.exists(filename):
                 return
+            # open a new stc
+            self.addPage()
+            self.Text= u''
             fout = open(filename, "rb")
             for line in fout.readlines():
                 self.AddText(line)
@@ -546,7 +546,6 @@ class ScriptPanel( wx.Panel):
             self.SetText= filename
             dlg.Destroy()
             
-
     def undo(self,event):
         self.Undo()
 
