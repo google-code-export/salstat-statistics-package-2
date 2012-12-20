@@ -61,10 +61,81 @@ class Sheets(object):
         return len(self._sheets)
 
 class Wb(object):
-    def __init__(self, xl):
+    def __init__(self, xl, wbObject= None):
         self._xl= xl
-    def open(self):
-        pass
+        # wbPath: path of the workbook
+        if wbObject == None:
+            # Try to set the wb to a new workbook
+            self._xl.Workbooks.Add()
+            self._wb= self.xl.ActiveWorkbook
+            self._sh = self._updateSheets()
+        elif isinstance(wbObject, (str,unicode)):
+            if _isfile(wbObject):
+                self._wb = self.xl.Workbooks.open( wbPath)
+                self._sh = self._updateSheets()
+            else:
+                raise IOError(wbObject + " is not a file")
+        else:
+            self._wb= wbObject
+            self._sh = self._updateSheets()
+                    
+    def _updateSheets(self):
+        sh= Sheets(self)
+        return sh # a list
+    
+    @property
+    def Sheets(self):
+        return self._wb.Sheets
+    @property
+    def xl(self):
+        return self._xl
+    @property
+    def sh(self):
+        #sheetNumber: number or name of the sheet
+        if self._sh == None:
+            self._sh= self._updateSheets()
+        return self._sh
+    
+    def addSheet(self, sheetName= None):
+        sh= self.wb.Add()
+        if sheetName != None:
+            if isinstance( sheetName, (str, unicode)):
+                sh.Name= sheetName
+            else:
+                sh.Name= sheetName.__str__()
+        self._sh= self._updateSheets()
+    @property
+    def name(self):
+        return self._wb.name
+    @property
+    def activeSheet(self):
+        return self.xl.ActiveWorkbook.ActiveSheet
+
+class Wbs(object):
+    def __init__(self, xl):
+        self._xl=  xl
+        self._wbs= [ Wb( self.xl, self.xl.Workbooks[wbNumber]) for wbNumber in range( self.xl.Workbooks.Count)]
+        
+    @property
+    def xl( self):
+        return self._xl
+    
+    def __getitem__( self, wbNumber):
+        wbName= wbNumber 
+        if isinstance( wbNumber, (int, float)):
+            if wbNumber < 0:
+                wbNumber= self.__len__() + wbNumber - 1
+            return self._wbs[wbNumber]
+        # try to find for a number
+        elif isinstance( wbName, (str, unicode)):
+            for sh in self._wbs:
+                if sh.Name== wbName:
+                    return sh
+            raise KeyError( wbName.__str__ + " not found")
+        
+    def __len__(self):
+        return len(self._wbs)
+    
 class Xl(object):
     def __init__(self,**params):
         from win32com.client import Dispatch
@@ -77,11 +148,24 @@ class Xl(object):
             except KeyError:
                 pass
         self._xl.Visible = default['Visible']
-        self._wb=  default['wb']
-        self._sh=  None
+        #self._wb= Wbs(self)
+    @property
+    def wb(self):
+        return Wbs(self)
+    
+    @property
+    def Workbooks(self):
+        return self._xl.Workbooks
+    
+    @property
+    def addwb(self):
+        self._xl.Workbooks.Add() 
+        return self.wb[-1]
+    
     @property
     def Visible(self):
         return self._xl
+    
     @Visible.setter
     def Visible(self, value):
         if value == True:
@@ -90,39 +174,8 @@ class Xl(object):
             self._xl.Visible = False
         else:
             raise StandardError("Available options True/False")
-    @property
-    def wb(self):
-        if self._wb == None:
-            self._xl.Workbooks.Add()
-            self._wb= self._xl.ActiveWorkbook
-            # update the sheets
-            self.sh
-        return self._wb
-
-    @wb.setter
-    def wb(self, wbPath):
-        # wbPath: path of the workbook
-        if not isinstance(wbPath, (str, unicode)):
-            raise StandardError("only accept string or unicode value for wbPath parameter")
-
-        if not _isfile(wbPath):
-            raise IOError("the path is not a valid or existent file: " + wbPath)
-
-        self._wb = self._xl.Workbooks.open(wbPath)
-        # update the sheets
-        self._sh = self._updateSheets()
-
-    def _updateSheets(self):
-        sh= Sheets(self.wb)
-        return sh # a list
-    @property
-    def sh(self):
-        #sheetNumber: number or name of the sheet
-        if self._sh == None:
-            self._sh= self._updateSheets()
-        return self._sh
-    def activeSheet(self):
-        return Sheet(self.wb.ActiveSheet)
+            return Sheet(self.wb.ActiveSheet)
+        
     @property
     def ScreenUpdating(self):
         return self._xl.ScreenUpdating
@@ -132,6 +185,9 @@ class Xl(object):
             self._xl.ScreenUpdating= state
         else:
             raise StandardError(" state not available only True/False is allowed")
+    @property
+    def ActiveWorkbook(self):
+        return self.xl.ActiveWorkbook
 
 if 0:
     # add a new Workbook
