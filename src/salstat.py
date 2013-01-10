@@ -32,11 +32,11 @@ try:
 except KeyError:
     # check the required version
     try:
-	import wx
-	if wx.__version__ < '2.9.4':
-	    raise ImportError("Required wx 2.9.4 at least")
+        import wx
+        if wx.__version__ < '2.9.4':
+            raise ImportError("Required wx 2.9.4 at least")
     except ImportError:
-	raise ImportError("Required wx 2.9.4")
+        raise ImportError("Required wx 2.9.4")
 # -----------------
 # to use the sash
 # import  wx.lib.multisash as sash
@@ -58,11 +58,11 @@ if wx.Platform != '__WXMSW__':
     import wx.py.crust
     #import wx.py.crustslices
     try:
-	import matplotlib
-	if matplotlib.__version__ < '1.1':
-	    raise ImportError("matplotlib >= 1.1.0 required")
+        import matplotlib
+        if matplotlib.__version__ < '1.1':
+            raise ImportError("matplotlib >= 1.1.0 required")
     except ImportError:
-	raise 
+        raise 
     import matplotlib.tri.triangulation
     import matplotlib.delaunay.triangulate
     import matplotlib.tri.tricontour
@@ -82,7 +82,7 @@ except ImportError:
 try:
     import scipy
     if scipy.__version__ < '0.11':
-	raise ("scipy >= 0.11.0 required")
+        raise ("scipy >= 0.11.0 required")
 except ImportError:
     raise ("scipy >= 0.11.0 required")
 ##---------------------------------
@@ -249,9 +249,9 @@ class formulaBar ( aui.AuiToolBar ):
                                 agwStyle = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
         self._text= u''
         self.textCtrl1 = wx.TextCtrl( self, wx.ID_ANY,
-                                        wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
-                                        wx.TE_CHARWRAP|wx.TE_MULTILINE|wx.TE_RICH2|
-                                        wx.TE_WORDWRAP|wx.NO_BORDER )
+                                      wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
+                                      wx.TE_CHARWRAP|wx.TE_MULTILINE|wx.TE_RICH2|
+                                      wx.TE_WORDWRAP|wx.NO_BORDER )
         self.textCtrl1.SetMinSize( wx.Size( 320, 30 ) )
         self.textCtrl1.SetSize( wx.Size( 320, 30 ) )
         self.AddControl( self.textCtrl1, label= "Text control")
@@ -263,7 +263,7 @@ class formulaBar ( aui.AuiToolBar ):
         #self.m_toggleBtn1.Bind( wx.EVT_TOGGLEBUTTON, self._ontogle )
         self.originalSize= self.Size
         self.value= u'text'
-	
+
     @property
     def value(self):
         return self._text
@@ -397,7 +397,7 @@ def GetAvailLocales(installDir):
 class Grids(NoteBookSheet):
     def __init__(self, parent, id= wx.ID_ANY, *args, **params):
         NoteBookSheet.__init__(self, parent, id, *args, **params)
-	
+
     def _gridSetRenderer(self, grid):
         '''setting the renderer to the grid'''
         attr=   GridCellAttr()
@@ -411,14 +411,14 @@ class Grids(NoteBookSheet):
             grid.SetGridLineColour("#b7b7b7")
             grid.SetLabelBackgroundColour("#d2d2d2")
             grid.SetLabelTextColour("#444444")
-	            
+
 
 class Tb1(aui.AuiToolBar):
     def __init__(self, *args, **params):
-	imageEmbed= params.pop('imageEmbed')
-	translate= params.pop('translation')
-	aui.AuiToolBar.__init__(self, *args, **params)
-	# Get icons for toolbar
+        imageEmbed= params.pop('imageEmbed')
+        translate= params.pop('translation')
+        aui.AuiToolBar.__init__(self, *args, **params)
+        # Get icons for toolbar
         imag = imageEmbed()
         NewIcon =    imag.exporCsv()
         OpenIcon =   imag.folder()
@@ -461,26 +461,26 @@ class Tb1(aui.AuiToolBar):
         self.SetToolBitmapSize( (24,24))
         self.Realize()
         self.languages.Bind( wx.EVT_COMBOBOX, self._changeLanguage) # id= self.languages.GetId()
-	
+
     @property
     def grid(self):
-	return wx.GetApp().grid
-	
+        return wx.GetApp().grid
+
     def _changeLanguage(self, evt):
         allPreferences= dict()
         allPreferences["Language"] = self.languages.GetValue()
         print "you have to restart the app to see the changes"
         wx.GetApp().SetPreferences( allPreferences)
-	
+
     def LoadFile(self, evt):
         self.grid.addPage( gridSize= (256,64))
         (HasLoad, SheetName)= self.grid.LoadFile(evt)
         if not HasLoad:
             # delete the current sheet
-	        return
+            return
         self.grid.changeLabel(newLabel= SheetName)
         evt.Skip()
-	
+
     def closePage(self, evt):
         # check if there are pages
         if len(self.grid.pageNames) == 0:
@@ -493,61 +493,61 @@ class Tb1(aui.AuiToolBar):
                 win = SaveOneGridDialog(self.grid)
                 win.Show(True)
                 evt.Skip()
-	
+
     def SaveXls(self, evt):
         if len(self.grid.pageNames) == 0:
             return
         self.grid.SaveXls()
         evt.Skip()
-	
+
     def SaveXlsAs(self, evt):
         if len(self.grid.pageNames) == 0:
             return
         self.grid.SaveXlsAs(evt)
         evt.Skip()
-	
+
     def CutData(self, evt):
         if len(self.grid.pageNames) == 0:
             return
         self.grid.CutData(evt)
         evt.Skip()
-	
+
     def CopyData(self, evt):
         if len(self.grid.pageNames) == 0:
             return
         self.grid.CopyData(evt)
         evt.Skip()
-	
+
     def PasteData(self, evt):
         if len(self.grid.pageNames) == 0:
             return
         self.grid.PasteData(evt)
         evt.Skip()
-	
+
     def Undo(self, evt):
         if len(self.grid.pageNames) == 0:
             return
         self.grid.Undo(evt)
         evt.Skip()
-	
+
     def Redo(self, evt):
         if len(self.grid.pageNames) == 0:
             return
         self.grid.Redo(evt)
         evt.Skip()
-	
+
     def NewPage(self, evt):
         self.grid.addPage( gridSize= (256,64))
         evt.Skip()
-	
+
     def DeleteCurrentCol(self, evt):
         self.grid.DeleteCurrentCol(evt)
         evt.Skip()
-	
+
     def DeleteCurrentRow(self, evt):
         self.grid.DeleteCurrentRow(evt)
         evt.Skip()
-	
+
     def SelectAllCells(self, evt):
         self.grid.SelectAllCells(evt)
         evt.Skip()
@@ -575,7 +575,7 @@ class SalStat2App(wx.App):
         except:
             installDir = os.path.dirname( os.path.abspath( sys.argv[0]))
 
-	# decoding the path name
+        # decoding the path name
         self.installDir= installDir.decode( sys.getfilesystemencoding()) 
 
         language = self.GetPreferences( "Language")
@@ -595,8 +595,8 @@ class SalStat2App(wx.App):
         self.getConfigFile()
         self.DECIMAL_POINT=  locale.localeconv()['decimal_point']
         #<p> help data
-	path = sys.argv[0]
-	path= path.decode( sys.getfilesystemencoding())
+        path = sys.argv[0]
+        path= path.decode( sys.getfilesystemencoding())
         path= os.path.abspath( os.path.join( os.path.split( path)[0], 'help'))
         fileName= os.path.join( path, "help.hhp")
         self.HELPDATA= HtmlHelpData()
@@ -621,47 +621,47 @@ class SalStat2App(wx.App):
         if len(sys.argv) > 1:
             for f in  sys.argv[1:]:
                 self.OpenFileMessage(f)
-	# check for updates
-	self._checkUpdates()
+        # check for updates
+        self._checkUpdates()
         return True
-    
+
     def setItems(self,logPanel, grid, answerPanel, plot):
-	self.Logg=   logPanel
-	self.grid=   grid
+        self.Logg=   logPanel
+        self.grid=   grid
         self.output= answerPanel
         self.plot=   plot
-    
+
     def getMainFrame( self, *args):
         frame = MainFrame( *args)
         frame.grid.SetFocus()
         return frame
-	
+
     def BringWindowToFront( self):
         try: # it's possible for this event to come when the frame is closed
             wx.GetApp().GetTopWindow().Raise()
         except:
             pass
-    
+
     def _visitBlog( self, *args, **params):
-	import webbrowser
-	webbrowser.open("http://s2statistical.blogspot.com/")
-	
+        import webbrowser
+        webbrowser.open("http://s2statistical.blogspot.com/")
+
     def _checkUpdates( self,*args, **params):
         ## extracted from iep the Interactive Editor for Python
         """ Check whether a newer version of S2 is available. """
         # Get versions available
-	from urllib import urlopen
+        from urllib import urlopen
         import re
         url = "http://code.google.com/p/salstat-statistics-package-2/downloads/list"
-	try:
-	    text = str( urlopen(url).read() )
-	except IOError:
-	    ## it's not possible to connect with the main site
-	    return
+        try:
+            text = str( urlopen(url).read() )
+        except IOError:
+            ## it's not possible to connect with the main site
+            return
         results = []
         for pattern in ['S2 [V|v](.{1,9}?)\.(.{1,9}?)' ]: #\.exe\.zip
             results.extend( re.findall(pattern, text) )
-	results= [(res[0] + '.' + res[-1]) for res in results]
+        results= [(res[0] + '.' + res[-1]) for res in results]
         # Produce single string with all versions ...
         versions = ', '.join(set(results))
         if not versions:
@@ -670,19 +670,19 @@ class SalStat2App(wx.App):
         text = "Your version of S2 is: {}\n" 
         text += "Available versions are: {}\n\n"         
         text = text.format(self.GetVersion(), versions)
-	
+
         # Create a message box
-	structure = list()
-	btn1 = ('StaticText', (text,))
-	structure.append( [btn1] )
-	Settings = {'Title': translate(u"Check for the latest version.")}
-	dlg= dialog(parent= None, struct= structure, settings= Settings)
-	toUpdate= False
-	if dlg.ShowModal() == wx.ID_OK:
-	    toUpdate= True
-	    pass
-	dlg.Destroy()
-	## Goto webpage if user chose to
+        structure = list()
+        btn1 = ('StaticText', (text,))
+        structure.append( [btn1] )
+        Settings = {'Title': translate(u"Check for the latest version.")}
+        dlg= dialog(parent= None, struct= structure, settings= Settings)
+        toUpdate= False
+        if dlg.ShowModal() == wx.ID_OK:
+            toUpdate= True
+            pass
+        dlg.Destroy()
+        ## Goto webpage if user chose to
         if toUpdate:
             import webbrowser
             webbrowser.open("http://code.google.com/p/salstat-statistics-package-2/downloads/list")
@@ -814,7 +814,7 @@ class SalStat2App(wx.App):
 
     def GetVersion(self):
         return self.__version__
-    
+
 #---------------------------------------------------------------------------
 # This is the main interface of application
 class MainFrame(wx.Frame): #  wx.FileDropTarget
@@ -840,7 +840,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         self.tb1=             self._createTb1()
         self.formulaBarPanel= formulaBar( self, -1)
         # create the status bar
-	self.StatusBar= self._createStatusBar()
+        self.StatusBar= self._createStatusBar()
         self.log= self.logPanel= LogPanel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         self.defaultDialogSettings = {'Title': None,
                                       'icon': imagenes.logo16()}
@@ -852,68 +852,70 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         self.answerPanel=   NoteBookSheet(self, fb = self.formulaBarPanel)
         self.answerPanel2=  ScriptPanel(self, self.logPanel)
         # Redirecting the error messages and the std output to the logPanel
-	if not __debug__:
-	    sys.stderr= self.logPanel
-	    sys.stdout= self.logPanel
-	
-        self.scriptPanel=  wx.py.crust.Shell( self)
+        if not __debug__:
+            sys.stderr= self.logPanel
+            sys.stdout= self.logPanel
+
+        self.scriptPanel=  wx.py.sliceshell.SlicesShell( self) ##wx.py.crust.Shell( self, -1, introText="S2 interactive shell")
         # put the references into the main app
         appname.setItems(self.logPanel, self.grid, self.answerPanel, plot)
-        
+
         # create menubar
         self._createMenu()
-	
+
         # create plot selection panel
         grapHplotData=      self._autoCreateMenu( plotFunctions, twoGraph= True)
         self.plotSelection= createPlotSelectionPanel( self, size= wx.Size( 320, 480) )
         self.plotSelection.createPanels( grapHplotData)
         # organizing panels
         self.auiPanels = dict()
-	# adding panels to the aui
+        # adding panels to the aui
         self.m_mgr.AddPane( self.formulaBarPanel,
                             aui.AuiPaneInfo().Name("tb2").Caption(translate(u"Inspection Tool")).
-	                    ToolbarPane().Top().Row(1).
+                            ToolbarPane().Top().Row(1).
                             Position(1).CloseButton( False ))
-	self.m_mgr.AddPane( self.tb1, aui.AuiPaneInfo().Name("tb1").
-	                    Caption(translate(u"Basic Operations")).
+
+        self.m_mgr.AddPane( self.tb1, aui.AuiPaneInfo().Name("tb1").
+                            Caption(translate(u"Basic Operations")).
                             ToolbarPane().Top().Row(1).CloseButton( False ))
-	
-        self.m_mgr.AddPane(self.grid,
-                           aui.AuiPaneInfo().Centre().
-                           CaptionVisible(True).Caption(translate(u"Data Entry Panel")).
-                           MaximizeButton(True).MinimizeButton(False).PaneBorder( False ).
-                           CloseButton( False ).MinSize( wx.Size( 240,-1 )).Position(0))
+
+        self.m_mgr.AddPane( self.grid,
+                            aui.AuiPaneInfo().Centre().CaptionVisible(True).
+                            Caption(translate(u"Data Entry Panel")).
+                            MaximizeButton(True).MinimizeButton(False).Resizable(True).
+                            PaneBorder( False ).CloseButton( False ).
+                            MinSize( wx.Size( 240,-1 )).Position(0))
 
         self.m_mgr.AddPane(self.answerPanel,
                            aui.AuiPaneInfo().Caption(translate(u"Output Panel")).
-	                   Right().CaptionVisible(True).
-                           MinimizeButton(True).Resizable(True).MaximizeButton(True).
+                           Right().CaptionVisible(True).MinimizeButton(True).
+                           FloatingSize( wx.Size(300,300) ).
+                           Resizable(True).MaximizeButton(True).PinButton().
                            PaneBorder( False ).CloseButton( False ).BestSize( wx.Size( 400,-1 ))) # 
 
-        
+
         self.m_mgr.AddPane( self.answerPanel2, 
-	                    aui.AuiPaneInfo().Caption((translate(u"Script Panel"))).
-	                    Right().CaptionVisible(True).\
-	                    MinimizeButton(True).Resizable(True).MaximizeButton(True).\
-	                    PaneBorder( False ).CloseButton( False ))
+                            aui.AuiPaneInfo().Caption((translate(u"Script Panel"))).
+                            Right().CaptionVisible(True).PinButton().
+                            FloatingSize( wx.Size(400,500) ).
+                            MinimizeButton(True).Resizable(True).MaximizeButton(True).
+                            PaneBorder( False ).CloseButton( False ))
 
         self.m_mgr.AddPane( self.scriptPanel,
-	                    aui.AuiPaneInfo().Bottom().
-	                    CloseButton( False ).MaximizeButton( True ).
-	                    Caption((translate(u"Shell Panel"))).
-	                    MinimizeButton().PinButton( False ).
-	                    Dock().Resizable().FloatingSize( wx.DefaultSize ).
-	                    PaneBorder( False ).CaptionVisible(True).
-	                    DockFixed( True ).BestSize(wx.Size(-1,150)))
+                            aui.AuiPaneInfo().Caption((translate(u"Shell Panel"))).
+                            DefaultPane().Bottom().CloseButton( False ).MaximizeButton( True ).
+                            MinimizeButton().PinButton( ).Resizable(True).
+                            Dock().FloatingSize( wx.Size(260,200)).
+                            PaneBorder( False ).CaptionVisible(True).
+                            BestSize(wx.Size(-1,150)))
 
         self.m_mgr.AddPane( self.logPanel,
-	                    aui.AuiPaneInfo().Bottom().
-	                    CloseButton( False ).MaximizeButton( True ).
-	                    Caption((translate(u"Log Panel"))).
-	                    MinimizeButton().PinButton( False ).
-	                    Dock().Resizable().FloatingSize( wx.DefaultSize ).
-	                    PaneBorder( False ).CaptionVisible(True).
-	                    DockFixed( True ).BestSize(wx.Size(-1,150)))
+                            aui.AuiPaneInfo().Caption((translate(u"Log Panel"))).
+                            DefaultPane().Bottom().CloseButton( False ).MaximizeButton( True ).
+                            MinimizeButton().PinButton().Resizable(True).
+                            Dock().FloatingSize( wx.Size(260,200) ).
+                            PaneBorder( False ).CaptionVisible(True).
+                            BestSize(wx.Size(-1,150)))
 
         self.m_mgr.AddPane(self.plotSelection,
                            aui.AuiPaneInfo().Centre().Left().Show(False).
@@ -925,20 +927,20 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         # allowing the shell access to the selected objects
         self._sendObj2Shell(self.scriptPanel)
         self._BindEvents()
-	panel= self.m_mgr.GetPane( self.answerPanel2)
-	#self.m_mgr.InsertPane( self.answerPanel2, panel, insert_level= aui.AUI_INSERT_DOCK)
-	#panel.Row(0).Position(1)
+        #panel= self.m_mgr.GetPane( self.answerPanel2)
+        #self.m_mgr.InsertPane( self.answerPanel2, panel, insert_level= aui.AUI_INSERT_DOCK)
+        #panel.Row(0).Position(1)
         self.m_mgr.Update()
         # Saving the perspective
         self._defaultPerspective= self.m_mgr.SavePerspective()
         self.Center()
-	
+
     def _createStatusBar(self):
         StatusBar= self.CreateStatusBar( 3)
         StatusBar.SetStatusText( 'cells Selected:   '+'count:      '+'sum:    ', 1 )
         StatusBar.SetStatusText( 'S2', 2)
-	return StatusBar
-	
+        return StatusBar
+
     def _gridSetRenderer(self, grid):
         '''setting the renderer to the grid'''
         attr=   GridCellAttr()
@@ -957,7 +959,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
 
     def _sendObj2Shell(self, shell):
         # making available useful object to the shell
-	from slbTools import getPath
+        from slbTools import getPath
         env= {'cls':        self.logPanel.clearLog,
               'grid':       self.grid,
               'show':       self.logPanel.write,
@@ -971,11 +973,18 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
               'scipy':      scipy,
               'stats':      stats,
               'getPath':    getPath,
-              }
-	if wx.Platform == '__WXMSW__':
-	    #interactively work with ms excel under windows os
-	    from xl import Xl
-	    env['XL'] = Xl
+              }	
+        # path of modules
+        pathInit=    sys.argv[0]
+        pathInit=    pathInit.decode( sys.getfilesystemencoding())
+        pathModules= os.path.join( pathInit, 'Modules')
+        sys.path.append( pathModules)
+        # Add the path of modules
+
+        if wx.Platform == '__WXMSW__':
+            #interactively work with ms excel under windows os
+            from xl import Xl
+            env['XL'] = Xl
 ##'sm':         sm, stats models will be included later
 #'stats': self.stats,
 #'statistics':statistics,
@@ -983,11 +992,11 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         shell.interp.locals= env
 
     def _createTb1(self):
-	return Tb1(self, -1, wx.DefaultPosition, wx.DefaultSize, style = 0,
-	    agwStyle = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT,
-	    imageEmbed= imageEmbed,
-	    translation= translate)
-    
+        return Tb1(self, -1, wx.DefaultPosition, wx.DefaultSize, style = 0,
+                   agwStyle = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT,
+                   imageEmbed= imageEmbed,
+                   translation= translate)
+
     def _autoCreateMenu(self, module, twoGraph = False):
         # automatically creates a menu related with a specified module
         groups= module.__all__
@@ -1071,9 +1080,9 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
             (translate(u"&Help"),
              (##("Help\tCtrl-H",       imag.about(),  self.GoHelpSystem,  wx.ID_HELP),
               (translate(u"Check for a new version"), None, wx.GetApp()._checkUpdates, None),
-	      [u"--"],
-	      (translate(u"Visit The blog of S2"), None,  wx.GetApp()._visitBlog, None),
-	      (translate(u"&About..."),          imag.icon16(), self.ShowAbout,     wx.ID_ABOUT),)),
+              [u"--"],
+              (translate(u"Visit The blog of S2"), None,  wx.GetApp()._visitBlog, None),
+              (translate(u"&About..."),          imag.icon16(), self.ShowAbout,     wx.ID_ABOUT),)),
         )
         self.__createMenu(dat1, menuBar)
         self.SetMenuBar(menuBar)
@@ -1137,7 +1146,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         self.grid.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_BG_DCLICK, self._OnNtbDbClick )
         self.Bind( wx.EVT_CLOSE, self.EndApplication )
         self.sig= self.siguiente()
-	    	
+
     def siguiente(self):
         i= 0
         while 1:
@@ -1168,7 +1177,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
 
     def onDefaultPerspective(self, evt):
         self.m_mgr.LoadPerspective(self._defaultPerspective)
-	
+
     def GoClearData(self, evt):
         if not self.grid.hasSaved:
             # display discard dialog
@@ -1181,25 +1190,25 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
                 self.grid.SaveXls()
             elif response == wx.ID_NO:
                 pass
-	
+
         #<p> shows a new data entry frame
         # resizing the grid
         try:
             self.grid.DeleteCols( pos=0, numCols= int(self.grid.NumberCols))
         except wx._core.PyAssertionError:
             pass
-	
+
         try:
             self.grid.DeleteRows( pos=0, numRows= int(self.grid.NumberRows))
         except wx._core.PyAssertionError:
             pass
-	
+
         self.grid.AppendRows( 500)
         self.grid.AppendCols( 50)
         # <p> updating the renderer
         self._gridSetRenderer(self.grid)
         # /<p>
-	
+
         self.grid.path= None
         self.grid.hasSaved = False
         self.m_mgr.Update()
@@ -1334,7 +1343,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         else:
             panel.Show(False)
         self.m_mgr.Update()  
-	
+
     def EndApplication(self, evt):
         if len(self.grid.pageNames) == 0:
             wx.GetApp().frame.Destroy()
@@ -1405,7 +1414,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         wx.GetApp().output.addColData(colums[1])
         wx.GetApp().output.addRowData(['',"shorted Data","original position"], currRow= 0)
         self.logPanel.write(functionName + " successful")
-    
+
     def Destroy(self):
         super(MainFrame, self).Destroy()
 #--------------------------------------------------------------------------
