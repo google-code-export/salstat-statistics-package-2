@@ -1,4 +1,5 @@
 __all__ = ['Xl']
+# check http://win32com.goermezer.de/component/option,com_frontpage/Itemid,239/
 
 from os.path import isfile as _isfile
 
@@ -38,7 +39,12 @@ class Sheet:
                                self.sh.Cells( lastRow, colNumber)).ClearContents()
     def __repr__(self):
         return "%s(%r)" % (self.__class__, self.Name)
-
+    @property
+    def Range(self):
+        return self.sh.Range
+    @property
+    def Cells(self):
+        return self.sh.Cells
 class Sheets(object):
     def __init__(self, wb):
         self._wb =    wb
@@ -97,7 +103,7 @@ class Wb(object):
         return self._sh
     
     def addSheet(self, sheetName= None):
-        sh= self.wb.Add()
+        sh= self._wb.Add()
         if sheetName != None:
             if isinstance( sheetName, (str, unicode)):
                 sh.Name= sheetName
@@ -109,7 +115,7 @@ class Wb(object):
         return self._wb.name
     @property
     def activeSheet(self):
-        return self.xl.ActiveWorkbook.ActiveSheet
+        return Sheet(self._xl.ActiveWorkbook.ActiveSheet)
 
 class Wbs(object):
     def __init__(self, xl):
@@ -162,6 +168,12 @@ class Xl(object):
         self._xl.Workbooks.Add() 
         return self.wb[-1]
     
+    def _rgb_to_hex(self,r,g,b):
+        return '%02x%02x%02x'%(r,g,b)
+    def rgb(self, *rgb):
+        # changes an rgb to its int corresponding
+        s= self._rgb_to_hex(*rgb)
+        return int(s, 16)
     @property
     def Visible(self):
         return self._xl
@@ -174,7 +186,7 @@ class Xl(object):
             self._xl.Visible = False
         else:
             raise StandardError("Available options True/False")
-            return Sheet(self.wb.ActiveSheet)
+        return Sheet(self._xl.ActiveWorkbook.ActiveSheet)
         
     @property
     def ScreenUpdating(self):
@@ -187,25 +199,15 @@ class Xl(object):
             raise StandardError(" state not available only True/False is allowed")
     @property
     def ActiveWorkbook(self):
-        return self.xl.ActiveWorkbook
+        return Wb(self._xl, self._xl.ActiveWorkbook)
 
 if 0:
-    # add a new Workbook
-    wb= xl.Workbooks.Add()
-    # the number of sheets
-    nSheets= wb.Sheets.Count
-    # changing the name of the first sheet
-    ShNames= [sh.name for sh in wb.Sheets]
-    sh= wb.Sheets(ShNames[0])
-    # changing the name of the selected sheet
-    sh.name= u"Selobu"
-
     #=======================
     # creating a chart
     chart= wb.Charts.Add()
     chart.SetSourceData(sh.Range("$A:$B"))
     # destroy the chart
-    #chart.Delete()
+    chart.Delete()
 
     # deleting all charts in a worksheet
     try:
@@ -213,48 +215,20 @@ if 0:
     except:
         pass
 
-    # getting a range of data
-    rg= numpy.array(sh.Range("A1:C5").value)
+    
 
-    if 0:
-        #  reading the maximum num of columns and row of existing data
-        [maxRows, maxCols] = (sh.Rows.Count,sh.Columns.Count)
-        # readign the non empty columns and rows
-        [ lastColumn, lastRow]=(sh.Cells( 1, sh.Columns.Count).End(-4159).Column, sh.Cells(sh.Rows.Count,1).End(-4162).Row)
-        print [ lastColumn, lastRow]
-        # Setting cell value
-        sh.Cells(1,1).Value= 1
+    #  reading the maximum num of columns and row of existing data
+    [maxRows, maxCols] = (sh.Rows.Count,sh.Columns.Count)
+    # readign the non empty columns and rows
+    [ lastColumn, lastRow]=(sh.Cells( 1, sh.Columns.Count).End(-4159).Column, sh.Cells(sh.Rows.Count,1).End(-4162).Row)
+    print [ lastColumn, lastRow]
+    # Setting cell value
+    sh.Cells(1,1).Value= 1
 
-        # stop screen updating
-        xl.ScreenUpdating = False
-        # continue screen updating
-        xl.ScreenUpdating = True
-
-
-        def PutCol(colNumber, values, sheet= None):
-            if sheet== None:
-                sheet = wb.ActiveSheet
-            sheet.Range( sheet.Cells(1,colNumber), sheet.Cells(len(values), colNumber)).Value= [(val,) for val in values]
-
-        def GetCol(colNumber,sheet= None):
-            if sheet== None:
-                sheet = wb.ActiveSheet
-            lastRow= sheet.Cells( sheet.Rows.Count,colNumber).End(-4162).Row
-            values=  sheet.Range( sheet.Cells(1,colNumber), sheet.Cells(lastRow, colNumber)).Value
-            return [val[0] for val in values]
-
-    def GetColRange(colNumber,sheet= None):
-        if sheet== None:
-            sheet = wb.ActiveSheet
-        lastRow= sheet.Cells( sheet.Rows.Count,colNumber).End(-4162).Row
-        return sheet.Range( sheet.Cells(1,colNumber), sheet.Cells(lastRow, colNumber))
-
-    # clear a col
-    def ClearCol(colNumber, sheet= None):
-        if sheet== None:
-            sheet = wb.ActiveSheet
-        lastRow= sheet.Cells( sheet.Rows.Count,colNumber).End(-4162).Row
-        sheet.Range( sheet.Cells(1,colNumber), sheet.Cells(lastRow, colNumber)).ClearContents()
+    # stop screen updating
+    xl.ScreenUpdating = False
+    # continue screen updating
+    xl.ScreenUpdating = True
 
     # calling a function from excel
     xl.WorksheetFunction.Pmt(0.0825 /12.0, 360, -150000)
