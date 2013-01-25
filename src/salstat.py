@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-
-""" Copyright 2012 Sebastian Lopez Buritica, S2 Team,  licensed under GPL 3
+""" Copyright 2012 - 2013 Sebastian Lopez Buritica, S2 Team,  licensed under GPL 3
 
 SalStat Statistics Package. Copyright 2002 Alan James Salmoni. Licensed
 under the GNU General Public License (GPL 2) """
-
 
 ##-----------------------------
 ## STANDAR LIBRARY DEPENDENCES
@@ -17,6 +15,8 @@ import traceback
 # to be used with translation module
 import locale
 import glob
+from threading import Thread
+
 ##---------------------------------
 ## END STANDAR LIBRARY DEPENDENCES
 ##---------------------------------
@@ -119,7 +119,7 @@ import plotFunctions
 ##---------------------------------
 
 APPNAME= 'S2'
-__version__= '2.1 beta 5'
+__version__= '2.1 rc 1'
 inits= {}    # dictionary to hold the config values
 missingvalue= None ## It's not used
 imagenes= imageEmbed()
@@ -552,11 +552,43 @@ class Tb1(aui.AuiToolBar):
         self.grid.SelectAllCells(evt)
         evt.Skip()
 
+class _checkUpdates(Thread):
+    def run(self, *args, **params):
+        ## extracted from iep the Interactive Editor for Python
+        """ Check whether a newer version of S2 is available. """
+        # Get versions available
+        from urllib import urlopen
+        import re
+        url = "http://code.google.com/p/salstat-statistics-package-2/downloads/list"
+        try:
+            text = str( urlopen( url).read() )
+        except IOError:
+            ## it's not possible to connect with the main site
+            return
+        pattern = 'S2 [V|v](.{1,9}?)\.(.{1,9}?)' #\.exe\.zip
+        results= re.findall( pattern, text)
+        results= [(res[0] + '.' + res[-1]) for res in results]
+        # Produce single string with all versions ...
+        versions = ', '.join( set( results))
+        if not versions:
+            versions = '?'
+        # Define message
+        text = "Your version of S2 is: {}\n" 
+        text += "Available versions are: {}\n\n"         
+        text = text.format(__version__, versions)
+
+        # Create a message box
+        #structure = list()
+        #btn1 = ('StaticText', (text,))
+        #structure.append( [btn1] )
+        #Settings = {'Title': translate(u"Check for the latest version.")}
+        #dlg= dialog(parent= None, struct= structure, settings= Settings)
+        print text
+
 class SalStat2App(wx.App):
     # the main app
     def __init__(self, *args, **kwargs):
         wx.App.__init__(self, *args, **kwargs)
-
         # This catches events on Mac OS X when the app is asked to activate by some other
         # process
         # TODO: Check if this interferes with non-OS X platforms. If so, wrap in __WXMAC__ block!
@@ -621,7 +653,8 @@ class SalStat2App(wx.App):
         if len(sys.argv) > 1:
             for f in  sys.argv[1:]:
                 self.OpenFileMessage(f)
-        # check for updates
+        # check for updates by using a diferent threating
+        
         self._checkUpdates()
         return True
 
@@ -646,37 +679,12 @@ class SalStat2App(wx.App):
         import webbrowser
         webbrowser.open("http://s2statistical.blogspot.com/")
 
-    def _checkUpdates( self,*args, **params):
-        ## extracted from iep the Interactive Editor for Python
-        """ Check whether a newer version of S2 is available. """
-        # Get versions available
-        from urllib import urlopen
-        import re
-        url = "http://code.google.com/p/salstat-statistics-package-2/downloads/list"
-        try:
-            text = str( urlopen(url).read() )
-        except IOError:
-            ## it's not possible to connect with the main site
-            return
-        results = []
-        for pattern in ['S2 [V|v](.{1,9}?)\.(.{1,9}?)' ]: #\.exe\.zip
-            results.extend( re.findall(pattern, text) )
-        results= [(res[0] + '.' + res[-1]) for res in results]
-        # Produce single string with all versions ...
-        versions = ', '.join(set(results))
-        if not versions:
-            versions = '?'
-        # Define message
-        text = "Your version of S2 is: {}\n" 
-        text += "Available versions are: {}\n\n"         
-        text = text.format(self.GetVersion(), versions)
-
-        # Create a message box
-        structure = list()
-        btn1 = ('StaticText', (text,))
-        structure.append( [btn1] )
-        Settings = {'Title': translate(u"Check for the latest version.")}
-        dlg= dialog(parent= None, struct= structure, settings= Settings)
+    def _checkUpdates( self):
+        thread = _checkUpdates()
+        thread.setDaemon(True)
+        thread.start()
+        #thread.join()
+        return
         toUpdate= False
         if dlg.ShowModal() == wx.ID_OK:
             toUpdate= True
