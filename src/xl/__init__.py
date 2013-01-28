@@ -200,6 +200,9 @@ class Xl(object):
     @property
     def ActiveWorkbook(self):
         return Wb(self._xl, self._xl.ActiveWorkbook)
+    def OpenWorkbook(self, path):
+        self._xl.Workbooks.Open(path)
+        return self.wb[-1]
 
 if 0:
     #=======================
@@ -214,8 +217,6 @@ if 0:
         sh.ChartObjects().Delete()
     except:
         pass
-
-    
 
     #  reading the maximum num of columns and row of existing data
     [maxRows, maxCols] = (sh.Rows.Count,sh.Columns.Count)
