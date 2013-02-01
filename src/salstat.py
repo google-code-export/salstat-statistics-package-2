@@ -108,6 +108,7 @@ import statFunctions
 from script     import ScriptPanel
 from imagenes   import imageEmbed
 from helpSystem import Navegator
+from TreeCtrl   import TreePanel
 
 from dialogs import SaveDialog, SaveOneGridDialog, VariablesFrame #, DescriptivesFrame
 from dialogs import TransformFrame
@@ -584,7 +585,13 @@ class _checkUpdates(Thread):
         #Settings = {'Title': translate(u"Check for the latest version.")}
         #dlg= dialog(parent= None, struct= structure, settings= Settings)
         print text
-
+def hlp(param):
+    # replace the help function
+    try:
+        print param.__doc__
+    except:
+        return help(param)
+    
 class SalStat2App(wx.App):
     # the main app
     def __init__(self, *args, **kwargs):
@@ -679,7 +686,7 @@ class SalStat2App(wx.App):
         import webbrowser
         webbrowser.open("http://s2statistical.blogspot.com/")
 
-    def _checkUpdates( self):
+    def _checkUpdates( self,*args,**params):
         thread = _checkUpdates()
         thread.setDaemon(True)
         thread.start()
@@ -832,6 +839,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         # wx.FileDropTarget.__init__( self)
         self.translate= translate
         self.window=    self
+        
         # setting an appropriate size to the frame
         dp=    wx.Display()
         ca=    dp.GetClientArea()
@@ -841,43 +849,58 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         self.m_mgr=   aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
         self.appname= appname
+        
         #set icon for frame (needs x-platform separator!
         self.Icon=          appname.icon24
         self.DECIMAL_POINT= appname.DECIMAL_POINT
+        
         # create toolbars
         self.tb1=             self._createTb1()
         self.formulaBarPanel= formulaBar( self, -1)
+        
         # create the status bar
         self.StatusBar= self._createStatusBar()
         self.log= self.logPanel= LogPanel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         self.defaultDialogSettings = {'Title': None,
                                       'icon': imagenes.logo16()}
+        
         #<p> set up the datagrid
         self.grid=  Grids(self, -1)
+        
+        
+        
         self.grid.addPage( gridSize= (256,64))
         # set up the datagrid  /<p>
+        
         # -response panel
         self.answerPanel=   NoteBookSheet(self, fb = self.formulaBarPanel)
         self.answerPanel2=  ScriptPanel(self, self.logPanel)
+        
         # Redirecting the error messages and the std output to the logPanel
         if not __debug__:
             sys.stderr= self.logPanel
             sys.stdout= self.logPanel
-
+        
         self.scriptPanel=  wx.py.sliceshell.SlicesShell( self) ##wx.py.crust.Shell( self, -1, introText="S2 interactive shell")
+        
         # put the references into the main app
         appname.setItems(self.logPanel, self.grid, self.answerPanel, plot)
-
+        
+        # create the three panel
+        self.treePanel= TreePanel( self, self.log, style=wx.TAB_TRAVERSAL|wx.CLIP_CHILDREN)
+        
         # create menubar
-        self._createMenu()
-
+        self._createMenuUpdadteTree()
+        
         # create plot selection panel
         grapHplotData=      self._autoCreateMenu( plotFunctions, twoGraph= True)
         self.plotSelection= createPlotSelectionPanel( self, size= wx.Size( 320, 480) )
         self.plotSelection.createPanels( grapHplotData)
         # organizing panels
         self.auiPanels = dict()
+         
         # adding panels to the aui
+        # 
         self.m_mgr.AddPane( self.formulaBarPanel,
                             aui.AuiPaneInfo().Name("tb2").Caption(translate(u"Inspection Tool")).
                             ToolbarPane().Top().Row(1).
@@ -886,14 +909,21 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         self.m_mgr.AddPane( self.tb1, aui.AuiPaneInfo().Name("tb1").
                             Caption(translate(u"Basic Operations")).
                             ToolbarPane().Top().Row(1).CloseButton( False ))
-
+        # explorer panel
+        self.m_mgr.AddPane( self.treePanel,
+                            aui.AuiPaneInfo().Left().CaptionVisible(True).
+                            Caption(translate(u"Explorer Panel")).
+                            MaximizeButton(True).MinimizeButton(False).Resizable(True).
+                            PaneBorder( False ).CloseButton( False ).
+                            MinSize( wx.Size( 240,-1 )))
+        # data entry panel
         self.m_mgr.AddPane( self.grid,
                             aui.AuiPaneInfo().Centre().CaptionVisible(True).
                             Caption(translate(u"Data Entry Panel")).
                             MaximizeButton(True).MinimizeButton(False).Resizable(True).
                             PaneBorder( False ).CloseButton( False ).
                             MinSize( wx.Size( 240,-1 )).Position(0))
-
+        # output panel
         self.m_mgr.AddPane(self.answerPanel,
                            aui.AuiPaneInfo().Caption(translate(u"Output Panel")).
                            Right().CaptionVisible(True).MinimizeButton(True).
@@ -901,14 +931,14 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
                            Resizable(True).MaximizeButton(True).PinButton().
                            PaneBorder( False ).CloseButton( False ).BestSize( wx.Size( 400,-1 ))) # 
 
-
+        # scripting panel
         self.m_mgr.AddPane( self.answerPanel2, 
                             aui.AuiPaneInfo().Caption((translate(u"Script Panel"))).
-                            Right().CaptionVisible(True).PinButton().
+                            Right().CaptionVisible(True).PinButton().Show(False).
                             FloatingSize( wx.Size(400,500) ).
                             MinimizeButton(True).Resizable(True).MaximizeButton(True).
-                            PaneBorder( False ).CloseButton( False ))
-
+                            PaneBorder( False ).CloseButton( True ))
+        # shell panel
         self.m_mgr.AddPane( self.scriptPanel,
                             aui.AuiPaneInfo().Caption((translate(u"Shell Panel"))).
                             DefaultPane().Bottom().CloseButton( False ).MaximizeButton( True ).
@@ -916,7 +946,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
                             Dock().FloatingSize( wx.Size(260,200)).
                             PaneBorder( False ).CaptionVisible(True).
                             BestSize(wx.Size(-1,150)))
-
+        # log panel
         self.m_mgr.AddPane( self.logPanel,
                             aui.AuiPaneInfo().Caption((translate(u"Log Panel"))).
                             DefaultPane().Bottom().CloseButton( False ).MaximizeButton( True ).
@@ -924,11 +954,11 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
                             Dock().FloatingSize( wx.Size(260,200) ).
                             PaneBorder( False ).CaptionVisible(True).
                             BestSize(wx.Size(-1,150)))
-
+        # chart selection panel
         self.m_mgr.AddPane(self.plotSelection,
                            aui.AuiPaneInfo().Centre().Left().Show(False).
                            CaptionVisible(True).Caption((translate(u"Chart selection panel"))).
-                           MinimizeButton().Resizable(True).MaximizeButton(True).
+                           MinimizeButton().Resizable(True).MaximizeButton(True).PinButton().
                            PaneBorder( False ).CloseButton( True ).MinSize( wx.Size( 240,-1 )))
 
         self.currPanel = None
@@ -942,7 +972,10 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         # Saving the perspective
         self._defaultPerspective= self.m_mgr.SavePerspective()
         self.Center()
-
+        
+    def _updatetree(self, data):
+        self.treePanel.treelist= data
+    
     def _createStatusBar(self):
         StatusBar= self.CreateStatusBar( 3)
         StatusBar.SetStatusText( 'cells Selected:   '+'count:      '+'sum:    ', 1 )
@@ -968,6 +1001,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
     def _sendObj2Shell(self, shell):
         # making available useful object to the shell
         from slbTools import getPath
+        # defining the help function
         env= {'cls':        self.logPanel.clearLog,
               'grid':       self.grid,
               'show':       self.logPanel.write,
@@ -981,6 +1015,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
               'scipy':      scipy,
               'stats':      stats,
               'getPath':    getPath,
+              'help':       hlp,
               }	
         # path of modules
         pathInit=    sys.argv[0]
@@ -1021,33 +1056,37 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
             subgroup.append( ( translate( attr.__name__), result))
         return subgroup
 
-    def _createMenu(self):
+    def _createMenuUpdadteTree(self):
         # Get icons for toolbar
-        imag = imageEmbed()
+        imag =       imageEmbed()
         NewIcon =    imag.exporCsv()
         OpenIcon =   imag.folder()
         SaveIcon =   imag.disk()
         SaveAsIcon = imag.save2disk()
-        #PrintIcon =  imag.printer()
         CutIcon =    imag.edit_cut()
         CopyIcon =   imag.edit_copy()
         PasteIcon =  imag.edit_paste()
+        ExitIcon =   imag.stop()
+        #PrintIcon =  imag.printer()
         #PrefsIcon =  imag.preferences()
         #HelpIcon =   imag.about()
         #UndoIcon =   imag.edit_undo()
         #RedoIcon =   imag.edit_redo()
-        ExitIcon =   imag.stop()
         #FindRIcon =  imag.findr()
         #sixsigma =   imag.sixsigma16()
         #set up menus
         menuBar = wx.MenuBar()
-
+        
         # to be used for statistical menu autocreation
         from statFunctions import *
         from plotFunctions import *
-
+        
         statisticalMenus= self._autoCreateMenu( statFunctions)
         plotMenus= self._autoCreateMenu( plotFunctions)
+        
+        # updating the tree
+        self._updatetree( statisticalMenus)
+        
         #add contents of menu
         dat1= (
             (translate(u"&File"),
@@ -1060,6 +1099,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
               [u"--"],
               [translate(u"E&xit\tCtrl-Q"),       ExitIcon,   self.EndApplication,  wx.ID_EXIT],
               )),
+            
             (translate(u"&Edit"),
              ([translate(u"Cu&t"),           CutIcon,         self.tb1.CutData,     wx.ID_CUT],
               [translate(u"&Copy"),          CopyIcon,        self.tb1.CopyData,    wx.ID_COPY],
@@ -1070,27 +1110,34 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
               [u"--"],
               [translate(u"Delete Current Column"), None,     self.tb1.DeleteCurrentCol,     None],
               [translate(u"Delete Current Row"),    None,     self.tb1.DeleteCurrentRow,     None],)),
-            (translate(u"&Preferences"),
-             ((translate(u"Variables..."),             None,  self.GoVariablesFrame,     None ),
-              [translate(u"Add Columns and Rows..."),  None,  self.GoEditGrid,     None],
-              [translate(u"Change Cell Size..."),      None,  self.GoGridPrefFrame,     None],
-              [translate(u"Change the Font..."),       None,  self.GoFontPrefsDialog,     None],
-              [u"--"],
-              [translate(u"Load default perspective"),      None, self.onDefaultPerspective, None],)),
+            
             (translate(u"P&reparation"),
              ([translate(u"Transform Data"),           None,  self.GoTransformData,     None],
               [translate(u"short data"),               None,  self.shortData,     None],)),
+            
             (translate(u"S&tatistics"),
              statisticalMenus),
+            
             (translate(u"&Graph"),
-             [ (translate(u"Show/Hide the plot panel"), None, self.showPlotPanel,       None),] +
-             [plotMenu for plotMenu in plotMenus]),
+             plotMenus),
+             
             (translate(u"&Help"),
              (##("Help\tCtrl-H",       imag.about(),  self.GoHelpSystem,  wx.ID_HELP),
+              (translate(u"&Preferences"),
+               ((translate(u"Variables..."),             None,  self.GoVariablesFrame,     None ),
+                [translate(u"Add Columns and Rows..."),  None,  self.GoEditGrid,     None],
+                [translate(u"Change Cell Size..."),      None,  self.GoGridPrefFrame,     None],
+                [translate(u"Change the Font..."),       None,  self.GoFontPrefsDialog,     None],
+                [u"--"],
+                [(translate(u"Show/Hide the plot panel"), None, self.showPlotPanel,       None),],
+                [(translate(u"Show/Hide the script panel"), None, self.showScriptPanel,       None),],
+                [translate(u"Load default perspective"),      None, self.onDefaultPerspective, None],)),
+              [u"--"],
               (translate(u"Check for a new version"), None, wx.GetApp()._checkUpdates, None),
               [u"--"],
               (translate(u"Visit The blog of S2"), None,  wx.GetApp()._visitBlog, None),
-              (translate(u"&About..."),          imag.icon16(), self.ShowAbout,     wx.ID_ABOUT),)),
+              (translate(u"&About..."),          imag.icon16(), self.ShowAbout,     wx.ID_ABOUT),
+              )),
         )
         self.__createMenu(dat1, menuBar)
         self.SetMenuBar(menuBar)
@@ -1350,8 +1397,16 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
             panel.Show(True)
         else:
             panel.Show(False)
-        self.m_mgr.Update()  
-
+        self.m_mgr.Update()
+        
+    def showScriptPanel(self, evt):
+        panel = self.m_mgr.GetPane(self.answerPanel2)
+        if not panel.IsShown():
+            panel.Show(True)
+        else:
+            panel.Show(False)
+        self.m_mgr.Update()
+        
     def EndApplication(self, evt):
         if len(self.grid.pageNames) == 0:
             wx.GetApp().frame.Destroy()
