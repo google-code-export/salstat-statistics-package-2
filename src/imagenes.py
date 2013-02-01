@@ -5,27 +5,25 @@ __all__ =['imageEmbed']
 from cStringIO import StringIO
 from base64 import b64decode, encodestring
 from os.path import exists
-from wx import BitmapFromImage, ImageFromStream, IconFromBitmap, App
+from wx import BitmapFromImage, ImageFromStream, IconFromBitmap, App, GetApp
 from wx._core import PyNoAppError
 
 class imageEmbed:
     def __init__(self):
-        pass
+        if GetApp()== None:
+            app= App(0)
+    
+    def __getitem__(self, key):
+        # given the name of the picture it tries to search
+        return getattr(self, key)()
+        
     def __conversion__(self, data):
         jpg1 = b64decode(data)
         # convert jpg stream to a data stream
         stream1 = StringIO(jpg1)
         # convert to a bitmap
         u = False
-        try:
-            return BitmapFromImage( ImageFromStream( stream1))
-        except PyNoAppError:
-            app= App()
-            u = True
-            return BitmapFromImage( ImageFromStream( stream1))
-        finally:
-            if u:
-                app.Destroy()
+        return BitmapFromImage( ImageFromStream( stream1))
     
     def convertFromfile(self,pathFile, show = False):
         # muestra el string correspondiente para embeber una imagen en codigo
