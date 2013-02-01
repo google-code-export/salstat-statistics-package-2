@@ -17,7 +17,8 @@ import traceback
 from  warnings import warn
 from copy import deepcopy
 
-__WILDCARD= "Supported Files (*.txt;*.csv;*.xls)|*.txt;*.csv;*.xls|"\
+__WILDCARD= "Supported Files (*.txt;*.csv;*.xlsx;*.xls)|*.txt;*.csv;*xlsx;*.xls|"\
+            "Excel 2010 File (*.xlsx)|*.xlsx|" \
             "Excel 2003 File (*.xls)|*.xls|" \
             "Txt file (*.txt)|*.txt|"    \
             "Csv file (*.csv)|*.csv" 
@@ -37,7 +38,7 @@ def getPath(wildcard= __WILDCARD):
     fullPath= dlg.Path 
     junk, filterIndex = os.path.splitext(fileName)
     try:
-        if filterIndex == '.xls':
+        if filterIndex in ('.xls','.xlsx'):
             return fullPath
         elif filterIndex in ('.txt', '.csv'):
             return fullPath
