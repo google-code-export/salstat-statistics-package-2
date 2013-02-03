@@ -1,17 +1,14 @@
 import matplotlib.pyplot as plt
-import numpy as np
 from matplotlib.image import BboxImage
-
 from matplotlib._png import read_png
 import matplotlib.colors
-
 from matplotlib.transforms import Bbox, TransformedBbox
 from matplotlib.ticker import ScalarFormatter
 
+import numpy as np
 import os.path
 import sys
 import wx
-
 
 class _RibbonBox(object):
     def __init__(self, color, figName, 
@@ -46,10 +43,10 @@ class _RibbonBox(object):
         self.im = im
 
     def get_stretched_image(self, stretch_factor):
-        stretch_factor = max(stretch_factor, 1)
+        stretch_factor = max( stretch_factor, 1)
         ny, nx, nch = self.im.shape
-        ny2 = int(ny*stretch_factor)
-        stretched_image = np.empty((ny2, nx, nch),
+        ny2 = int( ny*stretch_factor)
+        stretched_image = np.empty( (ny2, nx, nch),
                                    self.im.dtype)
         cut = self.im[self.cut_location,:,:]
         stretched_image[:,:,:] = cut
@@ -110,18 +107,23 @@ def plothist(ax=      None,
         IMAGESPATH= os.path.join(wx.GetApp().installDir, 'nicePlot','images')
     except:
         path1= sys.argv[0]
+        if os.path.isfile(path1):
+            path1= os.path.split(path1)[0]
         path1= path1.decode( sys.getfilesystemencoding())
-        IMAGESPATH= os.path.join( path1, 'nicePlot', 'images')
+        if os.path.split( path1)[-1] == 'nicePlot':
+            IMAGESPATH= os.path.join( path1, 'images')
+        else:
+            IMAGESPATH= os.path.join( path1, 'nicePlot', 'images')
            
     # se generan los colores en forma aleatoria
-    box_colors = _generatecolors(colors,len(xdata))   
+    box_colors = _generatecolors( colors,len( xdata))
     # se genera la figura
     fig = plt.gcf()
     if ax == None:
         ax = plt.gca()
-    fmt = ScalarFormatter(useOffset=False)
-    ax.xaxis.set_major_formatter(fmt)
-    for year, h, bc in zip(xdata, ydata, box_colors):
+    fmt = ScalarFormatter( useOffset=False)
+    ax.xaxis.set_major_formatter( fmt)
+    for year, h, bc in zip( xdata, ydata, box_colors):
         bbox0 = Bbox.from_extents(year-0.5, 0.0, year+0.5, h) # year-0.48, 0., year+0.48, year-1 year+1
         bbox = TransformedBbox(bbox0, ax.transData)
         rb_patch = _RibbonBoxImage(bbox, bc, figName, 
@@ -138,16 +140,16 @@ def plothist(ax=      None,
             elif str(type(h)) == "<type 'numpy.int32'>":
                 ax.annotate(r"%d" % h,
                         (year, h), va="bottom", ha="center")
-    patch_gradient = BboxImage(ax.bbox,
+    patch_gradient = BboxImage( ax.bbox,
                                interpolation="bicubic",
                                zorder=0.1,
                                )
-    gradient = np.zeros((2, 2, 4), dtype=np.float)
+    gradient = np.zeros( (2, 2, 4), dtype=np.float)
     gradient[:,:,:3] = [1, 1, 1]
     gradient[:,:,3] = [[0.2, 0.3],[0.2, 0.5]] # alpha channel
-    patch_gradient.set_array(gradient)
-    ax.add_artist(patch_gradient)
-    ax.set_xlim(xdata[0]-1.0, xdata[-1]+1.0)
+    patch_gradient.set_array( gradient)
+    ax.add_artist( patch_gradient)
+    ax.set_xlim( xdata[0]-1.0, xdata[-1]+1.0)
     # se determinan los limites para el eje Y
     try:
         ydatamax = ydata.max() # en el caso de informacion proveniente de numpy
@@ -159,10 +161,10 @@ def plothist(ax=      None,
         maxYlimit = 1.0
     else:
         maxYlimit = ydatamax*(1.0-0.05)
-    ax.set_ylim(0, maxYlimit)
-    return (fig,plt)
+    ax.set_ylim( 0, maxYlimit)
+    return ( fig,plt)
 
-def _generatecolors(colors, ndata):
+def _generatecolors( colors, ndata):
     if isinstance(colors,(str,unicode)):
         colors= [colors.upper() for i in range(ndata)]
     else:
@@ -220,8 +222,13 @@ def plotBar(ax=      None,
         IMAGESPATH= os.path.join(wx.GetApp().installDir, 'nicePlot','images')
     except:
         path1= sys.argv[0]
+        if os.path.isfile(path1):
+            path1= os.path.split(path1)[0]
         path1= path1.decode( sys.getfilesystemencoding())
-        IMAGESPATH= os.path.join( path1, 'nicePlot', 'images')
+        if os.path.split( path1)[-1] == 'nicePlot':
+            IMAGESPATH= os.path.join( path1, 'images')
+        else:
+            IMAGESPATH= os.path.join( path1, 'nicePlot', 'images')
         
     if len(xdata) != len(ydata):
         raise StandardError('xdata and ydata must have the same len()')
@@ -291,8 +298,8 @@ if __name__ == '__main__':
                        figName= 'redunca'
                        )
     plot.show()
-    fig,plot = plothist(xdata=  np.arange( 1, 40),
-                        ydata=  np.arange( 2, 41), 
+    fig,plot = plothist(xdata=  np.arange( 1, 50),
+                        ydata=  np.arange( 2, 51), 
                         colors= 'blue',
                         figName= 'redunca')
     plot.show()

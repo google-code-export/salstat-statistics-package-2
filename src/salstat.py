@@ -1001,7 +1001,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
     def _sendObj2Shell(self, shell):
         # making available useful object to the shell
         from slbTools import getPath
-        # defining the help function
+        import statsmodels.api as sm
         env= {'cls':        self.logPanel.clearLog,
               'grid':       self.grid,
               'show':       self.logPanel.write,
@@ -1016,7 +1016,8 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
               'stats':      stats,
               'getPath':    getPath,
               'help':       hlp,
-              }	
+              'sm':         sm,
+              }
         # path of modules
         pathInit=    sys.argv[0]
         pathInit=    pathInit.decode( sys.getfilesystemencoding())
