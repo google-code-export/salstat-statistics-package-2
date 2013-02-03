@@ -4,7 +4,7 @@ Created on 17/05/2012
 @author: sebastian lopez buritica
 license: GPL3
 '''
-
+from imagenes import imageEmbed
 import collections
 import tempfile, xlwt
 import os
@@ -12,10 +12,39 @@ import sys
 import wx
 import numpy as np
 from openStats import statistics
+import traceback
 
 from  warnings import warn
 from copy import deepcopy
 
+__WILDCARD= "Supported Files (*.txt;*.csv;*.xlsx;*.xls)|*.txt;*.csv;*xlsx;*.xls|"\
+            "Excel 2010 File (*.xlsx)|*.xlsx|" \
+            "Excel 2003 File (*.xls)|*.xls|" \
+            "Txt file (*.txt)|*.txt|"    \
+            "Csv file (*.csv)|*.csv" 
+
+def getPath(wildcard= __WILDCARD):
+    dlg = wx.FileDialog(None, "Load Data File", "","",
+                        wildcard= wildcard,
+                        style = wx.OPEN)
+    icon = imageEmbed().logo16()
+    dlg.SetIcon(icon)
+    
+    if dlg.ShowModal() != wx.ID_OK:
+        dlg.Destroy()
+        return None
+    
+    fileName= dlg.GetFilename()
+    fullPath= dlg.Path 
+    junk, filterIndex = os.path.splitext(fileName)
+    try:
+        if filterIndex in ('.xls','.xlsx'):
+            return fullPath
+        elif filterIndex in ('.txt', '.csv'):
+            return fullPath
+    except (Exception, TypeError) as e:
+        traceback.print_exc( file = self.log)
+            
 def siguiente():
     '''genera una serie de datos continuos
     >> sig = siguiente()

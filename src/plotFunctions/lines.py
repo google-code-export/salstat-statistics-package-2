@@ -28,7 +28,7 @@ class lines( _neededLibraries):
             self.log.write(self.translate(u"You need some data to draw a graph!"))
             return
         
-        return self.data2Plotdiaglog( None, self.columnNames)
+        return self.data2Plotdiaglog( None, self.columnNames, title= self.name)
     
     def _showGui_GetValues(self):
         dlg= self._dialog()
@@ -98,7 +98,7 @@ class stem( _neededLibraries):
             self.log.write(self.translate(u"You need some data to draw a graph!"))
             return
         
-        return self.data2Plotdiaglog( None, self.columnNames)
+        return self.data2Plotdiaglog( None, self.columnNames, title= self.name)
     
     def _showGui_GetValues(self):
         dlg= self._dialog()
@@ -166,7 +166,7 @@ class linesOfMean( _neededLibraries):
             self.log.write(self.translate(u"You need some data to draw a graph!"))
             return
         
-        return self.data2Plotdiaglog( None, self.columnNames)
+        return self.data2Plotdiaglog( None, self.columnNames, title= self.name)
     
     def _showGui_GetValues(self):
         dlg= self._dialog()
@@ -282,7 +282,7 @@ class areaPlot( lines):
             self.log.write(self.translate(u"You need some data to draw a graph!"))
             return
         
-        return self.data2Plotdiaglog( None, self.columnNames)
+        return self.data2Plotdiaglog( None, self.columnNames, title= self.name)
     
     def _showGui_GetValues(self):
         dlg= self._dialog()
@@ -351,7 +351,7 @@ class multipleAreaPlot( lines):
             self.log.write(self.translate(u"You need some data to draw a graph!"))
             return
         
-        return self.data2Plotdiaglog( None, self.columnNames)
+        return self.data2Plotdiaglog( None, self.columnNames, title= self.name)
     
     def _showGui_GetValues(self):
         dlg= self._dialog()

@@ -4,22 +4,32 @@ Created on 09/12/2010
 
 @author: usuario
 """
-
+__all__ = ['NewGrid']
 import wx
 import wx.grid
 
 def translate(a):
     return a
-
-from imagenes import imageEmbed
+ECXISTIMAGES = True
+try:
+    from imagenes import imageEmbed
+    EXISTIMAGES = True
+except ImportError:
+    EXISTIMAGES = False
+    
 from GridCopyPaste import PyWXGridEditMixin
 
+def Translate(obj):
+    return obj
 class _MyContextGrid(wx.Menu):
     # Clase para hacer el menu contextual del grid
     def __init__(self,parent,*args,**params):
         wx.Menu.__init__(self)
         self.parent = parent
-        translate= wx.GetApp().translate
+        try:
+            translate= wx.GetApp().translate
+        except AttributeError:
+            translate = Translate
         cortar =     wx.MenuItem(self, wx.NewId(), translate('&Cut\tCtrl+X'))
         copiar =     wx.MenuItem(self, wx.NewId(), translate('C&opy\tCtrl+C'))
         pegar =      wx.MenuItem(self, wx.NewId(), translate('&Paste\tCtrl+V'))
@@ -30,13 +40,14 @@ class _MyContextGrid(wx.Menu):
         delCol=      wx.MenuItem(self, wx.NewId(), translate('Del Col'))
         ##exportarCsv= wx.MenuItem(self, wx.NewId(), '&Export\tCtrl+E')
         
-        imagenes = imageEmbed()
-        cortar.SetBitmap(imagenes.edit_cut())
-        copiar.SetBitmap(imagenes.edit_copy())
-        pegar.SetBitmap(imagenes.edit_paste())
-        eliminar.SetBitmap(imagenes.cancel())
-        deshacer.SetBitmap(imagenes.edit_undo())
-        rehacer.SetBitmap(imagenes.edit_redo())
+        if EXISTIMAGES:
+            imagenes = imageEmbed()
+            cortar.SetBitmap(imagenes.edit_cut())
+            copiar.SetBitmap(imagenes.edit_copy())
+            pegar.SetBitmap(imagenes.edit_paste())
+            eliminar.SetBitmap(imagenes.cancel())
+            deshacer.SetBitmap(imagenes.edit_undo())
+            rehacer.SetBitmap(imagenes.edit_redo())
         ##exportarCsv.SetBitmap(imagenes.exporCsv())
 
         self.AppendSeparator()
@@ -65,40 +76,71 @@ class _MyContextGrid(wx.Menu):
         
     def OnCortar(self, evt):
         self.parent.OnCut()
+        evt.Skip()
 
     def OnCopiar(self, evt):
         self.parent.Copy()
+        evt.Skip()
         
     def OnPegar(self, evt):
         self.parent.OnPaste()
-
+        evt.Skip()
+        
     def OnEliminar(self, evt):
         self.parent.Delete()
+        evt.Skip()
         
     def OnRehacer(self, evt):
         self.parent.Redo()
+        evt.Skip()
 
     def OnDeshacer(self, evt):
         self.parent.Undo()
+        evt.Skip()
     
     def OnExportarCsv(self,evt):
         self.parent.OnExportCsv()
+        evt.Skip()
         
     def OnDelRow(self, evt):
-        if hasattr(self.parent, 'DeleteCurrentCol'):
-            self.parent.DeleteCurrentRow(evt= None)
+        try:
+            # searching for the parent in the simplegrid parent
+            parent= self.parent.Parent
+        except AttributeError:
+            parent= None
+            
+        if hasattr(parent, 'DeleteCurrentRow'):
+            parent.DeleteCurrentRow(evt)
         else:
-            currentRow= self.parent.GetGridCursorCol()
+            currentRow, left, rows,cols = self.parent.GetSelectionBox()[0]
+            if rows < 1:
+                return
             self.parent.DeleteRows(currentRow, 1)
             self.parent.AdjustScrollbars()
+        
+        self.parent.hasChanged= True
+        self.parent.hasSaved=   False
+        evt.Skip()
     
     def OnDelCol(self, evt):
-        if hasattr(self.parent, 'DeleteCurrentRow'):
-            self.parent.DeleteCurrentCol(evt= None)
+        try:
+            # searching for the parent in the simplegrid parent
+            parent= self.parent.Parent
+        except AttributeError:
+            parent= None
+            
+        if hasattr(parent,  'DeleteCurrentCol'):
+            parent.DeleteCurrentCol(evt)
         else:
-            currentcol= self.parent.GetGridCursorRow()
-            self.parent.DeleteCols(currentcol, 1)
+            currentRow, currentCol, rows,cols = self.parent.GetSelectionBox()[0]
+            if cols < 1:
+                return
+            self.parent.DeleteCols(currentCol, 1)
             self.parent.AdjustScrollbars()
+        
+        self.hasChanged= True
+        self.hasSaved=   False
+        evt.Skip()
     
 ###########################################################################
 ## Class NewGrid
@@ -226,7 +268,7 @@ class NewGrid(wx.grid.Grid):
         return selectCol
     
 def test():
-    # para verificar el correcto funcionamiento del grid
+    # para verificar el funcionamiento correcto del grid
     pass
 if __name__ == '__main__':    
         app = wx.PySimpleApp()

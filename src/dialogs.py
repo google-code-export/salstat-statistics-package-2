@@ -174,6 +174,121 @@ class makePairs(wx.Panel):
 
 #  END MAKE PAIRS /<p>
 
+# aui notebook wrapper
+class auiNotebookWrap( wx.Panel):
+    def numPage(self):
+	i=1
+	while True:
+	    yield i
+	    i+= 1
+    def __init__( self, parent,id= wx.ID_ANY, *args, **params):
+        '''parent, *args of the panel'''
+	wx.Panel.__init__(self, parent, id, *args, **params)
+            
+        self.m_mgr = wx.aui.AuiManager()
+        self.m_mgr.SetManagedWindow( self )
+        
+        self.m_notebook= wx.aui.AuiNotebook( self, wx.ID_ANY,
+                                           wx.DefaultPosition, wx.DefaultSize,
+                                           wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|
+	                                   wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_BOTTOM|
+	                                   wx.aui.AUI_NB_TAB_SPLIT)
+        
+        
+        self.m_mgr.AddPane( self.m_notebook, wx.aui.AuiPaneInfo().CenterPane().Dock().
+                            Resizable(True).FloatingSize( wx.DefaultSize ).
+                            DockFixed( True ).Centre().
+                            CloseButton(False ) )
+        self.npage = self.numPage()
+        self.currentPage = None
+        self.pageNames= dict()
+	
+	self.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChange)
+        self.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.delPage)
+	
+        self.Bindded() # call your custom callbacks
+        self.Layout()
+        self.m_mgr.Update()
+        self.Center( )
+	
+    # <p> you should override this
+    def Bindded(self):
+	# add some custom callbacks
+	pass 
+    def addOnePage(self, id= wx.ID_ANY):
+        #overwrite this method to create your own custom widget
+	return wx.TextCtrl( self, id)
+    # end override this /<p>
+    
+    # implementing a wrap to the current notebook
+    def __getattribute__( self, name):
+        '''wraps the funtions to the grid
+        emulating a grid control'''
+        try:
+            return object.__getattribute__( self, name)
+        except AttributeError:
+            if self.GetPageCount( ) != 0:
+                if str(type(self.currentPage)) == "<class 'wx._core._wxPyDeadObject'>":
+                    self.currentPage == None
+                    return
+                currPage= self.currentPage
+                return currPage.__getattribute__( name)
+            raise AttributeError
+    
+    def getPageNames( self):
+        return self.pageNames.keys()
+
+    def getHeader( self,pageName):
+        if not (pageName in self.pageNames.keys()):
+            raise StandardError('The page does not exist')
+        page= self.pageNames[pageName]
+        return page.getHeader()
+
+    def OnNotebookPageChange( self,evt):
+        self.currentPage= self.m_notebook.GetPage( evt.Selection)
+        
+    def GetPageCount( self):
+        # 21/04/2011
+        # retorna el numero de paginas que hay en el notebook
+        return self.m_notebook.PageCount
+    
+    def addPage( self, data= dict()):
+        defaultData = {'name': u''}
+        for key, value in data.items():
+            if defaultData.has_key(key):
+                defaultData[key] = value
+        # adiciona una pagina al notebook grid
+        newName= defaultData['name'] +'_'+ str(self.npage.next())
+        self.pageNames[newName]= self.addOnePage( )
+        self.currentPage=  self.pageNames[newName]
+        ntb= self.pageNames[newName]
+        self.m_notebook.AddPage(ntb, newName, False )
+        # se hace activo la pagina adicionada
+        self.m_notebook.SetSelection(self.m_notebook.GetPageCount()-1)
+        return ntb # retorna el objeto ntb
+    
+    def delPage( self, evt, page= None):
+        # si no se ingresa un numero de pagina se
+        #     considera que se va a borrar la pagina actual
+        # las paginas se numeran mediante numeros desde el cero
+        if page == None:
+            # se considera que la pagina a borrar es la pagina actual
+            #self.m_notebook.GetCurrentPage().Destroy() # borra el contenido de la pagina
+            if self.m_notebook.GetSelection() > -1:
+                self.m_notebook.DeletePage(self.m_notebook.GetSelection())
+            return
+        page = int(page)
+        if page <0:
+            return
+        if page > self.GetPageCount():
+            raise IndexError("Page doesn't exist")
+        parent = self.pages[page].GetParent()
+        parent.DeletePage(page)
+        
+    def newScript(self, event):
+        self.addPage()
+#
+
 #<p> INIT SELECT A TYPE OF CHART
 class _panelSubPlot(wx.ScrolledWindow):
     def __init__(self, *args, **param):
@@ -274,22 +389,52 @@ class SaveDialog(wx.Dialog):
 	wx.GetApp().frame.grid.hasSaved = True
 	wx.GetApp().frame.grid.SaveXlsAs(self) # will it be ASCII or XML?
 	# wx.GetApp().output.Close(True)
-	self.Close(True)
+	self.Destroy()
 	wx.GetApp().frame.Close(True)
 
     def DiscardData(self, evt):
-	self.Close(True)
+	self.Destroy()
 	wx.GetApp().frame.grid.hasSaved = True
 	wx.GetApp().frame.Close(True)
 
 
     def CancelDialog(self, evt):
+	self.Destroy()
+	
+class SaveOneGridDialog(SaveDialog):
+    def __init__(self, *args, **params):
+	self.grid= args[0]
+	SaveDialog.__init__(self, *args, **params)
+	
+    def SaveData(self, evt):
+	try:
+	    wx.GetApp().frame.grid.hasSaved = True
+	    wx.GetApp().frame.grid.SaveXlsAs(self)
+	    self.grid.delPage()
+	except:
+	    raise
+	finally:
+	    self.Close(True)
+	    
+    def DiscardData(self, evt):
+	try:
+	    self.grid.delPage()
+	except:
+	    raise
+	finally:
+	    self.Close(True)
+	    
+    def CancelDialog(self, evt):
 	self.Close(True)
+    
 
 class VariablesFrame(wx.Dialog):
     def __init__(self,parent,id):
 	wx.Dialog.__init__(self, parent,id,"S2 - Variables", \
 	                   size=(380, 480,))
+	if len(wx.GetApp().frame.grid.pageNames) == 0:
+	    self.Close(True)
+	    return
 	translate= wx.GetApp().translate
 	self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
 	self.m_mgr = wx.aui.AuiManager()
@@ -363,144 +508,6 @@ class VariablesFrame(wx.Dialog):
     def OnCloseVariables(self, evt):
 	self.Close(True)
 
-#---------------------------------------------------------------------------
-# user selects which cols to analyse, and what stats to have
-DescList= [u'N',
-           u'Sum',
-           u'Mean',
-           u'missing',
-           u'Variance',
-           u'Standard Deviation',
-           u'Standard Error',
-           u'Sum of Squares',#'Sum of Squared Devs',
-           u'Coefficient of Variation',
-           u'Minimum',
-           u'Maximum',
-           u'Range',
-           u'Number Missing',
-           u'Geometric Mean',
-           u'Harmonic Mean',
-           u'Skewness',u'Kurtosis', 
-           u'Median',        #'Median Absolute Deviation',
-           u'Mode', ] #'Interquartile Range', 'Number of Unique Levels']
-
-class ManyDescriptives:
-    def __init__(self, source, ds):
-	__x__= len(ds)
-	if __x__ == 0:
-	    return
-	data= {'name': "Many Descriptives",
-	       'size': (0,0),
-	       'nameCol': list(),
-	       'data': []}
-	data['nameCol'].append('Statistic')
-	data['nameCol'].extend([ds[i].Name for i in range(__x__)])
-	listaDatos= ((u'N', 'N'),
-	             (u'Sum', 'suma'),
-	             (u'Mean', 'mean'),
-	             (u'missing', 'missing'),
-	             (u'Variance', 'variance'), # changing by the correct
-	             (u'Standard Deviation', 'stddev'),
-	             (u'Standard Error', 'stderr'),
-	             (u'Sum of Squares', 'sumsquares'),
-	             (u'Sum of Squared Devs', 'ssdevs'),
-	             (u'Coefficient of Variation', 'coeffvar'),
-	             (u'Minimum', 'minimum'),
-	             (u'Maximum', 'maximum'),
-	             (u'Range', 'range'),
-	             (u'Number Missing', 'missing'),
-	             (u'Geometric Mean', 'geomean'),
-	             (u'Harmonic Mean', 'harmmean'),
-	             (u'Skewness', 'skewness'),
-	             (u'Kurtosis', 'kurtosis'),
-	             (u'Median', 'median'),
-	             (u'Median Absolute Deviation', 'mad'),
-	             (u'Mode', 'mode'),#    'Interquartile Range', None,
-	             (u'Number of Unique Levels', 'numberuniques')
-	             )
-	funcTrans= dict()
-	for key,value in listaDatos:
-	    funcTrans[wx.GetApp().translate(key)] = value
-
-	items= source.DescChoice.GetItems()
-	itemsSelected = source.DescChoice.GetChecked()
-	if len( itemsSelected) == 0:
-	    return
-	firstcol= [wx.GetApp().translate(u'Descriptives')]
-	firstcol.extend([items[pos] for pos in itemsSelected])
-	wx.GetApp().output.addColData( firstcol, wx.GetApp().translate(u'Descriptive statistics'))
-	itemNamesSelected= [ items[ itemnumber] for  itemnumber in itemsSelected ]
-	for i, nameCol in zip(range(__x__), data['nameCol'][1:]):
-	    statsi = ds[i]
-	    result= [nameCol]
-	    result.extend([getattr( statsi,funcTrans[ itemNameSelected]) for itemNameSelected in itemNamesSelected])
-	    wx.GetApp().output.addColData( result)
-
-class DescriptivesFrame(wx.Dialog):
-    def __init__( self, parent, id ):
-	wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY,
-	                     title = wx.GetApp().translate("Descriptive Statistics"),
-	                     pos = wx.DefaultPosition, size = wx.Size( 420,326 ),
-	                     style = wx.DEFAULT_DIALOG_STYLE )
-
-	self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
-	icon = imageEmbed().logo16()
-	self.SetIcon(icon)
-	ColumnList, self.colnums  = wx.GetApp().frame.grid.GetUsedCols()
-
-	self.m_mgr = wx.aui.AuiManager()
-	self.m_mgr.SetManagedWindow( self )
-	newDescList= [parent.translate(DescListi) for DescListi in DescList]
-	self.DescChoice = CheckListBox(self, wx.ID_ANY,  wx.DefaultPosition, wx.DefaultSize, newDescList, 0 )
-	self.m_mgr.AddPane( self.DescChoice, wx.aui.AuiPaneInfo() .Center() .
-	                    Caption( wx.GetApp().translate(u"Select Descriptive Statistics") ).CloseButton( False ).
-	                    PaneBorder( False ).Dock().Resizable().FloatingSize( wx.DefaultSize ).
-	                    DockFixed( False ).BottomDockable( False ).TopDockable( False ) )
-
-	self.ColChoice = CheckListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, ColumnList, 0 )
-	self.m_mgr.AddPane( self.ColChoice, wx.aui.AuiPaneInfo() .Center() .Caption( wx.GetApp().translate(u"Select Column(s) to Analyse") ).
-	                    CloseButton( False ).PaneBorder( False ).Dock().Resizable().
-	                    FloatingSize( wx.Size( 161,93 ) ).DockFixed( False ).BottomDockable( False ).
-	                    TopDockable( False ).Row( 1 ).Layer( 0 ) )
-
-	self.m_panel1 = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-	self.m_mgr.AddPane( self.m_panel1, wx.aui.AuiPaneInfo() .Bottom() .CaptionVisible( False ).
-	                    CloseButton( False ).PaneBorder( False ).Dock().Resizable().
-	                    FloatingSize( wx.DefaultSize ).DockFixed( False ).LeftDockable( False ).
-	                    RightDockable( False ).MinSize( wx.Size( -1,30 ) ) )
-
-	bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
-
-	okaybutton = wx.Button( self.m_panel1, wx.ID_ANY, wx.GetApp().translate(u"Ok"), wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
-	bSizer2.Add( okaybutton, 0, wx.ALL, 5 )
-
-	cancelbutton = wx.Button( self.m_panel1, wx.ID_ANY, wx.GetApp().translate(u"Cancel"), wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
-	bSizer2.Add( cancelbutton, 0, wx.ALL, 5 )
-
-	self.m_panel1.SetSizer( bSizer2 )
-	self.m_panel1.Layout()
-	bSizer2.Fit( self.m_panel1 )
-
-	self.m_mgr.Update()
-	self.Centre( wx.BOTH )
-
-	self.Bind(wx.EVT_BUTTON, self.OnOkayButton,          id = okaybutton.GetId())
-	self.Bind(wx.EVT_BUTTON, self.OnCloseContDesc,       id = cancelbutton.GetId())
-
-    def OnOkayButton(self, evt):
-	descs = []
-	for i in range(len(self.colnums)):
-	    if self.ColChoice.IsChecked(i):
-		realColi = self.colnums[i]
-		name = wx.GetApp().frame.grid.GetColLabelValue(realColi)
-		descs.append(statistics(
-		    wx.GetApp().frame.grid.CleanData(realColi), name,
-		    wx.GetApp().frame.grid.missing))
-	ManyDescriptives(self, descs)
-	self.Close(True)
-
-    def OnCloseContDesc(self, evt):
-	self.Close(True)
 
 #---------------------------------------------------------------------------
 # instance of the tool window that contains the test buttons
@@ -624,7 +631,7 @@ class NumTextCtrl(wx.TextCtrl):
 	self.allowed = [ str( x) for x in range( 10)]
 	self.allowed.extend([ wx.GetApp().DECIMAL_POINT, '-'])
 
-    def _textChange(self, event):
+    def _textChange(self, evt):
 	texto = self.Value
 
 	if len(texto) == 0:
@@ -642,7 +649,7 @@ class NumTextCtrl(wx.TextCtrl):
 	    return
 
 	self.SetValue(newstr)
-
+	evt.Skip()
     def GetAsNumber(self):
 	prevResult = self.Value
 	if len(prevResult) == 0:
@@ -664,7 +671,7 @@ class IntTextCtrl( NumTextCtrl):
 	self.Bind( wx.EVT_TEXT, self._textChange)
 	self.allowed = [ str( x) for x in range( 10)]
 
-    def _textChange( self, event):
+    def _textChange( self, evt):
 	texto = self.Value
 
 	newstr= [ x for x in texto if x in self.allowed]
@@ -680,7 +687,8 @@ class IntTextCtrl( NumTextCtrl):
 	    return
 
 	self.SetValue( newstr)
-
+	evt.Skip()
+	
     def GetAsNumber( self):
 	prevResult = self.Value
 	if len( prevResult) == 0:

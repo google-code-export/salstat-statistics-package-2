@@ -6,18 +6,20 @@ Created on 25/10/2010
 '''
 
 import wx
-from NewGrid import NewGrid # grid with context menu
+from gridLib import NewGrid # grid with context menu
 from imagenes import imageEmbed
 import wx.grid
 from slbTools import isnumeric, isiterable
-from gridCellRenderers import floatRenderer
+from gridLib import floatRenderer
 import wx.aui
-from numpy import ndarray, ravel
+from numpy import ndarray, ravel, genfromtxt
 import traceback
 from slbTools import ReportaExcel
 import xlrd
 from easyDialog import Dialog as dialog
 import os
+DEFAULT_FONT_SIZE = 12
+DECIMAL_POINT = '.' # default value
 
 def numPage():
     i = 1
@@ -62,11 +64,11 @@ class MyGridPanel( wx.Panel, object ):
         # Cell Defaults
         self.SetDefaultCellAlignment( wx.ALIGN_LEFT, wx.ALIGN_TOP )
         #< don't change this line
-        self.sizer.Add( self.m_grid , 1, wx.ALL|wx.EXPAND, 5 )
+        self.sizer.Add( self.m_grid , 1, wx.EXPAND, 5 )
         # don't change this line/>
         self.SetSizer(self.sizer)
         self.Fit()
-         
+
     def __getattribute__(self, name):
         '''wraps the functions to the grid
         emulating a grid control'''
@@ -74,40 +76,40 @@ class MyGridPanel( wx.Panel, object ):
             return object.__getattribute__(self, name)
         except AttributeError:
             return self.m_grid.__getattribute__(name)
-        
+
     def _getCol(self, colNumber, includeHeader= False):
         if isinstance(colNumber, (str, unicode)):
             # searching for a col with the name:
             if not(colNumber in self.colNames):
                 raise TypeError('You can only use a numeric value, or the name of an existing column')
-            
+
             for pos, value in enumerate(self.colNames):
                 if value == colNumber:
                     colNumber= pos
                     break
-        
+
         if not isnumeric(colNumber):
             raise TypeError('You can only use a numeric value, or the name of an existing column')
-        
+
         if colNumber > self.GetNumberRows():
             raise StandardError('The maximum column allowed is %i, but you selected %i'%(self.GetNumberRows()-1, colNumber))
-        
+
         return self._getColNumber(colNumber, includeHeader)
-    
+
     def _getColNumber(self, colNumber, includeHeader= False):
         if not isnumeric(colNumber):
             raise TypeError('Only allow numeric values for the column, but you input '+ str(type(colNumber)))
-        
+
         colNumber= int(colNumber)
         if colNumber < 0 or colNumber > self.GetNumberCols():
             raise StandardError('The minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
-        
+
         result = [self.GetCellValue(row, colNumber) for row in range(self.GetNumberRows())]
         if includeHeader:
             result.insert(0, self.GetColLabelValue(colNumber))
         return result
-    
-    
+
+
     def _getRow( self, rowNumber):
         if isinstance( rowNumber, (str, unicode)):
             # searching for a col with the name:
@@ -117,26 +119,26 @@ class MyGridPanel( wx.Panel, object ):
                 if value == rowNumber:
                     rowNumber= pos
                     break
-                
+
         if not isnumeric(rowNumber):
             raise TypeError('You can only use a numeric value, or the name of an existing row')
-        
+
         if rowNumber > self.GetNumberRows():
             raise StandardError('The maximum row allowed is %i, but you selected %i'%(self.GetNumberRows()-1, rowNumber))
-        
+
         return self._getRowNumber(rowNumber)
-    
-    
+
+
     def _getRowNumber(self, rowNumber):
         if not isnumeric( rowNumber):
             raise TypeError('Only allow numeric values for the row, but you input '+ type(rowNumber).__str__())
-        
+
         rowNumber= int(rowNumber)
         if rowNumber < 0 or rowNumber > self.GetNumberRows():
             raise StandardError('The minimum accepted row is 0, and the maximum is %i'%self.GetNumberRows()-1)
-        
+
         return [self.GetCellValue( rowNumber, col) for col in range( self.GetNumberCols())]
-    
+
     def putCol( self, colNumber, data):
         if isinstance( colNumber, (str, unicode)):
             if not(colNumber in self.colNames):
@@ -145,37 +147,37 @@ class MyGridPanel( wx.Panel, object ):
                 if value == colNumber:
                     colNumber= pos
                     break
-                
+
         if not isnumeric( colNumber):
             raise TypeError('You can only use a numeric value, or the name of an existing column')
-        
+
         colNumber= int(colNumber)        
         if colNumber < 0 or colNumber > self.GetNumberCols():
             raise StandardError('The minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
-        
+
         self.clearCol( colNumber)
-        
+
         if isinstance( data,(str, unicode)):
             data= [data]
-        
+
         if isinstance( data, (int, long, float)):
             data= [data]
-        
+
         if isinstance( data, (ndarray),):
             data= ravel( data)
-        
+
         rows2add= len( data) - self.GetNumberRows()
         if rows2add > 0:
             if len( data) > 1e6:
                 data= data[:1e6]
                 rows2add= len( data) - self.GetNumberRows()
             self.AppendRows( rows2add)
-        
+
         try:
             dp= wx.GetApp().DECIMAL_POINT
         except:
-            d= '.'
-            
+            dp= DECIMAL_POINT
+
         newdat= list()
         for row, dat in enumerate( data):
             if isinstance( dat, (str, unicode)):
@@ -188,28 +190,28 @@ class MyGridPanel( wx.Panel, object ):
                     dat= str(dat)
                 except:
                     dat= None
-                    
+
             newdat.append(dat)
-            
+
         for row, dat in enumerate(newdat):
             self.SetCellValue(row, colNumber, dat)
-            
-        
-            
+
+
+
     def clearCol( self, colNumber):
         if colNumber < 0 or colNumber > self.GetNumberCols():
             raise StandardError( 'The minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
-        
+
         for row in range( self.GetNumberRows()):
             self.SetCellValue( row, colNumber, u'')
-    
+
     def clearRow( self, rowNumber):
         if rowNumber < 0 or rowNumber > self.GetNumberRows():
             raise StandardError( 'The minimum accepted row is 0, and the maximum is %i'%self.GetNumberRols()-1)
-        
+
         for col in range( self.GetNumberCols()):
             self.SetCellValue( rowNumber, col, u'')
-    
+
     @property
     def rowNames( self):
         return [self.GetRowLabelValue(row) for row in range(self.GetNumberRows())]
@@ -217,16 +219,16 @@ class MyGridPanel( wx.Panel, object ):
     def rowNames( self, rowNames):
         if isinstance(rowNames, (str, unicode)):
             rolNames= [rowNames]
-            
+
         if not isiterable(rowNames):
             raise TypeError('rowNames must be an iterable object')
-        
+
         if len(rowNames) == 0:
             return
-        
+
         for rownumber, rowname in enumerate(rowNames):
             self.SetRowLabelValue(rownumber, rowname)
-    
+
     @property
     def colNames(self):
         return [self.GetColLabelValue(col) for col in range(self.GetNumberCols())]
@@ -234,16 +236,16 @@ class MyGridPanel( wx.Panel, object ):
     def colNames(self, colNames):
         if isinstance(colNames, (str, unicode)):
             colNames= [colNames]
-            
+
         if not isiterable(colNames):
             raise TypeError('colNames must be an iterable object')
-        
+
         if len(colNames) == 0:
             return
-        
+
         for colnumber, colname in enumerate(colNames):
             self.SetColLabelValue(colnumber, colname)
-            
+
 class MyFileDropTarget(wx.FileDropTarget):
     def __init__( self, wxPanel ):
         wx.FileDropTarget.__init__(self)
@@ -252,24 +254,27 @@ class MyFileDropTarget(wx.FileDropTarget):
     def OnDropFiles( self, x, y, filenames):
         log= wx.GetApp().Logg
         log.write( "\n%d file(s) dropped at %d,%d:" %
-                              (len( filenames), x, y))
+                   (len( filenames), x, y))
         for file in filenames:
             log.write( file)
-            
+
         # try to load the file
         if isinstance(filenames, (str, unicode)):
             filenames= [filenames]
-            
+
         if len(filenames) == 0:
             log.write("You don't select any file")
             return
-        
+
         # selecting just the first filename
         filename= filenames[0]
-        self.window.LoadXls(filename)
-            
+        # self.window.LoadXls(filename)
+        self.window.LoadFile(evt= None, fullpath= filename)
+
 class SimpleGrid( MyGridPanel):# wxGrid
-    def __init__( self, parent, log= None, size= (1000,100)):
+    def __init__( self, parent, log= None, size= (800,20)):
+        self.rowsizes= dict()
+        self.colsizes= dict()
         self.NumSheetReport = 0
         if log == None:
             try:
@@ -283,25 +288,88 @@ class SimpleGrid( MyGridPanel):# wxGrid
         # allowing drop files into the sheet
         dropTarget = MyFileDropTarget( self)
         self.m_grid.SetDropTarget(dropTarget)
-        self.Saved = True
+        self.grid = self.m_grid # adding some compatibility
+        self.m_grid.zoom= 1.0
         self.moveTo = None
         if wx.Platform == "__WXMAC__":
             self.SetGridLineColour(wx.BLACK)
-        self.setPadreCallBack( self)
+        # self.setPadreCallBack( self)
         self.SetColLabelAlignment( wx.ALIGN_CENTER, wx.ALIGN_CENTER)
         self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
-        ###### self.m_grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.onCellChanged)
+        self.m_grid.Bind(wx.grid.EVT_GRID_CELL_CHANGE, self.onCellChanged)
         self.wildcard = "Any File (*.*)|*.*|" \
             "S2 Format (*.xls)|*.xls"
         #<p> used to check changes iin the grid
         self.hasChanged = True 
         self.usedCols= ([], [],)
         # </p>
-        
+        self.m_grid.Bind(wx.grid.EVT_GRID_EDITOR_CREATED, self.onCellEdit)
+        self.m_grid.Bind(wx.EVT_MOUSEWHEEL, self.OnMouseWheel)
+
+    def zoom_rows(self):
+        """Zooms grid rows"""
+        for rowno in xrange(self.grid.GetNumberRows()):
+            if rowno not in self.rowsizes.keys():
+                self.rowsizes[rowno] = self.GetRowSize(rowno)
+
+            self.grid.SetRowSize(rowno, self.rowsizes[rowno]*self.m_grid.zoom)
+
+        if "label" not in self.rowsizes:
+            self.rowsizes["label"] = self.GetRowLabelSize()
+        self.SetRowLabelSize(self.rowsizes["label"] * self.m_grid.zoom)
+
+    def zoom_cols(self):
+        """Zooms grid columns"""
+
+        tabno = 1 #self.current_table
+        for colno in xrange(self.grid.GetNumberCols()):
+            if colno not in self.colsizes.keys():
+                self.colsizes[colno] = self.grid.GetColSize(colno)
+
+            self.grid.SetColSize(colno, self.colsizes[colno]*self.m_grid.zoom)
+
+        if "label" not in self.colsizes:
+            self.colsizes["label"] = self.grid.GetColLabelSize()
+        self.grid.SetColLabelSize(self.colsizes["label"] * self.m_grid.zoom)
+
+    def zoom_labels(self):
+        """Zooms grid labels"""
+
+        labelfont = self.grid.GetLabelFont()
+        labelfont.SetPointSize(max(1, int(DEFAULT_FONT_SIZE * self.m_grid.zoom)))
+        self.SetLabelFont(labelfont)
+
+    def OnMouseWheel(self, event):
+        """Event handler for mouse wheel actions
+
+        Invokes zoom when mouse when Ctrl is also pressed
+
+        """
+
+        if event.ControlDown():
+            zoomstep = 0.05 * event.LinesPerAction
+
+            if event.WheelRotation > 0:
+                self.m_grid.zoom += zoomstep
+            else:
+                if self.m_grid.zoom > 0.6:
+                    self.m_grid.zoom -= zoomstep
+
+
+            self.zoom_rows()
+            self.zoom_cols()
+            self.zoom_labels()
+
+            self.ForceRefresh()
+        else:
+            event.Skip()
+
     def setLog(self, log):
         self.log= log
-    #def onCellChanged(self, evt):
-    #    self.Saved = False
+    def onCellChanged(self, evt):
+        self.hasChanged= True
+        self.hasSaved=   False
+        evt.Skip()
 
     def RangeSelected(self, evt):
         if evt.Selecting():
@@ -310,6 +378,9 @@ class SimpleGrid( MyGridPanel):# wxGrid
 
     def CutData(self, evt):
         self.Delete()
+        self.hasChanged= True
+        self.hasSaved=   False
+        evt.Skip()
 
     def CopyData(self, evt):
         self.Copy()
@@ -317,19 +388,35 @@ class SimpleGrid( MyGridPanel):# wxGrid
 
     def PasteData(self, evt):
         self.OnPaste()
+        self.hasChanged= True
+        self.hasSaved=   False
+        evt.Skip()
 
     def DeleteCurrentCol(self, evt):
-        currentcol = self.GetGridCursorCol()
-        self.DeleteCols(currentcol, 1)
-        self.AdjustScrollbars()
+        currentRow, currentCol, rows,cols = self.GetSelectionBox()[0]
+        if cols < 1:
+            return
+        # A wxpython bug was detected
+        # the app crash when trying to delete a colum
+        # with a custom attr
+        # deleting all data
+        self.clearCol(currentCol)
+        self.SetColLabelValue(currentCol, self.generateLabel( currentCol))
+        #self.DeleteCols( pos = currentCol, numCols = 1)
+        self.AdjustScrollbars( )
         self.hasChanged= True
-
+        self.hasSaved=   False
+        evt.Skip()
 
     def DeleteCurrentRow(self, evt):
-        currentrow = self.GetGridCursorRow()
-        self.DeleteRows(currentrow, 1)
+        currentRow, currentCol, rows,cols = self.GetSelectionBox()[0]
+        if rows < 1:
+            return
+        self.m_grid.DeleteRows(currentRow, 1)
         self.AdjustScrollbars()
         self.hasChanged= True
+        self.hasSaved=   False
+        evt.Skip()
 
     def SelectAllCells(self, evt):
         self.SelectAll()
@@ -344,6 +431,8 @@ class SimpleGrid( MyGridPanel):# wxGrid
                 self.SetColAttr( colNumber, attr)
         self.AdjustScrollbars()
         self.hasChanged= True
+        self.hasSaved=   False
+        evt.Skip()
 
     # function finds out how many cols contain data - all in a list
     #(ColsUsed) which has col #'s
@@ -351,7 +440,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
         # improving the performance
         if not self.hasChanged:
             return self.usedCols
-        
+
         ColsUsed = []
         colnums = []
         dat = ''
@@ -362,7 +451,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
                 if dat != '':
                     tmp += 1
                     break # it's just needed to search by the first element
-                
+
             if tmp > 0:
                 ColsUsed.append(self.GetColLabelValue(col))
                 colnums.append(col)
@@ -392,7 +481,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
         return RowsUsed
 
     def SaveXlsAs(self, evt):
-        self.SaveXls(None, True)
+        return self.SaveXls(None, True)
 
     def SaveXls(self, *args):
         if len(args) == 1:
@@ -402,7 +491,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
         else:
             saveAs= args[1]
         self.reportObj= ReportaExcel(cell_overwrite_ok = True)
-        if self.Saved == False or saveAs: # path del grid
+        if self.hasSaved == False or saveAs: # path del grid
             # mostrar el dialogo para guardar el archivo
             dlg= wx.FileDialog(self, "Save Data File", "" , "",\
                                "Excel (*.xls)|*.xls| \
@@ -412,7 +501,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
                 if not self.path.endswith('.xls'):
                     self.path= self.path+'.xls'       
             else:
-                return
+                return (False, None)
             self.reportObj.path = self.path
         else:
             self.reportObj.path = self.path
@@ -436,13 +525,29 @@ class SimpleGrid( MyGridPanel):# wxGrid
             self.reportObj.writeByCols(result, self.NumSheetReport)
         self.reportObj.save()
         self.hasSaved = True
-        self.log.write("The file %s was successfully saved!" % self.reportObj.path)
+        filename= os.path.split(self.path)[-1]
+        if len( filename) > 8:
+            filename = filename[:8]
+        print "The file %s was successfully saved!" % self.reportObj.path
+        return (True, filename)
 
-    def LoadFile(self, evt):
+    def LoadFile(self, evt, **params):
+        try:
+            fullpath= params.pop('fullpath')
+            if fullpath.endswith('xls') or fullpath.endswith('xlsx'):
+                return self.LoadXls(fullpath)
+            elif fullpath.endswith('csv') or fullpath.endswith('txt'):
+                return self.LoadCsvTxt(fullpath)
+
+        except KeyError:
+            pass
         '''check the file type selected and redirect
         to the corresponding load function'''
-        wildcard= "Excel 2003 File (*.xls)|*.xls|" \
-            "Txt file (*.txt)|*.txt|"    \
+        wildcard=  "Suported files (*.txt;*.csv;*.xls;*.xlsx)|*.txt;*.csv;*.xls;*.xlsx|" \
+            "Excel Files (*xlsx;*xlsm;*.xls)|*.xlsx;*.xlsm;*.xls|"\
+            "Excel 2007 File (*xlsx)|*.xlsx|"\
+            "Excel 2003 File (*.xls)|*.xls|" \
+            "Txt file (*.txt)|*.txt|" \
             "Csv file (*.csv)|*.csv"        
         dlg = wx.FileDialog(self, "Load Data File", "","",
                             wildcard= wildcard,
@@ -452,19 +557,18 @@ class SimpleGrid( MyGridPanel):# wxGrid
             dlg.SetIcon(icon)
         except:
             pass
-        
+
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
-            return
-        
+            return (False, None)
+
         fileName= dlg.GetFilename()
         fullPath= dlg.Path 
         junk, filterIndex = os.path.splitext(fileName)
         try:
-            if filterIndex == '.xls':
+            if filterIndex in ('.xls','.xlsx',):
                 return self.LoadXls(fullPath)
-            
-            elif filterIndex in ('.txt', '.csv'):
+            elif filterIndex in ('.txt', '.csv',):
                 return self.LoadCsvTxt(fullPath)
         except (Exception, TypeError) as e:
             traceback.print_exc( file = self.log)
@@ -473,72 +577,132 @@ class SimpleGrid( MyGridPanel):# wxGrid
             self.hasSaved= True
             # emptying the undo - redo buffer
             self.emptyTheBuffer()
-            
-        
+            if evt != None:
+                evt.Skip()
+
     def LoadCsvTxt(self, fullPath):
         '''use the numpy library to load the data'''
-        btn1= []
-        btn2= []
-        btn3= []
-        btn4= []
+        # comments='#', delimiter=None, skiprows=0, skip_header=0, skip_footer=0, converters=None, missing='', missing_values=None, filling_values=None, usecols=None, names=None, excludelist=None, deletechars=None, replace_space='_', autostrip=False, case_sensitive=True, defaultfmt='f%i', unpack=None, usemask=False, loose=True, invalid_raise=True
+        btn1= ['FilePath',    [fullPath] ]
+        txt1= ['StaticText',  ['comments symbol'] ]
+        btn2= ['TextCtrl',    [] ]
+        txt2= ['StaticText',  ['delimiter symbol']]
+        txt3= ['StaticText',  ['Number of header lines to skip']]
+        btn3= ['IntTextCtrl', []]
+        txt4= ['StaticText',  ['Number of footer lines to skip']]
+        btn4= ['CheckBox',    ['Has Header']]
+
         structure= []
-        structure.append()
-        setting = {'Title': 'Select a sheet',
-                   '_size':  wx.Size(250,220)}
-        
+        structure.append([btn1 ])
+        structure.append([btn2, txt1])
+        structure.append([btn2, txt2])
+        structure.append([btn3, txt3])
+        structure.append([btn3, txt4])
+        structure.append([btn4])
+
+        setting = {'Title': 'Select a sheet'}
+
         dlg = dialog(self, struct= structure, settings= setting)
         if dlg.ShowModal() != wx.ID_OK:
-            return
-    
+            dlg.Destroy()
+            return False, None
+
+        (f_name, comments, delimiter, header2skip, footer2skip, hasHeader)= dlg.GetValue()
+        if delimiter== u'':
+            delimiter= None
+
+        if header2skip == None:
+            header2skip= 0
+
+        if footer2skip == None:
+            footer2skip= 0
+
+        if comments == u'':
+            comments= '#'
+
+        dlg.Destroy()
+        # reading the data
+        data = genfromtxt(f_name, comments= comments,
+                          dtype= None,
+                          delimiter=  delimiter,
+                          skip_header= header2skip,
+                          skip_footer= footer2skip)
+        # putting the data inito the Data Entry Panel
+        if hasHeader:
+            initRow= 1
+        else:
+            initRow= 0
+
+        grid= wx.GetApp().inputGrid    
+        for col in range(data.shape[1]):
+            grid.PutCol( col, data[initRow:,col])
+
+        # Renaming the column of the Data Entry Panel
+        if hasHeader:
+            headerData= [data[0, col] for col in range(data.shape[1]) ]
+            for pos,x in enumerate(headerData):
+                if not isinstance( x, (str, unicode)):
+                    x.__str__()
+                # writing the data
+                grid.SetColLabelValue(pos, x)
+
+        self.hasChanged= True
+        self.hasSaved=   True
+        return (True, os.path.split(f_name)[-1])
+
     def LoadXls(self, fullPath):
-        self.log.write('import xlrd', None)
+        print 'import xlrd'
         filename= fullPath
         filenamestr= filename.__str__()
-        self.log.write('# remember to write an  r   before the path', None)
-        self.log.write('filename= ' + "'" + filename.__str__() + "'", None)
+        print '# remember to write an  r   before the path'
+        print 'filename= ' + "'" + filename.__str__() + "'"
         # se lee el libro
         wb= xlrd.open_workbook(filename)
-        self.log.write('wb = xlrd.open_workbook(filename)', None)
+        print 'wb = xlrd.open_workbook(filename)', None
         sheets= [wb.sheet_by_index(i) for i in range(wb.nsheets)]
-        self.log.write('sheets= [wb.sheet_by_index(i) for i in range(wb.nsheets)]', None)
+        print 'sheets= [wb.sheet_by_index(i) for i in range(wb.nsheets)]'
         sheetNames = [sheet.name for sheet in sheets]
-        self.log.write('sheetNames= ' + sheetNames.__str__(), None)
+        print 'sheetNames= ' + sheetNames.__str__()
         bt1= ('Choice',     [sheetNames])
         bt2= ('StaticText', ['Select a sheet to be loaded'])
         bt3= ('CheckBox',   ['Has header'])
         setting = {'Title': 'Select a sheet',
                    '_size':  wx.Size(250,220)}
-        
+
         dlg = dialog(self, struct=[[bt1,bt2],[bt3]], settings= setting)
         if dlg.ShowModal() != wx.ID_OK:
-            return
+            return (False, None)
+
         (sheetNameSelected, hasHeader)= dlg.GetValue()
         if sheetNameSelected == None:
-            return
+            return (False, None)
+
         if not isinstance(sheetNameSelected, (str, unicode)):
-            self.log.write('sheetNameSelected= ' + "'" + sheetNameSelected.__str__() + "'",None)
-        else:
-            self.log.write('sheetNameSelected= ' + "'" + sheetNameSelected + "'",None)
-        self.log.write('hasHeader= ' + hasHeader.__str__(), None)
+            sheetNameSelected = sheetNameSelected.__str__()
+
+        print 'sheetNameSelected= ' + "'" + sheetNameSelected + "'"
+        print 'hasHeader= ' + hasHeader.__str__()
         dlg.Destroy()
-        
+
         if not ( sheetNameSelected in sheetNames):
-            return
-        
+            return (False, None)
+
         self._loadXls(sheetNameSelected= sheetNameSelected,
                       sheets= sheets,
                       sheetNames= sheetNames,
                       filename= filename,
                       hasHeader= hasHeader)
-        self.log.write('''grid._loadXls(sheetNameSelected= sheetNameSelected,
+        print '''grid._loadXls(sheetNameSelected= sheetNameSelected,
                       sheets= sheets,
                       sheetNames= sheetNames,
                       filename= filename,
-                      hasHeader= hasHeader)''', None)
-        
-        self.log.write('Importing  : %s successful'%filename)
+                      hasHeader= hasHeader)'''
+
+        print 'Importing  : %s successful'%filename
         self.hasChanged= True
-        
+        self.hasSaved=   True
+        return (True, sheetNameSelected)
+
     def _loadXls( self, *args,**params):
         sheets=         params.pop( 'sheets')
         sheetNames=     params.pop( 'sheetNames')
@@ -549,82 +713,88 @@ class SimpleGrid( MyGridPanel):# wxGrid
             if sheetname == sheetNameSelected:
                 sheetSelected= sheet
                 break
-            
+
         #<p> updating the path related to the new open file
         self.path= filename
-        self.Saved= True
+        self.hasSaved= True
         # /<p>
-        
-        # se lee el tamanio del sheet seleccionado
-        #size = (sheetSelected.nrows, sheetSelected.ncols)
+
         # se hace el grid de tamanio 1 celda y se redimensiona luego
         self.ClearGrid()
-        size = (self.NumberRows, self.NumberCols)
+        # reading the size of the needed sheet
+        currentSize= (self.NumberRows, self.NumberCols)
         # se lee el tamanio de la pagina y se ajusta las dimensiones
-        newSize = (sheetSelected.nrows, sheetSelected.ncols)
-        if newSize[0]-size[0] > 0:
-            self.AppendRows(newSize[0]-size[0])
+        neededSize = (sheetSelected.nrows, sheetSelected.ncols)
+        if neededSize[0]-currentSize[0] > 0:
+            self.AppendRows(neededSize[0]-currentSize[0])
 
-        if newSize[1]-size[1] > 0:
-            self.AppendCols(newSize[1]-size[1])
+        if neededSize[1]-currentSize[1] > 0:
+            self.AppendCols(neededSize[1]-currentSize[1])
 
         # se escribe los datos en el grid
-        DECIMAL_POINT= wx.GetApp().DECIMAL_POINT
+        try:
+            DECIMAL_POINT= wx.GetApp().DECIMAL_POINT
+        except AttributeError:
+            pass
         star= 0
         if hasHeader:
             star= 1
-            for col in range( newSize[1]):
+            for col in range( neededSize[1]):
                 header= sheetSelected.cell_value( 0, col)
                 if header == u'' or header == None:
                     ## return the column to it's normal label value
-                    self.SetColLabelValue( self.generateLabel( col))
+                    self.SetColLabelValue( col, self.generateLabel( col))
                 elif not isinstance( header,( str, unicode)):
                     self.SetColLabelValue( col, sheetSelected.cell_value( 0, col).__str__())
                 else:
                     self.SetColLabelValue( col, sheetSelected.cell_value( 0, col))
         else:
             # return all header to default normal value
-            for col in range( newSize[1]):
-                self.SetColLabelValue(col, self.generateLabel( col)) 
-        
-        if hasHeader and newSize[0] < 2:
+            for col in range( neededSize[1]):
+                self.SetColLabelValue(col, self.generateLabel( col))
+
+        if hasHeader and neededSize[0] < 2:
             return
-        
-        for reportRow, row in enumerate(range( star, newSize[0])):
-            for col in range( newSize[1]):
+
+        for reportRow, row in enumerate(range( star, neededSize[0])):
+            for col in range( neededSize[1]):
                 newValue = sheetSelected.cell_value( row, col)
                 if isinstance( newValue, (str, unicode)):
                     self.SetCellValue( reportRow, col, newValue)
-                elif sheetSelected.cell_type( row, col) in (2,3):
+                elif sheetSelected.cell_type( row, col) in ( 2, 3):
                     self.SetCellValue( reportRow, col, str( newValue).replace('.', DECIMAL_POINT))
                 else:
                     try:
                         self.SetCellValue (reportRow, col, str(newValue))
                     except:
-                        self.log.write( "Could not import the row,col (%i,%i)" % (row+1,col+1))
-                        
+                        print  "Could not import the row,col (%i,%i)" % (row+1, col+1)
+
     def generateLabel( self, colNumber):
         colNumber+= 1
         analyse = True
         result= list()
         while analyse:
-            res = colNumber/float( 26)
-            if res == 1:
+            res = colNumber/26.0
+            if res == int(res):
                 result.append(26)
+                colNumber= colNumber/26-1
+                analyse= res > 1
                 continue
-            
+
             fp= res-int(res) # float Part
+            # deleting fix by rounding
             if fp !=0 :
-                fp= int( fp*26)
+                fp= int(round(fp*26.0,0))
             else:
                 fp= 1
-                
+
             result.append(fp)
+            colNumber= colNumber/26
             analyse= res > 1
-        
+
         res = '' 
-        for caracter in result:
-            res += chr(caracter + 64) 
+        while len(result):
+            res += chr(result.pop(-1) + 64) 
         return res
 
     def getData(self, x):
@@ -659,7 +829,10 @@ class SimpleGrid( MyGridPanel):# wxGrid
     def CleanData(self, coldata):
         indata = []
         self.missing = 0
-        dp= wx.GetApp().DECIMAL_POINT
+        try:
+            dp= wx.GetApp().DECIMAL_POINT
+        except AttributeError:
+            dp= DECIMAL_POINT
         missingvalue= wx.GetApp().missingvalue 
         if dp == '.':
             for i in range(self.GetNumberRows()):
@@ -686,21 +859,24 @@ class SimpleGrid( MyGridPanel):# wxGrid
                     except ValueError:
                         pass
         return indata
-    
+
     def _cleanData(self, data):
         if isinstance(data, (str, unicode)):
             data= [data]
-            
+
         if not isiterable(data):
             raise TypeError('Only iterable data allowed!')
-        
+
         for pos in range(len(data)-1, -1, -1):
             if data[pos] != u'':
                 break
-        
+
         data= data[:pos+1]
         # changing data into a numerical value
-        dp = wx.GetApp().DECIMAL_POINT
+        try:
+            dp = wx.GetApp().DECIMAL_POINT
+        except AttributeError:
+            dp= DECIMAL_POINT
         result= list()
         for dat in data:
             if dat == u'' or dat.replace(' ','') == u'': # to detect a cell of only space bar
@@ -710,22 +886,22 @@ class SimpleGrid( MyGridPanel):# wxGrid
                     dat= float(dat.replace(dp, '.'))
                 except:
                     pass
-                
+
             result.append(dat)
         return result
-    
+
     def GetCol(self, col, hasHeader= False):
         return self._cleanData( self._getCol( col, hasHeader))
-    
+
     def PutCol(self, colNumber, data):
         try:
             return self.putCol(colNumber, data)
         except:
             raise
         finally:
-            self.Saved= False
+            self.hasSaved= False
             self.hasChanged= True
-            
+
     def PutRow(self, rowNumber, data):
         try: 
             if isinstance(rowNumber, (str, unicode)):
@@ -735,37 +911,37 @@ class SimpleGrid( MyGridPanel):# wxGrid
                     if value == rowNumber:
                         rowNumber= pos
                         break
-                    
+
             if not isnumeric(rowNumber):
                 raise TypeError('You can only use a numeric value, or the name of an existing column')
-            
+
             rowNumber= int(rowNumber)        
             if rowNumber < 0 or rowNumber > self.GetNumberRows():
                 raise StandardError('The minimum accepted col is 0, and the maximum is %i'%self.GetNumberRows()-1)
-            
+
             self.clearRow(rowNumber)
-            
+
             if isinstance( data,(str, unicode)):
                 data= [data]
-            
+
             if isinstance( data, (int, long, float)):
                 data= [data]
-            
+
             if isinstance( data, (ndarray),):
                 data= ravel( data)
-            
+
             cols2add= len( data) - self.GetNumberCols()
             if cols2add > 0:
                 if len( data) > 16384:
                     data= data[:16384]
                     cols2add= len( data) - self.GetNumberCols()
                 self.AppendCols( cols2add) ############### TO TEST
-            
+
             try:
                 dp= wx.GetApp().DECIMAL_POINT
-            except:
-                d= '.'
-                
+            except AttributeError:
+                dp= DECIMAL_POINT
+
             newdat= list()
             for row, dat in enumerate( data):
                 if isinstance( dat, (str, unicode)):
@@ -778,20 +954,20 @@ class SimpleGrid( MyGridPanel):# wxGrid
                         dat= str(dat)
                     except:
                         dat= None
-                        
+
                 newdat.append(dat)
-                
+
             for col, dat in enumerate(newdat):
                 self.SetCellValue(rowNumber, col, dat)
         except:
             raise
         finally:
-            self.Saved= False
+            self.hasSaved= False
             self.hasChanged= True
-        
+
     def GetRow(self, row):
         return self._cleanData( self._getRow( row))
-    
+
     def GetEntireDataSet(self, numcols):
         """Returns the data specified by a list 'numcols' in a Numpy
         array"""
@@ -801,7 +977,7 @@ class SimpleGrid( MyGridPanel):# wxGrid
             smalllist = wx.GetApp().frame.grid.CleanData(numcols[i])
             biglist.append(smalllist)
         return numpy.array((biglist), numpy.float)
-    
+
     def GetColNumeric(self, colNumber):
         # return only the numeric values of a selected colNumber or col label
         # all else values are drop
@@ -813,17 +989,45 @@ class SimpleGrid( MyGridPanel):# wxGrid
                 if value == colNumber:
                     colNumber= pos
                     break
-                    
+
             if not isnumeric(colNumber):
                 raise TypeError('You can only use a numeric value, or the name of an existing column')
-            
+
             colNumber= int(colNumber)        
             if colNumber < 0 or colNumber > self.GetNumberCols():
                 raise StandardError('The minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
-            
+
         values= self._cleanData( self._getCol( colNumber))
         return [val for val in values if not isinstance(val,(unicode, str)) and val != None ]
-                   
+    def onCellEdit(self, event):
+        '''
+        When cell is edited, get a handle on the editor widget
+        and bind it to EVT_KEY_DOWN
+        '''        
+        editor = event.GetControl()        
+        editor.Bind(wx.EVT_KEY_DOWN, self.onEditorKey)
+        event.Skip()
+
+    #----------------------------------------------------------------------
+    def onEditorKey(self, event):
+        '''
+        Handler for the wx.grid's cell editor widget's keystrokes. Checks for specific
+        keystrokes, such as arrow up or arrow down, and responds accordingly. Allows
+        all other key strokes to pass through the handler.
+        '''
+        keycode = event.GetKeyCode() 
+        if keycode == wx.WXK_UP:
+            self.MoveCursorUp(False)
+        elif keycode == wx.WXK_DOWN:
+            self.MoveCursorDown(False)
+        elif keycode == wx.WXK_LEFT:
+            self.MoveCursorLeft(False)
+        elif keycode == wx.WXK_RIGHT:
+            self.MoveCursorRight(False)
+        else:
+            pass
+        event.Skip()
+
 class NoteBookSheet(wx.Panel, object):
     def __init__( self, parent, *args, **params):
         # se almacenan las paginas en un diccionario con llave el numero de pagina
@@ -832,9 +1036,11 @@ class NoteBookSheet(wx.Panel, object):
 
         wx.Panel.__init__ ( self, parent, *args, **params)
         bSizer = wx.BoxSizer( wx.VERTICAL )
-        self.m_notebook = wx.aui.AuiNotebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.aui.AUI_NB_DEFAULT_STYLE )
-        ## wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.NB_BOTTOM )
-        # self.m_notebook.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED,self.OnNotebookPageChange)
+        self.m_notebook = wx.aui.AuiNotebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,
+                                              wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|
+                                              wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_BOTTOM|
+                                              wx.aui.AUI_NB_TAB_SPLIT|wx.aui.AUI_NB_CLOSE_BUTTON)
+        self.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChange)
         bSizer.Add( self.m_notebook, 1, wx.EXPAND |wx.ALL, 5 )
         self.SetSizer( bSizer )
         # se inicia el generador para el numero de pagina
@@ -842,7 +1048,14 @@ class NoteBookSheet(wx.Panel, object):
         self.currentPage = None
         self.pageNames= dict()
         self.Layout()
-        
+        self.numberPage= self._generador()
+
+    def _generador(self):
+        i= 1
+        while True:
+            yield i
+            i+= 1
+
     # implementing a wrap to the current grid
     def __getattribute__( self, name):
         '''wraps the funtions to the grid
@@ -851,7 +1064,11 @@ class NoteBookSheet(wx.Panel, object):
             return object.__getattribute__(self, name)
         except AttributeError:
             if self.GetPageCount() != 0:
-                currGrid= self.m_notebook.GetSelection()
+                if str(type(self.currentPage)) == "<class 'wx._core._wxPyDeadObject'>":
+                    self.currentPage == None
+                    self.currentPageNumber= None
+                    return
+                currGrid=  self.currentPage
                 return currGrid.__getattribute__(name)
             raise AttributeError
 
@@ -871,41 +1088,8 @@ class NoteBookSheet(wx.Panel, object):
         return page.getHeader()
 
     def OnNotebookPageChange( self,evt):
-        self.currentPage= evt.Selection
-
-    def addPage( self, data= dict()):
-        defaultData = {'name': u'',
-                       'size': (0,0),
-                       'nameCol': list(),
-                       'nameRow': list()}
-        for key, value in data.items():
-            if defaultData.has_key(key):
-                defaultData[key] = value
-        # adiciona una pagina al notebook grid
-        newName= defaultData['name'] +'_'+ str(self.npage.next())
-        self.pageNames[newName]= MyGridPanel(self.m_notebook,-1,size= defaultData['size'] )
-        self.currentPage=  self.pageNames[newName]
-        grid= self.pageNames[newName]
-        self.m_notebook.AddPage(grid, newName, False )
-        # se hace activo la pagina adicionada
-        self.m_notebook.SetSelection(self.m_notebook.GetPageCount()-1)
-        # se escriben los nombres de las columnas en el grid en caso de existir
-        if 'nameCol' in defaultData.keys():
-            for index, value in enumerate(defaultData['nameCol']):
-                grid.SetColLabelValue(index,value) # str(value)
-        if 'nameRow' in defaultData.keys():
-            for index, value in enumerate(defaultData['nameRow']):
-                grid.SetRowLabelValue(index,value)
-        # para actualizar un toolbar del grid
-        if hasattr(self,'fb'):
-            self.pageNames[newName].Bind(wx.grid.EVT_GRID_CMD_SELECT_CELL,
-                      self._cellSelectionChange,)
-
-            self.pageNames[newName].Bind(wx.grid.EVT_GRID_SELECT_CELL,
-                      self._cellSelectionChange,#      source= self.pageNames[newName],
-                      )
-
-        return grid # retorna el objeto MyGrid
+        self.currentPage= self.m_notebook.GetPage( evt.Selection)
+        self.currentPageNumber= evt.Selection
 
     def _cellSelectionChange( self, event):
         if self.GetPageCount() == 0:
@@ -917,7 +1101,7 @@ class NoteBookSheet(wx.Panel, object):
         grid= self.m_notebook.GetPage(pageSelectNumber)
         try:
             texto= grid.GetCellValue(row, col)
-            self.fb.m_textCtrl1.SetValue(texto)
+            self.fb.value= texto
         except:
             pass
         event.Skip()
@@ -952,26 +1136,6 @@ class NoteBookSheet(wx.Panel, object):
         # 21/04/2011
         # retorna el numero de paginas que hay en el notebook
         return self.m_notebook.PageCount
-
-    def delPage( self, page= None):
-        # si no se ingresa un numero de pagina se
-        #     considera que se va a borrar la pagina actual
-        # las paginas se numeran mediante numeros desde el cero
-        if page == None:
-            # se considera que la pagina a borrar es la pagina actual
-            #self.m_notebook.GetCurrentPage().Destroy() # borra el contenido de la pagina
-            self.m_notebook.DeletePage(self.m_notebook.GetSelection())
-            # se borra la pagina
-
-            return
-        page = int(page)
-        if page <0:
-            return
-        if page > self.GetPageCount():
-            raise IndexError("Page doesn't exist")
-        parent = self.pages[page].GetParent()
-        parent.DeletePage(page)
-
     def upData( self,  data):
         # It's used to upload data into a grid
         # where the grid it's an int number
@@ -1016,7 +1180,7 @@ class NoteBookSheet(wx.Panel, object):
         elif pageName in self.pageNames.keys():
             page = self.pageNames[pageName]
         else:
-            page = self.addPage({'name': pageName})
+            page = self.addPage( name= pageName)
         # se procede a verificar las dimensiones de la pagina actual
         size = (page.GetNumberRows(), page.GetNumberCols())
         # adding one column
@@ -1039,7 +1203,7 @@ class NoteBookSheet(wx.Panel, object):
                 len(colData)
             except TypeError:
                 colData = [colData]
-                
+
         # compare de row numbres
         if size[0] >= len(colData):
             pass
@@ -1048,21 +1212,24 @@ class NoteBookSheet(wx.Panel, object):
             # adding the required rows
             page.AppendRows(diffColNumber)
         # populate with data
-        DECIMAL_POINT= wx.GetApp().DECIMAL_POINT
+        try:
+            DECIMAL_POINT= wx.GetApp().DECIMAL_POINT
+        except AttributeError:
+            pass
         for colPos, colValue in enumerate(colData):
             if isinstance(colValue, (str,unicode)):
                 pass
             else:
                 colValue = str(colValue).replace('.', DECIMAL_POINT)
             page.SetCellValue(colPos, currCol, colValue)
-            
+
     def addRowData( self, rowData, pageName= None, currRow = None):
         '''adds a row with it's row content'''
         # currRow is used to indicate if the user needs to insert
         # the rowContent into a relative row
         if not isnumeric(currRow) and currRow != None:
             raise TypeError('currRow must be a numerical value')
-            
+
         if pageName == None:
             if len( self.getPageNames()) == 0:
                 # adding a new page into the notebook
@@ -1072,8 +1239,8 @@ class NoteBookSheet(wx.Panel, object):
         elif pageName in self.pageNames.keys():
             page = self.pageNames[pageName]
         else:
-            page = self.addPage( {'name': pageName})
-            
+            page = self.addPage( name= pageName)
+
         # check the size of the current page
         size = (page.GetNumberRows(), page.GetNumberCols())
         # check if it needs to add more columns
@@ -1091,7 +1258,7 @@ class NoteBookSheet(wx.Panel, object):
                 # the renderer was not found
                 pass
             # setting the renderer />
-            
+
         # checking if the user input some currRow
         if currRow  == None:
             currRow = page.NumberRows
@@ -1100,7 +1267,7 @@ class NoteBookSheet(wx.Panel, object):
         elif currRow < 0:
             raise StandardError('the minimum allowed row to insert is the row 0')
         currRow = int(currRow)
-        
+
         if currRow == page.NumberRows:
             # append one row
             page.AppendRows(1)
@@ -1116,7 +1283,7 @@ class NoteBookSheet(wx.Panel, object):
                 len( rowData)
             except TypeError:
                 rowData = [rowData]
-       
+
         # populate with data
         DECIMAL_POINT= wx.GetApp().DECIMAL_POINT
         for colPos, rowValue in enumerate( rowData):
@@ -1125,6 +1292,144 @@ class NoteBookSheet(wx.Panel, object):
             else:
                 rowValue = str( rowValue).replace('.', DECIMAL_POINT)
             page.SetCellValue( currRow, colPos, rowValue)
+    def addOnePage(self, id= wx.ID_ANY, gridSize= (500,20)):
+        #overwrite this method to create your own custom widget
+        #overwrite this method to create your own custom widget
+        grid=  SimpleGrid( self, size= gridSize)
+        grid.hasSaved= True
+        grid.hasChanged= False
+        grid.SetDefaultColSize( 60, True)
+        grid.SetRowLabelSize( 40)
+        grid.SetDefaultCellAlignment( wx.ALIGN_RIGHT, wx.ALIGN_CENTER )
+        # adjust the renderer
+        self._gridSetRenderer(grid)
+        # setting the callback to the range change
+        grid.Bind( wx.grid.EVT_GRID_SELECT_CELL, self._cellSelectionChange)
+        grid.Bind( wx.grid.EVT_GRID_RANGE_SELECT, self._gridRangeSelect)
+        return grid
+
+    def _gridRangeSelect(self, evt):
+        grid= evt.GetEventObject()
+        # displays the count and the sum of selected values
+        selectedCells= grid.get_selection()
+        # Count the selected cells
+        # getting the cell values:
+        selectedCellText= list()
+        selectedNumerical= list()
+        emptyText= 0
+        try:
+            DECIMAL_POINT= wx.GetApp().DECIMAL_POINT
+        except AttributeError:
+            pass
+        for rowi, coli in selectedCells:
+            currText= grid.GetCellValue( rowi, coli)
+            if currText == u"":
+                emptyText+= 1
+            try:
+                selectedNumerical.append( float( currText.replace( DECIMAL_POINT, ".")))
+            except:
+                pass
+            selectedCellText.append( currText)
+        try:
+            statusBar= wx.GetApp().frame.StatusBar
+            statusBar.SetStatusText( wx.GetApp().translate(u"cells Selected: %.0f  count: %.0f  sum: %.4f ")%(len(selectedCells),len(selectedCells)-emptyText,sum(selectedNumerical)),1 )
+        except AttributeError:
+            pass
+        evt.Skip()
+
+    def _cellSelectionChange( self, evt):
+        # se lee el contenido de la celda seleccionada
+        row= evt.GetRow()
+        col= evt.GetCol()
+        texto= u""
+        grid= evt.GetEventObject()
+        try:
+            texto= grid.GetCellValue( row, col)
+        except wx._core.PyAssertionError:
+            pass
+        try:
+            formulaBar= wx.GetApp().frame.formulaBarPanel
+            formulaBar.value= texto
+        except AttributeError:
+            pass
+        evt.Skip()
+
+    def _gridSetRenderer(self, grid):
+        pass
+
+    def addPage( self, **params):
+        defaultData = {'name': u'', 'gridSize': (0,0)}
+        for key, value in params.items():
+            if defaultData.has_key(key):
+                defaultData[key] = value
+        # adiciona una pagina al notebook grid
+        newName= defaultData['name'] +'_'+ str(self.npage.next())
+        self.pageNames[newName]= self.addOnePage( gridSize = defaultData['gridSize'])
+        self.currentPage=  self.pageNames[newName]
+        ntb= self.pageNames[newName]
+        self.m_notebook.AddPage(ntb, newName, False )
+        # se hace activo la pagina adicionada
+        self.m_notebook.SetSelection(self.m_notebook.GetPageCount()-1)
+        return ntb # retorna el objeto ntb
+
+    def delPage( self, evt = None, page= None):
+        # si no se ingresa un numero de pagina se
+        #     considera que se va a borrar la pagina actual
+        # las paginas se numeran mediante numeros desde el cero
+        if page == None:
+            # se considera que la pagina a borrar es la pagina actual
+            #self.m_notebook.GetCurrentPage().Destroy() # borra el contenido de la pagina
+            if self.m_notebook.GetSelection() > -1:
+                page = self.m_notebook.GetSelection()
+            else:
+                return
+        pageNumber = int(page)
+        if pageNumber <0:
+            return
+        if pageNumber > self.GetPageCount():
+            raise IndexError("Page doesn't exist")
+        currPageObj= self.m_notebook.GetPage(pageNumber)
+        # delete de erased page from the pages list
+        pageName = None
+        for pageName, pageObj in self.pageNames.items():
+            if pageObj == currPageObj:
+                break
+        if pageName == None:
+            return
+        self.pageNames.pop( pageName)
+        self.m_notebook.DeletePage( pageNumber)
+
+    def changeLabel(self, page= None, newLabel= None):
+        if self.GetPageCount() < 1:
+            return
+
+        if page== None:
+            # check for the current sheet
+            pageNumber= self.currentPageNumber
+
+        if not isinstance(pageNumber, (int, long, float, ndarray)):
+            return
+        pageNumber= int(pageNumber)
+        if newLabel== None:
+            newlabel= self.numberPage.next().__str__()
+
+        elif not isinstance(newLabel, (str, unicode)):
+            return
+
+        newLabel= newLabel.replace(' ', '')
+        if newLabel== '':
+            newlabel= self.numberPage.next().__str__()
+
+        self.m_notebook.SetPageText(pageNumber, newLabel)
+
+    def SaveXlsAs(self, evt):
+        currGrid=  self.currentPage
+        if currGrid == None:
+            return
+        (HasSaved, fileName)= currGrid.__getattribute__( 'SaveXlsAs')(evt)
+        if not HasSaved:
+            return
+        self.changeLabel( newLabel= fileName)
 
 class Test(wx.Frame):
     def __init__(self, parent, id, title):
@@ -1132,7 +1437,7 @@ class Test(wx.Frame):
         customPanel = NoteBookSheet(self,-1)
         # se adicionan 4 paginas al sheet
         for i in range(4):
-            customPanel.addPage(size=(15,10))
+            customPanel.addPage( gridSize=(40,20))
         #customPanel.delPage(2)
         self.Centre()
         self.Show(True)

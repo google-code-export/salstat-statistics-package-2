@@ -54,7 +54,7 @@ class histogram( _neededLibraries):
         structure.append([btn4])
         structure.append([btn5])
         structure.append([btn2, txt2])
-        setting= {'Title': self.translate(u'Histogram chart of selected columns'),
+        setting= {'Title': self.translate(self.name),
                   '_size': Size(200,300)}
         
         return self.dialog(settings= setting, struct= structure)
@@ -113,7 +113,7 @@ class histogram( _neededLibraries):
         showNormCurv= args[2]
         color=        args[3]
         # evaluating the histogram function to obtain the data to plot
-        data= _histogram().evaluate(ydat, nbins)
+        data= _histogram().evaluate( array( ydat), nbins)
         
         plt= pltobj( None, xlabel= 'variable', ylabel= self.translate(u'value'), title= self.translate(u'Histogram Chart of ') + self.colNameSelect[0] )
         plt.gca().hold( True)
@@ -190,7 +190,7 @@ class niceHistogram( _neededLibraries):
         ##structure.append([btn5])
         structure.append([btn1, txt1])
         structure.append([btn2, txt2])
-        setting= {'Title': self.translate(u'Histogram chart of selected columns')}
+        setting= {'Title': self.translate(self.name)}
         return self.dialog(settings= setting, struct= structure)
     
     def _calc(self, columns, *args, **params):
@@ -204,7 +204,7 @@ class niceHistogram( _neededLibraries):
         colData= args[0]
         numBins= args[1]
         # evaluating the histogram function to obtain the data to plot
-        result= [_histogram().evaluate( colData, numBins)]
+        result= [_histogram().evaluate( array(colData), numBins)]
         plots = list()
         for res, varName in zip( result, self.colNameSelect):
             ydata= res[0]

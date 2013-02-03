@@ -10,6 +10,7 @@ from imagenes import imageEmbed
 # from statlib import stats
 # from plotFrame import MpltFrame as plot
 import traceback
+# import wx.lib.multisash as sash
 
 # styled text using wxPython's
 # wx.StyledTextCtrl(parent, id, pos, size, style, name)
@@ -44,12 +45,15 @@ else:
         }
 
 
-class MySTC(stc.StyledTextCtrl):
+class MySTC( stc.StyledTextCtrl, object):
     """
-   set up for folding and Python code highlighting
-   """
-    def __init__(self, parent):
-        stc.StyledTextCtrl.__init__(self, parent, wx.ID_ANY)
+    set up for folding and Python code highlighting
+    """
+    #doc= None
+    def __init__(self, parent, ID= wx.ID_ANY,
+                 pos=wx.DefaultPosition, size=wx.DefaultSize,
+                 style=0):
+        stc.StyledTextCtrl.__init__(self, parent, ID, pos, size, style)
 
         # use Python code highlighting
         self.SetLexer(stc.STC_LEX_PYTHON)
@@ -58,15 +62,17 @@ class MySTC(stc.StyledTextCtrl):
         keylist.extend(keyword.__builtins__.keys())
         keyWordlist = " ".join(keylist)
         self.SetKeyWords(0, keyWordlist )
+        
         self.SetMarginType(1,stc.STC_MARGIN_NUMBER)
         #self.SetMaxLength(250)
 
         # set other options ...
         self.SetProperty("fold", "1")
-        self.SetMargins(0, 1)
+        self.SetMargins(0, 0)
         self.SetViewWhiteSpace(False)
+        self.SetUseAntiAliasing(True)
         self.SetEdgeMode(stc.STC_EDGE_BACKGROUND)
-        self.SetEdgeColumn(78)
+        self.SetEdgeColumn(78)#78
         self.SetCaretForeground("blue")
         self.SetTabWidth(4)
 
@@ -75,6 +81,7 @@ class MySTC(stc.StyledTextCtrl):
         self.SetMarginMask(2, stc.STC_MASK_FOLDERS)
         self.SetMarginSensitive(2, True)
         self.SetMarginWidth(2, 12)
+        self.SetMarginWidth(1, 32)
 
         # fold markers use square headers
         self.MarkerDefine(stc.STC_MARKNUM_FOLDEROPEN,
@@ -174,6 +181,12 @@ class MySTC(stc.StyledTextCtrl):
             wx.ArtProvider.GetBitmap(wx.ART_NEW, size=(16,16)))
         self.RegisterImage(3,
             wx.ArtProvider.GetBitmap(wx.ART_COPY, size=(16,16)))
+        
+        #if self.doc:
+        #    self.SetDocPointer(self.doc)
+        #else:
+        #    self.SetText(u"")
+        #    MySTC.doc= self.GetDocPointer()
 
     def onKeyPressed(self, event):
         if self.CallTipActive():
@@ -193,7 +206,7 @@ class MySTC(stc.StyledTextCtrl):
                 # Python sorts are case sensitive
                 kw.sort()
                 # so this needs to match
-                self.AutoCompSetIgnoreCase(False)
+                self.AutoCompSetIgnoreCase(True)
                 # registered images are specified with appended "?type"
                 for i in range(len(kw)):
                     if kw[i] in keyword.kwlist:
@@ -312,37 +325,59 @@ class MySTC(stc.StyledTextCtrl):
         return line
 
 
-class ScriptPanel(wx.Panel):
-    def __init__(self, parent,*args):
-        '''ScriptPanel parent, log, grid, *args'''
+def numPage():
+    i = 1
+    while True:
+        yield i
+        i+= 1
+
+class ScriptPanel( wx.Panel):
+    def __init__( self, parent,*args):
+        '''ScriptPanel parent, log, *args'''
         self.log=   args[0]
-        # self.grid=  args[1]
-        #self.stats= stats
-        #self.plot=  plot
-        self.showgrid= args[2]
         try:
             wx.Panel.__init__(self, parent, wx.ID_ANY, *args[1:])
         except:
             wx.Panel.__init__(self, parent, wx.ID_ANY)
+            
         self.m_mgr = aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
-
-        self.answerPanel2 = MySTC(self)
-
-        self.m_mgr.AddPane( self.answerPanel2, aui.AuiPaneInfo().CenterPane().Dock().
+        
+        self.m_notebook= wx.aui.AuiNotebook( self, wx.ID_ANY,
+                                           wx.DefaultPosition, wx.DefaultSize,
+                                           wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|
+                                           wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_BOTTOM)
+        
+        self.m_mgr.AddPane( self.m_notebook, aui.AuiPaneInfo().CenterPane().Dock().
                             Resizable(True).FloatingSize( wx.DefaultSize ).
                             DockFixed( True ).Centre().
                             CloseButton(False ) )
+        self.npage = numPage()
+        self.currentPage = None
+        self.pageNames= dict()
+        
+        prepend_items, append_items = [], []
+        item = aui.AuiToolBarItem()
+        
+        item.SetKind(wx.ITEM_SEPARATOR)
+        append_items.append(item)
+
+        item = aui.AuiToolBarItem()
+        item.SetKind(wx.ITEM_NORMAL)
+        item.SetId(wx.ID_ANY)
+        item.SetLabel("Customize...")
+        append_items.append(item)
 
         if wx.version < "2.9":
             tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
-                            style = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
+                            style = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_OVERFLOW)
         else:
             tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
-                agwStyle = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
+                agwStyle = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_OVERFLOW)
 
         imagenes = imageEmbed()
-        self.bt1= tb1.AddSimpleTool(wx.ID_ANY, u"Run Script" , imagenes.runIcon(), u"Run Script" )
+        tb1.SetToolBitmapSize(wx.Size(16, 16))
+        self.bt1= tb1.AddSimpleTool(wx.ID_ANY, u"Run Script" , imagenes.runIcon(), u"Run Script", )
         tb1.AddSeparator()
         self.bt2= tb1.AddSimpleTool(wx.ID_ANY, u"New Script" , imagenes.documentNew(), u"New Script" )
         self.bt4= tb1.AddSimpleTool(wx.ID_ANY, u"Load Script" , imagenes.folderOpen(), u"Load Script" )
@@ -354,29 +389,89 @@ class ScriptPanel(wx.Panel):
         self.bt5= tb1.AddSimpleTool(wx.ID_ANY, u"Cut" , imagenes.edit_cut(), u"Cut" )
         self.bt6= tb1.AddSimpleTool(wx.ID_ANY, u"Copy" , imagenes.edit_copy(), u"Copy" )
         self.bt7= tb1.AddSimpleTool(wx.ID_ANY, u"Paste" , imagenes.edit_paste(), u"Paste" )
-        tb1.SetToolBitmapSize(wx.Size(24, 24))
+        tb1.AddSeparator()
+        self.bt10= tb1.AddSimpleTool(wx.ID_ANY, u"Close" , imagenes.cancel(), u"Close" )
+        tb1.AddSeparator()
+        tb1.SetCustomOverflowItems( prepend_items, append_items)
+        tb1.SetToolDropDown(wx.ID_ANY, True)
         tb1.Realize()
-        
+                
         self.m_mgr.AddPane( tb1,
-                            aui.AuiPaneInfo().Name("tb1").Caption("Basic Operations").
-                            ToolbarPane().Top().Row(1).CloseButton( False ))
+                            aui.AuiPaneInfo().Name("tb1").
+                            Caption("Basic Operations").
+                            ToolbarPane().Top().
+                            CloseButton( False ))
 
         self.Bindded()
         self.Layout()
         self.m_mgr.Update()
         self.Center( )
 
+    # implementing a wrap to the current notebook
+    def __getattribute__( self, name):
+        '''wraps the funtions to the grid
+        emulating a grid control'''
+        try:
+            return object.__getattribute__( self, name)
+        except AttributeError:
+            if self.GetPageCount( ) != 0:
+                if str( type( self.currentPage)) == "<class 'wx._core._wxPyDeadObject'>":
+                    self.currentPage == None
+                    return
+                currPage= self.currentPage
+                return currPage.__getattribute__( name)
+            raise AttributeError
+    
+    def getPageNames( self):
+        return self.pageNames.keys()
 
+    def getHeader( self,pageName):
+        if not (pageName in self.pageNames.keys()):
+            raise StandardError('The page does not exist')
+        page= self.pageNames[pageName]
+        return page.getHeader()
+
+    def OnNotebookPageChange( self,evt):
+        self.currentPage= self.m_notebook.GetPage( evt.Selection)
+        
+    def GetPageCount( self):
+        # 21/04/2011
+        # retorna el numero de paginas que hay en el notebook
+        return self.m_notebook.PageCount
+    def addPage( self, data= dict()):
+        defaultData = {'name': u''}
+        for key, value in data.items():
+            if defaultData.has_key(key):
+                defaultData[key] = value
+        # adiciona una pagina al notebook grid
+        newName= defaultData['name'] +'_'+ str(self.npage.next())
+        #multi = sash.MultiSash( self.m_notebook, -1, pos = (0,0), size= self.m_notebook.GetSize())
+        # Use this method to set the default class that will be created when
+        # a new sash is created. The class's constructor needs 1 parameter
+        # which is the parent of the window
+        #multi.SetDefaultChildClass(MySTC)
+        
+        self.pageNames[newName]= MySTC(self.m_notebook,-1)
+        self.currentPage=  self.pageNames[newName]
+        ntb= self.pageNames[newName]
+        self.m_notebook.AddPage(ntb, newName, False )
+        # se hace activo la pagina adicionada
+        self.m_notebook.SetSelection(self.m_notebook.GetPageCount()-1)
+        return ntb # retorna el objeto ntb
+        
     def Bindded(self):
-        self.Bind(wx.EVT_TOOL, self.runScript, id = self.bt1.GetId() )
-        self.Bind(wx.EVT_TOOL, self.newScript, id = self.bt2.GetId())
-        self.Bind(wx.EVT_TOOL, self.SaveScriptAs, id = self.bt3.GetId())
-        self.Bind(wx.EVT_TOOL, self.loadScript, id = self.bt4.GetId())
-        self.Bind(wx.EVT_TOOL, self.CutSelection, id = self.bt5.GetId())
-        self.Bind(wx.EVT_TOOL, self.CopySelection, id = self.bt6.GetId())
-        self.Bind(wx.EVT_TOOL, self.PasteSelection, id = self.bt7.GetId())
-        self.Bind(wx.EVT_TOOL, self.undo, id = self.bt8.GetId())
-        self.Bind(wx.EVT_TOOL, self.redo, id = self.bt9.GetId())
+        self.Bind( wx.EVT_TOOL, self.runScript,      id = self.bt1.GetId())
+        self.Bind( wx.EVT_TOOL, self.newScript,      id = self.bt2.GetId())
+        self.Bind( wx.EVT_TOOL, self.SaveScriptAs,   id = self.bt3.GetId())
+        self.Bind( wx.EVT_TOOL, self.loadScript,     id = self.bt4.GetId())
+        self.Bind( wx.EVT_TOOL, self.CutSelection,   id = self.bt5.GetId())
+        self.Bind( wx.EVT_TOOL, self.CopySelection,  id = self.bt6.GetId())
+        self.Bind( wx.EVT_TOOL, self.PasteSelection, id = self.bt7.GetId())
+        self.Bind( wx.EVT_TOOL, self.undo,           id = self.bt8.GetId())
+        self.Bind( wx.EVT_TOOL, self.redo,           id = self.bt9.GetId())
+        self.Bind( wx.EVT_TOOL, self.delPage,        id = self.bt10.GetId())
+        self.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChange)
+        self.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.delPage)
 
     def clearLog(self,):
         self.log.clearLog()
@@ -393,37 +488,45 @@ class ScriptPanel(wx.Panel):
                 self.log.writeLine(error.message)
 
     def runScript(self, event):
-#        env= {'cls': self.clearLog,
-#              'stats': self.stats,
-#              'plot': self.plot,
-#              'OK': wx.ID_OK,
-#              'statistics':statistics,
-#              'homogenize':homogenize,
-#              }
-#        buildins = {}
-#        buildins["locals"]   = None
-#        buildins["__name__"] = None
-#        buildins["__file__"] = None
-        # buildins["__builtins__"] = None
         try:
-            mainscript= self.answerPanel2.GetText()
+            mainscript= self.GetText()
             wx.GetApp().frame.scriptPanel.interp.runcode( mainscript)
         except (Exception, TypeError) as e:
             traceback.print_exc( file = self.log)
-
+            
+    def delPage( self, evt, page= None):
+        # si no se ingresa un numero de pagina se
+        #     considera que se va a borrar la pagina actual
+        # las paginas se numeran mediante numeros desde el cero
+        if page == None:
+            # se considera que la pagina a borrar es la pagina actual
+            #self.m_notebook.GetCurrentPage().Destroy() # borra el contenido de la pagina
+            if self.m_notebook.GetSelection() > -1:
+                self.m_notebook.DeletePage(self.m_notebook.GetSelection())
+            return
+        page = int(page)
+        if page <0:
+            return
+        if page > self.GetPageCount():
+            raise IndexError("Page doesn't exist")
+        parent = self.pages[page].GetParent()
+        parent.DeletePage(page)
+        
     def loadScript(self, event):
         wildcard = 'TEXT files (*.txt)|*.txt|ALL files (*.*)|*.*'
         dlg = wx.FileDialog(self, "Open Script File", "","",\
                             wildcard, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetPath()
-            self.answerPanel2.SetText('')
             import os.path
             if not os.path.exists(filename):
                 return
+            # open a new stc
+            self.addPage()
+            self.Text= u''
             fout = open(filename, "rb")
             for line in fout.readlines():
-                self.answerPanel2.AddText(line)
+                self.AddText(line)
             fout.close()
 
     def SaveScriptAs(self, event):
@@ -431,26 +534,33 @@ class ScriptPanel(wx.Panel):
         dlg = wx.FileDialog(self, "Open Script File", "","",\
                             wildcard, wx.SAVE)
         if dlg.ShowModal() == wx.ID_OK:
-            filename = dlg.GetPath()
-            fout = open(filename, "wb")
-            for line in self.answerPanel2.GetText().split('\n'):
+            fullPath = dlg.GetPath()
+            fout = open(fullPath, "wb")
+            for line in self.GetText().split('\n'):
                 fout.writelines(line)
             fout.close()
-
+            # changing the name of the notebook
+            filename= dlg.GetFilename()[:-4]
+            if len( filename) > 8:
+                filename= filename[:8]+u'\u2026'
+            self.SetText= filename
+            dlg.Destroy()
+            
     def undo(self,event):
-        self.answerPanel2.Undo()
+        self.Undo()
 
     def redo(self,event):
-        self.answerPanel2.Redo()
+        self.Redo()
 
     def CutSelection(self, event):
-        self.answerPanel2.Cut()
+        self.Cut()
 
     def CopySelection(self, event):
-        self.answerPanel2.Copy()
+        self.Copy()
 
     def PasteSelection(self, event):
-        self.answerPanel2.Paste()
+        self.Paste()
 
     def newScript(self, event):
-        self.answerPanel2.SetText("")
+        self.addPage()
+        

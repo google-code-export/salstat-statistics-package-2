@@ -1,6 +1,7 @@
 '''custom grid cell renderers
 
 copyright:  2012  Sebastian Lopez Buritica'''
+__all__= ['floatRendererSub', 'floatRenderer', 'AutoWrapStringRenderer']
 
 import wx
 import wx.grid as Grid
@@ -27,11 +28,11 @@ class floatRendererSub(Grid.PyGridCellRenderer):
         return floatRendererSub(table, self.decimalPoints, self.color, self.font, self.fontsize)
 
 class floatRenderer(Grid.PyGridCellRenderer):
-    def __init__(self, decimalPoints):
+    def __init__(self, decimalPoints, defaultFontZise= 10):
         """Render data in the specified color and font and fontsize"""
         Grid.PyGridCellRenderer.__init__(self)
         self.decimalPoints= decimalPoints
-        
+        self.DEFAULT_FONT_SIZE= defaultFontZise
     @property
     def decimalPoints( self):
         return self._decimalPoints
@@ -52,20 +53,23 @@ class floatRenderer(Grid.PyGridCellRenderer):
         # the grid's DC, otherwise the text will spill over
         # to the next cell
         dc.SetClippingRect(rect)
-        dc.SetFont( attr.GetFont() )
-        hAlign, vAlign = attr.GetAlignment()     
+        textfont= attr.GetFont()
+        textfont.SetPointSize(max(1, int(self.DEFAULT_FONT_SIZE * grid.zoom)))
+        dc.SetFont(textfont)
+        
+        # dc.SetFont( attr.GetFont() )
+        hAlign, vAlign = attr.GetAlignment()
         if isSelected: 
-            bg = grid.GetSelectionBackground() 
-            fg = grid.GetSelectionForeground() 
+            bg = grid.GetSelectionBackground()
+            fg = grid.GetSelectionForeground()
         else: 
             bg = attr.GetBackgroundColour()
-            fg = attr.GetTextColour() 
-        dc.SetTextBackground(bg) 
+            fg = attr.GetTextColour()
+        dc.SetTextBackground(bg)
         dc.SetTextForeground(fg)
         dc.SetBrush(wx.Brush(bg, wx.SOLID))
         dc.SetPen(wx.TRANSPARENT_PEN)
-        dc.DrawRectangleRect(rect)
-        
+        dc.DrawRectangleRect(rect)        
         text= grid.GetCellValue(row, col)
         try:
             dp= wx.GetApp().DECIMAL_POINT
@@ -76,9 +80,10 @@ class floatRenderer(Grid.PyGridCellRenderer):
             text= round( text, self.decimalPoints)
             text= str( text)
             text= text.replace( '.', dp)
+            
         except:
             pass # allowing the non numerical values
-
+        
         dc.DrawText( text, rect.x+1, rect.y+1)
 
         width, height= dc.GetTextExtent( text)
@@ -87,7 +92,7 @@ class floatRenderer(Grid.PyGridCellRenderer):
             x = rect.x+1 + rect.width-2 - width
             dc.DrawRectangle( x, rect.y+1, width+1, height)
             dc.DrawText( u'\u2026', x, rect.y+1)
-            
+        
         dc.DestroyClippingRegion()
 
     def Clone(self):
