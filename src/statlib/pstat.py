@@ -963,7 +963,7 @@ try:                         # DEFINE THESE *ONLY* IF numpy IS AVAILABLE
     Returns: an array of equal length containing 1s where the two rows had
              identical elements and 0 otherwise
     """
-        return 
+        #return
         if row1.dtype.char=='O' or row2.dtype=='O':
             cmpvect = N.logical_not(abs(N.array(map(cmp,row1,row2)))) # cmp fcn gives -1,0,1
         else:

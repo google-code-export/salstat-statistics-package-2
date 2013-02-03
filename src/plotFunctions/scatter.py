@@ -19,12 +19,12 @@ imag= imageEmbed()
 PROPLEGEND= {'size':11}
 
 class scatter( _neededLibraries):
-    name=      u"scatter"
+    name=      u"Scatter chart"
     plotName=  u"scatter"
     image=     imag.scatter()
     def __init__( self):
         _neededLibraries.__init__(self)
-        self.name=      u"scatter"
+        self.name=      u"Scatter chart"
         self.plotName=  u"scatter"
         
     def _dialog(self, *arg, **params):
@@ -39,7 +39,7 @@ class scatter( _neededLibraries):
         structure= list()
         structure.append([bt1,])
         structure.append([bt2,])
-        return self.dialog( struct= structure, settings = {"Title": self.translate(u"Scatter Chart Data") ,
+        return self.dialog( struct= structure, settings = {"Title": self.translate(self.name) ,
                                                            "_size": wx.Size(300,500)},)
 
     def _showGui_GetValues(self):
@@ -115,7 +115,7 @@ class adaptative( _neededLibraries):
         structure= list()
         structure.append( [txt1])
         structure.append( [btn1])
-        setting= {'Title': self.translate(u'Adaptative chart of selected columns'),
+        setting= {'Title': self.translate(self.name),
                   '_size': wx.Size( 250,320)}
         
         return self.dialog(settings= setting, struct= structure)
@@ -195,7 +195,7 @@ class box_whisker(_neededLibraries):
         structure= list()
         structure.append( [txt1])
         structure.append( [btn1])
-        setting= {'Title': self.translate(u'Adaptative chart of selected columns'),
+        setting= {'Title': self.translate(self.name),
                   '_size': wx.Size( 250,320)}
         
         return self.dialog(settings= setting, struct= structure)
@@ -266,7 +266,7 @@ class normalProb( _neededLibraries):
         structure= list()
         structure.append( [txt1])
         structure.append( [btn1])
-        setting= {'Title': self.translate(u'Adaptative chart of selected columns'),
+        setting= {'Title': self.translate(self.name),
                   '_size': wx.Size( 250,320)}
         
         return self.dialog(settings= setting, struct= structure)
