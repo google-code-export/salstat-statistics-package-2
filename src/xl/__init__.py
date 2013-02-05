@@ -130,7 +130,10 @@ class Wbs(object):
         wbName= wbNumber 
         if isinstance( wbNumber, (int, float)):
             if wbNumber < 0:
-                wbNumber= self.__len__() + wbNumber - 1
+                wbNumber*= -1
+                if wbNumber > self.__len__():
+                    raise IndexError
+                wbNumber= self.__len__() - wbNumber
             return self._wbs[wbNumber]
         # try to find for a number
         elif isinstance( wbName, (str, unicode)):
