@@ -36,7 +36,7 @@ import matplotlib.cm as cm
 
 from pylab import setp
 from multiPlotDialog import selectDialogData2plot, scatterDialog
-from dialogs import NumTextCtrl
+from easyDialog import NumTextCtrl
 
 PROPLEGEND=   {'size':11}
 markerStyles= [ 'None', '.', '+', 'o', 'v', 
