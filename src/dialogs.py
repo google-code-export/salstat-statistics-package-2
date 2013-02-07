@@ -701,69 +701,6 @@ class IntTextCtrl( NumTextCtrl):
 
 	return prevResult
 
-class CheckListBox( wx.Panel, object ):
-    def __init__( self, parent , *args, **params):
-	wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( -1, -1 ), style = wx.TAB_TRAVERSAL )
-	translate= wx.GetApp().translate
-	bSizer8 = wx.BoxSizer( wx.VERTICAL )
-
-	bSizer9 = wx.BoxSizer( wx.HORIZONTAL )
-
-	self.m_button1 = wx.Button( self, wx.ID_ANY, translate(u"All"), wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT )
-	bSizer9.Add( self.m_button1, 0, 0, 5 )
-
-	self.m_button2 = wx.Button( self, wx.ID_ANY, translate(u"None"), wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT )
-	bSizer9.Add( self.m_button2, 0, 0, 5 )
-
-	self.m_button3 = wx.Button( self, wx.ID_ANY, translate(u"Invert"), wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT )
-	bSizer9.Add( self.m_button3, 0, 0, 5 )
-
-	bSizer8.Add( bSizer9, 0, wx.EXPAND, 5 )
-
-	self.m_checkList2 = wx.CheckListBox( self, *args, **params )
-	bSizer8.Add( self.m_checkList2, 1, wx.EXPAND, 5 )
-
-	self.SetSizer( bSizer8 )
-	self.Layout()
-
-	# Connect Events
-	self.m_button1.Bind( wx.EVT_BUTTON, self.All )
-	self.m_button2.Bind( wx.EVT_BUTTON, self.none )
-	self.m_button3.Bind( wx.EVT_BUTTON, self.Invert )
-
-    def __getattribute__(self, name):
-	#import types
-	#types.MethodType(self, instance, instance.__class__)
-	try:
-	    return object.__getattribute__(self, name)
-
-	except AttributeError:
-	    wrapee = self.m_checkList2.__getattribute__( name)
-	    try:
-		return getattr(wrapee, name)
-	    except AttributeError:
-		return wrapee  # detect a property value
-
-    # Virtual event handlers, override them in your derived class
-    def All( self, event ):
-	self.m_checkList2.Checked= range(len(self.m_checkList2.Items))
-	customEvent = wx.PyCommandEvent(wx.EVT_CHECKLISTBOX.typeId, self.m_checkList2.GetId())
-	self.GetEventHandler().ProcessEvent(customEvent)
-
-    def none( self, event ):
-	self.m_checkList2.Checked= ()
-	customEvent = wx.PyCommandEvent(wx.EVT_CHECKLISTBOX.typeId, self.m_checkList2.GetId())
-	self.GetEventHandler().ProcessEvent(customEvent)
-
-    def Invert( self, event ):
-	# identifying not checked
-	checked= self.m_checkList2.Checked
-	notchecked= [pos for pos in range(len((self.m_checkList2.Items)))
-	             if not(pos in checked)]
-	self.m_checkList2.Checked= ()
-	self.m_checkList2.Checked= notchecked
-	customEvent = wx.PyCommandEvent(wx.EVT_CHECKLISTBOX.typeId, self.m_checkList2.GetId())
-	self.GetEventHandler().ProcessEvent(customEvent)
 
 class SixSigma( wx.Dialog ):
     def __init__( self, parent, colNames ):

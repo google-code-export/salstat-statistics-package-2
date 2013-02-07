@@ -47,7 +47,7 @@ class AllDescriptives(_genericFunc):
 	self.selectedStatistics = None
 	
     def _dialog(self, *arg, **params):
-	from dialogs import CheckListBox
+	from easyDialog import CheckListBox
 	import wx
         self._updateColsInfo() # update self.columnames and self.colnums
 	dlg= wx.Dialog( parent= self.app.frame,
