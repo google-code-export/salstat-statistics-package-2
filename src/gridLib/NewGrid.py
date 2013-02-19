@@ -141,6 +141,7 @@ class _MyContextGrid(wx.Menu):
         self.hasChanged= True
         self.hasSaved=   False
         evt.Skip()
+
     
 ###########################################################################
 ## Class NewGrid
@@ -160,7 +161,7 @@ class NewGrid(wx.grid.Grid):
             self.__init_mixin__( params['parent'])
         # se activa el menu contextual sobre el grid
         self.Bind(wx.grid.EVT_GRID_CELL_RIGHT_CLICK, self.OnGridRighClic )
-    
+        
     def get_selection(self):
         """ Returns an index list of all cell that are selected in 
         the grid. All selection types are considered equal. If no 
@@ -184,6 +185,7 @@ class NewGrid(wx.grid.Grid):
         
     def OnGridRighClic(self,evt):
         self.PopupMenu(_MyContextGrid(self), evt.GetPosition())
+        evt.Skip()
         
     def setColNames(self,names):
         # escribe los nombres de las columnas en el grid
@@ -241,6 +243,7 @@ class NewGrid(wx.grid.Grid):
         contenidoGrid = [self.getHeader()]
         contenidoGrid.extend([tuple([self.GetCellValue(row,col) for col in range(numCols)]) for row in range(self.GetNumberRows())])
         return tuple(contenidoGrid)
+    
     def getNumByCol(self,colNumber):
         # the colNumber exist?
         ncols= self.GetNumberCols() 
@@ -270,6 +273,7 @@ class NewGrid(wx.grid.Grid):
 def test():
     # para verificar el funcionamiento correcto del grid
     pass
+
 if __name__ == '__main__':    
         app = wx.PySimpleApp()
         app.translate= translate
