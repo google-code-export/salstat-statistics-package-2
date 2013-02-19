@@ -29,6 +29,7 @@ except ImportError:
 from distutils.core import setup
 import py2exe
 import matplotlib
+import sqlalchemy
 
 distdir = '..\\..\\SalStatdist'
 iconPath = "salstat.ico"
@@ -45,7 +46,9 @@ opts = { "py2exe":
                            "statFunctions.*",  # importing the statistical functions
                            "plotFunctions.*", #       "statsmodels.*",
                            "scipy.interpolate",
-                           "scipy.stats" 
+                           "scipy.stats",
+                           "sqlalchemy",
+                           "sqlalchemy.dialects.sqlite",
                            ],
               "excludes":['_gtkagg',       '_tkagg',             '_agg2',
                           '_fltkagg',      '_gtk',               '_gtkcairo',
