@@ -273,7 +273,7 @@ class _CustomDataTable( gridlib.PyGridTableBase):
 
     # Called when the grid needs to display labels
     def GetColLabelValue(self, col):
-        print col
+        #print col
         return self.colLabels[col]
 
     # Called to determine the kind of editor/renderer to use by
@@ -401,7 +401,7 @@ class FilePath( wx.Panel, object ):
     def GetValue(self ):
         return self.path
 
-class Dialog ( wx.Dialog, wx.Frame ):
+class Dialog ( wx.Dialog):
     ALLOWED= ['StaticText',   'TextCtrl',     'Choice',
               'CheckListBox', 'StaticLine',   'RadioBox',
               'SpinCtrl',     'ToggleButton', 'NumTextCtrl',
@@ -495,14 +495,14 @@ class Dialog ( wx.Dialog, wx.Frame ):
                 icon= wx.EmptyIcon()
         self.SetIcon(icon)
         # setting the icon/>
-
+        
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
         bSizer1 = wx.BoxSizer( wx.VERTICAL )
-
+        
         # getting the horizontal border size
         bSizer1.Fit( self )
         xBorderSize= self.Size[0]
-
+        
         self.m_scrolledWindow1 = wx.ScrolledWindow( self, wx.ID_ANY,
                                                     wx.DefaultPosition, wx.DefaultSize,
                                                     wx.DOUBLE_BORDER|wx.HSCROLL|wx.VSCROLL )
@@ -518,7 +518,7 @@ class Dialog ( wx.Dialog, wx.Frame ):
                           'FilePath']
 
         bSizer1.Add( self.m_scrolledWindow1, 1, wx.EXPAND, 5 )
-
+        
         # ok cancel buttoms
         m_sdbSizer1 = wx.StdDialogButtonSizer()
         self.m_sdbSizer1OK = wx.Button( self, wx.ID_OK )
@@ -526,14 +526,14 @@ class Dialog ( wx.Dialog, wx.Frame ):
         self.m_sdbSizer1Cancel = wx.Button( self, wx.ID_CANCEL )
         m_sdbSizer1.AddButton( self.m_sdbSizer1Cancel )
         m_sdbSizer1.Realize()
-
+        
         depthSize=  wx.GetDisplayDepth()
         buttonOkCancelSize= (self.m_sdbSizer1Cancel.Size[0] + self.m_sdbSizer1OK.Size[0] + depthSize,
                              max(self.m_sdbSizer1Cancel.Size[1], self.m_sdbSizer1OK.Size[1]) + depthSize)
 
         bSizer1.Add( m_sdbSizer1, 0, wx.EXPAND|wx.ALL, 5 )# 
         self.SetSizer( bSizer1 )
-
+        
         # getting the actual size of the dialog
         bSizer1.Fit( self )
         sizeDialog= self.Size
@@ -545,7 +545,7 @@ class Dialog ( wx.Dialog, wx.Frame ):
         bSizer3.Fit( self.m_scrolledWindow1 )
         # getting the size of the scrolldialog
         sizeScroll= self.m_scrolledWindow1.Size
-
+        
         # getting the required size
         requiredSize= (sizeScroll[0] + xBorderSize,
                        sizeDialog[1] + sizeScroll[1]+ 0)
@@ -556,7 +556,7 @@ class Dialog ( wx.Dialog, wx.Frame ):
                     min([requiredSize[1], maxSize[1]-10]),]
         minAllowed= [buttonOkCancelSize[0], buttonOkCancelSize[1]]
         allowSize= [max([minAllowed[0], allowSize[0]]), max([minAllowed[1], allowSize[1]])]
-
+        
         # adpat the dialog if needed
         if allowSize[1] == maxSize[1]-10 and allowSize[0] <= maxSize[0]-20:
             allowSize[0]= allowSize[0]+10
@@ -566,7 +566,7 @@ class Dialog ( wx.Dialog, wx.Frame ):
         self.SetSize(wx.Size(allowSize[0], allowSize[1]))
         self.Layout()
         self.Centre( wx.BOTH )
-
+        
     def adding(self, parentSizer, struct ):
         diferents= ['CheckListBox','Choice',]
         for row in struct:
