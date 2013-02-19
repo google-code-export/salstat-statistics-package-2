@@ -25,7 +25,7 @@ from threading import Thread
 ## EXTERNAL LIBRARY DEPENDENCES
 #----
 # http://www.pyinstaller.org/ticket/596
-###from scipy.sparse.csgraph import _validation
+from scipy.sparse.csgraph import _validation
 #----
 try:
     sys.modules['wx']
