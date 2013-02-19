@@ -138,7 +138,8 @@ class MyGridPanel( wx.Panel, object ):
             raise StandardError('The minimum accepted row is 0, and the maximum is %i'%self.GetNumberRows()-1)
 
         return [self.GetCellValue( rowNumber, col) for col in range( self.GetNumberCols())]
-
+    def PutCol(self, *args, **params):
+        return self.putCol(*args, **params)
     def putCol( self, colNumber, data):
         if isinstance( colNumber, (str, unicode)):
             if not(colNumber in self.colNames):
@@ -197,6 +198,57 @@ class MyGridPanel( wx.Panel, object ):
             self.SetCellValue(row, colNumber, dat)
 
 
+    def putRow( self, rowNumber, data):
+        if isinstance( rowNumber, (str, unicode)):
+            raise TypeError('You can only use a numeric value')
+
+        if not isnumeric( rowNumber):
+            raise TypeError('You can only use a numeric value, or the name of an existing column')
+
+        rowNumber= int(rowNumber)        
+        if rowNumber < 0 or rowNumber > self.GetNumberRows():
+            raise StandardError('The minimum accepted row is 0, and the maximum is %i'%self.GetNumberRows()-1)
+
+        self.clearCol( rowNumber)
+
+        if isinstance( data,(str, unicode)):
+            data= [data]
+
+        if isinstance( data, (int, long, float)):
+            data= [data]
+
+        if isinstance( data, (ndarray),):
+            data= ravel( data)
+
+        cols2add= len( data) - self.GetNumberCols()
+        if cols2add > 0:
+            if len( data) > 32000:
+                data= data[:32000]
+                cols2add= len( data) - self.GetNumberRows()
+            self.AppendCols( cols2add)
+
+        try:
+            dp= wx.GetApp().DECIMAL_POINT
+        except:
+            dp= DECIMAL_POINT
+
+        newdat= list()
+        for row, dat in enumerate( data):
+            if isinstance( dat, (str, unicode)):
+                try:
+                    dat= str(float(dat.replace(dp,'.'))).replace('.',dp)
+                except:
+                    pass
+            else:
+                try:
+                    dat= str(dat)
+                except:
+                    dat= None
+
+            newdat.append(dat)
+
+        for col, dat in enumerate(newdat):
+            self.SetCellValue(rowNumber, col, dat)
 
     def clearCol( self, colNumber):
         if colNumber < 0 or colNumber > self.GetNumberCols():
@@ -400,9 +452,11 @@ class SimpleGrid( MyGridPanel):# wxGrid
         # the app crash when trying to delete a colum
         # with a custom attr
         # deleting all data
-        self.clearCol(currentCol)
-        self.SetColLabelValue(currentCol, self.generateLabel( currentCol))
-        #self.DeleteCols( pos = currentCol, numCols = 1)
+        if 1:
+            self.clearCol(currentCol)
+            self.SetColLabelValue(currentCol, self.generateLabel( currentCol))
+        else:
+            self.DeleteCols( pos = currentCol, numCols = 1)
         self.AdjustScrollbars( )
         self.hasChanged= True
         self.hasSaved=   False
@@ -1372,7 +1426,7 @@ class NoteBookSheet(wx.Panel, object):
         self.m_notebook.SetSelection(self.m_notebook.GetPageCount()-1)
         return ntb # retorna el objeto ntb
 
-    def delPage( self, evt = None, page= None):
+    def delPage( self, evt= None, page= None):
         # si no se ingresa un numero de pagina se
         #     considera que se va a borrar la pagina actual
         # las paginas se numeran mediante numeros desde el cero
@@ -1384,7 +1438,7 @@ class NoteBookSheet(wx.Panel, object):
             else:
                 return
         pageNumber = int(page)
-        if pageNumber <0:
+        if pageNumber < 0:
             return
         if pageNumber > self.GetPageCount():
             raise IndexError("Page doesn't exist")
@@ -1398,7 +1452,7 @@ class NoteBookSheet(wx.Panel, object):
             return
         self.pageNames.pop( pageName)
         self.m_notebook.DeletePage( pageNumber)
-
+        
     def changeLabel(self, page= None, newLabel= None):
         if self.GetPageCount() < 1:
             return

@@ -23,7 +23,7 @@ __WILDCARD= "Supported Files (*.txt;*.csv;*.xlsx;*.xls)|*.txt;*.csv;*xlsx;*.xls|
             "Txt file (*.txt)|*.txt|"    \
             "Csv file (*.csv)|*.csv" 
 
-def getPath(wildcard= __WILDCARD):
+def getPath(wildcard= __WILDCARD, aplyFilter= True):
     dlg = wx.FileDialog(None, "Load Data File", "","",
                         wildcard= wildcard,
                         style = wx.OPEN)
@@ -37,13 +37,14 @@ def getPath(wildcard= __WILDCARD):
     fileName= dlg.GetFilename()
     fullPath= dlg.Path 
     junk, filterIndex = os.path.splitext(fileName)
-    try:
-        if filterIndex in ('.xls','.xlsx'):
-            return fullPath
-        elif filterIndex in ('.txt', '.csv'):
-            return fullPath
-    except (Exception, TypeError) as e:
-        traceback.print_exc( file = self.log)
+    if aplyFilter:
+        try:
+            if filterIndex in ('.xls','.xlsx','.txt', '.csv'):
+                return fullPath
+        except (Exception, TypeError) as e:
+            traceback.print_exc( file = self.log)
+    else:
+        return fullPath
             
 def siguiente():
     '''genera una serie de datos continuos

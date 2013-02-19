@@ -6,9 +6,9 @@ TreeBaseClass = wx.TreeCtrl
 
 imagenes= imageEmbed()
 
-_demoPngs = ["disk", "pageexcel", "printer", "cancel", "icono", "edit_copy",
-             "edit_cut", "edit_paste", "edit_redo", "edit_undo", "x_office_spreadsheet",
-             "save", "x_office_calendar", "view_refresh"]
+_demoPngs = ["disk",]*14#, "pageexcel", "printer", "cancel", " ", "edit_copy",
+             #"edit_cut", "edit_paste", "edit_redo", "edit_undo", "x_office_spreadsheet",
+             #"save", "x_office_calendar", "view_refresh"]
 USE_CUSTOMTREECTRL = False
 
 
@@ -133,7 +133,6 @@ class TreePanel(wx.Panel):
         # initialize the tree data
         self._treelist= []
         self._callbacDict= dict()
-
         
         # Create a TreeCtrl
         self.ReadConfigurationFile()
@@ -144,7 +143,6 @@ class TreePanel(wx.Panel):
         bSizer1.Add( self.tree, 1, wx.ALL|wx.EXPAND, 5 )
 
         self.filter = wx.SearchCtrl( self, style= wx.TE_PROCESS_ENTER)# leftPanel
-
         self.filter.ShowCancelButton( True)
         self.filter.Bind( wx.EVT_TEXT, self.RecreateTree)
         self.filter.Bind( wx.EVT_SEARCHCTRL_CANCEL_BTN,
@@ -183,11 +181,11 @@ class TreePanel(wx.Panel):
             for key,values in data:
                 for keyname, icon, callback, callbackOptional in values:
                     self._callbacDict[keyname] = callback
-                 
+
             self.RecreateTree()
         else:
             raise StandardError('unsoported variable type')
-
+        
     def ReadConfigurationFile(self):
 
         self.auiConfigurations = {}
@@ -232,27 +230,26 @@ class TreePanel(wx.Panel):
         fullSearch = searchMenu[1].IsChecked()
         if evt:
             if fullSearch:
-                # Do not`scan all the demo files for every char
+                # Do not scan all the demo files for every char
                 # the user input, use wx.EVT_TEXT_ENTER instead
                 return
-        expansionState = self.tree.GetExpansionState()
-        current = None
-        item = self.tree.GetSelection()
+        expansionState= self.tree.GetExpansionState()
+        current=        None
+        item=           self.tree.GetSelection()
         if item:
-            prnt = self.tree.GetItemParent(item)
+            prnt=       self.tree.GetItemParent(item)
             if prnt:
-                #try:
-                    current = (self.tree.GetItemText(item),
-                           self.tree.GetItemText(prnt))
-                #except:
-                #    pass
+                current= (self.tree.GetItemText(item),
+                          self.tree.GetItemText(prnt))
         self.tree.Freeze()
         self.tree.DeleteAllItems()
-        self.root = self.tree.AddRoot("Statistical Functions")
-        self.tree.SetItemImage(self.root, 0)
-        self.tree.SetItemPyData(self.root, 0)
-        treeFont = self.tree.GetFont()
-        catFont = self.tree.GetFont()
+        
+        self.root= list()
+        self.root.append( self.tree.AddRoot( "Statistical Functions"))
+        self.tree.SetItemImage( self.root[-1], 0)
+        self.tree.SetItemPyData( self.root[-1], 0)
+        treeFont= self.tree.GetFont()
+        catFont=  self.tree.GetFont()
 
         # The native treectrl on MSW has a bug where it doesn't draw
         # all of the text for an item if the font is larger than the
@@ -262,38 +259,41 @@ class TreePanel(wx.Panel):
             treeFont.SetPointSize(treeFont.GetPointSize()+2)
         treeFont.SetWeight(wx.BOLD)
         catFont.SetWeight(wx.BOLD)
-        self.tree.SetItemFont(self.root, treeFont)
-        firstChild = None
-        selectItem = None
-        filter = self.filter.GetValue()
-        count = 0
-
-        # creation of list data
+        self.tree.SetItemFont(self.root[-1], treeFont)
+        firstChild= None
+        selectItem= None
+        filter=     self.filter.GetValue()
+        count=      0
+        
+        ##############################
+        ## creation of list data
         for category, items in self.treelist:
-            items= [item[0] for item in items]
-            count += 1
+            items=  [item[0] for item in items]
+            count+= 1
             if filter:
                 if fullSearch:
-                    items = self.searchItems[category]
+                    items= self.searchItems[category]
                 else:
-                    items = [item for item in items if filter.lower() in item.lower()] # item -> item[0]
+                    items= [item for item in items if filter.lower() in item.lower()] # item -> item[0]
             if items:
-                child = self.tree.AppendItem(self.root, category, image=count)
+                child= self.tree.AppendItem(self.root[-1], category, image=count)
                 self.tree.SetItemFont(child, catFont)
                 self.tree.SetItemPyData(child, count)
                 if not firstChild: firstChild = child
                 for childItem in items:
-                    image = count
+                    image= count
                     #if DoesModifiedExist(childItem):
                     #    image = len(_demoPngs)
-                    theDemo = self.tree.AppendItem(child, childItem, image=image)
+                    theDemo= self.tree.AppendItem(child, childItem, image=image)
                     self.tree.SetItemPyData(theDemo, count)
                     self.treeMap[childItem] = theDemo
                     if current and (childItem, category) == current:
-                        selectItem = theDemo
-
+                        selectItem= theDemo
+        ## end tree list
+        ##############################
+        
         #
-        self.tree.Expand(self.root)
+        self.tree.Expand(self.root[-1])
         if firstChild:
             self.tree.Expand(firstChild)
         if filter:

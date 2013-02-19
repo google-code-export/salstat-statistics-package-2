@@ -5,7 +5,7 @@ SalStat Statistics Package. Copyright 2002 Alan James Salmoni. Licensed
 under the GNU General Public License (GPL 2) """
 
 ##-----------------------------
-## STANDAR LIBRARY DEPENDENCES
+## STANDARD LIBRARY DEPENDENCES
 import os
 import sys
 import webbrowser # online Help
@@ -15,8 +15,8 @@ import traceback
 # to be used with translation module
 import locale
 import glob
-from threading import Thread
 
+from threading import Thread
 ##---------------------------------
 ## END STANDAR LIBRARY DEPENDENCES
 ##---------------------------------
@@ -25,7 +25,7 @@ from threading import Thread
 ## EXTERNAL LIBRARY DEPENDENCES
 #----
 # http://www.pyinstaller.org/ticket/596
-from scipy.sparse.csgraph import _validation
+###from scipy.sparse.csgraph import _validation
 #----
 try:
     sys.modules['wx']
@@ -91,8 +91,9 @@ except ImportError:
 
 ##-----------------------------
 ## INTERNAL LIBRARY DEPENDENCES
-# system of graphics
+# graphics system
 from plotFunctions import pltobj as plot
+
 # spreadSheet
 from ntbSheet import NoteBookSheet, SimpleGrid
 from gridLib  import floatRenderer #, AutoWrapStringRenderer
@@ -119,8 +120,8 @@ import plotFunctions
 ## END INTERNAL LIBRARY DEPENDENCES
 ##---------------------------------
 
-APPNAME= 'S2'
-__version__= '2.1 rc 1'
+APPNAME= 'S2 - Salstat Statistics Package 2'
+__version__= '2.1 rc 2'
 inits= {}    # dictionary to hold the config values
 missingvalue= None ## It's not used
 imagenes= imageEmbed()
@@ -400,8 +401,10 @@ class Grids(NoteBookSheet):
         NoteBookSheet.__init__(self, parent, id, *args, **params)
 
     def _gridSetRenderer(self, grid):
+        return
         '''setting the renderer to the grid'''
         attr=   GridCellAttr()
+        attr.IncRef() # correct delete column
         renderer = floatRenderer( 4)
         attr.SetRenderer( renderer)
         self.floatCellAttr= attr
@@ -433,7 +436,7 @@ class Tb1(aui.AuiToolBar):
         HelpIcon =   imag.about()
         UndoIcon =   imag.edit_undo()
         RedoIcon =   imag.edit_redo()
-        closePage=   imag.cancel()
+        #closePage=   imag.cancel()
 
         self.bt1 = self.AddSimpleTool(10, translate(u"New"),  NewIcon,     translate(u"New"))
         self.bt2 = self.AddSimpleTool(20, translate(u"Open"), OpenIcon,    translate(u"Open"))
@@ -451,7 +454,7 @@ class Tb1(aui.AuiToolBar):
         self.bt9 = self.AddSimpleTool(85, translate(u"Preferences"),PrefsIcon, translate(u"Preferences"))
         ##self.bt10= selfAddSimpleTool(90, "Help", HelpIcon, "Help")
         self.bt10= self.AddSimpleTool(95, translate(u"OnlineHelp"), HelpIcon, translate(u"Online Help"))
-        self.bt13= self.AddSimpleTool(100, translate(u"Close"), closePage, translate(u"Close Current Page"))
+        ##self.bt13= self.AddSimpleTool(100, translate(u"Close"), closePage, translate(u"Close Current Page"))
 
         # to the language
         language = wx.GetApp().GetPreferences( "Language")
@@ -482,18 +485,18 @@ class Tb1(aui.AuiToolBar):
         self.grid.changeLabel(newLabel= SheetName)
         evt.Skip()
 
-    def closePage(self, evt):
-        # check if there are pages
-        if len(self.grid.pageNames) == 0:
-            return
-        if self.grid.hasSaved:
-            self.grid.delPage()
-        else:
-            # checking if there is data to be saved
-            if len(self.grid.GetUsedCols()[0]) != 0:
-                win = SaveOneGridDialog(self.grid)
-                win.Show(True)
-                evt.Skip()
+    #def closePage(self, evt):
+    #    # check if there are pages
+    #    if len(self.grid.pageNames) == 0:
+    #        return
+    #    if self.grid.hasSaved:
+    #        self.grid.delPage()
+    #    else:
+    #        # checking if there is data to be saved
+    #        if len(self.grid.GetUsedCols()[0]) != 0:
+    #            win = SaveOneGridDialog(self.grid)
+    #            win.Show(True)
+    #            evt.Skip()
 
     def SaveXls(self, evt):
         if len(self.grid.pageNames) == 0:
@@ -587,11 +590,13 @@ class _checkUpdates(Thread):
         print text
 def hlp(param):
     # replace the help function
+    # it's needed into the script to corectly diplay the
+    # help of the statistical functions
     try:
         print param.__doc__
     except:
         return help(param)
-    
+
 class SalStat2App(wx.App):
     # the main app
     def __init__(self, *args, **kwargs):
@@ -661,7 +666,7 @@ class SalStat2App(wx.App):
             for f in  sys.argv[1:]:
                 self.OpenFileMessage(f)
         # check for updates by using a diferent threating
-        
+
         self._checkUpdates()
         return True
 
@@ -839,66 +844,64 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         # wx.FileDropTarget.__init__( self)
         self.translate= translate
         self.window=    self
-        
+
         # setting an appropriate size to the frame
         dp=    wx.Display()
         ca=    dp.GetClientArea()
-        wx.Frame.__init__(self, parent, -1, "S2",
+        wx.Frame.__init__(self, parent, -1, APPNAME,
                           size = wx.Size( ca[2], ca[-1] ),
                           pos = ( ca[0],ca[1]) )
         self.m_mgr=   aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
+        self.m_mgr.SetArtProvider(aui.AuiDefaultDockArt())
         self.appname= appname
-        
+
         #set icon for frame (needs x-platform separator!
         self.Icon=          appname.icon24
         self.DECIMAL_POINT= appname.DECIMAL_POINT
-        
+
         # create toolbars
         self.tb1=             self._createTb1()
         self.formulaBarPanel= formulaBar( self, -1)
-        
+
         # create the status bar
-        self.StatusBar= self._createStatusBar()
-        self.log= self.logPanel= LogPanel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+        self.StatusBar=     self._createStatusBar()
+        self.log=           self.logPanel= LogPanel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         self.defaultDialogSettings = {'Title': None,
                                       'icon': imagenes.logo16()}
-        
         #<p> set up the datagrid
         self.grid=  Grids(self, -1)
-        
-        
-        
         self.grid.addPage( gridSize= (256,64))
         # set up the datagrid  /<p>
-        
-        # -response panel
+
+        # response panel
         self.answerPanel=   NoteBookSheet(self, fb = self.formulaBarPanel)
         self.answerPanel2=  ScriptPanel(self, self.logPanel)
-        
+
         # Redirecting the error messages and the std output to the logPanel
         if not __debug__:
             sys.stderr= self.logPanel
             sys.stdout= self.logPanel
-        
+
+        # Shell
         self.scriptPanel=  wx.py.sliceshell.SlicesShell( self) ##wx.py.crust.Shell( self, -1, introText="S2 interactive shell")
-        
+
         # put the references into the main app
         appname.setItems(self.logPanel, self.grid, self.answerPanel, plot)
-        
+
         # create the three panel
         self.treePanel= TreePanel( self, self.log, style=wx.TAB_TRAVERSAL|wx.CLIP_CHILDREN)
-        
+
         # create menubar
         self._createMenuUpdadteTree()
-        
+
         # create plot selection panel
         grapHplotData=      self._autoCreateMenu( plotFunctions, twoGraph= True)
         self.plotSelection= createPlotSelectionPanel( self, size= wx.Size( 320, 480) )
         self.plotSelection.createPanels( grapHplotData)
         # organizing panels
         self.auiPanels = dict()
-         
+
         # adding panels to the aui
         # 
         self.m_mgr.AddPane( self.formulaBarPanel,
@@ -972,10 +975,10 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         # Saving the perspective
         self._defaultPerspective= self.m_mgr.SavePerspective()
         self.Center()
-        
+
     def _updatetree(self, data):
         self.treePanel.treelist= data
-    
+
     def _createStatusBar(self):
         StatusBar= self.CreateStatusBar( 3)
         StatusBar.SetStatusText( 'cells Selected:   '+'count:      '+'sum:    ', 1 )
@@ -1077,22 +1080,20 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         #sixsigma =   imag.sixsigma16()
         #set up menus
         menuBar = wx.MenuBar()
-        
+
         # to be used for statistical menu autocreation
         from statFunctions import *
         from plotFunctions import *
-        
+
         statisticalMenus= self._autoCreateMenu( statFunctions)
         plotMenus= self._autoCreateMenu( plotFunctions)
-        
-        # updating the tree
-        self._updatetree( statisticalMenus)
-        
+
         #add contents of menu
         dat1= (
             (translate(u"&File"),
              ([translate(u"&New Data\tCtrl-N"),   NewIcon,    self.tb1.NewPage,     wx.ID_NEW],
               [translate(u"&Open...\tCtrl-O"),    OpenIcon,   self.grid.LoadFile,   wx.ID_OPEN], # LoadXls
+              [translate(u"&Load from a database\tCtrl-L"),    OpenIcon,   self.LoadFromDb,   wx.ID_OPEN], # Load a table from a Database
               [u"--"],
               [translate(u"&Save\tCtrl-S"),       SaveIcon,   self.grid.SaveXls,         wx.ID_SAVE],
               [translate(u"Save &As...\tCtrl-Shift-S"), SaveAsIcon, self.grid.SaveXlsAs, wx.ID_SAVEAS],
@@ -1100,7 +1101,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
               [u"--"],
               [translate(u"E&xit\tCtrl-Q"),       ExitIcon,   self.EndApplication,  wx.ID_EXIT],
               )),
-            
+
             (translate(u"&Edit"),
              ([translate(u"Cu&t"),           CutIcon,         self.tb1.CutData,     wx.ID_CUT],
               [translate(u"&Copy"),          CopyIcon,        self.tb1.CopyData,    wx.ID_COPY],
@@ -1111,17 +1112,17 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
               [u"--"],
               [translate(u"Delete Current Column"), None,     self.tb1.DeleteCurrentCol,     None],
               [translate(u"Delete Current Row"),    None,     self.tb1.DeleteCurrentRow,     None],)),
-            
+
             (translate(u"P&reparation"),
              ([translate(u"Transform Data"),           None,  self.GoTransformData,     None],
               [translate(u"short data"),               None,  self.shortData,     None],)),
-            
+
             (translate(u"S&tatistics"),
              statisticalMenus),
-            
+
             (translate(u"&Graph"),
              plotMenus),
-             
+
             (translate(u"&Help"),
              (##("Help\tCtrl-H",       imag.about(),  self.GoHelpSystem,  wx.ID_HELP),
               (translate(u"&Preferences"),
@@ -1140,6 +1141,9 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
               (translate(u"&About..."),          imag.icon16(), self.ShowAbout,     wx.ID_ABOUT),
               )),
         )
+        # updating the tree
+        self._updatetree( statisticalMenus) #statisticalMenus
+
         self.__createMenu(dat1, menuBar)
         self.SetMenuBar(menuBar)
 
@@ -1197,7 +1201,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         self.Bind( wx.EVT_MENU, self.GoOnlyneHelp,      id= self.tb1.bt10.GetId())
         self.Bind( wx.EVT_MENU, self.tb1.Undo,          id= self.tb1.bt11.GetId())
         self.Bind( wx.EVT_MENU, self.tb1.Redo,          id= self.tb1.bt12.GetId())
-        self.Bind( wx.EVT_MENU, self.tb1.closePage,     id= self.tb1.bt13.GetId())
+        #self.Bind( wx.EVT_MENU, self.tb1.closePage,     id= self.tb1.bt13.GetId())
         # controlling the expansion of the notebook
         self.grid.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_BG_DCLICK, self._OnNtbDbClick )
         self.Bind( wx.EVT_CLOSE, self.EndApplication )
@@ -1210,6 +1214,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
             i+= 1
     def _evalstat(self, evt, stat):
         stat().showGui()
+        
     def _OnNtbDbClick(self, evt):
         for pane in self.m_mgr.GetAllPanes():
             if pane.caption == self.translate(u"Data Entry Panel"):
@@ -1219,7 +1224,55 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         else:
             self.m_mgr.RestorePane(pane)
         self.m_mgr.Update()
+        
+    def LoadFromDb(self, evt, *args, **params):
+        # to load data from an sqlite database
+        from slbTools import getPath
+        from sqlalchemy import create_engine
+        from gridLib.gridsql import selectDbTableDialog, GenericDBClass
 
+        dbPath= getPath(wildcard= "Supported Files (*.db)|*.db|"\
+                        "MS access db (*.mdb)|*.mdb|"\
+                        "All Files (*.*)|*.*", aplyFilter=False)
+        if dbPath == None:
+            return
+        extension= dbPath.split('.')[-1]
+        dispatch= {'db': 'sqlite',
+                   'mdb': 'access',}
+        if not(extension in dispatch):
+            return
+        
+        engine= create_engine( dispatch[extension]+ ':///%s'%dbPath, echo=False)
+        dlg= selectDbTableDialog(self, engine)
+
+        if dlg.ShowModal() == wx.ID_OK:
+            values= dlg.GetValue()
+        else:
+            dlg.Destroy()
+            return
+        # the dialog is drestroyed after the results of the database
+
+        value = values[0]
+        if value == None:
+            dlg.Destroy()
+            # The user don't select any table
+            return
+        # reading the data by columns and paste into the current sheet
+        table=  dlg.m_grid.table
+        sesion = table.Session()
+        # add a page to write the result
+        self.grid.addPage(name= 'noname', gridSize= (sesion.query(GenericDBClass).limit(20000).count(), len(table.colLabels)))
+
+        for colNumber, colName in enumerate( table.colLabels):
+            rowValues= list()
+            for rowi in sesion.query( GenericDBClass).limit(20000).all():
+                rowValues.append( getattr( rowi, colName))
+                # report the values
+            # writing the data in a new sheet
+            self.grid.PutCol( colNumber, rowValues,)
+            
+        dlg.Destroy()        
+        
     def OnDropFiles( self, x, y, filenames):
         if isinstance( filenames, (str, unicode)):
             filenames= [filenames]
@@ -1399,7 +1452,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         else:
             panel.Show(False)
         self.m_mgr.Update()
-        
+
     def showScriptPanel(self, evt):
         panel = self.m_mgr.GetPane(self.answerPanel2)
         if not panel.IsShown():
@@ -1407,12 +1460,17 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         else:
             panel.Show(False)
         self.m_mgr.Update()
-        
+
     def EndApplication(self, evt):
         if len(self.grid.pageNames) == 0:
             wx.GetApp().frame.Destroy()
             return
-        if self.grid.hasSaved == False:
+        try:
+            saved= self.grid.hasSaved
+        except AttributeError:
+            # if there aren't active sheets
+            saved= True
+        if saved == False:
             # checking if there is data to be saved
             if len(self.grid.GetUsedCols()[0]) != 0:
                 win = SaveDialog(self)
@@ -1480,6 +1538,7 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         self.logPanel.write(functionName + " successful")
 
     def Destroy(self):
+        self.m_mgr.UnInit()
         super(MainFrame, self).Destroy()
 #--------------------------------------------------------------------------
 # main loop
