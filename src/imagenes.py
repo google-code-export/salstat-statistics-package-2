@@ -2,11 +2,12 @@
 # retorna un bitmap dado el nombre de la clase especifica
 # se modificara
 __all__ =['imageEmbed']
-from cStringIO import StringIO
-from base64 import b64decode, encodestring
+#from cStringIO import StringIO
+#from base64 import b64decode, encodestring
 from os.path import exists
-from wx import BitmapFromImage, ImageFromStream, IconFromBitmap, App, GetApp
-from wx._core import PyNoAppError
+#from wx import BitmapFromImage, ImageFromStream, IconFromBitmap, App, GetApp
+from wx import App, GetApp
+from wx.lib.embeddedimage import PyEmbeddedImage
 
 class imageEmbed:
     def __init__(self):
@@ -18,12 +19,16 @@ class imageEmbed:
         return getattr(self, key)()
         
     def __conversion__(self, data):
-        jpg1 = b64decode(data)
-        # convert jpg stream to a data stream
-        stream1 = StringIO(jpg1)
-        # convert to a bitmap
-        u = False
-        return BitmapFromImage( ImageFromStream( stream1))
+        if 0:# old method
+            jpg1 = b64decode(data)
+            # convert jpg stream to a data stream
+            stream1 = StringIO(jpg1)
+            # convert to a bitmap
+            u = False
+            return BitmapFromImage( ImageFromStream( stream1))
+        if 1: # new method
+            jpg1 = PyEmbeddedImage(data)
+            return jpg1.getBitmap()
     
     def convertFromfile(self,pathFile, show = False):
         # muestra el string correspondiente para embeber una imagen en codigo
@@ -583,13 +588,65 @@ class imageEmbed:
         ivNf+MplYm5My5MAAAAASUVORK5CYII=
         """)
     def logo16(self):
-        return IconFromBitmap(self.icon16())
+        jpg1= PyEmbeddedImage("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
+        WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3AYYEC0yRx5UOwAAAB1pVFh0Q29tbWVudAAAAAAAQ3Jl
+        YXRlZCB3aXRoIEdJTVBkLmUHAAADL0lEQVQ4y22TbUiddRjGf/dzznnMOnMoHinMcxTfX4a4ZNrC
+        toGrD6tBg6wkasig6OOKZHPRjLI+5CiCYl/WYLH1Mvowg1hSS3Isk8nMl1labB4beo5vs+f/dM7z
+        cv59sERa97f7vq/r9+m6hP/Mz5NTZb7vvxw0Q3uSiWQZQCQSmXFc95IZCPRuq6ma2ayXzcvQyLWz
+        yUTymSuDV7TnByRaWgMIs79PEAr4uumhByUSyT/X/EBD+x2AwaHh6eEfh0s9HZZo5SP4mRD636fW
+        BMQjPtNPUP7UjTsaf2tp3lG+Afh2YPCzsdGxJ8N59aLNinXPJjMYaDKAYLjT2KujunZb7Retu1qe
+        ku8GBssSyeT0rXmfQHjPulEL6H8gsk7TGkQ0GkH++p57C4SCSKQ8eHttrTN+I67JeVq81DIPV7/O
+        8qpJQf4ikzcfI77Uhucl2NfUyUIij7xcj4HxN7k116ezsszOoJN2WkPZ+ZJYDXKg5QhfXT6K45eA
+        hsroSSwleF6a8wOnEaCu5DQV931OfKFInLTTati2igXMmLaVkLtlnuRSMbYCZcPI1AsoBel0FNte
+        v92cr8UMrWKEotq27Zjhuh4QFMsSvhnq4LVDrVQUf4qyfCxLULaBUoKlBGUJuxvOMvJrC2RC4noe
+        huM4c+G7b2MrzQ/DT3D43X4m4tW82H6Ql9oOoiyNUmAriMW+5sZSIRO/NJMTXsNJpeYMJ+VcNPSS
+        FvGxbEFZQeLTDbzxwRkqi66jlGArwc1KsKuxj3NfvoqIj7CoXdftN2LF0fcSiaTs3jmrm3aeRymN
+        ssFSGVLOXSgFOfkztD/6Ed29H6Is2NsS1wvzCxKLFp0QgJ53ei8UFhXuy86ZNUoKL7Ps5HOPpzj2
+        fi+ptS0823aSmtIxJKDJysqgMtn8dKmqr+vIK/s3otx1rHu2qqa60DfqjVOfRFhZCW6kSAO5Wz0O
+        Pb9IIDOamRyf+KPnrePRO8p0tOv4hZBpPr69cbvODpfL9akAWoTqKp+0Na2vDl8VJ53ue7une///
+        thHg41Nn6q6Njh12XGdvXl7u/QArSytzIdPsr6+vO9HR8dz4Zv3fVDCAyQsMbqMAAAAASUVORK5C
+        YII=
+        """)
+        return jpg1.getIcon()
     
     def logo24(self):
-        return IconFromBitmap(self.icon24())
+        jpg1= PyEmbeddedImage("""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
+        ivNf+MplYm5My5MAAAAASUVORK5CYII=
+        """)
+        return jpg1.getIcon()
     
     def logo32(self):
-        return IconFromBitmap(self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
+        jpg1= PyEmbeddedImage("""iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3AYYEC0hw6AV5QAAAB1pVFh0Q29tbWVudAAAAAAAQ3Jl
         YXRlZCB3aXRoIEdJTVBkLmUHAAAJ2UlEQVRYw6WXe3Bc1X3HP+feu6vVai1phS3ZWMYvPW1LCJxC
         bdnGBNcGQyDMZDDThEcTCg2PTpMJ9OGmzDRtZxgo06R0aIBAWobpZCbNBMchNjY2luUHJLEtwJYt
@@ -636,10 +693,11 @@ class imageEmbed:
         AJRCKYUX8bDG8vHgEEePHJVzZ87hRT01p3H2pie/9Wd3/c6H07179rVu2/7u85cuX15vjcVYIzU1
         1Wr6jBnE45UlQZondSHFeCYjnhdRXsSjri751to1n//m8u7fP/b/Oh2XNY7ItGeeef7BXC6/Ll8o
         tDhKNU9kJ0CgKpEAkcFYLDZQGY9v/Ys//8YPlVLjv82+/w0gYF0armjmNAAAAABJRU5ErkJggg==
-        """))
+        """)
+        return jpg1.getIcon()
     
     def logo64(self):
-        return IconFromBitmap(self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
+        jpg1= PyEmbeddedImage("""iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3AYYEC0R5XklSQAAAB1pVFh0Q29tbWVudAAAAAAAQ3Jl
         YXRlZCB3aXRoIEdJTVBkLmUHAAAcb0lEQVR42tWbeZRfVZXvP/vc+5tqTKWqMpPKPJKEQAhDIKhg
         q2gris9ZW1Seiu3Q+vQ9e/ns90c/12rXA1scnmODiCiICmrDcogKIQLBzCSBhCRVlTlVlZp/073n
@@ -770,7 +828,9 @@ class imageEmbed:
         f/fq8bGJDcdPnAgEIQiMIpW1IY2vTT+vO05t7ERRZs+aZVtaW7Zcftm6H2/YcMWt/1+8PV7/7/Sp
         069/4MF/Xjo4OLQwlU5dIrB6ZGSUyYkJylFUfeGpuaWZKVOmoKq7ozja1tXZeeiG17zq2ekzpt//
         Qvbv/wGeTVTTDVh63gAAAABJRU5ErkJggg==
-        """))
+        """)
+        return jpg1.getIcon()
+    
     def backward(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAK
         T2lDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjanVNnVFPpFj333vRCS4iAlEtvUhUIIFJCi4AU

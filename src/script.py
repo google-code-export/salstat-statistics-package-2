@@ -33,7 +33,7 @@ if wx.Platform == '__WXMSW__':
         'other': 'Comic Sans MS',
         'size' : 10,
         'size2': 8,
-        }
+    }
 else:
     faces = {
         'times': 'Times',
@@ -42,7 +42,7 @@ else:
         'other': 'Century Schoolbook',
         'size' : 12,
         'size2': 10,
-        }
+    }
 
 
 class MySTC( stc.StyledTextCtrl, object):
@@ -62,7 +62,7 @@ class MySTC( stc.StyledTextCtrl, object):
         keylist.extend(keyword.__builtins__.keys())
         keyWordlist = " ".join(keylist)
         self.SetKeyWords(0, keyWordlist )
-        
+
         self.SetMarginType(1,stc.STC_MARGIN_NUMBER)
         #self.SetMaxLength(250)
 
@@ -85,19 +85,19 @@ class MySTC( stc.StyledTextCtrl, object):
 
         # fold markers use square headers
         self.MarkerDefine(stc.STC_MARKNUM_FOLDEROPEN,
-            stc.STC_MARK_BOXMINUS, "white", "#808080")
+                          stc.STC_MARK_BOXMINUS, "white", "#808080")
         self.MarkerDefine(stc.STC_MARKNUM_FOLDER,
-            stc.STC_MARK_BOXPLUS, "white", "#808080")
+                          stc.STC_MARK_BOXPLUS, "white", "#808080")
         self.MarkerDefine(stc.STC_MARKNUM_FOLDERSUB,
-            stc.STC_MARK_VLINE, "white", "#808080")
+                          stc.STC_MARK_VLINE, "white", "#808080")
         self.MarkerDefine(stc.STC_MARKNUM_FOLDERTAIL,
-            stc.STC_MARK_LCORNER, "white", "#808080")
+                          stc.STC_MARK_LCORNER, "white", "#808080")
         self.MarkerDefine(stc.STC_MARKNUM_FOLDEREND,
-            stc.STC_MARK_BOXPLUSCONNECTED, "white", "#808080")
+                          stc.STC_MARK_BOXPLUSCONNECTED, "white", "#808080")
         self.MarkerDefine(stc.STC_MARKNUM_FOLDEROPENMID,
-            stc.STC_MARK_BOXMINUSCONNECTED, "white", "#808080")
+                          stc.STC_MARK_BOXMINUSCONNECTED, "white", "#808080")
         self.MarkerDefine(stc.STC_MARKNUM_FOLDERMIDTAIL,
-            stc.STC_MARK_TCORNER, "white", "#808080")
+                          stc.STC_MARK_TCORNER, "white", "#808080")
 
         # bind some events ...
         self.Bind(stc.EVT_STC_UPDATEUI, self.onUpdateUI)
@@ -108,80 +108,80 @@ class MySTC( stc.StyledTextCtrl, object):
         # global default styles for all languages
         # set default font
         self.StyleSetSpec(stc.STC_STYLE_DEFAULT,
-            "face:%(helv)s,size:%(size)d" % faces)
+                          "face:%(helv)s,size:%(size)d" % faces)
         # set default background color
         if wx.Platform == "__WXMAC__":
             self.StyleSetBackground(style=stc.STC_STYLE_DEFAULT,
-                back="#ffffff") # White
+                                    back="#ffffff") # White
         else:
             self.StyleSetBackground(style=stc.STC_STYLE_DEFAULT,
-                back="#F5F5DC") # beige / light yellow
+                                    back="#F5F5DC") # beige / light yellow
         # reset all to be like the default
         self.StyleClearAll()
 
         # more global default styles for all languages
         self.StyleSetSpec(stc.STC_STYLE_LINENUMBER,
-            "back:#C0C0C0,face:%(helv)s,size:%(size2)d" % faces)
+                          "back:#C0C0C0,face:%(helv)s,size:%(size2)d" % faces)
         self.StyleSetSpec(stc.STC_STYLE_CONTROLCHAR,
-            "face:%(other)s" % faces)
+                          "face:%(other)s" % faces)
         self.StyleSetSpec(stc.STC_STYLE_BRACELIGHT,
-            "fore:#FFFFFF,back:#0000FF,bold")
+                          "fore:#FFFFFF,back:#0000FF,bold")
         self.StyleSetSpec(stc.STC_STYLE_BRACEBAD,
-            "fore:#000000,back:#FF0000,bold")
+                          "fore:#000000,back:#FF0000,bold")
 
         # make the Python styles ...
         # default
         self.StyleSetSpec(stc.STC_P_DEFAULT,
-            "fore:#000000,face:%(helv)s,size:%(size)d" % faces)
+                          "fore:#000000,face:%(helv)s,size:%(size)d" % faces)
         # comments
         self.StyleSetSpec(stc.STC_P_COMMENTLINE,
-            "fore:#007F00,face:%(other)s,size:%(size)d" % faces)
+                          "fore:#007F00,face:%(other)s,size:%(size)d" % faces)
         # number
         self.StyleSetSpec(stc.STC_P_NUMBER,
-            "fore:#007F7F,size:%(size)d" % faces)
+                          "fore:#007F7F,size:%(size)d" % faces)
         # string
         self.StyleSetSpec(stc.STC_P_STRING,
-            "fore:#7F007F,face:%(helv)s,size:%(size)d" % faces)
+                          "fore:#7F007F,face:%(helv)s,size:%(size)d" % faces)
         # single quoted string
         self.StyleSetSpec(stc.STC_P_CHARACTER,
-            "fore:#7F007F,face:%(helv)s,size:%(size)d" % faces)
+                          "fore:#7F007F,face:%(helv)s,size:%(size)d" % faces)
         # keyword
         self.StyleSetSpec(stc.STC_P_WORD,
-            "fore:#00007F,bold,size:%(size)d" % faces)
+                          "fore:#00007F,bold,size:%(size)d" % faces)
         # triple quotes
         self.StyleSetSpec(stc.STC_P_TRIPLE,
-            "fore:#7F0000,size:%(size)d" % faces)
+                          "fore:#7F0000,size:%(size)d" % faces)
         # triple double quotes
         self.StyleSetSpec(stc.STC_P_TRIPLEDOUBLE,
-            "fore:#7F0000,size:%(size)d" % faces)
+                          "fore:#7F0000,size:%(size)d" % faces)
         # class name definition
         self.StyleSetSpec(stc.STC_P_CLASSNAME,
-            "fore:#0000FF,bold,underline,size:%(size)d" % faces)
+                          "fore:#0000FF,bold,underline,size:%(size)d" % faces)
         # function or method name definition
         self.StyleSetSpec(stc.STC_P_DEFNAME,
-            "fore:#007F7F,bold,size:%(size)d" % faces)
+                          "fore:#007F7F,bold,size:%(size)d" % faces)
         # operators
         self.StyleSetSpec(stc.STC_P_OPERATOR,
-            "bold,size:%(size)d" % faces)
+                          "bold,size:%(size)d" % faces)
         # identifiers
         self.StyleSetSpec(stc.STC_P_IDENTIFIER,
-            "fore:#000000,face:%(helv)s,size:%(size)d" % faces)
+                          "fore:#000000,face:%(helv)s,size:%(size)d" % faces)
         # comment-blocks
         self.StyleSetSpec(stc.STC_P_COMMENTBLOCK,
-            "fore:#7F7F7F,size:%(size)d" % faces)
+                          "fore:#7F7F7F,size:%(size)d" % faces)
         # end of line where string is not closed
         self.StyleSetSpec(stc.STC_P_STRINGEOL,
-            "fore:#000000,face:%(mono)s,back:#E0C0E0,eol,size:%(size)d"\
-                % faces)
+                          "fore:#000000,face:%(mono)s,back:#E0C0E0,eol,size:%(size)d"\
+                          % faces)
 
         # register some images for use in the AutoComplete box
         self.RegisterImage(1,
-            wx.ArtProvider.GetBitmap(wx.ART_TIP, size=(16,16)))
+                           wx.ArtProvider.GetBitmap(wx.ART_TIP, size=(16,16)))
         self.RegisterImage(2,
-            wx.ArtProvider.GetBitmap(wx.ART_NEW, size=(16,16)))
+                           wx.ArtProvider.GetBitmap(wx.ART_NEW, size=(16,16)))
         self.RegisterImage(3,
-            wx.ArtProvider.GetBitmap(wx.ART_COPY, size=(16,16)))
-        
+                           wx.ArtProvider.GetBitmap(wx.ART_COPY, size=(16,16)))
+
         #if self.doc:
         #    self.SetDocPointer(self.doc)
         #else:
@@ -227,7 +227,7 @@ class MySTC( stc.StyledTextCtrl, object):
             styleBefore = self.GetStyleAt(caretPos - 1)
         # check before
         if charBefore and chr(charBefore) in "[]{}()"\
-                and styleBefore == stc.STC_P_OPERATOR:
+           and styleBefore == stc.STC_P_OPERATOR:
             braceAtCaret = caretPos - 1
         # check after
         if braceAtCaret < 0:
@@ -235,7 +235,7 @@ class MySTC( stc.StyledTextCtrl, object):
             styleAfter = self.GetStyleAt(caretPos)
 
             if charAfter and chr(charAfter) in "[]{}()"\
-                    and styleAfter == stc.STC_P_OPERATOR:
+               and styleAfter == stc.STC_P_OPERATOR:
                 braceAtCaret = caretPos
         if braceAtCaret >= 0:
             braceOpposite = self.BraceMatch(braceAtCaret)
@@ -252,7 +252,7 @@ class MySTC( stc.StyledTextCtrl, object):
             else:
                 lineClicked = self.LineFromPosition(evt.GetPosition())
                 if self.GetFoldLevel(lineClicked) &\
-                        stc.STC_FOLDLEVELHEADERFLAG:
+                   stc.STC_FOLDLEVELHEADERFLAG:
                     if evt.GetShift():
                         self.SetFoldexpanded(lineClicked, True)
                         self.expand(lineClicked, True, True, 1)
@@ -273,7 +273,7 @@ class MySTC( stc.StyledTextCtrl, object):
         # find out if folding or unfolding
         for lineNum in range(lineCount):
             if self.GetFoldLevel(lineNum) &\
-                    stc.STC_FOLDLEVELHEADERFLAG:
+               stc.STC_FOLDLEVELHEADERFLAG:
                 expanding = not self.GetFoldexpanded(lineNum)
                 break;
         lineNum = 0
@@ -281,7 +281,7 @@ class MySTC( stc.StyledTextCtrl, object):
             level = self.GetFoldLevel(lineNum)
             if level & stc.STC_FOLDLEVELHEADERFLAG and \
                (level & stc.STC_FOLDLEVELNUMBERMASK) ==\
-                    stc.STC_FOLDLEVELBASE:
+               stc.STC_FOLDLEVELBASE:
                 if expanding:
                     self.SetFoldexpanded(lineNum, True)
                     lineNum = self.expand(lineNum, True)
@@ -339,14 +339,14 @@ class ScriptPanel( wx.Panel):
             wx.Panel.__init__(self, parent, wx.ID_ANY, *args[1:])
         except:
             wx.Panel.__init__(self, parent, wx.ID_ANY)
-            
+
         self.m_mgr = aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
-        
-        self.m_notebook= wx.aui.AuiNotebook( self, wx.ID_ANY,
-                                           wx.DefaultPosition, wx.DefaultSize,
-                                           wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|
-                                           wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_BOTTOM)
+
+        self.m_notebook= wx.aui.AuiNotebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,
+                                              wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|
+                                              wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_BOTTOM|
+                                              wx.aui.AUI_NB_TAB_SPLIT|wx.aui.AUI_NB_CLOSE_BUTTON)
         
         self.m_mgr.AddPane( self.m_notebook, aui.AuiPaneInfo().CenterPane().Dock().
                             Resizable(True).FloatingSize( wx.DefaultSize ).
@@ -355,10 +355,10 @@ class ScriptPanel( wx.Panel):
         self.npage = numPage()
         self.currentPage = None
         self.pageNames= dict()
-        
+
         prepend_items, append_items = [], []
         item = aui.AuiToolBarItem()
-        
+
         item.SetKind(wx.ITEM_SEPARATOR)
         append_items.append(item)
 
@@ -370,10 +370,10 @@ class ScriptPanel( wx.Panel):
 
         if wx.version < "2.9":
             tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
-                            style = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_OVERFLOW)
+                                style = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_OVERFLOW)
         else:
             tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
-                agwStyle = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_OVERFLOW)
+                                agwStyle = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_OVERFLOW)
 
         imagenes = imageEmbed()
         tb1.SetToolBitmapSize(wx.Size(16, 16))
@@ -390,12 +390,10 @@ class ScriptPanel( wx.Panel):
         self.bt6= tb1.AddSimpleTool(wx.ID_ANY, u"Copy" , imagenes.edit_copy(), u"Copy" )
         self.bt7= tb1.AddSimpleTool(wx.ID_ANY, u"Paste" , imagenes.edit_paste(), u"Paste" )
         tb1.AddSeparator()
-        self.bt10= tb1.AddSimpleTool(wx.ID_ANY, u"Close" , imagenes.cancel(), u"Close" )
-        tb1.AddSeparator()
         tb1.SetCustomOverflowItems( prepend_items, append_items)
         tb1.SetToolDropDown(wx.ID_ANY, True)
         tb1.Realize()
-                
+
         self.m_mgr.AddPane( tb1,
                             aui.AuiPaneInfo().Name("tb1").
                             Caption("Basic Operations").
@@ -421,7 +419,7 @@ class ScriptPanel( wx.Panel):
                 currPage= self.currentPage
                 return currPage.__getattribute__( name)
             raise AttributeError
-    
+
     def getPageNames( self):
         return self.pageNames.keys()
 
@@ -433,7 +431,7 @@ class ScriptPanel( wx.Panel):
 
     def OnNotebookPageChange( self,evt):
         self.currentPage= self.m_notebook.GetPage( evt.Selection)
-        
+
     def GetPageCount( self):
         # 21/04/2011
         # retorna el numero de paginas que hay en el notebook
@@ -450,7 +448,7 @@ class ScriptPanel( wx.Panel):
         # a new sash is created. The class's constructor needs 1 parameter
         # which is the parent of the window
         #multi.SetDefaultChildClass(MySTC)
-        
+
         self.pageNames[newName]= MySTC(self.m_notebook,-1)
         self.currentPage=  self.pageNames[newName]
         ntb= self.pageNames[newName]
@@ -458,7 +456,7 @@ class ScriptPanel( wx.Panel):
         # se hace activo la pagina adicionada
         self.m_notebook.SetSelection(self.m_notebook.GetPageCount()-1)
         return ntb # retorna el objeto ntb
-        
+
     def Bindded(self):
         self.Bind( wx.EVT_TOOL, self.runScript,      id = self.bt1.GetId())
         self.Bind( wx.EVT_TOOL, self.newScript,      id = self.bt2.GetId())
@@ -469,7 +467,6 @@ class ScriptPanel( wx.Panel):
         self.Bind( wx.EVT_TOOL, self.PasteSelection, id = self.bt7.GetId())
         self.Bind( wx.EVT_TOOL, self.undo,           id = self.bt8.GetId())
         self.Bind( wx.EVT_TOOL, self.redo,           id = self.bt9.GetId())
-        self.Bind( wx.EVT_TOOL, self.delPage,        id = self.bt10.GetId())
         self.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChange)
         self.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.delPage)
 
@@ -493,7 +490,7 @@ class ScriptPanel( wx.Panel):
             wx.GetApp().frame.scriptPanel.interp.runcode( mainscript)
         except (Exception, TypeError) as e:
             traceback.print_exc( file = self.log)
-            
+
     def delPage( self, evt, page= None):
         # si no se ingresa un numero de pagina se
         #     considera que se va a borrar la pagina actual
@@ -502,15 +499,33 @@ class ScriptPanel( wx.Panel):
             # se considera que la pagina a borrar es la pagina actual
             #self.m_notebook.GetCurrentPage().Destroy() # borra el contenido de la pagina
             if self.m_notebook.GetSelection() > -1:
-                self.m_notebook.DeletePage(self.m_notebook.GetSelection())
+                page = self.m_notebook.GetSelection()
+            else:
+                return
+            
+        pageNumber = int(page)
+        
+        if pageNumber < 0:
             return
-        page = int(page)
-        if page <0:
-            return
-        if page > self.GetPageCount():
+        
+        if pageNumber > self.GetPageCount():
             raise IndexError("Page doesn't exist")
-        parent = self.pages[page].GetParent()
-        parent.DeletePage(page)
+        
+        currPageObj= self.m_notebook.GetPage(pageNumber)
+        # delete the erased page from the pages list
+        pageName = None
+        for pageName, pageObj in self.pageNames.items():
+            if pageObj == currPageObj:
+                break
+        
+        if pageName == None:
+            return
+        
+        self.pageNames.pop( pageName)
+        # it isn't required to delete a page because the aui manageer makes itself
+        # so if you enable the following line the app will crash
+        #self.m_notebook.DeletePage( pageNumber)
+        evt.Skip()
         
     def loadScript(self, event):
         wildcard = 'TEXT files (*.txt)|*.txt|ALL files (*.*)|*.*'
@@ -545,7 +560,7 @@ class ScriptPanel( wx.Panel):
                 filename= filename[:8]+u'\u2026'
             self.SetText= filename
             dlg.Destroy()
-            
+
     def undo(self,event):
         self.Undo()
 
@@ -563,4 +578,3 @@ class ScriptPanel( wx.Panel):
 
     def newScript(self, event):
         self.addPage()
-        

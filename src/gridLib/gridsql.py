@@ -492,7 +492,7 @@ class _example( wx.Frame ):
     # Virtual event handlers, overide them in your derived class
     def showDialog( self, evt ):
         dbPath= 'e:\\proyecto gridsql\\mymusic.db'
-        engine= create_engine('sqlite:///%s'%dbPath, echo=True)
+        engine= create_engine('sqlite:///%s'%dbPath, echo=False)
         dlg= selectDbTableDialog(self, engine)
         if dlg.ShowModal() == wx.ID_OK:
             values= dlg.GetValue()
