@@ -13,20 +13,20 @@ from sqlalchemy.exc import StatementError
 from easyDialog import Dialog
 from gridEditors import VARCHAR
 
-SEARCHINDEX= 500
+SEARCHINDEX= 45
 class okCancelPanel(wx.Panel):
     def __init__(self, *args, **params):
         wx.Panel.__init__(self, *args, **params)
         bSizer1 = wx.BoxSizer( wx.HORIZONTAL )
-        
+
         bSizer1.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
-        
+
         self.okButton = wx.Button( self, wx.ID_OK, u"OK", wx.DefaultPosition, wx.DefaultSize, 0 )
         self.cancelButton = wx.Button( self, wx.ID_CANCEL, u"CANCEL", wx.DefaultPosition, wx.DefaultSize, 0 )
-        
+
         bSizer1.Add( self.okButton, 0, wx.ALL, 5 )
         bSizer1.Add( self.cancelButton, 0, wx.ALL, 5 )
-        
+
         self.SetSizer( bSizer1 )
         self.Layout()
 
@@ -108,7 +108,7 @@ class SqlTable( wx.grid.PyGridTableBase):
 
     def getColsInfo( self, evt= None):
         # it's used to read the type of columns of the selected table
-        # and interact with the 
+        # and interact with the
         pass
 
     def loadDatabase( self, evt):
@@ -139,7 +139,7 @@ class SqlTable( wx.grid.PyGridTableBase):
             values= dlg.GetValue()
         dlg.Destroy()
 
-        try: 
+        try:
             self.currTable= values[0]
         except IndexError:
             # try to load the first table
@@ -177,7 +177,7 @@ class SqlTable( wx.grid.PyGridTableBase):
                     msg = wx.grid.GridTableMessage(self, notifications['delCol'],
                                                    self._numCols, # position
                                                    -difCol)   # number of columns
-                try:    
+                try:
                     self.GetView().ProcessTableMessage(msg)
                 except AttributeError:
                     pass
@@ -201,14 +201,14 @@ class SqlTable( wx.grid.PyGridTableBase):
                 self._numRows= self.GetNumberRows()
 
 
-            # update the column rendering plugins 
-            #self._updateColAttrs(grid) 
+            # update the column rendering plugins
+            #self._updateColAttrs(grid)
 
-            # update the scrollbars and the displayed part of the grid 
-            #self.AdjustScrollbars() 
+            # update the scrollbars and the displayed part of the grid
+            #self.AdjustScrollbars()
             #self.ForceRefresh()
         else:
-            raise StandardError("%s doesn't exist"%tableName)	
+            raise StandardError("%s doesn't exist"%tableName)
 
     def loadTable( self, evt):
         metadata=       MetaData( self.engine)
@@ -312,9 +312,9 @@ class SqlTable( wx.grid.PyGridTableBase):
         rows=        session.query( GenericDBClass).offset( minRequiredDb).limit( maxRequiredDb-minRequiredDb+1).all()
         session.close()
         rowResults=  self._getRowValues( rows)
-        for pos, rowContents in enumerate( rowResults): 
+        for pos, rowContents in enumerate( rowResults):
             self.bufer[minRequiredDb+pos]= rowContents
-        # in case the row is the last then adding none data as the last element
+        # in case the row is the last then adding None data as the last element
 
     def _getRowValues( self, rowContents):
         return   [[getattr( row, attr) for attr in self.colLabels] for row in rowContents]
@@ -329,7 +329,7 @@ class SqlTable( wx.grid.PyGridTableBase):
         if not self.allow2edit:
             return
         # create a Session
-        session = self.Session() 
+        session = self.Session()
         # querying for a record in the Artist table
         rowNumber= self.GetValue(row, 0)
         if rowNumber != u'':
@@ -359,7 +359,7 @@ class SqlTable( wx.grid.PyGridTableBase):
                 self.GetView().ProcessTableMessage(msg)
                 session.close()
                 return
-        else:      
+        else:
             setattr(res, self.colLabels[col], value)
             session.commit()
             session.close()
@@ -374,7 +374,9 @@ class SqlTable( wx.grid.PyGridTableBase):
     def GetRowLabelValue( self, row):
         session= self.Session()
         try:
-            rowLabel= getattr( session.query( GenericDBClass).get( row+self.initId), self.colLabels[0])
+            rowLabel= row.__str__()
+            # preventing to query the database without needed
+            # getattr( session.query( GenericDBClass).get( row+self.initId), self.colLabels[0])
         except AttributeError:
             return u''
         finally:
@@ -397,11 +399,11 @@ class SqlGrid( wx.grid.Grid):
     @currTable.setter
     def currTable(self, table):
         self.table.currTable= table
-        
-    def UpdateValues(self): 
-        """Update all displayed values""" 
-        # This sends an event to the grid table to update all of the values 
-        msg = wx.grid.GridTableMessage(self.table, 
+
+    def UpdateValues(self):
+        """Update all displayed values"""
+        # This sends an event to the grid table to update all of the values
+        msg = wx.grid.GridTableMessage(self.table,
                                        wx.grid.GRIDTABLE_REQUEST_VIEW_GET_VALUES)
         self.ProcessTableMessage(msg)
 
@@ -412,43 +414,43 @@ class selectDbTableDialog( wx.Dialog):
                            id=    wx.ID_ANY,
                            title= "Choose a table",
                            size=  (640,480))
-        
+
         self.m_mgr = wx.aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
         self.m_mgr.SetFlags(wx.aui.AUI_MGR_DEFAULT)
         self.m_grid=  SqlGrid( self, engine, tableName, allow2edit)
-        
+
         self.m_listBox2Choices= self.m_grid.tableNames
         if len(self.m_listBox2Choices) > 0:
             selected= 0
-        
+
         self.selectedTableName= self.m_listBox2Choices[selected]
         self.m_listBox = wx.ListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, self.m_listBox2Choices, selected )
-        
+
         self.okCancel= okCancelPanel(self, wx.ID_ANY)
-        
+
         self.m_mgr.AddPane( self.m_listBox, wx.aui.AuiPaneInfo().Left().
                             CaptionVisible(True).Caption('Existent Tables').
                             MaximizeButton(True).MinimizeButton(False).Resizable(True).
                             PaneBorder( False ).CloseButton( False ).MinSize( wx.Size( 120,-1 )) )
-        
+
         self.m_mgr.AddPane( self.m_grid, wx.aui.AuiPaneInfo().Centre().
                             CaptionVisible(True).Caption('Table contents').
                             MaximizeButton(True).MinimizeButton(False).Resizable(True).
                             PaneBorder( False ).CloseButton( False ))
-        
+
         self.m_mgr.AddPane( self.okCancel, wx.aui.AuiPaneInfo().Bottom().
                             CaptionVisible(False).CloseButton( False ).
                             BestSize( wx.Size(-1, 35))
                             )
-        
+
         self.currTableNumber= [pos for pos, tab in enumerate(self.m_grid.tableNames) if tab == self.m_grid.currTable][0]
         self.m_mgr.Update()
         self.Center()
         self.m_listBox.Bind( wx.EVT_LISTBOX, self._onListBoxElementSelected )
         #self.okCancel.okButton.Bind( wx.EVT_BUTTON, self.ok )
         #self.okCancel.cancelButton.Bind( wx.EVT_BUTTON, self.cancel )
-        
+
     def _onListBoxElementSelected(self, evt, *args, **params):
         currSelectionNumber= evt.GetSelection()
         if currSelectionNumber >= 0:
@@ -461,10 +463,10 @@ class selectDbTableDialog( wx.Dialog):
                 ## self.GetView().Refresh() # .table.
             else:
                 return
-            
+
     def GetValue(self):
         return (self.selectedTableName,)
-    
+
     def Destroy(self, *args, **params):
         self.m_mgr.UnInit()
 
