@@ -491,9 +491,20 @@ class VariablesFrame(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.OnCloseVariables, id =  2002)
 
     # this method needs to work out the other variables too
+    def _checkVariables(self, data):
+        newData= set( data[:])
+        if len(data) != len(newData):
+            return False
+        if u'' in newData:
+            return False
+        return True
+        
     def OnOkayVariables(self, evt):
+        newlabels= [self.vargrid.GetCellValue(i, 0) for i in range( self.vargrid.GetNumberRows())]
+        if not self._checkVariables( newlabels):
+            return
         for i in range( wx.GetApp().frame.grid.GetNumberCols()-1):
-            newlabel = self.vargrid.GetCellValue(i, 0)
+            newlabel = newlabels[i]
             if (newlabel != ''):
                 wx.GetApp().frame.grid.SetColLabelValue( i, newlabel)
             #newsig = self.vargrid.GetCellValue( i, 1)
