@@ -569,9 +569,11 @@ class _checkUpdates(Thread):
         except IOError:
             ## it's not possible to connect with the main site
             return
-        pattern = 'S2 [V|v](.{1,9}?)\.(.{1,9}?)' #\.exe\.zip
+        pattern = 'S2 [V|v](.{1,9}?)\.(.{1,9}?)([A-z0-9]+) ([A-z0-9]+)' #\.exe\.zip
         results= re.findall( pattern, text)
-        results= [(res[0] + '.' + res[-1]) for res in results]
+        # getting unique values
+        results= set(results)
+        results= [(res[0] + '.' + res[1] + u' ' + res[2] + u' ' + res[3]) for res in results]
         # Produce single string with all versions ...
         versions = ', '.join( set( results))
         if not versions:
