@@ -1,7 +1,7 @@
 __name__ = u'Bar plot'
 __all__=  ['barChart', 'HorizBarChart',
            'barChartAllMeans', 'barChartAllMeansNice',
-           'stakedBar']
+           'stakedBar', 'Pareto']
 
 from openStats import statistics
 
@@ -570,6 +570,135 @@ class stakedBar(_neededLibraries):
         plt.updateControls()
         plt.canvas.draw()
         return [ plt]
+    
+    def showGui( self, *args, **params):
+        values= self._showGui_GetValues()
+        if values== None:
+            return None
+        result= self._calc( *values)
+        self._report( result)
+        
+    def _report( self, result):
+        [res.Show() for res in result]
+        self.log.write( self.plotName+ ' ' + self.translate('successful'))
+
+class Pareto(_neededLibraries):
+    ''''''
+    name=      u'Pareto chart'
+    plotName=  'pareto'
+    image=     imag.pareto()
+    def __init__(self):
+        # getting all required methods
+        _neededLibraries.__init__( self)
+        self.name=      u'Pareto chart'
+        self.plotName=  'pareto'
+        self.minRequiredCols= 1
+        self.colNameSelect= ''
+        
+    def _dialog(self, *arg, **params):
+        '''this funtcion is used to plot the bar chart of all means'''
+        self.log.write(self.translate(u"Bar Chart"))
+        self._updateColsInfo()
+        if len( self.columnNames) == 0:
+            return
+
+        txt2= ["StaticText",   [self.translate(u"xtics Labels")]]
+        txt3= ["StaticText",   [self.translate(u"Select data to plot")]]
+        btn2= ["Choice",       [self.columnNames]]
+        btn3= ["CheckListBox", [self.columnNames]]
+        structure= list()
+        structure.append( [txt3])
+        structure.append( [btn3])
+        structure.append( [txt2])
+        structure.append( [btn2])
+        setting= {"Title": self.translate(self.name)}
+        return self.dialog(settings= setting, struct= structure)
+    
+    def _calc( self, columns, *args, **params):
+        return [self.evaluate( col, *args, **params) for col in columns]
+        
+    def object(self):
+        return self
+    
+    def _showGui_GetValues(self):
+        dlg= self._dialog()
+        if dlg == None:
+            return
+        
+        if dlg.ShowModal() != _OK:
+            dlg.Destroy()
+            return
+        
+        values=   dlg.GetValue()
+        self.colNameSelect=  values[0]
+        if values[1] != None:
+            self.xticlabel=  self.grid.GetCol( values[1])
+            
+        if self.colNameSelect == None:
+            self.log.write(self.translate("you have to select at least %i columns")%self.minRequiredCols)
+            return
+        
+        if isinstance( self.colNameSelect, (str, unicode)):
+            self.colNameSelect= [self.colNameSelect]
+
+        if len( self.colNameSelect) < self.minRequiredCols:
+            self.log.write( self.translate(u'You have to select at least %i columns to draw a graph!')%self.minRequiredCols)
+            return
+        
+        # it only retrieves the numerical values
+        columns= [self.grid.GetColNumeric(col) for col in self.colNameSelect]
+        
+        return ( columns, self.xticlabel)# self.colour, showBarValues)
+        
+    def _calc( self, *args, **params):
+        return self.evaluate( *args, **params)
+        
+    def object( self):
+        return self.evaluate
+    
+    def evaluate( self, *args, **params):
+        # extracting data from the result
+        from statlib.stats import cumsum
+        ydata, passPos =  homogenize( *args[0], returnPos= True)
+        if args[0] != None:
+            xticLabel=  numpy.array( args[1])[passPos]
+        else:
+            xticLabel= None
+            
+        plots= list()
+        for ydat in ydata:
+            plots.append( pltobj( None, xlabel= 'variable', ylabel= self.translate(u'value'), title= self.translate(self.name)))
+            plt=    plots[-1]
+            
+            ax1=    plt.gca()
+            ax1.hold( True)
+            bars=   list()
+            colour= generateColors()
+            ydat=   numpy.array( ydat)
+            xdat=   numpy.arange( 1, len( ydat)+1)
+            bars.append( ax1.bar( xdat, ydat, color= colour.next())) #align = 'center',
+            width=  bars[-1][0]._width/2.0
+            # plot the line
+            suma= lambda x,y: x+y
+            ydat= cumsum( ydat)
+            self._maxYValue= ydat[-1]
+            ax1.plot( xdat+width, ydat,'bo-',linewidth=3.0)
+            ax1.hold( False)
+            
+            # add the percent axis
+            ax2 = ax1.twinx()
+            ax2.set_ylim( numpy.array( [ax1.get_ylim()[0]/float(self._maxYValue), 1])*100*numpy.array( [1.0, 1.05]))
+            
+            ax1.set_xticks( xdat + width)
+            ax1.set_xticklabels( xticLabel)
+            ax1.set_xlim( min( xdat)-0.5, max( xdat)+width*2+0.5)
+            ax1.set_ylim( numpy.array( [ax1.get_ylim()[0], self._maxYValue])*numpy.array( [1, 1.05]))          
+            
+            legend= plt.legend( [bar[0] for bar in bars], self.colNameSelect )
+            legend.draggable( True)
+            plt.updateControls()
+            plt.canvas.draw()
+        return plots
     
     def showGui( self, *args, **params):
         values= self._showGui_GetValues()
