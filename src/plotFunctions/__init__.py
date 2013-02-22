@@ -1641,7 +1641,9 @@ class pltobj( wx.Frame, object ):
             self.statusbar.SetStatusText(( "x= " + str(round(x,5)) +
                                            "  y=" + str(round(y,5)) ),
                                          1)
-    
+    def Destroy(self, *args, **params):
+        if wx.Platform != '__WXGTK__':
+            self.m_mgr.UnInit()
 def fontDialog( parent):
     curClr = wx.Colour(0,0,0,0)#r,g,b,ALPHA
     fuente = wx.Font(wx.FONTSIZE_MEDIUM,wx.FONTFAMILY_DEFAULT,wx.FONTSTYLE_NORMAL,wx.FONTWEIGHT_NORMAL)
