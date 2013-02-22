@@ -121,7 +121,7 @@ import plotFunctions
 ##---------------------------------
 
 APPNAME= 'S2 - Salstat Statistics Package 2'
-__version__= '2.1 rc 2'
+__version__= '2.1 rc2'
 inits= {}    # dictionary to hold the config values
 missingvalue= None ## It's not used
 imagenes= imageEmbed()
@@ -423,7 +423,7 @@ class Tb1(aui.AuiToolBar):
         translate= params.pop('translation')
         aui.AuiToolBar.__init__(self, *args, **params)
         # Get icons for toolbar
-        imag = imageEmbed()
+        imag =       imageEmbed()
         NewIcon =    imag.exporCsv()
         OpenIcon =   imag.folder()
         SaveIcon =   imag.disk()
@@ -438,17 +438,17 @@ class Tb1(aui.AuiToolBar):
         RedoIcon =   imag.edit_redo()
         #closePage=   imag.cancel()
 
-        self.bt1 = self.AddSimpleTool(10, translate(u"New"),  NewIcon,     translate(u"New"))
-        self.bt2 = self.AddSimpleTool(20, translate(u"Open"), OpenIcon,    translate(u"Open"))
-        self.bt3 = self.AddSimpleTool(30, translate(u"Save"), SaveIcon,    translate(u"Save"))
+        self.bt1 = self.AddSimpleTool(10, translate(u"New"),     NewIcon,    translate(u"New"))
+        self.bt2 = self.AddSimpleTool(20, translate(u"Open"),    OpenIcon,   translate(u"Open"))
+        self.bt3 = self.AddSimpleTool(30, translate(u"Save"),    SaveIcon,   translate(u"Save"))
         self.bt4 = self.AddSimpleTool(40, translate(u"Save As"), SaveAsIcon, translate(u"Save As"))
         ##self.bt5 = self.AddSimpleTool(50, "Print",PrintIcon,"Print")
         self.AddSeparator()
         self.bt11= self.AddSimpleTool(wx.ID_ANY, translate(u"Undo"), UndoIcon, translate(u"Undo"))
         self.bt12= self.AddSimpleTool(wx.ID_ANY, translate(u"Redo"), RedoIcon, translate(u"Redo"))
         self.AddSeparator()
-        self.bt6 = self.AddSimpleTool(60, translate(u"Cut"),  CutIcon, translate(u"Cut"))
-        self.bt7 = self.AddSimpleTool(70, translate(u"Copy"), CopyIcon, translate(u"Copy"))
+        self.bt6 = self.AddSimpleTool(60, translate(u"Cut"),  CutIcon,   translate(u"Cut"))
+        self.bt7 = self.AddSimpleTool(70, translate(u"Copy"), CopyIcon,  translate(u"Copy"))
         self.bt8 = self.AddSimpleTool(80, translate(u"Paste"),PasteIcon, translate(u"Paste"))
         self.AddSeparator()
         self.bt9 = self.AddSimpleTool(85, translate(u"Preferences"),PrefsIcon, translate(u"Preferences"))
@@ -649,11 +649,11 @@ class SalStat2App(wx.App):
         if os.path.isfile(fileName):
             self.HELPDATA.AddBook(fileName)
         # help data /<p>
-        self.icon= imagenes.logo16()
+        self.icon=   imagenes.logo16()
         self.icon16= imagenes.logo16()
         self.icon24= imagenes.logo24()
         self.icon64= imagenes.logo64()
-        self.frame= self.getMainFrame(None, self)
+        self.frame=  self.getMainFrame(None, self)
         self.SetTopWindow(self.frame)
         # referencing the plot system
         if wx.Platform == '__WXGTK__':
@@ -839,9 +839,9 @@ class SalStat2App(wx.App):
 
 #---------------------------------------------------------------------------
 # This is the main interface of application
-class MainFrame(wx.Frame): #  wx.FileDropTarget
+class MainFrame(wx.Frame):
     def __init__(self, parent, appname ):
-        self.path=     None
+        self.path=      None
         # to allow the user to drop allowed files into the Data Entry Panel
         # wx.FileDropTarget.__init__( self)
         self.translate= translate
@@ -1234,17 +1234,17 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
         from gridLib.gridsql import selectDbTableDialog, GenericDBClass
 
         dbPath= getPath(wildcard= "Supported Files (*.db)|*.db|"\
-                        "MS access db (*.mdb)|*.mdb|"\
+                        #"MS access db (*.mdb;*.accdb)|*.mdb;*.accdb|"\
                         "All Files (*.*)|*.*", aplyFilter=False)
         if dbPath == None:
             return
         extension= dbPath.split('.')[-1]
-        dispatch= {'db': 'sqlite',
-                   'mdb': 'access',}
+        dispatch= {'db': 'sqlite',}
+                   #'mdb': 'access',
+                   #'accdb': 'access'}
         if not(extension in dispatch):
             return
-        
-        engine= create_engine( dispatch[extension]+ ':///%s'%dbPath, echo=False)
+        engine= create_engine( dispatch[extension]+ ':///%s'%dbPath, echo=False, )
         dlg= selectDbTableDialog(self, engine)
 
         if dlg.ShowModal() == wx.ID_OK:
@@ -1275,17 +1275,6 @@ class MainFrame(wx.Frame): #  wx.FileDropTarget
             
         dlg.Destroy()        
         
-    def OnDropFiles( self, x, y, filenames):
-        if isinstance( filenames, (str, unicode)):
-            filenames= [filenames]
-
-        if len( filenames) == 0:
-            return
-
-        # taking the first element as the selected file
-        filename= filenames[0]
-        sys.stderr.write( translate(u"the file %d was dropped")%filename)
-
     def onDefaultPerspective(self, evt):
         self.m_mgr.LoadPerspective(self._defaultPerspective)
 
