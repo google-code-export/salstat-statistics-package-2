@@ -1,0 +1,18 @@
+Places where I have changed colours / styling:
+
+Salstat.py:
+
+VariablesFrame.__init__()
+MainFrame.__init__()
+SimpleGrid.__init__()
+
+Script.py:
+
+MySTC.__init__()
+
+ntbSheet.py:
+
+MyGridPanel.__init__()
+
+I created the salstat.icns format icon file using http://www.macupdate.com/app/mac/18369/img2icns
+
