@@ -17,7 +17,9 @@ xlrd					http://www.python-excel.org
 xlwt					http://www.python-excel.org
 numpy					http://numpy.scipy.org
 scipy					http://www.scipy.org
-wxython 2.94			http://www.wxpython.org
+sqlalchemy				http://www.sqlalchemy.org
+scikits.statsmodels		http://statsmodels.sourceforge.net
+wxython 2.94 (Cocoa)	http://www.wxpython.org
 PIL						http://www.pythonware.com/products/pil/
 PyQT4					http://www.riverbankcomputing.co.uk/software/pyqt/download
 
