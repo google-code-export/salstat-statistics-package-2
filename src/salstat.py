@@ -5,7 +5,7 @@ SalStat Statistics Package. Copyright 2002 Alan James Salmoni. Licensed
 under the GNU General Public License (GPL 2) """
 
 ##-----------------------------
-## STANDARD LIBRARY DEPENDENCES
+## STANDARD LIBRARY DEPENDENCIES
 import os
 import sys
 import webbrowser # online Help
@@ -18,11 +18,11 @@ import glob
 
 from threading import Thread
 ##---------------------------------
-## END STANDAR LIBRARY DEPENDENCES
+## END STANDARD LIBRARY DEPENDENCIES
 ##---------------------------------
 
 ##-----------------------------
-## EXTERNAL LIBRARY DEPENDENCES
+## EXTERNAL LIBRARY DEPENDENCIES
 #----
 # http://www.pyinstaller.org/ticket/596
 from scipy.sparse.csgraph import _validation
@@ -46,7 +46,7 @@ from   wx.html  import HtmlHelpData    # create the help data panel
 from   wx.combo import BitmapComboBox # translation control
 import wx.lib.agw.aui as aui          # advanced user interface manager
 import wx.lib.langlistctrl as langlist
-import wx.py # to the be used as the script panel
+import wx.py # to be used as the script panel
 
 if wx.Platform != '__WXMSW__':
     # -----------------
@@ -86,11 +86,11 @@ try:
 except ImportError:
     raise ("scipy >= 0.11.0 required")
 ##---------------------------------
-## END EXTERNAL LIBRARY DEPENDENCES
+## END EXTERNAL LIBRARY DEPENDENCIES
 ##---------------------------------
 
 ##-----------------------------
-## INTERNAL LIBRARY DEPENDENCES
+## INTERNAL LIBRARY DEPENDENCIES
 # graphics system
 from plotFunctions import pltobj as plot
 
@@ -117,7 +117,7 @@ from dialogs import createPlotSelectionPanel
 
 import plotFunctions
 ##---------------------------------
-## END INTERNAL LIBRARY DEPENDENCES
+## END INTERNAL LIBRARY DEPENDENCIES
 ##---------------------------------
 
 APPNAME= 'S2 - Salstat Statistics Package 2'
@@ -667,7 +667,7 @@ class SalStat2App(wx.App):
         if len(sys.argv) > 1:
             for f in  sys.argv[1:]:
                 self.OpenFileMessage(f)
-        # check for updates by using a diferent threating
+        # check for updates by using a different thread
 
         self._checkUpdates()
         return True
@@ -1252,12 +1252,12 @@ class MainFrame(wx.Frame):
         else:
             dlg.Destroy()
             return
-        # the dialog is drestroyed after the results of the database
+        # the dialog is destroyed after the results of the database
 
         value = values[0]
         if value == None:
             dlg.Destroy()
-            # The user don't select any table
+            # The user didn't select any table
             return
         # reading the data by columns and paste into the current sheet
         table=  dlg.m_grid.table
@@ -1498,7 +1498,7 @@ class MainFrame(wx.Frame):
         # changing value strings to numbers
         colNameSelect = values[0]
         if len( colNameSelect ) == 0:
-            self.logPanel.write("You haven't select any items!")
+            self.logPanel.write("You haven't selected any items!")
             return
 
         if len(colNameSelect) < None:

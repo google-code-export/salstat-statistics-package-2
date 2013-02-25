@@ -2,6 +2,8 @@ import wx
 from wx.lib.mixins.treemixin import ExpansionState
 from imagenes import imageEmbed
 import os
+import cPickle
+
 TreeBaseClass = wx.TreeCtrl
 
 imagenes= imageEmbed()
@@ -184,7 +186,7 @@ class TreePanel(wx.Panel):
 
             self.RecreateTree()
         else:
-            raise StandardError('unsoported variable type')
+            raise StandardError('unsupported variable type')
         
     def ReadConfigurationFile(self):
 
