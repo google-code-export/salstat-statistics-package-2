@@ -1,0 +1,413 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass scrbook
+\use_default_options true
+\maintain_unincluded_children false
+\language british
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format pdf2
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize a4paper
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Chapter
+Introduction
+\end_layout
+
+\begin_layout Section
+Welcome
+\end_layout
+
+\begin_layout Standard
+This is the manual for the S2 statistics package which is actively developed
+ by the S2 team.
+ 
+\end_layout
+
+\begin_layout Standard
+In this introduction we will commence by discussing the history of the S2
+ project.
+ We will then discuss the aims of the project, and some of our future developmen
+t goals.
+ From the outset, we want to stress that this is an open source project,
+ and we really want to hear from people who try our software.
+ Please feel more than welcome to go to the project homepage which can be
+ found at 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://code.google.com/p/salstat-statistics-package-2/
+\end_layout
+
+\end_inset
+
+ and to use the 
+\begin_inset Quotes eld
+\end_inset
+
+Issues
+\begin_inset Quotes erd
+\end_inset
+
+ section to leave us comments on any defects you may find, and suggestions
+ for future enhancements.
+ There are also contact details so you mau send us email if you prefer to!
+ 
+\end_layout
+
+\begin_layout Standard
+As an open source project released under the terms of the GPL license, you
+ are free to install and use S2 on any computer you want to.
+ we also welcome you to contribute to S2 if you have any skills you feel
+ like offering, whether it be coding, documentation, adding tips to the
+ Wiki, or any of a number of other possibilities.
+ We would be most grateful for any help you are able to provide on a one
+ off basis, or ongoing! In particular, we would welcome people who can contribut
+e by helping to translate S2 to other languages.
+ Also, we would welcome users who can test S2 on platforms that the developers
+ do not have access to.
+ If something does not look nice visually on your computer, let us know
+ and we will try to improve it where possible.
+\end_layout
+
+\begin_layout Section
+Project History
+\end_layout
+
+\begin_layout Standard
+To understand where S2 has come from, we have to go back 2002 and discuss
+ a program called SalStat which was initiated by Dr.
+ Alan James Salmoni Ph.D.
+ He was teaching undergraduate Psychology students and realised that SPSS
+ would not run on his computer (This was at a time when computers were much
+ more costly than they are now, and had limited processor speeds, memory,
+ and hard disk capacity.
+ Since he was an Information Technology graduate, he set about doing what
+ IT graduates do -- coding a solution to his problem! 
+\end_layout
+
+\begin_layout Standard
+Since his Ph.D.
+ was in the area of User Experience (nowadays referred to as UX,) he was
+ very aware of making a program what could be used on different platforms
+ (Windows, Mac, Linux,) and that had a User Interface that was able to be
+ used by students who were not computer experts, but who needed reasonably
+ comprehensive Statistical routines (his Psychology undergraduates.) After
+ examining his options, he chose to use Python 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+www.python.org
+\end_layout
+
+\end_inset
+
+ as his language of choice, and to use the already well established wxWindows
+ (now called wxWidgets) 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+www.wxwidgets.org
+\end_layout
+
+\end_inset
+
+ GUI library which has been ported to Python as the wxPython 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+www.wxpython.org
+\end_layout
+
+\end_inset
+
+ software library.
+ 
+\end_layout
+
+\begin_layout Standard
+Even in those days, intellectual property was a big issue of the day.
+ As Dr.
+ Salmoni did not want to have to deal with support and commercial marketing
+ issues, he decided to use the GNU General Public License (the 
+\begin_inset Quotes eld
+\end_inset
+
+GPL
+\begin_inset Quotes erd
+\end_inset
+
+) which he felt protected his intellectual property in a way that no other
+ license did at the time.
+ 
+\end_layout
+
+\begin_layout Standard
+Having sorted out these issues, he got out his text editor, and did what
+ programmers do -- he opened a fresh file named 
+\begin_inset Quotes eld
+\end_inset
+
+salstat.py
+\begin_inset Quotes erd
+\end_inset
+
+ and started writing code! Between approximately 2002 and early 2004 he
+ continued to code what became named 
+\begin_inset Quotes eld
+\end_inset
+
+SalStat
+\begin_inset Quotes erd
+\end_inset
+
+ and released his source code through the huge online open source repository
+ SourceForge.
+ These efforts can still be found at 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://salstat.sourceforge.net/
+\end_layout
+
+\end_inset
+
+ today.
+ 
+\end_layout
+
+\begin_layout Standard
+Due to his teaching commitments, and because he had a good working program
+ at this point, Dr.
+ Salmoni stopped working on SalStat early in 2004 but the fruits of his
+ labours continued to be downloaded by people wanting statistics software.
+ It was about this time that there was a fork in SalStat's road which, unknowing
+ly, led to it being developed in two different directions!
+\end_layout
+
+\begin_layout Standard
+Over in South America, in Colombia, around early 2004, a young Chemical
+ Engineer named Sebastian López needed some statistical software, and decided
+ to teach himself his first programming language.
+ He found SalStat, and his programming language of choice become Python!
+ Following long tradition, Sebastian forked SalStat (the process by which
+ you take an existing program and begin development independent of the original
+ developer.) Sebastian then worked alone on his version of SalStat, losing
+ touch with Dr.
+ Salmoni, and the original SalStat development (which had stalled / ceased.)
+ At some point, he opened a project on the Google Code repository which
+ is the current project home site at 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://code.google.com/p/salstat-statistics-package-2/
+\end_layout
+
+\end_inset
+
+ where you can now find it.
+ However, in the interests of history, we should tell what happened in the
+ mean time back in the original SalStat fork.
+ 
+\end_layout
+
+\begin_layout Standard
+In early 2007 your author (Mark Livingstone) was a mature age undergraduate
+ at Griffith University on the Gold Coast, Queensland, Australia studying
+ part time towards his Bachelor of Information Technology.
+ With an interest in Bioinformatics (combining Science and Information technolog
+y,) he decided to try the Biostatistics course being offered by the Medical
+ Science School.
+ As an aid to learning, and because SPSS is not exactly something you could
+ download and hack on at home, he looked online for some statistical software
+ to be able to study the code for the statistical algorithms.
+ He found the abandoned SalStat and contacted Dr.
+ Salmoni who was more than happy for someone to work at bringing SalStat
+ uptodate (3 years being a long time in the computer software world!) 
+\end_layout
+
+\begin_layout Standard
+Over the years as time permitted, Mark worked by fixing bugs, adding new
+ statistical routines, and upgrading the user interface to current standards.
+ In particular, Mark had been bitten early by the Macintosh bug and worked
+ hard to make SalStat work well, and look gorgeous on the Macintosh platform
+ which had recently started to be made with Intel processors.
+ This continued until one day in mid-2012 when Mark typed 
+\begin_inset Quotes eld
+\end_inset
+
+SalStat
+\begin_inset Quotes erd
+\end_inset
+
+ into Google and discovered an entry for 
+\begin_inset Quotes eld
+\end_inset
+
+Salstat 2
+\begin_inset Quotes erd
+\end_inset
+
+ over on the Google Code site!
+\end_layout
+
+\begin_layout Standard
+When Mark looked at Sebastian's Salstat 2 program, it was obvious that Sebastian
+ was programming at a much faster rate! It looked good from screenshots,
+ and had far more functionality than Mark had, so it was decided to combine
+ efforts.
+ Mark has joined Sebastian and is working to port over all of his work,
+ and in particular to make what has now been renamed as 
+\begin_inset Quotes eld
+\end_inset
+
+S2
+\begin_inset Quotes erd
+\end_inset
+
+ into the code base going forward.
+ The source code on Sourceforge continues to be downloaded as it still has
+ some functionality not yet available in S2 (for example Printing), but
+ this will change in the near future.
+ 
+\end_layout
+
+\begin_layout Standard
+So, this is how things came to be as they are now.
+ Sebastian and Mark are working hard on the next releases that we have planned
+ -- and invite you to join us if you have some time to spare! While statistics
+ often has a dry and uninviting feel to it, and most people don't like anything
+ that relates to maths, we and S2 are not like that at all.
+ The S2 development team are having fun and invite you to join us!
+\end_layout
+
+\begin_layout Standard
+Now that we know how history transpired, and S2 came about, let us quickly
+ summarise some of what S2 can do for you, so that you can decide if it
+ is what you are looking for.
+\end_layout
+
+\begin_layout Section
+Overview
+\end_layout
+
+\begin_layout Standard
+S2 has a comprehensive feature set which is being added to constantly.
+\end_layout
+
+\begin_layout Standard
+[Copy some of the features from:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://code.google.com/p/salstat-statistics-package-2/
+\end_layout
+
+\end_inset
+
+]
+\end_layout
+
+\begin_layout Standard
+If this sounds like what you are looking for, let us move into the next
+ chapter on Installation so that we can try out S2, and see how it can help
+ you with your statistical requirements!
+\end_layout
+
+\begin_layout Chapter
+Installation
+\end_layout
+
+\begin_layout Section
+Getting S2
+\end_layout
+
+\begin_layout Section
+Installing S2
+\end_layout
+
+\end_body
+\end_document
