@@ -2,10 +2,10 @@
 # retorna un bitmap dado el nombre de la clase especifica
 # se modificara
 __all__ =['imageEmbed']
-#from cStringIO import StringIO
+from cStringIO import StringIO
 from base64 import b64decode, encodestring
 from os.path import exists
-#from wx import BitmapFromImage, ImageFromStream, IconFromBitmap, App, GetApp
+from wx import BitmapFromImage, ImageFromStream, IconFromBitmap, App, GetApp
 from wx import App, GetApp
 from wx.lib.embeddedimage import PyEmbeddedImage
 
@@ -536,8 +536,6 @@ class imageEmbed:
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAAAAAAAD5Q7t/AAAACXBI\nWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH1gELEAARlER4oQAAANBJREFUOMvNkb0OwWAUhh/SxWC3\ncgfSuoHGYDZbO3RxB0TSxGQXsVoNJoOEG+hnN1osVmnip98xEIr6iwTvdvKdvPme58Cvk7j3YDk9\nHzCPo/K7FStuL/mg3PRcG8+1iRS9VfBSPi4w7jDHOZHIeHJiRJlb1SJbLSSAbXje91wbERA5WK93\nxubNDwBW65D5MkAEtBa0QLARwlDYaUFryGVS8QiAanQmFwjlUgGAwci/JlJP5VhOT4bThTT7M7ni\n//IZ89n0a2eMiaq1T7YVf5s9VHJLC4uyd44AAAAASUVORK5CYII=\n""")
     def minus(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAAAAAAAD5Q7t/AAAACXBI\nWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH1gELDzsiAFwSwgAAAIRJREFUOMvtkbEJg1AQhr8HadzA\nOivoCBkjrW1GCBkgC4itc8QFdIjUtiJE8+5PIcqzszOFHxwcB/93HAcH++PmJs3KGkg25pq6uKYA\np2CYPG8XRhMOGL1WCWkqB9zz17IoFNB9PO+2RwIzYYJ+EN6LrwkzOMfRShwKmkdebT7h+P4/8QOs\nUy3bRuSA2AAAAABJRU5ErkJggg==\n""")
-    def refresh(self):
-        return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAABl0RVh0\nU29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAMiSURBVDiNbVJNbFRlFD33e++V+a0zbQdb\nqLYKhhKmoaIzjX/RmEY3xGBYqLxEjJCB8LNhBxsMTQwRdGGi4AOjMUwlmDQBN/wEIZLUwqtx0dCS\n1NLGAUY7tB3ozLTz3vu+66LzkllwkpvcxT0nJ+dcYmb4SGWyzzTo2hEQ3vSkatWEmCfCuOPKEwAu\n2Jbp1t0eBHCCfIF0JrtF08RAT9cqfV1ns9HWFAGYUShWMDJ2v3xn+qEnFe+2LfNselc2w4zvAMSI\nmZHKZNcbuhjZ2tcdiseC0InQHA0gHNARDRkIGgIzxUUczw5XCsWKHQ019D4uVw1mNBEz49U9Z0/1\nrGv7NBgwxK3RHKquB0PX5JrVscW+9PPh3vWtpAmCEIRfrk2ot15sFwe+vuo4rmzRAYCZP7wzXRCu\np1gxLzLjM8eVZ8anZ5MT9+aPXu9o7tq3dVMoEQvh43e7RC0GAqAEAEipwlXH85IvPPuDlOoRgEHb\nMvO2ZV7549uPXhqdLOzdfewS7j8sYXqmDKkYAAMACyyvqumpSH9jJPBVZ/vKbgBTdWnruiZ2bnsn\n6XY+HUWicQU0Qb4D1mt38V8/37yAJ+O0J9VrF4cnq1ftqSXfvOOqAAD2W6gCMGoErpvfAOwE4D5B\nWLct854v4J0/+r4GEJgZF+1/1Knzf+WkVD22ZRbrWYezY6tK5aWO30fGbwCI6QBABBAR7v5XhiEY\nJwf/JABf1JNTmWyYiO72blx7Jj8zlwKgAagKABBEBAAdiRBWt4Tx5f63qa0lcuyVPT/fSmWy6ZrG\n9hWGrufyswfyheLrmkaubZmuWHZAeFxxcWFoij2P0b4yisM73gh90Jd8ubU5ci29a8A1dPGNVDI+\n92gBTY1B0oQYBAD/kaj/x6Glidzc5KXhyc7Mlk3hRCyI7rUJeq49HiqWXfw7W4LjeBQJGjh3ebTi\nSXUEAJYfSTFN5OZO3zy5LfmgsPBJ//c35o8P3CwN384jP1tG1ZUQRCjMl+S5y6OLUqmMbZljAOC3\n8BOA7bZlci0wA8B7DYa2VzFvkFLFDV2bIcJQ1ZGHbMv82w/3fy5VdmoTZczGAAAAAElFTkSuQmCC\n""")
     def folder(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlz\nAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAHCSURB\nVDiNpZAxa5NRFIafc+9XLCni4BC6FBycMnbrLpkcgtDVX6C70D/g4lZX/4coxLlgxFkpiiSSUGm/\nJiXfveee45AmNlhawXc53HvPee55X+l2u/yPqt3d3Tfu/viatwt3fzIYDI5uBJhZr9fr3TMzzAx3\nB+D09PR+v98/7HQ6z5fNOWdCCGU4HH6s67oAVDlnV1UmkwmllBUkhMD29nYHeLuEAkyn06qU8qqu\n64MrgIyqYmZrkHa73drc3KTVahFjJITAaDRiPB4/XFlQVVMtHH5IzJo/P4EA4MyB+erWPQB7++zs\n7ccYvlU5Z08pMW2cl88eIXLZeDUpXzsBkNQ5eP1+p0opmaoCTgzw6fjs6gLLsp58FB60t0DcK1Ul\n54yIEIMQ43Uj68pquDmCeJVztpwzuBNE2LgBoMVpslHMCUEAFgDVxQbzVAiA+aK5uGPmmDtZF3Vp\noUm2ArhqQaRiUjcMf81p1G60UEVhcjZfAFTVUkrgkS+jc06mDX9nvq4YhJ9nlxZExMwMEaHJRutO\ndWuIIsJFUoBSuTvHJ4YIfP46unV4qdlsjsBRZRtb/XfHd5+C8+P7+J8BIoxFwovfRxYhnhxjpzEA\nAAAASUVORK5CYII=\n""")
     def folderOpen(self):
@@ -644,26 +642,6 @@ class imageEmbed:
         FffQ57uHAq/x4SfgsVoBFO9f6OlZ69PM/PeDkRFEBOUpHV1DdYE0/QE8YWvn0GxsbL8FcKPItzWL
         1zwiQhRFNBpJT9QwIfp/0497EYY5eIh8x8GwpcHZsB0zqd2xEXK5HI+Bi+P4Q5IkxX8hxXH8nv+F
         K8w9mWB7rBTJAAAAAElFTkSuQmCC
-        """)
-    def icon16(self):
-        return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
-        WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3AYYEC0yRx5UOwAAAB1pVFh0Q29tbWVudAAAAAAAQ3Jl
-        YXRlZCB3aXRoIEdJTVBkLmUHAAADL0lEQVQ4y22TbUiddRjGf/dzznnMOnMoHinMcxTfX4a4ZNrC
-        toGrD6tBg6wkasig6OOKZHPRjLI+5CiCYl/WYLH1Mvowg1hSS3Isk8nMl1labB4beo5vs+f/dM7z
-        cv59sERa97f7vq/r9+m6hP/Mz5NTZb7vvxw0Q3uSiWQZQCQSmXFc95IZCPRuq6ma2ayXzcvQyLWz
-        yUTymSuDV7TnByRaWgMIs79PEAr4uumhByUSyT/X/EBD+x2AwaHh6eEfh0s9HZZo5SP4mRD636fW
-        BMQjPtNPUP7UjTsaf2tp3lG+Afh2YPCzsdGxJ8N59aLNinXPJjMYaDKAYLjT2KujunZb7Retu1qe
-        ku8GBssSyeT0rXmfQHjPulEL6H8gsk7TGkQ0GkH++p57C4SCSKQ8eHttrTN+I67JeVq81DIPV7/O
-        8qpJQf4ikzcfI77Uhucl2NfUyUIij7xcj4HxN7k116ezsszOoJN2WkPZ+ZJYDXKg5QhfXT6K45eA
-        hsroSSwleF6a8wOnEaCu5DQV931OfKFInLTTati2igXMmLaVkLtlnuRSMbYCZcPI1AsoBel0FNte
-        v92cr8UMrWKEotq27Zjhuh4QFMsSvhnq4LVDrVQUf4qyfCxLULaBUoKlBGUJuxvOMvJrC2RC4noe
-        huM4c+G7b2MrzQ/DT3D43X4m4tW82H6Ql9oOoiyNUmAriMW+5sZSIRO/NJMTXsNJpeYMJ+VcNPSS
-        FvGxbEFZQeLTDbzxwRkqi66jlGArwc1KsKuxj3NfvoqIj7CoXdftN2LF0fcSiaTs3jmrm3aeRymN
-        ssFSGVLOXSgFOfkztD/6Ed29H6Is2NsS1wvzCxKLFp0QgJ53ei8UFhXuy86ZNUoKL7Ps5HOPpzj2
-        fi+ptS0823aSmtIxJKDJysqgMtn8dKmqr+vIK/s3otx1rHu2qqa60DfqjVOfRFhZCW6kSAO5Wz0O
-        Pb9IIDOamRyf+KPnrePRO8p0tOv4hZBpPr69cbvODpfL9akAWoTqKp+0Na2vDl8VJ53ue7une///
-        thHg41Nn6q6Njh12XGdvXl7u/QArSytzIdPsr6+vO9HR8dz4Zv3fVDCAyQsMbqMAAAAASUVORK5C
-        YII=
         """)
     def icon24(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
