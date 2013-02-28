@@ -57,23 +57,31 @@ class MySTC( stc.StyledTextCtrl, object):
 
         # use Python code highlighting
         self.SetLexer(stc.STC_LEX_PYTHON)
+        
+        # defining the keys to be colored
         keylist=['cls','plot','grid','show','dialog','OK','report']
         keylist.extend(keyword.kwlist)
         keylist.extend(keyword.__builtins__.keys())
         keyWordlist = " ".join(keylist)
         self.SetKeyWords(0, keyWordlist )
-
-        self.SetMarginType(1,stc.STC_MARGIN_NUMBER)
+        
+        # setting the margin one to be numerical
+        self.SetMarginWidth(1, 45)
+        self.SetMarginType(1, stc.STC_MARGIN_NUMBER)
+        # setting the margin zero to be None
+        
+        self.SetMargins(0, 0)
+        
         #self.SetMaxLength(250)
-
+        
         # set other options ...
         self.SetProperty("fold", "1")
-        self.SetMargins(0, 0)
+        
         self.SetViewWhiteSpace(False)
-        self.SetUseAntiAliasing(True)
+        self.SetUseAntiAliasing(True)        
+        self.SetEdgeColumn(100)# number of the column posiiton to higligh the code
         self.SetEdgeMode(stc.STC_EDGE_BACKGROUND)
-        self.SetEdgeColumn(78)#78
-        self.SetCaretForeground("blue")
+        self.SetCaretForeground("black") # background of the cursor
         self.SetTabWidth(4)
 
         # setup a margin to hold the fold markers
@@ -81,7 +89,6 @@ class MySTC( stc.StyledTextCtrl, object):
         self.SetMarginMask(2, stc.STC_MASK_FOLDERS)
         self.SetMarginSensitive(2, True)
         self.SetMarginWidth(2, 12)
-        self.SetMarginWidth(1, 32)
 
         # fold markers use square headers
         self.MarkerDefine(stc.STC_MARKNUM_FOLDEROPEN,
@@ -116,6 +123,7 @@ class MySTC( stc.StyledTextCtrl, object):
         else:
             self.StyleSetBackground(style=stc.STC_STYLE_DEFAULT,
                                     back="#F5F5DC") # beige / light yellow
+        
         # reset all to be like the default
         self.StyleClearAll()
 
@@ -128,6 +136,7 @@ class MySTC( stc.StyledTextCtrl, object):
                           "fore:#FFFFFF,back:#0000FF,bold")
         self.StyleSetSpec(stc.STC_STYLE_BRACEBAD,
                           "fore:#000000,back:#FF0000,bold")
+        
 
         # make the Python styles ...
         # default

@@ -49,6 +49,7 @@ opts = { "py2exe":
                            "scipy.stats",
                            "sqlalchemy",
                            "sqlalchemy.dialects.sqlite",
+                           "sqlalchemy.dialects.mysql", "mysql", # mysql is a connector library
                            ],
               "excludes":['_gtkagg',       '_tkagg',             '_agg2',
                           '_fltkagg',      '_gtk',               '_gtkcairo',
