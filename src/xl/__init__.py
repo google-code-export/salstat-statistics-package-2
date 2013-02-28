@@ -7,6 +7,19 @@ class Sheet:
     def __init__( self, sheetObj):
         self._sh= sheetObj
     @property
+    def size(self):
+        # return the maximum number of rows and columns
+        maxColNumber=  self.sh.Columns.Count
+        # folowing line fails under ms office 2010, because
+        # just check for the selected row, in that case the row number one
+        lastColumn= self.sh.Cells( 1, maxColNumber).End(-4159).Column
+        # check the max row number
+        if lasColumn < 20:
+            maxRownumber= max([self.sh.Cells( self.sh.Rows.Count, colNumber).End( -4162).Row for colNumber in range(1, lastColumn+1)])
+        else:
+            maxRownumber= self.sh.Cells( self.sh.Rows.Count, 1).End( -4162).Row
+        return (maxRownumber, lasColumn)
+    @property
     def sh( self):
         return self._sh
     @property
@@ -148,7 +161,7 @@ class Wbs(object):
 class Xl(object):
     def __init__(self,**params):
         from win32com.client import Dispatch
-        self._xl=   Dispatch("Excel.Application")
+        self._xl= Dispatch("Excel.Application")
         default= {'Visible': True,
                   'wb':      None,}
         for key in default.keys():
