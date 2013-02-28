@@ -14,11 +14,11 @@ class Sheet:
         # just check for the selected row, in that case the row number one
         lastColumn= self.sh.Cells( 1, maxColNumber).End(-4159).Column
         # check the max row number
-        if lasColumn < 20:
+        if lastColumn < 20:
             maxRownumber= max([self.sh.Cells( self.sh.Rows.Count, colNumber).End( -4162).Row for colNumber in range(1, lastColumn+1)])
         else:
             maxRownumber= self.sh.Cells( self.sh.Rows.Count, 1).End( -4162).Row
-        return (maxRownumber, lasColumn)
+        return (maxRownumber, lastColumn)
     @property
     def sh( self):
         return self._sh
@@ -90,7 +90,7 @@ class Wb(object):
             self._sh = self._updateSheets()
         elif isinstance(wbObject, (str,unicode)):
             if _isfile(wbObject):
-                self._wb = self.xl.Workbooks.open( wbPath)
+                self._wb = self.xl.Workbooks.open( wbObject)
                 self._sh = self._updateSheets()
             else:
                 raise IOError(wbObject + " is not a file")
