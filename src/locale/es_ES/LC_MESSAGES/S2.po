@@ -1,0 +1,1222 @@
+# 
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"Report-Msgid-Bugs-To: bselobu@gmail.com\n"
+"POT-Creation-Date: 2012-08-29 06:10+0100\n"
+"PO-Revision-Date: 2012-10-06 11:01-0500\n"
+"Last-Translator: Sebastian Lopez <selobu@gmail.com>\n"
+"Language-Team: English <selobu@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Change the cell Size"
+msgstr "Cambiar el tamaño de las celdas"
+
+msgid "Column Width"
+msgstr "Cambiar el ancho de las columnas"
+
+msgid "Row Height"
+msgstr "Cambiar la altura de las filas"
+
+msgid "The file %s could not be opened. "
+msgstr "No Se pudo abrir el archivo %s "
+
+msgid "Please check file type and extension!"
+msgstr "Por favor verifique la extensión del archivo!"
+
+msgid "%s dropped on S2 dock icon"
+msgstr "El archivo %s se arrastró en el ícono de S2"
+
+msgid "Log"
+msgstr "Comentarios"
+
+msgid "Shell"
+msgstr "Shell"
+
+msgid "Inspection Tool"
+msgstr "Herramienta de inspección"
+
+msgid "Data Entry Panel"
+msgstr "Panel de ingreso de datos"
+
+msgid "Output Panel"
+msgstr "Panel de respuesta"
+
+msgid "Basic Operations"
+msgstr "Operaciones Básicas"
+
+msgid "Script Panel"
+msgstr "Panel de programación"
+
+msgid "Shell Panel"
+msgstr "Panel Línea de comandos"
+
+msgid "Log Panel"
+msgstr "Panel de actividades"
+
+msgid "New"
+msgstr "Nuevo"
+
+msgid "Open"
+msgstr "Abrir"
+
+msgid "Save"
+msgstr "Guardar"
+
+msgid "Save As"
+msgstr "Guardar como"
+
+msgid "Undo"
+msgstr "Deshacer"
+
+msgid "Redo"
+msgstr "Rehacer"
+
+msgid "Cut"
+msgstr "Cortar"
+
+msgid "Copy"
+msgstr "Copiar"
+
+msgid "Paste"
+msgstr "Pegar"
+
+msgid "Preferences"
+msgstr "Preferencias"
+
+msgid "OnlineHelp"
+msgstr "AyudaLinea"
+
+msgid "Online Help"
+msgstr "Ayuda en Línea"
+
+msgid "&File"
+msgstr "Archivo"
+
+msgid "&New Data\tCtrl-N"
+msgstr "Hoja nueva\tCtrl-N"
+
+msgid "&Open...\tCtrl-O"
+msgstr "Abrir...\tCtrl-O"
+
+msgid "&Save\tCtrl-S"
+msgstr "Guardar\tCtrl-S"
+
+msgid "Save &As...\tCtrl-Shift-S"
+msgstr "Guardar Como...\tCtrl-Shift-S"
+
+msgid "E&xit\tCtrl-Q"
+msgstr "Salir\tCtrl-Q"
+
+msgid "&Edit"
+msgstr "&Editar"
+
+msgid "Cu&t"
+msgstr "Cor&tar"
+
+msgid "&Copy"
+msgstr "&Copiar"
+
+msgid "&Paste"
+msgstr "&Pegar"
+
+msgid "Select &All\tCtrl-A"
+msgstr "Seleccionar todo\tCtrl-A"
+
+msgid "Delete Current Column"
+msgstr "Eliminar columna actual"
+
+msgid "Delete Current Row"
+msgstr "Eliminar fila actual"
+
+msgid "&Preferences"
+msgstr "Preferencias"
+
+msgid "Variables..."
+msgstr "Variables..."
+
+msgid "Add Columns and Rows..."
+msgstr "Adicionar columnas y filas..."
+
+msgid "Change Cell Size..."
+msgstr "Cambiar el tamaño de las celdas..."
+
+msgid "Change the Font..."
+msgstr "Cambiar el tamaño de letra..."
+
+msgid "Load default perspective"
+msgstr "Mostrar la perspectiva por defecto"
+
+msgid "P&reparation"
+msgstr "P&reparacion"
+
+msgid "Descriptive Statistics"
+msgstr "Estadisticas Descriptivas"
+
+msgid "Transform Data"
+msgstr "Modificar datos"
+
+msgid "short data"
+msgstr "Ordenar datos"
+
+msgid "S&tatistics"
+msgstr "Es&tadisticas"
+
+msgid "&Graph"
+msgstr "&Graficos"
+
+msgid "Line Chart of All Means"
+msgstr "Linea de todas las medias"
+
+msgid "Bar Chart of All Means"
+msgstr "Barras de todas las medias"
+
+msgid "Bar Chart"
+msgstr "Gráfico de barras"
+
+msgid "Lines and areas"
+msgstr "Lineas y areas"
+
+msgid "Scatter"
+msgstr "Dispersión"
+
+msgid "Box & Whisker"
+msgstr "Cajas y bigotes"
+
+msgid "Linear Regression"
+msgstr "Regresión Lineal"
+
+msgid "Ternary"
+msgstr "Ternario"
+
+msgid "Probability"
+msgstr "Probabilidad Normal"
+
+msgid "Adaptative"
+msgstr "Adaptativo"
+
+msgid "&Help"
+msgstr "Ayuda"
+
+msgid "&About..."
+msgstr "Acerca de..."
+
+msgid "cells Selected: %.0f  count: %.0f  sum: %.4f "
+msgstr "Celdas seleccionadas: %.0f  cuenta: %.0f  suma: %.4f "
+
+msgid "the file %d was dropped"
+msgstr "El archivo %d se arrastró"
+
+msgid "Do you wish to save now?"
+msgstr "Desea guardar ahora?"
+
+msgid "You have Unsaved Data"
+msgstr "Tiene datos sin guardar"
+
+msgid "Find and Replace"
+msgstr "Buscar y reemplazar"
+
+msgid "Change Grid Size"
+msgstr "Cambiar el tamaño de la malla"
+
+msgid "Add Columns"
+msgstr "Adicionar columnas"
+
+msgid "Add Rows"
+msgstr "Adicionar filas"
+
+msgid "Change Grid size"
+msgstr "Cambiar el tamaño de la malla"
+
+msgid "This is a newer version of the SalStat Statistics Package "
+msgstr "Esta es una nueva versión de Salstat "
+
+msgid "originally developed by Alan James Salmoni and Mark Livingstone. "
+msgstr "fue desarrollada originalmente por Alan James Salmoni y Mark Livingstone. "
+
+msgid ""
+"There have been minor bug corrections, and new improvements:\n"
+"\n"
+msgstr ""
+"Se corrigieron errores y se adicionaron nuevas caracteristicas:\n"
+"\n"
+
+msgid "*You can cut, copy, and paste multiple cells,\n"
+msgstr "*Se puede copiar, cortar y pegar multiples celdads,\n"
+
+msgid "*You can undo and redo some actions.\n"
+msgstr "*Se puede deshacer y rehcer multiples acciones.\n"
+
+msgid ""
+"*The calculations are faster than the original version.\n"
+"\n"
+msgstr ""
+"*Los calculos son mas rápidos que en la primer vesión.\n"
+"\n"
+
+msgid ""
+"The plot system can draw:\n"
+"\n"
+msgstr ""
+"El sistema pude graficar:\n"
+"\n"
+
+msgid ""
+"*Scatter charts\n"
+"*line chart of all means\n"
+"*bar chart of all means\n"
+msgstr ""
+"*Gráficos de dispersión\n"
+"*Lineas de todas las medias\n"
+"*barras de todas las medias\n"
+
+msgid "*Histogram chart\n"
+msgstr "*Histogramas\n"
+
+msgid ""
+"*Line charts of the data,\n"
+"*box and whisker chart\n"
+"*Ternary chart\n"
+msgstr ""
+"*Lineas,\n"
+"*cajas y bigotes\n"
+"*ternario\n"
+
+msgid "*Linear regression plot (show the equation and the correlation inside the chart),\n"
+msgstr "*Regresión lineal (muestra una ecuación ys su correlación),\n"
+
+msgid ""
+"\n"
+"The input data can be saved to, and loaded from an xls format file.\n"
+"\n"
+msgstr ""
+"\n"
+"Los datos de ingreso se pueden cargar y guardar en un archivo de formato xls.\n"
+"\n"
+
+msgid ""
+"Salstat2 can be scripted by using Python.\n"
+"\n"
+msgstr ""
+"S2 puede programarse usando Python.\n"
+"\n"
+
+msgid ""
+"All the numerical results are send to a sheet in a different panel where you can cut, copy, paste, and edit them.\n"
+"\n"
+msgstr ""
+"Todso los resultados numericos se envían a un panel diferente en el cual se puede copiar, cortar y pegar.\n"
+"\n"
+
+msgid "and much more!"
+msgstr "y mucho mas!"
+
+msgid "Mark Livingstone -- MAC & LINUX  Translator"
+msgstr "Mark Livingstone -- traductor  MAC y LINUX "
+
+msgid "You need some data to draw a graph!"
+msgstr "Se necesitan datos para poder graficar!"
+
+msgid "selectedcols="
+msgstr "columnas Selecciondas="
+
+msgid "variable"
+msgstr "variable"
+
+msgid "mean"
+msgstr "promedio"
+
+msgid "Line Chart of all means"
+msgstr "Linea de todas las medias"
+
+msgid "centralTendency"
+msgstr "Tendencia central"
+
+msgid "xConditionTest"
+msgstr "Test de condiciones"
+
+msgid "moments"
+msgstr "Momentos"
+
+msgid "frequency"
+msgstr "Frecuencia"
+
+msgid "variability"
+msgstr "Variabilidad"
+
+msgid "trimming"
+msgstr "Seleccion"
+
+msgid "correlation"
+msgstr "Correlacion"
+
+msgid "inferential"
+msgstr "Inferencial"
+
+msgid "probability"
+msgstr "Probabilidad"
+
+msgid "anova"
+msgstr "Anova"
+
+msgid "ctrlProcess"
+msgstr "Control de Procesos"
+
+msgid "random"
+msgstr "Aleatorio"
+
+msgid "Anova functions"
+msgstr "Funciones Anova"
+
+msgid "Central Tendency"
+msgstr "Tendencia central"
+
+msgid "Correlation"
+msgstr "Correlacion"
+
+msgid "Process Control"
+msgstr "Control de Procesos"
+
+msgid "Frequency Stats"
+msgstr "Estadisticas de Frecuencia"
+
+msgid "Inferential stats"
+msgstr "Estadistica inferencial"
+
+msgid "Moments"
+msgstr "momentos"
+
+msgid "Probability calcs"
+msgstr "Calculos probabilisticos"
+
+msgid "Generate data"
+msgstr "Generar datos"
+
+msgid "Trimming Fcns"
+msgstr "Funciones para recortar"
+
+msgid "variability"
+msgstr "variacion"
+
+msgid "Condition tests"
+msgstr "Test de condicion"
+
+msgid "one way anova"
+msgstr "anova una via"
+
+msgid "geometric Mean"
+msgstr "Media geometrica"
+
+msgid "harmonic mean"
+msgstr "Media armonica"
+
+msgid "median"
+msgstr "Mediana"
+
+msgid "medianscore"
+msgstr "medianscore"
+
+msgid "mode"
+msgstr "Moda"
+
+msgid "paired"
+msgstr "emparejados"
+
+msgid "covariance"
+msgstr "covarianza"
+
+msgid "linregress"
+msgstr "regresion lineal"
+
+msgid "Six Sigma Pack"
+msgstr "Paquete seis sigma"
+
+msgid "item frequency"
+msgstr "Frecuencia de elementos"
+
+msgid "histogram"
+msgstr "histograma"
+
+msgid "cumulative frequency"
+msgstr "frecuencia acumulada"
+
+msgid "relative frequency histogram"
+msgstr "histograma de frecuencia relativa"
+
+msgid "normal random"
+msgstr "aleatorio normal"
+
+msgid "One condition test"
+msgstr "Una condicion"
+
+msgid "Two condition test"
+msgstr "Dos condiciones"
+
+msgid "Three or more condition test"
+msgstr "Tres o mas condiciones"
+
+msgid "moment"
+msgstr "momento"
+
+msgid "variation"
+msgstr "variacion"
+
+msgid "skew"
+msgstr "asimetria"
+
+msgid "kurtosis"
+msgstr "curtosis"
+
+msgid "skew test"
+msgstr "prueva de asimetria"
+
+msgid "kurtosis test"
+msgstr "prueva de curtosis"
+
+msgid "normal test"
+msgstr "prueva de normalidad"
+
+msgid "score at percentile"
+msgstr "puntuacion al percentil"
+
+msgid "percentile of score"
+msgstr "percentil de la puntuacion"
+
+msgid "sample variance"
+msgstr "varianza del muestreo"
+
+msgid "sample standar deviation"
+msgstr "desviacion estandar del muestreo"
+
+msgid "variance"
+msgstr "varianza-dispersion"
+
+msgid "standar deviation"
+msgstr "desviacion estandar"
+
+msgid "standar error"
+msgstr "error estandar"
+
+msgid "estimated standard error of the mean"
+msgstr "error estandar estimado de la media"
+
+msgid "list of z-scores"
+msgstr "lista de puntuaciones standar (z-scores)"
+
+msgid "signal to noise (mean/stdev)"
+msgstr "señal a ruido (promedio/desviacion_estandar)"
+
+msgid "z-score for a given input"
+msgstr "(z-score) puntuacion estandar de un valor ingresado"
+
+msgid "t-test one sample"
+msgstr "prueva t una muestra"
+
+msgid "t-test independent"
+msgstr "prueva t independiente"
+
+msgid "t-test related"
+msgstr "prueva t relacionados"
+
+msgid "chi-square test"
+msgstr "prueva chi cuadrado"
+
+msgid "Kolmogorov-Smirnof two samples"
+msgstr "Kolmogorov-Smirnof dos muestras"
+
+msgid "Mann-Whitney U statistic"
+msgstr "estadistica Mann-Whitney U"
+
+msgid "rank sums statistic"
+msgstr "estadistica suma de los rangos (rank sums)"
+
+msgid "Wilcoxon T-test related samples"
+msgstr "prueva Wilcoxon T para muestras relacionadas"
+
+msgid "Kruskal-Wallis H-test"
+msgstr "Kruskal-Wallis prueva H"
+
+msgid "Friedman Chi-Square test"
+msgstr "prueva Friedman Chi cuadrado"
+
+msgid "Histogram plot"
+msgstr "Histogramas"
+
+msgid "Nice Histogram"
+msgstr "Histograma mejorado"
+
+msgid "Histogram"
+msgstr "Histograma"
+
+msgid "Cumulative Frecuency"
+msgstr "Frecuencia acumulada"
+
+msgid "Realtive Frecuency"
+msgstr "Frecuencua relativa"
+
+msgid "Bar plot"
+msgstr "Barras"
+
+msgid "bar chart of all means"
+msgstr "barras de todas las medias"
+
+msgid "linear space"
+msgstr "distribucion lineal"
+
+msgid "beta space"
+msgstr "distribucion beta"
+
+msgid "chi square"
+msgstr "chi cuadrado"
+
+msgid "exponential space"
+msgstr "ditribucion exponencial"
+
+msgid "Select Column(s) to Transform"
+msgstr "Seleccione la(s) columa(s) a transformar"
+
+msgid "Okay"
+msgstr "Aceptar"
+
+msgid "Ok"
+msgstr "Aceptar"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Common Transformations:"
+msgstr "Transformaciones comunes"
+
+msgid "Square Root"
+msgstr "Raiz cuadrada"
+
+msgid "Logarithmic"
+msgstr "Logaritmico"
+
+msgid "Reciprocal"
+msgstr "Inversa"
+
+msgid "Square"
+msgstr "Al cuadrado"
+
+msgid "Function :"
+msgstr "Funcion :"
+
+msgid " Square Root"
+msgstr " Raiz cuadrada"
+
+msgid " Logarithm"
+msgstr " Logaritmo"
+
+msgid " Reciprocal"
+msgstr " Inversa"
+
+msgid " Square"
+msgstr " Al cuadrado"
+
+msgid "N"
+msgstr "N"
+
+msgid "Sum"
+msgstr "Suma"
+
+msgid "Mean"
+msgstr "Promedio"
+
+msgid "missing"
+msgstr "Faltantes"
+
+msgid "Variance"
+msgstr "Varianza"
+
+msgid "Standard Deviation"
+msgstr "Desviacion estandar"
+
+msgid "Standard Error"
+msgstr "Error estandar"
+
+msgid "Sum of Squares"
+msgstr "Suma de los cuadrados"
+
+msgid "Coefficient of Variation"
+msgstr "Coeficiente de variacion"
+
+msgid "Minimum"
+msgstr "Minimo"
+
+msgid "Maximum"
+msgstr "Maximo"
+
+msgid "Range"
+msgstr "Rango"
+
+msgid "Number Missing"
+msgstr "Falta número"
+
+msgid "Geometric Mean"
+msgstr "Media Geométrica"
+
+msgid "Harmonic Mean"
+msgstr "Media armónica"
+
+msgid "Skewness"
+msgstr "Simetria"
+
+msgid "Kurtosis"
+msgstr "Curtosis"
+
+msgid "Median"
+msgstr "Mediana"
+
+msgid "Mode"
+msgstr "Moda"
+
+msgid "Descriptive statistics"
+msgstr "estadisticas descriptivas"
+
+msgid "Descriptives"
+msgstr "descriptivo"
+
+msgid "Select Descriptive Statistics"
+msgstr "Seleccione estaditicos descriptivos"
+
+msgid "Select Column(s) to Analyse"
+msgstr "Selecciona la(s) columna(s) a analizar"
+
+msgid "You input bad type data as choiceNames variable"
+msgstr ""
+
+msgid "Save data?"
+msgstr "Guardar los datos?"
+
+msgid "You have unsaved data!"
+msgstr "Tiene datos sin guardar!"
+
+msgid "Do you wish to save it?"
+msgstr "Desea guardar la información"
+
+msgid "Save"
+msgstr "Guardar"
+
+msgid "Discard"
+msgstr "Descartar"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Variable Name"
+msgstr "Nombre de la variable"
+
+msgid "Decimal Places"
+msgstr "cifras decimales"
+
+msgid "Missing Value"
+msgstr "Valores faltantes"
+
+msgid "Six Sigma Pack"
+msgstr "Paquete Seis Sigma"
+
+msgid "Limits"
+msgstr "Límites"
+
+msgid "Upper Control Limit"
+msgstr "Límite de control superior"
+
+msgid "Lower Control Limit"
+msgstr "Límite de control inferior"
+
+msgid "Target value"
+msgstr "Valor buscado"
+
+msgid "Use tolerance of  k  in  k*Sigma"
+msgstr "Valor de k en k*Sigma"
+
+msgid "Subgroup Size"
+msgstr "Tamaño del subgrupo"
+
+msgid "All"
+msgstr "Todos"
+
+msgid "None"
+msgstr "Ninguno"
+
+msgid "Invert"
+msgstr "invertir"
+
+msgid "Select data to plot"
+msgstr "Seleccione los datos a graficar"
+
+msgid "X data"
+msgstr "Datos X"
+
+msgid "Y data"
+msgstr "Datos Y"
+
+msgid "Selected data"
+msgstr "Datos Seleccionados"
+
+msgid "Series Name"
+msgstr "nombre de la serie"
+
+msgid "add"
+msgstr "adicionar"
+
+msgid "Current List to plot"
+msgstr "Lista actual para graficar"
+
+msgid "del"
+msgstr "eliminar"
+
+msgid "&Cut\tCtrl+X"
+msgstr "Cortar\tCtrl+X"
+
+msgid "C&opy\tCtrl+C"
+msgstr "Copiar\tCtrl+C"
+
+msgid "&Paste\tCtrl+V"
+msgstr "Pegar\tCtrl+V"
+
+msgid "&Del\tDel"
+msgstr "Eliminar\tDel"
+
+msgid "&Undo\tCtrl+Z"
+msgstr "Deshacer\tCtrl+Z"
+
+msgid "&Redo\tCtrl+Y"
+msgstr "Rehacer\tCtrl+Y"
+
+msgid "Del Row"
+msgstr "Eliminar fila"
+
+msgid "Del Col"
+msgstr "Eliminar columna"
+
+msgid "integer space"
+msgstr "Distribución enteros"
+
+msgid "lines of all means"
+msgstr "Lineas de todos los promedios"
+
+msgid "lines"
+msgstr "lineas"
+
+msgid "Cumulative Frecuency"
+msgstr "Frecuencia acumulada"
+
+msgid "Realtive Frecuency"
+msgstr "Frecuencia relativa"
+
+msgid "Bar chart of all means"
+msgstr "Barras de todas las medias"
+
+msgid "Nice Bar chart of all means"
+msgstr "Barras de todas las medias mejorado"
+
+msgid "Bar chart"
+msgstr "Gráfico de barras"
+
+msgid "Horizontal bar chart"
+msgstr "Gráfico de barras horizontales"
+
+msgid "Horizontal bar chart"
+msgstr "Barras horizontales"
+
+msgid "Graphical Selection"
+msgstr "Seleccion mediante gráfica"
+
+msgid "Show/Hide the plot panel"
+msgstr "Mostrar/Ocultar el panel para gráficos"
+
+msgid "Chart selection panel"
+msgstr "Panel para selección de gráficos"
+
+msgid "Staked bar chart"
+msgstr "Barras apiladas"
+
+msgid "lines with shadow"
+msgstr "Lineas con sombra"
+
+msgid "Area chart"
+msgstr "Area"
+
+msgid "Multiple area chart"
+msgstr "Areas Multiples"
+
+msgid "scatter"
+msgstr "dispersión"
+
+msgid "Normal probability"
+msgstr "Probabilidad Normal"
+
+msgid "Another plots"
+msgstr "otros gráficos"
+
+msgid "table"
+msgstr "tabla"
+
+msgid "linear regression"
+msgstr "regresión lineal"
+
+msgid "Ternary scatter"
+msgstr "Dispersión ternaria"
+
+msgid "You need some data to draw a graph!"
+msgstr "No hay datos para hacer la gráfica!"
+
+msgid "Title"
+msgstr "Título"
+
+msgid "X label"
+msgstr "nombre eje de las X"
+
+msgid "Y label"
+msgstr "nombre eje de las Y"
+
+msgid "Show Grid"
+msgstr "Mostrar la malla"
+
+msgid "View Cursor"
+msgstr "Ver el cursor"
+
+msgid "X axis"
+msgstr "Eje de las X"
+
+msgid "Y axis"
+msgstr "Eje de las Y"
+
+msgid "min"
+msgstr "mínimo"
+
+msgid "max"
+msgstr "máximo"
+
+msgid "angle"
+msgstr "ángulo"
+
+msgid "axis scale"
+msgstr "escala del eje"
+
+msgid "Choose a line"
+msgstr "Seleccione una línea"
+
+msgid "Refresh lines"
+msgstr "Actualizar las lineas"
+
+msgid "Some Properties"
+msgstr "Algunas caracteristicas"
+
+msgid "Name"
+msgstr "Nombre"
+
+msgid "Line Width"
+msgstr "Amcho de línea"
+
+msgid "Line Colour"
+msgstr "Color de línea"
+
+msgid "Line Style"
+msgstr "Estilo de línea"
+
+msgid "Marker Style"
+msgstr "Tipo de marcador"
+
+msgid "Marker Size"
+msgstr "Tamaño marcador"
+
+msgid "Shown"
+msgstr "Visible"
+
+msgid "Add ReferenceLine"
+msgstr "Adicionar línea de referencia"
+
+msgid "Horizontal"
+msgstr "Horizontal"
+
+msgid "Vertical"
+msgstr "Vertical"
+
+msgid "Choose a patchs"
+msgstr "Seleccione un parche"
+
+msgid "Refresh Patchs"
+msgstr "Actualizar los parches"
+
+msgid "Some Properties"
+msgstr "Algunas propiedades"
+
+msgid "Patch Name"
+msgstr "Nombre del parche"
+
+msgid "Face Colour"
+msgstr "Color"
+
+msgid "Alpha"
+msgstr "Transparencia"
+
+msgid "add an span"
+msgstr "Adicionar un span"
+
+msgid "Y axis position 1"
+msgstr "Posición 1 eje de las Y"
+
+msgid "Y axis position 2"
+msgstr "Posición 2 eje de las Y"
+
+msgid "X axis position 1"
+msgstr "Posición 1 eje de las X"
+
+msgid "X axis position 2"
+msgstr "Posición 2 eje de las X"
+
+msgid "Graph"
+msgstr "Gráfica"
+
+msgid "Graph Properties"
+msgstr "Propiedades del gráfico"
+
+msgid "Main Options"
+msgstr "Opciones Principales"
+
+msgid "Lines"
+msgstr "Líneas"
+
+msgid "patches"
+msgstr "Parches"
+
+msgid "Colour"
+msgstr "Color"
+
+msgid "push the values up to the bars"
+msgstr "Escribir los valores sobre las barras"
+
+msgid "push the labels up to the bars"
+msgstr "Escribir las etiquetas sobre las barras"
+
+msgid "Bar chart of selected columns"
+msgstr "Gráfico de barras de las columnas seleccionadas"
+
+msgid "you have to select at least %i column"
+msgstr "debe seleccionar al menos %i columnas"
+
+msgid "You have to select at least %i columns to draw a graph!"
+msgstr "Debe seleccionar al menos %i columnas para graficar!"
+
+msgid "value"
+msgstr "valor"
+
+msgid "successful"
+msgstr "exitoso"
+
+msgid "Bar chart means of selected columns"
+msgstr "Gráfico de barras de las columnas seleccionadas"
+
+msgid "Nice Bar Chart of All Means"
+msgstr "Gráfico de barras atractivo de todas las medias"
+
+msgid "xtics Labels"
+msgstr "nombre de las escalas de las X"
+
+msgid "Histogram Chart"
+msgstr "Histograma"
+
+msgid "number of bins"
+msgstr "número de divisiones"
+
+msgid "Show best Normal Curve"
+msgstr "Mostrar curva normal mejor aproximada"
+
+msgid "Histogram chart of selected columns"
+msgstr "Histograma de las columnas seleccionadas"
+
+msgid "Histogram Chart of "
+msgstr "Histograma de "
+
+msgid "Histogram type"
+msgstr "Tipo de histograma"
+
+msgid "Select the name of the rows"
+msgstr "Seleccione el nombre de las filas"
+
+msgid "the user have to select a name colum to the rows"
+msgstr "Debe seleccionar una columna con nombres para las filas"
+
+msgid "Select pairs of data by rows"
+msgstr "Selecione pares de datos por fila"
+
+msgid "X data to plot"
+msgstr "datos de X para graficar"
+
+msgid "Y data to plot"
+msgstr "datos de Y para graficar"
+
+msgid "linear Regression"
+msgstr "Regresión lineal"
+
+msgid "Left Corner Label"
+msgstr "Etiqueta de la esquina izquierda"
+
+msgid "Right Corner Label"
+msgstr "Etiqueta de la esquina derecha"
+
+msgid "Upper Corner Label"
+msgstr "Etiqueta de la esquina superior"
+
+msgid "Select the pairs of data by rows"
+msgstr "Seleccione grupos de datos por filas"
+
+msgid "A Left Corner"
+msgstr "A esquina izquierda"
+
+msgid "C Upper Corner"
+msgstr "C esquina superior"
+
+msgid "B Right Corner"
+msgstr "B esquina derecha"
+
+msgid "Ternary plot dialog"
+msgstr "Dialogo gráfica ternaria"
+
+msgid "Scatter Chart Data"
+msgstr "Datos para el gráfico de dispersión"
+
+msgid "Adaptative chart of selected columns"
+msgstr "Gráfica adaptable de las columnas seleccionadas"
+
+msgid "Adaptative plot"
+msgstr "Gráfica adaptable"
+
+msgid "Adaptative chart of selected columns"
+msgstr "Gráfica adaptable de las columnas seleccionadas"
+
+msgid "Order Statistic Medians"
+msgstr "Media estadística ordenada"
+
+msgid "Ordered Values"
+msgstr "Valores ordenados"
+
+msgid "Select the columns to analyse"
+msgstr "Seleccione las columnas a analizar"
+
+msgid "you don't select any items"
+msgstr "No ha seleccionado items"
+
+msgid "you have to select at least %i columns"
+msgstr "debe seleccionar al menos %i columnas"
+
+msgid "Input data"
+msgstr "Datos de ingreso"
+
+msgid "Selected columns"
+msgstr "Columnas seleccionadas"
+
+msgid "Asumptions"
+msgstr "Supuestos"
+
+msgid "1-The samples are independent."
+msgstr "1-Las muestras son independientes"
+
+msgid "2-Each sample is from a normally distributed population."
+msgstr "2-Cada muestra es desde una población normalmente distribuída"
+
+msgid ""
+"'3-The population standard deviations of the groups are all equal.\n"
+"        This property is known as homoscedasticity."
+msgstr ""
+"3-La desviacion estandar poblacional de los todos grupos son iguales\n"
+"        esta propiedad se conoce omo homoscedasticidad"
+
+msgid "Results"
+msgstr "Resultados"
+
+msgid "variable name"
+msgstr "nombre de la variable"
+
+msgid "frecuency"
+msgstr "frecuencia"
+
+msgid "X Column to analyse"
+msgstr "Columna X para analizar"
+
+msgid "Y Column to analyse"
+msgstr "Columna Y para analizar"
+
+msgid "Pearson's r"
+msgstr "r de Pearson"
+
+msgid " two-tailed p-value"
+msgstr " p-valor de dos areas"
+
+msgid "two-tailed p-value"
+msgstr "p-valor de dos areas"
+
+msgid "You haven't selected any items!"
+msgstr "No ha seleccionado items!"
+
+msgid "Input Data"
+msgstr "Datos de ingreso"
+
+msgid "x column="
+msgstr "columna x="
+
+msgid "Output Data"
+msgstr "Datos de salida"
+
+msgid "Spearman's r"
+msgstr "r de Spearman"
+
+msgid "two-tailed p-value"
+msgstr "p-valor dos areas"
+
+msgid "Kendall's tau"
+msgstr "tau de Kendall"
+
+msgid "slope"
+msgstr "pendiente"
+
+msgid "intercept"
+msgstr "intercepto"
+
+msgid "two-tailed prob"
+msgstr "probabilidad de dos areas"
+
+msgid "stderr-of-the-estimate"
+msgstr "error estandar estimado"
+
+msgid "Lower control limit"
+msgstr "Límite de control inferior"
+
+msgid "Upper control limit"
+msgstr "Límite de control superior"
+
+msgid "control chart"
+msgstr "Gráfica de control"
+
+msgid "You have to input the lower and upper control limits"
+msgstr "Debe ingresar los limites inferior y superior de control"
+
+msgid "upper limmit"
+msgstr "límite superior"
+
+msgid "lower limit"
+msgstr "límite inferior"
+
+msgid "Target value"
+msgstr "Valor buscado"
+
+msgid "You have to input a target value"
+msgstr "Debe ingresar un valor objetivo"
+
+msgid "target"
+msgstr "objetivo"
+
+msgid "stem"
+msgstr "arbol"
+
+msgid "out of control"
+msgstr "fuera de control"
+
+msgid "of"
+msgstr "de"
+
