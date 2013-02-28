@@ -219,33 +219,3 @@ class Xl(object):
     def OpenWorkbook(self, path):
         self._xl.Workbooks.Open(path)
         return self.wb[-1]
-
-if 0:
-    #=======================
-    # creating a chart
-    chart= wb.Charts.Add()
-    chart.SetSourceData(sh.Range("$A:$B"))
-    # destroy the chart
-    chart.Delete()
-
-    # deleting all charts in a worksheet
-    try:
-        sh.ChartObjects().Delete()
-    except:
-        pass
-
-    #  reading the maximum num of columns and row of existing data
-    [maxRows, maxCols] = (sh.Rows.Count,sh.Columns.Count)
-    # readign the non empty columns and rows
-    [ lastColumn, lastRow]=(sh.Cells( 1, sh.Columns.Count).End(-4159).Column, sh.Cells(sh.Rows.Count,1).End(-4162).Row)
-    print [ lastColumn, lastRow]
-    # Setting cell value
-    sh.Cells(1,1).Value= 1
-
-    # stop screen updating
-    xl.ScreenUpdating = False
-    # continue screen updating
-    xl.ScreenUpdating = True
-
-    # calling a function from excel
-    xl.WorksheetFunction.Pmt(0.0825 /12.0, 360, -150000)
