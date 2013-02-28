@@ -7,6 +7,19 @@ class Sheet:
     def __init__( self, sheetObj):
         self._sh= sheetObj
     @property
+    def size(self):
+        # return the maximum number of rows and columns
+        maxColNumber=  self.sh.Columns.Count
+        # folowing line fails under ms office 2010, because
+        # just check for the selected row, in that case the row number one
+        lastColumn= self.sh.Cells( 1, maxColNumber).End(-4159).Column
+        # check the max row number
+        if lastColumn < 20:
+            maxRownumber= max([self.sh.Cells( self.sh.Rows.Count, colNumber).End( -4162).Row for colNumber in range(1, lastColumn+1)])
+        else:
+            maxRownumber= self.sh.Cells( self.sh.Rows.Count, 1).End( -4162).Row
+        return (maxRownumber, lastColumn)
+    @property
     def sh( self):
         return self._sh
     @property
@@ -77,7 +90,7 @@ class Wb(object):
             self._sh = self._updateSheets()
         elif isinstance(wbObject, (str,unicode)):
             if _isfile(wbObject):
-                self._wb = self.xl.Workbooks.open( wbPath)
+                self._wb = self.xl.Workbooks.open( wbObject)
                 self._sh = self._updateSheets()
             else:
                 raise IOError(wbObject + " is not a file")
@@ -148,7 +161,7 @@ class Wbs(object):
 class Xl(object):
     def __init__(self,**params):
         from win32com.client import Dispatch
-        self._xl=   Dispatch("Excel.Application")
+        self._xl= Dispatch("Excel.Application")
         default= {'Visible': True,
                   'wb':      None,}
         for key in default.keys():
@@ -206,33 +219,3 @@ class Xl(object):
     def OpenWorkbook(self, path):
         self._xl.Workbooks.Open(path)
         return self.wb[-1]
-
-if 0:
-    #=======================
-    # creating a chart
-    chart= wb.Charts.Add()
-    chart.SetSourceData(sh.Range("$A:$B"))
-    # destroy the chart
-    chart.Delete()
-
-    # deleting all charts in a worksheet
-    try:
-        sh.ChartObjects().Delete()
-    except:
-        pass
-
-    #  reading the maximum num of columns and row of existing data
-    [maxRows, maxCols] = (sh.Rows.Count,sh.Columns.Count)
-    # readign the non empty columns and rows
-    [ lastColumn, lastRow]=(sh.Cells( 1, sh.Columns.Count).End(-4159).Column, sh.Cells(sh.Rows.Count,1).End(-4162).Row)
-    print [ lastColumn, lastRow]
-    # Setting cell value
-    sh.Cells(1,1).Value= 1
-
-    # stop screen updating
-    xl.ScreenUpdating = False
-    # continue screen updating
-    xl.ScreenUpdating = True
-
-    # calling a function from excel
-    xl.WorksheetFunction.Pmt(0.0825 /12.0, 360, -150000)

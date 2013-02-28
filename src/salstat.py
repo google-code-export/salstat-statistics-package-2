@@ -401,7 +401,7 @@ class Grids(NoteBookSheet):
         NoteBookSheet.__init__(self, parent, id, *args, **params)
 
     def _gridSetRenderer(self, grid):
-        return
+        #return
         '''setting the renderer to the grid'''
         attr=   GridCellAttr()
         attr.IncRef() # correct delete column
@@ -692,7 +692,11 @@ class SalStat2App(wx.App):
     def _visitBlog( self, *args, **params):
         import webbrowser
         webbrowser.open("http://s2statistical.blogspot.com/")
-
+        
+    def _getFeedBack( self, *args, **params):
+        import webbrowser
+        webbrowser.open("https://docs.google.com/forms/d/1abxr-i0s_5Aftjf0_B5K-jqg_sdDBcyQF_h24usJ7bU/viewform")
+        
     def _checkUpdates( self,*args,**params):
         thread = _checkUpdates()
         thread.setDaemon(True)
@@ -1021,7 +1025,7 @@ class MainFrame(wx.Frame):
               'stats':      stats,
               'getPath':    getPath,
               'help':       hlp,
-              'sm':         sm,
+              'sm':         sm, #stats models will be included later
               }
         # path of modules
         pathInit=    sys.argv[0]
@@ -1034,9 +1038,8 @@ class MainFrame(wx.Frame):
             #interactively work with ms excel under windows os
             from xl import Xl
             env['XL'] = Xl
-##'sm':         sm, stats models will be included later
-#'stats': self.stats,
-#'statistics':statistics,
+            #'stats': self.stats,
+            #'statistics':statistics,
 
         shell.interp.locals= env
 
@@ -1095,7 +1098,9 @@ class MainFrame(wx.Frame):
             (translate(u"&File"),
              ([translate(u"&New Data\tCtrl-N"),   NewIcon,    self.tb1.NewPage,     wx.ID_NEW],
               [translate(u"&Open...\tCtrl-O"),    OpenIcon,   self.grid.LoadFile,   wx.ID_OPEN], # LoadXls
-              [translate(u"&Load from a database\tCtrl-L"),    OpenIcon,   self.LoadFromDb,   wx.ID_OPEN], # Load a table from a Database
+              [u"--"],
+              [translate(u"&Load from sqlite database\tCtrl-L"),  OpenIcon,   self.LoadFromSqlite,   None], # Load a table from a Database
+              [translate(u"Load From MySql"),     OpenIcon,   self.loadMsql, None],
               [u"--"],
               [translate(u"&Save\tCtrl-S"),       SaveIcon,   self.grid.SaveXls,         wx.ID_SAVE],
               [translate(u"Save &As...\tCtrl-Shift-S"), SaveAsIcon, self.grid.SaveXlsAs, wx.ID_SAVEAS],
@@ -1138,6 +1143,7 @@ class MainFrame(wx.Frame):
                 [translate(u"Load default perspective"),      None, self.onDefaultPerspective, None],)),
               [u"--"],
               (translate(u"Check for a new version"), None, wx.GetApp()._checkUpdates, None),
+              (translate(u"Give us some feedback"), None, wx.GetApp()._getFeedBack, None),
               [u"--"],
               (translate(u"Visit The blog of S2"), None,  wx.GetApp()._visitBlog, None),
               (translate(u"&About..."),          imag.icon16(), self.ShowAbout,     wx.ID_ABOUT),
@@ -1227,11 +1233,10 @@ class MainFrame(wx.Frame):
             self.m_mgr.RestorePane(pane)
         self.m_mgr.Update()
         
-    def LoadFromDb(self, evt, *args, **params):
+    def LoadFromSqlite(self, evt, *args, **params):
         # to load data from an sqlite database
         from slbTools import getPath
         from sqlalchemy import create_engine
-        from gridLib.gridsql import selectDbTableDialog, GenericDBClass
 
         dbPath= getPath(wildcard= "Supported Files (*.db)|*.db|"\
                         #"MS access db (*.mdb;*.accdb)|*.mdb;*.accdb|"\
@@ -1244,7 +1249,51 @@ class MainFrame(wx.Frame):
                    #'accdb': 'access'}
         if not(extension in dispatch):
             return
-        engine= create_engine( dispatch[extension]+ ':///%s'%dbPath, echo=False, )
+        engine= create_engine( dispatch[extension]+ ':///%s'%dbPath,
+                               echo=False, )
+        self._loadDb(engine)
+        
+    def loadMsql(self, evt, *args, **params):
+        structure= list()
+        stxt1= ('StaticText',  (u'Host:      ',))
+        stxt2= ('StaticText',  (u'Port:      ',))
+        stxt3= ('StaticText',  (u'User Name: ',))
+        stxt4= ('StaticText',  (u'Password:  ',))
+        stxt5= ('StaticText',  (u'Database:  ',))
+        txt1=  ('TextCtrl',    ('',))
+        txt2=  ('NumTextCtrl', ())
+        
+        structure.append([stxt1, txt1,])
+        structure.append([stxt2, txt2,])
+        structure.append([stxt5, txt1,])
+        structure.append([stxt3, txt1,])
+        structure.append([stxt4, txt1,])
+        
+        dlg= dialog( parent= None, struct= structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            values= dlg.GetValue()
+            print values
+        else:
+            dlg.Destroy()
+            return
+        dlg.Destroy()
+        
+        host=     values.pop(0).__str__()
+        port=     int(values.pop(0)).__str__()
+        dbname=   values.pop(0).__str__()
+        user=     values.pop(0).__str__()
+        password= values.pop(0).__str__()
+        
+        
+        from sqlalchemy import create_engine
+        import mysql
+        engine= create_engine( "mysql+mysqlconnector://"+user+":"+password+"@"+host+":"+port+"/"+dbname,
+                               echo= False, encoding='utf8')
+        self._loadDb(engine)
+        
+        
+    def _loadDb(self, engine):
+        from gridLib.gridsql import selectDbTableDialog, GenericDBClass
         dlg= selectDbTableDialog(self, engine)
 
         if dlg.ShowModal() == wx.ID_OK:
