@@ -1450,8 +1450,7 @@ class MainFrame(wx.Frame):
         info.Icon= wx.GetApp().icon64
         from wx.lib.wordwrap import wordwrap
         info.Description = wordwrap(
-            translate(u"This is a newer version of the SalStat Statistics Package ")+
-            translate(u"originally developed by Alan James Salmoni and Mark Livingstone. ")+
+            translate(u"This is a newer version of the SalStat Statistics Package. ")+
             translate(u"There have been minor bug corrections, and new improvements:\n\n")+
             translate(u"*You can cut, copy, and paste multiple cells,\n")+
             translate(u"*You can undo and redo some actions.\n")+
@@ -1462,7 +1461,7 @@ class MainFrame(wx.Frame):
             translate(u"*Line charts of the data,\n*box and whisker chart\n*Ternary chart\n")+
             translate(u"*Linear regression plot (show the equation and the correlation inside the chart),\n")+
             translate(u"\nThe input data can be saved to, and loaded from an xls format file.\n\n")+
-            translate(u"Salstat2 can be scripted by using Python.\n\n")+
+            translate(u"S2 can be scripted by using Python.\n\n")+
             translate(u"All the numerical results are send to a sheet in a different panel where you can cut, copy, paste, and edit them.\n\n")+
             translate(u"and much more!"),
             460, wx.ClientDC( self))
