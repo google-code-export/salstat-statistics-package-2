@@ -160,7 +160,7 @@ class wls(ols):
         xcolumn= self.inputGrid.GetCol( self.xcolNameSelect)
         ycolumn= self.inputGrid.GetCol( self.ycolNameSelect)
         if wIsOnes:
-            weights= numpy.ones( (len(self.xcolNameSelect), 1) )
+            weights= numpy.ones( (len(xcolumn), 1) )
         else:
             weights= self.inputGrid.GetCol( self.weights)
         
