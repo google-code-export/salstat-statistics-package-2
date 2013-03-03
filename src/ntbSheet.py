@@ -88,6 +88,7 @@ class SimpleGrid( wx.Panel, object):# wxGrid
         
 class NoteBookSheet(wx.Panel, object):
     def __init__( self, parent, *args, **params):
+        from collections import OrderedDict # to be used under the notebook
         # se almacenan las paginas en un diccionario con llave el numero de pagina
         if params.has_key('fb'):
             self.fb= params.pop('fb')
@@ -103,10 +104,10 @@ class NoteBookSheet(wx.Panel, object):
         self.SetSizer( bSizer )
         # se inicia el generador para el numero de pagina
         self.npage = numPage()
-        self.currentPage = None
-        self.pageNames= dict()
+        self.currentPage= None
+        self.pageNames=   OrderedDict() #dict()
         self.Layout()
-        self.numberPage= self._generador()
+        self.numberPage=  self._generador()
 
     def _generador(self):
         i= 1
@@ -129,7 +130,20 @@ class NoteBookSheet(wx.Panel, object):
                 currGrid=  self.currentPage
                 return currGrid.__getattribute__(name)
             raise AttributeError
-
+        
+    def __getitem__(self, item):
+        if isinstance(item, (str, unicode)):
+            if item in self.getPageNames():
+                return self.pageNames[item]
+            
+        elif isinstance(item, (int, float)):
+            item= int(item)
+            if item < 0:
+                item = self.GetPageCount() + item
+            if item < 0:
+                raise StandardError("The selectecd page doesn't exist")
+            return self.pageNames[self.pageNames.keys()[item]]
+    
     def getGridAllValueByCols( self,pageName):
         if not (pageName in self.pageNames.keys()):
             raise StandardError('The page does not exist')
