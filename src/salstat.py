@@ -702,16 +702,11 @@ class SalStat2App(wx.App):
         thread.setDaemon(True)
         thread.start()
         #thread.join()
-        return
-        toUpdate= False
-        if dlg.ShowModal() == wx.ID_OK:
-            toUpdate= True
-            pass
-        dlg.Destroy()
+        if len(args) == 0:
+            return
         ## Goto webpage if user chose to
-        if toUpdate:
-            import webbrowser
-            webbrowser.open("http://code.google.com/p/salstat-statistics-package-2/downloads/list")
+        import webbrowser
+        webbrowser.open("http://code.google.com/p/salstat-statistics-package-2/downloads/list")
 
     def OnActivate(self, event):
         # if this is an activate event, rather than something else, like iconize.
@@ -727,6 +722,12 @@ class SalStat2App(wx.App):
             return self.frame.grid.LoadXls(fullPath)
         elif filterIndex in ('.txt', '.csv'):
             return self.frame.grid.LoadCsvTxt(fullPath)
+        elif filterIndex in ('db',):
+            # open an sqlite database
+            from sqlalchemy import create_engine
+            engine= create_engine( 'sqlite'+ ':///%s'%fullPath,
+                               echo=False, )
+            return self.frame._loadDb(engine)
         else:
             self.frame.logPanel.write(translate(u"The file %s could not be opened. ")%filename +
                                       translate(u"Please check file type and extension!") )
