@@ -15,7 +15,7 @@ import wx.aui
 from numpy import ndarray, ravel, genfromtxt
 #import traceback
 
-
+DEFAULT_GRID_SIZE= (500,20)
 DEFAULT_FONT_SIZE = 12
 DECIMAL_POINT = '.' # default value
 
@@ -149,7 +149,10 @@ class NoteBookSheet(wx.Panel, object):
             raise StandardError('The page does not exist')
         page= self.pageNames[pageName]
         return page.getByColumns()
-
+    
+    def __len__(self):
+        return self.m_notebook.PageCount
+    
     def getPageNames( self):
         return self.pageNames.keys()
 
@@ -364,7 +367,7 @@ class NoteBookSheet(wx.Panel, object):
             else:
                 rowValue = str( rowValue).replace('.', DECIMAL_POINT)
             page.SetCellValue( currRow, colPos, rowValue)
-    def addOnePage(self, id= wx.ID_ANY, gridSize= (500,20)):
+    def addOnePage(self, id= wx.ID_ANY, gridSize= DEFAULT_GRID_SIZE):
         #overwrite this method to create your own custom widget
         #overwrite this method to create your own custom widget
         grid=  SimpleGrid( self, size= gridSize)
@@ -430,7 +433,7 @@ class NoteBookSheet(wx.Panel, object):
         pass
 
     def addPage( self, **params):
-        defaultData = {'name': u'', 'gridSize': (0,0)}
+        defaultData = {'name': u'', 'gridSize': DEFAULT_GRID_SIZE}
         for key, value in params.items():
             if defaultData.has_key(key):
                 defaultData[key] = value
