@@ -847,8 +847,6 @@ class SalStat2App(wx.App):
 class MainFrame(wx.Frame):
     def __init__(self, parent, appname ):
         self.path=      None
-        # to allow the user to drop allowed files into the Data Entry Panel
-        # wx.FileDropTarget.__init__( self)
         self.translate= translate
         self.window=    self
 
@@ -882,7 +880,8 @@ class MainFrame(wx.Frame):
         # set up the datagrid  /<p>
 
         # response panel
-        self.answerPanel=   NoteBookSheet(self, fb = self.formulaBarPanel)
+        self.answerPanel=   NoteBookSheet(self, -1, fb = self.formulaBarPanel)
+        self.answerPanel.addPage( gridSize= (256,64))
         self.answerPanel2=  ScriptPanel(self, self.logPanel)
 
         # Redirecting the error messages and the std output to the logPanel
@@ -919,6 +918,7 @@ class MainFrame(wx.Frame):
         self.m_mgr.AddPane( self.tb1, aui.AuiPaneInfo().Name("tb1").
                             Caption(translate(u"Basic Operations")).
                             ToolbarPane().Top().Row(1).CloseButton( False ))
+        
         # explorer panel
         self.m_mgr.AddPane( self.treePanel,
                             aui.AuiPaneInfo().Left().CaptionVisible(True).
@@ -926,48 +926,55 @@ class MainFrame(wx.Frame):
                             MaximizeButton(True).MinimizeButton(False).Resizable(True).
                             PaneBorder( False ).CloseButton( False ).
                             MinSize( wx.Size( 240,-1 )))
+        
         # data entry panel
         self.m_mgr.AddPane( self.grid,
                             aui.AuiPaneInfo().Centre().CaptionVisible(True).
                             Caption(translate(u"Data Entry Panel")).
                             MaximizeButton(True).MinimizeButton(False).Resizable(True).
                             PaneBorder( False ).CloseButton( False ).
+                            FloatingSize( wx.Size(400,400) ).
                             MinSize( wx.Size( 240,-1 )).Position(0))
+        
         # output panel
-        self.m_mgr.AddPane(self.answerPanel,
-                           aui.AuiPaneInfo().Caption(translate(u"Output Panel")).
-                           Right().CaptionVisible(True).MinimizeButton(True).
-                           FloatingSize( wx.Size(300,300) ).
-                           Resizable(True).MaximizeButton(True).PinButton().
-                           PaneBorder( False ).CloseButton( False ).BestSize( wx.Size( 400,-1 ))) # 
+        self.m_mgr.AddPane( self.answerPanel,
+                            aui.AuiPaneInfo().Right().CaptionVisible(True).
+                            Caption(translate(u"Output Panel")).
+                            MaximizeButton(True).MinimizeButton(True).Resizable(True).
+                            PaneBorder( False ).CloseButton( False ).
+                            BestSize( wx.Size( 400,-1 )).FloatingSize( wx.Size(300,300) ).
+                            PinButton())
 
         # scripting panel
         self.m_mgr.AddPane( self.answerPanel2, 
-                            aui.AuiPaneInfo().Caption((translate(u"Script Panel"))).
+                            aui.AuiPaneInfo().Caption(translate(u"Script Panel")).
                             Right().CaptionVisible(True).PinButton().Show(False).
                             FloatingSize( wx.Size(400,500) ).
                             MinimizeButton(True).Resizable(True).MaximizeButton(True).
                             PaneBorder( False ).CloseButton( True ))
+        
         # shell panel
         self.m_mgr.AddPane( self.scriptPanel,
-                            aui.AuiPaneInfo().Caption((translate(u"Shell Panel"))).
+                            aui.AuiPaneInfo().Caption(translate(u"Shell Panel")).
                             DefaultPane().Bottom().CloseButton( False ).MaximizeButton( True ).
                             MinimizeButton().PinButton( ).Resizable(True).
                             Dock().FloatingSize( wx.Size(260,200)).
                             PaneBorder( False ).CaptionVisible(True).
                             BestSize(wx.Size(-1,150)))
+        
         # log panel
         self.m_mgr.AddPane( self.logPanel,
-                            aui.AuiPaneInfo().Caption((translate(u"Log Panel"))).
+                            aui.AuiPaneInfo().Caption(translate(u"Log Panel")).
                             DefaultPane().Bottom().CloseButton( False ).MaximizeButton( True ).
                             MinimizeButton().PinButton().Resizable(True).
                             Dock().FloatingSize( wx.Size(260,200) ).
                             PaneBorder( False ).CaptionVisible(True).
                             BestSize(wx.Size(-1,150)))
+        
         # chart selection panel
         self.m_mgr.AddPane(self.plotSelection,
                            aui.AuiPaneInfo().Centre().Left().Show(False).
-                           CaptionVisible(True).Caption((translate(u"Chart selection panel"))).
+                           CaptionVisible(True).Caption(translate(u"Chart selection panel")).
                            MinimizeButton().Resizable(True).MaximizeButton(True).PinButton().
                            PaneBorder( False ).CloseButton( True ).MinSize( wx.Size( 240,-1 )))
 
@@ -975,9 +982,6 @@ class MainFrame(wx.Frame):
         # allowing the shell access to the selected objects
         self._sendObj2Shell(self.scriptPanel)
         self._BindEvents()
-        #panel= self.m_mgr.GetPane( self.answerPanel2)
-        #self.m_mgr.InsertPane( self.answerPanel2, panel, insert_level= aui.AUI_INSERT_DOCK)
-        #panel.Row(0).Position(1)
         self.m_mgr.Update()
         # Saving the perspective
         self._defaultPerspective= self.m_mgr.SavePerspective()
