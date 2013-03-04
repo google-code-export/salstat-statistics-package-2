@@ -923,7 +923,7 @@ class MainFrame(wx.Frame):
         self.m_mgr.AddPane( self.treePanel,
                             aui.AuiPaneInfo().Left().CaptionVisible(True).
                             Caption(translate(u"Explorer Panel")).
-                            MaximizeButton(True).MinimizeButton(False).Resizable(True).
+                            MaximizeButton(True).MinimizeButton(True).Resizable(True).
                             PaneBorder( False ).CloseButton( False ).
                             MinSize( wx.Size( 240,-1 )))
         
@@ -972,11 +972,11 @@ class MainFrame(wx.Frame):
                             BestSize(wx.Size(-1,150)))
         
         # chart selection panel
-        self.m_mgr.AddPane(self.plotSelection,
-                           aui.AuiPaneInfo().Centre().Left().Show(False).
-                           CaptionVisible(True).Caption(translate(u"Chart selection panel")).
-                           MinimizeButton().Resizable(True).MaximizeButton(True).PinButton().
-                           PaneBorder( False ).CloseButton( True ).MinSize( wx.Size( 240,-1 )))
+        self.m_mgr.AddPane( self.plotSelection,
+                            aui.AuiPaneInfo().Centre().Left().Show(False).
+                            CaptionVisible(True).Caption(translate(u"Chart selection panel")).
+                            MinimizeButton().Resizable(True).MaximizeButton(True).PinButton().
+                            PaneBorder( False ).CloseButton( True ).MinSize( wx.Size( 240,-1 )))
 
         self.currPanel = None
         # allowing the shell access to the selected objects
@@ -1456,7 +1456,7 @@ class MainFrame(wx.Frame):
         from wx.lib.wordwrap import wordwrap
         info.Description = wordwrap(
             translate(u"This is a newer version of the SalStat Statistics Package. ")+
-            translate(u"There have been minor bug corrections, and new improvements:\n\n")+
+            translate(u"There have been new improvements:\n\n")+
             translate(u"*You can cut, copy, and paste multiple cells,\n")+
             translate(u"*You can undo and redo some actions.\n")+
             translate(u"*The calculations are faster than the original version.\n\n")+
