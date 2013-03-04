@@ -15,7 +15,7 @@ import wx.aui
 from numpy import ndarray, ravel, genfromtxt
 #import traceback
 
-DEFAULT_GRID_SIZE= (500,20)
+DEFAULT_GRID_SIZE= (0,0)
 DEFAULT_FONT_SIZE = 12
 DECIMAL_POINT = '.' # default value
 
@@ -150,7 +150,7 @@ class NoteBookSheet(wx.Panel, object):
         page= self.pageNames[pageName]
         return page.getByColumns()
     
-    def __len__(self):
+    def len(self):
         return self.m_notebook.PageCount
     
     def getPageNames( self):

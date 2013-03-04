@@ -881,7 +881,7 @@ class MainFrame(wx.Frame):
 
         # response panel
         self.answerPanel=   NoteBookSheet(self, -1, fb = self.formulaBarPanel)
-        self.answerPanel.addPage( gridSize= (256,64))
+        #self.answerPanel.addPage( gridSize= (256,64))
         self.answerPanel2=  ScriptPanel(self, self.logPanel)
 
         # Redirecting the error messages and the std output to the logPanel

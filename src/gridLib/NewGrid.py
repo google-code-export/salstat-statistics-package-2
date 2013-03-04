@@ -13,6 +13,11 @@ from easyDialog import Dialog as dialog
 from slbTools import isnumeric, isiterable
 from numpy import ndarray
 import os
+import traceback
+
+DEFAULT_GRID_SIZE= (0,0)
+DEFAULT_FONT_SIZE = 12
+DECIMAL_POINT = '.' 
 
 def translate(a):
     return a
@@ -337,7 +342,7 @@ class NewGrid(wx.grid.Grid, object):
         self.AdjustScrollbars()
         self.hasChanged= True
         self.hasSaved=   False
-        evt.Skip()
+        #evt.Skip()
 
     # function finds out how many cols contain data - all in a list
     #(ColsUsed) which has col #'s
