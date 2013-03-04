@@ -10,6 +10,8 @@ import wx.grid
 from slbTools import ReportaExcel
 import xlrd
 from easyDialog import Dialog as dialog
+from slbTools import isnumeric, isiterable
+from numpy import ndarray
 import os
 
 def translate(a):
@@ -286,7 +288,6 @@ class NewGrid(wx.grid.Grid, object):
 
     def CopyData(self, evt):
         self.Copy()
-
 
     def PasteData(self, evt):
         self.OnPaste()
@@ -797,15 +798,6 @@ class NewGrid(wx.grid.Grid, object):
     def GetCol(self, col, hasHeader= False):
         return self._cleanData( self._getCol( col, hasHeader))
 
-    def PutCol(self, colNumber, data):
-        try:
-            return self.putCol(colNumber, data)
-        except:
-            raise
-        finally:
-            self.hasSaved= False
-            self.hasChanged= True
-
     def PutRow(self, rowNumber, data):
         try: 
             if isinstance(rowNumber, (str, unicode)):
@@ -999,114 +991,67 @@ class NewGrid(wx.grid.Grid, object):
         return self.putCol(*args, **params)
     
     def putCol( self, colNumber, data):
-        if isinstance( colNumber, (str, unicode)):
-            if not(colNumber in self.colNames):
+        try:
+            if isinstance( colNumber, (str, unicode)):
+                if not(colNumber in self.colNames):
+                    raise TypeError('You can only use a numeric value, or the name of an existing column')
+                for pos, value in enumerate(self.colNames):
+                    if value == colNumber:
+                        colNumber= pos
+                        break
+    
+            if not isnumeric( colNumber):
                 raise TypeError('You can only use a numeric value, or the name of an existing column')
-            for pos, value in enumerate(self.colNames):
-                if value == colNumber:
-                    colNumber= pos
-                    break
-
-        if not isnumeric( colNumber):
-            raise TypeError('You can only use a numeric value, or the name of an existing column')
-
-        colNumber= int(colNumber)        
-        if colNumber < 0 or colNumber > self.GetNumberCols():
-            raise StandardError('The minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
-
-        self.clearCol( colNumber)
-
-        if isinstance( data,(str, unicode)):
-            data= [data]
-
-        if isinstance( data, (int, long, float)):
-            data= [data]
-
-        if isinstance( data, (ndarray),):
-            data= ravel( data)
-
-        rows2add= len( data) - self.GetNumberRows()
-        if rows2add > 0:
-            if len( data) > 1e6:
-                data= data[:1e6]
-                rows2add= len( data) - self.GetNumberRows()
-            self.AppendRows( rows2add)
-
-        try:
-            dp= wx.GetApp().DECIMAL_POINT
+    
+            colNumber= int(colNumber)        
+            if colNumber < 0 or colNumber > self.GetNumberCols():
+                raise StandardError('The minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
+    
+            self.clearCol( colNumber)
+    
+            if isinstance( data,(str, unicode)):
+                data= [data]
+    
+            if isinstance( data, (int, long, float)):
+                data= [data]
+    
+            if isinstance( data, (ndarray),):
+                data= ravel( data)
+    
+            rows2add= len( data) - self.GetNumberRows()
+            if rows2add > 0:
+                if len( data) > 1e6:
+                    data= data[:1e6]
+                    rows2add= len( data) - self.GetNumberRows()
+                self.AppendRows( rows2add)
+    
+            try:
+                dp= wx.GetApp().DECIMAL_POINT
+            except:
+                dp= DECIMAL_POINT
+    
+            newdat= list()
+            for row, dat in enumerate( data):
+                if isinstance( dat, (str, unicode)):
+                    try:
+                        dat= str(float(dat.replace(dp,'.'))).replace('.',dp)
+                    except:
+                        pass
+                else:
+                    try:
+                        dat= str(dat)
+                    except:
+                        dat= None
+    
+                newdat.append(dat)
+    
+            for row, dat in enumerate(newdat):
+                self.SetCellValue(row, colNumber, dat)
         except:
-            dp= DECIMAL_POINT
-
-        newdat= list()
-        for row, dat in enumerate( data):
-            if isinstance( dat, (str, unicode)):
-                try:
-                    dat= str(float(dat.replace(dp,'.'))).replace('.',dp)
-                except:
-                    pass
-            else:
-                try:
-                    dat= str(dat)
-                except:
-                    dat= None
-
-            newdat.append(dat)
-
-        for row, dat in enumerate(newdat):
-            self.SetCellValue(row, colNumber, dat)
-
-
-    def putRow( self, rowNumber, data):
-        if isinstance( rowNumber, (str, unicode)):
-            raise TypeError('You can only use a numeric value')
-
-        if not isnumeric( rowNumber):
-            raise TypeError('You can only use a numeric value, or the name of an existing column')
-
-        rowNumber= int(rowNumber)        
-        if rowNumber < 0 or rowNumber > self.GetNumberRows():
-            raise StandardError('The minimum accepted row is 0, and the maximum is %i'%self.GetNumberRows()-1)
-
-        self.clearCol( rowNumber)
-
-        if isinstance( data,(str, unicode)):
-            data= [data]
-
-        if isinstance( data, (int, long, float)):
-            data= [data]
-
-        if isinstance( data, (ndarray),):
-            data= ravel( data)
-
-        cols2add= len( data) - self.GetNumberCols()
-        if cols2add > 0:
-            if len( data) > 32000:
-                data= data[:32000]
-                cols2add= len( data) - self.GetNumberRows()
-            self.AppendCols( cols2add)
-
-        try:
-            dp= wx.GetApp().DECIMAL_POINT
-        except:
-            dp= DECIMAL_POINT
-
-        newdat= list()
-        for row, dat in enumerate( data):
-            if isinstance( dat, (str, unicode)):
-                try:
-                    dat= str(float(dat.replace(dp,'.'))).replace('.',dp)
-                except:
-                    pass
-            else:
-                try:
-                    dat= str(dat)
-                except:
-                    dat= None
-
-            newdat.append(dat)
-
-        for col, dat in enumerate(newdat):
-            self.SetCellValue(rowNumber, col, dat)
+            raise
+        finally:
+            self.hasSaved= False
+            self.hasChanged= True
 
     def clearCol( self, colNumber):
         if colNumber < 0 or colNumber > self.GetNumberCols():
