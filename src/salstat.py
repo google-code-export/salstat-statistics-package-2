@@ -940,16 +940,16 @@ class MainFrame(wx.Frame):
                             aui.AuiPaneInfo().Name(u'scriptPanel').Caption(translate(u"Script Panel")).
                             Right().CaptionVisible(True).PinButton().Show(True).
                             FloatingSize( wx.Size(400,500) ).
-                            MinimizeButton(True).Resizable(True).MaximizeButton(True).
-                            PaneBorder( False ).CloseButton( True ).
+                            MinimizeButton(False).Resizable(True).MaximizeButton(True).
+                            PaneBorder( False ).CloseButton( False ).
                             BestSize( wx.Size( 400,-1 )).MinSize( wx.Size( 240,-1 )))
         
         # chart selection panel
         self.m_mgr.AddPane( self.plotSelection,
                             aui.AuiPaneInfo().Centre().Left().Show(True).
                             CaptionVisible(True).Caption(translate(u"Chart selection panel")).
-                            MinimizeButton().Resizable(True).MaximizeButton(True).PinButton().
-                            PaneBorder( False ).CloseButton( True ).MinSize( wx.Size( 240,-1 )),
+                            MinimizeButton(False).Resizable(True).MaximizeButton(True).PinButton().
+                            PaneBorder( False ).CloseButton( False ).MinSize( wx.Size( 240,-1 )),
                             target=self.m_mgr.GetPane(u"scriptPanel"))
         
         # output panel
@@ -1147,8 +1147,8 @@ class MainFrame(wx.Frame):
                 [translate(u"Change Cell Size..."),      None,  self.GoGridPrefFrame,     None],
                 [translate(u"Change the Font..."),       None,  self.GoFontPrefsDialog,     None],
                 [u"--"],
-                [(translate(u"Show/Hide the plot panel"), None, self.showPlotPanel,       None),],
-                [(translate(u"Show/Hide the script panel"), None, self.showScriptPanel,       None),],
+                #[(translate(u"Show/Hide the plot panel"), None, self.showPlotPanel,       None),],
+                #[(translate(u"Show/Hide the script panel"), None, self.showScriptPanel,       None),],
                 [translate(u"Load default perspective"),      None, self.onDefaultPerspective, None],)),
               [u"--"],
               (translate(u"Check for a new version"), None, wx.GetApp()._checkUpdates, None),
@@ -1455,7 +1455,7 @@ class MainFrame(wx.Frame):
         info= wx.AboutDialogInfo()
         info.Name= u"S2 SalStat Statistics Package 2"
         info.Version= u"V" + wx.GetApp().__version__
-        info.Copyright= u"(C) 2012 Sebastian Lopez Buritica, S2 Team"
+        info.Copyright= u"(C) 2012 - 2013 Sebastian Lopez Buritica, S2 Team"
         info.Icon= wx.GetApp().icon64
         from wx.lib.wordwrap import wordwrap
         info.Description = wordwrap(
