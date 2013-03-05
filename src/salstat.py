@@ -23,7 +23,6 @@ from threading import Thread
 
 ##-----------------------------
 ## EXTERNAL LIBRARY DEPENDENCIES
-#----
 # http://www.pyinstaller.org/ticket/596
 from scipy.sparse.csgraph import _validation
 #----
@@ -936,22 +935,33 @@ class MainFrame(wx.Frame):
                             FloatingSize( wx.Size(400,400) ).
                             MinSize( wx.Size( 240,-1 )).Position(0))
         
+        # scripting panel
+        self.m_mgr.AddPane( self.answerPanel2, 
+                            aui.AuiPaneInfo().Name(u'scriptPanel').Caption(translate(u"Script Panel")).
+                            Right().CaptionVisible(True).PinButton().Show(True).
+                            FloatingSize( wx.Size(400,500) ).
+                            MinimizeButton(True).Resizable(True).MaximizeButton(True).
+                            PaneBorder( False ).CloseButton( True ).
+                            BestSize( wx.Size( 400,-1 )).MinSize( wx.Size( 240,-1 )))
+        
+        # chart selection panel
+        self.m_mgr.AddPane( self.plotSelection,
+                            aui.AuiPaneInfo().Centre().Left().Show(True).
+                            CaptionVisible(True).Caption(translate(u"Chart selection panel")).
+                            MinimizeButton().Resizable(True).MaximizeButton(True).PinButton().
+                            PaneBorder( False ).CloseButton( True ).MinSize( wx.Size( 240,-1 )),
+                            target=self.m_mgr.GetPane(u"scriptPanel"))
+        
         # output panel
         self.m_mgr.AddPane( self.answerPanel,
-                            aui.AuiPaneInfo().Right().CaptionVisible(True).
+                            aui.AuiPaneInfo().Name(u"outputPanel").Right().CaptionVisible(True).
                             Caption(translate(u"Output Panel")).
                             MaximizeButton(True).MinimizeButton(True).Resizable(True).
                             PaneBorder( False ).CloseButton( False ).
                             BestSize( wx.Size( 400,-1 )).FloatingSize( wx.Size(300,300) ).
-                            PinButton())
-
-        # scripting panel
-        self.m_mgr.AddPane( self.answerPanel2, 
-                            aui.AuiPaneInfo().Caption(translate(u"Script Panel")).
-                            Right().CaptionVisible(True).PinButton().Show(False).
-                            FloatingSize( wx.Size(400,500) ).
-                            MinimizeButton(True).Resizable(True).MaximizeButton(True).
-                            PaneBorder( False ).CloseButton( True ))
+                            PinButton(),
+                            target=self.m_mgr.GetPane(u"scriptPanel"))
+        
         
         # shell panel
         self.m_mgr.AddPane( self.scriptPanel,
@@ -970,13 +980,7 @@ class MainFrame(wx.Frame):
                             Dock().FloatingSize( wx.Size(260,200) ).
                             PaneBorder( False ).CaptionVisible(True).
                             BestSize(wx.Size(-1,150)))
-        
-        # chart selection panel
-        self.m_mgr.AddPane( self.plotSelection,
-                            aui.AuiPaneInfo().Centre().Left().Show(False).
-                            CaptionVisible(True).Caption(translate(u"Chart selection panel")).
-                            MinimizeButton().Resizable(True).MaximizeButton(True).PinButton().
-                            PaneBorder( False ).CloseButton( True ).MinSize( wx.Size( 240,-1 )))
+
 
         self.currPanel = None
         # allowing the shell access to the selected objects
