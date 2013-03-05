@@ -170,7 +170,6 @@ class NewGrid(wx.grid.Grid, object):
         self.hasChanged = True
         self.usedCols= ([], [],)
         # </p>
-        
         wx.grid.Grid.__init__(self, parent, *args, **params)
         # functions to copy paste
         if len([clase for clase in wx.grid.Grid.__bases__ if issubclass( PyWXGridEditMixin, clase)]) == 0:
@@ -197,6 +196,11 @@ class NewGrid(wx.grid.Grid, object):
         self.EnableDragRowSize( True )
         self.SetRowLabelSize( 80 )
         self.SetRowLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
+        
+        self.defaultRowSize=      self.GetRowSize(0)
+        self.defaultColSize=      self.GetColSize(0)
+        self.defaultRowLabelSize= self.GetRowLabelSize()
+        self.defaultColLabelSize= self.GetColLabelSize()
         # Label Appearance
         if wx.Platform == '__WXMAC__':
             self.SetGridLineColour("#b7b7b7")
@@ -219,31 +223,18 @@ class NewGrid(wx.grid.Grid, object):
     def zoom_rows(self):
         """Zooms grid rows"""
         for rowno in xrange(self.GetNumberRows()):
-            if rowno not in self.rowsizes.keys():
-                self.rowsizes[rowno] = self.GetRowSize(rowno)
-
-            self.SetRowSize(rowno, self.rowsizes[rowno]*self.zoom)
-
-        if "label" not in self.rowsizes:
-            self.rowsizes["label"] = self.GetRowLabelSize()
-        self.SetRowLabelSize(self.rowsizes["label"] * self.zoom)
+            self.SetRowSize(rowno, self.defaultRowSize*self.zoom)
+        self.SetRowLabelSize( self.defaultRowLabelSize * self.zoom)
 
     def zoom_cols(self):
         """Zooms grid columns"""
         tabno = 1 #self.current_table
         for colno in xrange(self.GetNumberCols()):
-            if colno not in self.colsizes.keys():
-                self.colsizes[colno] = self.GetColSize(colno)
-
-            self.SetColSize(colno, self.colsizes[colno]*self.zoom)
-
-        if "label" not in self.colsizes:
-            self.colsizes["label"] = self.GetColLabelSize()
-        self.SetColLabelSize(self.colsizes["label"] * self.zoom)
+            self.SetColSize(colno, self.defaultColSize * self.zoom)
+        self.SetColLabelSize(self.defaultColLabelSize * self.zoom)
 
     def zoom_labels(self):
         """Zooms grid labels"""
-
         labelfont = self.GetLabelFont()
         labelfont.SetPointSize(max(1, int(DEFAULT_FONT_SIZE * self.zoom)))
         self.SetLabelFont(labelfont)
