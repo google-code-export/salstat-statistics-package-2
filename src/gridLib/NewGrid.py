@@ -11,7 +11,7 @@ from slbTools import ReportaExcel
 import xlrd
 from easyDialog import Dialog as dialog
 from slbTools import isnumeric, isiterable
-from numpy import ndarray
+from numpy import ndarray, ravel
 import os
 import traceback
 
@@ -197,8 +197,14 @@ class NewGrid(wx.grid.Grid, object):
         self.SetRowLabelSize( 80 )
         self.SetRowLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
         
-        self.defaultRowSize=      self.GetRowSize(0)
-        self.defaultColSize=      self.GetColSize(0)
+        try:
+            self.defaultRowSize=  self.GetRowSize(0)
+        except:
+            self.defaultRowSize=  19
+        try:    
+            self.defaultColSize=  self.GetColSize(0)
+        except:
+            self.defaultColSize=  80
         self.defaultRowLabelSize= self.GetRowLabelSize()
         self.defaultColLabelSize= self.GetColLabelSize()
         # Label Appearance
