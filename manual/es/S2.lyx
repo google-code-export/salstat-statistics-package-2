@@ -1,0 +1,349 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Enumerate
+introducción
+\end_layout
+
+\begin_layout Standard
+1.1 bienvenido
+\end_layout
+
+\begin_layout Standard
+Este documento es el manual para el paquete de estadística S2 el cual es
+ activamente desarrollado por el equipo S2.
+\end_layout
+
+\begin_layout Standard
+Para introducirte a S2 comenzaremos discutiendo la historia del proyecto,
+ también discutiremos el propósito del proyecto y algunos de los desarrollos
+ futuros.
+ Por ahora queremos resaltar que este es un proyecto de código abierto y
+ realmente quisiéramos que nos retroalimentaras con la experiencia que has
+ tenido al probar el software; por favor siéntase invitado para visitar
+ la página del proyecto la cual la pueden encontrar en el hipervínculo 
+\lang british
+
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://code.google.com/p/salstat-statistics-package-2/
+\end_layout
+
+\end_inset
+
+
+\lang english
+ y desde allí en la pestaña 
+\begin_inset Quotes eld
+\end_inset
+
+Issues
+\begin_inset Quotes erd
+\end_inset
+
+ puede escribir sus comentarios o cualquier defecto que encuentre, asimismo
+ sugerencias para desarrollos futuros; también encontrará detalles como
+ dirección de correo de contacto por si así lo prefiere, finalmente puede
+ llenar un formulario sobre su experiencia en S2 
+\lang british
+
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+https://docs.google.com/forms/d/1abxr-i0s_5Aftjf0_B5K-jqg_sdDBcyQF_h24usJ7bU/viewf
+orm?pli=1
+\end_layout
+
+\end_inset
+
+
+\lang english
+!
+\end_layout
+
+\begin_layout Standard
+Como un proyecto de código abierto se libera bajo los términos de la licencia
+ GPL, por lo tanto eres libre de instalar y utilizaren S2 en cualquier computado
+ra que lo desees.
+ también te invitamos a contribuir con el proyecto S2 si tienes habilidades
+ que crees que puedas ofrecernos las cuales podrían ser escribiendo código,
+ documentando, adicionando tips a la páginael Wiki, o también cualquier
+ otra habilidad que tengas.
+ Estaremos muy agradecidos por cualquier ayuda que nos pueda ofrecer de
+ cualquier tipo en particular invitamos a las personas que puedan contribuir
+ traduciendo la ayudade S2 a otros idiomas.
+ También, invitamos a los usuarios que han probado S2 o que pueden probarlo
+ en plataformas que los desarrolladores no tienen acceso.
+ Si la interfase gráfica de usuario no luce bien visualmente en tu computadora,
+ hazlo saber y trataremos de mejorarlo en lo posible.
+\end_layout
+
+\begin_layout Standard
+1.
+ 2 Historia del proyecto
+\end_layout
+
+\begin_layout Standard
+Para entender el origen de S2, debemos de regresar al año 2002 y discutir
+ un programa llamado SALSTAT el cual se inició por el doctor Alan Salmoni
+ Ph.
+ El estaba enseñando a los enestudiantes de pregrado en psicología y encontró
+ que el programa de estadística SPSS no se ejecutaba en su computador (esto
+ fue en el tiempo en que las computadoras eran mucho más costosas que ahora,
+ y tenían limitado la velocidad de procesador, memoria y la capacidad del
+ disco duro.) Por lo tanto hizo lo que correspondía a un tecnico con grado
+ en información, 
+\begin_inset Quotes eld
+\end_inset
+
+resolver el problema haciendo su propio código
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Como su doctorado fue en el área de la experiencia del usuario (hoy en día
+ se refiere como UX) estaba llamado a ser un programa que se pudiera usar
+ en diferentes plataformas (Windows, Mac, Linux,) y que tuviera una interfase
+ de usuario que fuera posible usar por estudiantes inexpertos en computación,
+ pero que necesitaban una comprensión razonable de las rutinas en estadística
+ (sus estudiantes de pregrado en psicología) después de examinar sus opciones,
+ él escogió usar Python como su lenguaje de escogencia, y usó WX como la
+ librería gráfica -esta librería ha sido portada a Python con el nombre
+ de WxPython.
+\end_layout
+
+\begin_layout Standard
+Inclusive en esos días, la propiedad intelectual era un gran problema, el
+ doctor salmonino no quería lidiar con soporte y problemas comerciales por
+ lo tanto decidió usar la licencia pública general GNU gpl la cual ofrecía
+ protección a su propiedad intelectual en una forma que no se ofrecía la
+ época.
+\end_layout
+
+\begin_layout Standard
+Una vez eliminado estos problemas, tomó su editor de texto, y hizo lo que
+ los programadores hacen abrir una hoja nueva y llamarla salstat.py e iniciar
+ a escribir código.
+ Aproximadamente entre 2002 y comienzos de 2004 continuó escribiendo lo
+ que se convertiría en SALSTAT y publicó su código a través de un repositorio
+ en línea llamado sourcefoge.
+ Sus esfuerzos los pueden encontrar todavía en el sitio 
+\lang british
+
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://salstat.sourceforge.net/
+\end_layout
+
+\end_inset
+
+
+\lang english
+.
+\end_layout
+
+\begin_layout Standard
+Debido a los compromisos como docente, y porque tenía un buen programa en
+ ese punto, el doctor Salomoni dejó de trabajar en SALSTAT a comienzos de
+ 2004 pero los frutos de su labor continuaron, siendo descargado por la
+ gente que busca un programa de estadística.
+ Aproximadamente en esta época el programa SALSTAT dio origen al desarrollo
+ en dos diferentes direcciones.
+\end_layout
+
+\begin_layout Standard
+En Sur América, Colombia cerca de 2004 Sebastián López Buriticá un ingeniero
+ químico joven necesitaba un programa de estadística y encontró SALSTAT,
+ con el su lenguaje de programación favorito se convirtió Python.
+ Siguiendo una larga tradición, Sebastián bifurcó SALSTAT ( el proceso por
+ el cual se toma un programa existente y se continúa desarrollando independiente
+ de su programador original) fue entonces como Sebastián estuvo trabajando
+ sólo en su versión de SALSTAT sin contacto con el doctor Salmoni, y el
+ desarrollo del programa original (el cual se había estancado).
+ En algún punto, el abrió un proyecto en el repositorio bifurcado y el cual
+ es el sitio actual del proyecto 
+\lang british
+
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://code.google.com/p/salstat-statistics-package-2/
+\end_layout
+
+\end_inset
+
+
+\lang english
+.
+ No obstante, por su historia, queríamos contarte sobre la bifurcación del
+ proyecto.
+\end_layout
+
+\begin_layout Standard
+Temprano en 2007 su autor (Mark Livingston) estudiante de pregrado maduro
+ de la Universidad Griffith en la Costa de oro en Queensland, Australia,
+ estaba estudiando parte de se tiempo de grado en información de la tecnología.
+ Con un interés envío de informática (combinando ciencia y tecnología de
+ información) el decidió probar el curso de bioestadística el cual era ofrecido
+ por la escuela de ciencias médicas.
+ Como un aporte de su estudio, y debido a que SPSS no es exactamente algo
+ libre que tú puedas descargar y trabajar en casa, buscó en Internet por
+ algún software estadístico y que fuera capaz de estudiar su código respecto
+ a los algoritmos estadísticos.
+ El encontró el abandonado proyectos SALSTAT y contactó al doctor Salmoni
+ quien estuvo más que feliz de que alguien trabajara para actualizar SALSTAT
+ (tres años es un largo tiempo en el mundo del software para computadores).
+\end_layout
+
+\begin_layout Standard
+Durante un periodo de tres años, Mark trabajo corrigiendo errores, adicionando
+ nuevas rutinas estadísticas, y actualizando la interfase de usuario a los
+ estándares actuales.
+ En particular, Mark corrigio pimeramente erroren en Macintosh y trabajó
+ arduamente para que SALSTAT trabajará bien, y lucía genial en la plataforma
+ Macintosh la cual El continuó, hasta que un día a mediados de 2012 Mark
+ escribió SALSTAT en Google y descubrió una entrada para SALSTAT.
+\end_layout
+
+\begin_layout Standard
+Cuando Mark echó un vistazo al programa de Sebastián 
+\begin_inset Quotes eld
+\end_inset
+
+SALSTAT 2
+\begin_inset Quotes erd
+\end_inset
+
+, era obvio que Sebastián programaba mucho más rápido que Mark, tabién notó
+ que tenía buenas tomas de pantalla con más funcionalidades que las Mark
+ había hecho, entonces él decidió combinar esfuerzos.
+ Mark se unió a Sebastián para trabajar en grupo y unir sus mejores esfuerzos
+ hasta construir lo que hoy en día se renombrado como S2, para compactart
+ el nombre.
+ El código fuente de S2 y SALSTAT continúa con unas características pendientes
+ por ejemplo imprimir, pero esto cambiará en el futuro cercano.
+\end_layout
+
+\begin_layout Standard
+Entonces, esto ha sido la manera en que el proyecto se ha convertido en
+ lo que es.
+ Sebastian y yo hemos estado trabajando duro en los próximos lanzamientos
+ los cuales se han planeado, asimismo te invitamos a que te unas a nosotros
+ si tienes algo que aportar.
+ Mientras que las estadísticas frecuentemente tienen malos sentimientos
+ asociados hacia ella y mucha de las personas no quieren saber nada de las
+ matemática, nosotros y S2 no somos de todo como ellos, al respecto el equipo
+ de desarrollo de S2 lo disfrutamos y te invitamos a unírtenos.
+\end_layout
+
+\begin_layout Standard
+Ya que te contamos algo de la historia de cómo S2 vino, déjados hacerte
+ un breve resumen de lo que S2 puede hacer por ti así podrías decir si esto
+ lo que buscas.
+\end_layout
+
+\begin_layout Standard
+1.3 Resumen
+\end_layout
+
+\begin_layout Standard
+S2 tiene un listado de características las cuales se han adicionado en forma
+ constante como siguen a continuación:
+\end_layout
+
+\begin_layout Standard
+Estas características las puedes revisar en forma actualizada desde la página
+ del proyecto 
+\lang british
+
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://code.google.com/p/salstat-statistics-package-2/
+\end_layout
+
+\end_inset
+
+
+\lang english
+.
+ si todas estas características te suenan y es lo que estás buscando, vamos
+ al siguiente capítulo donde te describiremos cómo hacer instalar S2 y como
+ te puede ayudar con tus necesidades de estadística.
+\end_layout
+
+\end_body
+\end_document
