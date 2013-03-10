@@ -605,7 +605,6 @@ class SalStat2App(wx.App):
         # This catches events on Mac OS X when the app is asked to activate by some other
         # process
         # TODO: Check if this interferes with non-OS X platforms. If so, wrap in __WXMAC__ block!
-        self.Bind(wx.EVT_ACTIVATE_APP, self.OnActivate)
 
     def OnInit(self):
         # getting the os type
@@ -706,12 +705,6 @@ class SalStat2App(wx.App):
         ## Goto webpage if user chose to
         import webbrowser
         webbrowser.open("http://code.google.com/p/salstat-statistics-package-2/downloads/list")
-
-    def OnActivate(self, event):
-        # if this is an activate event, rather than something else, like iconize.
-        if event.GetActive():
-            self.BringWindowToFront()
-        event.Skip()
 
     def OpenFileMessage(self, filename):
         self.BringWindowToFront()
