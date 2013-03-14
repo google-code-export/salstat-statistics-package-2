@@ -164,6 +164,7 @@ class NewGrid(wx.grid.Grid, object):
         self.maxcol=   0
         self.zoom=     1.0
         self.moveTo=   None
+        self.hasSaved= False
         self.wildcard= "S2 Format (*.xls;*xlsx;*.txt;*csv)|*.xls;*xlsx;*.txt;*csv" \
                        "Any File (*.*)|*.*|"
         #<p> used to check changes in the grid
@@ -429,7 +430,7 @@ class NewGrid(wx.grid.Grid, object):
                 else:
                     pass
                 result.append(header)
-            self.reportObj.writeByCols(result, self.NumSheetReport)
+            self.reportObj.writeByCols(result, sheet= 0) # report the data in the first sheet
         self.reportObj.save()
         self.hasSaved = True
         filename= os.path.split(self.path)[-1]
@@ -437,25 +438,70 @@ class NewGrid(wx.grid.Grid, object):
             filename = filename[:8]
         print "The file %s was successfully saved!" % self.reportObj.path
         return (True, filename)
-
-    def LoadFile(self, evt, **params):
+    
+    def load(self, path, *args, **params):
+        # dispath load data depending on the file extension
+        if path == None:
+            return self._LoadFile(evt= None)
+        
+        extension= os.path.split(path)[1].split('.')[-1]
+        
+        available= {'csv':  self.LoadCsvTxt,
+                    'txt':  self.LoadCsvTxt,
+                    'xls':  self.LoadXls,
+                    'xlsx': self.LoadXls,
+                    'db':   self._LoadSqlite,
+                    }
         try:
-            fullpath= params.pop('fullpath')
-            if fullpath.endswith('xls') or fullpath.endswith('xlsx'):
-                return self.LoadXls(fullpath)
-            elif fullpath.endswith('csv') or fullpath.endswith('txt'):
-                return self.LoadCsvTxt(fullpath)
-
+            return available[extension](path, *args, **params)
         except KeyError:
-            pass
-        '''check the file type selected and redirect
-        to the corresponding load function'''
-        wildcard=  "Suported files (*.txt;*.csv;*.xls;*.xlsx)|*.txt;*.csv;*.xls;*.xlsx|" \
+            raise
+        
+    def _LoadSqlite(self, path, *args, **params):
+        # to load data from an sqlite database
+        from sqlalchemy import create_engine
+        if path == None:
+            return ( False, )
+        engine= create_engine( 'sqlite:///%s'%path, echo=False, )
+        return ( self._loadDb( engine), path)
+        
+    def _loadDb(self, engine):
+        from gridLib.gridsql import selectDbTableDialog, GenericDBClass
+        dlg= selectDbTableDialog( self, engine)
+        if dlg.ShowModal() == wx.ID_OK:
+            values= dlg.GetValue()
+        else:
+            dlg.Destroy()
+            return False
+        # the dialog is destroyed after the results of the database
+        value = values[0]
+        if value == None:
+            dlg.Destroy()
+            # The user didn't select any table
+            return False
+        # reading the data by columns and paste into the current sheet
+        table=  dlg.m_grid.table
+        sesion = table.Session()
+        # add a page to write the result
+        # self.addPage(name= 'noname', gridSize= (sesion.query(GenericDBClass).limit(20000).count(), len(table.colLabels)))
+        for colNumber, colName in enumerate( table.colLabels):
+            rowValues= list()
+            for rowi in sesion.query( GenericDBClass).limit(20000).all():
+                rowValues.append( getattr( rowi, colName))
+                # report the values
+            # writing the data in a new sheet
+            self.PutCol( colNumber, rowValues,)
+        dlg.Destroy()
+        return True
+        
+    def LoadFile(self, evt, **params):
+        wildcard=  "Suported files (*.txt;*.csv;*.xls;*.xlsx)|*.txt;*.csv;*.xls;*.xlsx;*db|" \
             "Excel Files (*xlsx;*xlsm;*.xls)|*.xlsx;*.xlsm;*.xls|"\
             "Excel 2007 File (*xlsx)|*.xlsx|"\
             "Excel 2003 File (*.xls)|*.xls|" \
             "Txt file (*.txt)|*.txt|" \
-            "Csv file (*.csv)|*.csv"        
+            "Csv file (*.csv)|*.csv|" \
+            "Sqlite Database (*.db)|*.db"
         dlg = wx.FileDialog(self, "Load Data File", "","",
                             wildcard= wildcard,
                             style = wx.OPEN)
@@ -468,26 +514,22 @@ class NewGrid(wx.grid.Grid, object):
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return (False, None)
-
-        fileName= dlg.GetFilename()
-        fullPath= dlg.Path 
-        junk, filterIndex = os.path.splitext(fileName)
-        try:
-            if filterIndex in ('.xls','.xlsx',):
-                return self.LoadXls(fullPath)
-            elif filterIndex in ('.txt', '.csv',):
-                return self.LoadCsvTxt(fullPath)
-        except (Exception, TypeError) as e:
-            traceback.print_exc( file = self.log)
-        finally:
+        
+        fullPath= dlg.Path
+        # if the file is loaded then 
+        if self.load(fullPath)[0]:
             self.hasChanged= True
             self.hasSaved= True
             # emptying the undo - redo buffer
             self.emptyTheBuffer()
             if evt != None:
                 evt.Skip()
+            return ( True, os.path.split(fullPath)[-1])
+        else:
+            return ( False, None)
 
     def LoadCsvTxt(self, fullPath):
+        from numpy import genfromtxt
         '''use the numpy library to load the data'''
         # comments='#', delimiter=None, skiprows=0, skip_header=0, skip_footer=0, converters=None, missing='', missing_values=None, filling_values=None, usecols=None, names=None, excludelist=None, deletechars=None, replace_space='_', autostrip=False, case_sensitive=True, defaultfmt='f%i', unpack=None, usemask=False, loose=True, invalid_raise=True
         btn1= ['FilePath',    [fullPath] ]
@@ -540,9 +582,12 @@ class NewGrid(wx.grid.Grid, object):
         else:
             initRow= 0
 
-        grid= wx.GetApp().inputGrid    
+        #grid= wx.GetApp().inputGrid 
+        if len(data.shape)== 1:
+            # it's considered to be of one column
+            data.shape= (data.shape[0],1)
         for col in range(data.shape[1]):
-            grid.PutCol( col, data[initRow:,col])
+            self.PutCol( col, data[initRow:,col])
 
         # Renaming the column of the Data Entry Panel
         if hasHeader:
@@ -551,7 +596,7 @@ class NewGrid(wx.grid.Grid, object):
                 if not isinstance( x, (str, unicode)):
                     x.__str__()
                 # writing the data
-                grid.SetColLabelValue(pos, x)
+                self.SetColLabelValue(pos, x)
 
         self.hasChanged= True
         self.hasSaved=   True
@@ -561,11 +606,11 @@ class NewGrid(wx.grid.Grid, object):
         print 'import xlrd'
         filename= fullPath
         filenamestr= filename.__str__()
-        print '# remember to write an  r   before the path'
-        print 'filename= ' + "'" + filename.__str__() + "'"
+        #print '# remember to write an  r   before the path'
+        print 'filename= r' + "'" + filename.__str__() + "'"
         # se lee el libro
         wb= xlrd.open_workbook(filename)
-        print 'wb = xlrd.open_workbook(filename)', None
+        print 'wb = xlrd.open_workbook(filename)'
         sheets= [wb.sheet_by_index(i) for i in range(wb.nsheets)]
         print 'sheets= [wb.sheet_by_index(i) for i in range(wb.nsheets)]'
         sheetNames = [sheet.name for sheet in sheets]
