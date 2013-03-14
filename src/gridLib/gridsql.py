@@ -93,7 +93,7 @@ class SqlTable( wx.grid.PyGridTableBase):
         self._numRows= self.numRows
         self._numCols= self.GetNumberCols()
 
-        self.initId=         int(self.getFirstId())
+        self.initId=         0
 
     def _initializeParams(self):
         # used to initialize the data if the user change the selected table
@@ -226,11 +226,6 @@ class SqlTable( wx.grid.PyGridTableBase):
             types.append( col.type.__str__())
         return types
 
-    def getFirstId( self):
-        session= self.Session()
-        res= session.query(GenericDBClass).first().id
-        session.close()
-        return res
 
     @property
     def numRows( self):
@@ -278,7 +273,7 @@ class SqlTable( wx.grid.PyGridTableBase):
             self.bufer[row]= [None]*len( self.colLabels)
             return
 
-        rowMin=      max( [self.getFirstId()-1, row-SEARCHINDEX])
+        rowMin=      max( [0, row-SEARCHINDEX])
         rowMax=      min( [self.numRows-1, row+SEARCHINDEX])
         # emptying the non needed keys in buffer
         neededRange= range( rowMin, rowMax)
