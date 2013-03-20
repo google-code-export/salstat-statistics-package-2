@@ -121,7 +121,7 @@ class ReportaExcel(object):
         self._file = nameFile
         self.path =  os.path.join(os.path.split(self.path)[0], nameFile)
 
-        if os.path.isfile(fullpath):
+        if os.path.isfile(self.path):
             print('Warning: the selected file already exists, the object could fail')
 
     def __addSheet(self):
@@ -132,12 +132,13 @@ class ReportaExcel(object):
         self._hojas.append( (hoja, self.__numPage(), self.__numPage()) )
         # objeto hoja, iterador sobre columnas, iterador sobre filas
 
-    def write(self,lista,sheet = None, cell_overwrite_ok = False):
+    def write(self, lista, sheet = None, cell_overwrite_ok = False):
         '''reporte al contenido considerando que se ha ingresado una columna'''
         # se verifica si existen hojas para el reporte
         if len(self._hojas) < 1:
             # se crea una hoja
             self.__addSheet()
+            
         if sheet == None:
             # se considera que la hoja utilizada sera la primera(hoja numero cero)
             sheet = 0

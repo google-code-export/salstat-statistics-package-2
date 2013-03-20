@@ -474,7 +474,7 @@ class NewGrid(wx.grid.Grid, object):
             dlg.Destroy()
             return False
         # the dialog is destroyed after the results of the database
-        value = values[0]
+        value, filterTxt = values
         if value == None:
             dlg.Destroy()
             # The user didn't select any table
@@ -486,7 +486,7 @@ class NewGrid(wx.grid.Grid, object):
         # self.addPage(name= 'noname', gridSize= (sesion.query(GenericDBClass).limit(20000).count(), len(table.colLabels)))
         for colNumber, colName in enumerate( table.colLabels):
             rowValues= list()
-            for rowi in sesion.query( GenericDBClass).limit(20000).all():
+            for rowi in sesion.query( GenericDBClass).filter(filterTxt).limit(20000).all():
                 rowValues.append( getattr( rowi, colName))
                 # report the values
             # writing the data in a new sheet
