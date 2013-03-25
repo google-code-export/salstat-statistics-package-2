@@ -12,8 +12,12 @@ from sqlalchemy.orm import mapper, sessionmaker, clear_mappers
 from sqlalchemy.exc import StatementError
 from easyDialog import Dialog
 from gridEditors import VARCHAR
-
+from gridEditors import DATE
+from collections import OrderedDict
 SEARCHINDEX= 50
+
+from gridEditors import datePickerEditor
+
 class okCancelPanel(wx.Panel):
     def __init__(self, *args, **params):
         wx.Panel.__init__(self, *args, **params)
@@ -39,7 +43,7 @@ def AttrType( leg):
         'BOOLEANTYPE': 5,
         'CHAR':        6,
         'CLOB':        7,
-        'DATE':        8,
+        'DATE':        DATE,
         'DATETIME':    9,
         'DECIMAL':     1,
         'FLOAT':       2,
@@ -71,26 +75,22 @@ class SqlTable( wx.grid.PyGridTableBase):
         self._numCols=       0
         self._numRows=       0
         self._filter=        ''
-        # the rederer is a global property for the sheet
-        self.odd= wx.grid.GridCellAttr()
-        self.odd.SetBackgroundColour( wx.Colour( 220, 230, 250 ))
-        self.odd.SetEditor(VARCHAR())
-        self.even= wx.grid.GridCellAttr()
-        self.even.SetEditor(VARCHAR())
-        self.even.SetBackgroundColour( wx.Colour( 146, 190, 183 ))
+        self._colsInfo=      {}
         wx.grid.PyGridTableBase.__init__(self)
 
         if engine == None:
             self.loadDatabase( evt = None)
-            # getting the information of the column
-            self.getColsInfo()
         else:
             self.engine= engine
             if tableName == None:
                 tableName= self.tableNames[0]
             # once the currtable changes, also the data is autonatically loaded
             self.currTable= tableName
-
+            
+        
+        # getting the information of the column
+        self._colsInfo= self.getColsInfo()
+        
         self._numRows= self.numRows
         self._numCols= self.GetNumberCols()
         self.initId=         0
@@ -102,14 +102,20 @@ class SqlTable( wx.grid.PyGridTableBase):
         self.curRowData=     None
 
     def GetAttr(self, row, col, kind):
-        attr = [ self.even, self.odd][row % 2]
+        attr=   [ self.evenAttr, self.oddAttr][row % 2]
+        attr= attr[col]
         attr.IncRef()
         return attr
 
     def getColsInfo( self, evt= None):
         # it's used to read the type of columns of the selected table
         # and interact with the
-        pass
+        # getting the current table
+        table= self.table
+        desc=  OrderedDict()
+        for colName in table.columns.keys():
+            desc[colName]= table.columns.get(colName).type.__visit_name__
+        return desc
 
     def loadDatabase( self, evt):
         wildcard = "All files (*.*)|*.*"
@@ -146,6 +152,28 @@ class SqlTable( wx.grid.PyGridTableBase):
             self.currTable= self.table_names[0]
 
         self.loadTable(evt= None)
+        
+    def _updateRenderer(self):
+        editor= {'DATE': datePickerEditor}
+        #  creating attr by columns
+        self.oddAttr=  list()
+        self.evenAttr= list()
+        
+        for colType in self.getColsInfo().values():
+            # the rederer is a global property for the sheet
+            self.oddAttr.append(  wx.grid.GridCellAttr())
+            self.oddAttr[-1].SetBackgroundColour( wx.Colour( 220, 230, 250 ))
+            self.evenAttr.append( wx.grid.GridCellAttr())
+            self.evenAttr[-1].SetBackgroundColour( wx.Colour( 146, 190, 183 ))
+            
+            try:
+                edit= editor[colType]
+                self.oddAttr[-1].SetEditor( edit())
+                self.evenAttr[-1].SetEditor( edit())
+            except KeyError:
+                pass
+                #self.oddAttr[-1].SetEditor(VARCHAR())
+                #self.evenAttr[-1].SetEditor(VARCHAR())
 
     @property
     def tableNames(self):
@@ -162,7 +190,8 @@ class SqlTable( wx.grid.PyGridTableBase):
             # updating the required fields
             self._initializeParams()
             self.loadTable(evt= None)
-
+            #updating the renderer
+            self._updateRenderer()
             notifications= {'delRow': wx.grid.GRIDTABLE_NOTIFY_ROWS_DELETED,
                             'addRow': wx.grid.GRIDTABLE_NOTIFY_ROWS_APPENDED,
                             'delCol': wx.grid.GRIDTABLE_NOTIFY_COLS_DELETED,
@@ -218,6 +247,8 @@ class SqlTable( wx.grid.PyGridTableBase):
         clear_mappers() #http://docs.sqlalchemy.org/en/rel_0_6/orm/mapper_config.html#sqlalchemy.orm.clear_mappers
         mapper( GenericDBClass, self.table)
         self.Session=   sessionmaker( bind = self.engine)
+        # updating the columns info
+        self._colsInfo= self.getColsInfo()
         #self._filter= ''# reset the filter
 
     def _getColTypes(self, table):
@@ -241,9 +272,15 @@ class SqlTable( wx.grid.PyGridTableBase):
 
     def GetNumberRows( self):
         session= self.Session()
-        res=     session.query(GenericDBClass).filter(self._filter).count()+1
-        session.close()
-        return res
+        res=     session.query(GenericDBClass)# applaying the filter
+        try:
+            res= res.filter(self._filter)
+        except:
+            print "filter error"
+        finally:
+            res= res.count()+1
+            session.close()
+            return res
 
     def GetNumberCols( self):
         return len(self._getColTypes(self.table))
@@ -278,7 +315,7 @@ class SqlTable( wx.grid.PyGridTableBase):
 
         rowMin=      max( [0, row-SEARCHINDEX])
         rowMax=      min( [self.numRows-1, row+SEARCHINDEX])
-        # emptying the non needed keys in buffer
+        # emptying the not needed keys in buffer
         neededRange= range( rowMin, rowMax)
         # the position in buffer is equal to the position in the grid
         for key in self.bufer.keys():
@@ -326,12 +363,23 @@ class SqlTable( wx.grid.PyGridTableBase):
     def SetValue( self, row, col, value):
         if not self.allow2edit:
             return
+        # identifying if is a date object
+        if self._colsInfo.values()[col]=='DATE':
+            import datetime
+            value= [int(val) for val in value.split('-')]
+            value= datetime.datetime(value.pop(0), value.pop(0), value.pop(0))
         # create a Session
         session = self.Session()
         # querying for a record in the Artist table
-        rowNumber= self.GetValue(row, 0)
+        rowNumber= row# self.GetValue(row, 0)
         if rowNumber != u'':
-            res= session.query( GenericDBClass).filter(self._filter).get( long(rowNumber))
+            res= session.query( GenericDBClass)
+            try:
+                res= res.filter(self._filter)
+            except:
+                print "Filter error"
+            finally:
+                res= res[ long( rowNumber)] #res.get( long(rowNumber))
         else:
             res= None
 
@@ -488,11 +536,12 @@ class selectDbTableDialog( wx.Dialog):
                 return
             
     def applyFilter(self, evt):
+        print "filtering data"
         self.m_grid.applySqlFilter( self.txtCtrl.GetValue())
         evt.Skip()
     
     def GetValue(self):
-        return (self.selectedTableName, self.m_grid.table._filter,)
+        return (self.selectedTableName, self.m_grid.table._filter)
 
     def Destroy(self, *args, **params):
         self.m_mgr.UnInit()
@@ -522,7 +571,7 @@ class _example( wx.Frame ):
     def showDialog( self, evt ):
         dbPath= 'e:\\proyecto gridsql\\mymusic.db'
         engine= create_engine('sqlite:///%s'%dbPath, echo=False)
-        dlg= selectDbTableDialog(self, engine)
+        dlg= selectDbTableDialog(self, engine,allow2edit= True)
         if dlg.ShowModal() == wx.ID_OK:
             values= dlg.GetValue()
             print values

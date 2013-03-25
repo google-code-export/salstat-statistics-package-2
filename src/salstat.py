@@ -1296,7 +1296,7 @@ class MainFrame(wx.Frame):
         
     def _loadDb(self, engine):
         from gridLib.gridsql import selectDbTableDialog, GenericDBClass
-        dlg= selectDbTableDialog(self, engine)
+        dlg= selectDbTableDialog(self, engine, allow2edit= True)
 
         if dlg.ShowModal() == wx.ID_OK:
             values= dlg.GetValue()
