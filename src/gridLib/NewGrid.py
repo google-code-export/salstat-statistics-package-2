@@ -53,12 +53,12 @@ class _MyContextGrid(wx.Menu):
         
         if EXISTIMAGES:
             imagenes = imageEmbed()
-            cortar.SetBitmap(imagenes.edit_cut())
-            copiar.SetBitmap(imagenes.edit_copy())
-            pegar.SetBitmap(imagenes.edit_paste())
-            eliminar.SetBitmap(imagenes.cancel())
-            deshacer.SetBitmap(imagenes.edit_undo())
-            rehacer.SetBitmap(imagenes.edit_redo())
+            cortar.SetBitmap(imagenes.edit_cut)
+            copiar.SetBitmap(imagenes.edit_copy)
+            pegar.SetBitmap(imagenes.edit_paste)
+            eliminar.SetBitmap(imagenes.cancel)
+            deshacer.SetBitmap(imagenes.edit_undo)
+            rehacer.SetBitmap(imagenes.edit_redo)
         ##exportarCsv.SetBitmap(imagenes.exporCsv())
 
         self.AppendSeparator()
@@ -467,7 +467,7 @@ class NewGrid(wx.grid.Grid, object):
         
     def _loadDb(self, engine):
         from gridLib.gridsql import selectDbTableDialog, GenericDBClass
-        dlg= selectDbTableDialog( self, engine)
+        dlg= selectDbTableDialog( self, engine, allow2edit= True)
         if dlg.ShowModal() == wx.ID_OK:
             values= dlg.GetValue()
         else:
@@ -495,13 +495,14 @@ class NewGrid(wx.grid.Grid, object):
         return True
         
     def LoadFile(self, evt, **params):
-        wildcard=  "Suported files (*.txt;*.csv;*.xls;*.xlsx)|*.txt;*.csv;*.xls;*.xlsx;*db|" \
+        wildcard=  "Suported files (*.txt;*.csv;*.xls;*.xlsx;*.db)|*.txt;*.csv;*.xls;*.xlsx;*db|" \
             "Excel Files (*xlsx;*xlsm;*.xls)|*.xlsx;*.xlsm;*.xls|"\
-            "Excel 2007 File (*xlsx)|*.xlsx|"\
-            "Excel 2003 File (*.xls)|*.xls|" \
             "Txt file (*.txt)|*.txt|" \
             "Csv file (*.csv)|*.csv|" \
-            "Sqlite Database (*.db)|*.db"
+            "Sqlite Database (*.db)|*.db" \
+            "Excel 2007 File (*xlsx)|*.xlsx|"\
+            "Excel 2003 File (*.xls)|*.xls|" 
+            
         dlg = wx.FileDialog(self, "Load Data File", "","",
                             wildcard= wildcard,
                             style = wx.OPEN)
