@@ -63,7 +63,7 @@ class ttest_1samp(_genericFunc):
             return
 
         columns= [ self.inputGrid.GetCol(col) for col in  self.colNameSelect]
-        return columns
+        return (columns, self.popmean)
 
     def _calc(self, columns, *args, **params):
         return [self.evaluate( col, *args, **params ) for col in columns]
@@ -78,16 +78,18 @@ class ttest_1samp(_genericFunc):
         values= self._showGui_GetValues()
         if values== None:
             return None
-        result= self._calc(values)
+        result= self._calc(*values)
         self._report(result)
 
     def _report(self, result):
-        self.outputGrid.addColData(['t','two tailed prob'], functionName)
-        self.outputGrid.addColData(result)
-        self.outputGrid.addRowData(['Input Data'], currRow= 0)
-        self.outputGrid.addRowData(['selected Col=', colNameSelect], currRow= 1)
-        self.outputGrid.addRowData(['popmean=', popmean], currRow= 2)
-        self.outputGrid.addRowData(['Output', popmean], currRow= 3)
+        for varSelected, res in zip(self.colNameSelect, result):
+            #self.outputGrid.addColData( res)
+            self.outputGrid.addRowData( ['Input Data'],     self.statName)
+            self.outputGrid.addRowData( ['selected Col=',   varSelected],   currRow= 1)
+            self.outputGrid.addRowData( ['popmean=',        self.popmean],  currRow= 2)
+            self.outputGrid.addRowData( ['t',               res[0]])
+            self.outputGrid.addRowData( ['two tailed prob', res[1]])
+            ##self.outputGrid.addRowData( ['Output',        res],           currRow= 3)
 
 class ttest_ind(pearsonr):
     ''''''
