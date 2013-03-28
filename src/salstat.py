@@ -1218,6 +1218,7 @@ class MainFrame(wx.Frame):
     def _BindEvents(self):
         #-----------------
         # tb1 toolbar callbacks
+        self.Bind( wx.EVT_MENU, lambda evt: self.tb1.fullScreen(self.tb1._fullScreen), id= self.tb1.btnMax.GetId())
         self.Bind( wx.EVT_MENU, self.tb1.NewPage,       id= self.tb1.bt1.GetId())
         self.Bind( wx.EVT_MENU, self.tb1.LoadFile,      id= self.tb1.bt2.GetId())
         self.Bind( wx.EVT_MENU, self.tb1.SaveXls,       id= self.tb1.bt3.GetId())
