@@ -176,10 +176,11 @@ class NewGrid(wx.grid.Grid, object):
         if len([clase for clase in wx.grid.Grid.__bases__ if issubclass( PyWXGridEditMixin, clase)]) == 0:
             wx.grid.Grid.__bases__ += ( PyWXGridEditMixin,)
         # contextual menu
-        if len(args) > 0:
-            self.__init_mixin__( args[0])
-        elif 'parent' in params.keys():
-            self.__init_mixin__( params['parent'])
+        self.__init_mixin__()
+        #if len(args) > 0:
+        #    self.__init_mixin__( args[0])
+        #elif 'parent' in params.keys():
+        #    self.__init_mixin__( params['parent'])
         
         # Grid
         self.CreateGrid( size[0], size[1] )

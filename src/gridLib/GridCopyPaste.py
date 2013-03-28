@@ -17,11 +17,7 @@ Handlers are in the method Key below.  Other handlers (e.g., menu, toolbar) shou
 """
 class PyWXGridEditMixin():
     """ A Copy/Paste and undo/redo mixin for wx.grid. Undo/redo is per-table, not yet global."""
-    def __init_mixin__(self, padre=False):
-        # el parent se utiliza para hacer un llamado a una funcion externa 
-        # luego de modificar las celda en el caso que se deban aceptar ciertos 
-        # valores en las celdas, especificamente cuando se quiera realizar una accion
-        # sobre la funcion wx.grid.EVT_GRID_CELL_CHANGE
+    def __init_mixin__(self):
         """caller must invoke this method to enable keystrokes, or call these handlers if they are overridden."""
         wx.EVT_KEY_DOWN(self, self.OnMixinKeypress)
         wx.grid.EVT_GRID_CELL_CHANGE(self, self.Mixin_OnCellChange)
@@ -38,13 +34,14 @@ class PyWXGridEditMixin():
             self.SelectCol(self.GetGridCursorCol())
             return
         
-        if key == wx.WXK_DELETE: self.Delete()
+        if key == wx.WXK_DELETE:
+            self.Delete()
         
         if not event.CmdDown():
             event.Skip()
             return
         
-        if key == ord("C"):   self.Copy()
+        if   key == ord("C"): self.Copy()
         elif key == ord("V"): self.OnPaste()
         elif key == ord("X"): self.OnCut()
         elif key == ord("Z"): self.Undo()
@@ -59,21 +56,22 @@ class PyWXGridEditMixin():
 
     def Mixin_OnCellChange(self, evt):
         """Undo/redo handler Use saved value from above for undo."""
-        box = self.GetSelectionBox()[0]
-        newValue = self.GetCellValue(*box[:2])
+        box=      self.GetSelectionBox()[0]
+        newValue= self.GetCellValue(*box[:2])
         self.AddUndo(undo=(self.Paste, (box, self._editOldValue)),
             redo=(self.Paste, (box, newValue)))
         self._editOldValue = None
+        evt.Skip()
     
     def GetSelectionBox(self):
         """Produce a set of selection boxes of the form (top, left, nrows, ncols)"""
         #For wxGrid, blocks, cells, rows and cols all have different selection notations.  
         #This captures them all into a single "box" tuple (top, left, rows, cols)
-        gridRows = self.GetNumberRows()
-        gridCols = self.GetNumberCols()
-        tl, br = self.GetSelectionBlockTopLeft(), self.GetSelectionBlockBottomRight()
+        gridRows=  self.GetNumberRows()
+        gridCols=  self.GetNumberCols()
+        tl, br =   self.GetSelectionBlockTopLeft(), self.GetSelectionBlockBottomRight()
         # need to reorder based on what should get copy/pasted first
-        boxes = []
+        boxes=     []
         # collect top, left, rows, cols in boxes for each selection
         for blk in range(len(tl)):
             boxes.append((tl[blk][0], tl[blk][1], br[blk][0] - tl[blk][0]+1, br[blk][1]-tl[blk][1]+1))
@@ -92,9 +90,9 @@ class PyWXGridEditMixin():
         """Copy selected range into clipboard.  If more than one range is selected at a time, only the first is copied"""
         top, left, rows,cols = self.GetSelectionBox()[0]
 
-        data = self.Box2String(top, left, rows, cols)
+        data=       self.Box2String(top, left, rows, cols)
         # Create text data object for use by TheClipboard
-        clipboard = wx.TextDataObject()
+        clipboard=  wx.TextDataObject()
         clipboard.SetText(data)
         # Put the data in the clipboard
         if wx.TheClipboard.Open():
@@ -112,26 +110,25 @@ class PyWXGridEditMixin():
             rowAsString = list()
             for c in range (left, left+cols):
                 if self.CellInGrid(r,c):
-                    try:
-                        cellValue= str(self.GetCellValue(r, c))
-                    except:
-                        cellValue= self.GetCellValue(r, c)
+                    cellValue= self.GetCellValue(r, c)
+                    if not isinstance(cellValue, (str, unicode)):
+                        cellValue= cellValue.__str__()
                     rowAsString.append(cellValue)                    
-                    
             # rowAsString = [str(self.GetCellValue(r, c)) for c in range(left, left+cols) if self.CellInGrid(r,c)]
             data += str.join("\t",rowAsString) + "\n"
         return data    
 
     def OnPaste(self):
-        """Event handler to paste from clipboard into grid.  Data assumed to be separated by tab (columns) and "\n" (rows)."""
+        """Event handler to paste from clipboard into grid.
+        Data assumed to be separated by tab (columns) and "\n" (rows)."""
         clipboard = wx.TextDataObject()
         if wx.TheClipboard.Open():
             wx.TheClipboard.GetData(clipboard)
             wx.TheClipboard.Close()
         else:
             print "Can't open the clipboard"
-        data = clipboard.GetText()
-        table = [r.split('\t') for r in data.splitlines()] # convert to array
+        data=  clipboard.GetText()
+        table= [r.split('\t') for r in data.splitlines()] # convert to array
 
         #Determine the paste area given the size of the data in the clipboard (clipBox) and the current selection (selBox)
         top, left, selRows,selCols = self.GetSelectionBox()[0]
@@ -235,6 +232,7 @@ class PyWXGridEditMixin():
             #padre.m_grid.SetGridCursor(top, left) # se espera que el parent sea el grid
             self.hasChanged= True
             self.hasSaved= False
+            
     def emptyTheBuffer(self):
         self._undoStack= list()
         self._redoStack= list()
