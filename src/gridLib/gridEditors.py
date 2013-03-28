@@ -342,7 +342,7 @@ class VARCHAR(Grid.PyGridCellEditor):
         return VARCHAR()#parent=self)
 
 
-class datePickerEditor(Grid.PyGridCellEditor): #   PyGridCellEditor
+class datePickerEditor(Grid.PyGridCellEditor):
     """
     This GridCellEditor allows you to date pick from a calendar inside the
     cell of a grid.
@@ -409,12 +409,12 @@ class datePickerEditor(Grid.PyGridCellEditor): #   PyGridCellEditor
         has changed.  If necessary, the control may be destroyed.
         *Must Override*
         """
-        changed = False
-        val = self._picker.GetValue().GetDateOnly()
+        changed=  False
+        val=      self._picker.GetValue().GetDateOnly()
         if val.Format("%Y-%m-%d") != self.startValue:
             self.startValue = val.Format("%Y-%m-%d")
             grid.GetTable().SetValue(row, col, str(val.Format("%Y-%m-%d"))) # update the table
-            changed = True
+            changed= True
             # se hace activa la celda contigua COMO, evt.skip
         return changed
 

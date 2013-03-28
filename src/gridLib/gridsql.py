@@ -372,7 +372,7 @@ class SqlTable( wx.grid.PyGridTableBase):
         session = self.Session()
         # querying for a record in the Artist table
         rowNumber= row# self.GetValue(row, 0)
-        if rowNumber != u'':
+        if rowNumber < self.numRows-1: #u''
             res= session.query( GenericDBClass)
             try:
                 res= res.filter(self._filter)
@@ -397,12 +397,13 @@ class SqlTable( wx.grid.PyGridTableBase):
                     session.close()
                 self.updateBuffer(row, forceRefresh= True)
                 # tell the grid we've added a row
-                msg = wx.grid.GridTableMessage(self,            # The table
+                if self._filter == u'':
+                    msg = wx.grid.GridTableMessage(self,            # The table
                                                wx.grid.GRIDTABLE_NOTIFY_ROWS_APPENDED, # what we did to it
                                                1                                       # how many
                                                )
-
-                self.GetView().ProcessTableMessage(msg)
+                    self.GetView().ProcessTableMessage(msg)
+                
                 session.close()
                 return
         else:
