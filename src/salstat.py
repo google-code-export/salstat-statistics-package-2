@@ -418,6 +418,9 @@ class Grids(NoteBookSheet):
 
 class Tb1(aui.AuiToolBar):
     def __init__(self, *args, **params):
+        # emulating [F11]
+        self._fullScreen= False
+        
         imageEmbed= params.pop('imageEmbed')
         translate= params.pop('translation')
         aui.AuiToolBar.__init__(self, *args, **params)
@@ -436,6 +439,8 @@ class Tb1(aui.AuiToolBar):
         UndoIcon =   imag.edit_undo()
         RedoIcon =   imag.edit_redo()
         #closePage=   imag.cancel()
+        self._iconMax= imag.printer()
+        self._iconMin= imag.cancel()
 
         self.bt1 = self.AddSimpleTool(10, translate(u"New"),     NewIcon,    translate(u"New"))
         self.bt2 = self.AddSimpleTool(20, translate(u"Open"),    OpenIcon,   translate(u"Open"))
@@ -453,6 +458,7 @@ class Tb1(aui.AuiToolBar):
         self.bt9 = self.AddSimpleTool(85, translate(u"Preferences"),PrefsIcon, translate(u"Preferences"))
         ##self.bt10= selfAddSimpleTool(90, "Help", HelpIcon, "Help")
         self.bt10= self.AddSimpleTool(95, translate(u"OnlineHelp"), HelpIcon, translate(u"Online Help"))
+        self.btnMax= self.AddSimpleTool(100, translate(u"Maximize"), self._iconMax, translate(u"Maximize"))
         ##self.bt13= self.AddSimpleTool(100, translate(u"Close"), closePage, translate(u"Close Current Page"))
 
         # to the language
@@ -464,7 +470,14 @@ class Tb1(aui.AuiToolBar):
         self.SetToolBitmapSize( (24,24))
         self.Realize()
         self.languages.Bind( wx.EVT_COMBOBOX, self._changeLanguage) # id= self.languages.GetId()
-
+        
+    def fullScreen(self, bool):
+        self._fullScreen= not bool
+        bitmap= [self._iconMax, self._iconMin][self._fullScreen]
+        self.btnMax.SetBitmap( bitmap)
+        app= wx.GetApp()
+        app.frame.ShowFullScreen( self._fullScreen)
+            
     @property
     def grid(self):
         return wx.GetApp().grid
@@ -605,7 +618,14 @@ class SalStat2App(wx.App):
         # This catches events on Mac OS X when the app is asked to activate by some other
         # process
         # TODO: Check if this interferes with non-OS X platforms. If so, wrap in __WXMAC__ block!
-
+        wx.EVT_KEY_DOWN(self, self.OnKeypress)
+        
+    def OnKeypress(self, evt):
+        key= evt.GetKeyCode()
+        if key == wx.WXK_F11:
+            self.frame.tb1.fullScreen(self.frame.tb1._fullScreen)
+        evt.Skip()
+        
     def OnInit(self):
         # getting the os type
         self.OSNAME=        os.name
