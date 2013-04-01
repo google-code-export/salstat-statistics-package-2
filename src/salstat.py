@@ -136,23 +136,23 @@ class translate(unicode):
 
 if wx.Platform == '__WXMSW__':
     # for windows OS
-    face1 = 'Courier New'
-    face2 = 'Times New Roman'
-    face3 = 'Courier New'
-    fontsizes = [7,8,10,12,16,22,30]
-    pb = 12
-    wind = 50
-    DOCDIR = 'c:\My Documents'
-    INITDIR = os.getcwd()
+    face1= 'Courier New'
+    face2= 'Times New Roman'
+    face3= 'Courier New'
+    fontsizes= [7,8,10,12,16,22,30]
+    pb=    12
+    wind=  50
+    DOCDIR= 'c:\My Documents'
+    INITDIR= os.getcwd()
 else:
-    face1 = 'Helvetica'
-    face2 = 'Times'
-    face3 = 'Courier'
-    fontsizes = [10,12,14,16,19,24,32]
-    pb = 12
-    wind = 0
-    DOCDIR = os.environ['HOME']
-    INITDIR = DOCDIR
+    face1= 'Helvetica'
+    face2= 'Times'
+    face3= 'Courier'
+    fontsizes= [10,12,14,16,19,24,32]
+    pb= 12
+    wind= 0
+    DOCDIR= os.environ['HOME']
+    INITDIR= DOCDIR
 
 class _MyLog(wx.PyLog):
     def __init__(self, textCtrl, logTime=0):
@@ -497,18 +497,18 @@ class Tb1(aui.AuiToolBar):
         self.grid.changeLabel(newLabel= SheetName)
         evt.Skip()
 
-    #def closePage(self, evt):
-    #    # check if there are pages
-    #    if len(self.grid.pageNames) == 0:
-    #        return
-    #    if self.grid.hasSaved:
-    #        self.grid.delPage()
-    #    else:
-    #        # checking if there is data to be saved
-    #        if len(self.grid.GetUsedCols()[0]) != 0:
-    #            win = SaveOneGridDialog(self.grid)
-    #            win.Show(True)
-    #            evt.Skip()
+    def closePage(self, evt):
+        # check if there are pages
+        if len(self.grid.pageNames) == 0:
+            return
+        if self.grid.hasSaved:
+            self.grid.delPage()
+        else:
+            # checking if there is data to be saved
+            if len(self.grid.GetUsedCols()[0]) != 0:
+                win = SaveOneGridDialog(self.grid)
+                win.Show(True)
+                evt.Skip()
 
     def SaveXls(self, evt):
         if len(self.grid.pageNames) == 0:
@@ -624,6 +624,7 @@ class SalStat2App(wx.App):
         key= evt.GetKeyCode()
         if key == wx.WXK_F11:
             self.frame.tb1.fullScreen(self.frame.tb1._fullScreen)
+            return
         evt.Skip()
         
     def OnInit(self):
@@ -1121,7 +1122,6 @@ class MainFrame(wx.Frame):
              ([translate(u"&New Data\tCtrl-N"),   NewIcon,    self.tb1.NewPage,     wx.ID_NEW],
               [translate(u"&Open...\tCtrl-O"),    OpenIcon,   self.grid.LoadFile,   wx.ID_OPEN], # LoadXls
               [u"--"],
-              [translate(u"&Load from sqlite database\tCtrl-L"),  OpenIcon,   self.LoadFromSqlite,   None], # Load a table from a Database
               [translate(u"Load From MySql"),     OpenIcon,   self.loadMsql, None],
               [u"--"],
               [translate(u"&Save\tCtrl-S"),       SaveIcon,   self.grid.SaveXls,         wx.ID_SAVE],
@@ -1255,27 +1255,7 @@ class MainFrame(wx.Frame):
         else:
             self.m_mgr.RestorePane(pane)
         self.m_mgr.Update()
-        
-    def LoadFromSqlite(self, evt, *args, **params):
-        # to load data from an sqlite database
-        from slbTools import getPath
-        from sqlalchemy import create_engine
-
-        dbPath= getPath(wildcard= "Supported Files (*.db)|*.db|"\
-                        #"MS access db (*.mdb;*.accdb)|*.mdb;*.accdb|"\
-                        "All Files (*.*)|*.*", aplyFilter=False)
-        if dbPath == None:
-            return
-        extension= dbPath.split('.')[-1]
-        dispatch= {'db': 'sqlite',}
-                   #'mdb': 'access',
-                   #'accdb': 'access'}
-        if not(extension in dispatch):
-            return
-        engine= create_engine( dispatch[extension]+ ':///%s'%dbPath,
-                               echo=False, )
-        self._loadDb(engine)
-        
+            
     def loadMsql(self, evt, *args, **params):
         structure= list()
         stxt1= ('StaticText',  (u'Host:      ',))
