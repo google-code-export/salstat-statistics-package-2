@@ -439,8 +439,8 @@ class Tb1(aui.AuiToolBar):
         UndoIcon =   imag.edit_undo()
         RedoIcon =   imag.edit_redo()
         #closePage=   imag.cancel()
-        self._iconMax= imag.printer()
-        self._iconMin= imag.cancel()
+        self._iconMax= imag.maximize()
+        self._iconMin= imag.minimize()
 
         self.bt1 = self.AddSimpleTool(10, translate(u"New"),     NewIcon,    translate(u"New"))
         self.bt2 = self.AddSimpleTool(20, translate(u"Open"),    OpenIcon,   translate(u"Open"))
