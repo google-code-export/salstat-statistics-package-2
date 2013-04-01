@@ -5083,6 +5083,28 @@ class imageEmbed:
         Aq6dG6h5Yf22KV2/dtS5gboHWjsvoIPPDdRIvU2dG6goH7p6sBYn0FcjCjGOdfX9PycSpxQY6ZKd
         AAAAAElFTkSuQmCC
         """)
+    def maximize(self):
+        return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
+        WXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH3QMeDQksftC71AAAAWVJREFUOMuVkktLAlEYhp9zGdJF
+        JmWZEDKpeaVMCGKyRZsWEZHKjK7b9//6C636BYGgQTeSDKwwa1oYoelovstzDs/3vIcPJqQQj9TP
+        DmL1SW+k14UQULbi5rkVMFNL0p0ZsLkedu18gIzvgeOkns1ACkG1mCDlb+H77GBnDJIeFmMBW/Gw
+        62wvINsNhID8quLEw0KOdhdU9+JszD1BtwOAX4OdNUiHRi1GADvJiFsrBBHPjSFoPqw4TenpBo4V
+        I6Yf4eN16NynoZIxyC0PWwwBdtNrbq0QhHaTcdU2VxSltEYKD4BtrROV9yPTBy3KaYPsgIUcnG5v
+        zcNzE+/lEuSWFaWURok/AMcyMdUD9N4mbS5zGipZg9xK30ICFHNR18kHoH3DtAghyIQU5Z+/kFoK
+        HMvsd58y/ddCgZM1KKzKN10pJi6OEorWXRN6X/w3i37BYUyj95fal5dXLa5vX5g1na77/g1PUlPk
+        Yo9AUAAAAABJRU5ErkJggg==
+        """)
+    def minimize(self):
+        return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
+        WXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH3QMeDQoMbpPI3wAAAYdJREFUOMuVk81KI0EURk+1UVAX
+        7Q/GjfoIs3bjXtCFb6D4Aj6Ci9nOyrfQbjQis3M5GgJCjNI/iVFDEDTGDJkWSceu6nKRESLpaKxl
+        1b3nfPdCiZ219LY5ohbL9wHfPc1Qh6k/DXPx58rc8mrggGwN3NyWmp3cayhShuDX5pLe+vECjfJA
+        zVpr3LpiPdMKDRlrrGyFajwLqdHB7AosNyL/EI8aACdOVViFAMy5gezek+LAl8QajPcHK1uhotJf
+        pmhL2HcjnMdYQBcg598J++IZJuY/tTt1RaYoUbpzZ3QX2Nnbzi6GxxIBoYQDP8Ktd+w9gJx/J3bz
+        TTDnE+2Xj4rM/9kTAZ1d3HAjZ3pShBL2vQiny54IOCvdi918Ez2x8MFeqCkOi7InmZEUde/0mqv2
+        NIyMA9CSYLsR/tNHeyIA4OK6Jqzzf8TmAlpD4UFxVJKJi00ExFqzd1Km2JoiHBrH9iJKjV57XwDA
+        5W1N2IUAL0zzu48dYOjT7/oSbVSDuHns/Z3sV/MGEcrPBJFqwPMAAAAASUVORK5CYII=
+        """)
 if __name__ == '__main__':
     imagen = imageEmbed()
     path = 'e:\\Proyecto S2\\logo\\Logo 16 16.png'
