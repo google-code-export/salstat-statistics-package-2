@@ -8,11 +8,16 @@ TreeBaseClass = wx.TreeCtrl
 
 imagenes= imageEmbed()
 
-_demoPngs = ["disk",]*14#, "pageexcel", "printer", "cancel", " ", "edit_copy",
-             #"edit_cut", "edit_paste", "edit_redo", "edit_undo", "x_office_spreadsheet",
-             #"save", "x_office_calendar", "view_refresh"]
+_demoPngs = ["disk",]*14#     "pageexcel",         "printer",   "cancel",    "edit_copy",
+             #"edit_cut", "edit_paste",        "edit_redo", "edit_undo", "x_office_spreadsheet",
+             #"save",     "x_office_calendar", "view_refresh"]
 USE_CUSTOMTREECTRL = False
 
+class myEVT_CUSTOM:
+    def __init__(self):
+        return
+    def Skip(self):
+        return
 
 _treeList = [
     # new stuff
@@ -94,33 +99,186 @@ class _wxPythonDemoTree(ExpansionState, TreeBaseClass):
         if USE_CUSTOMTREECTRL:
             self.SetSpacing(10)
             self.SetWindowStyle(self.GetWindowStyle() & ~wx.TR_LINES_AT_ROOT)
-
         self.SetInitialSize((100,80))
+        self._callbacks= dict()
 
-
-    def AppendItem(self, parent, text, image=-1, wnd=None):
+    def AppendItem( self, parent, text, image=-1, wnd=None, callback= None):
         if USE_CUSTOMTREECTRL:
-            item = TreeBaseClass.AppendItem(self, parent, text, image=image, wnd=wnd)
+            item= TreeBaseClass.AppendItem( self, parent, text, image=image, wnd=wnd)
         else:
-            item = TreeBaseClass.AppendItem(self, parent, text, image=image)
+            item= TreeBaseClass.AppendItem( self, parent, text, image=image)
+        # getting the treePath of the item
+        treePath = self._getTreePath(item)
+        # getting the callback to the items
+        self._setDictItemCallback( self._callbacks, treePath, callback)
         return item
+    
+    def _setDictItemCallback(self, dictionary, treePath, callback= None):
+        curritem= treePath.pop(0)
+        currdict= dictionary # using currdict as a reference to the dictionary object
+        while len(treePath) > 0:
+            if not currdict.has_key( curritem):
+                currdict[curritem]= dict()
+            currdict= currdict[curritem]
+            curritem= treePath.pop(0)
+        if not currdict.has_key(curritem):
+            currdict[curritem]= dict()
+        currdict[curritem]['_callbac']= callback
+    
+    def _getTreePath(self, item):
+        # return the full path of the selected item
+        root=      self.GetRootItem()
+        pathList=  [item]
+        done=      False
+        while not done:
+            try:
+                item=  self.GetItemParent(item)
+            except:
+                return []
+            pathList.insert(0, item)
+            if item == root:
+                done= True
+        return [self.GetItemText( obj) for obj in  pathList]
 
     def BuildTreeImageList(self):
         imgList = wx.ImageList(16, 16)
         for png in _demoPngs:
             imgList.Add(imagenes[png]) #.GetBitmap())
-
         # add the image for modified demos.
         imgList.Add(imagenes["config"])#.GetBitmap())
-
         self.AssignImageList(imgList)
-
 
     def GetItemIdentity(self, item):
         return self.GetPyData(item)
-
-
-
+    
+    def GetItemCallback(self, item):
+        # getting the path to the item
+        treePath= self._getTreePath(item)
+        # reading the callback of the item
+        if len(treePath) == 0:
+            return None
+        curritem= treePath.pop(0)
+        currdict= self._callbacks # using currdict as a reference to the dictionary object
+        while len( treePath) > 0:
+            if not currdict.has_key( curritem):
+                raise StandardError( 'Unknown item')
+            currdict= currdict[curritem]
+            curritem= treePath.pop(0)
+        if not currdict.has_key( curritem):
+            raise StandardError( 'Unknown item')
+        return currdict[curritem]['_callbac']
+    def recreateTree(self, data, parent= None, filter= None):
+        if parent == None:
+            parent= self.GetRootItem()
+            
+        if isinstance(data, (str, unicode)):
+            return
+        
+        if len(data) == 0:
+            return
+        
+        if len(data) == 1:
+            if data[0] == u"--":
+                return None
+            if isinstance(data, (tuple,)):
+                if isinstance(data[0],(str, unicode)):
+                    return None
+            
+        elif len(data) == 4:
+            if not isinstance( data[2], (list,tuple)):
+                texto= data[0].replace('&','').split('\t')[0]
+                if filter== None:
+                    item= self.AppendItem(parent, texto,  callback= data[2])# data[1]
+                else:
+                    if filter.lower() in data[0].lower():
+                        item= self.AppendItem(parent, texto,  callback= data[2])# data[1]
+                return
+        
+        for item in data:
+            if len(item)== 0:
+                continue
+            if len( item) in [1,4] and not isinstance(item, (str, unicode)):
+                self.recreateTree( item, parent, filter)
+                continue
+            if isinstance(item, (str, unicode)):
+                continue
+            texto= item[0].replace('&','').split('\t')[0]
+            newitem= self.AppendItem(parent, texto)
+            self.recreateTree( item[1], newitem, filter)
+            if filter:
+                self.ExpandAll()
+    
+    def testFilter(self, data, parent= None, filtro= None):
+        if parent == None:
+            parent= tuple()#self.GetRootItem()
+            
+        if isinstance(data, (str, unicode,)):
+            return
+        
+        if len(data) == 1:
+            if data[0] == u"--":
+                return
+            if isinstance(data, (tuple,)):
+                if isinstance(data[0],(str, unicode)):
+                    return
+        
+        elif len(data) == 4:
+            if not isinstance( data[2], (list,tuple)):
+                texto= data[0].replace('&','').split('\t')[0]
+                if filtro == None:
+                    return data
+                else:
+                    if filtro.lower() in data[0].lower():
+                        return data
+                return None
+            
+        if isinstance(parent, (str,unicode)):
+            parent= (parent,)
+        listItems= tuple()
+        for item in data:
+            if len( item) in [1,4]:
+                res= self.testFilter( item, parent, filtro)
+                if res != None:
+                    listItems+=(res,)
+                continue
+            texto= item[0].replace('&','').split('\t')[0]
+            newitem= texto
+            res= self.testFilter( item[1], newitem, filtro)
+            if len(res) > 0:
+                listItems+= ( self.testFilter( item[1], newitem, filtro), )
+            
+        if len(parent)> 0:
+            # in case there is not items to select
+            if len(listItems) == 0:
+                parent= tuple()
+            else:
+                parent+= (listItems,)
+            #try:
+                #if filtro != None and len(listItems)== 2:
+                    #if isinstance(listItems[1], (tuple,)) and len( listItems[1])!=0:
+                        #parent+= (listItems,)
+                #else:
+                    #parent+= (listItems,)
+            #except IndexError:
+                #parent+= (listItems,)
+        else:
+            parent= listItems
+            
+        return parent
+            
+    def filterData(self, data, filtro):
+        # filtering the data to display only the needed items
+        if filtro == None:
+            return data
+        
+        if not isinstance(filtro, (str, unicode)):
+            return data
+        
+        res= self.testFilter(data, filtro= filtro)
+        # removing empty submenus
+        
+        return self.recreateTree(res, filter= filtro) #recreateTree
+    
 class TreePanel(wx.Panel):
     def __init__( self, parent, log, *args, **params):
         '''TreePanel parent, log, *args'''
@@ -167,8 +325,8 @@ class TreePanel(wx.Panel):
         
         #self.tree.Bind( wx.EVT_TREE_ITEM_EXPANDED,  self.OnItemExpanded)
         #self.tree.Bind( wx.EVT_TREE_ITEM_COLLAPSED, self.OnItemCollapsed)
-        self.tree.Bind( wx.EVT_TREE_SEL_CHANGED,    self.OnSelChanged)
-        #self.tree.Bind( wx.EVT_TREE_KEY_DOWN, self.OnSelChanged)
+        #self.tree.Bind( wx.EVT_TREE_SEL_CHANGED,    self.OnSelChanged)
+        #self.tree.Bind( wx.EVT_TREE_ITEM_ACTIVATED, self.OnSelChanged)
         self.tree.Bind( wx.EVT_LEFT_DOWN,           self.OnTreeLeftDown)
 
     @property
@@ -179,15 +337,10 @@ class TreePanel(wx.Panel):
     def treelist(self, data):
         if isinstance( data, (tuple, list)):
             self._treelist= data
-            # updating the callbacks:
-            for key,values in data:
-                for keyname, icon, callback, callbackOptional in values:
-                    self._callbacDict[keyname] = callback
-
             self.RecreateTree()
         else:
             raise StandardError('unsupported variable type')
-        
+
     def ReadConfigurationFile(self):
 
         self.auiConfigurations = {}
@@ -226,10 +379,10 @@ class TreePanel(wx.Panel):
 
         fid.close()
 
-    def RecreateTree(self, evt=None): # child of the main frame
+    def RecreateTree(self, evt= None): # child of the main frame
         # Catch the search type (name or content)
-        searchMenu = self.filter.GetMenu().GetMenuItems()
-        fullSearch = searchMenu[1].IsChecked()
+        searchMenu= self.filter.GetMenu().GetMenuItems()
+        fullSearch= searchMenu[1].IsChecked()
         if evt:
             if fullSearch:
                 # Do not scan all the demo files for every char
@@ -247,7 +400,7 @@ class TreePanel(wx.Panel):
         self.tree.DeleteAllItems()
         
         self.root= list()
-        self.root.append( self.tree.AddRoot( "Statistical Functions"))
+        self.root.append( self.tree.AddRoot( "Main"))
         self.tree.SetItemImage( self.root[-1], 0)
         self.tree.SetItemPyData( self.root[-1], 0)
         treeFont= self.tree.GetFont()
@@ -268,44 +421,45 @@ class TreePanel(wx.Panel):
         count=      0
         
         ##############################
-        ## creation of list data
-        for category, items in self.treelist:
-            items=  [item[0] for item in items]
-            count+= 1
+        ## recursive creation of data
+        #self.tree.testFilter( self.treelist, filtro= filter)
+        res= self.tree.filterData(self.treelist, filtro= filter)
+        if 0:
+            for category, items in self.treelist:
+                items=  [item[0] for item in items]
+                count+= 1
+                if filter:
+                    if fullSearch:
+                        items= self.searchItems[category]
+                    else:
+                        items= [item for item in items if filter.lower() in item.lower()] # item -> item[0]
+                if items:
+                    child= self.tree.AppendItem(self.root[-1], category, image=count)
+                    self.tree.SetItemFont(child, catFont)
+                    self.tree.SetItemPyData(child, count)
+                    if not firstChild: firstChild = child
+                    for childItem in items:
+                        image= count
+                        theDemo= self.tree.AppendItem(child, childItem, image=image)
+                        self.tree.SetItemPyData(theDemo, count)
+                        self.treeMap[childItem] = theDemo
+                        if current and (childItem, category) == current:
+                            selectItem= theDemo
+            ## end tree list
+            ##############################
+            
+            #
+            self.tree.Expand(self.root[-1])
+            if firstChild:
+                self.tree.Expand(firstChild)
             if filter:
-                if fullSearch:
-                    items= self.searchItems[category]
-                else:
-                    items= [item for item in items if filter.lower() in item.lower()] # item -> item[0]
-            if items:
-                child= self.tree.AppendItem(self.root[-1], category, image=count)
-                self.tree.SetItemFont(child, catFont)
-                self.tree.SetItemPyData(child, count)
-                if not firstChild: firstChild = child
-                for childItem in items:
-                    image= count
-                    #if DoesModifiedExist(childItem):
-                    #    image = len(_demoPngs)
-                    theDemo= self.tree.AppendItem(child, childItem, image=image)
-                    self.tree.SetItemPyData(theDemo, count)
-                    self.treeMap[childItem] = theDemo
-                    if current and (childItem, category) == current:
-                        selectItem= theDemo
-        ## end tree list
-        ##############################
-        
-        #
-        self.tree.Expand(self.root[-1])
-        if firstChild:
-            self.tree.Expand(firstChild)
-        if filter:
-            self.tree.ExpandAll()
-        elif expansionState:
-            self.tree.SetExpansionState(expansionState)
-        if selectItem:
-            self.skipLoad = True
-            self.tree.SelectItem(selectItem)
-            self.skipLoad = False
+                self.tree.ExpandAll()
+            elif expansionState:
+                self.tree.SetExpansionState(expansionState)
+            if selectItem:
+                self.skipLoad = True
+                self.tree.SelectItem(selectItem)
+                self.skipLoad = False
 
         self.tree.Thaw()
         self.searchItems = {}
@@ -322,44 +476,48 @@ class TreePanel(wx.Panel):
             self.OnSearch()
         else:
             self.RecreateTree()
+
     def OnItemExpanded(self, event):
         item = event.GetItem()
-        wx.LogMessage("OnItemExpanded: %s" % self.tree.GetItemText(item))
         event.Skip()
 
         #---------------------------------------------
     def OnItemCollapsed(self, event):
         item = event.GetItem()
-        wx.LogMessage("OnItemCollapsed: %s" % self.tree.GetItemText(item))
         event.Skip()
 
     def OnSelChanged(self, evt):
         #if self.dying or not self.loaded or self.skipLoad:
         #  
         #self.StopDownload()
+        return
         item = evt.GetItem()
         itemText = self.tree.GetItemText( item)
         evt.Skip()
         self._loadDemo( itemText)
 
-    def OnTreeLeftDown(self, event):
+    def OnTreeLeftDown(self, evt):
         # reset the overview text if the tree item is clicked on again
-        pt = event.GetPosition();
+        pt = evt.GetPosition();
         item, flags = self.tree.HitTest(pt)
+        if hasattr(item,'callback'):
+            pass
         try:
             itemText = self.tree.GetItemText( item)
         except: # try to catch the wx._core.PyAssertionError
             return
         finally:
-            event.Skip()
-        self._loadDemo( itemText)
-        return
-        if item == self.tree.GetSelection():
-            self.SetOverview(self.tree.GetItemText(item)+" Overview", self.curOverview)
-        event.Skip()
+            evt.Skip()
+        callback= self.tree.GetItemCallback(item)
+        if callback != None:
+            try:
+                callback()
+            except TypeError:
+                callback(evt= myEVT_CUSTOM())
+        #self._loadDemo( itemText)
     
-    def _loadDemo(self, demoName):
+    def _loadDemo(self, demoPath):
         try:
-            self._callbacDict[demoName]()
+            self._callbacDict[demoPath]()
         except KeyError:
             pass
