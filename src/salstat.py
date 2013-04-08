@@ -1122,8 +1122,8 @@ class MainFrame(wx.Frame):
              ([translate(u"&New Data\tCtrl-N"),   NewIcon,    self.tb1.NewPage,     wx.ID_NEW],
               [translate(u"&Open...\tCtrl-O"),    OpenIcon,   self.grid.LoadFile,   wx.ID_OPEN], # LoadXls
               [u"--"],
-              [translate(u"Load From MySql"),     OpenIcon,   self.loadMsql, None],
-              [u"--"],
+              #[translate(u"Load From MySql"),     OpenIcon,   self.loadMsql, None],
+              #[u"--"],
               [translate(u"&Save\tCtrl-S"),       SaveIcon,   self.grid.SaveXls,         wx.ID_SAVE],
               [translate(u"Save &As...\tCtrl-Shift-S"), SaveAsIcon, self.grid.SaveXlsAs, wx.ID_SAVEAS],
               ##["&Print...\tCtrl-P",   PrintIcon,  None,     None],
