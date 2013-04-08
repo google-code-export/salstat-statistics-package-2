@@ -53,12 +53,12 @@ class _MyContextGrid(wx.Menu):
         
         if EXISTIMAGES:
             imagenes = imageEmbed()
-            cortar.SetBitmap(imagenes.edit_cut)
-            copiar.SetBitmap(imagenes.edit_copy)
-            pegar.SetBitmap(imagenes.edit_paste)
-            eliminar.SetBitmap(imagenes.cancel)
-            deshacer.SetBitmap(imagenes.edit_undo)
-            rehacer.SetBitmap(imagenes.edit_redo)
+            cortar.SetBitmap(imagenes.edit_cut())
+            copiar.SetBitmap(imagenes.edit_copy())
+            pegar.SetBitmap(imagenes.edit_paste())
+            eliminar.SetBitmap(imagenes.cancel())
+            deshacer.SetBitmap(imagenes.edit_undo())
+            rehacer.SetBitmap(imagenes.edit_redo())
         ##exportarCsv.SetBitmap(imagenes.exporCsv())
 
         self.AppendSeparator()
