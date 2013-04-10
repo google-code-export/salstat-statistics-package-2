@@ -575,9 +575,8 @@ class _checkUpdates(Thread):
         # Get versions available
         from urllib import urlopen
         import re
-        url = "http://code.google.com/p/salstat-statistics-package-2/downloads/list"
         try:
-            text = str( urlopen( url).read() )
+            text = str( urlopen( self.url).read() )
         except IOError:
             ## it's not possible to connect with the main site
             return
@@ -591,7 +590,8 @@ class _checkUpdates(Thread):
         if not versions:
             versions = '?'
         # Define message
-        text = "Your version of S2 is: {}\n" 
+        text = "From: " + self.url + "\n"
+        text += "Your version of S2 is: {}\n" 
         text += "Available versions are: {}\n\n"         
         text = text.format(__version__, versions)
 
@@ -602,6 +602,10 @@ class _checkUpdates(Thread):
         #Settings = {'Title': translate(u"Check for the latest version.")}
         #dlg= dialog(parent= None, struct= structure, settings= Settings)
         print text
+        
+    def setUrl(self, url):
+        self.url= url
+        
 def hlp(param):
     # replace the help function
     # it's needed into the script to corectly diplay the
@@ -717,9 +721,15 @@ class SalStat2App(wx.App):
         webbrowser.open("https://docs.google.com/forms/d/1abxr-i0s_5Aftjf0_B5K-jqg_sdDBcyQF_h24usJ7bU/viewform")
         
     def _checkUpdates( self,*args,**params):
-        thread = _checkUpdates()
+        thread=     _checkUpdates()
+        thread.setUrl( "http://code.google.com/p/salstat-statistics-package-2/downloads/list")
         thread.setDaemon(True)
         thread.start()
+        
+        newThread=     _checkUpdates( )
+        newThread.setUrl( 'http://sourceforge.net/projects/s2statistical/files/?source=navbar')
+        newThread.setDaemon(True)
+        newThread.start()
         #thread.join()
         if len(args) == 0:
             return
@@ -730,21 +740,9 @@ class SalStat2App(wx.App):
     def OpenFileMessage(self, filename):
         self.BringWindowToFront()
         junk, filterIndex = os.path.splitext(filename)
-        fullPath=filename
-        if filterIndex in ('.xls', '.xlsx'):
-            return self.frame.grid.LoadXls(fullPath)
-        elif filterIndex in ('.txt', '.csv'):
-            return self.frame.grid.LoadCsvTxt(fullPath)
-        elif filterIndex in ('db',):
-            # open an sqlite database
-            from sqlalchemy import create_engine
-            engine= create_engine( 'sqlite'+ ':///%s'%fullPath,
-                               echo=False, )
-            return self.frame._loadDb(engine)
-        else:
-            self.frame.logPanel.write(translate(u"The file %s could not be opened. ")%filename +
-                                      translate(u"Please check file type and extension!") )
-
+        fullPath= filename
+        return self.frame.grid.load( fullPath)
+        
     def MacOpenFile(self, filename):
         """Called for files dropped on dock icon, or opened via finders context menu"""
         if (os.path.basename(filename).lower()) == "salstat.py":
