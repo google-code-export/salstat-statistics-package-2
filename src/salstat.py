@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+#RELEASE 2.1 rc2
+
 """ Copyright 2012 - 2013 Sebastian Lopez Buritica, S2 Team,  licensed under GPL 3
 
 SalStat Statistics Package. Copyright 2002 Alan James Salmoni. Licensed
