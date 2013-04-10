@@ -30,7 +30,7 @@ class Sheet:
         if not isinstance( newName, (str, unicode)):
             raise StandardError()
 
-        self.sh.Name= newName
+        self._sh.Name= newName
 
     def GetCol( self, colNumber):
         maxColNumber=  self.sh.Columns.Count
@@ -101,7 +101,6 @@ class Wb(object):
     def _updateSheets(self):
         sh= Sheets(self)
         return sh # a list
-    
     @property
     def Sheets(self):
         return self._wb.Sheets
@@ -124,8 +123,11 @@ class Wb(object):
                 sh.Name= sheetName.__str__()
         self._sh= self._updateSheets()
     @property
-    def name(self):
+    def Name(self):
         return self._wb.name
+    @Name.setter
+    def Name(self, newname):
+        self._wb.Name= newname
     @property
     def activeSheet(self):
         return Sheet(self._xl.ActiveWorkbook.ActiveSheet)
