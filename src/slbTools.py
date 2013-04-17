@@ -5,6 +5,7 @@ Created on 17/05/2012
 license: GPL3
 '''
 from imagenes import imageEmbed
+from collections import OrderedDict
 import collections
 import tempfile, xlwt
 import os
@@ -27,7 +28,7 @@ def getPath(wildcard= __WILDCARD, aplyFilter= True):
     dlg = wx.FileDialog(None, "Load Data File", "","",
                         wildcard= wildcard,
                         style = wx.OPEN)
-    icon = imageEmbed().logo16()
+    icon = imageEmbed().logo16
     dlg.SetIcon(icon)
     
     if dlg.ShowModal() != wx.ID_OK:
@@ -121,7 +122,7 @@ class ReportaExcel(object):
         self._file = nameFile
         self.path =  os.path.join(os.path.split(self.path)[0], nameFile)
 
-        if os.path.isfile(self.path):
+        if os.path.isfile(fullpath):
             print('Warning: the selected file already exists, the object could fail')
 
     def __addSheet(self):
@@ -132,33 +133,37 @@ class ReportaExcel(object):
         self._hojas.append( (hoja, self.__numPage(), self.__numPage()) )
         # objeto hoja, iterador sobre columnas, iterador sobre filas
 
-    def write(self, lista, sheet = None, cell_overwrite_ok = False):
+    def write(self, lista, sheetNumber= None, cell_overwrite_ok = False):
         '''reporte al contenido considerando que se ha ingresado una columna'''
-        # se verifica si existen hojas para el reporte
+        # check if the sheet is a name of an existent sheet
+        
+        #if isinstance(sheet, (str, unicode)):
+        #    if sheet in 
+        #
         if len(self._hojas) < 1:
             # se crea una hoja
             self.__addSheet()
-            
-        if sheet == None:
+        
+        if sheetNumber == None:
             # se considera que la hoja utilizada sera la primera(hoja numero cero)
-            sheet = 0
+            sheetNumber = 0
         else:
-            if sheet < 0:
+            if sheetNumber < 0:
                 raise StandardError('las hojas solo pueden ser valores enteros')
             else:
-                if int(sheet) > len(self._hojas):
+                if int(sheetNumber) > len(self._hojas):
                     # se crean tantas hojas como la posicion solicitada
-                    for hoja in range(len(self._hojas),int(sheet)+1):
+                    for hoja in range(len(self._hojas), int(sheetNumber)+1):
                         self.__addSheet()
         # para la hoja seleccionada se determina la ultima columna escrita
-        sheetObj=  self._hojas[sheet][0]
-        sheetCol=  self._hojas[sheet][1].next()
+        sheetObj=  self._hojas[sheetNumber][0]
+        sheetCol=  self._hojas[sheetNumber][1].next()
         # se reporta el contenido de la lista en la columna
-        style0 = xlwt.easyxf(num_format_str='#,##0.00')
-        lista= self._filterlist(lista)
-        for posicion,contenido in enumerate(lista):
-            if isinstance(contenido,(int,float)):
-                sheetObj.write(posicion, sheetCol, contenido, style0)
+        style0 = xlwt.easyxf( num_format_str='#,##0.00')
+        lista= self._filterlist( lista)
+        for posicion,contenido in enumerate( lista):
+            if isinstance( contenido, (int,float)):
+                sheetObj.write( posicion, sheetCol, contenido, style0)
             else:
                 sheetObj.write(posicion, sheetCol, contenido)
                 
@@ -364,6 +369,18 @@ def isiterable(data):
         return True
     return False
 ########
+def concat(data):
+    conca= lambda x,y: x+'; ' +y
+    if isinstance(data, (tuple, list)):
+        newdat= list()
+        for dat in data:
+            if not isinstance(dat, (str, unicode)):
+                dat= dat.__str__()
+            newdat.append(dat)
+        data= reduce(conca, newdat)
+    elif not isinstance(data, (str, unicode)):
+        data= data.__str__()
+    return [data]
 def __dict2list(diccionario):
     '''convierte un diccionario como una lista de datos'''
     try:
@@ -382,7 +399,7 @@ def dict2list( diccionario, maximo = None):
         return __dict2list(diccionario)
     return _newdict(diccionario,actual= 1,maximo = 3)
 
-def _newdict(diccionario,actual,maximo):
+def _newdict(diccionario, actual, maximo):
     try:
         if actual > maximo:
             raise
@@ -391,7 +408,6 @@ def _newdict(diccionario,actual,maximo):
                 yield (key,) + key2 # (key,) + key2
     except:
         yield (diccionario, )
-
 
 class GroupData(object):
     '''Grouping data similar to a pivot table
@@ -405,6 +421,8 @@ class GroupData(object):
     res.names= names # optional
     dictionary= res.calc()
     listOfData= res.getAsList()
+    # getting by rows
+    rows= res.getAsRow()
     '''
     def __init__( self, xdata= [], ydata= [], yalias= [], restrictions= [], yvalues= [], yvaluesAlias= []):
         # se verifica que la cantidad de datos
@@ -463,7 +481,8 @@ class GroupData(object):
     
     def _fil2dict(self, data):
         '''convierte una serie de filas en diccionario'''
-        dictionary = dict()
+        
+        dictionary = OrderedDict()
         for dato in data:
             try:
                 key= dato[0]
@@ -614,7 +633,7 @@ class GroupData(object):
             for key, value in zip( self.xdataNames, xValues):
                 dictValues[key]= value
             dictValues['statistics']= statistics
-            
+            dictValues['concat']=     concat
             # evaluating the conditions with the local dict
             # for all values
             for colY, alias in zip(self.yvalues, self.yvaluesAlias): # colY correspond
@@ -646,6 +665,30 @@ class GroupData(object):
     def getAsList(self, maximum= None):
         return [lis for lis in self.getAsGen(maximum)]
     
+    def getAsRow(self):
+        maximun= len( self.xdata) #+ len( self.ydata) - 1
+        def fix( data):
+            data, diccio=  (list(data[:-1]), data[-1])
+            newdiccio=     diccio.values()
+            for pos, item in enumerate(newdiccio):
+                if isinstance( item, (list, tuple,)):
+                    if len(item) == 1:
+                        item= item[0]
+                newdiccio[pos]= item
+            # if the last value is a list or a tuple and
+            #if the len is one then it's values is extracted
+            data.extend( newdiccio)
+            return tuple( data)
+        
+        header= self.xdataNames[:]
+        if len(self.yvaluesAlias) != 0:
+            header.extend( self.yvaluesAlias)
+        else:
+            header.extend( self.ydataNames)
+        res=[ header ]
+        res.extend([fix( lis) for lis in self.getAsGen( maximun)])
+        return res
+        
     def getAsGen(self, maximun= None):
         return self.dict2list(self.getAsDict(), maximun= maximun)
     @property
