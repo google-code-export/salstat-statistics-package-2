@@ -1448,13 +1448,13 @@ class MainFrame(wx.Frame):
 
     def ShowAbout(self, evt):
         info= wx.AboutDialogInfo()
-        info.Name= u"S2 SalStat Statistics Package 2"
+        info.Name= u"SalStat2"
         info.Version= u"V" + wx.GetApp().__version__
         info.Copyright= u"(C) 2012 - 2013 Sebastian Lopez Buritica, S2 Team"
         info.Icon= wx.GetApp().icon64
         from wx.lib.wordwrap import wordwrap
         info.Description = wordwrap(
-            translate(u"This is a newer version of the SalStat Statistics Package. ")+
+            translate(u"This is a newer version of the SalStat2 Statistical Package. ")+
             translate(u"There have been new improvements:\n\n")+
             translate(u"*You can cut, copy, and paste multiple cells,\n")+
             translate(u"*You can undo and redo some actions.\n")+
@@ -1470,7 +1470,7 @@ class MainFrame(wx.Frame):
             translate(u"and much more!"),
             460, wx.ClientDC( self))
         info.WebSite = ( u"http://code.google.com/p/salstat-statistics-package-2/", u"S2 home page")
-        info.Developers = [ u"Sebastian Lopez Buritica", "Mark Livingstone --",]
+        info.Developers = [ u"Sebastian Lopez Buritica", "Mark Livingstone, Salstat2 Team",]
 
         info.License = wordwrap(u"GPL 3", 450, wx.ClientDC(self))
 
