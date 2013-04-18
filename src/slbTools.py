@@ -25,6 +25,16 @@ __WILDCARD= "Supported Files (*.txt;*.csv;*.xlsx;*.xls)|*.txt;*.csv;*xlsx;*.xls|
             "Csv file (*.csv)|*.csv" 
 
 def getPath(wildcard= __WILDCARD, aplyFilter= True):
+    """getPath(wildcard= __WILDCARD, aplyFilter= True)
+    
+    __WILDCARD= "Supported Files (*.txt;*.csv;*.xlsx;*.xls)|*.txt;*.csv;*xlsx;*.xls|"\
+            "Excel 2010 File (*.xlsx)|*.xlsx|" \
+            "Excel 2003 File (*.xls)|*.xls|" \
+            "Txt file  (*.txt)|*.txt|"    \
+            "Csv file  (*.csv)|*.csv|"    \
+            "All Files (*.*)|*.*"
+    getPath(wildcard= __WILDCARD, aplyFilter= True)
+    """
     dlg = wx.FileDialog(None, "Load Data File", "","",
                         wildcard= wildcard,
                         style = wx.OPEN)
@@ -421,8 +431,6 @@ class GroupData(object):
     res.names= names # optional
     dictionary= res.calc()
     listOfData= res.getAsList()
-    # getting by rows
-    rows= res.getAsRow()
     '''
     def __init__( self, xdata= [], ydata= [], yalias= [], restrictions= [], yvalues= [], yvaluesAlias= []):
         # se verifica que la cantidad de datos
@@ -520,7 +528,7 @@ class GroupData(object):
         self.filterPos= []
         xcols= [np.array(x) for x in self.xdata]
         ycols= [np.array(x) for x in self.ydata]
-        localsDict= dict( )
+        localsDict= OrderedDict( )
         
         for key, value in zip( self.xdataNames, xcols):
             localsDict[key]= value
@@ -553,15 +561,22 @@ class GroupData(object):
                 
         if len(keys) == 1:
             if not diccionario.has_key(key0):
-                diccionario[key0]= dict()
+                diccionario[key0]= OrderedDict()
             try:
-                (nombreCampo[-1],value[-1])
-                for nombrei,valuei in zip(nombreCampo,value):
+                if isinstance(nombreCampo, (str, unicode)):
                     try:
-                        diccionario[key0][nombrei].append(valuei)
+                        diccionario[key0][nombreCampo].append(value)
                     except KeyError:
-                        diccionario[key0][nombrei] = list()
-                        diccionario[key0][nombrei].append(valuei)
+                        diccionario[key0][nombreCampo]= value#list()
+                        #diccionario[key0][nombreCampo].append(value)
+                else:        
+                    (nombreCampo[-1],value[-1])
+                    for nombrei,valuei in zip(nombreCampo,value):
+                        try:
+                            diccionario[key0][nombrei].append(valuei)
+                        except KeyError:
+                            diccionario[key0][nombrei] = list()
+                            diccionario[key0][nombrei].append(valuei)
             except:
                 try:
                     diccionario[key0][nombreCampo].append(value)
@@ -572,7 +587,7 @@ class GroupData(object):
             try:
                 self.__setdictValue(diccionario[key0],keys[1:],nombreCampo,value)
             except KeyError:
-                diccionario[key0]= dict()
+                diccionario[key0]= OrderedDict()
                 self.__setdictValue(diccionario[key0],keys[1:],nombreCampo,value)
                 
     
@@ -580,7 +595,7 @@ class GroupData(object):
         self.__testAll()
         self.__homogenizeData()
         if len( self.xdata[0]) == 0 or len( self.ydata[0]) == 0:
-            return dict()
+            return OrderedDict()
         
         diccionario= self._cols2dict( *self.xdata)
         if len(self.filterPos) > 0:
@@ -624,9 +639,9 @@ class GroupData(object):
         if len( self.yvaluesAlias) != len( self.yvalues):
             self.yvaluesAlias= self.yvalues[:]
         
-        localdict= dict()
+        localdict= OrderedDict()
         newdict= self.dict2list( diccionario, maximun= len( self.xdata))
-        responseDict= dict()
+        responseDict= OrderedDict()
         for dat in newdict:
             xValues= dat[:-1]
             dictValues= dat[-1]
@@ -634,6 +649,7 @@ class GroupData(object):
                 dictValues[key]= value
             dictValues['statistics']= statistics
             dictValues['concat']=     concat
+            
             # evaluating the conditions with the local dict
             # for all values
             for colY, alias in zip(self.yvalues, self.yvaluesAlias): # colY correspond
@@ -670,6 +686,8 @@ class GroupData(object):
         def fix( data):
             data, diccio=  (list(data[:-1]), data[-1])
             newdiccio=     diccio.values()
+            if len(newdiccio)!= len(self.ydata):
+                newdiccio= newdiccio[0]
             for pos, item in enumerate(newdiccio):
                 if isinstance( item, (list, tuple,)):
                     if len(item) == 1:
