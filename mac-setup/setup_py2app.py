@@ -4,14 +4,14 @@ import sys
 # Application Information
 APP = "../src/salstat.py"
 NAME = 'SalStat'
-VERSION = '2.2'
+VERSION = '2.1 rc2'
 PACKAGES = ['']
 URL = 'http://code.google.com/p/salstat-statistics-package-2/'
-LICENSE = 'GPL 2'
+LICENSE = 'GPL 3'
 AUTHOR = 'Sebastian lopez, S2 Team'
 AUTHOR_EMAIL = 'selobu@gmail.com'
 DESCRIPTION = 'Statistics Package'
-YEAR = 2012
+YEAR = 2013
 # End of Application Information
 
 
@@ -36,9 +36,29 @@ def BuildOSXApp():
     )
     PY2APP_OPTS = dict(iconfile = "../src/salstat.icns",
         argv_emulation = True,
-        includes = ['wx.py.editor', 'statFunctions.*', 'plotFunctions.*'],
-        excludes = ['_gtkagg', '_tkagg', '_agg2', '_cairo',
-                    '_fltkagg', '_gtk', '_gtkcairo',
+        includes = ['wx',
+                    'numpy',
+                    'PyQt4',
+                    'wx.py.editor',
+                    'statFunctions.*',
+                    'plotFunctions.*',
+                    'nicePlot.*'
+                    'matplotlib',
+                    'matplotlib.backends',
+                    #'matplotlib.backends.backend_qt4',
+                    #'matplotlib.backends.backend_qt4agg',
+                    'matplotlib.backends.backend_macosx',
+                    'matplotlib.backends,backend_cocoaagg',
+                    'scipy.interpolate',
+                    'scipy.stats',
+                    'sqlalchemy',
+                    'sqlalchemy.dialects.sqlite',
+                    'sqlalchemy.dialects.mysql',
+                    'mysql',
+
+                    ],
+        excludes = [#'_gtkagg', '_tkagg', '_agg2', '_cairo',
+                    #'_fltkagg', '_gtk', '_gtkcairo',
                     "pywin", "pywin.debugger", "pywin.debugger.dbgcon",
                     "pywin.dialogs", "pywin.dialogs.list", "Tkconstants",
                     "Tkinter", "tcl", "scipy.sparce", 'PyQt4.uic'],
