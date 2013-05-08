@@ -96,13 +96,13 @@ opts = { "py2exe":
               }
           }
 
-setup(name=         'S2',
-      version=      '0.1',
-      description=  'Campo adquisition data',
+setup(name=         'Salstat2',
+      version=      '2.1 final',
+      description=  'Statistical Package',
       url=          '',
-      license=      'privativa',
+      license=      'GPL3',
       windows=[
-          {"script":         'main.py',
+          {"script":         'salstat2.py',
            "icon_resources": [(0, iconPath)]
            }
           ],
