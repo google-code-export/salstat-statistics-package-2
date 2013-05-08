@@ -19,141 +19,9 @@ DEFAULT_GRID_SIZE= (0,0)
 DEFAULT_FONT_SIZE = 12
 DECIMAL_POINT = '.' 
 
-def translate(a):
-    return a
-ECXISTIMAGES = True
-try:
-    from imagenes import imageEmbed
-    EXISTIMAGES = True
-except ImportError:
-    EXISTIMAGES = False
-    
-from GridCopyPaste import PyWXGridEditMixin
+from GridCopyPaste import PyWXGridEditMixin, MyContextGrid
+from gridCellRenderers import floatRenderer
 
-def Translate(obj):
-    return obj
-class _MyContextGrid(wx.Menu):
-    # Clase para hacer el menu contextual del grid
-    def __init__(self,parent,*args,**params):
-        wx.Menu.__init__(self)
-        self.parent = parent
-        try:
-            translate= wx.GetApp().translate
-        except AttributeError:
-            translate = Translate
-        cortar =     wx.MenuItem(self, wx.NewId(), translate('&Cut\tCtrl+X'))
-        copiar =     wx.MenuItem(self, wx.NewId(), translate('C&opy\tCtrl+C'))
-        pegar =      wx.MenuItem(self, wx.NewId(), translate('&Paste\tCtrl+V'))
-        eliminar =   wx.MenuItem(self, wx.NewId(), translate('&Del\tDel'))
-        deshacer =   wx.MenuItem(self, wx.NewId(), translate('&Undo\tCtrl+Z'))
-        rehacer =    wx.MenuItem(self, wx.NewId(), translate('&Redo\tCtrl+Y'))
-        delRow=      wx.MenuItem(self, wx.NewId(), translate('Del Row'))
-        delCol=      wx.MenuItem(self, wx.NewId(), translate('Del Col'))
-        ##exportarCsv= wx.MenuItem(self, wx.NewId(), '&Export\tCtrl+E')
-        
-        if EXISTIMAGES:
-            imagenes = imageEmbed()
-            cortar.SetBitmap(imagenes.edit_cut())
-            copiar.SetBitmap(imagenes.edit_copy())
-            pegar.SetBitmap(imagenes.edit_paste())
-            eliminar.SetBitmap(imagenes.cancel())
-            deshacer.SetBitmap(imagenes.edit_undo())
-            rehacer.SetBitmap(imagenes.edit_redo())
-        ##exportarCsv.SetBitmap(imagenes.exporCsv())
-
-        self.AppendSeparator()
-        self.AppendItem(cortar)
-        self.AppendItem(copiar,)
-        self.AppendItem(pegar,)
-        self.AppendSeparator()
-        self.AppendItem(eliminar,)
-        self.AppendSeparator()
-        self.AppendItem(deshacer,)
-        self.AppendItem(rehacer,)
-        self.AppendSeparator()
-        self.AppendItem(delRow,)
-        self.AppendItem(delCol,)
-        ##self.AppendItem(exportarCsv,)
-        
-        self.Bind(wx.EVT_MENU, self.OnCortar,      id= cortar.GetId())
-        self.Bind(wx.EVT_MENU, self.OnCopiar,      id= copiar.GetId())
-        self.Bind(wx.EVT_MENU, self.OnPegar,       id= pegar.GetId())
-        self.Bind(wx.EVT_MENU, self.OnEliminar,    id= eliminar.GetId())
-        self.Bind(wx.EVT_MENU, self.OnDeshacer,    id= deshacer.GetId())
-        self.Bind(wx.EVT_MENU, self.OnRehacer,     id= rehacer.GetId())
-        self.Bind(wx.EVT_MENU, self.OnDelRow,     id= delRow.GetId())
-        self.Bind(wx.EVT_MENU, self.OnDelCol,     id= delCol.GetId())
-        ##self.Bind(wx.EVT_MENU, self.OnExportarCsv, id= exportarCsv.GetId())
-        
-    def OnCortar(self, evt):
-        self.parent.OnCut()
-        evt.Skip()
-
-    def OnCopiar(self, evt):
-        self.parent.Copy()
-        evt.Skip()
-        
-    def OnPegar(self, evt):
-        self.parent.OnPaste()
-        evt.Skip()
-        
-    def OnEliminar(self, evt):
-        self.parent.Delete()
-        evt.Skip()
-        
-    def OnRehacer(self, evt):
-        self.parent.Redo()
-        evt.Skip()
-
-    def OnDeshacer(self, evt):
-        self.parent.Undo()
-        evt.Skip()
-    
-    def OnExportarCsv(self,evt):
-        self.parent.OnExportCsv()
-        evt.Skip()
-        
-    def OnDelRow(self, evt):
-        try:
-            # searching for the parent in the simplegrid parent
-            parent= self.parent.Parent
-        except AttributeError:
-            parent= None
-            
-        if hasattr(parent, 'DeleteCurrentRow'):
-            parent.DeleteCurrentRow(evt)
-        else:
-            currentRow, left, rows,cols = self.parent.GetSelectionBox()[0]
-            if rows < 1:
-                return
-            self.parent.DeleteRows(currentRow, 1)
-            self.parent.AdjustScrollbars()
-        
-        self.parent.hasChanged= True
-        self.parent.hasSaved=   False
-        evt.Skip()
-    
-    def OnDelCol(self, evt):
-        try:
-            # searching for the parent in the simplegrid parent
-            parent= self.parent.Parent
-        except AttributeError:
-            parent= None
-            
-        if hasattr(parent,  'DeleteCurrentCol'):
-            parent.DeleteCurrentCol(evt)
-        else:
-            currentRow, currentCol, rows,cols = self.parent.GetSelectionBox()[0]
-            if cols < 1:
-                return
-            self.parent.DeleteCols(currentCol, 1)
-            self.parent.AdjustScrollbars()
-        
-        self.hasChanged= True
-        self.hasSaved=   False
-        evt.Skip()
-
-    
 ###########################################################################
 ## Class NewGrid
 ###########################################################################
@@ -165,7 +33,7 @@ class NewGrid(wx.grid.Grid, object):
         self.zoom=     1.0
         self.moveTo=   None
         self.hasSaved= False
-        self.wildcard= "S2 Format (*.xls;*xlsx;*.txt;*csv)|*.xls;*xlsx;*.txt;*csv" \
+        self.wildcard= "Suported Formats (*.xls;*xlsx;*.txt;*csv)|*.xls;*xlsx;*.txt;*csv" \
                        "Any File (*.*)|*.*|"
         #<p> used to check changes in the grid
         self.hasChanged = True
@@ -177,6 +45,10 @@ class NewGrid(wx.grid.Grid, object):
             wx.grid.Grid.__bases__ += ( PyWXGridEditMixin,)
         # contextual menu
         self.__init_mixin__()
+        
+        # setting the renderer
+        self.__initAttr()
+        
         #if len(args) > 0:
         #    self.__init_mixin__( args[0])
         #elif 'parent' in params.keys():
@@ -221,6 +93,11 @@ class NewGrid(wx.grid.Grid, object):
         if wx.Platform == "__WXMAC__":
             self.SetGridLineColour( wx.BLACK)
         self.SetColLabelAlignment( wx.ALIGN_CENTER, wx.ALIGN_CENTER)
+        
+        newtable= self.GetTable()
+        setattr(newtable,'GetAttr',self.GetAttr)
+        ##self.SetTable(newtable, True)
+        
         # se activa el menu contextual sobre el grid
         self.Bind(wx.grid.EVT_GRID_EDITOR_CREATED,         self.onCellEdit)
         self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
@@ -228,6 +105,21 @@ class NewGrid(wx.grid.Grid, object):
         self.Bind(wx.grid.EVT_GRID_CELL_RIGHT_CLICK,       self.OnGridRighClic)
         self.Bind(wx.EVT_MOUSEWHEEL,                       self.OnMouseWheel)
         
+    def __initAttr(self):
+        renderer = floatRenderer( 4)
+        self.__oddAttr=  wx.grid.GridCellAttr()
+        self.__oddAttr.SetBackgroundColour( wx.Colour( 220, 230, 250 ))
+        self.__oddAttr.SetRenderer( renderer)
+        self.__evenAttr= wx.grid.GridCellAttr()
+        self.__evenAttr.SetBackgroundColour( wx.Colour( 146, 190, 183 ))
+        self.__evenAttr.SetRenderer( renderer)
+        
+    def GetAttr(self, row, col, kind):
+        attr=   [ self.__evenAttr, self.__oddAttr][row % 2]
+        ##attr=  attr[col] # renderer by col is missing
+        attr.IncRef()
+        return attr
+    
     def zoom_rows(self):
         """Zooms grid rows"""
         for rowno in xrange(self.GetNumberRows()):
@@ -285,6 +177,7 @@ class NewGrid(wx.grid.Grid, object):
             self.br = evt.GetBottomRightCoords()
 
     def CutData(self, evt):
+        self.Copy()
         self.Delete()
         self.hasChanged= True
         self.hasSaved=   False
@@ -1138,7 +1031,7 @@ class NewGrid(wx.grid.Grid, object):
         return selection
         
     def OnGridRighClic(self,evt):
-        self.PopupMenu(_MyContextGrid(self), evt.GetPosition())
+        self.PopupMenu(MyContextGrid(self), evt.GetPosition())
         evt.Skip()
         
     def setColNames(self,names):
@@ -1263,7 +1156,7 @@ def test():
 
 if __name__ == '__main__':    
         app = wx.PySimpleApp()
-        app.translate= translate
+        app.translate= lambda x:x
         frame = wx.Frame(None, -1, size=(700,500), title = "wx example")
         grid = NewGrid(frame)
         grid.CreateGrid(2000,60)

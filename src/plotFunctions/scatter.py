@@ -21,7 +21,7 @@ PROPLEGEND= {'size':11}
 class scatter( _neededLibraries):
     name=      u"Scatter chart"
     plotName=  u"scatter"
-    image=     imag.scatter()
+    image=     imag.scatter
     def __init__( self):
         _neededLibraries.__init__(self)
         self.name=      u"Scatter chart"
@@ -99,7 +99,7 @@ class scatter( _neededLibraries):
 class adaptative( _neededLibraries):
     name=      u"Adaptative"
     plotName=  u"Adaptative"
-    image=     imag.adaptative()
+    image=     imag.adaptative
     def __init__( self):
         _neededLibraries.__init__(self)
         self.name=      u"Adaptative"
@@ -179,7 +179,7 @@ class adaptative( _neededLibraries):
 class box_whisker(_neededLibraries):
     name= u"Box & Whisker"
     plotName=  u"boxWhisker"
-    image=     imag.boxWhisker()
+    image=     imag.boxWhisker
     def __init__( self):
         _neededLibraries.__init__(self)
         self.name=      u"Box & Whisker"
@@ -250,7 +250,7 @@ class box_whisker(_neededLibraries):
 class normalProb( _neededLibraries):
     name=      u"Normal probability"
     plotName=  u"normalProb"
-    image=     imag.normalProb()
+    image=     imag.normalProb
     def __init__( self):
         _neededLibraries.__init__(self)
         self.name=      u"Normal probability"

@@ -16,7 +16,7 @@ imag= imageEmbed()
 class lines( _neededLibraries):
     name=      u"lines"
     plotName=  u"lines"
-    image=     imag.lines()
+    image=     imag.lines
     def __init__( self):
         _neededLibraries.__init__(self)
         self.name=      u"lines"
@@ -86,7 +86,7 @@ class lines( _neededLibraries):
 class stem( _neededLibraries):
     name=      u"stem"
     plotName=  u"stem"
-    image=     imag.stem()
+    image=     imag.stem
     def __init__( self):
         _neededLibraries.__init__(self)
         self.name=      u"stem"
@@ -154,7 +154,7 @@ class stem( _neededLibraries):
 class linesOfMean( _neededLibraries):
     name=      u"lines of all means"
     plotName=  u"linesMean"
-    image=     imag.linesOfMean()
+    image=     imag.linesOfMean
     def __init__( self):
         _neededLibraries.__init__(self)
         self.name=      u"lines of all means"
@@ -222,7 +222,7 @@ class linesOfMean( _neededLibraries):
 class shadowLines(lines):
     name=      u"lines with shadow"
     plotName=  u"linesShadow"
-    image=     imag.shadowLines()
+    image=     imag.shadowLines
     def __init__( self):
         lines.__init__(self)
         self.name=      u"lines with shadow"
@@ -270,7 +270,7 @@ class shadowLines(lines):
 class areaPlot( lines):
     name=      u"Area chart"
     plotName=  u"arePlot"
-    image=     imag.areaPlot()
+    image=     imag.areaPlot
     def __init__( self):
         lines.__init__(self)
         self.name=      u"Area chart"
@@ -339,7 +339,7 @@ class areaPlot( lines):
 class multipleAreaPlot( lines):
     name=      u"Multiple area chart"
     plotName=  u"multiArePlot"
-    image=     imag.multipleAreaPlot()
+    image=     imag.multipleAreaPlot
     def __init__( self):
         lines.__init__(self)
         self.name=      u"Multiple area chart"

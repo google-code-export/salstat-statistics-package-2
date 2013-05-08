@@ -1268,5 +1268,3 @@ xlYears = 2
 xlYErrorBars = 11
 xlYes = 1
 xlZero = 2
-
-Also see:

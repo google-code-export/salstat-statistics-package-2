@@ -13,6 +13,7 @@ from slbTools import isnumeric, isiterable
 from gridLib import floatRenderer
 import wx.aui
 from numpy import ndarray, ravel, genfromtxt
+from wx.grid  import GridCellAttr 
 #import traceback
 
 DEFAULT_GRID_SIZE= (0,0)
@@ -31,18 +32,16 @@ class MyFileDropTarget(wx.FileDropTarget):
         self.window = wxPanel
 
     def OnDropFiles( self, x, y, filenames):
-        log= wx.GetApp().Logg
-        log.write( "\n%d file(s) dropped at %d,%d:" %
-                   (len( filenames), x, y))
+        print "\n%d file(s) dropped at %d,%d:" %( len( filenames), x, y)
         for file in filenames:
-            log.write( file)
+            print file
 
         # try to load the file
         if isinstance(filenames, (str, unicode)):
             filenames= [filenames]
 
         if len(filenames) == 0:
-            log.write("You don't select any file")
+            print "You don't select any file"
             return
 
         # selecting just the first filename
@@ -51,17 +50,10 @@ class MyFileDropTarget(wx.FileDropTarget):
         self.window.LoadFile(evt= None, fullpath= filename)
 
 class SimpleGrid( wx.Panel, object):# wxGrid
-    def __init__( self, parent, log= None, size= (800,20)):
+    def __init__( self, parent, size= (800,20)):
         self.rowsizes= dict()
         self.colsizes= dict()
         self.NumSheetReport = 0
-        if log == None:
-            try:
-                self.log= wx.GetApp().Logg
-            except:
-                pass
-        else:
-            self.log= log
         self.path = None
         
         wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, style = wx.TAB_TRAVERSAL )
@@ -85,27 +77,25 @@ class SimpleGrid( wx.Panel, object):# wxGrid
             return object.__getattribute__(self, name)
         except AttributeError:
             return self.m_grid.__getattribute__(name)
-        
-class NoteBookSheet(wx.Panel, object):
+
+class NoteBookSheet(wx.aui.AuiNotebook, object):
     def __init__( self, parent, *args, **params):
+        wx.aui.AuiNotebook.__init__( self, parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,
+                                     wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|
+                                     wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_BOTTOM|
+                                     wx.aui.AUI_NB_TAB_SPLIT|wx.aui.AUI_NB_CLOSE_BUTTON)
         from collections import OrderedDict # to be used under the notebook
         # se almacenan las paginas en un diccionario con llave el numero de pagina
         if params.has_key('fb'):
             self.fb= params.pop('fb')
-
-        wx.Panel.__init__ ( self, parent, *args, **params)
+        
         bSizer = wx.BoxSizer( wx.VERTICAL )
-        self.m_notebook = wx.aui.AuiNotebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,
-                                              wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|
-                                              wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_BOTTOM|
-                                              wx.aui.AUI_NB_TAB_SPLIT|wx.aui.AUI_NB_CLOSE_BUTTON)
-        self.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChange)
-        bSizer.Add( self.m_notebook, 1, wx.EXPAND |wx.ALL, 5 )
-        self.SetSizer( bSizer )
+        self.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChange)
+
         # se inicia el generador para el numero de pagina
         self.npage = numPage()
-        self.currentPage= None
-        self.pageNames=   OrderedDict() #dict()
+        self.currentPage=    None
+        self._pageObjects=   OrderedDict() #dict()
         self.Layout()
         self.numberPage=  self._generador()
 
@@ -124,7 +114,7 @@ class NoteBookSheet(wx.Panel, object):
         except AttributeError:
             if self.GetPageCount() != 0:
                 if str(type(self.currentPage)) == "<class 'wx._core._wxPyDeadObject'>":
-                    self.currentPage == None
+                    self.currentPage = None
                     self.currentPageNumber= None
                     return
                 currGrid=  self.currentPage
@@ -134,7 +124,7 @@ class NoteBookSheet(wx.Panel, object):
     def __getitem__(self, item):
         if isinstance(item, (str, unicode)):
             if item in self.getPageNames():
-                return self.pageNames[item]
+                return self._pageObjects[item]
             
         elif isinstance(item, (int, float)):
             item= int(item)
@@ -142,44 +132,54 @@ class NoteBookSheet(wx.Panel, object):
                 item = self.GetPageCount() + item
             if item < 0:
                 raise StandardError("The selectecd page doesn't exist")
-            return self.pageNames[self.pageNames.keys()[item]]
+            return self._pageObjects[self._pageObjects.keys()[item]]
     
+    def GetCol(self,*args, **params):
+        pageName= self.getPageNames()[0]
+        pageObject= self._pageObjects[pageName]
+        return  getattr( pageObject, 'GetCol')(*args, **params)
+    def PutCol(self, *args, **params):
+        pageName= self.getPageNames()[0]
+        pageObject= self._pageObjects[pageName]
+        return  getattr( pageObject, 'PutCol')(*args, **params)
+    
+    def _gridSetRenderer(self, grid):
+        return
+        '''setting the renderer to the grid'''
+        attr=   GridCellAttr()
+        attr.IncRef() # correct delete column
+        renderer = floatRenderer( 4)
+        attr.SetRenderer( renderer)
+        self.floatCellAttr= attr
+        for colNumber in range( grid.NumberCols):
+            grid.SetColAttr( colNumber, self.floatCellAttr)
+
+        if wx.Platform == '__WXMAC__':
+            grid.SetGridLineColour("#b7b7b7")
+            grid.SetLabelBackgroundColour("#d2d2d2")
+            grid.SetLabelTextColour("#444444")
+            
     def getGridAllValueByCols( self,pageName):
-        if not (pageName in self.pageNames.keys()):
+        if not (pageName in self._pageObjects.keys()):
             raise StandardError('The page does not exist')
-        page= self.pageNames[pageName]
+        page= self._pageObjects[pageName]
         return page.getByColumns()
     
-    def len(self):
-        return self.m_notebook.PageCount
+    def __len__(self):
+        return self.PageCount
     
     def getPageNames( self):
-        return self.pageNames.keys()
+        return self._pageObjects.keys()
 
     def getHeader( self,pageName):
-        if not (pageName in self.pageNames.keys()):
+        if not (pageName in self._pageObjects.keys()):
             raise StandardError('The page does not exist')
-        page= self.pageNames[pageName]
+        page= self._pageObjects[pageName]
         return page.getHeader()
 
     def OnNotebookPageChange( self,evt):
-        self.currentPage= self.m_notebook.GetPage( evt.Selection)
+        self.currentPage= self.GetPage( evt.Selection)
         self.currentPageNumber= evt.Selection
-
-    def _cellSelectionChange( self, event):
-        if self.GetPageCount() == 0:
-            return
-        row=  int(event.Row)
-        col=  int(event.Col)
-        Id=   event.GetId()
-        pageSelectNumber=  self.m_notebook.GetSelection()
-        grid= self.m_notebook.GetPage(pageSelectNumber)
-        try:
-            texto= grid.GetCellValue(row, col)
-            self.fb.value= texto
-        except:
-            pass
-        event.Skip()
 
     def __loadData__( self,selectedGrid,data, byRows = True):
         # gridId, nombre de la hoja en la que se adicionaran los datos
@@ -210,7 +210,7 @@ class NoteBookSheet(wx.Panel, object):
     def GetPageCount( self):
         # 21/04/2011
         # retorna el numero de paginas que hay en el notebook
-        return self.m_notebook.PageCount
+        return self.PageCount
     def upData( self,  data):
         # It's used to upload data into a grid
         # where the grid it's an int number
@@ -252,8 +252,8 @@ class NoteBookSheet(wx.Panel, object):
                 page = self.addPage()
             else:
                 page = self.currentPage
-        elif pageName in self.pageNames.keys():
-            page = self.pageNames[pageName]
+        elif pageName in self._pageObjects.keys():
+            page = self._pageObjects[pageName]
         else:
             page = self.addPage( name= pageName)
         # se procede a verificar las dimensiones de la pagina actual
@@ -299,7 +299,9 @@ class NoteBookSheet(wx.Panel, object):
             page.SetCellValue(colPos, currCol, colValue)
 
     def addRowData( self, rowData, pageName= None, currRow = None):
-        '''adds a row with it's row content'''
+        '''adds a row with it's row content
+        addRowData( rowData, pageName, currRow)
+        '''
         # currRow is used to indicate if the user needs to insert
         # the rowContent into a relative row
         if not isnumeric(currRow) and currRow != None:
@@ -311,8 +313,8 @@ class NoteBookSheet(wx.Panel, object):
                 page = self.addPage()
             else:
                 page = self.currentPage
-        elif pageName in self.pageNames.keys():
-            page = self.pageNames[pageName]
+        elif pageName in self._pageObjects.keys():
+            page = self._pageObjects[pageName]
         else:
             page = self.addPage( name= pageName)
 
@@ -429,9 +431,6 @@ class NoteBookSheet(wx.Panel, object):
             pass
         evt.Skip()
 
-    def _gridSetRenderer(self, grid):
-        pass
-
     def addPage( self, **params):
         defaultData = {'name': u'', 'gridSize': DEFAULT_GRID_SIZE}
         for key, value in params.items():
@@ -439,12 +438,12 @@ class NoteBookSheet(wx.Panel, object):
                 defaultData[key] = value
         # adiciona una pagina al notebook grid
         newName= defaultData['name'] +'_'+ str(self.npage.next())
-        self.pageNames[newName]= self.addOnePage( gridSize = defaultData['gridSize'])
-        self.currentPage=  self.pageNames[newName]
-        ntb= self.pageNames[newName]
-        self.m_notebook.AddPage(ntb, newName, False )
+        self._pageObjects[newName]= self.addOnePage( gridSize = defaultData['gridSize'])
+        self.currentPage=  self._pageObjects[newName]
+        ntb= self._pageObjects[newName]
+        self.AddPage(ntb, newName, False )
         # se hace activo la pagina adicionada
-        self.m_notebook.SetSelection(self.m_notebook.GetPageCount()-1)
+        self.SetSelection(self.GetPageCount()-1)
         return ntb # retorna el objeto ntb
 
     def delPage( self, evt= None, page= None):
@@ -453,9 +452,9 @@ class NoteBookSheet(wx.Panel, object):
         # las paginas se numeran mediante numeros desde el cero
         if page == None:
             # se considera que la pagina a borrar es la pagina actual
-            #self.m_notebook.GetCurrentPage().Destroy() # borra el contenido de la pagina
-            if self.m_notebook.GetSelection() > -1:
-                page = self.m_notebook.GetSelection()
+            #self.GetCurrentPage().Destroy() # borra el contenido de la pagina
+            if self.GetSelection() > -1:
+                page = self.GetSelection()
             else:
                 return
         pageNumber = int(page)
@@ -463,16 +462,15 @@ class NoteBookSheet(wx.Panel, object):
             return
         if pageNumber > self.GetPageCount():
             raise IndexError("Page doesn't exist")
-        currPageObj= self.m_notebook.GetPage(pageNumber)
+        currPageObj= self.GetPage(pageNumber)
         # delete de erased page from the pages list
         pageName = None
-        for pageName, pageObj in self.pageNames.items():
+        for pageName, pageObj in self._pageObjects.items():
             if pageObj == currPageObj:
                 break
         if pageName == None:
             return
-        self.pageNames.pop( pageName)
-        self.m_notebook.DeletePage( pageNumber)
+        self._pageObjects.pop( pageName)
         
     def changeLabel(self, page= None, newLabel= None):
         if self.GetPageCount() < 1:
@@ -495,7 +493,7 @@ class NoteBookSheet(wx.Panel, object):
         if newLabel== '':
             newlabel= self.numberPage.next().__str__()
 
-        self.m_notebook.SetPageText(pageNumber, newLabel)
+        self.SetPageText(pageNumber, newLabel)
 
     def SaveXlsAs(self, evt):
         currGrid=  self.currentPage
@@ -505,6 +503,7 @@ class NoteBookSheet(wx.Panel, object):
         if not HasSaved:
             return
         self.changeLabel( newLabel= fileName)
+
 
 class Test(wx.Frame):
     def __init__(self, parent, id, title):
@@ -521,3 +520,4 @@ if __name__ == '__main__':
     app = wx.App()
     Test(None, -1, 'Custom Grid Cell')
     app.MainLoop()
+#eof

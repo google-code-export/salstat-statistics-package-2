@@ -286,7 +286,6 @@ import copy as _copy  # required python modules
 from types import ListType as _ListType, TupleType as _TupleType
 from types import IntType as _IntType, FloatType as _FloatType
 ## from types import * # possible not needed
-import scipy.stats as sc
 
 __version__ = 0.6
 
@@ -425,7 +424,14 @@ def _lfirstquartilescore(inlist):
     #newlist = _copy.deepcopy(inlist) ## the memory could be deprecated by a large amount of data
     newlist = inlist
     newlist.sort()
-    firstquartile = sc.scoreatpercentile(newlist, 25)
+    if len(newlist) == 5:
+        firstquartile = newlist[1]
+    else:
+        if len(newlist) % 2 == 0:    # even number of scores
+            firstquartile = (newlist[((len(newlist) + 1) / 4) - 1] + newlist[((len(newlist) + 1) / 4)]) / 2.0
+        else:                   # odd number of scores
+            firstquartile = (newlist[(len(newlist) / 4)] + newlist[(len(newlist) / 4) + 1]) / 2
+    #print "First quartile =", firstquartile
     return firstquartile
 
 
@@ -439,7 +445,16 @@ def _lthirdquartilescore(inlist):
 
     newlist = _copy.deepcopy(inlist)
     newlist.sort()
-    thirdquartile = sc.scoreatpercentile(newlist, 75)
+    if len(newlist) == 5:
+        thirdquartile = newlist[3]
+    else:
+        if len(newlist) % 2 == 0:    # even number of scores
+            print "even length =", len(newlist)
+            thirdquartile = (newlist[3 * ((len(newlist) + 1) / 4) - 1] + newlist[3 * ((len(newlist) + 1) / 4)]) / 2.0
+        else:                   # odd number of scores
+            print "odd length =", len(newlist)
+            thirdquartile = (newlist[(3 * (len(newlist)) / 4)] + newlist[((3 * len(newlist)) / 4) + 1]) / 2
+    print "Third quartile =", thirdquartile
     return thirdquartile
 
 

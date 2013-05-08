@@ -14,7 +14,7 @@ SetCompressor /SOLID LZMA
 !define URL http://selobu.blogspot.com
 # to check if the app is running
 !define WNDCLASS "WindowClassOfYourApplication"
-!define WNDTITLE "S2"
+!define WNDTITLE "Salstat2"
 
 # MultiUser Symbol Definitions
 !define MULTIUSER_EXECUTIONLEVEL Standard

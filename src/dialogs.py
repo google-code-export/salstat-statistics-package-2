@@ -533,7 +533,7 @@ class TransformFrame(wx.Dialog):
         self.parent= parent
         x= self.GetClientSize()
         winheight= x[1]
-        icon= imageEmbed().logo16()
+        icon= imageEmbed().logo16
         self.SetIcon(icon)
         self.transform= ""
         self.transformName= ""

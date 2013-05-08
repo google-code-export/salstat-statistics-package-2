@@ -31,7 +31,7 @@ import py2exe
 import matplotlib
 import sqlalchemy
 
-distdir = '..\\..\\SalStatdist'
+distdir = '..\\..\\campo'
 iconPath = "salstat.ico"
 
 opts = { "py2exe":
@@ -42,23 +42,27 @@ opts = { "py2exe":
                            "matplotlib",
                            "matplotlib.backends",
                            "matplotlib.backends.backend_qt4agg",
+                           'matplotlib.backends.backend_tkagg', # matplotlib 1.2
                            "PyQt4",
                            "statFunctions.*",  # importing the statistical functions
-                           "plotFunctions.*", #       "statsmodels.*",
+                           "plotFunctions.*", 
+                           "statsmodels.*",
                            "scipy.interpolate",
                            "scipy.stats",
                            "sqlalchemy",
                            "sqlalchemy.dialects.sqlite",
                            "sqlalchemy.dialects.mysql", "mysql", # mysql is a connector library
                            ],
-              "excludes":['_gtkagg',       '_tkagg',             '_agg2',
+              "excludes":['_gtkagg',       '_tkagg',             '_agg2',    
                           '_fltkagg',      '_gtk',               '_gtkcairo',
                           "pywin",         "pywin.debugger",     "pywin.debugger.dbgcon",
-                          "pywin.dialogs", "pywin.dialogs.list", "Tkconstants",
-                          "Tkinter",       "tcl",                "scipy.sparce",
+                          "pywin.dialogs", "pywin.dialogs.list",  "scipy.sparce",
+                          #"Tkinter",       "tcl",               "Tkconstants", 
                            '_cairo',       '_cocoaagg',          ], # "scipy.optimize",
               "dist_dir": distdir,
-              "dll_excludes" : ['_gtkagg', 
+              "dll_excludes" : ['_gtkagg',
+                                "libzmq.dll",
+                                "libzmq.pyd",
                                 '_tkagg',
                                 "MSVCP90.DLL",
                                 "API-MS-Win-Security-Base-L1-1-0.dll",
@@ -77,10 +81,15 @@ opts = { "py2exe":
                                 "ADVAPI32.dll",
                                 "GDI32.dll",
                                 "msvcrt.dll",
+                                "NETAPI32.dll",
+                                "IMM32.dll",
+                                "MPR.dll",
+                                "ntdll.dll",
                                 "WS2_32.dll",
                                 "mfc90.dll",
                                 "RPCRT4.dll",
                                 "VERSION.dll",
+                                "WINSPOOL.DRV",
                                 "KERNEL32.dll",
                                 "UxTheme.dll",
                                 ]
@@ -88,12 +97,12 @@ opts = { "py2exe":
           }
 
 setup(name=         'S2',
-      version=      '2.1',
-      description=  'Statistics Package',
-      url=          'http://code.google.com/p/salstat-statistics-package-2/',
-      license=      'GPL 3',
+      version=      '0.1',
+      description=  'Campo adquisition data',
+      url=          '',
+      license=      'privativa',
       windows=[
-          {"script":         'salstat.py',
+          {"script":         'main.py',
            "icon_resources": [(0, iconPath)]
            }
           ],

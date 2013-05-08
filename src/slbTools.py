@@ -597,6 +597,9 @@ class GroupData(object):
         if len( self.xdata[0]) == 0 or len( self.ydata[0]) == 0:
             return OrderedDict()
         
+        if self.yalias==  None:
+            self.yalias= self.ydataNames[:]
+            
         diccionario= self._cols2dict( *self.xdata)
         if len(self.filterPos) > 0:
             for rowNumber in range( len( self.xdata[0])): # self.ydata[0]

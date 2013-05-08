@@ -21,7 +21,7 @@ imag= imageEmbed()
 class histogram( _neededLibraries):
     name=      u"Histogram"
     plotName=  u"Histogram"
-    image =    imag.histogram()
+    image =    imag.histogram
     def __init__( self):
         _neededLibraries.__init__(self)
         self.name=      u'Histogram'
@@ -150,7 +150,7 @@ class niceHistogram( _neededLibraries):
     chart of the selected column'''   
     name=      u'Nice Histogram'
     plotName=  'histogram'
-    image=     imag.niceHistogram()
+    image=     imag.niceHistogram
     def __init__(self):
         _neededLibraries.__init__(self)
         self.name=     u'Nice Histogram'
@@ -294,7 +294,7 @@ class niceHistogram( _neededLibraries):
 class cumulativeFrecuency( cumfreq, _neededLibraries):
     name=     u'Cumulative Frecuency'
     plotName= 'cumulativeFrecuency'
-    image=    imag.cumulativeFrecuency()
+    image=    imag.cumulativeFrecuency
     def __init__(self):
         cumfreq.__init__(self)
         _neededLibraries.__init__(self)

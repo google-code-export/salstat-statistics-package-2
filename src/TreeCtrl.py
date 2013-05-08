@@ -1,17 +1,10 @@
 import wx
 from wx.lib.mixins.treemixin import ExpansionState
-from imagenes import imageEmbed
 import os
 import cPickle
 
 TreeBaseClass = wx.TreeCtrl
 
-imagenes= imageEmbed()
-
-_demoPngs = ["disk",]*14#     "pageexcel",         "printer",   "cancel",    "edit_copy",
-             #"edit_cut", "edit_paste",        "edit_redo", "edit_undo", "x_office_spreadsheet",
-             #"save",     "x_office_calendar", "view_refresh"]
-USE_CUSTOMTREECTRL = False
 
 class myEVT_CUSTOM:
     def __init__(self):
@@ -92,18 +85,20 @@ def GetConfig():
     return config
 
 class _wxPythonDemoTree(ExpansionState, TreeBaseClass):
+    USE_CUSTOMTREECTRL = False
+    _demoPngs= [wx.ART_FOLDER, wx.ART_FOLDER_OPEN, wx.ART_EXECUTABLE_FILE ]
     def __init__(self, parent):
         TreeBaseClass.__init__(self, parent, style=wx.TR_DEFAULT_STYLE|
                                wx.TR_HAS_VARIABLE_ROW_HEIGHT)
         self.BuildTreeImageList()
-        if USE_CUSTOMTREECTRL:
+        if self.USE_CUSTOMTREECTRL:
             self.SetSpacing(10)
             self.SetWindowStyle(self.GetWindowStyle() & ~wx.TR_LINES_AT_ROOT)
         self.SetInitialSize((100,80))
         self._callbacks= dict()
 
     def AppendItem( self, parent, text, image=-1, wnd=None, callback= None):
-        if USE_CUSTOMTREECTRL:
+        if self.USE_CUSTOMTREECTRL:
             item= TreeBaseClass.AppendItem( self, parent, text, image=image, wnd=wnd)
         else:
             item= TreeBaseClass.AppendItem( self, parent, text, image=image)
@@ -141,11 +136,11 @@ class _wxPythonDemoTree(ExpansionState, TreeBaseClass):
         return [self.GetItemText( obj) for obj in  pathList]
 
     def BuildTreeImageList(self):
+        def str2Bmp(artName):
+            return wx.ArtProvider.GetBitmap(artName, wx.ART_MENU, (16,16))
         imgList = wx.ImageList(16, 16)
-        for png in _demoPngs:
-            imgList.Add(imagenes[png]) #.GetBitmap())
-        # add the image for modified demos.
-        imgList.Add(imagenes["config"])#.GetBitmap())
+        for png in self._demoPngs:
+            imgList.Add( str2Bmp(png)) #.GetBitmap())
         self.AssignImageList(imgList)
 
     def GetItemIdentity(self, item):
@@ -187,11 +182,11 @@ class _wxPythonDemoTree(ExpansionState, TreeBaseClass):
         elif len(data) == 4:
             if not isinstance( data[2], (list,tuple)):
                 texto= data[0].replace('&','').split('\t')[0]
-                if filter== None:
-                    item= self.AppendItem(parent, texto,  callback= data[2])# data[1]
+                if filter in (None,u''):
+                    item= self.AppendItem(parent, texto, 2 ,callback= data[2])# data[1]
                 else:
                     if filter.lower() in data[0].lower():
-                        item= self.AppendItem(parent, texto,  callback= data[2])# data[1]
+                        item= self.AppendItem(parent, texto, 2, callback= data[2])# data[1]
                 return
         
         for item in data:
@@ -203,7 +198,10 @@ class _wxPythonDemoTree(ExpansionState, TreeBaseClass):
             if isinstance(item, (str, unicode)):
                 continue
             texto= item[0].replace('&','').split('\t')[0]
-            newitem= self.AppendItem(parent, texto)
+            if filter in (None,u''):
+                newitem= self.AppendItem(parent, texto, 0)
+            else:
+                newitem= self.AppendItem(parent, texto, 1)
             self.recreateTree( item[1], newitem, filter)
             if filter:
                 self.ExpandAll()
@@ -280,6 +278,7 @@ class _wxPythonDemoTree(ExpansionState, TreeBaseClass):
         return self.recreateTree(res, filter= filtro) #recreateTree
     
 class TreePanel(wx.Panel):
+    USE_CUSTOMTREECTRL= False
     def __init__( self, parent, log, *args, **params):
         '''TreePanel parent, log, *args'''
         self.log=   log
@@ -323,7 +322,7 @@ class TreePanel(wx.Panel):
         self.SetSizer( bSizer1 )
         self.Layout()
         
-        #self.tree.Bind( wx.EVT_TREE_ITEM_EXPANDED,  self.OnItemExpanded)
+        self.tree.Bind( wx.EVT_TREE_ITEM_EXPANDED,  self.OnItemExpanded)
         #self.tree.Bind( wx.EVT_TREE_ITEM_COLLAPSED, self.OnItemCollapsed)
         #self.tree.Bind( wx.EVT_TREE_SEL_CHANGED,    self.OnSelChanged)
         #self.tree.Bind( wx.EVT_TREE_ITEM_ACTIVATED, self.OnSelChanged)
@@ -410,7 +409,7 @@ class TreePanel(wx.Panel):
         # all of the text for an item if the font is larger than the
         # default.  It seems to be clipping the item's label as if it
         # was the size of the same label in the default font.
-        if USE_CUSTOMTREECTRL or 'wxMSW' not in wx.PlatformInfo:
+        if self.USE_CUSTOMTREECTRL or 'wxMSW' not in wx.PlatformInfo:
             treeFont.SetPointSize(treeFont.GetPointSize()+2)
         treeFont.SetWeight(wx.BOLD)
         catFont.SetWeight(wx.BOLD)
@@ -478,12 +477,12 @@ class TreePanel(wx.Panel):
             self.RecreateTree()
 
     def OnItemExpanded(self, event):
-        item = event.GetItem()
+        item= event.GetItem()
+        # change the icon to open state
         event.Skip()
-
-        #---------------------------------------------
     def OnItemCollapsed(self, event):
         item = event.GetItem()
+        # change the icon to close state
         event.Skip()
 
     def OnSelChanged(self, evt):
@@ -491,10 +490,6 @@ class TreePanel(wx.Panel):
         #  
         #self.StopDownload()
         return
-        item = evt.GetItem()
-        itemText = self.tree.GetItemText( item)
-        evt.Skip()
-        self._loadDemo( itemText)
 
     def OnTreeLeftDown(self, evt):
         # reset the overview text if the tree item is clicked on again
@@ -514,10 +509,3 @@ class TreePanel(wx.Panel):
                 callback()
             except TypeError:
                 callback(evt= myEVT_CUSTOM())
-        #self._loadDemo( itemText)
-    
-    def _loadDemo(self, demoPath):
-        try:
-            self._callbacDict[demoPath]()
-        except KeyError:
-            pass

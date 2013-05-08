@@ -11,10 +11,146 @@ __all__= ['PyWXGridEditMixin']
 import wx
 import wx.grid
 
+import wx.lib.newevent
+# creating the evt of paste a cell
+PasteEvt, EVT_GRID_PASTE = wx.lib.newevent.NewCommandEvent()
+BeforePasteEvt, EVT_GRID_BEFORE_PASTE = wx.lib.newevent.NewCommandEvent()
+evtIDpaste=       wx.NewEventType()
+evtIDBeforePaste= wx.NewEventType()
+
 """
 Mixin for wx.grid to implement cut/copy/paste and undo/redo.
 Handlers are in the method Key below.  Other handlers (e.g., menu, toolbar) should call the functions in OnMixinKeypress.
 """
+try:
+    from imagenes import imageEmbed
+    EXISTIMAGES = True
+except ImportError:
+    EXISTIMAGES = False
+    
+class MyContextGrid(wx.Menu):
+    # Clase para hacer el menu contextual del grid
+    def __init__(self,parent,*args,**params):
+        wx.Menu.__init__(self)
+        self.parent = parent
+        try:
+            translate= wx.GetApp().translate
+        except AttributeError:
+            translate= lambda x:x
+        cortar =     wx.MenuItem(self, wx.NewId(), translate('&Cut\tCtrl+X'))
+        copiar =     wx.MenuItem(self, wx.NewId(), translate('C&opy\tCtrl+C'))
+        pegar =      wx.MenuItem(self, wx.NewId(), translate('&Paste\tCtrl+V'))
+        eliminar =   wx.MenuItem(self, wx.NewId(), translate('&Del\tDel'))
+        deshacer =   wx.MenuItem(self, wx.NewId(), translate('&Undo\tCtrl+Z'))
+        rehacer =    wx.MenuItem(self, wx.NewId(), translate('&Redo\tCtrl+Y'))
+        delRow=      wx.MenuItem(self, wx.NewId(), translate('Del Row'))
+        delCol=      wx.MenuItem(self, wx.NewId(), translate('Del Col'))
+        ##exportarCsv= wx.MenuItem(self, wx.NewId(), '&Export\tCtrl+E')
+        
+        if EXISTIMAGES:
+            imagenes = imageEmbed()
+            cortar.SetBitmap(imagenes.edit_cut)
+            copiar.SetBitmap(imagenes.edit_copy)
+            pegar.SetBitmap(imagenes.edit_paste)
+            eliminar.SetBitmap(imagenes.cancel)
+            deshacer.SetBitmap(imagenes.edit_undo)
+            rehacer.SetBitmap(imagenes.edit_redo)
+        ##exportarCsv.SetBitmap(imagenes.exporCsv())
+
+        self.AppendSeparator()
+        self.AppendItem(cortar)
+        self.AppendItem(copiar,)
+        self.AppendItem(pegar,)
+        self.AppendSeparator()
+        self.AppendItem(eliminar,)
+        self.AppendSeparator()
+        self.AppendItem(deshacer,)
+        self.AppendItem(rehacer,)
+        self.AppendSeparator()
+        self.AppendItem(delRow,)
+        self.AppendItem(delCol,)
+        ##self.AppendItem(exportarCsv,)
+        
+        self.Bind(wx.EVT_MENU, self.OnCortar,      id= cortar.GetId())
+        self.Bind(wx.EVT_MENU, self.OnCopiar,      id= copiar.GetId())
+        self.Bind(wx.EVT_MENU, self.OnPegar,       id= pegar.GetId())
+        self.Bind(wx.EVT_MENU, self.OnEliminar,    id= eliminar.GetId())
+        self.Bind(wx.EVT_MENU, self.OnDeshacer,    id= deshacer.GetId())
+        self.Bind(wx.EVT_MENU, self.OnRehacer,     id= rehacer.GetId())
+        self.Bind(wx.EVT_MENU, self.OnDelRow,     id= delRow.GetId())
+        self.Bind(wx.EVT_MENU, self.OnDelCol,     id= delCol.GetId())
+        ##self.Bind(wx.EVT_MENU, self.OnExportarCsv, id= exportarCsv.GetId())
+        
+    def OnCortar(self, evt):
+        self.parent.OnCut()
+        evt.Skip()
+
+    def OnCopiar(self, evt):
+        self.parent.Copy()
+        evt.Skip()
+        
+    def OnPegar(self, evt):
+        self.parent.OnPaste()
+        evt.Skip()
+        
+    def OnEliminar(self, evt):
+        self.parent.Delete()
+        evt.Skip()
+        
+    def OnRehacer(self, evt):
+        self.parent.Redo()
+        evt.Skip()
+
+    def OnDeshacer(self, evt):
+        self.parent.Undo()
+        evt.Skip()
+    
+    def OnExportarCsv(self,evt):
+        self.parent.OnExportCsv()
+        evt.Skip()
+        
+    def OnDelRow(self, evt):
+        try:
+            # searching for the parent in the simplegrid parent
+            parent= self.parent.Parent
+        except AttributeError:
+            parent= None
+            
+        if hasattr(parent, 'DeleteCurrentRow'):
+            parent.DeleteCurrentRow(evt)
+        else:
+            currentRow, left, rows,cols = self.parent.GetSelectionBox()[0]
+            if rows < 1:
+                return
+            self.parent.DeleteRows(currentRow, 1)
+            self.parent.AdjustScrollbars()
+        
+        self.parent.hasChanged= True
+        self.parent.hasSaved=   False
+        evt.Skip()
+    
+    def OnDelCol(self, evt):
+        try:
+            # searching for the parent in the simplegrid parent
+            parent= self.parent.Parent
+        except AttributeError:
+            parent= None
+            
+        if hasattr(parent,  'DeleteCurrentCol'):
+            parent.DeleteCurrentCol(evt)
+        else:
+            currentRow, currentCol, rows,cols = self.parent.GetSelectionBox()[0]
+            if cols < 1:
+                return
+            self.parent.DeleteCols(currentCol, 1)
+            self.parent.AdjustScrollbars()
+        
+        self.hasChanged= True
+        self.hasSaved=   False
+        evt.Skip()
+
+ 
+
 class PyWXGridEditMixin():
     """ A Copy/Paste and undo/redo mixin for wx.grid. Undo/redo is per-table, not yet global."""
     def __init_mixin__(self):
@@ -131,9 +267,10 @@ class PyWXGridEditMixin():
         table= [r.split('\t') for r in data.splitlines()] # convert to array
 
         #Determine the paste area given the size of the data in the clipboard (clipBox) and the current selection (selBox)
-        top, left, selRows,selCols = self.GetSelectionBox()[0]
-        if len(table) ==0 or type(table[0]) is not list: table = [table]
-        pBox = self._DeterminePasteArea(top, left, len(table), len(table[0]), selRows, selCols)
+        top, left, selRows, selCols= self.GetSelectionBox()[0]
+        if len(table) ==0 or type(table[0]) is not list:
+            table = [table]
+        pBox= self._DeterminePasteArea(top, left, len(table), len(table[0]), selRows, selCols)
         self.AddUndo(undo=(self.Paste, (pBox, self.Box2String(*pBox))),
             redo=(self.Paste, (pBox, data)))
         self.Paste(pBox, data)
@@ -151,23 +288,29 @@ class PyWXGridEditMixin():
         return top, left, pRows, pCols # the actual area we'll paste into
         
     def Paste(self, box, dataString):
+        self.GetEventHandler().ProcessEvent( BeforePasteEvt(evtIDBeforePaste))
         top, left, rows, cols = box
-        data = [r.split('\t') for r in dataString.splitlines()]
-        if len(data) ==0 or type(data[0]) is not list: data = [data]
+        data= [r.split('\t') for r in dataString.splitlines()]
+        if len(data) == 0 or type(data[0]) is not list:
+            data= [data]
         # get sizes (rows, cols) of both clipboard and current selection
-        dataRows, dataCols = len(data), len(data[0])
+        dataRows, dataCols= len(data), len(data[0])
         try:
             for r in range(rows):
-                row = top + r
+                row= top + r
                 for c in range(cols):
-                    col = left + c
-                    if self.CellInGrid(row, col): self.SetCellValue(row, col, data[r %dataRows][c % dataCols])
-            return
+                    col= left + c
+                    if self.CellInGrid(row, col):
+                        self.SetCellValue(row, col, data[r %dataRows][c % dataCols])
         except ZeroDivisionError:
             print "Zero division: Num_col "  +str(dataRows)+ ", Num_Fil " + str(dataCols)
         finally:
             self.hasChanged= True
-            self.hasSaved= False    
+            self.hasSaved=   False
+        
+        ## post the event
+        #wx.PostEvent(self.GrandParent, PasteEvt(evtID))
+        self.GetEventHandler().ProcessEvent( PasteEvt(evtIDpaste))
 
     def CellInGrid(self, r, c): # only paste data that actually falls on the table
         return r >=0 and c >=0 and r < self.GetNumberRows() and c < self.GetNumberCols()
