@@ -1511,17 +1511,15 @@ class pltobj( wx.Frame, object ):
         else:
             self.m_mgr = aui.AuiManager()
             self.m_mgr.SetManagedWindow( self )
-            self.m_mgr.AddPane( self.figpanel, aui.AuiPaneInfo() .Left().
-                                CloseButton( False ).MaximizeButton( True ).MinimizeButton( ).
-                                Caption(self.translate(u"Graph")).CaptionVisible(True).
-                                Dock().Resizable().FloatingSize( wx.DefaultSize ).DockFixed( True ).
-                                CloseButton(False).Centre() )
-            self.m_mgr.AddPane( self.m_notebook1, aui.AuiPaneInfo() .Left() .
-                                CloseButton( False ).MaximizeButton( True ).
-                                MinimizeButton().Dock().Resizable().
-                                Caption(self.translate(u"Graph Properties")).CaptionVisible(True).
-                                FloatingSize( wx.DefaultSize ).DockFixed( True ).
-                                CloseButton(False). BestSize(wx.Size(200,-1)))
+            self.m_mgr.AddPane( self.figpanel, aui.AuiPaneInfo().Left().
+                                CaptionVisible(True).Caption(self.translate(u"Graph")).Centre().
+                                MaximizeButton(True).MinimizeButton(False).Resizable(True).
+                                PaneBorder( False ).CloseButton( False ))
+            
+            self.m_mgr.AddPane( self.m_notebook1, aui.AuiPaneInfo().Left().
+                                CaptionVisible(True).Caption(self.translate(u"Graph Properties")).CaptionVisible(True).
+                                MaximizeButton(True).MinimizeButton(False).Resizable(True).
+                                PaneBorder( False ).CloseButton( False ). BestSize(wx.Size(200,-1)))
         
         self.scrolledWindow1= scrolled1( self.graphParams, self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL)
         self.scrolledWindow2= scrolled2( self.graphParams, self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL)

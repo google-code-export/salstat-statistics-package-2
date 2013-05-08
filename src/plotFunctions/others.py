@@ -20,7 +20,7 @@ PROPLEGEND= {'size':11}
 class table( _neededLibraries):
     name=      u"table"
     plotName=  u"table"
-    image=     imag.scatter()
+    image=     imag.scatter
     def __init__( self):
         _neededLibraries.__init__(self)
         self.name=      u"table"
@@ -124,7 +124,7 @@ class table( _neededLibraries):
 class linRegres( _neededLibraries):
     name=      u"linear regression"
     plotName=  u"linregres"
-    image=     imag.linearRegres()
+    image=     imag.linearRegres
     def __init__( self):
         _neededLibraries.__init__(self)
         self.name=      u"linear regression"
@@ -218,7 +218,7 @@ class linRegres( _neededLibraries):
 class ternaryScatter( _neededLibraries):
     name=      u"Ternary scatter"
     plotName=  u"ternaryscatter"
-    image=     imag.ternary()
+    image=     imag.ternary
     
     def __init__( self):
         _neededLibraries.__init__(self)
@@ -420,7 +420,7 @@ class ternaryScatter( _neededLibraries):
 class runChart( _neededLibraries):
     name=      u"control chart"
     plotName=  u"controlChart"
-    image=     imag.controlChart()
+    image=     imag.controlChart
     
     def __init__( self):
         _neededLibraries.__init__(self)

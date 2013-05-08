@@ -16,7 +16,7 @@ class imageEmbed:
     
     def __getitem__(self, key):
         # given the name of the picture it tries to search
-        return getattr(self, key)()
+        return getattr(self, key)
         
     def __conversion__(self, data):
         if 0:# old method
@@ -41,7 +41,7 @@ class imageEmbed:
             jpg_text = 'jpg1_b64 = \\\n"""' + encodestring(open(pathFile,"rb").read()) + '"""'
             print jpg_text
         return jpg_text
-    
+    @property
     def disk(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0\n
         U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAH+SURBVBgZBcE9i11VGAbQtc/sO0OCkqhg\n
@@ -54,6 +54,7 @@ class imageEmbed:
         SkQSVVMqopyuIaUTs0J455VLAAAAAODW0U/GiKT0pTWziEj44PZ1AAAAcPPqkTmH3QiJrlEVDXDt\n
         0qsAAAAAapa5BqUnyaw0Am7//gUAAAB49tEXzTmtM5KkV/y2G/X4M5fPao03n/sUAAAAwIX7y5yB\n
         v9vhjW/fT/IkuSp5gJKElKRISYoUiSRIyD1tufs/IXxui20QsKIAAAAASUVORK5CYII=\n""")
+    @property
     def pageexcel(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0\n
         U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAALDSURBVBgZBcFNiFVVAADg75x777z50Rmd\n
@@ -70,6 +71,7 @@ class imageEmbed:
         gzeqIlUMIOWsN5VACXXdaBoARobm2rJ2NwAAgJyyXrcGEeqplOqUMgAAAABAWcZUN6mGEnrd5sJQ\n
         XzFH6A3lnKNMAowMlCBnBqooBKkqwn9Nnc5DCSHkHWu3Ht0QQlia5UEAmYwsAxl0U0qnymgf/A8e\n
         WStYAg6kAQAAAABJRU5ErkJggg==\n""")
+    @property
     def printer(self):
         return self.__conversion__(\
             """iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0\n
@@ -86,6 +88,7 @@ class imageEmbed:
             Ojo6WHZubg6tra3gDAbDzNDQ0LZOpwPvCqNYIjg6IfhBOcxJSGdL2PtewKeMiKJUBu8MQ6VSKc1b\n
             FFPDv8C7ItXhJ2sYdv/lDmOVodR4Z6R6vucXuxIEyKz+W40AAAAASUVORK5CYII=\n
             """)
+    @property
     def cancel(self):
         return self.__conversion__( \
             """iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0
@@ -100,6 +103,7 @@ class imageEmbed:
             FPZSLKzcGjKPrbJaDsu+dQO3msfZzeGY2TCvKGYQhdSYeeJjUt21dIcjXQ7U7Kv599f4j/oF55W4
             g/2e3b8AAAAASUVORK5CYII=
             """)
+    @property
     def icon16(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3AYYEC0yRx5UOwAAAB1pVFh0Q29tbWVudAAAAAAAQ3Jl
@@ -120,6 +124,7 @@ class imageEmbed:
         thHg41Nn6q6Njh12XGdvXl7u/QArSytzIdPsr6+vO9HR8dz4Zv3fVDCAyQsMbqMAAAAASUVORK5C
         YII=
         """)
+    @property
     def icono(self):
         return self.__conversion__(\
             """AAABAAIAICAAAAEAGACoDAAAJgAAABAQAAABABgAaAMAAM4MAAAoAAAAIAAAAEAAAAABABgAAAAA
@@ -196,6 +201,7 @@ class imageEmbed:
             smYZsmYZsmYZsmYZsmYZsmYZsmYZsmYZsmYZsmYZsmYZsmYZjEwMAACcQQAAnEEAAJxBAACcQQAA
             nEEAAJxBAACcQQAAnEEAAJxBAACcQQAAnEEAAJxBAACcQQAAnEEAAJxBAACcQQ==
             """)
+    @property
     def edit_copy(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAAAAAAAD5Q7t/AAAACXBI\n
         WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH1QoaFAgvgxQ0mwAAAX9JREFUOMuVk0tLAlEYht8jM2Pa\n
@@ -206,6 +212,7 @@ class imageEmbed:
         aagDSiWYpoHKS6UL0LQfBAJjsCw21O7l1QUeHu/dEQSer56dn7oWhzHL07YoilhZXoVlmVC/VOSu\n
         s+A21qN5AHnHcmwbhuHrFTtLVVXkbrIA8OzzGpKm6fD7/RAEAaIoghCCer0OgODj890WpxKx5Bzp\n
         FR8ep7OmaS55fay/KgAoJGLJHQD4BUJZpgMViPfYAAAAAElFTkSuQmCC\n""")
+    @property
     def edit_cut(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAAAAAAAD5Q7t/AAAACXBI\n
         WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH1QocFh0xaEFkXgAAArRJREFUOMuFk11Ik1EYx59z3nev\n
@@ -222,6 +229,7 @@ class imageEmbed:
         gyxTIMSwC+A4Qa1UMl/z8mImna5pXhC8iszMK8mPpNU2fHe5Ng4fOtQwa7HECKUYMA4AADAAANVa\n
         rc/l95/0SxIbAJA5tfrsRUFI7twqiu7q7GyPNxDI8YfDGl8k4lOoVOetouj+DaDzOgfcNME8AAAA\n
         AElFTkSuQmCC\n""")
+    @property
     def edit_paste(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAA\n
         B3RJTUUH1QoOABwVr+LxGAAAAdBJREFUOMuVk7FrU1EUxn/3vTSCJDGN1JQMhSIGXFy0amIE0RJw\n
@@ -233,6 +241,7 @@ class imageEmbed:
         DdDfKNJtbv1ojT6BiOtBql+rNBr1HSGHAQM157qAVsvSqNcpFs8P2xRv2ATWblD7XkNEev71+atc\n
         nloevsLeMaUZNEmnM6TTGbLZw1i7gapwY+Far9k3GgJsiujv9i+350TyIw8W7/DT7YymsP8Tq+0D\n
         ACS1ijFmU1U7BmDhXPcaMYwzglS71/jkFUt/AU/m4Zh4acTaAAAAAElFTkSuQmCC\n""")
+    @property
     def edit_redo(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI\n
         WXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH1gcaCicVP7jtIQAAAdxJREFUOMudk01rE1EYhZ87X02M\n
@@ -245,6 +254,7 @@ class imageEmbed:
         MFU0bFE0bAHwNjkUgoFuB+w3q+5KXUjA/aJhrx5O4MMzRcMuRW6iqsgHgBcF+wrBwQQbzb2yWpC9\n
         GKY2f9jkzzWiJAOM3ZbdLwft+q2Z3I/UbvmU0NWtz687dj9/JLiJI8ACUAU2niTd7wK8+UWn8y+D\n
         39dLugVezzXeAAAAAElFTkSuQmCC\n""")
+    @property
     def edit_undo(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH1gcaCg4AFiOWIQAAAhdJREFUOMuVk09okmEcx7/P877P
@@ -258,6 +268,7 @@ class imageEmbed:
         yc3M0CjI0CgIgIOlvDyVmLv9vm/gHLjoAJHShL/VuFGVw/fheDdN5eryDRF5aJPbmli7cyN/+DyW
         FGGVG8U4hGrPNwU0g0SnMNjtOCy07BIA3Gr4mf6ho1079858jj2pHDujXftvgGzrt6Y+PH9Bde1p
         1fsFBRbiJSu+JBQAAAAASUVORK5CYII=\n""")
+    @property
     def x_office_spreadsheet(self):
         return self.__conversion__(\
             """iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QAAAAAAAD5Q7t/AAAACXBI
@@ -295,6 +306,7 @@ class imageEmbed:
             YXJ5VM/tggAAADp0RVh0U291cmNlX1VSTABodHRwOi8vdGFuZ28uZnJlZWRlc2t0b3Aub3JnL1Rh
             bmdvX0ljb25fTGlicmFyebzIrdYAAAAASUVORK5CYII=
             """)
+    @property
     def x_office_calendar(self):
         return self.__conversion__( \
             """iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QAAAAAAAD5Q7t/AAAACXBI
@@ -333,6 +345,7 @@ class imageEmbed:
             IExpYnJhcnlUz+2CAAAAOnRFWHRTb3VyY2VfVVJMAGh0dHA6Ly90YW5nby5mcmVlZGVza3RvcC5v
             cmcvVGFuZ29fSWNvbl9MaWJyYXJ5vMit1gAAAABJRU5ErkJggg==
             """)
+    @property
     def save(self):
         return self.__conversion__( \
             """iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QAAAAAAAD5Q7t/AAAACXBI
@@ -359,6 +372,7 @@ class imageEmbed:
             b24gTGlicmFyeVTP7YIAAAA6dEVYdFNvdXJjZV9VUkwAaHR0cDovL3RhbmdvLmZyZWVkZXNrdG9w
             Lm9yZy9UYW5nb19JY29uX0xpYnJhcnm8yK3WAAAAAElFTkSuQmCC
             """)
+    @property
     def save2disk(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH1QsKDTgPGbLEcAAAAIx0RVh0Q29tbWVudABNZW51LXNp
@@ -377,6 +391,7 @@ class imageEmbed:
         zf6qGgCyHQ4QJZlbADRNIz3d+s+6ml0DwK7ZV51bfi3qag+yERSf33sZaGNjtP8Elb70qz97tp0A
         AAAASUVORK5CYII=
         """)
+    @property
     def view_refresh(self):
         return self.__conversion__(\
             """iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAABmJLR0QAAAAAAAD5Q7t/AAAACXBI
@@ -411,7 +426,8 @@ class imageEmbed:
             ABl0RVh0U291cmNlAFRhbmdvIEljb24gTGlicmFyeVTP7YIAAAA6dEVYdFNvdXJjZV9VUkwAaHR0
             cDovL3RhbmdvLmZyZWVkZXNrdG9wLm9yZy9UYW5nb19JY29uX0xpYnJhcnm8yK3WAAAAAElFTkSu
             QmCC
-            """)   
+            """)
+    @property
     def config(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0
         U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAH+SURBVBgZBcE9i11VGAbQtc/sO0OCkqhg
@@ -425,6 +441,7 @@ class imageEmbed:
         0qsAAAAAapa5BqUnyaw0Am7//gUAAAB49tEXzTmtM5KkV/y2G/X4M5fPao03n/sUAAAAwIX7y5yB
         v9vhjW/fT/IkuSp5gJKElKRISYoUiSRIyD1tufs/IXxui20QsKIAAAAASUVORK5CYII=
         """)
+    @property
     def water_drop_big(self):
         return self.__conversion__( \
             """iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABGdBTUEAALGPC/xhBQAAAAFzUkdC
@@ -497,30 +514,43 @@ class imageEmbed:
             dEVYdFNvdXJjZQBXUENsaXBhcnThHo5hAAAAJHRFWHRTb3VyY2VfVVJMAGh0dHA6Ly93d3cud3Bj
             bGlwYXJ0LmNvbS80l/SfAAAAAElFTkSuQmCC
             """)
+    @property
     def water_drop_1(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABGdBTUEAALGPC/xhBQAAAAFzUkdC\nAK7OHOkAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAAZiS0dE\nAAAAAAAA+UO7fwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAl2cEFnAAAAIAAAACAAh/qcnQAABZZJ\nREFUWMO9l/uPnFUZxz/f57yXmenutrO7UEqrBYRNLYqJSiVSDAZMTUVFTCERU4hEExP/Bw0/aKJG\nYvzFXzCaeImRgG4Af6Em1oKJ8RJBJWlJgSWN66VhL93uzuWcxx/ed2aX9DLrxvomJ+/MmXPO9/t8\nn8t5RmzxOfDknDxxuwO96M//+YG9vpVzbKsEFtZSa6kbP7HYjUcWu2mC77y8pXOyLW367kkWOnGf\n4FB0tnWTz7LcPfZ/UyC5F0vd+NHFbrpxuZf2dqJ/ujHVmpj58etXnsDuH5ymCLYP9KlMtJqZsvHc\n7mmX4WAnuq4ogXf86DU60Vtjmd23vbCb22Vgsgy0y7C7XdpndhTaefjpM1eOwD9XnfHcbp0o7Ei7\nERqTzcBUIzDdMJssw6F2aR/rJ8Ijv/rHps/cdBAeeGKOlX6aMnQ0N2YamVEGUZgIBkGaCuKhzPTC\nzGS26ZTYlM/u+Pkcq13PzPRgZvpGM+iqZm40gigMMhMmIegE8Vhm+tquVlj68q1T/xsFdjYL5r23\nP0ifawRNj+WilRmNTJQmMhNBgChB95t4YanTfxoYWZxGKnD37Bn6nnbk0qPt0r5w/URWjuXGuV71\nexlEbsIEQiTcgV8G+NJ0M3v18/sntk7g3T87w2TuoQwc2TuefevuPY1d+ydzeglOLfZ5YzmRqSIQ\nrCbgTnTOOXxV8O2J0s4fnRnfmgve24a/r+rmq5v2xXuua+667ZqCTh9Wes6ebRkxJXqJioBAguQQ\nk4/1naOO/76T/Lkfnl7xz96w7b8jcNfsGebXmCiMh67dFg68azIHh7Xo9L0C3V4YncgQfPAkF9G5\nKbk/AryUi/lL4Vy0Duz76Wu4ewjwkfHCHpjZkTfGC8MknMrKvoNJlAGKOh0HaVkEUQZCYTqUSZ90\nyH9xemXzCtw0ltFNenswPbyzFa69ZSqnE521COe6sNKHTqwCqBgE4AYJqjgQBjui+4MOzzcK/8um\nCSz0Uj6WhXsbQR8ypNeXI50InSTW+hVwZiIf1oBqTlArJKJDX46S3pfc7+30dArojHTBB5+aIze7\nLpjuawRNSPDqUuL0krPYAXeGkT8YA9mH71CRy01kRsukj5u4/pm585tQwDGDO3PxnmZmNENVcoNE\npuGh6wCCYGB1RjtO8uq7vJLE5e8E3ZHgJJAuq0Am227SwSJorAzQyEQzE41AXfMr2SsykNeW5wGK\nUMVEbiILkAsyg8wYC+IDBuMjFTBxVWbMFEEqa+vLYDWoCEMFqhJcVBdRVYrrGOgnkFcjVVmjJL/R\noQ0sXpZAEBNB2p7XQTawKAhMlQIDwKxWI6/nUJUBohI6GQSv9pk07u6tkQoEUz834sDfA5/bWwhQ\nK1GBD9ZQZ8AgG6L7cL2Jvos4kkBuLAbT2crK2nLW00wXJVKREFWBcpzoA2DVe/zfLi2PTMPMdDY3\nXjaRbHjAhrGBjAnCsCaIPGxUa+N6jwZ/k3hzJAEnLefScZMWqC0e1Lh1cK3P1++h1Fx4xUr6l4nj\nMbI2kgAuz0y/DsZxIOHrXYUPh+N1hA/uhugQU/XZAffBaqLgmNBv0YUNygUEZg/vRtJ8YXpc0qno\nXgP6W4gkqqpYgTu95HRTdVPG9fQD+KvE9xKcvWtPk5EEaoCUm44F8U2HuZTWrUo1aH3v009OL0E3\nVgR69VytxivA1wUnuER7dlECj995NdFZzcRPgvRogpeSk4ZS16PvVdGprIdurIj0EjG6/8HhKw5P\nOnRvv6ZxMajLt2SPvbhAuwxFK9OBRtDDhenDZWB3YSqLuiOu2jERKv92HN5Iieei+/cT/DEl+rdM\nl5fEuGxL9uL8eQ6+bax7/5/ePDH7/umTwG3JORzhYHRu6DtNOXjylSRekfQb4FmH35UKZ1c9cmLE\nX5//AH8LNAsvJlhUAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDEwLTAyLTE2VDIyOjM3OjUxLTA3OjAw\nhe8pcwAAACV0RVh0ZGF0ZTptb2RpZnkAMjAxMC0wMi0xNlQyMjozNzo1MS0wNzowMPSykc8AAAAy\ndEVYdExpY2Vuc2UAaHR0cDovL2VuLndpa2lwZWRpYS5vcmcvd2lraS9QdWJsaWNfZG9tYWluP/3q\nzwAAABB0RVh0U291cmNlAFdQQ2xpcGFydOEejmEAAAAkdEVYdFNvdXJjZV9VUkwAaHR0cDovL3d3\ndy53cGNsaXBhcnQuY29tLzSX9J8AAAAASUVORK5CYII=\n""")
+    @property
     def delete(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlz\nAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAIaSURB\nVDiNjZI/SNVRFMc/5977y/fkZYMkhK46iDx5LW4Ngi1NOWRB2BYRDba7GI6llaHRW1zKoMaadSzE\n3B6IWG8QHUwlEl++d+89DT/fU5HMA1/u8D1/vt9zjxSLRQvcSZJkBGjlfPEnhDAbY5xxIvK4ubn5\nSWdnZzabzSIi/62u1WqUy+Wx3d3da85aO9LT05O9vLiIW1gA1TObqCqhUODS4GDT/Px8v4sxtuZy\nOS7MziJbW+fSb5eX8UNDJElSMwDGGMT7o4zePLS1oaopcjm0rw8ymZQPAWMMAAZARFBVYozE7m6Y\nmYb379CrBbTlIky/QiafofeGiSEQY2w0cHUFMUY0BNjZxlQqkM1iJp6iP7eR9vZ08OoqGgIiclKB\nMYYQQoofZaoPH8H+PjRlGsV+5jX+0+dG3ikLMUbiIem/r6E7O0c7CQG/tEQIIbVwqEJEjjWok86R\nKb5BOjrSb6tWwVoyr6aQfP7fClSVECPSm8d0dQFQmZjk991hdG8PMhns9YHGEuu34k5Z+PIV83KK\nuLFB5cNHAH7duk1m8CYHc3Op/GPH5uo2Y4wpvGfv+Qs0xsYKqqUS1VIp9W0MRrXBGRE5qFarJAMD\nqHNokjTe6BzRWqJzJ7ikvx9VxXvvnIi8LZVK9wujo65lfBxrLcaYBk4c2SG896ysrACsOe/92Obm\n5pX19fUbInKk7YxQVWut/Var1R78BWN4K9NzAEw1AAAAAElFTkSuQmCC\n""")
+    @property
     def exportText(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAABmJLR0QA/wD/AP+gvaeTAAAACXBI\nWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH1QYYDQkr4Wx8tgAAAZhJREFUOMu1ld1qGkEYhp9vVo+a\nnCriDSgq/lGStb2bXkQJpD1IYjD2wvpHQQRRPBHaHiwoFAIhB2X360Hczbgb3AmmHww7s7s88847\n7zDwn0rizmg8vAA+HAJT1cuz9+cfd16OxkM9tEbjoca8QnrW1WqF53moKiKCyMOi7H48tpRSrVZ3\nOBmwDZjNZhlIujqdDqqaeb8X3Gw2KRQefwnDcGf8lPpcsIgwnU5zN6zb7WKMcQMbY1BV2u02AMVi\n8dkJyYC///iGfzJARJhMJrkA3/cJwzAffPL6lEqlQhAE9Hq9p9VsfbYT42RFEASICMvlMldxq9Vy\n9zhutVptr2LP85Ic54LTS4w3054wvXQnK758/cybwVtEhPl87hQ3p1T4pwNKpRKbzSaxwhiTqLYt\niPtRFLl5vF6vEREWi8XLHRC76vV65nCkfXdWbG/GPo/7/f7zcmxXo9FI1MUK009VdYtbuVx+kasp\nAUdRdHXz6fr8ENivn7/fZe681GRHwPG2HQGvAAN4gAJ/gXvgD3AL3G3H4fY7/wAc1bAz9NMAcQAA\nAABJRU5ErkJggg==\n""")
+    @property
     def spreadsheet(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI\nWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH1QQWFA0J2YhE+gAAAk1JREFUOMuVkt9LU2EYxz9nm256\n1vxV4FmKlXEIUiGRLIoKlBEUeCGZFIHdSH9FY111GzTQm1KDCq0LQ3LQhRQUaHc5zWyUDPRITVtb\nS885O+/pYj/s1y58rr4v7/P9vN/3fV5peHj4yfr6ei+7q8vBYHAcgFAoZO+2QqGQXSC5CiISieSV\nhKZp+P0KAJqmoSj+vF5jYGDgjyhFgKZpSFIOIEm59c7eWsm7FAGKX8ErewGIxWL09PQAEI1GaWlt\nQbIl5qPzpQGGbpAhg4QEQCqVIi9Jf0+Rj1ca4HG7kb1eCq/j81UV/PiqdnRJwLau50/MtX6MPGf1\n7h22FhaJpzO5JrmCybZWvG3t/0ng8SDLMgD26D0+zc3RdOUiZZ0qwiGRFQLDFEgOD03Ppnh0vONl\n/+zb/iJA13UANh6MUbOyTMONPrLpJMn4KqYQGJaNs6oWUwisThXn0uqZEfXw7SLA7XYjyzKJyDT7\nr57nRzxWNJpC8KH+EJuGC1NkMSQL77F61KeTff8ksDe/YRlb6NaOWVLK2dPhJvy1C8PUUWu9CMvk\n6OhDj+PvBGZ1Dc59DeCrQRcWuiVwqpU0N6epz65xsnEvX1IpfCvvyXg828UEgUAgN43BQd7dH+Pg\n9V7qDhzBdrmoPl2HqHAQ7JB4/DlNY3yR9skJKlV1XAqHw1OJROLC77OtnZlBfvMa89wJyhqq8Zy1\n0Q1BZsNkekrQM/uKClV9cW1hIVDqfzDS3X1JX1q66U4mVefPTLltg5Blw6Uoywe7um6dGhqaAPgF\n9PUj6TDrLfkAAAAASUVORK5CYII=\n""")
+    @property
     def graficos(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAAAAAAAD5Q7t/AAAACXBI\nWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH1gELCzgrVaRReQAAAcRJREFUOMudkk9IFGEYxn/fzLTt\nEia07WGnUsiKXfsHSxkbgrelg50iRDaFILyJskJkXW3JbObgbbeku+apCIOILum5Dg1Iwkxh46HW\nUzM4fux0aI2NnGL9Lt/7vXzvw4/nfcRgcWBSSllmD0fTtLvi+sC18HFlDsexWxp2XZe5p08QxaHB\nShAEI3shiMViVQHw4OH9cPjGTTzPQ1UUBBD4PqGU7G9rAyFQVBVFURBCoOs60zNl7ty+J7QdtXQ6\njeM4fJmf5/DKCic7OkBKbNvG7enhWLFIHfj8dR1d139TKM1I3yyLi65LprOTuufhb25ySNvHqXfL\nvC//8rmr68SfRjY/apZFXVXxNzbYQvL6SoGF9Qyh3CL7tsJ5YG3tUzTB8UKBl4uLuL5P7dJRDuZt\njmg12j+8Idt3GoBMJhtNcCCZJD07y7OpKWoLr/ixvM13+wK5XI6+W5MEnsfqqkUqldpdIB6P093b\nS/fS0q5rSyQStCeT0QSW9fHfixdw9sy5aIF8/nLrcW7c1emZcqtprP73x9j46IhhPNoeGx9tPeqm\nafSbphE26tA0jf4IW/4eBJ4DlEoToqkfNsqrpdLEi53+T49VmPwrl5RfAAAAAElFTkSuQmCC\n""")
+    @property
     def exporCsv(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA7ADsAOwdIxY2AAAACXBI\nWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH1QkPCjsE7Rz77AAAAZFJREFUOMuVk7+O2kAQxn+DVqIM\nzgMgCgo3SMdbRIqoUvAIuZrGDQdyB/QUNPScriNNJN6BlFTISAiwgysaaJgr1usYTnfRjTS7q9HO\nN9/8k8lk8nI4HH7wOWn3+/1nAMIw1M9KGIbqkIx7pGmawwuCCkgxptjjq+fdUDH33EQkuy0QgKoD\n0ze5mGIE54AIogW7ZAxU3geQIgPNDIIFEgf8EQPE5u7+i+XjfJX7olgpFVNQ0eyP5LeK1SSJefz5\nyG63ewdAHYcC40z/JjG9Xo8gCOh0Olyv17cAUuTnCioQJzFPT9Z5s9ng+z6r1YogCB5uaqDyr/8l\nBEVJ4iSPvN1uMcZQr9dJ05QoipZBEDTv5kARzYZIJHfe7/cYY/IZKZfL1Go1oihalu7baPutKMpo\nNGI4HGKMyfV0OuH7PlEUATRzAM/z8DyPSqVi9UuFarXKYDBgOp1ijOFyuQCwWCwAmrPZ7I+Mx+Nf\nx+Px+0erdz6fWa/XtFot5vM5jUbjd7fb/XbD/L/7224/AEsX2dlfAZgsvxGj7otLAAAAAElFTkSu\nQmCC\n""")
+    @property
     def calculator(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAABmJLR0QA/wD/AP+gvaeTAAAACXBI\nWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH1gcEESQXWi6z8wAAAuVJREFUOMu1lUtrG1cUx3/3MdId\n62HZjjchwQQ3WJELlmvoC5xCSOm2lCSLZtEPUOgXaJb5Alkkm9BFKe2mGG8MpZvQRbc20mgytUWS\nXUIgkYVGzkOve7sYWXWJrCSEHDhcZjj3N+f8z5l74T2ZAPjm0tc/KKVuvCvMWvv9xu+btwA0gFLq\nxtVvvwPATIm3Br587gD49befbwL/gUcB3QPMVI7tnTtjAe32MzIZnxcvOiglMSbN2kcXkn2p7P9i\n9ThAHDfGgh/cf4hSkuZ+mzh+xqeff3hsFWPBZ86M37CwUEIIgXMOIQRCiDcD3/7pF86vf8YnH6++\nsb7bOwF3/vqbq5evHA9+8rTBxuYWG5tbbzdaYzKXRx++WF9nyveRUiY+LHeSZzMZzi4uTpYin8ux\nuHAaa+HkqVM8fvQIawfkpgu0W02ctfiZHEJKmvsNpBTgwDdmMvhefY9zxSWcc4RhyPLyMkopwjCk\nVCohpSSKIhyCtdUynufR6/WIomiyFJ1uF+fcqOsAg8EAEHQ6Hay1yR/mHEop3HAFQavVOj7jXH6a\najUAITgxP8/duxHWDijMzrFXr4NzFGZP4IBqtTqCTxdmJkvRjmPK5ZVEiiiiVDqH1pparcZquYyU\nkkqlitaalZWVUVVB+BopcBatNdZabL+PUgqtNVLK0RRIKYBEAs/zkFKCHXBwcHB8xlPZHJVKBRDM\nzc8T1GpopchkswRhiHAO4/t0O51kivJ5ms0m4CZL0e28pFgsAlCv1ykuLaGU4p/dPc5+sIjWmt3d\nXaRS5PN51HAdZ/LwTAbod3sYY0in03S7PVKpNMYYtJJorTHGJLIAcRzT7/eJ43jsGa8B7/BN2vcJ\nggCAwswMQZA0Km0MQa1GOpVKApXH9s4OSsrhVBSOgj2gpw/l2G80+OrLi6/MI/BKY15j+hBMq9W6\n9sefW9ff9WqKW/GPR/VIATlgFsgPvyiOaj/B3ND7QAzsA22g9y95DgxiphPiiAAAAABJRU5ErkJg\ngg==\n""")
+    @property
     def textEditor(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI\nWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH1QkWEjcpO1ICSAAAActJREFUOMulk01oE0EUx38z3aNI\nFiIt4rHgKaBYKwEPghWEeOxF0LYnr6UXFTyKIMUg9SJ+gJoWijG9WxoRTVwQ7cFi040bTP3A1Wzr\nEBVakc14MEOzbWorvsv/Dcz7z29m3oP/DGGS4l36gBng2FZ6eIi8qZMAl0cvnQFmDh532I62ElhN\nvQHw7fk5tqNXT0rdrDstjdPeVEBZFVjdk6esCvzoethWX0xLBseKHOkfBhg3BMTjccSJpT+LfU1l\nTX3fJ39PMnTtGR+ejDO3EIRAh9V6H6UU9Xp9w0sHQYCbSa0Ve8t8LU11AD0RA9u2sW07Uuz7Pm4m\nxeBYkcXHGV6Vl1GlHEDPyGRj9q8E5uSBdIHFfIa5twpVyvFz/0XOn70wC4hNCbTWFNK9DFx5ijd9\nh8rn76j5B7zvGqazzTdGCLTWZLNZfslDzDsO7z7VWXo9Bb1pdq2sANo0oW5LEIYhuz+mefSlm/u5\nHN3yJTv7bpFMJnFdlzeVBYyLXE9QrVbxPI+RyQZHOyus7kgQHhglkUhgWRaWZUW6eANBLBZDa02t\nVkNrjZQSrTVCCIQQrdsbEQOlFI7jbDp1xmR9GIOJm7evn/qHKZ4wyW9aneiYeQn8EgAAAABJRU5E\nrkJggg==\n""")
+    @property
     def plus(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAAAAAAAD5Q7t/AAAACXBI\nWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH1gELEAARlER4oQAAANBJREFUOMvNkb0OwWAUhh/SxWC3\ncgfSuoHGYDZbO3RxB0TSxGQXsVoNJoOEG+hnN1osVmnip98xEIr6iwTvdvKdvPme58Cvk7j3YDk9\nHzCPo/K7FStuL/mg3PRcG8+1iRS9VfBSPi4w7jDHOZHIeHJiRJlb1SJbLSSAbXje91wbERA5WK93\nxubNDwBW65D5MkAEtBa0QLARwlDYaUFryGVS8QiAanQmFwjlUgGAwci/JlJP5VhOT4bThTT7M7ni\n//IZ89n0a2eMiaq1T7YVf5s9VHJLC4uyd44AAAAASUVORK5CYII=\n""")
+    @property
     def minus(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAAAAAAAD5Q7t/AAAACXBI\nWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH1gELDzsiAFwSwgAAAIRJREFUOMvtkbEJg1AQhr8HadzA\nOivoCBkjrW1GCBkgC4itc8QFdIjUtiJE8+5PIcqzszOFHxwcB/93HAcH++PmJs3KGkg25pq6uKYA\np2CYPG8XRhMOGL1WCWkqB9zz17IoFNB9PO+2RwIzYYJ+EN6LrwkzOMfRShwKmkdebT7h+P4/8QOs\nUy3bRuSA2AAAAABJRU5ErkJggg==\n""")
+    @property
     def folder(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlz\nAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAHCSURB\nVDiNpZAxa5NRFIafc+9XLCni4BC6FBycMnbrLpkcgtDVX6C70D/g4lZX/4coxLlgxFkpiiSSUGm/\nJiXfveee45AmNlhawXc53HvPee55X+l2u/yPqt3d3Tfu/viatwt3fzIYDI5uBJhZr9fr3TMzzAx3\nB+D09PR+v98/7HQ6z5fNOWdCCGU4HH6s67oAVDlnV1UmkwmllBUkhMD29nYHeLuEAkyn06qU8qqu\n64MrgIyqYmZrkHa73drc3KTVahFjJITAaDRiPB4/XFlQVVMtHH5IzJo/P4EA4MyB+erWPQB7++zs\n7ccYvlU5Z08pMW2cl88eIXLZeDUpXzsBkNQ5eP1+p0opmaoCTgzw6fjs6gLLsp58FB60t0DcK1Ul\n54yIEIMQ43Uj68pquDmCeJVztpwzuBNE2LgBoMVpslHMCUEAFgDVxQbzVAiA+aK5uGPmmDtZF3Vp\noUm2ArhqQaRiUjcMf81p1G60UEVhcjZfAFTVUkrgkS+jc06mDX9nvq4YhJ9nlxZExMwMEaHJRutO\ndWuIIsJFUoBSuTvHJ4YIfP46unV4qdlsjsBRZRtb/XfHd5+C8+P7+J8BIoxFwovfRxYhnhxjpzEA\nAAAASUVORK5CYII=\n""")
+    @property
     def folderOpen(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlz\nAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAHuSURB\nVDiNpZM7T5RBFIafme/bXcNHsiFeEhsttTAhVtR2Flps4T8wsaMmxM6S+AsspIF/ocZQGC1MiMTE\nSoxIIrALGNjLnDPnWCyLLCgUnmSqOe9zLu9McHf+J8L8/PxLd3/4l7uuiDxaWFh4fy5gbm5ur9Vq\nNc0MM2PUUafTYWVl5VVVVQ9Gyevr6wAsLi4O/CixFBFXVba3t8k5j0FqtdpMu90+cHfcnaqqcHdm\nZ2c/AXdPAARVxczGINPT05NTU1NUVUVRFMQY6Xa7LC0t3Rl1VaqqqWZy/nNGABGh2+0SQiCEQIwR\ngJTS8eZLEfGU0hgg58yobXc/A1DV4yWWKSVTVXLOLH+M7PUiUDvXOqvu12aeLPdCjF9LVUVEyDmz\n24s8fXyPIoYjj4B/vJOkdunZi7e3SxExEcHMCDgTjYK1779wH+oJp3wHYgzcuDxBCFgpIqY6BBQx\nUMRADOGM8ERl+v1MvAqAH9k4XFpZFBQx0CjjGeFAjF7KZHMaRRyNaaWqWkqJgwE0J+ts7Q/op4z7\nsNpAM0ltbBVlEdja6w9HCCGYmfFlp871a012D4W+GL2kx6LTI8UQ2Ng5JIa4VbrD6ias/qxzq1nn\nzeoPsl38QzvtfbLb6zI3rrz7sFndBGft87cLhSdiA7PnvwHfolGj0Ct3mAAAAABJRU5ErkJggg==\n""")
+    @property
     def about(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAABl0RVh0
         U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAM2SURBVDiNbZNbbFRlFIW/8//nWlEawIZO
@@ -540,6 +570,7 @@ class imageEmbed:
         7dpxv11V4dPKC5eiaRrxxCi/9Y9473zyXWZ8crop63k3h+n/4iylqFNKBQGklF2zs9mIUuqWOP8H
         ZvdMlKLbimEAAAAASUVORK5CYII=
         """)
+    @property
     def preferences(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH1QkaDBM5i2PCSAAAAfBJREFUOMulkktoE2EUhb+Z+EyK
@@ -553,6 +584,7 @@ class imageEmbed:
         TKgXYMxpAMDuXR72+A7x88cvsvkFgHCrSS6vUv1Y/SNsEWBl4zv7fQHa9np4PvMBIPxpcnTaSTRN
         kmvrqwtA0r5CMJK6BEw4uNvEO+E3N+LV9uq8VLwAAAAASUVORK5CYII=
         """)
+    @property
     def stop(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH1QoRFy0Na8CcwAAAAsFJREFUOMttk7tPU2EYh59z6QVt
@@ -570,6 +602,7 @@ class imageEmbed:
         lbKhPQqp2jFtduI/eLD77OnTLkUIbMtCWlbtTyST1qdsdsaGrigsbrvGrSICenayV4VpG85FYXkz
         9wfHTVL214b3FAAAAABJRU5ErkJggg==
         """)
+    @property
     def find(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA8ADwAO80BmcbAAAACXBI
         WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH1QsFEA8FJf2tLwAAAfZJREFUOMudkk1rE1EYhZ87ySRN
@@ -583,6 +616,7 @@ class imageEmbed:
         K9J8DcMwcDhUTpyNsLxWZMtUGOyVrC++ZPjgCAAf5t+nHj54dFh0a9jV65enAoHgZDPn6/URHg3z
         O5ut92X1K4J/RCwelQ2R/xIAlFg8agGUDYO/Boz2038z5y4AAAAASUVORK5CYII=
         """)
+    @property
     def findr(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH1gEGFgQD9XZoggAAApVJREFUOMutk01sDGEYx38zs7O1
@@ -599,6 +633,7 @@ class imageEmbed:
         72Z5w2PE5Dkkk0lyuTyAMjFIgKq68XrdDiCTyZBIJMhmsyiKgqqqf8sFYE8AKIpy+0LLue1CiAlT
         FEuSnH+Hx+NpB3L8D/0Gec0bDM69rVkAAAAASUVORK5CYII=
         """)
+    @property
     def runIcon(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH1QwGESQhztmtXgAAAiFJREFUOMudk0trEwEUhc88Mskk
@@ -613,6 +648,7 @@ class imageEmbed:
         LkAJQBTtNDNz39J0bWU0O3orIIfmj6vqxn5B6t4gIGN7u7V5biw1fUI9OQcwm4qiUM9RJqIwAAPA
         GsMw1n/XkojYg9T5FzBGwR9B4E5iAAAAAElFTkSuQmCC
         """)
+    @property
     def documentNew(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/ADpAE8017ENAAAACXBI
         WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH1QISDiYc07YZKQAAAWpJREFUOMutkE9LW1EQxX9z741W
@@ -624,6 +660,7 @@ class imageEmbed:
         1zwiQhRFNBpJT9QwIfp/0497EYY5eIh8x8GwpcHZsB0zqd2xEXK5HI+Bi+P4Q5IkxX8hxXH8nv+F
         K8w9mWB7rBTJAAAAAElFTkSuQmCC
         """)
+    @property
     def icon24(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3AYYEDIn55m+TgAAAB1pVFh0Q29tbWVudAAAAAAAQ3Jl
@@ -658,6 +695,7 @@ class imageEmbed:
         evbsdv7vq+Lu+uSTC+LIyGh7JrtwSOd8p21ZXYZheAGgoqKiKEnSoNvtPh8KBU+sWtUWf+o7T9oP
         ivNf+MplYm5My5MAAAAASUVORK5CYII=
         """)
+    @property
     def logo16(self):
         jpg1= PyEmbeddedImage("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3AYYEC0yRx5UOwAAAB1pVFh0Q29tbWVudAAAAAAAQ3Jl
@@ -679,7 +717,7 @@ class imageEmbed:
         YII=
         """)
         return jpg1.getIcon()
-    
+    @property
     def logo24(self):
         jpg1= PyEmbeddedImage("""iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3AYYEDIn55m+TgAAAB1pVFh0Q29tbWVudAAAAAAAQ3Jl
@@ -715,7 +753,7 @@ class imageEmbed:
         ivNf+MplYm5My5MAAAAASUVORK5CYII=
         """)
         return jpg1.getIcon()
-    
+    @property
     def logo32(self):
         jpg1= PyEmbeddedImage("""iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3AYYEC0hw6AV5QAAAB1pVFh0Q29tbWVudAAAAAAAQ3Jl
@@ -766,7 +804,7 @@ class imageEmbed:
         tDhKNU9kJ0CgKpEAkcFYLDZQGY9v/Ys//8YPlVLjv82+/w0gYF0armjmNAAAAABJRU5ErkJggg==
         """)
         return jpg1.getIcon()
-    
+    @property
     def logo64(self):
         jpg1= PyEmbeddedImage("""iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3AYYEC0R5XklSQAAAB1pVFh0Q29tbWVudAAAAAAAQ3Jl
@@ -901,7 +939,7 @@ class imageEmbed:
         Qvbv/wGeTVTTDVh63gAAAABJRU5ErkJggg==
         """)
         return jpg1.getIcon()
-    
+    @property
     def backward(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAK
         T2lDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjanVNnVFPpFj333vRCS4iAlEtvUhUIIFJCi4AU
@@ -961,6 +999,7 @@ class imageEmbed:
         q3SM/8eJno2StAu2w4LWLJ2aI5cfRjIC9xtQryL/NMr1Ksu+z+nnz/j4ep2u7w2exIG7UK/y0him
         372nsfaEn/9NEJNs1Spcbm1xQxRPk3J+DQBnP6UBYL92HAAAAABJRU5ErkJggg==
         """)
+    @property
     def forward(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAK
         T2lDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjanVNnVFPpFj333vRCS4iAlEtvUhUIIFJCi4AU
@@ -1020,6 +1059,7 @@ class imageEmbed:
         nB2EwxoWl6j7Pi/F9tpovAmGd8twi5G+i8fB/4PMviVstZn0Jvb+DfOvl9i2UPnM1vo6NdvVct+A
         +SXqQZ2SWB50t9wXQGkWN4P+vvPfAQDPNKs7uG1eKgAAAABJRU5ErkJggg==
         """)
+    @property
     def refresh(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAABl0RVh0
         U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAMiSURBVDiNbVJNbFRlFD33e++V+a0zbQdb
@@ -1038,6 +1078,7 @@ class imageEmbed:
         SXUEAJYfSTFN5OZO3zy5LfmgsPBJ//c35o8P3CwN384jP1tG1ZUQRCjMl+S5y6OLUqmMbZljAOC3
         8BOA7bZlci0wA8B7DYa2VzFvkFLFDV2bIcJQ1ZGHbMv82w/3fy5VdmoTZczGAAAAAElFTkSuQmCC
         """)
+    @property
     def goHome(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAAAAAAAD5Q7t/AAAACXBI
         WXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH1QoOFCUTUyrSOwAAAetJREFUOMuVk79rU1EUgL97+95L
@@ -1051,6 +1092,7 @@ class imageEmbed:
         AJcuTnM1GkPqcS5Lk+1NQhUY/RX8m37vpe/eDqLZOHD1A0EkEsG2bRKJBAKJEBCLxXAcZwCyLCv8
         F67POq8Ah+Fi9eWL13f/AFb41aOFu4AaAAAAAElFTkSuQmCC
         """)
+    @property
     def sixsigma16(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3AcBARwRLrHaGQAAAB1pVFh0Q29tbWVudAAAAAAAQ3Jl
@@ -1069,6 +1111,7 @@ class imageEmbed:
         ArKMK+KWcc+YG+4GuUByLBetBxPtDR0hsEyQ1KJZS1P3drMinqrIDFcF2q2SWuchSBX+A40aVd72
         vVRxAAAAAElFTkSuQmCC
         """)
+    @property
     def adaptative(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA9hAAAPYQGoP6dpAAAAB3RJTUUH3AkFDyYcT2V84QAAIABJREFUeNqNfXncV2W1/VqHlxlE
@@ -1349,6 +1392,7 @@ class imageEmbed:
         iXTs2JEvbNrZOGfrnnxmuA7+i0omMI0K80wKHXEQupXl05EhJDBw40Lp1mMHzt2+YzuElopwknNp
         S9/v/wNv7k+QNYBKYgAAAABJRU5ErkJggg==
         """)
+    @property
     def boxWhisker(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAAG0OVFdAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA9hAAAPYQGoP6dpAAAAB3RJTUUH3AkEEB4iNl1emQAAIABJREFUeNrVfXu0JVV55++rx3nd
@@ -1587,6 +1631,7 @@ class imageEmbed:
         NBoxAOr3+9bt4qvuSzPfbOndrWQXfdMp04ph265eP0ajEaIowvz8fMnshD2kHf8Pmm161loUJg8A
         AAAASUVORK5CYII=
         """)
+    @property
     def linearRegres(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA9hAAAPYQGoP6dpAAAAB3RJTUUH3AkFDygraVv0YAAAIABJREFUeNqlfXl0nnd15nN/36fF
@@ -1882,6 +1927,7 @@ class imageEmbed:
         5MDrQuY1lJSl25AeUOkc2NuyQ11EyFC8PLNtmYmxkbMrVg9PKwr9df/8XwCNoRgD1XBcAAAAAElF
         TkSuQmCC
         """)
+    @property
     def normalProb(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAAG0OVFdAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA9hAAAPYQGoP6dpAAAAB3RJTUUH3AkEECwZaibjzAAAIABJREFUeNrFfXmYFNXV/nuql+nZ
@@ -2131,6 +2177,7 @@ class imageEmbed:
         GkrRlVHcd8p9ZoJi2BhB0lSRXV1d+Pbbb1OiXxURLLZ4aw83/9+2bVtyJ7Js8U78N2zYYG5MnRPe
         jv+6devSbsm1/eYtvb29+Prrr/PafiKi/wfpiyH9ZtXP1QAAAABJRU5ErkJggg==
         """)
+    @property
     def scatter(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA9hAAAPYQGoP6dpAAAAB3RJTUUH3AkFDycUWKXFkgAAIABJREFUeNrlfWmYnVWV7rv2OZVT
@@ -2426,6 +2473,7 @@ class imageEmbed:
         DkJYMwDdz8a2TSMltkhhD8MIzyBGlkCUaYuovDwRmfL0WLwdPnirThLgHYhhB6aHoJlIKTgl7tc7
         ic4oldlKZlemPX24YP4vfB1Xwz6LDUQAAAAASUVORK5CYII=
         """)
+    @property
     def ternary(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA9hAAAPYQGoP6dpAAAAB3RJTUUH3AkEEQopjuM6cwAAIABJREFUeNrtfXd8VFXa//fOTDoh
@@ -2677,6 +2725,7 @@ class imageEmbed:
         qKqqwn333ceduM5IpVJKTU29whMYBitXrhTcpbfLjVvy8/Nx4cIFjqX96U9/wtSpU/H/AbTsUpfV
         wRyOAAAAAElFTkSuQmCC
         """)
+    @property
     def bars(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAAG0OVFdAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA9hAAAPYQGoP6dpAAAAB3RJTUUH3AkEEAUwbNLkSwAAIABJREFUeNrtfWuUHMWV5ncjs6pb
@@ -2832,7 +2881,8 @@ class imageEmbed:
         9etD99W8Shs/efQtW7Zgy5YtvmdN/IkIBw4cwMaNG0OBGWqZBPm/9957+PDDD300913ddw/Ku27d
         OmQyGXUTCBARXnjhhdBHJSK888472LlzZ4iH4zhYs2ZN6FsJIfD666/j3Fnn4l8X/yseP+lxPP75
         x/HUqU/hn+f9MxomNnjP/3+ZtywvwLXFgQAAAABJRU5ErkJggg==
-""")
+        """)
+    @property
     def HorizBarChart(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAAG0OVFdAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA9hAAAPYQGoP6dpAAAAB3RJTUUH3AkEEDIduQoYCgAAH8dJREFUeNrtXX2wXVV1/6179/sK
@@ -2980,6 +3030,7 @@ class imageEmbed:
         CDzbphERtmzZQq6AI2PWtXMIp1iR2PKNiAhPPfUUtm3bluPZYhcuEsaaaPxdW/qWLVtk/H7htnFl
         8ScibN26lZ5++mkZ+5/Dv0hIlPj/P4iLw01f1Fs9AAAAAElFTkSuQmCC
         """)
+    @property
     def barChartAllMeans(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAAG0OVFdAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA9hAAAPYQGoP6dpAAAAB3RJTUUH3AkEEAgpvRcyxgAAG4ZJREFUeNrtXV+oZtV1X+vM0Xun
@@ -3108,6 +3159,7 @@ class imageEmbed:
         HJ2PbpjNQZZ/m1+3s8sN2OC8oQlUqg9ABsBBx3R/ZkT07w7WvKwZyAGIRAGe/RoR/xIDVMWJGQpq
         MjOdPXuWjh8/rotsjp/fAC+6SqBngg5YAAAAAElFTkSuQmCC
         """)
+    @property
     def barChartAllMeansNice(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAAG0OVFdAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA9hAAAPYQGoP6dpAAAAB3RJTUUH3AkEEBEccKRf/QAAIABJREFUeNrNfWmUXVd15rfPvfcN
@@ -3377,6 +3429,7 @@ class imageEmbed:
         iwjv/bUC3nx5EUtX9CEMbIShRK1WxaaXtmLdunVYuWohVp2zGE7BwsR4Bbt3jmDnjhOoVyWYRbr2
         jOGd/xcjYdaAkcugHwAAAABJRU5ErkJggg==
         """)
+    @property    
     def histogram(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA9hAAAPYQGoP6dpAAAAB3RJTUUH3AkEEQADr7cbLwAAEepJREFUeNrtnXl0FFW+xz+3tyQk
@@ -3462,6 +3515,7 @@ class imageEmbed:
         M9DxOnWsBP6jXOfus5wD+gKJuD+ieR44owhEqqfcIiCq1vc25JyIuxXN6g6qgS9rPbez3Ibe3lsU
         4tzu3vP8PwIvrmeqg6RJAAAAAElFTkSuQmCC
         """)
+    @property
     def niceHistogram(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAAG0OVFdAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA9hAAAPYQGoP6dpAAAAB3RJTUUH3AkEDzosN3d2dQAAIABJREFUeNrlfVusJcdV9reqe9/O
@@ -3666,6 +3720,7 @@ class imageEmbed:
         tK9a/AnlMxWJLb4LOVOWYXt5Gcmb34yxMTT7+te59yu/gsdOn8Z9oxH2Bo0tvAIv5lKsWJ5j6w1v
         gDl8GGQtGMD/Bwkwtau8YrHKAAAAAElFTkSuQmCC
         """)
+    @property
     def cumulativeFrecuency(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAAG0OVFdAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA9hAAAPYQGoP6dpAAAAB3RJTUUH3AkEEAES3d5gqwAAIABJREFUeNrlXVvMbVdV/sba65x/
@@ -3820,6 +3875,7 @@ class imageEmbed:
         7PuMAUx4e3udLrlkiv8DOINPZih1x+gAAAAASUVORK5CYII=
         """)
 
+    @property
     def lines(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAAG0OVFdAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA9hAAAPYQGoP6dpAAAAB3RJTUUH3AkEEBYUMT5BCAAAIABJREFUeNrtfXucFMXV9lOzs8uy
@@ -4049,6 +4105,7 @@ class imageEmbed:
         TOIvEBASjUbZqVMnFXXOHQroXCH4QIgIli1bpnQTOKgDpKl8ZTrJO8DU8wBClixZgh49ejimbigm
         sIYdIC0mcsIE4P8DO0P1e+FTtwMAAAAASUVORK5CYII=
         """)
+    @property
     def linesOfMean(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAAG0OVFdAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA9hAAAPYQGoP6dpAAAAB3RJTUUH3AkEEBoR7eH6iwAAH91JREFUeNrtfXmYJEWZ9y+y7u7q
@@ -4197,6 +4254,7 @@ class imageEmbed:
         +MSLfl7KoNIgYdnDxPU1AQzDwPT09MA6Pz09mAmwt+IFALVaDbVazXf5/wd3HuY2xax+lAAAAABJ
         RU5ErkJggg==
         """)
+    @property
     def staked(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA9hAAAPYQGoP6dpAAAAB3RJTUUH3AkGEhgIEjEsLAAAFGNJREFUeNrtnWlsHMeVx3/VPQdn
@@ -4293,6 +4351,7 @@ class imageEmbed:
         s337dtrb2+nt7WVkZITdu3cvyp1SlKU4+gEaGhqora0lEAhQWlpKfX09LpcL0zSpra3l6NGj3H//
         /bS0tLBq1apF2x//D1jl5JgTSnr7AAAAAElFTkSuQmCC
         """)
+    @property
     def shadowLines(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA9hAAAPYQGoP6dpAAAAB3RJTUUH3AkHAAwvPoteaQAAIABJREFUeNrtnXl8FOS197/PrJnM
@@ -4487,6 +4546,7 @@ class imageEmbed:
         CgRZEKdSKXp7e9FqtRQWFp5Qhh8BgA9uUjKZRAhxyGGKUzkSSCmHt8OfBMAoauAJFhJPRoCT64Ra
         /x8w0U7WbzM5zAAAAABJRU5ErkJggg==
         """)
+    @property
     def areaPlot(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA9hAAAPYQGoP6dpAAAAB3RJTUUH3AkHATcGQUlDCgAAEaxJREFUeNrtnWlwXNWVx3/3vdd7
@@ -4571,6 +4631,7 @@ class imageEmbed:
         a2+yerrWAJBS4rRpiLU34A81WMWfWgsBZc1bOp3GtQSHR1i2CnOAMgRmfOjTAsAyKwewzALAslVu
         /w/7I94V7zHe0QAAAABJRU5ErkJggg==
         """)
+    @property
     def multipleAreaPlot(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA9hAAAPYQGoP6dpAAAAB3RJTUUH3AkHDTY3AJaLFQAAIABJREFUeNrtnXm4XOdd3z/ve86Z
@@ -4778,6 +4839,7 @@ class imageEmbed:
         1mhe6X5xw433TZiHRwhqxVOqzVnU6yyuWS8BbIoMqs4yqv3wlXD4xhsEQnAmFtucvdASdP2EVQ3M
         ZbNvIRughR25nE7fFAQws4kb32zE1tO2bZ3j/wOBmOiXos3yywAAAABJRU5ErkJggg==
         """)
+    @property
     def stem(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA9hAAAPYQGoP6dpAAAAB3RJTUUH3AkIDCYkl0ui+wAAFadJREFUeNrtnXlYlWXexz/3OYfl
@@ -4880,6 +4942,7 @@ class imageEmbed:
         oKo1X3MNbruwWYOHDgEAVqvCE09kUFzsxdy5McTFRWmt0tE0gNVqwWazYTT6abd8tDH+Hy4t18Rc
         39xhAAAAAElFTkSuQmCC
         """)
+    @property
     def controlChart(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA9hAAAPYQGoP6dpAAAAB3RJTUUH3AkKFh4S9NZltAAADG1JREFUeNrtnX9slPUdx1/f5+76
@@ -4940,6 +5003,7 @@ class imageEmbed:
         o7EokVgUn2dKynFQCkAiQ4BECkAiBSCRApBIAUikACRSABIpAIkUgEQKQCIFIJECkEgBSKQAJFIA
         EikAiRSARApAIgUgkQKQSAFIpAAkUgCSbOT/t75Jvy5HDSoAAAAASUVORK5CYII=
         """)
+    @property
     def pareto(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA9hAAAPYQGoP6dpAAAAB3RJTUUH3QIWCioi2lr2aAAAHsVJREFUeNrtXWuMHFeV/k5VP6Z7
@@ -5083,6 +5147,37 @@ class imageEmbed:
         Aq6dG6h5Yf22KV2/dtS5gboHWjsvoIPPDdRIvU2dG6goH7p6sBYn0FcjCjGOdfX9PycSpxQY6ZKd
         AAAAAElFTkSuQmCC
         """)
+    @property
+    def arrowDown(self):
+        return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAABl0RVh0
+        U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAI9SURBVDiNhZNNaBNBGIbfmezmD2vAYNJD
+        /MGq9SIaj0m04MGL8SIULx4q4kEU6qFV8SoI0hU8qVCEnBQholJTW3Kx1lUItS0Ue6hVtFTNmq79
+        C+kms7Ofh9Yamxjf4zffPPO+880wIkK14t1qHoQw6onB0HtEc3VJqWkihG9dSMN2BGxHYMkqYMky
+        AQB3H92oAdcCADDGkJt5jrJdQqE4g49zY2g/eLWuKV6vWB3Ko/jrbmwIABGIHBARFO5uCFASl1Wd
+        HMTW7btgOSS9kmxIsrFcNlG9Fu9S1w0yjjcKOUhFQi3Riyev+xSXCiLHK0mCmAS4RFEWoHo5uMJw
+        /tQ1LwgQooJ0NlWaX5xLMSJColtNt0WPJ49Ek573+VeQXECijBV7EdPzORBoLRZH2/bTGJ0YKU9O
+        jfe97hHtfC1yx8uxjPHFmKJIcC+IVwCXjUJlGqqPwe3jUH0uRCNHYS6YNPlh3CDCmfVL1DVRBCH5
+        cPCe5eVNCPiDKNFPlF2LcHs53D4Xtm3Zg5CvBdmhjEUOkromin9NQdfEREWsdD4YvFPaETgAm5Wg
+        elZP3rwpgP2hY+jLPi4JUenUNTFRd4y6JnpnjU8vhscGRGswAa4wKG6OQ+ETyL17W/lhfuvXNdHb
+        8B2Qg46hkYHvprFAu5ti2OWPwfy6TLlRPe/I1dwNAbomiiSRzGSfWVuxD0GnFU/7n1iO/JO7Wmzj
+        b/yteJd6LtK88zYAzOY/X9po/b8AADh8Rb0PAMM3xdl/9fwCc0oSKoZoHMsAAAAASUVORK5CYII=
+        """)
+    @property
+    def arrowUp(self):
+        return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAABl0RVh0
+        U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAIeSURBVDiNlZNPaBNBFMa/N7sz2Y2FemhM
+        /9GCBO3BQCqo0NWKaERiRS0UcmtKyUmQYhbBq8dSkaAXD0VPHqVC8eJNKl5EUNBDKbQqlZQ0iaaa
+        JtnZGQ9RrCGp9h3f++bHfN+bIa012tXJm3weAJZmvel2GtZu4Lg83d8VSfZ1HUw6Lk/vCeC4PBoQ
+        +7JXzkwGx0aTwYAIZh2XR/8L4Li8A4TFiXPT1paXx5a3ifjIJQuERcflHf8EEOHR6HCipzc0SJ9L
+        H/Cx9B6dnZ0UGzrRDcLDXQGOy9P9ByKJs0fH+Ur+DQzGYTKOV2sLiA0dF6H9PYnmPNiOw1HB7Wwq
+        4drr5WVo8iCEiTp9xzYV8S7/HBdOXw2apvgrD7bT99RYxlLkoSJLEAEBHuAoy3UI20BBrqKoVnH+
+        1EWL2J882G/f8WPj3Yf6YpSvrMHkBjg3UFEFVI2vEDaDsBmWv71AuDdERw4Ph4k18qCRjJke6I5k
+        b0zcsQUPQEHCh4fXuQW8LTyDZBUQIyQGMtBaQymgXq/h8dP5SrG0OWMSQ+pTbsWeuXe54Ymjevf6
+        E6ssc/CNbXDBwEyCwQlzD25XZU1bv+wHiSFlLs16TtMmtNYKpfoXMINgcAYeaEBkTVsv5zza9R0A
+        gNI+ftSLjSv7GrKuoFXrP2O2avpKolrbhjI1oBV8SfC9PQCkLxEfvAZiADECEfYAIGzcuj8ZbiUm
+        wkZz7ycw98XbttCaIgAAAABJRU5ErkJggg==
+        """)
+    @property
     def maximize(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH3QMeDQksftC71AAAAWVJREFUOMuVkktLAlEYhp9zGdJF
@@ -5094,6 +5189,7 @@ class imageEmbed:
         HMvsd58y/ddCgZM1KKzKN10pJi6OEorWXRN6X/w3i37BYUyj95fal5dXLa5vX5g1na77/g1PUlPk
         Yo9AUAAAAABJRU5ErkJggg==
         """)
+    @property
     def minimize(self):
         return self.__conversion__("""iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBI
         WXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH3QMeDQoMbpPI3wAAAYdJREFUOMuVk81KI0EURk+1UVAX
@@ -5105,7 +5201,8 @@ class imageEmbed:
         NIyMA9CSYLsR/tNHeyIA4OK6Jqzzf8TmAlpD4UFxVJKJi00ExFqzd1Km2JoiHBrH9iJKjV57XwDA
         5W1N2IUAL0zzu48dYOjT7/oSbVSDuHns/Z3sV/MGEcrPBJFqwPMAAAAASUVORK5CYII=
         """)
+
 if __name__ == '__main__':
     imagen = imageEmbed()
-    path = 'e:\\Proyecto S2\\logo\\Logo 16 16.png'
+    path = 'e:\\proyecto gridsql\\iconos\\maximize.png'
     imagen.convertFromfile(path, True)

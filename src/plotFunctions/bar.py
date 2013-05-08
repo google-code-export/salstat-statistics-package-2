@@ -20,7 +20,7 @@ class barChart( _neededLibraries):
     ''''''
     name=      u'Bar chart'
     plotName=  'barChart'
-    image=     imag.bars()
+    image=     imag.bars
     def __init__(self):
         # getting all required methods
         _neededLibraries.__init__( self)
@@ -154,7 +154,7 @@ class HorizBarChart(barChart):
     ''''''
     name=      u'Horizontal bar chart'
     plotName=  'barChart'
-    image=     imag.HorizBarChart()
+    image=     imag.HorizBarChart
     def __init__(self):
         barChart.__init__(self)
         name=      u'Horizontal bar chart'
@@ -205,7 +205,7 @@ class barChartAllMeans( _neededLibraries):
     ''''''
     name=      u'Bar chart of all means'
     plotName=  'barChartMeans'
-    image=     imag.barChartAllMeans()
+    image=     imag.barChartAllMeans
     def __init__(self):
         # getting all required methods
         _neededLibraries.__init__( self)
@@ -338,7 +338,7 @@ class barChartAllMeansNice( _neededLibraries):
     ''''''
     name=      u'Nice Bar chart of all means'
     plotName=  'barChartMeans'
-    image=     imag.barChartAllMeansNice()
+    image=     imag.barChartAllMeansNice
     def __init__(self):
         # getting all required methods
         _neededLibraries.__init__( self)
@@ -471,7 +471,7 @@ class stakedBar(_neededLibraries):
     ''''''
     name=      u'Staked bar chart'
     plotName=  'barStaked'
-    image=     imag.staked()
+    image=     imag.staked
     def __init__(self):
         # getting all required methods
         _neededLibraries.__init__( self)
@@ -586,7 +586,7 @@ class Pareto(_neededLibraries):
     ''''''
     name=      u'Pareto chart'
     plotName=  'pareto'
-    image=     imag.pareto()
+    image=     imag.pareto
     def __init__(self):
         # getting all required methods
         _neededLibraries.__init__( self)

@@ -17,6 +17,8 @@ from collections import OrderedDict
 SEARCHINDEX= 50
 
 from gridEditors import datePickerEditor
+from GridCopyPaste import PyWXGridEditMixin, MyContextGrid
+from GridCopyPaste import EVT_GRID_BEFORE_PASTE, EVT_GRID_PASTE
 
 class okCancelPanel(wx.Panel):
     def __init__(self, *args, **params):
@@ -72,18 +74,26 @@ class SqlTable( wx.grid.PyGridTableBase):
         self.allow2edit=     allow2edit
         self._currTable=     None
         self._initializeParams()
-        self._numCols=       0
-        self._numRows=       0
-        self._filter=        ''
-        self._colsInfo=      {}
+        self._numCols=        0
+        self._numRows=        None
+        self._filter=         ''
+        self._colsInfo=       {}
+        self.currsession=   None
+        self.__commit=        True
+        self.__closeSession=  True
+        self.__updateBuffer=  True
         wx.grid.PyGridTableBase.__init__(self)
+        
 
         if engine == None:
             self.loadDatabase( evt = None)
         else:
             self.engine= engine
             if tableName == None:
-                tableName= self.tableNames[0]
+                if len(self.tableNames) > 0:
+                    tableName= self.tableNames[0]
+                else:
+                    return
             # once the currtable changes, also the data is autonatically loaded
             self.currTable= tableName
             
@@ -93,13 +103,17 @@ class SqlTable( wx.grid.PyGridTableBase):
         
         self._numRows= self.numRows
         self._numCols= self.GetNumberCols()
-        self.initId=         0
 
-    def _initializeParams(self):
+    def _initializeParams(self, udpdateNumrows= False):
         # used to initialize the data if the user change the selected table
         self.bufer=          dict()
         self.oldRowSelected= None
         self.curRowData=     None
+        
+        # Used when changing the table
+        if udpdateNumrows:
+            self._numRows= None
+            self.numRows()
 
     def GetAttr(self, row, col, kind):
         attr=   [ self.evenAttr, self.oddAttr][row % 2]
@@ -188,7 +202,6 @@ class SqlTable( wx.grid.PyGridTableBase):
         if tableName in self.tableNames:
             self._currTable= tableName
             # updating the required fields
-            self._initializeParams()
             self.loadTable(evt= None)
             #updating the renderer
             self._updateRenderer()
@@ -213,7 +226,7 @@ class SqlTable( wx.grid.PyGridTableBase):
                 # uodating the current number of columns
                 self._numCols= self.GetNumberCols()
 
-            difRow= self.numRows-self._numRows
+            difRow= self.GetNumberRows()-[0, self._numRows][self._numRows!=None]
             if difRow != 0:
                 if difRow > 0:
                     msg = wx.grid.GridTableMessage(self, notifications['addRow'],
@@ -227,7 +240,7 @@ class SqlTable( wx.grid.PyGridTableBase):
                 except AttributeError:
                     pass
                 # updating the current number of rows
-                self._numRows= self.numRows
+                self._numRows= self.GetNumberRows()
 
 
             # update the column rendering plugins
@@ -235,7 +248,6 @@ class SqlTable( wx.grid.PyGridTableBase):
 
             # update the scrollbars and the displayed part of the grid
             #self.AdjustScrollbars()
-            #self.ForceRefresh()
         else:
             raise StandardError("%s doesn't exist"%tableName)
 
@@ -260,7 +272,9 @@ class SqlTable( wx.grid.PyGridTableBase):
 
     @property
     def numRows( self):
-        return self.GetNumberRows()
+        if self._numRows== None:
+            self._numRows= self.GetNumberRows()
+        return self._numRows
     
     def _refresTable(self, evt= None):
         self.currTable= self.currTable[:]
@@ -276,11 +290,11 @@ class SqlTable( wx.grid.PyGridTableBase):
         try:
             res= res.filter(self._filter)
         except:
-            print "filter error"
+            raise StandardError("filter error")
         finally:
-            res= res.count()+1
+            numberRows= res.count()+1
             session.close()
-            return res
+            return numberRows
 
     def GetNumberCols( self):
         return len(self._getColTypes(self.table))
@@ -359,21 +373,32 @@ class SqlTable( wx.grid.PyGridTableBase):
         if value== None:
             return u""
         return "%s" % (value)
-
+    def bufferValue(self, row, data):        
+        # it's used to contain the data to upload to the database
+        pass
+    
+    def setCommit(self, state):
+        if isinstance(state,(bool,)):
+            self.__commit= state
+        else:
+            raise StandardError('The estate of the commit must be a boolean')
+        
     def SetValue( self, row, col, value):
         if not self.allow2edit:
             return
-        # identifying if is a date object
+        
+        # identifying if it's a date object
         if self._colsInfo.values()[col]=='DATE':
             import datetime
             value= [int(val) for val in value.split('-')]
             value= datetime.datetime(value.pop(0), value.pop(0), value.pop(0))
         # create a Session
-        session = self.Session()
+        if self.currsession== None:
+            self.currsession = self.Session()
         # querying for a record in the Artist table
         rowNumber= row# self.GetValue(row, 0)
         if rowNumber < self.numRows-1: #u''
-            res= session.query( GenericDBClass)
+            res= self.currsession.query( GenericDBClass)
             try:
                 res= res.filter(self._filter)
             except:
@@ -386,60 +411,113 @@ class SqlTable( wx.grid.PyGridTableBase):
         if res == None:
             if row >= self.numRows-1:
                 # se adiciona un registro nuevo
+                self._numRows= None # to force the refresh of the number of columns
                 newRegsitry= GenericDBClass()
                 setattr(newRegsitry, self.colLabels[col], value)
-                session.add(newRegsitry)
+                self.currsession.add(newRegsitry)
+                
                 try:
-                    session.commit()
+                    self.currsession.commit()
                 except StatementError:
                     return
-                finally:
-                    session.close()
-                self.updateBuffer(row, forceRefresh= True)
-                # tell the grid we've added a row
+                
+                if self.__commit:
+                    self.currsession.commit()
+                    self.updateBuffer(row, forceRefresh= True)
+                    self.currsession.close()
+                    self.currsession= None
+                    
                 if self._filter == u'':
+                    # tell the grid we've added a row
                     msg = wx.grid.GridTableMessage(self,            # The table
-                                               wx.grid.GRIDTABLE_NOTIFY_ROWS_APPENDED, # what we did to it
-                                               1                                       # how many
+                                            wx.grid.GRIDTABLE_NOTIFY_ROWS_APPENDED, # what we did to it
+                                            1                                       # how many
                                                )
                     self.GetView().ProcessTableMessage(msg)
-                
-                session.close()
                 return
         else:
             setattr(res, self.colLabels[col], value)
-            session.commit()
-            session.close()
-            self.updateBuffer(row, forceRefresh= True)
-            # is missing to update the grid
-            self.GetView().Refresh()
+            if self.__commit:
+                self.currsession.commit()
+                self.currsession.close()
+                self.currsession= None
+                self.updateBuffer(row, forceRefresh= True)
+                # is missing to update the grid
+                self.GetView().Refresh()
         # refresh the grid
-
+    def commit(self):
+        self.__commit= True
+        self.currsession.commit()
+        self.currsession.close()
+        self.currsession= None
+        self._emptyTheBuffer()
+        self.GetView().Refresh()
+    def _emptyTheBuffer(self):
+        self.bufer= dict()
     def GetColLabelValue( self, col):
         return self.colLabels[col]
 
     def GetRowLabelValue( self, row):
-        session= self.Session()
-        try:
-            rowLabel= row.__str__()
-            # preventing to query the database without needed
-            # getattr( session.query( GenericDBClass).get( row+self.initId), self.colLabels[0])
-        except AttributeError:
-            return u''
-        finally:
-            session.close()
-        return rowLabel
+        return row.__str__()
     
     def applySqlFilter(self, SQLString):
         self._filter= SQLString
         self._refresTable()
 
-class SqlGrid( wx.grid.Grid):
+class SqlGrid( wx.grid.Grid, object):
     def __init__(self, parent, engine= None, tableName= None, allow2edit= False):
         wx.grid.Grid.__init__( self, parent)
+        # functions to copy paste
+        if len([clase for clase in wx.grid.Grid.__bases__ if issubclass( PyWXGridEditMixin, clase)]) == 0:
+            wx.grid.Grid.__bases__ += ( PyWXGridEditMixin,)
+        # contextual menu
+        self.__init_mixin__()
+        
         self.table= SqlTable( engine, tableName, allow2edit)
         self.SetTable( self.table, True)
         self._currTable= self.table.currTable
+        
+        self.Bind( wx.EVT_KEY_DOWN, self.OnKeyDown)
+        self.Bind( wx.grid.EVT_GRID_CELL_RIGHT_CLICK, self.OnGridRighClic)
+        self.Bind( EVT_GRID_BEFORE_PASTE, self.onBeforePaste)
+        self.Bind( EVT_GRID_PASTE, self.Onpaste)
+        
+    def onBeforePaste(self, evt):
+        self.table.setCommit(False)
+        print "on before paste"
+        evt.Skip()
+    def Onpaste(self, evt):
+        self.table.commit()
+        print "paste the data"
+        evt.Skip()
+
+    def OnGridRighClic(self,evt):
+        self.PopupMenu(MyContextGrid(self), evt.GetPosition())
+        evt.Skip()
+        
+    def OnKeyDown(self, evt):
+        if evt.GetKeyCode() != wx.WXK_RETURN:
+            evt.Skip()
+            return
+
+        if evt.ControlDown():   # the edit control needs this key
+            evt.Skip()
+            return
+
+        self.DisableCellEditControl()
+        success = self.MoveCursorRight(evt.ShiftDown())
+
+        if not success:
+            newRow = self.GetGridCursorRow() + 1
+
+            if newRow < self.GetTable().GetNumberRows():
+                self.SetGridCursor(newRow, 0)
+                self.MakeCellVisible(newRow, 0)
+            else:
+                # this would be a good place to add a new row if your app
+                # needs to do that
+                pass
+
     @property
     def tableNames(self):
         return self.table.tableNames
@@ -549,6 +627,7 @@ class selectDbTableDialog( wx.Dialog):
 
 class _example( wx.Frame ):
     def __init__( self, parent ):
+        self.name= 'selobu'
         wx.Frame.__init__ ( self, parent, id = wx.ID_ANY,
                             title = wx.EmptyString, pos = wx.DefaultPosition,
                             size = wx.Size( 200, 200 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
@@ -567,7 +646,7 @@ class _example( wx.Frame ):
 
         # Connect Events
         self.m_button8.Bind( wx.EVT_BUTTON, self.showDialog )
-
+        
     # Virtual event handlers, overide them in your derived class
     def showDialog( self, evt ):
         dbPath= 'e:\\proyecto gridsql\\mymusic.db'

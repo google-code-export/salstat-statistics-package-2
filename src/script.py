@@ -21,6 +21,8 @@ import traceback
 import  wx
 import  wx.stc  as  stc
 import  keyword
+from wx.py import sliceshell
+import os
 
 if wx.Platform == '__WXMSW__':
     # for windows OS
@@ -334,6 +336,84 @@ class MySTC( stc.StyledTextCtrl, object):
         return line
 
 
+class PyslicesEditor(sliceshell.SlicesShell, object):
+    from wx.py.sliceshell import INPUT_MASK, OUTPUT_MASK, OUTPUT_BG
+    def __init__(self, *args, **params):
+        sliceshell.SlicesShell.__init__(self, *args, **params)
+        self.SetMarginWidth(1, 45)
+        self.SetMarginType(1, stc.STC_MARGIN_NUMBER)
+    
+    def processLine(self):
+        """Process the line of text at which the user hit Enter or Shift+RETURN."""
+        # The user hit ENTER (Shift+RETURN) (Shift+ENTER) and we need to
+        # decide what to do. They could be sitting on any line in the slices shell.
+        thepos = self.GetCurrentPos()
+        cur_line = self.GetCurrentLine()
+        marker=self.MarkerGet(cur_line)
+        if marker & self.INPUT_MASK:
+            pass
+        elif marker & self.OUTPUT_MASK:
+            return
+        else:
+            pass #print 'BLANK LINE!!'
+        
+        startline,endline=self.GetIOSlice(cur_line)
+        
+        if startline==0:
+            startpos=0
+        else:
+            startpos=self.PositionFromLine(startline)
+        
+        endpos=self.GetLineEndPosition(endline)
+        # If they hit ENTER inside the current command, execute the command.
+        if self.CanEdit():
+            self.SetCurrentPos(endpos)
+            self.interp.more = False
+            command = self.GetTextRange(startpos, endpos)
+            lines = command.split(os.linesep)
+            lines = [line.rstrip() for line in lines]
+            command = '\n'.join(lines)
+            if self.reader.isreading:
+                if not command:
+                    # Match the behavior of the standard Python shell
+                    # when the user hits return without entering a value.
+                    command= '\n'
+                self.reader.input= command
+                self.write(os.linesep,'Input')
+                self.MarkerSet(self.GetCurrentLine(),READLINE_BG)
+                self.MarkerSet(self.GetCurrentLine(),INPUT_READLINE)
+            else:
+                self.runningSlice = (startline,endline)
+                #########  self.push(command,useMultiCommand=True)
+                #print 'command: ',command
+                wx.FutureCall(1, self.EnsureCaretVisible)
+                self.runningSlice=None
+        
+        # removed because ctrl+enter doesn,t work
+        skip=self.BackspaceWMarkers(force=True)
+        if skip:
+            self.DeleteBack()
+        
+        if self.GetCurrentLine()==self.GetLineCount()-1:
+            self.write(os.linesep,type='Input')
+            cpos= self.GetCurrentLine()
+            if self.MarkerGet(cpos-1) & self.OUTPUT_MASK:
+                self.MarkerAdd(cpos-1, self.OUTPUT_BG)
+            self.SplitSlice()
+        else:
+            cur_line= self.GetCurrentLine()
+            new_pos=  self.GetLineEndPosition(cur_line+1)
+            self.SetSelection(new_pos,new_pos)
+            self.SetCurrentPos(new_pos)
+        
+        self.EmptyUndoBuffer()
+        self.NeedsCheckForSave=True
+        if self.hasSyntaxError:
+            pos=self.GetLineEndPosition(self.syntaxErrorRealLine)
+            self.SetCurrentPos(pos)
+            self.SetSelection(pos,pos)
+
+
 def numPage():
     i = 1
     while True:
@@ -341,6 +421,7 @@ def numPage():
         i+= 1
 
 class ScriptPanel( wx.Panel):
+    tb1= None
     def __init__( self, parent,*args):
         '''ScriptPanel parent, log, *args'''
         self.log=   args[0]
@@ -351,7 +432,7 @@ class ScriptPanel( wx.Panel):
 
         self.m_mgr = aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
-
+        
         self.m_notebook= wx.aui.AuiNotebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,
                                               wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|
                                               wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_BOTTOM|
@@ -364,19 +445,34 @@ class ScriptPanel( wx.Panel):
         self.npage = numPage()
         self.currentPage = None
         self.pageNames= dict()
-
+        
+        self.m_mgr.AddPane( self.getToolbar(),
+                            aui.AuiPaneInfo().Name("tb1").
+                            Caption("Basic Operations").
+                            ToolbarPane().Top().
+                            CloseButton( False ))
+        
+        self.Bindded()
+        self.addPage()
+        self.Layout()
+        self.m_mgr.Update()
+        self.Center( )
+        
+    def _createToolbar( self):
+        if self.tb1 != None:
+            return
         prepend_items, append_items = [], []
         item = aui.AuiToolBarItem()
-
+        
         item.SetKind(wx.ITEM_SEPARATOR)
         append_items.append(item)
-
+        
         item = aui.AuiToolBarItem()
         item.SetKind(wx.ITEM_NORMAL)
         item.SetId(wx.ID_ANY)
         item.SetLabel("Customize...")
         append_items.append(item)
-
+        
         if wx.version < "2.9":
             tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
                                 style = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_OVERFLOW)
@@ -386,34 +482,29 @@ class ScriptPanel( wx.Panel):
 
         imagenes = imageEmbed()
         tb1.SetToolBitmapSize(wx.Size(16, 16))
-        self.bt1= tb1.AddSimpleTool(wx.ID_ANY, u"Run Script" , imagenes.runIcon(), u"Run Script", )
+        self.bt1= tb1.AddSimpleTool(wx.ID_ANY, u"Run Script" , imagenes.runIcon, u"Run Script", )
         tb1.AddSeparator()
-        self.bt2= tb1.AddSimpleTool(wx.ID_ANY, u"New Script" , imagenes.documentNew(), u"New Script" )
-        self.bt4= tb1.AddSimpleTool(wx.ID_ANY, u"Load Script" , imagenes.folderOpen(), u"Load Script" )
-        self.bt3= tb1.AddSimpleTool(wx.ID_ANY, u"Save Script" , imagenes.save2disk(), u"Save Script" )
+        self.bt2= tb1.AddSimpleTool(wx.ID_ANY, u"New Script" , imagenes.documentNew, u"New Script" )
+        self.bt4= tb1.AddSimpleTool(wx.ID_ANY, u"Load Script" , imagenes.folderOpen, u"Load Script" )
+        self.bt3= tb1.AddSimpleTool(wx.ID_ANY, u"Save Script" , imagenes.save2disk, u"Save Script" )
         tb1.AddSeparator()
-        self.bt8= tb1.AddSimpleTool(wx.ID_ANY, u"Undo", imagenes.edit_undo(), u"Undo")
-        self.bt9= tb1.AddSimpleTool(wx.ID_ANY, u"Redo" , imagenes.edit_redo(), u"Redo" )
+        self.bt8= tb1.AddSimpleTool(wx.ID_ANY, u"Undo", imagenes.edit_undo, u"Undo")
+        self.bt9= tb1.AddSimpleTool(wx.ID_ANY, u"Redo" , imagenes.edit_redo, u"Redo" )
         tb1.AddSeparator()
-        self.bt5= tb1.AddSimpleTool(wx.ID_ANY, u"Cut" , imagenes.edit_cut(), u"Cut" )
-        self.bt6= tb1.AddSimpleTool(wx.ID_ANY, u"Copy" , imagenes.edit_copy(), u"Copy" )
-        self.bt7= tb1.AddSimpleTool(wx.ID_ANY, u"Paste" , imagenes.edit_paste(), u"Paste" )
+        self.bt5= tb1.AddSimpleTool(wx.ID_ANY, u"Cut" , imagenes.edit_cut, u"Cut" )
+        self.bt6= tb1.AddSimpleTool(wx.ID_ANY, u"Copy" , imagenes.edit_copy, u"Copy" )
+        self.bt7= tb1.AddSimpleTool(wx.ID_ANY, u"Paste" , imagenes.edit_paste, u"Paste" )
         tb1.AddSeparator()
         tb1.SetCustomOverflowItems( prepend_items, append_items)
         tb1.SetToolDropDown(wx.ID_ANY, True)
         tb1.Realize()
-
-        self.m_mgr.AddPane( tb1,
-                            aui.AuiPaneInfo().Name("tb1").
-                            Caption("Basic Operations").
-                            ToolbarPane().Top().
-                            CloseButton( False ))
-
-        self.Bindded()
-        self.Layout()
-        self.m_mgr.Update()
-        self.Center( )
-
+        self.tb1= tb1
+        
+    def getToolbar(self):
+        if self.tb1 == None:
+            self._createToolbar() # create and set the tb1
+        return self.tb1
+    
     # implementing a wrap to the current notebook
     def __getattribute__( self, name):
         '''wraps the funtions to the grid
@@ -458,13 +549,18 @@ class ScriptPanel( wx.Panel):
         # which is the parent of the window
         #multi.SetDefaultChildClass(MySTC)
 
-        self.pageNames[newName]= MySTC(self.m_notebook,-1)
+        self.pageNames[newName]= PyslicesEditor(self.m_notebook,
+                                                introText=            '#'+wx.GetApp().AppName,
+                                                showPySlicesTutorial= False,
+                                                enableShellMode=      False,
+                                                showInterpIntro=      False)
+        
         self.currentPage=  self.pageNames[newName]
         ntb= self.pageNames[newName]
         self.m_notebook.AddPage(ntb, newName, False )
         # se hace activo la pagina adicionada
         self.m_notebook.SetSelection(self.m_notebook.GetPageCount()-1)
-        return ntb # retorna el objeto ntb
+        return ntb # ret;na el objeto ntb
 
     def Bindded(self):
         self.Bind( wx.EVT_TOOL, self.runScript,      id = self.bt1.GetId())
@@ -496,7 +592,7 @@ class ScriptPanel( wx.Panel):
     def runScript(self, event):
         try:
             mainscript= self.GetText()
-            wx.GetApp().frame.scriptPanel.interp.runcode( mainscript)
+            wx.GetApp().frame.shellPanel.interp.runcode( mainscript)
         except (Exception, TypeError) as e:
             traceback.print_exc( file = self.log)
 
@@ -534,10 +630,14 @@ class ScriptPanel( wx.Panel):
         # it isn't required to delete a page because the aui manageer makes itself
         # so if you enable the following line the app will crash
         #self.m_notebook.DeletePage( pageNumber)
+        
+        # in case there is no pages then the system adds one
+        if len( self.pageNames) == 0:
+            self.addPage()
         evt.Skip()
         
     def loadScript(self, event):
-        wildcard = 'TEXT files (*.txt)|*.txt|ALL files (*.*)|*.*'
+        wildcard = 'TEXT files (*.txt;*.py)|*.txt;*.py|ALL files (*.*)|*.*'
         dlg = wx.FileDialog(self, "Open Script File", "","",\
                             wildcard, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
@@ -549,9 +649,28 @@ class ScriptPanel( wx.Panel):
             self.addPage()
             self.Text= u''
             fout = open(filename, "rb")
-            for line in fout.readlines():
-                self.AddText(line)
+            content= fout.read()
             fout.close()
+            dataToWrite= wx.TextDataObject()
+            if not content.endswith('\n'):
+                content= content+'\n'
+            data = wx.TextDataObject(content)
+            # readin the data content of the clipboard
+            newData= wx.TextDataObject()
+            if wx.TheClipboard.IsOpened() or wx.TheClipboard.Open():
+                try:
+                    wx.TheClipboard.GetData( newData)
+                finally:
+                    wx.TheClipboard.Close()
+            self._clip(data)
+            self.Paste()
+            # restoring the clipboard
+            if wx.TheClipboard.IsOpened() or wx.TheClipboard.Open():
+                try:
+                    wx.TheClipboard.SetData( newData)
+                finally:
+                    wx.TheClipboard.Close()
+            #self.processLine()
 
     def SaveScriptAs(self, event):
         wildcard = 'TEXT files (*.txt)|*.txt|ALL files (*.*)|*.*'
