@@ -97,7 +97,7 @@ opts = { "py2exe":
           }
 
 setup(name=         'Salstat2',
-      version=      '2.1 final',
+      version=      '2.1',
       description=  'Statistical Package',
       url=          '',
       license=      'GPL3',

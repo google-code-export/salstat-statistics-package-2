@@ -340,7 +340,7 @@ class PyslicesEditor(sliceshell.SlicesShell, object):
     from wx.py.sliceshell import INPUT_MASK, OUTPUT_MASK, OUTPUT_BG
     def __init__(self, *args, **params):
         sliceshell.SlicesShell.__init__(self, *args, **params)
-        self.SetMarginWidth(1, 45)
+        self.SetMarginWidth(1, 35)
         self.SetMarginType(1, stc.STC_MARGIN_NUMBER)
     
     def processLine(self):
