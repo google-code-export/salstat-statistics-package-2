@@ -31,7 +31,7 @@ import py2exe
 import matplotlib
 import sqlalchemy
 
-distdir = '..\\..\\campo'
+distdir = '..\\..\\SalStatdist'
 iconPath = "salstat.ico"
 
 opts = { "py2exe":
