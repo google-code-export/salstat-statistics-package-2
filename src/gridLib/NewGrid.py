@@ -49,18 +49,13 @@ class NewGrid(wx.grid.Grid, object):
         # setting the renderer
         self.__initAttr()
         
-        #if len(args) > 0:
-        #    self.__init_mixin__( args[0])
-        #elif 'parent' in params.keys():
-        #    self.__init_mixin__( params['parent'])
-        
         # Grid
         self.CreateGrid( size[0], size[1] )
         self.EnableEditing( True )
         self.EnableGridLines( True )
         self.EnableDragGridSize( False )
         self.SetMargins( 0, 0 )
-        self.floatCellAttr= None
+        
         # Columns
         self.EnableDragColMove( False )
         self.EnableDragColSize( True )
@@ -97,7 +92,12 @@ class NewGrid(wx.grid.Grid, object):
         newtable= self.GetTable()
         setattr(newtable,'GetAttr',self.GetAttr)
         ##self.SetTable(newtable, True)
-        
+        # se establece el render
+        self.floatCellAttr= wx.grid.GridCellAttr()
+        self.floatCellAttr.SetRenderer(floatRenderer(4))
+        self.floatCellAttr.IncRef()
+        for colnumber in range(len(self.colNames)):
+            self.SetColAttr(colnumber, self.floatCellAttr)
         # se activa el menu contextual sobre el grid
         self.Bind(wx.grid.EVT_GRID_EDITOR_CREATED,         self.onCellEdit)
         self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
@@ -110,6 +110,7 @@ class NewGrid(wx.grid.Grid, object):
         self.__oddAttr=  wx.grid.GridCellAttr()
         self.__oddAttr.SetBackgroundColour( wx.Colour( 220, 230, 250 ))
         self.__oddAttr.SetRenderer( renderer)
+        
         self.__evenAttr= wx.grid.GridCellAttr()
         self.__evenAttr.SetBackgroundColour( wx.Colour( 146, 190, 183 ))
         self.__evenAttr.SetRenderer( renderer)
@@ -774,7 +775,9 @@ class NewGrid(wx.grid.Grid, object):
                     data= data[:16384]
                     cols2add= len( data) - self.GetNumberCols()
                 self.AppendCols( cols2add) ############### TO TEST
-
+                # set the renderer for the added columns
+                for colnumber in range(len(self.colNames)-cols2add, len(self.colNames)):
+                    self.SetColAttr(colnumber, self.floatCellAttr)
             try:
                 dp= wx.GetApp().DECIMAL_POINT
             except AttributeError:

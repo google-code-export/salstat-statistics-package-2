@@ -30,7 +30,7 @@ SetCompressor /SOLID LZMA
 !define MUI_STARTMENUPAGE_REGISTRY_KEY ${REGKEY}
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME StartMenuGroup
 !define MUI_STARTMENUPAGE_DEFAULTFOLDER $(^Name)
-!define MUI_FINISHPAGE_RUN $INSTDIR\salstat.exe
+!define MUI_FINISHPAGE_RUN $INSTDIR\salstat2.exe
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall-colorful.ico"
 
 # Included files
@@ -96,11 +96,11 @@ Section "-Main" SI_1
     SetOutPath $INSTDIR\nicePlot\images
     FIle /r ${SRCPATH}\nicePlot\images\*
     SetOutPath $SMPROGRAMS\$StartMenuGroup
-    CreateShortcut "$SMPROGRAMS\$StartMenuGroup\$(^Name).lnk" "$INSTDIR\salstat.exe" \
+    CreateShortcut "$SMPROGRAMS\$StartMenuGroup\$(^Name).lnk" "$INSTDIR\salstat2.exe" \
         "" "$INSTDIR\salstat.ico" 0 SW_SHOWNORMAL # "" "Paquete de estadistica"
     CreateShortcut "$SMPROGRAMS\$StartMenuGroup\Ayuda.lnk" "$INSTDIR\help\index.html"
     SetOutPath "$DESKTOP"
-    CreateShortcut "$DESKTOP\$(^Name).lnk" "$INSTDIR\salstat.exe" "" \
+    CreateShortcut "$DESKTOP\$(^Name).lnk" "$INSTDIR\salstat2.exe" "" \
                 "$INSTDIR\salstat.ico" 0
     # registry keys
     WriteRegStr HKLM "${REGKEY}\Components" Main 1
