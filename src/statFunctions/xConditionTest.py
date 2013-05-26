@@ -20,6 +20,7 @@ from statFunctions.correlation import linregress
 class oneConditionTest(_genericFunc):
     name= u"One condition test"
     statName= 'oneConditionTest'
+    _scritpEquivalenString= ""
     def __init__( self):
         # getting all required methods
         _genericFunc.__init__(self)
@@ -79,7 +80,8 @@ class oneConditionTest(_genericFunc):
     
     def _calc( self, columns, *args, **params):
         return self.evaluate( columns, *args, **params)
-    
+    def object(self):
+        return OneSampleTests
     def evaluate( self, *args, **params):
         # computations here
         columns=   args[0]
@@ -162,6 +164,7 @@ class oneConditionTest(_genericFunc):
 class twoConditionTest(oneConditionTest):
     name= u'Two condition test'
     statName= 'twoConditionTest'
+    _scritpEquivalenString= ""
     def __init__( self):
         oneConditionTest.__init__(self)
         self.name=     'Two condition test'
@@ -221,7 +224,10 @@ class twoConditionTest(oneConditionTest):
         #self.hypotesis= values[2]
         #self.userMean=  values[3]
         return ( columns, self.tests) #, self.hypotesis, self.userMean)
-
+    
+    def object(self):
+        return None
+    
     def evaluate( self, *args, **params):
         # computations here
         columns=   args[0]
@@ -289,6 +295,7 @@ class twoConditionTest(oneConditionTest):
 class threeConditionTest(oneConditionTest):
     name= u'Three or more condition test'
     statName= 'threeConditionTest'
+    _scritpEquivalenString= ""
     def __init__( self):
         oneConditionTest.__init__(self)
         self.name=     'Three or more condition test'
@@ -338,7 +345,10 @@ class threeConditionTest(oneConditionTest):
         columns= homogenize(*columns)
         self.tests=     values[1]
         return ( columns, self.tests)
-
+    
+    def object(self):
+        return None
+    
     def evaluate( self, *args, **params):
         # computations here
         columns=   args[0]

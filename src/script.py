@@ -339,8 +339,12 @@ class MySTC( stc.StyledTextCtrl, object):
 class PyslicesEditor(sliceshell.SlicesShell, object):
     from wx.py.sliceshell import INPUT_MASK, OUTPUT_MASK, OUTPUT_BG
     def __init__(self, *args, **params):
+        self.__marginWith= 45
+        try:   self.__marginWith= params.pop('marginWidth')
+        except KeyError: pass
+        
         sliceshell.SlicesShell.__init__(self, *args, **params)
-        self.SetMarginWidth(1, 35)
+        self.SetMarginWidth(1, self.__marginWith)
         self.SetMarginType(1, stc.STC_MARGIN_NUMBER)
     
     def processLine(self):
@@ -407,9 +411,9 @@ class PyslicesEditor(sliceshell.SlicesShell, object):
             self.SetCurrentPos(new_pos)
         
         self.EmptyUndoBuffer()
-        self.NeedsCheckForSave=True
+        self.NeedsCheckForSave= True
         if self.hasSyntaxError:
-            pos=self.GetLineEndPosition(self.syntaxErrorRealLine)
+            pos= self.GetLineEndPosition(self.syntaxErrorRealLine)
             self.SetCurrentPos(pos)
             self.SetSelection(pos,pos)
 
@@ -420,11 +424,26 @@ def numPage():
         yield i
         i+= 1
 
+
+class emptylog:
+    # emulating an empty log panel
+    def clearLog(self):
+        pass
+    def writeLine(self, *args, **params):
+        pass
+    
+    
 class ScriptPanel( wx.Panel):
     tb1= None
-    def __init__( self, parent,*args):
+    def __init__( self, parent,*args, **params ):
         '''ScriptPanel parent, log, *args'''
         self.log=   args[0]
+        self.__hideToolbar= False
+        try:
+            self.__hideToolbar= params.pop('hideToolbar')
+        except KeyError:
+            pass
+        
         try:
             wx.Panel.__init__(self, parent, wx.ID_ANY, *args[1:])
         except:
@@ -446,12 +465,13 @@ class ScriptPanel( wx.Panel):
         self.currentPage = None
         self.pageNames= dict()
         
-        self.m_mgr.AddPane( self.getToolbar(),
-                            aui.AuiPaneInfo().Name("tb1").
-                            Caption("Basic Operations").
-                            ToolbarPane().Top().
-                            CloseButton( False ))
-        
+        if not self.__hideToolbar:
+            self.m_mgr.AddPane( self.getToolbar(),
+                                aui.AuiPaneInfo().Name("tb1").
+                                Caption("Basic Operations").
+                                ToolbarPane().Top().
+                                CloseButton( False ))
+            
         self.Bindded()
         self.addPage()
         self.Layout()
@@ -563,15 +583,16 @@ class ScriptPanel( wx.Panel):
         return ntb # ret;na el objeto ntb
 
     def Bindded(self):
-        self.Bind( wx.EVT_TOOL, self.runScript,      id = self.bt1.GetId())
-        self.Bind( wx.EVT_TOOL, self.newScript,      id = self.bt2.GetId())
-        self.Bind( wx.EVT_TOOL, self.SaveScriptAs,   id = self.bt3.GetId())
-        self.Bind( wx.EVT_TOOL, self.loadScript,     id = self.bt4.GetId())
-        self.Bind( wx.EVT_TOOL, self.CutSelection,   id = self.bt5.GetId())
-        self.Bind( wx.EVT_TOOL, self.CopySelection,  id = self.bt6.GetId())
-        self.Bind( wx.EVT_TOOL, self.PasteSelection, id = self.bt7.GetId())
-        self.Bind( wx.EVT_TOOL, self.undo,           id = self.bt8.GetId())
-        self.Bind( wx.EVT_TOOL, self.redo,           id = self.bt9.GetId())
+        if not self.__hideToolbar:
+            self.Bind( wx.EVT_TOOL, self.runScript,      id = self.bt1.GetId())
+            self.Bind( wx.EVT_TOOL, self.newScript,      id = self.bt2.GetId())
+            self.Bind( wx.EVT_TOOL, self.SaveScriptAs,   id = self.bt3.GetId())
+            self.Bind( wx.EVT_TOOL, self.loadScript,     id = self.bt4.GetId())
+            self.Bind( wx.EVT_TOOL, self.CutSelection,   id = self.bt5.GetId())
+            self.Bind( wx.EVT_TOOL, self.CopySelection,  id = self.bt6.GetId())
+            self.Bind( wx.EVT_TOOL, self.PasteSelection, id = self.bt7.GetId())
+            self.Bind( wx.EVT_TOOL, self.undo,           id = self.bt8.GetId())
+            self.Bind( wx.EVT_TOOL, self.redo,           id = self.bt9.GetId())
         self.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChange)
         self.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.delPage)
 

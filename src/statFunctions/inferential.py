@@ -21,6 +21,7 @@ class ttest_1samp(_genericFunc):
         _genericFunc.__init__(self)
         self.name=      't-test one sample'
         self.statName=  'ttest_1samp'
+        self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
         self.colNameSelect= ''
 
@@ -100,6 +101,7 @@ class ttest_ind(pearsonr):
         pearsonr.__init__(self)
         self.name=      u't-test independent'
         self.statName=  'ttest_ind'
+        self._scritpEquivalenString='stats.'+self.statName
         self.txt1= "X Column to analyse"
         self.txt2= "Y Column to analyse"
         self.nameResults= ['t', 'two tailed prob']
@@ -121,6 +123,7 @@ class ttest_rel(pearsonr):
         pearsonr.__init__(self)
         self.name=      u't-test related'
         self.statName=  'ttest_rel'
+        self._scritpEquivalenString='stats.'+self.statName
         self.txt1= "X Column to analyse"
         self.txt2= "Y Column to analyse"
         self.nameResults= ['t', 'two tailed prob']
@@ -142,6 +145,7 @@ class chisquare(pearsonr):
         pearsonr.__init__(self)
         self.name=      u'chi-square test'
         self.statName=  'chisquare'
+        self._scritpEquivalenString='stats.'+self.statName
         self.txt1= "X Column to analyse"
         self.txt2= "Y Column to analyse"
         self.nameResults= ['chisq', 'chisqprob(chisq, k-1)']
@@ -163,6 +167,7 @@ class ks_2samp(pearsonr):
         pearsonr.__init__(self)
         self.name=      u'Kolmogorov-Smirnof two samples'
         self.statName=  'ks_2samp'
+        self._scritpEquivalenString='stats.'+self.statName
         self.txt1= "X Column to analyse"
         self.txt2= "Y Column to analyse"
         self.nameResults= ['KS D-value', 'associated p-value']
@@ -184,6 +189,7 @@ class mannwhitneyu(pearsonr):
         pearsonr.__init__(self)
         self.name=      u'Mann-Whitney U statistic'
         self.statName=  'mannwhitneyu'
+        self._scritpEquivalenString='stats.'+self.statName
         self.txt1= "X Column to analyse"
         self.txt2= "Y Column to analyse"
         self.nameResults= ['u-statistic', 'one-tailed p-value']
@@ -205,6 +211,7 @@ class ranksums(pearsonr):
         pearsonr.__init__(self)
         self.name=      u'rank sums statistic'
         self.statName=  'ranksums'
+        self._scritpEquivalenString='stats.'+self.statName
         self.txt1= "X Column to analyse"
         self.txt2= "Y Column to analyse"
         self.nameResults= ['z-statistic', 'two-tailed p-value']
@@ -226,6 +233,7 @@ class wilcoxont(pearsonr):
         pearsonr.__init__(self)
         self.name=      u'Wilcoxon T-test related samples'
         self.statName=  'wilcoxont'
+        self._scritpEquivalenString='stats.'+self.statName
         self.txt1= "X Column to analyse"
         self.txt2= "Y Column to analyse"
         self.nameResults= ['t-statistic', 'two-tail probability estimate']
@@ -247,6 +255,7 @@ class kruskalwallish(geometricMean):
         geometricMean.__init__(self)
         self.name=      u"Kruskal-Wallis H-test"
         self.statName=  'kruskalwallish'
+        self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 3
         self.colNameSelect= ''
         self.nameResults= ['H-statistic (corrected for ties)',
@@ -281,6 +290,7 @@ class friedmanchisquare(kruskalwallish):
         kruskalwallish.__init__(self)
         self.name=      u'Friedman Chi-Square test'
         self.statName=  'friedmanchisquare'
+        self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 3
         self.colNameSelect= ''
         self.nameResults= ['chi-square statistic', 'associated p-value']

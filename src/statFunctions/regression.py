@@ -13,23 +13,24 @@ import sys
 class ols( _genericFunc):
     ''''''
     name=      u'Ordinary least squares (OLS)'
-    statName=  'ols'
+    statName=  'OLS'
     def __init__( self):
         # getting all required methods
         _genericFunc.__init__(self)
         self.name=      u'Ordinary least squares (OLS)'
-        self.statName=  'ols'
-        self.txt1= self.translate(u"Response/dependent variable")
-        self.txt2= self.translate(u"Exogenous data")
-        #self.nameResults= [self.translate(u"Pearson's r"), self.translate(u" two-tailed p-value")]
+        self.statName=  'OLS'
+        self.txt1= self._(u"Response/dependent variable")
+        self.txt2= self._(u"Exogenous data")
+        #self.nameResults= [self._(u"Pearson's r"), self._(u" two-tailed p-value")]
         self.minRequiredCols= 2
         self.colNameSelect= ''
+        self._scritpEquivalenString='sm.'+self.statName
         
     def _dialog( self, *arg, **params):
         setting= {'Title': self.name,}
         self._updateColsInfo() # update self.columnames and self.colnums
         
-        txt1=  ['StaticText',   [self.translate(u'Select the columns to analyse')]]
+        txt1=  ['StaticText',   [self._(u'Select the columns to analyse')]]
         btn1=  ['Choice',       [self.columnNames]]
         txt2=  ['StaticText',   [self.txt1] ]
         txt3=  ['StaticText',   [self.txt2] ]
@@ -52,7 +53,7 @@ class ols( _genericFunc):
         (self.xcolNameSelect, self.ycolNameSelect)= values
         
         if self.xcolNameSelect == None or self.ycolNameSelect == None:
-            self.logPanel.write(self.translate(u"You haven't selected any items!"))
+            self.logPanel.write(self._(u"You haven't selected any items!"))
             return
         
         xcolumn= self.inputGrid.GetCol( self.xcolNameSelect)
@@ -88,22 +89,23 @@ class ols( _genericFunc):
         if 0:
             self.outputGrid.addColData( self.nameResults, self.name)
             self.outputGrid.addColData( result)
-            self.outputGrid.addRowData( [self.translate(u'Input Data')],  currRow= 0)
-            self.outputGrid.addRowData( [self.translate(u'x column='),   self.xcolNameSelect, 'y column=', self.ycolNameSelect ], currRow= 1)
-            self.outputGrid.addRowData( [self.translate(u'Output Data')], currRow= 2)
+            self.outputGrid.addRowData( [self._(u'Input Data')],  currRow= 0)
+            self.outputGrid.addRowData( [self._(u'x column='),   self.xcolNameSelect, 'y column=', self.ycolNameSelect ], currRow= 1)
+            self.outputGrid.addRowData( [self._(u'Output Data')], currRow= 2)
         print result.summary().__str__().decode( sys.getfilesystemencoding())
-        self.Logg.write( self.statName+ ' '+self.translate(u'successful'))
+        self.Logg.write( self.statName+ ' '+self._(u'successful'))
         
 class gls(ols):
     name=      u'Generalized least squares (GLS)'
-    statName=  u'gls'
+    statName=  u'GLS'
     def __init__(self):
         ols.__init__(self)
         self.name=      u'Generalized least squares (GLS)'
-        self.statName=  u'gls'
-        self.txt1=      self.translate(u"Response/independent variable")
-        self.txt2=      self.translate(u"Regressors/dependent variables")
-        self.txt3=      self.translate(u"Sigma")
+        self.statName=  u'GLS'
+        self.txt1=      self._(u"Response/independent variable")
+        self.txt2=      self._(u"Regressors/dependent variables")
+        self.txt3=      self._(u"Sigma")
+        self._scritpEquivalenString= "sm."+ self.statName
         self.minRequiredCols= 3
         self.colNameSelect= ''
     
@@ -111,7 +113,7 @@ class gls(ols):
         setting= {'Title': self.name,}
         self._updateColsInfo() # update self.columnames and self.colnums
         
-        txt1=  ['StaticText',   [self.translate(u'Select the columns to analyse')]]
+        txt1=  ['StaticText',   [self._(u'Select the columns to analyse')]]
         btn1=  ['Choice',       [self.columnNames]]
         txt2=  ['StaticText',   [self.txt1] ]
         txt3=  ['StaticText',   [self.txt2] ]
@@ -138,7 +140,7 @@ class gls(ols):
         (self.response, self.regresors, calculateSigma, self.sigma)= values
         
         if self.response == None or len(self.regresors) == 0:
-            self.logPanel.write(self.translate(u"You haven't selected any items!"))
+            self.logPanel.write(self._(u"You haven't selected any items!"))
             return
         
         response= self.inputGrid.GetCol( self.response)
@@ -181,15 +183,16 @@ class gls(ols):
 
 class wls(ols):
     name=      'Weighted least squares (WLS)'
-    statName=  'wls'
+    statName=  'WLS'
     def __init__(self):
         ols.__init__(self)
         self.name=      'Weighted least squares (WLS)'
-        self.statName=  'wls'
-        #self.nameResults= [self.translate(u"Point-biserial r"), self.translate(u"two-tailed p-value")]
-        self.txt1= self.translate(u"Response variable")
-        self.txt2= self.translate(u"Exogenous data")
-        self.txt3= self.translate(u"Weights")
+        self.statName=  'WLS'
+        #self.nameResults= [self._(u"Point-biserial r"), self._(u"two-tailed p-value")]
+        self.txt1= self._(u"Response variable")
+        self.txt2= self._(u"Exogenous data")
+        self.txt3= self._(u"Weights")
+        self._scritpEquivalenString= 'sm.'+ self.statName
         self.minRequiredCols= 3
         self.colNameSelect= ''
     
@@ -197,7 +200,7 @@ class wls(ols):
         setting= {'Title': self.name,}
         self._updateColsInfo() # update self.columnames and self.colnums
         
-        txt1=  ['StaticText',   [self.translate(u'Select the columns to analyse')]]
+        txt1=  ['StaticText',   [self._(u'Select the columns to analyse')]]
         btn1=  ['Choice',       [self.columnNames]]
         txt2=  ['StaticText',   [self.txt1] ]
         txt3=  ['StaticText',   [self.txt2] ]
@@ -223,7 +226,7 @@ class wls(ols):
         (self.xcolNameSelect, self.ycolNameSelect, wIsOnes, self.weights)= values
         
         if self.xcolNameSelect == None or self.ycolNameSelect == None:
-            self.logPanel.write(self.translate(u"You haven't selected any items!"))
+            self.logPanel.write(self._(u"You haven't selected any items!"))
             return
         
         xcolumn= self.inputGrid.GetCol( self.xcolNameSelect)
@@ -250,6 +253,9 @@ class wls(ols):
     def evaluate( self, *args, **params):
         return _sm.WLS(*args, **params).fit()
 
+
+##---------------------
+### not implemented yet
 class glsar(ols):
     name=      'Feasible generalized least squares'
     statName=  'glsar'
@@ -257,12 +263,14 @@ class glsar(ols):
         ols.__init__(self)
         self.name=      'Feasible generalized least squares'
         self.statName=  'glsar'
-        self.nameResults= [self.translate(u"Kendall's tau"), self.translate(u" two-tailed p-value")]
+        self._scritpEquivalenString= 'sm.'+ self.statName
+        self.nameResults= [self._(u"Kendall's tau"), self._(u" two-tailed p-value")]
         self.minRequiredCols= 2
         self.colNameSelect= ''
+        
     def object( self):
         return _stats.kendalltau
     
     def evaluate( self, *args, **params):
-        return _stats.kendalltau(*args, **params)
-        
+        return _stats.kendalltau(*args, **params)        
+##---------------------

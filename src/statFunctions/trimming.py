@@ -18,6 +18,7 @@ class threshold(_genericFunc):
         self.statName=  'threshold'
         self.minRequiredCols= 1
         self.colNameSelect= ''
+        self._scritpEquivalenString='stats.'+self.statName
         
     def _dialog(self, *arg, **params):
         setting= {'Title': self.name,

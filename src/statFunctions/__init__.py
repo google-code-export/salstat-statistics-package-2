@@ -20,12 +20,21 @@ class _genericFunc(object):
     icon= None
     id=   None
     name= ''
+    ##__scritpEquivalenString= "" # empty string
+        
+    def callbackFnc(self, *args, **params):
+        pass
+    
+    def callback(self, *args, **params):
+        texto= self._scritpEquivalenString[:] + "()"
+        return self.callbackFnc(texto)
+    #-------------------------    
     def __init__(self):
         self.name=        ""
         self.statName=    ""
         self.setminRequiredCols= 0
         self.app=         wx.GetApp()
-        self.translate=   self.app.translate
+        self._=   self.app._
         self.grid= self.inputGrid=   self.app.grid # to read the input data from the main grid
         self.dialog=      _dialog         # to create de dialod
         self.Logg=        self.app.Logg   # to report
@@ -81,4 +90,3 @@ class _genericFunc(object):
         if not isinstance(value, (int, float,numpy.ndarray )):
             return
         self._minRequiredCols= value
-

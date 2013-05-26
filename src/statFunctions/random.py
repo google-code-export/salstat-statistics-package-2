@@ -16,6 +16,7 @@ class random(_genericFunc):
         _genericFunc.__init__(self)
         self.name=      'random data'
         self.statName=  'rand'
+        self._scritpEquivalenString='numpy.random.'+self.statName
         self.lenData= None
         
     def _dialog( self, *arg, **params):
@@ -98,6 +99,7 @@ class randomn(random):
         _genericFunc.__init__(self)
         self.name=      'normal random'
         self.statName=  'randn'
+        self._scritpEquivalenString='numpy.random.'+self.statName
         self.lenData= None
         
     def object(self):
@@ -115,6 +117,7 @@ class linespace(_genericFunc):
         _genericFunc.__init__(self)
         self.name=      u'linear space'
         self.statName=  'linspace'
+        self._scritpEquivalenString='numpy.random.'+self.statName
         self.lenData= None
         
     def _dialog( self, *arg, **params):
@@ -150,7 +153,7 @@ class linespace(_genericFunc):
         return self.evaluate( *args, **params)
         
     def object(self):
-        return numpy.linespace
+        return numpy.linspace
     
     def evaluate(self, *args, **params):
         return numpy.linspace(*args, **params)
@@ -196,6 +199,7 @@ class beta(_genericFunc):
         _genericFunc.__init__(self)
         self.name=      u'beta space'
         self.statName=  'beta'
+        self._scritpEquivalenString='numpy.random.'+self.statName
         self.lenData= None
         
     def _dialog( self, *arg, **params):
@@ -280,6 +284,7 @@ class chisquare(_genericFunc):
         _genericFunc.__init__(self)
         self.name=      u'chi square'
         self.statName=  'chisquare'
+        self._scritpEquivalenString='numpy.random.'+self.statName
         self.lenData= None
         
     def _dialog( self, *arg, **params):
@@ -361,6 +366,7 @@ class exponential(_genericFunc):
         _genericFunc.__init__(self)
         self.name=      u'exponential space'
         self.statName=  'exponential'
+        self._scritpEquivalenString='numpy.random.'+self.statName
         self.lenData= None
         
     def _dialog( self, *arg, **params):
@@ -397,10 +403,10 @@ class exponential(_genericFunc):
         return self.evaluate( *args, **params)
         
     def object(self):
-        return numpy.random.chisquare
+        return numpy.random.exponential
     
     def evaluate(self, *args, **params):
-        return numpy.random.chisquare(*args, **params)
+        return numpy.random.exponential(*args, **params)
     
     def showGui(self, *args, **params):
         values= self._showGui_GetValues()
@@ -437,12 +443,13 @@ class exponential(_genericFunc):
 class integerSpace(_genericFunc):
     ''''''
     name=      u'integer space'
-    statName=  'integer'
+    statName=  'randint'
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
         self.name=      u'integer space'
-        self.statName=  'intege'
+        self.statName=  'randint'
+        self._scritpEquivalenString='numpy.random.'+self.statName
         self.lenData= None
         
     def _dialog( self, *arg, **params):

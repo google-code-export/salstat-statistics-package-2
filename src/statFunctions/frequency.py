@@ -17,6 +17,7 @@ class itemfreq(_genericFunc):
         _genericFunc.__init__(self)
         self.name=      'item frequency'
         self.statName=  'itemfreq'
+        self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
         self.colNameSelect= ''
         self.moment= None
@@ -90,6 +91,7 @@ class scoreatpercentile(_genericFunc):
         _genericFunc.__init__(self)
         self.name=      'score at percentile'
         self.statName=  'scoreatpercentile'
+        self._scritpEquivalenString='stats.'+self.statName
         self.nameStaticText= '%'
         self.minRequiredCols= 1
         self.spindata= [0,100,1]
@@ -175,6 +177,7 @@ class percentileofscore(scoreatpercentile):
         scoreatpercentile.__init__(self)
         self.name=      'percentile of score'
         self.statName=  'percentileofscore'
+        self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
         self.colNameSelect= ''
         self.score=   None
@@ -250,6 +253,7 @@ class histogram(scoreatpercentile):
         self.name=      'histogram'
         self.statName=  'histogram'
         self.nameStaticText= 'Number of Bins'
+        self._scritpEquivalenString='stats.'+self.statName
         self.spindata= [1,1000,1]
         self.minRequiredCols= 1
         self.colNameSelect= ''
@@ -291,6 +295,7 @@ class cumfreq(histogram):
         self.name=      'cumulatyve frequency'
         self.statName=  'cumfreq'
         self.nameStaticText= 'histbins'
+        self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
         self.colNameSelect= ''
         self._percent=   None  # self._percent == self.histbins
@@ -330,6 +335,7 @@ class relfreq(histogram):
         histogram.__init__(self)
         self.name=      'relative frequency histogram'
         self.statName=  'relfreq'
+        self._scritpEquivalenString='stats.'+self.statName
         
     def object(self):
         return _stats.relfreq
