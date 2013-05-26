@@ -13,7 +13,7 @@ from slbTools import isnumeric, isiterable
 from gridLib import floatRenderer
 import wx.aui
 from numpy import ndarray, ravel, genfromtxt
-from wx.grid  import GridCellAttr 
+from wx.grid  import GridCellAttr
 #import traceback
 
 DEFAULT_GRID_SIZE= (0,0)
@@ -55,7 +55,7 @@ class SimpleGrid( wx.Panel, object):# wxGrid
         self.colsizes= dict()
         self.NumSheetReport = 0
         self.path = None
-        
+
         wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, style = wx.TAB_TRAVERSAL )
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         #< don't change this line
@@ -64,12 +64,12 @@ class SimpleGrid( wx.Panel, object):# wxGrid
         self.sizer.Add( self.m_grid , 1, wx.EXPAND, 5 )
         self.SetSizer(self.sizer)
         self.Fit()
-    
+
         # allowing drop files into the sheet
         dropTarget = MyFileDropTarget( self)
         self.m_grid.SetDropTarget(dropTarget)
         self.grid = self.m_grid # adding some compatibility
-        
+
     def __getattribute__(self, name):
         '''wraps the functions to the grid
         emulating a grid control'''
@@ -88,7 +88,7 @@ class NoteBookSheet(wx.aui.AuiNotebook, object):
         # se almacenan las paginas en un diccionario con llave el numero de pagina
         if params.has_key('fb'):
             self.fb= params.pop('fb')
-        
+
         bSizer = wx.BoxSizer( wx.VERTICAL )
         self.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChange)
 
@@ -120,12 +120,12 @@ class NoteBookSheet(wx.aui.AuiNotebook, object):
                 currGrid=  self.currentPage
                 return currGrid.__getattribute__(name)
             raise AttributeError
-        
+
     def __getitem__(self, item):
         if isinstance(item, (str, unicode)):
             if item in self.getPageNames():
                 return self._pageObjects[item]
-            
+
         elif isinstance(item, (int, float)):
             item= int(item)
             if item < 0:
@@ -133,16 +133,27 @@ class NoteBookSheet(wx.aui.AuiNotebook, object):
             if item < 0:
                 raise StandardError("The selectecd page doesn't exist")
             return self._pageObjects[self._pageObjects.keys()[item]]
-    
+
     def GetCol(self,*args, **params):
-        pageName= self.getPageNames()[0]
-        pageObject= self._pageObjects[pageName]
+        if self.GetPageCount() != 0:
+            if str(type(self.currentPage)) == "<class 'wx._core._wxPyDeadObject'>":
+               self.currentPage = None
+               self.currentPageNumber= None
+        else:
+            raise AttributeError
+        pageObject=self.currentPage
         return  getattr( pageObject, 'GetCol')(*args, **params)
+
     def PutCol(self, *args, **params):
-        pageName= self.getPageNames()[0]
-        pageObject= self._pageObjects[pageName]
+        if self.GetPageCount() != 0:
+            if str(type(self.currentPage)) == "<class 'wx._core._wxPyDeadObject'>":
+               self.currentPage = None
+               self.currentPageNumber= None
+        else:
+            raise AttributeError
+        pageObject=self.currentPage
         return  getattr( pageObject, 'PutCol')(*args, **params)
-    
+
     def _gridSetRenderer(self, grid):
         return
         '''setting the renderer to the grid'''
@@ -158,16 +169,16 @@ class NoteBookSheet(wx.aui.AuiNotebook, object):
             grid.SetGridLineColour("#b7b7b7")
             grid.SetLabelBackgroundColour("#d2d2d2")
             grid.SetLabelTextColour("#444444")
-            
+
     def getGridAllValueByCols( self,pageName):
         if not (pageName in self._pageObjects.keys()):
             raise StandardError('The page does not exist')
         page= self._pageObjects[pageName]
         return page.getByColumns()
-    
+
     def __len__(self):
         return self.PageCount
-    
+
     def getPageNames( self):
         return self._pageObjects.keys()
 
@@ -471,7 +482,7 @@ class NoteBookSheet(wx.aui.AuiNotebook, object):
         if pageName == None:
             return
         self._pageObjects.pop( pageName)
-        
+
     def changeLabel(self, page= None, newLabel= None):
         if self.GetPageCount() < 1:
             return
