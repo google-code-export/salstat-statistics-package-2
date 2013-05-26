@@ -22,11 +22,11 @@ __WILDCARD= "Supported Files (*.txt;*.csv;*.xlsx;*.xls)|*.txt;*.csv;*xlsx;*.xls|
             "Excel 2010 File (*.xlsx)|*.xlsx|" \
             "Excel 2003 File (*.xls)|*.xls|" \
             "Txt file (*.txt)|*.txt|"    \
-            "Csv file (*.csv)|*.csv" 
+            "Csv file (*.csv)|*.csv"
 
 def getPath(wildcard= __WILDCARD, aplyFilter= True):
     """getPath(wildcard= __WILDCARD, aplyFilter= True)
-    
+
     __WILDCARD= "Supported Files (*.txt;*.csv;*.xlsx;*.xls)|*.txt;*.csv;*xlsx;*.xls|"\
             "Excel 2010 File (*.xlsx)|*.xlsx|" \
             "Excel 2003 File (*.xls)|*.xls|" \
@@ -40,13 +40,13 @@ def getPath(wildcard= __WILDCARD, aplyFilter= True):
                         style = wx.OPEN)
     icon = imageEmbed().logo16
     dlg.SetIcon(icon)
-    
+
     if dlg.ShowModal() != wx.ID_OK:
         dlg.Destroy()
         return None
-    
+
     fileName= dlg.GetFilename()
-    fullPath= dlg.Path 
+    fullPath= dlg.Path
     junk, filterIndex = os.path.splitext(fileName)
     if aplyFilter:
         try:
@@ -56,7 +56,7 @@ def getPath(wildcard= __WILDCARD, aplyFilter= True):
             traceback.print_exc( file = self.log)
     else:
         return fullPath
-            
+
 def siguiente():
     '''genera una serie de datos continuos
     >> sig = siguiente()
@@ -89,7 +89,7 @@ class ReportaExcel(object):
         while True:
             yield i
             i+= 1
-            
+
     @property
     def suffix(self):
         return self._suffix
@@ -97,7 +97,7 @@ class ReportaExcel(object):
     def suffix(self, suf):
         if suf in ('xls', 'xlsx'):
             self._suffix = suf
-            
+
     @property
     def path(self):
         return self._path
@@ -146,14 +146,14 @@ class ReportaExcel(object):
     def write(self, lista, sheetNumber= None, cell_overwrite_ok = False):
         '''reporte al contenido considerando que se ha ingresado una columna'''
         # check if the sheet is a name of an existent sheet
-        
+
         #if isinstance(sheet, (str, unicode)):
-        #    if sheet in 
+        #    if sheet in
         #
         if len(self._hojas) < 1:
             # se crea una hoja
             self.__addSheet()
-        
+
         if sheetNumber == None:
             # se considera que la hoja utilizada sera la primera(hoja numero cero)
             sheetNumber = 0
@@ -176,7 +176,7 @@ class ReportaExcel(object):
                 sheetObj.write( posicion, sheetCol, contenido, style0)
             else:
                 sheetObj.write(posicion, sheetCol, contenido)
-                
+
     def _filterlist(self, lista):
         if len(lista) == 0:
             return lista
@@ -184,7 +184,7 @@ class ReportaExcel(object):
         if isinstance(lista, (tuple)):
             lista = list(lista)
         lista2 = deepcopy(lista)
-        
+
         lista2.reverse()
         for pos,val in enumerate(lista2):
             if val != u'':
@@ -202,7 +202,7 @@ class ReportaExcel(object):
                 except:
                     pass
         return lista
-        
+
     def writeByRow(self,lista,sheet= None):
         '''escribe los resultados por filas'''
         # se verifica si existen hojas para el reporte
@@ -328,32 +328,48 @@ def distinct(data):
     return unicos
 
 def homogenize(*args, **params):
-    '''given a serie of vectors it check the values and 
-    groups it depens on its value. 
+    '''given a serie of vectors it check the values and
+    groups it depens on its value.
     arg1: iterable with numerical data'''
+    if len(args) == 0:
+        return args
     returnPos= False
-    try:
-        returnPos= params['returnPos']
-    except KeyError:
-        pass
-    
-    maxlen= min( [len(arg) for arg in args])
+    returnInvalid= False # indica si se quiere reportar las posiciones invalidas
+    try: returnPos= params['returnPos']
+    except KeyError:  pass
+    try: returnInvalid= params['returnInvalid']
+    except KeyError:  pass
+
+    argLens= [len(arg) for arg in args]
+    maxAllowedLen= min( argLens)
     nelements= len( args)
     passPos= list()
-    for pos in range( maxlen):
+    nonpassPos= [i for i in range(maxAllowedLen, max(argLens))]
+    for pos in range( maxAllowedLen):
         dat= [args[i][pos] for i in range(nelements)]
         if _allnumeric(dat):
             passPos.append(pos)
+        else:
+            nonpassPos.append(pos)
     if sum( [isinstance( arg,(np.ndarray,)) for arg in args]) == len(args):
-        return [np.array([arg[pos] for pos in passPos]) for arg in args]
-    if not returnPos:
-        return [[arg[pos] for pos in passPos] for arg in args]
+        result= [np.array([arg[pos] for pos in passPos]) for arg in args]
     else:
-        return ([[arg[pos] for pos in passPos] for arg in args], passPos)
+        result= [[arg[pos] for pos in passPos] for arg in args]
+
+    if not returnPos and not returnInvalid:
+        return result
+
+    result= (result,)
+    if returnPos:
+        result+= (passPos,)
+    if returnInvalid:
+        result+= (nonpassPos,)
+
+    return result
 
 def homogenizeNonNumerical(*args):
-    '''given a serie of vectors it check the values and 
-    groups it depens on its value. 
+    '''given a serie of vectors it check the values and
+    groups it depens on its value.
     arg1: iterable with numerical data'''
     maxlen= min( [len(arg) for arg in args])
     nelements= len( args)
@@ -365,7 +381,7 @@ def homogenizeNonNumerical(*args):
     if sum( [isinstance( arg,(np.ndarray,)) for arg in args]) == len(args):
         return [np.array([arg[pos] for pos in passPos]) for arg in args]
     return [[arg[pos] for pos in passPos] for arg in args]
-        
+
 def _allnumeric(data):
     return all([isnumeric(dat) for dat in data])
 
@@ -442,7 +458,7 @@ class GroupData(object):
         self.yvalues = yvalues
         self.yvaluesAlias = yvaluesAlias
         self.restrictions= restrictions
-        
+
     def _cols2dict(self, *cols):
         result= self._filterPos()
         '''convierte una serie de columnas en diccionario'''
@@ -450,7 +466,7 @@ class GroupData(object):
         data = [len( col) for col in cols]
         if False in map( lambda x,y:  x == y, data[1:] ,data[:-1]):
             raise StandardError( 'Los argumentos deben tener igual cantidad de elementos')
-        
+
         # se identifica las posiciones que cumplen con las restricciones
         if len(self.restrictions) != 0:
             # Aplaying the restrictions to the data
@@ -459,37 +475,37 @@ class GroupData(object):
             data= len( cols[0])
         else:
             data= data[0]
-            
+
         length= data
         result= ()
         for pos in range( length):
             res1= [col[pos] for col in cols]
             result += (res1,)
-        
+
         # se hace los calculos
         return list( self._fil2dict( list( result)))[0]
-    
+
     def __homogenizeData(self):
         # se homogeniza la informacion
         if self._homogenized == True:
             return
-        
+
         alldata= list()
         for xdat in self.xdata:
             alldata.append(xdat)
-            
+
         for ydat in self.ydata:
             alldata.append(ydat)
-        
+
         # homogenize numerical and non numerical data
         cols= homogenizeNonNumerical( *alldata)
         self._xdata= [cols.pop(0) for i in range(len(self.xdata))]
         self._ydata= cols
         self._homogenized == True
-    
+
     def _fil2dict(self, data):
         '''convierte una serie de filas en diccionario'''
-        
+
         dictionary = OrderedDict()
         for dato in data:
             try:
@@ -504,19 +520,19 @@ class GroupData(object):
                 dictionary[key] = (dato[1:],)
             except IndexError:
                 break
-            
+
         for key in dictionary.keys():
             for key2 in self._fil2dict(dictionary[key]):
                 dictionary[key] = key2
-                
+
         yield dictionary
-    
+
     def _filterPos(self):
         '''applying the general initital filter to the data by the given conditions'''
         # se identifica las posiciones que cumplen con las restricciones
         if len(self.restrictions) == 0:
             return
-        
+
         # joining the restrictions
         restrictiones= ['('+rest+')' for rest in self.restrictions]
         if len( self.restrictions) == 1:
@@ -524,27 +540,27 @@ class GroupData(object):
         else:
             u= lambda x,y: x+' & '+y
             restrictiones= reduce( u, restrictiones[1:], restrictiones[0])
-        
+
         self.filterPos= []
         xcols= [np.array(x) for x in self.xdata]
         ycols= [np.array(x) for x in self.ydata]
         localsDict= OrderedDict( )
-        
+
         for key, value in zip( self.xdataNames, xcols):
             localsDict[key]= value
-        
+
         for key, value in zip( self.ydataNames, ycols):
             localsDict[key]= value
-        
+
         self.filterPos= eval(restrictiones, {}, localsDict)
-        
+
         return self.filterPos
-    
+
     def __test__( self, *data):
         dimensiones = [len(datai) for datai in data]
         if sum([1 for dimen in dimensiones if dimen == dimensiones[0]]) != len(dimensiones):
             raise StandardError('all the data must have the same len')
-        
+
     def __testAll( self):
         self.__test__( self._xdata)
         self.__test__( self._ydata)
@@ -553,12 +569,12 @@ class GroupData(object):
     def __setdictValue( self, diccionario, keys, nombreCampo, value):
         if not isinstance(keys,(list,tuple)):
             return
-        
+
         if len(keys) >= 1:
             key0= keys[0]
             if not isinstance( keys[0], (str,unicode)):
                 key0= keys[0].__str__()
-                
+
         if len(keys) == 1:
             if not diccionario.has_key(key0):
                 diccionario[key0]= OrderedDict()
@@ -569,7 +585,7 @@ class GroupData(object):
                     except KeyError:
                         diccionario[key0][nombreCampo]= value#list()
                         #diccionario[key0][nombreCampo].append(value)
-                else:        
+                else:
                     (nombreCampo[-1],value[-1])
                     for nombrei,valuei in zip(nombreCampo,value):
                         try:
@@ -589,34 +605,34 @@ class GroupData(object):
             except KeyError:
                 diccionario[key0]= OrderedDict()
                 self.__setdictValue(diccionario[key0],keys[1:],nombreCampo,value)
-                
-    
+
+
     def getAsDict( self):
         self.__testAll()
         self.__homogenizeData()
         if len( self.xdata[0]) == 0 or len( self.ydata[0]) == 0:
             return OrderedDict()
-        
+
         if self.yalias==  None:
             self.yalias= self.ydataNames[:]
-            
+
         diccionario= self._cols2dict( *self.xdata)
         if len(self.filterPos) > 0:
             for rowNumber in range( len( self.xdata[0])): # self.ydata[0]
-                if not self.filterPos[rowNumber]: 
+                if not self.filterPos[rowNumber]:
                     continue
-                
+
                 rowData= [ydata[rowNumber] for ydata in self.ydata]
                 # changing empty string u'' to None
                 for pos,data in enumerate( rowData):
                     if data == u'':
                         rowData[pos] = None
-                        
+
                 self.__setdictValue( diccionario,
                         keys= [valor[rowNumber] for valor in self.xdata],
                         nombreCampo= self.yalias,
                         value= rowData)
-                
+
         else:
             for rowNumber in range( len( self.xdata[0])): # self.ydata[0]
                 rowData= [ydata[rowNumber] for ydata in self.ydata]
@@ -624,24 +640,24 @@ class GroupData(object):
                 for pos,data in enumerate( rowData):
                     if data == u'':
                         rowData[pos] = None
-        
+
                 self.__setdictValue( diccionario,
                         keys= [valor[rowNumber] for valor in self.xdata],
                         nombreCampo= self.yalias,
                         value= rowData)
-        
+
         # applying filters to obtain ydata
         return self._applyYfilters(diccionario)
-    
+
     def _applyYfilters(self, diccionario):
         # defining the dictionary of variables to be used as
         # local variables
         if len(self.yvalues) == 0:
             return diccionario
-        
+
         if len( self.yvaluesAlias) != len( self.yvalues):
             self.yvaluesAlias= self.yvalues[:]
-        
+
         localdict= OrderedDict()
         newdict= self.dict2list( diccionario, maximun= len( self.xdata))
         responseDict= OrderedDict()
@@ -652,7 +668,7 @@ class GroupData(object):
                 dictValues[key]= value
             dictValues['statistics']= statistics
             dictValues['concat']=     concat
-            
+
             # evaluating the conditions with the local dict
             # for all values
             for colY, alias in zip(self.yvalues, self.yvaluesAlias): # colY correspond
@@ -660,18 +676,18 @@ class GroupData(object):
                     yvalues= eval( colY, {}, dictValues)
                 except:
                     yvalues= ''
-   
+
                 # send the data to construct a dictionary
                 self.__setdictValue( responseDict, keys = xValues,
                                      nombreCampo = alias, value= yvalues)
-            
+
         return responseDict
-    
+
     def dict2list(self, diccionario, maximun = None ):
         if maximun== None:
             return self.__dict2list(diccionario)
         return _newdict(diccionario,actual= 1, maximo = maximun)
-    
+
     def __dict2list(self, diccionario):
         '''convierte un diccionario como una lista de datos'''
         try:
@@ -680,10 +696,10 @@ class GroupData(object):
                     yield (key,) + key2
         except:
             yield (diccionario, )
-        
+
     def getAsList(self, maximum= None):
         return [lis for lis in self.getAsGen(maximum)]
-    
+
     def getAsRow(self):
         maximun= len( self.xdata) #+ len( self.ydata) - 1
         def fix( data):
@@ -700,7 +716,7 @@ class GroupData(object):
             #if the len is one then it's values is extracted
             data.extend( newdiccio)
             return tuple( data)
-        
+
         header= self.xdataNames[:]
         if len(self.yvaluesAlias) != 0:
             header.extend( self.yvaluesAlias)
@@ -709,7 +725,7 @@ class GroupData(object):
         res=[ header ]
         res.extend([fix( lis) for lis in self.getAsGen( maximun)])
         return res
-        
+
     def getAsGen(self, maximun= None):
         return self.dict2list(self.getAsDict(), maximun= maximun)
     @property
@@ -724,7 +740,7 @@ class GroupData(object):
             if not( isinstance( xdat , (str, unicode))):
                 xdat= xdat.__str__()
             self.xdataNames.append( xdat)
-    @property       
+    @property
     def ydata( self):
         return self._ydata
     @ydata.setter
@@ -770,7 +786,7 @@ class GroupData(object):
             self._restrictions= [data]
         else:
             self._restrictions= data
-            
+
 def test_GroupData():
     xdata= (('colombia','colombia','colombia'),
         ('pasto','pasto','manizales'),

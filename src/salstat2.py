@@ -122,7 +122,7 @@ import plotFunctions
 ##---------------------------------
 
 APPNAME= 'Salstat2 - Statistical Package'
-__version__= '2.1 rc3'
+__version__= '2.2 a1'
 inits= {}    # dictionary to hold the config values
 missingvalue= None ## It's not used
 imagenes= imageEmbed()
