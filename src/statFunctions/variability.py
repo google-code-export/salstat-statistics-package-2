@@ -20,6 +20,7 @@ class samplevar(geometricMean):
         self.statName=  'samplevar'
         self.minRequiredCols= 1
         self.colNameSelect= ''
+        self._scritpEquivalenString='stats.'+self.statName
             
     def object(self):
         return _stats.samplevar
@@ -38,6 +39,7 @@ class samplestdev(geometricMean):
         self.statName=  'samplestdev'
         self.minRequiredCols= 1
         self.colNameSelect= ''
+        self._scritpEquivalenString='stats.'+self.statName
             
     def object(self):
         return _stats.samplestdev
@@ -56,6 +58,7 @@ class var(geometricMean):
         self.statName=  'var'
         self.minRequiredCols= 1
         self.colNameSelect= ''
+        self._scritpEquivalenString='stats.'+self.statName
             
     def object(self):
         return _stats.var
@@ -74,6 +77,7 @@ class stdev(geometricMean):
         self.statName=  'stdev'
         self.minRequiredCols= 1
         self.colNameSelect= ''
+        self._scritpEquivalenString='stats.'+self.statName
             
     def object(self):
         return _stats.stdev
@@ -92,6 +96,7 @@ class sterr(geometricMean):
         self.statName=  'sterr'
         self.minRequiredCols= 1
         self.colNameSelect= ''
+        self._scritpEquivalenString='stats.'+self.statName
             
     def object(self):
         return _stats.sterr
@@ -110,6 +115,7 @@ class sem(geometricMean):
         self.statName=  'sem'
         self.minRequiredCols= 1
         self.colNameSelect= ''
+        self._scritpEquivalenString='stats.'+self.statName
             
     def object(self):
         return _stats.sem
@@ -128,6 +134,7 @@ class zs(geometricMean):
         self.statName=  'zs'
         self.minRequiredCols= 1
         self.colNameSelect= ''
+        self._scritpEquivalenString='stats.'+self.statName
             
     def object(self):
         return _stats.zs
@@ -143,6 +150,7 @@ class signaltonoise(geometricMean):
         geometricMean.__init__(self)
         self.name=      u'signal to noise (mean/stdev)'
         self.statName=  'signaltonoise'
+        self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
         self.colNameSelect= ''
         self.percent=   None  # self.percent == self.histbins
@@ -168,6 +176,7 @@ class z(scoreatpercentile):
         self.name=      u"z-score for a given input"
         self.statName=  'z'
         self.nameStaticText= 'score'
+        self._scritpEquivalenString='stats.'+self.statName
         self.spindata= [1, 100, 1]
         self.minRequiredCols= 1
         self.colNameSelect= ''

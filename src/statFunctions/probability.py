@@ -20,6 +20,7 @@ class chisqprob(scoreatpercentile):
         self.name=      'chisqprob'
         self.statName=  'chisqprob'
         self.nameStaticText= 'Degrees of freedom'
+        self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
         self.spindata= [1,100,1]
         self.colNameSelect= ''
@@ -75,6 +76,7 @@ class erfcc(geometricMean):
         geometricMean.__init__(self)
         self.name=      'erfcc'
         self.statName=  'erfcc'
+        self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
         self.colNameSelect= ''
     
@@ -125,6 +127,7 @@ class zprob(erfcc):
         erfcc.__init__(self)
         self.name=      'zprob'
         self.statName=  'zprob'
+        self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
         self.colNameSelect= ''
         
@@ -142,6 +145,7 @@ class ksprob(erfcc):
         erfcc.__init__(self)
         self.name=      'ksprob'
         self.statName=  'ksprob'
+        self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
         self.colNameSelect= ''
         
@@ -159,6 +163,7 @@ class fprob(erfcc):
         erfcc.__init__(self)
         self.name=      'fprob'
         self.statName=  'fprob'
+        self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
         self.colNameSelect= ''
         
@@ -176,6 +181,7 @@ class gammln(erfcc):
         erfcc.__init__(self)
         self.name=      'gammln'
         self.statName=  'gammln'
+        self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
         self.colNameSelect= ''
         
@@ -194,6 +200,7 @@ class betacf(_genericFunc):
         _genericFunc.__init__(self)
         self.name=      'betacf'
         self.statName=  'betacf'
+        self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
         self.colNameSelect= ''
         
@@ -273,6 +280,7 @@ class betai(betacf):
         betacf.__init__(self)
         self.name=      'betai'
         self.statName=  'betai'
+        self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
         self.colNameSelect= ''
         

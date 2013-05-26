@@ -36,6 +36,7 @@ class sixPack(_genericFunc):
     icon= imageEmbed().sixsigma16
     name=      u"Six Sigma Pack"
     statName=  'sixpack'
+    _scritpEquivalenString= ""
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
@@ -59,7 +60,7 @@ class sixPack(_genericFunc):
         
         # changing value strings to numbers
         if len(self.ColSelect) == 0:
-            self.logPanel.write(self.translate(u"You haven't selected a column!"))
+            self.logPanel.write(self._(u"You haven't selected a column!"))
             return
     
         # taking the data
@@ -127,13 +128,13 @@ class sixPack(_genericFunc):
         self._report(result)
         
     def _report(self, result):
-        description= {'Desv.Est': self.translate(u'Standard Deviation'),
-                      'Cp':  self.translate(u'Process Capability. A simple and straightforward indicator of process capability.'),
-                      'Pp':  self.translate(u'Process Performance. A simple and straightforward indicator of process performance. basically tries to verify if the sample that you have generated from the process is capable to meet Customer CTQs (requirements)'),
-                      'Cpk': self.translate(u'Process Capability Index. Adjustment of Cp for the effect of non-centered distribution. measures how close a process is running to its specification limits, relative to the natural variability of the process'),
-                      'Ppk': self.translate(u'Process Performance Index. Adjustment of Pp for the effect of non-centered distribution.'),
-                      'Cpm': self.translate(u'Estimates process capability around a target, it is also known as the Taguchi capability index'),
-                      'ppm': self.translate(u'In a quality control context, PPM stands for the number of parts per million (cf. percent) that lie outside the tolerance limits')}
+        description= {'Desv.Est': self._(u'Standard Deviation'),
+                      'Cp':  self._(u'Process Capability. A simple and straightforward indicator of process capability.'),
+                      'Pp':  self._(u'Process Performance. A simple and straightforward indicator of process performance. basically tries to verify if the sample that you have generated from the process is capable to meet Customer CTQs (requirements)'),
+                      'Cpk': self._(u'Process Capability Index. Adjustment of Cp for the effect of non-centered distribution. measures how close a process is running to its specification limits, relative to the natural variability of the process'),
+                      'Ppk': self._(u'Process Performance Index. Adjustment of Pp for the effect of non-centered distribution.'),
+                      'Cpm': self._(u'Estimates process capability around a target, it is also known as the Taguchi capability index'),
+                      'ppm': self._(u'In a quality control context, PPM stands for the number of parts per million (cf. percent) that lie outside the tolerance limits')}
         
 
         general= {'Desv.Est': round( result['stddev'], 5),
@@ -144,11 +145,11 @@ class sixPack(_genericFunc):
         LCU=    result['LCU']
         LCL=    result['LCL']
         # se muestra los resultados
-        self.outputGrid.addColData( [self.translate(u'Input Data')], pageName= self.translate(u'SixSigma'))
-        self.outputGrid.addColData( [self.translate(u'UCL'), self.translate(u'LCL'),
-                                     self.translate(u'target'), self.translate(u'k'), self.translate(u'group size')])
+        self.outputGrid.addColData( [self._(u'Input Data')], pageName= self._(u'SixSigma'))
+        self.outputGrid.addColData( [self._(u'UCL'), self._(u'LCL'),
+                                     self._(u'target'), self._(u'k'), self._(u'group size')])
         self.outputGrid.addColData( [self.UCL, self.LCL, self.Target, self.k, self.groupSize])
-        self.outputGrid.addColData( [self.translate(u'selected columns')],)
+        self.outputGrid.addColData( [self._(u'selected columns')],)
         self.outputGrid.addColData( self.ColSelect)
         keys= list()
         desc= list()
@@ -160,8 +161,8 @@ class sixPack(_genericFunc):
         self.outputGrid.addColData( desc)
         self.outputGrid.addColData( keys)
         self.outputGrid.addColData( values)
-        self.outputGrid.addColData( [self.translate('xbar chart Limits')])
-        self.outputGrid.addColData( (self.translate(u'LCU'),self.translate(u'LCL')))
+        self.outputGrid.addColData( [self._('xbar chart Limits')])
+        self.outputGrid.addColData( (self._(u'LCU'),self._(u'LCL')))
         self.outputGrid.addColData( (LCU, LCL))
         
         # control process chart
@@ -209,11 +210,11 @@ class sixPack(_genericFunc):
         schart_LCL= B3[groupSize]*Ra
         schart_target= Sa
     
-        self.Logg.write(self.translate(u'SixSigma') + ' '+self.translate('successful'))
+        self.Logg.write(self._(u'SixSigma') + ' '+self._('successful'))
         
         self.outputGrid.addColData(self.colNameSelect, self.name)
         self.outputGrid.addColData(result)
-        self.Logg.write(self.translate(self.statName)+ ' '+self.translate('successful'))
+        self.Logg.write(self._(self.statName)+ ' '+self._('successful'))
         
         
     def _sixpack(self, data, UCL, LCL, Target, k= 6, n= 2 ):
@@ -221,7 +222,7 @@ class sixPack(_genericFunc):
         stadis= statistics(data)
         stddev = stadis.stddev
         if stddev == 0:
-            self.Logg.write(self.translate(u'Six pack analysis fail because the stddev is zero)'))
+            self.Logg.write(self._(u'Six pack analysis fail because the stddev is zero)'))
             return
     
         if UCL == None:
@@ -234,7 +235,7 @@ class sixPack(_genericFunc):
             Target= stadis.mean
     
         if UCL <= LCL:
-            self.Logg.write(self.translate(u'Six pack analysis fail because LCL >= UCL  %f >= %f')%(LCL, UCL))
+            self.Logg.write(self._(u'Six pack analysis fail because LCL >= UCL  %f >= %f')%(LCL, UCL))
             return
     
         mean=     stadis.mean

@@ -19,6 +19,7 @@ class moment(_genericFunc):
         _genericFunc.__init__(self)
         self.name=      'moment'
         self.statName=  'moment'
+        self.__scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
         self.colNameSelect= ''
         self.moment= None
@@ -99,6 +100,7 @@ class variation(_genericFunc):
         _genericFunc.__init__(self)
         self.name=      'variation'
         self.statName=  'variation'
+        self.__scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
         self.colNameSelect= ''
         
@@ -165,6 +167,7 @@ class skew(variation):
         variation.__init__(self)
         self.name=      'skew'
         self.statName=  'skew'
+        self.__scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
         self.colNameSelect= ''
     
@@ -183,6 +186,7 @@ class kurtosis(variation):
         variation.__init__(self)
         self.name=      'kurtosis'
         self.statName=  'kurtosis'
+        self.__scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
         self.colNameSelect= ''
     
@@ -201,6 +205,7 @@ class skewtest(variation):
         variation.__init__(self)
         self.name=      'skewtest'
         self.statName=  'skewtest'
+        self.__scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
         self.colNameSelect= ''
     
@@ -230,6 +235,7 @@ class kurtosistest(skewtest):
         skewtest.__init__(self)
         self.name=      'kurtosistest'
         self.statName=  'kurtosistest'
+        self.__scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
         self.colNameSelect= ''
     
@@ -248,6 +254,7 @@ class normaltest(kurtosistest):
         variation.__init__(self)
         self.name=      'normaltest'
         self.statName=  'normaltest'
+        self.__scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
         self.colNameSelect= ''
     

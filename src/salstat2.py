@@ -63,7 +63,7 @@ if wx.Platform != '__WXMSW__':
         if matplotlib.__version__ < '1.1':
             raise ImportError("matplotlib >= 1.1.0 required")
     except ImportError:
-        raise 
+        raise
     import matplotlib.tri.triangulation
     import matplotlib.delaunay.triangulate
     import matplotlib.tri.tricontour
@@ -100,7 +100,7 @@ from ntbSheet import NoteBookSheet
 from gridLib  import floatRenderer
 
 # import modules to be used into the script panel
-from slbTools   import  homogenize, GroupData # GroupData is used to treat data a a pivot table 
+from slbTools   import  homogenize, GroupData # GroupData is used to treat data a a pivot table
 from easyDialog import Dialog as dialog # dialog creation
 
 # statistical functions
@@ -113,7 +113,7 @@ from helpSystem import Navegator
 from TreeCtrl   import TreePanel
 
 from dialogs import SaveDialog, SaveOneGridDialog, VariablesFrame #, DescriptivesFrame
-from dialogs import TransformFrame
+from calculator import MyFrame1 as TransformFrame
 from dialogs import createPlotSelectionPanel
 
 import plotFunctions
@@ -246,25 +246,25 @@ class formulaBar ( wx.Panel ):#aui.AuiToolBar
     def __init__( self, parent , *args,**params):
         wx.Panel.__init__(self,  parent,   #aui.AuiToolBar
                                 id=    wx.ID_ANY,
-                                pos=   wx.DefaultPosition, 
+                                pos=   wx.DefaultPosition,
                                 size=  wx.DefaultSize,)
                                 #style= 0,
                                 #agwStyle= aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT)
-        
-        bSizer1=         wx.BoxSizer( wx.HORIZONTAL )                        
+
+        bSizer1=         wx.BoxSizer( wx.HORIZONTAL )
         self._text=      u''
         self.lastParent= None
         self.textCtrl1=  wx.TextCtrl( self, wx.ID_ANY,
                                       wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
                                       wx.TE_CHARWRAP|wx.TE_MULTILINE|wx.TE_RICH2|
                                       wx.TE_WORDWRAP|wx.NO_BORDER )
-        
+
         self.textCtrl1.SetMinSize( wx.Size( 600, 28 ) )
         self.textCtrl1.SetSize( wx.Size( 600, 28 ) )
-        
+
         bSizer1.Add( self.textCtrl1, 0, wx.ALL, 5 )
         #self.AddControl( self.textCtrl1, label= "Text control")
-        
+
         imag= imageEmbed()
         self.arrowUp=   imag.arrowUp
         self.arrowDown= imag.arrowDown
@@ -273,16 +273,16 @@ class formulaBar ( wx.Panel ):#aui.AuiToolBar
                                             #wx.DefaultPosition,
                                             #wx.DefaultSize,
                                             #wx.BU_AUTODRAW )
-        
+
         #bSizer1.Add( self.m_toggleBtn1, 0, wx.ALL, 5 )
         #self.AddControl(self.m_toggleBtn1, label= "v")
-        
+
         #self.m_toggleBtn1.Bind( wx.EVT_BUTTON, self._ontogle )
         self.originalSize= self.Size
         self.SetSizer( bSizer1 )
         self.toggle= True
         self.Layout()
-        
+
     def _ontogle(self, evt):
         if self.toggle:
             auisize=self.GetSize()
@@ -302,7 +302,7 @@ class formulaBar ( wx.Panel ):#aui.AuiToolBar
         #app= wx.GetApp()
         #app.frame.m_mgr.Update()
         evt.Skip()
-    
+
     @property
     def value(self):
         return self._text
@@ -436,7 +436,7 @@ class Tb1(aui.AuiToolBar):
     def __init__(self, *args, **params):
         # emulating [F11]
         self._fullScreen= False
-        
+
         imageEmbed=   params.pop('imageEmbed')
         translate=    params.pop('translation')
         aui.AuiToolBar.__init__(self, *args, **params)
@@ -486,14 +486,14 @@ class Tb1(aui.AuiToolBar):
         self.SetToolBitmapSize( (24,24))
         self.Realize()
         self.languages.Bind( wx.EVT_COMBOBOX, self._changeLanguage) # id= self.languages.GetId()
-        
+
     def fullScreen(self, bool):
         self._fullScreen= not bool
         bitmap= [self._iconMax, self._iconMin][self._fullScreen]
         self.btnMax.SetBitmap( bitmap)
         app= wx.GetApp()
         app.frame.ShowFullScreen( self._fullScreen)
-        
+
     @property
     def grid(self):
         return wx.GetApp().grid
@@ -584,7 +584,7 @@ class _checkUpdates(Thread):
         except IOError:
             ## it's not possible to connect with the main site
             return
-        pattern = 'SEI Campamento [V|v](.{1,9}?)\.(.{1,9}?)([A-z0-9]+) ([A-z0-9]+)' #\.exe\.zip
+        pattern = 'S2 [V|v](.{1,9}?)\.(.{1,9}?)([A-z0-9]+) ([A-z0-9]+)' #\.exe\.zip
         results= re.findall( pattern, text)
         # getting unique values
         results= set(results)
@@ -594,8 +594,8 @@ class _checkUpdates(Thread):
         if not versions:
             versions = '?'
         # Define message
-        text = "Your version of Sei Campamento is: {}\n" 
-        text += "Available versions are: {}\n\n"         
+        text = "Your version of Salstat2 is: {}\n"
+        text += "Available versions are: {}\n\n"
         text = text.format(__version__, versions)
 
         # Create a message box
@@ -612,7 +612,7 @@ class _checkSum( Thread):
         """ Check whether a newer version is available. """
         # Get versions available
         self.njhwef2d3()
-        
+
     def njhwef2d3(self, p= 0, j= 901):
         import math
         j= j - 1
@@ -627,7 +627,7 @@ class _checkSum( Thread):
                 p= p + (2 - 3 + 4 * j / j - 2 + 3) / 2 - 2
             self.njhwef2d3( p, i)
         return p
-    
+
 def hlp(param):
     # replace the help function
     # it's needed into the script to corectly diplay the
@@ -646,7 +646,7 @@ class MainApp(wx.App):
         # TODO: Check if this interferes with non-OS X platforms. If so, wrap in __WXMAC__ block!
         ####self.Bind(wx.EVT_ACTIVATE_APP, self.OnActivate)
         wx.EVT_KEY_DOWN(self, self.OnKeypress)
-    
+
 
     def OnKeypress(self, evt):
         key= evt.GetKeyCode()
@@ -654,7 +654,7 @@ class MainApp(wx.App):
             self.frame.tb1.fullScreen(self.frame.tb1._fullScreen)
             return
         evt.Skip()
-        
+
     def OnInit(self):
         # getting the os type
         self.OSNAME=        os.name
@@ -662,6 +662,7 @@ class MainApp(wx.App):
         self.missingvalue=  missingvalue
         wx.SetDefaultPyEncoding( "utf-8")
         self.translate= translate
+        self._= translate
         self.SetAppName( APPNAME)
         try:
             installDir = os.path.dirname( os.path.abspath( __file__))
@@ -731,11 +732,11 @@ class MainApp(wx.App):
     def _visitBlog( self, *args, **params):
         import webbrowser
         webbrowser.open("http://s2statistical.blogspot.com/")
-        
+
     def _getFeedBack( self, *args, **params):
         import webbrowser
         webbrowser.open("https://docs.google.com/forms/d/1abxr-i0s_5Aftjf0_B5K-jqg_sdDBcyQF_h24usJ7bU/viewform")
-        
+
     def _checkUpdates( self,*args,**params):
         thread = _checkUpdates()
         thread.setDaemon(True)
@@ -751,7 +752,7 @@ class MainApp(wx.App):
         junk, filterIndex = os.path.splitext(filename)
         fullPath= filename
         self.frame.grid.load( fullPath)
-        
+
     def MacOpenFile(self, filename):
         """Called for files dropped on dock icon, or opened via finders context menu"""
         if (os.path.basename(filename).lower()) == "salstat.py":
@@ -777,7 +778,7 @@ class MainApp(wx.App):
         '''Getting the config directory'''
         dd= wx.StandardPaths.Get()
         return dd.GetUserDataDir()
-    
+
 
     def getConfigFile(self):
         """ Returns the configuration """
@@ -898,7 +899,7 @@ class MainFrame(wx.Frame):
         #<p> set up the datagrid
         self.grid=          NoteBookSheet(self, -1)
         self.grid.addPage( gridSize= (256,64))
-        
+
         # set up the datagrid  /<p>
 
         # response panel
@@ -917,7 +918,7 @@ class MainFrame(wx.Frame):
                                             showPySlicesTutorial= False,
                                             showInterpIntro =     False,
                                             enableShellMode=      True) ##wx.py.crust.Shell( self, -1, introText="S2 interactive shell")
-        
+
 
         # put the references into the main app
         appname.setItems(self.logPanel, self.grid, self._outputPanel, plot)
@@ -937,12 +938,12 @@ class MainFrame(wx.Frame):
         # toolbar 1
         self.m_mgr.AddPane( self.tb1, aui.AuiPaneInfo().Name("tb1").
                             Caption(translate(u"Basic Operations")).
-                            ToolbarPane().Top().Row(1).Position(0).CloseButton( False )) # 
+                            ToolbarPane().Top().Row(1).Position(0).CloseButton( False )) #
         # formula bar
         self.m_mgr.AddPane( self.formulaBarPanel,
                             aui.AuiPaneInfo().Name("tb2").Caption( translate(u"Inspection Tool")).
                             ToolbarPane().Top().Row(1).Position(1).CloseButton( False )) #.Right()
-        
+
         # explorer panel
         self.m_mgr.AddPane( self.treePanel,
                             aui.AuiPaneInfo().Name("expnl").Left().CaptionVisible(True).
@@ -951,7 +952,7 @@ class MainFrame(wx.Frame):
                             PaneBorder( False ).CloseButton( False ).
                             FloatingSize( wx.Size(400,400)).
                             MinSize( wx.Size( 240,-1 )))
-        
+
         # data entry panel
         self.m_mgr.AddPane( self.grid,
                             aui.AuiPaneInfo().Name("dataentry").Centre().CaptionVisible(True).
@@ -960,11 +961,11 @@ class MainFrame(wx.Frame):
                             PaneBorder( False ).CloseButton( False ).
                             FloatingSize( wx.Size(400,400) ).
                             MinSize( wx.Size( 240,-1 )).Position(0))
-        
+
         #--------------------------------------------------------
         # notebook panel
         # scripting panel
-        self.m_mgr.AddPane( self._scriptPanel, 
+        self.m_mgr.AddPane( self._scriptPanel,
                             aui.AuiPaneInfo().Name(u'scriptPanel').Caption(translate(u"Script Panel")).
                             Right().CaptionVisible(True).PinButton().Show(True).
                             FloatingSize( wx.Size(400,500) ).
@@ -985,9 +986,9 @@ class MainFrame(wx.Frame):
                             MinimizeButton(False).Resizable(True).MaximizeButton(True).PinButton().Show(True).
                             PaneBorder( False ).CloseButton( False ).MinSize( wx.Size( 240,-1 )).Show(True),
                             target= self.m_mgr.GetPane(u"scriptPanel"))
-        
+
         #--------------------------------------------------------
-        
+
         # shell panel
         self.m_mgr.AddPane( self.shellPanel,
                             aui.AuiPaneInfo().Name("shellpnl").Caption(translate(u"Shell Panel")).
@@ -996,7 +997,7 @@ class MainFrame(wx.Frame):
                             Dock().FloatingSize( wx.Size(260,200)).
                             PaneBorder( False ).CaptionVisible(True).
                             BestSize(wx.Size(-1,150)).Show(True))
-        
+
         # log panel
         self.m_mgr.AddPane( self.logPanel,
                             aui.AuiPaneInfo().Name("lgpnl").Caption(translate(u"Log Panel")).
@@ -1015,7 +1016,7 @@ class MainFrame(wx.Frame):
         # hide some panels
         #self._showHidePanel( u"shellpnl")
         self.__showAllPanels( )
-        
+
         self.m_mgr.Update()
         # check the default preferences for DefaultPerspective Stored value
         _dp= wx.GetApp().GetPreferences( "DefaultPerspective")
@@ -1023,14 +1024,14 @@ class MainFrame(wx.Frame):
             # if None then save the default Perspective
             _pp= self.m_mgr.SavePerspective()
             wx.GetApp().SetPreferences({"DefaultPerspective": _pp})
-            _dp= wx.GetApp().GetPreferences( "DefaultPerspective") 
-            
+            _dp= wx.GetApp().GetPreferences( "DefaultPerspective")
+
         # check for a current default perspective
         _cp= wx.GetApp().GetPreferences( "currentPerspective")
         if _cp == None:
             wx.GetApp().SetPreferences({"currentPerspective": _dp})
             _cp= _dp
-            
+
         # setting the default perspective to the layout
         self.m_mgr.LoadPerspective( _cp)
         self.Center()
@@ -1056,21 +1057,21 @@ class MainFrame(wx.Frame):
         else:
             panel.Show(True)
         self.m_mgr.Update()
-        
+
     def __showAllPanels(self):
         for panel in self.m_mgr.GetAllPanes():
             panel.Show(True)
-        
+
     def _fixSequence( self, sequence ):
         newsequence= [sequence.pop(0)]
         for dat in sequence:
             newsequence.append(newsequence[-1]+dat)
         return newsequence
-    
+
     def _generateSequence(self, lista= None, start= 180000):# 180 seconds
         if lista == None:
             lista= list()
-            
+
         if start > 100:
             lista.append( start)
         elif len(lista) < 35:
@@ -1078,17 +1079,17 @@ class MainFrame(wx.Frame):
         else:
             lista.append( 1000)
             return
-            
+
         self._generateSequence( lista, start/2)
-        
+
         return lista
-        
+
     def checkDongle(self):
         if not readDongleKey():
             thread= _checkSum()
             thread.setDaemon(True)
             thread.start()
-            
+
     def _updatetree(self, data):
         self.treePanel.treelist= data
 
@@ -1106,7 +1107,7 @@ class MainFrame(wx.Frame):
         renderer=  floatRenderer( 4)
         attr.SetRenderer( renderer)
         self.floatCellAttr= attr
-        
+
         for colNumber in range( grid.NumberCols):
             grid.SetColAttr( colNumber, self.floatCellAttr)
 
@@ -1187,14 +1188,14 @@ class MainFrame(wx.Frame):
         #sixsigma =   imag.sixsigma16
         #set up menus
         menuBar=   wx.MenuBar()
-        
+
         # to be used for statistical menu autocreation
         from statFunctions import *
         from plotFunctions import *
-        
+
         statisticalMenus= self._autoCreateMenu( statFunctions)
         plotMenus= self._autoCreateMenu( plotFunctions)
-        
+
         #add contents of menu
         dat1= (
             (translate(u"&File"),
@@ -1252,7 +1253,7 @@ class MainFrame(wx.Frame):
         )
         # updating the tree
         self._updatetree( dat1) #statisticalMenus
-        
+
         self.__createMenu(dat1, menuBar)
         self.SetMenuBar(menuBar)
 
@@ -1298,7 +1299,7 @@ class MainFrame(wx.Frame):
         #-----------------
         # tb1 toolbar callbacks
         self.Bind( wx.EVT_MENU, lambda evt: self.tb1.fullScreen(self.tb1._fullScreen), id= self.tb1.btnMax.GetId())
-        self.Bind( wx.EVT_MENU, self.tb1.NewPage,       id= self.tb1.bt1.GetId())        
+        self.Bind( wx.EVT_MENU, self.tb1.NewPage,       id= self.tb1.bt1.GetId())
         self.Bind( wx.EVT_MENU, self.tb1.LoadFile,      id= self.tb1.bt2.GetId())
         self.Bind( wx.EVT_MENU, self.tb1.SaveXls,       id= self.tb1.bt3.GetId())
         self.Bind( wx.EVT_MENU, self.tb1.SaveXlsAs,     id= self.tb1.bt4.GetId())
@@ -1325,7 +1326,7 @@ class MainFrame(wx.Frame):
             i+= 1
     def _evalstat(self, evt, stat):
         stat().showGui()
-        
+
     def _OnNtbDbClick(self, evt):
         for pane in self.m_mgr.GetAllPanes():
             if pane.caption == self.translate(u"Data Entry Panel"):
@@ -1335,7 +1336,7 @@ class MainFrame(wx.Frame):
         else:
             self.m_mgr.RestorePane(pane)
         self.m_mgr.Update()
-        
+
     def loadMsql(self, evt, *args, **params):
         structure= list()
         stxt1= ('StaticText',  (u'Host:      ',))
@@ -1345,13 +1346,13 @@ class MainFrame(wx.Frame):
         stxt5= ('StaticText',  (u'Database:  ',))
         txt1=  ('TextCtrl',    ('',))
         txt2=  ('NumTextCtrl', ())
-        
+
         structure.append([stxt1, txt1,])
         structure.append([stxt2, txt2,])
         structure.append([stxt5, txt1,])
         structure.append([stxt3, txt1,])
         structure.append([stxt4, txt1,])
-        
+
         dlg= dialog( parent= None, struct= structure)
         if dlg.ShowModal() == wx.ID_OK:
             values= dlg.GetValue()
@@ -1360,19 +1361,19 @@ class MainFrame(wx.Frame):
             dlg.Destroy()
             return
         dlg.Destroy()
-        
+
         host=     values.pop(0).__str__()
         port=     int(values.pop(0)).__str__()
         user=     values.pop(0).__str__()
         password= values.pop(0).__str__()
         dbname=   values.pop(0).__str__()
-        
+
         from sqlalchemy import create_engine
         import mysql
         engine= create_engine( "mysql+mysqlconnector://"+user+":"+password+"@"+host+":"+port+"/"+dbname,
                                echo= False, encoding='utf8')
         self._loadDb(engine)
-        
+
     def onDefaultPerspective(self, evt):
         defaultPerspective= wx.GetApp().GetPreferences( preferenceKey= "DefaultPerspective")
         self.m_mgr.LoadPerspective( defaultPerspective)
@@ -1490,9 +1491,53 @@ class MainFrame(wx.Frame):
             self.grid.SetDefaultCellTextColour(data.GetColour())
             self.grid.SetDefaultCellFont(data.GetChosenFont())
         dlg.Destroy()
+
     def GoTransformData(self, evt):
-        win = TransformFrame(wx.GetApp().frame, -1)
-        win.Show(True)
+        self.__TransformFrame= TransformFrame(wx.GetApp().frame, -1)
+        gridCol=       self.grid.GetUsedCols()
+        columnNames=   gridCol[0]
+        columnNumbers= gridCol[1]
+        self.__TransformFrame.setAvailableColumns(columnNames)
+        # send objects to the shell
+        self._sendObj2Shell( self.__TransformFrame.scriptPanel)
+        # making the callback of the eval button
+        self.__TransformFrame.pusButtonList[-1].Bind(wx.EVT_BUTTON, self.__OnTransformPanelEVAL)
+        self.__TransformFrame.Show(True)
+
+    def __OnTransformPanelEVAL(self, evt):
+        responseCol, expresion= self.__TransformFrame.GetValue()
+        # defining the variables from the current grid
+        env= {'grid':       self.grid,
+              'numpy':      numpy,
+              'group':      GroupData,
+              'homogenize': homogenize,
+              'scipy':      scipy,
+              'stats':      stats,
+              'getPath':    self.getPath,
+              'sm':         self.sm, # statmodels
+              }
+        # defining the column names to the environment
+        gridCol=       self.grid.GetUsedCols()
+        columnNames=   gridCol[0]
+        listcolnames= list()
+        for colname in columnNames:
+            # defining the columns as numpy arrays
+            listcolnames.append(numpy.array(self.grid.GetCol(colname)))
+
+        if len(listcolnames)!= 0:
+            listcolnames, nonValidPos= homogenize(*listcolnames, returnPos= False, returnInvalid= True)
+        else:
+            nonValidPos= []
+        for colname in columnNames:
+            env[colname]= listcolnames.pop(0)
+        # evaluating the expresion
+        result= eval( expresion, {}, env)
+        # writing to the selected variable
+        # inserting the position with non valid result
+        for pos in nonValidPos:
+            result= numpy.insert(result, pos, None)
+        self.grid.PutCol(responseCol, result)
+        evt.Skip()
 
     def ShowAbout(self, evt):
         info= wx.AboutDialogInfo()

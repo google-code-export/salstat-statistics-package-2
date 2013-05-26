@@ -17,6 +17,7 @@ class geometricMean(_genericFunc):
         _genericFunc.__init__(self)
         self.name=      'geometric Mean'
         self.statName=  'geometricmean'
+        self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
         self.colNameSelect= ''
         
@@ -24,7 +25,7 @@ class geometricMean(_genericFunc):
         setting= {'Title': self.name,
                   '_size': Size(220,300)}
         self._updateColsInfo() # update self.columnames and self.colnums
-        bt1= ['StaticText',   [self.translate(u'Select the columns to analyse')]]
+        bt1= ['StaticText',   [self._(u'Select the columns to analyse')]]
         bt2= ['CheckListBox', [self.columnNames]]
         structure = list()
         structure.append([bt1,])
@@ -43,11 +44,11 @@ class geometricMean(_genericFunc):
         self.colNameSelect= values[0]
         
         if len( self.colNameSelect ) == 0:
-            self.Logg.write(self.translate(u"you don't select any items"))
+            self.Logg.write(self._(u"you don't select any items"))
             return
         
         if len( self.colNameSelect ) < self.minRequiredCols:
-            self.Logg.write(self.translate(u"you have to select at least %i columns")%self.minRequiredCols)
+            self.Logg.write(self._(u"you have to select at least %i columns")%self.minRequiredCols)
             return
         
         columns= self._convertColName2Values( self.colNameSelect )
@@ -72,16 +73,18 @@ class geometricMean(_genericFunc):
     def _report(self, result):
         self.outputGrid.addColData(self.colNameSelect, self.name)
         self.outputGrid.addColData(result)
-        self.Logg.write(self.statName+ ' '+self.translate('successful'))
+        self.Logg.write(self.statName+ ' '+self._('successful'))
         
 class harmonicmean(geometricMean):
     name=      u"harmonic mean"
     statName=  'harmonicmean'
+    
     def __init__(self):
         geometricMean.__init__(self)
         self.minRequiredCols= 1
         self.name=      'harmonic mean'
         self.statName=  'harmonicmean'
+        self._scritpEquivalenString='stats.'+self.statName
         
     def evaluate(self, *args, **params):
         return _stats.harmonicmean(*args, **params)
@@ -92,11 +95,13 @@ class harmonicmean(geometricMean):
 class mean(geometricMean):
     name= u"mean"
     statName= 'mean'
+    
     def __init__(self):
         geometricMean.__init__(self)
         self.minRequiredCols= 1
         self.name= 'mean'
         self.statName= 'mean'
+        self._scritpEquivalenString='stats.'+self.statName
     def evaluate(self, *args, **params):
         return _stats.mean(*args, **params)
     
@@ -111,6 +116,7 @@ class median(geometricMean):
         self.minRequiredCols= 1
         self.name=  'median'
         self.statName= 'median'
+        self._scritpEquivalenString='stats.'+self.statName
         
     def evaluate(self, *args, **params):
         return _stats.median(*args, **params)
@@ -126,6 +132,7 @@ class medianscore(geometricMean):
         self.minRequiredCols= 1
         self.name=   'medianscore'
         self.statName=  'medianscore'
+        self._scritpEquivalenString='stats.'+self.statName
     def evaluate(self, *args, **params):
         return _stats.medianscore(*args, **params)
     
@@ -140,6 +147,7 @@ class mode(geometricMean):
         self.minRequiredCols= 1
         self.name= 'mode'
         self.statName= 'mode'
+        self._scritpEquivalenString='stats.'+self.statName
     def _calc(self, columns, *args, **params):
         return [self.evaluate( map(None, col) ) for col in columns]
           
@@ -147,13 +155,13 @@ class mode(geometricMean):
         return _stats.mode(*args, **params)
     
     def _report(self, result):
-        res1= [self.translate(u'variable name')]
+        res1= [self._(u'variable name')]
         res1.extend(self.colNameSelect)
         self.outputGrid.addColData(res1, self.name)
-        res2= [self.translate(u'value')]
+        res2= [self._(u'value')]
         res2.extend([numpy.ravel(res[1]) for res in result])
         self.outputGrid.addColData(res2)
-        res3= [self.translate(u'frecuency')]
+        res3= [self._(u'frecuency')]
         res3.extend([numpy.ravel(res[0])[0] for res in result])
         self.outputGrid.addColData(res3)
-        self.Logg.write(self.statName + ' ' + self.translate('successfull'))
+        self.Logg.write(self.statName + ' ' + self._('successfull'))
