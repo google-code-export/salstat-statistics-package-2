@@ -88,8 +88,7 @@ class _wxPythonDemoTree(ExpansionState, TreeBaseClass):
     USE_CUSTOMTREECTRL = False
     _demoPngs= [wx.ART_FOLDER, wx.ART_FOLDER_OPEN, wx.ART_EXECUTABLE_FILE ]
     def __init__(self, parent):
-        TreeBaseClass.__init__(self, parent, style=wx.TR_DEFAULT_STYLE|
-                               wx.TR_HAS_VARIABLE_ROW_HEIGHT)
+        TreeBaseClass.__init__(self, parent, style= wx.TR_HAS_VARIABLE_ROW_HEIGHT|wx.TR_HAS_BUTTONS)
         self.BuildTreeImageList()
         if self.USE_CUSTOMTREECTRL:
             self.SetSpacing(10)
@@ -276,16 +275,22 @@ class _wxPythonDemoTree(ExpansionState, TreeBaseClass):
         # removing empty submenus
         
         return self.recreateTree(res, filter= filtro) #recreateTree
+
+class _emptyLog:
+    # emulating an empty log panel
+    def clearLog(self):
+        pass
+    def writeLine(self, *args, **params):
+        pass
     
 class TreePanel(wx.Panel):
     USE_CUSTOMTREECTRL= False
-    def __init__( self, parent, log, *args, **params):
+    def __init__( self, parent, *args, **params):
         '''TreePanel parent, log, *args'''
-        self.log=   log
-        try:
-            wx.Panel.__init__( self, parent, wx.ID_ANY, *args, **params)
-        except:
-            wx.Panel.__init__( self, parent, wx.ID_ANY)
+        try:   self.log= params.pop('log')
+        except KeyError:  self.log=  _emptyLog()
+        try:    wx.Panel.__init__( self, parent, wx.ID_ANY, *args, **params)
+        except: wx.Panel.__init__( self, parent, wx.ID_ANY)
 
         bSizer1 = wx.BoxSizer( wx.VERTICAL )
         
@@ -298,7 +303,7 @@ class TreePanel(wx.Panel):
         self.treeMap = {}
         self.searchItems = {}
 
-        self.tree = _wxPythonDemoTree( self)#leftPanel
+        self.tree = _wxPythonDemoTree( self)
         bSizer1.Add( self.tree, 1, wx.ALL|wx.EXPAND, 5 )
 
         self.filter = wx.SearchCtrl( self, style= wx.TE_PROCESS_ENTER)# leftPanel
@@ -315,18 +320,18 @@ class TreePanel(wx.Panel):
         self.Bind( wx.EVT_MENU, self.OnSearchMenu, item)
         #self.Bind( wx.EVT_MENU, self.OnSearchMenu, item)
         self.filter.SetMenu( searchMenu)
-
+        
         self.RecreateTree()
         self.tree.SetExpansionState( self.expansionState)
-
+        
         self.SetSizer( bSizer1 )
         self.Layout()
         
         self.tree.Bind( wx.EVT_TREE_ITEM_EXPANDED,  self.OnItemExpanded)
         #self.tree.Bind( wx.EVT_TREE_ITEM_COLLAPSED, self.OnItemCollapsed)
         #self.tree.Bind( wx.EVT_TREE_SEL_CHANGED,    self.OnSelChanged)
-        #self.tree.Bind( wx.EVT_TREE_ITEM_ACTIVATED, self.OnSelChanged)
-        self.tree.Bind( wx.EVT_LEFT_DOWN,           self.OnTreeLeftDown)
+        self.tree.Bind( wx.EVT_TREE_ITEM_ACTIVATED, self.OnTreeItemActivated)
+        #self.tree.Bind( wx.EVT_LEFT_DOWN,           self.OnTreeLeftDown)
 
     @property
     def treelist(self):
@@ -399,7 +404,8 @@ class TreePanel(wx.Panel):
         self.tree.DeleteAllItems()
         
         self.root= list()
-        self.root.append( self.tree.AddRoot( "Main"))
+        mainRoot= self.tree.AddRoot( "Main")
+        self.root.append( mainRoot)
         self.tree.SetItemImage( self.root[-1], 0)
         self.tree.SetItemPyData( self.root[-1], 0)
         treeFont= self.tree.GetFont()
@@ -423,45 +429,10 @@ class TreePanel(wx.Panel):
         ## recursive creation of data
         #self.tree.testFilter( self.treelist, filtro= filter)
         res= self.tree.filterData(self.treelist, filtro= filter)
-        if 0:
-            for category, items in self.treelist:
-                items=  [item[0] for item in items]
-                count+= 1
-                if filter:
-                    if fullSearch:
-                        items= self.searchItems[category]
-                    else:
-                        items= [item for item in items if filter.lower() in item.lower()] # item -> item[0]
-                if items:
-                    child= self.tree.AppendItem(self.root[-1], category, image=count)
-                    self.tree.SetItemFont(child, catFont)
-                    self.tree.SetItemPyData(child, count)
-                    if not firstChild: firstChild = child
-                    for childItem in items:
-                        image= count
-                        theDemo= self.tree.AppendItem(child, childItem, image=image)
-                        self.tree.SetItemPyData(theDemo, count)
-                        self.treeMap[childItem] = theDemo
-                        if current and (childItem, category) == current:
-                            selectItem= theDemo
-            ## end tree list
-            ##############################
-            
-            #
-            self.tree.Expand(self.root[-1])
-            if firstChild:
-                self.tree.Expand(firstChild)
-            if filter:
-                self.tree.ExpandAll()
-            elif expansionState:
-                self.tree.SetExpansionState(expansionState)
-            if selectItem:
-                self.skipLoad = True
-                self.tree.SelectItem(selectItem)
-                self.skipLoad = False
-
+        
         self.tree.Thaw()
         self.searchItems = {}
+        self.tree.Expand( mainRoot)
 
     def OnSearch(self, event=None): # child of the main frame
         self.RecreateTree()
@@ -491,10 +462,11 @@ class TreePanel(wx.Panel):
         #self.StopDownload()
         return
 
-    def OnTreeLeftDown(self, evt):
+    def OnTreeItemActivated(self, evt):
         # reset the overview text if the tree item is clicked on again
-        pt = evt.GetPosition();
-        item, flags = self.tree.HitTest(pt)
+        #pt = evt.GetPosition();
+        #item, flags = self.tree.HitTest(pt)
+        item= evt.GetItem()
         if hasattr(item,'callback'):
             pass
         try:
