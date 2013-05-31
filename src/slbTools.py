@@ -35,9 +35,13 @@ def getPath(wildcard= __WILDCARD, aplyFilter= True):
             "All Files (*.*)|*.*"
     getPath(wildcard= __WILDCARD, aplyFilter= True)
     """
+    if not isinstance(wildcard, (str, unicode)):
+        wildcard= __WILDCARD
+
     dlg = wx.FileDialog(None, "Load Data File", "","",
                         wildcard= wildcard,
                         style = wx.OPEN)
+
     icon = imageEmbed().logo16
     dlg.SetIcon(icon)
 
