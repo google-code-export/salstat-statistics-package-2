@@ -1535,7 +1535,10 @@ class MainFrame(wx.Frame):
         # writing to the selected variable
         # inserting the position with non valid result
         for pos in nonValidPos:
-            result= numpy.insert(result, pos, None)
+            if pos <=len(result):
+                result= numpy.insert(result, pos, None)
+            else:
+                result= numpy.append(result, None)
         self.grid.PutCol(responseCol, result)
         evt.Skip()
 

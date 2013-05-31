@@ -40,13 +40,13 @@ class floatRenderer(Grid.PyGridCellRenderer):
     def decimalPoints( self, dp):
         if not isnumeric( dp):
             raise TypeError('the selected decimal point must be numerical')
-        
+
         if dp < 0:
             raise StandardError('Only allowed values bigger than zero you input %f'%dp)
-        
+
         dp= int( dp)
         self._decimalPoints= dp
-    
+
     def Draw(self, grid, attr, dc, rect, row, col, isSelected):
         # Here we draw text in a grid cell using various fonts
         # and colors.  We have to set the clipping region on
@@ -56,21 +56,22 @@ class floatRenderer(Grid.PyGridCellRenderer):
         textfont= attr.GetFont()
         textfont.SetPointSize(max(1, int(self.DEFAULT_FONT_SIZE * grid.zoom)))
         dc.SetFont(textfont)
-        
+
         # dc.SetFont( attr.GetFont() )
         hAlign, vAlign = attr.GetAlignment()
-        if isSelected: 
+        if isSelected:
             bg = grid.GetSelectionBackground()
             fg = grid.GetSelectionForeground()
-        else: 
+        else:
             bg = attr.GetBackgroundColour()
             fg = attr.GetTextColour()
         dc.SetTextBackground(bg)
         dc.SetTextForeground(fg)
         dc.SetBrush(wx.Brush(bg, wx.SOLID))
         dc.SetPen(wx.TRANSPARENT_PEN)
-        dc.DrawRectangleRect(rect)        
+        dc.DrawRectangleRect(rect)
         text= grid.GetCellValue(row, col)
+
         try:
             dp= wx.GetApp().DECIMAL_POINT
         except AttributeError:
@@ -80,10 +81,10 @@ class floatRenderer(Grid.PyGridCellRenderer):
             text= round( text, self.decimalPoints)
             text= str( text)
             text= text.replace( '.', dp)
-            
+
         except:
             pass # allowing the non numerical values
-        
+
         dc.DrawText( text, rect.x+1, rect.y+1)
 
         width, height= dc.GetTextExtent( text)
@@ -92,42 +93,42 @@ class floatRenderer(Grid.PyGridCellRenderer):
             x = rect.x+1 + rect.width-2 - width
             dc.DrawRectangle( x, rect.y+1, width+1, height)
             dc.DrawText( u'\u2026', x, rect.y+1)
-        
+
         dc.DestroyClippingRegion()
 
     def Clone(self):
         return floatRenderer()
 
-class AutoWrapStringRenderer(wx.grid.PyGridCellRenderer):   
-    def __init__(self): 
+class AutoWrapStringRenderer(wx.grid.PyGridCellRenderer):
+    def __init__(self):
         wx.grid.PyGridCellRenderer.__init__(self)
 
     def Draw(self, grid, attr, dc, rect, row, col, isSelected):
         text= grid.GetCellValue( row, col)
-        dc.SetFont( attr.GetFont() ) 
+        dc.SetFont( attr.GetFont() )
         text= wordwrap.wordwrap( text, grid.GetColSize(col), dc,
                                  breakLongWords = False)
-        hAlign, vAlign = attr.GetAlignment()     
-        if isSelected: 
-            bg= grid.GetSelectionBackground() 
-            fg= grid.GetSelectionForeground() 
-        else: 
+        hAlign, vAlign = attr.GetAlignment()
+        if isSelected:
+            bg= grid.GetSelectionBackground()
+            fg= grid.GetSelectionForeground()
+        else:
             bg= attr.GetBackgroundColour()
-            fg= attr.GetTextColour() 
-        dc.SetTextBackground( bg) 
+            fg= attr.GetTextColour()
+        dc.SetTextBackground( bg)
         dc.SetTextForeground( fg)
         dc.SetBrush( wx.Brush(bg, wx.SOLID))
         dc.SetPen( wx.TRANSPARENT_PEN)
-        dc.DrawRectangleRect( rect)            
+        dc.DrawRectangleRect( rect)
         grid.DrawTextRectangle( dc, text, rect, hAlign, vAlign)
 
-    def GetBestSize( self, grid, attr, dc, row, col): 
+    def GetBestSize( self, grid, attr, dc, row, col):
         text= grid.GetCellValue( row, col)
         dc.SetFont( attr.GetFont())
         text= wordwrap.wordwrap( text, grid.GetColSize(col), dc,
                                  breakLongWords = False)
         w, h, lineHeight= dc.GetMultiLineTextExtent( text)
-        return wx.Size( w, h)        
+        return wx.Size( w, h)
 
-    def Clone(self): 
+    def Clone(self):
         return AutoWrapStringRenderer()
