@@ -32,19 +32,18 @@ class MyContextGrid(wx.Menu):
     # Clase para hacer el menu contextual del grid
     def __init__(self,parent,*args,**params):
         wx.Menu.__init__(self)
+        try:     _= wx.GetApp()._
+        except:  _= lambda x: x
+
         self.parent = parent
-        try:
-            translate= wx.GetApp().translate
-        except AttributeError:
-            translate= lambda x:x
-        cortar =     wx.MenuItem(self, wx.NewId(), translate('&Cut\tCtrl+X'))
-        copiar =     wx.MenuItem(self, wx.NewId(), translate('C&opy\tCtrl+C'))
-        pegar =      wx.MenuItem(self, wx.NewId(), translate('&Paste\tCtrl+V'))
-        eliminar =   wx.MenuItem(self, wx.NewId(), translate('&Del\tDel'))
-        deshacer =   wx.MenuItem(self, wx.NewId(), translate('&Undo\tCtrl+Z'))
-        rehacer =    wx.MenuItem(self, wx.NewId(), translate('&Redo\tCtrl+Y'))
-        delRow=      wx.MenuItem(self, wx.NewId(), translate('Del Row'))
-        delCol=      wx.MenuItem(self, wx.NewId(), translate('Del Col'))
+        cortar =     wx.MenuItem(self, wx.NewId(), _('&Cut\tCtrl+X'))
+        copiar =     wx.MenuItem(self, wx.NewId(), _('C&opy\tCtrl+C'))
+        pegar =      wx.MenuItem(self, wx.NewId(), _('&Paste\tCtrl+V'))
+        eliminar =   wx.MenuItem(self, wx.NewId(), _('&Del\tDel'))
+        deshacer =   wx.MenuItem(self, wx.NewId(), _('&Undo\tCtrl+Z'))
+        rehacer =    wx.MenuItem(self, wx.NewId(), _('&Redo\tCtrl+Y'))
+        delRow=      wx.MenuItem(self, wx.NewId(), _('Del Row'))
+        delCol=      wx.MenuItem(self, wx.NewId(), _('Del Col'))
         ##exportarCsv= wx.MenuItem(self, wx.NewId(), '&Export\tCtrl+E')
         
         if EXISTIMAGES:
@@ -122,7 +121,7 @@ class MyContextGrid(wx.Menu):
             currentRow, left, rows,cols = self.parent.GetSelectionBox()[0]
             if rows < 1:
                 return
-            self.parent.DeleteRows(currentRow, 1)
+            self.parent.DeleteRows(currentRow)
             self.parent.AdjustScrollbars()
         
         self.parent.hasChanged= True

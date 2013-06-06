@@ -349,6 +349,7 @@ class datePickerEditor(Grid.PyGridCellEditor):
     """
     def __init__(self):
         Grid.PyGridCellEditor.__init__(self)
+        self.startValue= None # to solve a trouble generated when whatching an emptycell
 
     def Create(self, parent, id, evtHandler):
         """

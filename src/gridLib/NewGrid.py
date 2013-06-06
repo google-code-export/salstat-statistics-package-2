@@ -27,14 +27,16 @@ from gridCellRenderers import floatRenderer
 ###########################################################################
 class NewGrid(wx.grid.Grid, object):
     def __init__(self, parent, size, *args, **params):
+        try:     _ = wx.GetApp()._
+        except:  _ = lambda x: x
         self.nombre=   'selobu'
         self.maxrow=   0
         self.maxcol=   0
         self.zoom=     1.0
         self.moveTo=   None
         self.hasSaved= False
-        self.wildcard= "Suported Formats (*.xls;*xlsx;*.txt;*csv)|*.xls;*xlsx;*.txt;*csv" \
-                       "Any File (*.*)|*.*|"
+        self.wildcard= _("Suported Formats")+" (*.xls;*xlsx;*.txt;*csv)|*.xls;*xlsx;*.txt;*csv" + \
+                       _("All Files")+" (*.*)|*.*|"
         #<p> used to check changes in the grid
         self.hasChanged = True
         self.usedCols= ([], [],)
@@ -47,7 +49,12 @@ class NewGrid(wx.grid.Grid, object):
         self.__init_mixin__()
         
         # setting the renderer
-        self.__initAttr()
+        ##self.__initAttr()
+        
+        #if len(args) > 0:
+        #    self.__init_mixin__( args[0])
+        #elif 'parent' in params.keys():
+        #    self.__init_mixin__( params['parent'])
         
         # Grid
         self.CreateGrid( size[0], size[1] )
@@ -55,7 +62,7 @@ class NewGrid(wx.grid.Grid, object):
         self.EnableGridLines( True )
         self.EnableDragGridSize( False )
         self.SetMargins( 0, 0 )
-        
+        self.floatCellAttr= None
         # Columns
         self.EnableDragColMove( False )
         self.EnableDragColSize( True )
@@ -78,39 +85,28 @@ class NewGrid(wx.grid.Grid, object):
         self.defaultColLabelSize= self.GetColLabelSize()
         # Label Appearance
         if wx.Platform == '__WXMAC__':
-            self.SetGridLineColour("#b7b7b7")
+            ##self.SetGridLineColour("#b7b7b7")
+            self.SetGridLineColour( wx.BLACK)
             self.SetLabelBackgroundColour("#d2d2d2")
             self.SetLabelTextColour("#444444")
         else:
             self.SetLabelBackgroundColour( wx.Colour( 254, 226, 188 ) )
         # Cell Defaults
         self.SetDefaultCellAlignment( wx.ALIGN_LEFT, wx.ALIGN_TOP )
-        if wx.Platform == "__WXMAC__":
-            self.SetGridLineColour( wx.BLACK)
         self.SetColLabelAlignment( wx.ALIGN_CENTER, wx.ALIGN_CENTER)
-        
-        newtable= self.GetTable()
-        setattr(newtable,'GetAttr',self.GetAttr)
-        ##self.SetTable(newtable, True)
-        # se establece el render
-        self.floatCellAttr= wx.grid.GridCellAttr()
-        self.floatCellAttr.SetRenderer(floatRenderer(4))
-        self.floatCellAttr.IncRef()
-        for colnumber in range(len(self.colNames)):
-            self.SetColAttr(colnumber, self.floatCellAttr)
+
         # se activa el menu contextual sobre el grid
         self.Bind(wx.grid.EVT_GRID_EDITOR_CREATED,         self.onCellEdit)
         self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
         self.Bind(wx.grid.EVT_GRID_CELL_CHANGE,            self.onCellChanged)
         self.Bind(wx.grid.EVT_GRID_CELL_RIGHT_CLICK,       self.OnGridRighClic)
-        self.Bind(wx.EVT_MOUSEWHEEL,                       self.OnMouseWheel)
-        
-    def __initAttr(self):
+        self.Bind(wx.EVT_MOUSEWHEEL,                       self.__OnMouseWheel)
+
+    def _selectDbTableDialog_initAttr(self):
         renderer = floatRenderer( 4)
         self.__oddAttr=  wx.grid.GridCellAttr()
         self.__oddAttr.SetBackgroundColour( wx.Colour( 220, 230, 250 ))
         self.__oddAttr.SetRenderer( renderer)
-        
         self.__evenAttr= wx.grid.GridCellAttr()
         self.__evenAttr.SetBackgroundColour( wx.Colour( 146, 190, 183 ))
         self.__evenAttr.SetRenderer( renderer)
@@ -121,46 +117,39 @@ class NewGrid(wx.grid.Grid, object):
         attr.IncRef()
         return attr
     
-    def zoom_rows(self):
+    def __zoom_rows(self):
         """Zooms grid rows"""
         for rowno in xrange(self.GetNumberRows()):
             self.SetRowSize(rowno, self.defaultRowSize*self.zoom)
         self.SetRowLabelSize( self.defaultRowLabelSize * self.zoom)
 
-    def zoom_cols(self):
+    def __zoom_cols(self):
         """Zooms grid columns"""
         tabno = 1 #self.current_table
         for colno in xrange(self.GetNumberCols()):
             self.SetColSize(colno, self.defaultColSize * self.zoom)
         self.SetColLabelSize(self.defaultColLabelSize * self.zoom)
 
-    def zoom_labels(self):
+    def __zoom_labels(self):
         """Zooms grid labels"""
         labelfont = self.GetLabelFont()
         labelfont.SetPointSize(max(1, int(DEFAULT_FONT_SIZE * self.zoom)))
         self.SetLabelFont(labelfont)
 
-    def OnMouseWheel(self, event):
+    def __OnMouseWheel(self, event):
         """Event handler for mouse wheel actions
-
         Invokes zoom when mouse when Ctrl is also pressed
-
         """
-
         if event.ControlDown():
             zoomstep = 0.05 * event.LinesPerAction
-
             if event.WheelRotation > 0:
                 self.zoom += zoomstep
             else:
                 if self.zoom > 0.6:
                     self.zoom -= zoomstep
-
-
-            self.zoom_rows()
-            self.zoom_cols()
-            self.zoom_labels()
-
+            self.__zoom_rows()
+            self.__zoom_cols()
+            self.__zoom_labels()
             self.ForceRefresh()
         else:
             event.Skip()
@@ -287,6 +276,8 @@ class NewGrid(wx.grid.Grid, object):
         return self.SaveXls(None, True)
 
     def SaveXls(self, *args):
+        try:     _= wx.GetApp()._
+        except:  _= lambda x: x
         if len(args) == 1:
             saveAs= False
         elif len(args) == 0:
@@ -296,7 +287,7 @@ class NewGrid(wx.grid.Grid, object):
         self.reportObj= ReportaExcel(cell_overwrite_ok = True)
         if self.hasSaved == False or saveAs: # path del grid
             # mostrar el dialogo para guardar el archivo
-            dlg= wx.FileDialog(self, "Save Data File", "" , "",\
+            dlg= wx.FileDialog(self, _("Save Data File"), "" , "",\
                                "Excel (*.xls)|*.xls| \
                                     Any (*.*)| *.*", wx.SAVE)
             if dlg.ShowModal() == wx.ID_OK:
@@ -390,7 +381,9 @@ class NewGrid(wx.grid.Grid, object):
         return True
         
     def LoadFile(self, evt, **params):
-        wildcard=  "Suported files (*.txt;*.csv;*.xls;*.xlsx;*.db)|*.txt;*.csv;*.xls;*.xlsx;*db|" \
+        try:     _= wx.GetApp()._
+        except:  _= lambda x: x
+        wildcard=  _("Suported files")+" (*.txt;*.csv;*.xls;*.xlsx;*.db)|*.txt;*.csv;*.xls;*.xlsx;*db|" \
             "Excel Files (*xlsx;*xlsm;*.xls)|*.xlsx;*.xlsm;*.xls|"\
             "Txt file (*.txt)|*.txt|" \
             "Csv file (*.csv)|*.csv|" \
@@ -398,7 +391,7 @@ class NewGrid(wx.grid.Grid, object):
             "Excel 2007 File (*xlsx)|*.xlsx|"\
             "Excel 2003 File (*.xls)|*.xls|" 
             
-        dlg = wx.FileDialog(self, "Load Data File", "","",
+        dlg = wx.FileDialog(self, _("Load Data File"), "","",
                             wildcard= wildcard,
                             style = wx.OPEN)
         try:
@@ -426,16 +419,18 @@ class NewGrid(wx.grid.Grid, object):
 
     def LoadCsvTxt(self, fullPath):
         from numpy import genfromtxt
+        try:     _= wx.GetApp()._
+        except:  _= lambda x: x
         '''use the numpy library to load the data'''
         # comments='#', delimiter=None, skiprows=0, skip_header=0, skip_footer=0, converters=None, missing='', missing_values=None, filling_values=None, usecols=None, names=None, excludelist=None, deletechars=None, replace_space='_', autostrip=False, case_sensitive=True, defaultfmt='f%i', unpack=None, usemask=False, loose=True, invalid_raise=True
         btn1= ['FilePath',    [fullPath] ]
-        txt1= ['StaticText',  ['comments symbol'] ]
+        txt1= ['StaticText',  [_('comments symbol')] ]
         btn2= ['TextCtrl',    [] ]
-        txt2= ['StaticText',  ['delimiter symbol']]
-        txt3= ['StaticText',  ['Number of header lines to skip']]
+        txt2= ['StaticText',  [_('delimiter symbol')]]
+        txt3= ['StaticText',  [_('Number of header lines to skip')]]
         btn3= ['IntTextCtrl', []]
-        txt4= ['StaticText',  ['Number of footer lines to skip']]
-        btn4= ['CheckBox',    ['Has Header']]
+        txt4= ['StaticText',  [_('Number of footer lines to skip')]]
+        btn4= ['CheckBox',    [_('Has Header')]]
 
         structure= []
         structure.append([btn1 ])
@@ -445,7 +440,7 @@ class NewGrid(wx.grid.Grid, object):
         structure.append([btn3, txt4])
         structure.append([btn4])
 
-        setting = {'Title': 'Select a sheet'}
+        setting = {'Title': _('Select a sheet')}
 
         dlg = dialog(self, struct= structure, settings= setting)
         if dlg.ShowModal() != wx.ID_OK:
@@ -499,6 +494,8 @@ class NewGrid(wx.grid.Grid, object):
         return (True, os.path.split(f_name)[-1])
 
     def LoadXls(self, fullPath):
+        try:     _= wx.GetApp()._
+        except:  _= lambda x: x
         print 'import xlrd'
         filename= fullPath
         filenamestr= filename.__str__()
@@ -512,9 +509,9 @@ class NewGrid(wx.grid.Grid, object):
         sheetNames = [sheet.name for sheet in sheets]
         print 'sheetNames= ' + sheetNames.__str__()
         bt1= ('Choice',     [sheetNames])
-        bt2= ('StaticText', ['Select a sheet to be loaded'])
-        bt3= ('CheckBox',   ['Has header'])
-        setting = {'Title': 'Select a sheet',
+        bt2= ('StaticText', [_('Select a sheet to be loaded')])
+        bt3= ('CheckBox',   [_('Has header')])
+        setting = {'Title': _('Select a sheet'),
                    '_size':  wx.Size(250,220)}
 
         dlg = dialog(self, struct=[[bt1,bt2],[bt3]], settings= setting)
@@ -552,6 +549,8 @@ class NewGrid(wx.grid.Grid, object):
         return (True, sheetNameSelected)
 
     def _loadXls( self, *args,**params):
+        try:     _= wx.GetApp()._
+        except:  _= lambda x: x
         sheets=         params.pop( 'sheets')
         sheetNames=     params.pop( 'sheetNames')
         sheetNameSelected= params.pop( 'sheetNameSelected')
@@ -615,7 +614,7 @@ class NewGrid(wx.grid.Grid, object):
                     try:
                         self.SetCellValue (reportRow, col, str(newValue))
                     except:
-                        print  "Could not import the row,col (%i,%i)" % (row+1, col+1)
+                        print  _("Could not import the row,col (%i,%i)") % (row+1, col+1)
 
     def generateLabel( self, colNumber):
         colNumber+= 1
@@ -646,6 +645,8 @@ class NewGrid(wx.grid.Grid, object):
         return res
 
     def getData(self, x):
+        try:     _= wx.GetApp()._
+        except:  _= lambda x: x
         for i in range(len(x)):
             try:
                 row = int(x[i].attributes["row"].value)
@@ -653,7 +654,7 @@ class NewGrid(wx.grid.Grid, object):
                 datavalue = float(self.getText(x[i].childNodes))
                 self.SetCellValue(row, col, str(datavalue))
             except ValueError:
-                print "Problem importing the xml"
+                print _("Problem importing the xml")
 
     def getText(self, nodelist):
         rc = ""
@@ -742,21 +743,23 @@ class NewGrid(wx.grid.Grid, object):
         return self._cleanData( self._getCol( col, hasHeader))
 
     def PutRow(self, rowNumber, data):
+        try:     _= wx.GetApp()._
+        except:  _= lambda x: x
         try: 
             if isinstance(rowNumber, (str, unicode)):
                 if not(rowNumber in self.rowNames):
-                    raise TypeError('You can only use a numeric value, or the name of an existing column')
+                    raise TypeError(_('You can only use a numeric value, or the name of an existing column'))
                 for pos, value in enumerate(self.rowNames):
                     if value == rowNumber:
                         rowNumber= pos
                         break
 
             if not isnumeric(rowNumber):
-                raise TypeError('You can only use a numeric value, or the name of an existing column')
+                raise TypeError(_('You can only use a numeric value, or the name of an existing column'))
 
             rowNumber= int(rowNumber)        
             if rowNumber < 0 or rowNumber > self.GetNumberRows():
-                raise StandardError('The minimum accepted col is 0, and the maximum is %i'%self.GetNumberRows()-1)
+                raise StandardError(_('The minimum accepted col is 0, and the maximum is %i')%self.GetNumberRows()-1)
 
             self.clearRow(rowNumber)
 
@@ -775,9 +778,7 @@ class NewGrid(wx.grid.Grid, object):
                     data= data[:16384]
                     cols2add= len( data) - self.GetNumberCols()
                 self.AppendCols( cols2add) ############### TO TEST
-                # set the renderer for the added columns
-                for colnumber in range(len(self.colNames)-cols2add, len(self.colNames)):
-                    self.SetColAttr(colnumber, self.floatCellAttr)
+
             try:
                 dp= wx.GetApp().DECIMAL_POINT
             except AttributeError:
@@ -820,6 +821,8 @@ class NewGrid(wx.grid.Grid, object):
         return numpy.array((biglist), numpy.float)
 
     def GetColNumeric(self, colNumber):
+        try:     _= wx.GetApp()._
+        except:  _= lambda x: x
         # return only the numeric values of a selected colNumber or col label
         # all else values are drop
         # add the ability to manage non numerical values
@@ -869,8 +872,6 @@ class NewGrid(wx.grid.Grid, object):
             pass
         event.Skip()
 
-
-    
     def _getCol(self, colNumber, includeHeader= False):
         if isinstance(colNumber, (str, unicode)):
             # searching for a col with the name:
@@ -1135,7 +1136,6 @@ class NewGrid(wx.grid.Grid, object):
 
         for rownumber, rowname in enumerate(rowNames):
             self.SetRowLabelValue(rownumber, rowname)
-
     @property
     def colNames(self):
         return [self.GetColLabelValue(col) for col in range(self.GetNumberCols())]

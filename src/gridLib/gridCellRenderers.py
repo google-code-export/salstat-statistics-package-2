@@ -6,9 +6,12 @@ __all__= ['floatRendererSub', 'floatRenderer', 'AutoWrapStringRenderer']
 import wx
 import wx.grid as Grid
 from wx.lib import wordwrap
+from numpy import ndarray
 
-
-from slbTools import isnumeric
+def isnumeric(data):
+    if isinstance(data, (int, float, long, ndarray)):
+        return True
+    return False
 
 class floatRendererSub(Grid.PyGridCellRenderer):
     def __init__(self, decimalPoints, color= 'blue',
@@ -28,7 +31,7 @@ class floatRendererSub(Grid.PyGridCellRenderer):
         return floatRendererSub(table, self.decimalPoints, self.color, self.font, self.fontsize)
 
 class floatRenderer(Grid.PyGridCellRenderer):
-    def __init__(self, decimalPoints, defaultFontZise= 10):
+    def __init__(self, decimalPoints=4, defaultFontZise= 10):
         """Render data in the specified color and font and fontsize"""
         Grid.PyGridCellRenderer.__init__(self)
         self.decimalPoints= decimalPoints
@@ -54,7 +57,11 @@ class floatRenderer(Grid.PyGridCellRenderer):
         # to the next cell
         dc.SetClippingRect(rect)
         textfont= attr.GetFont()
-        textfont.SetPointSize(max(1, int(self.DEFAULT_FONT_SIZE * grid.zoom)))
+        if hasattr(grid,'zoom'):
+            textfont.SetPointSize(max(1, int(self.DEFAULT_FONT_SIZE * grid.zoom)))
+        else:
+            textfont.SetPointSize(max(1, int(self.DEFAULT_FONT_SIZE)))
+
         dc.SetFont(textfont)
 
         # dc.SetFont( attr.GetFont() )
@@ -71,7 +78,6 @@ class floatRenderer(Grid.PyGridCellRenderer):
         dc.SetPen(wx.TRANSPARENT_PEN)
         dc.DrawRectangleRect(rect)
         text= grid.GetCellValue(row, col)
-
         try:
             dp= wx.GetApp().DECIMAL_POINT
         except AttributeError:
