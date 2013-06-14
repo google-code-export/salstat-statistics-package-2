@@ -13,6 +13,7 @@ from sqlalchemy.exc import StatementError
 from easyDialog import Dialog
 from gridEditors import VARCHAR
 from gridEditors import DATE
+from gridCellRenderers import floatRenderer
 from collections import OrderedDict
 SEARCHINDEX= 50
 
@@ -22,7 +23,6 @@ from GridCopyPaste import EVT_GRID_BEFORE_PASTE, EVT_GRID_PASTE
 from gridLib.NewGrid import NewGrid
 from slbTools import isnumeric
 from numpy import ndarray, ravel
-from gridLib.gridCellRenderers import floatRenderer
 
 class okCancelPanel(wx.Panel):
     def __init__(self, *args, **params):
@@ -72,12 +72,12 @@ def AttrType( leg):
 class GenericDBClass( object):
     """"""
     pass
-
 class SqlTable( wx.grid.PyGridTableBase):
     from datetime import datetime
     def __init__( self, engine= None, tableName= None, allow2edit= False):
-        self.allow2edit=     allow2edit
-        self._currTable=     None
+        self.genericDBClass=  GenericDBClass
+        self.allow2edit=      allow2edit
+        self._currTable=      None
         self._initializeParams()
         self._numCols=        0
         self._numRows=        None
@@ -100,15 +100,25 @@ class SqlTable( wx.grid.PyGridTableBase):
                     return
             # once the currtable changes, also the data is autonatically loaded
             self.currTable= tableName
-            
         
         # getting the information of the column
         self._colsInfo= self.getColsInfo()
         
         self._numRows= self.numRows
         self._numCols= self.GetNumberCols()
+
+    def _clearmapper(self):
+        class GenericDB( object):
+            """"""
+            pass
+        self.genericDBClass=  GenericDB
+        clear_mappers()
+        mapper(self.genericDBClass, self.table)
+        pass
+
     def AppendCols(self, numCols= 1):
         pass
+
     def _setcommit(self, commitStatte):
         if commitStatte== False:
             self.__commit= commitStatte
@@ -184,12 +194,11 @@ class SqlTable( wx.grid.PyGridTableBase):
         self.loadTable(evt= None)
         
     def _updateRenderer(self):
-        editor= {'DATE': datePickerEditor,
-                 }
-        render={'REAL': floatRenderer(4),
-                'INTEGER': floatRenderer(0),
-                 }
-        #  creating attr by column
+        editor= {'DATE': datePickerEditor}
+        render= {'DATE': floatRenderer,
+                 'STRING': floatRenderer,
+                 'VARCHAR': floatRenderer}
+        #  creating attr by columns
         self.oddAttr=  list()
         self.evenAttr= list()
         self.tirdAttr= list()
@@ -202,20 +211,18 @@ class SqlTable( wx.grid.PyGridTableBase):
             self.evenAttr[-1].SetBackgroundColour( wx.Colour( 246, 176, 54))
             self.tirdAttr.append( wx.grid.GridCellAttr())
             self.tirdAttr[-1].SetBackgroundColour( wx.Colour( 250, 250, 250 ))
-            # RENDERER
             try:
-                rend= render[colType]
-                self.oddAttr[-1].SetRenderer( rend)
-                self.evenAttr[-1].SetRenderer( rend)
-                self.tirdAttr[-1].SetRenderer( rend)
-            except KeyError:
-                pass
-            # EDITOR
-            try:
-                edit= editor[colType]
+                edit= editor[colType.upper()]
                 self.oddAttr[-1].SetEditor( edit())
                 self.evenAttr[-1].SetEditor( edit())
                 self.tirdAttr[-1].SetEditor( edit())
+            except KeyError:
+                pass
+            try:
+                renderer= render[colType.upper()] 
+                self.oddAttr[-1].SetRenderer( renderer(4))
+                self.evenAttr[-1].SetRenderer( renderer(4))
+                self.tirdAttr[-1].SetRenderer( renderer(4))
             except KeyError:
                 pass
 
@@ -273,7 +280,8 @@ class SqlTable( wx.grid.PyGridTableBase):
                     pass
                 # updating the current number of rows
                 self._numRows= self.GetNumberRows()
-                pass
+
+
             # update the column rendering plugins
             #self._updateColAttrs(grid)
 
@@ -288,7 +296,7 @@ class SqlTable( wx.grid.PyGridTableBase):
         self.colLabels= self.table.columns.keys()
         self.colTypes=  self._getColTypes(self.table)
         clear_mappers() #http://docs.sqlalchemy.org/en/rel_0_6/orm/mapper_config.html#sqlalchemy.orm.clear_mappers
-        mapper( GenericDBClass, self.table)
+        mapper( self.genericDBClass, self.table)
         self.Session=   sessionmaker( bind = self.engine)
         # updating the columns info
         self._colsInfo= self.getColsInfo()
@@ -317,7 +325,7 @@ class SqlTable( wx.grid.PyGridTableBase):
 
     def GetNumberRows( self):
         session= self.Session()
-        res=     session.query(GenericDBClass)# applaying the filter
+        res=     session.query(self.genericDBClass)# applaying the filter
         try:
             res= res.filter(self._filter)
         except:
@@ -358,8 +366,8 @@ class SqlTable( wx.grid.PyGridTableBase):
             self.bufer[row]= [None]*len( self.colLabels)
             return
 
-        rowMin=      max( [0, row-SEARCHINDEX])
-        rowMax=      min( [self.numRows-1, row+SEARCHINDEX])
+        rowMin= max( [0, row-SEARCHINDEX])
+        rowMax= min( [self.numRows-1, row+SEARCHINDEX])
         # emptying the not needed keys in buffer
         neededRange= range( rowMin, rowMax)
         # the position in buffer is equal to the position in the grid
@@ -388,8 +396,8 @@ class SqlTable( wx.grid.PyGridTableBase):
 
         # check the maximum and minimum required row positions
         minRequiredDb, maxRequiredDb= (min( required), max( required))
-        session=     self.Session()
-        rows=        session.query( GenericDBClass).filter(self._filter).offset( minRequiredDb).limit( maxRequiredDb-minRequiredDb+1).all()
+        session=  self.Session()
+        rows=     session.query( self.genericDBClass).filter(self._filter).offset( minRequiredDb).limit( maxRequiredDb-minRequiredDb+1).all()
         session.close()
         rowResults=  self._getRowValues( rows)
         for pos, rowContents in enumerate( rowResults):
@@ -431,12 +439,9 @@ class SqlTable( wx.grid.PyGridTableBase):
             return
         
         # identifying if it's a date object
-        columnType= self._colsInfo.values()[col]
-        if columnType == 'DATE':
+        if self._colsInfo.values()[col]=='DATE':
             value= [int(val) for val in value.split('-')]
             value= self.datetime(value.pop(0), value.pop(0), value.pop(0))
-        elif columnType == 'REAL':
-            value= float(value)
         
         # create a Session
         if self.currsession== None:
@@ -445,9 +450,14 @@ class SqlTable( wx.grid.PyGridTableBase):
                 
         # querying for a record in the Artist table
         rowNumber= row # self.GetValue(row, 0)
+        ##class GenericDB(object):
+        ##    pass
+        ##clear_mappers() #http://docs.sqlalchemy.org/en/rel_0_6/orm/mapper_config.html#sqlalchemy.orm.clear_mappers
+        ##mapper( GenericDB, self.table)
+        ##GenericDBC= GenericDB()
         if rowNumber < self.numRows-1: #u''
             if not rowNumber.__str__() in self.currDataRowChanging:
-                res= self.currsession.query( GenericDBClass)
+                res= self.currsession.query( self.genericDBClass) #GenericDBClass
                 try:
                     res= res.filter(self._filter)
                 except:
@@ -463,16 +473,15 @@ class SqlTable( wx.grid.PyGridTableBase):
         if res == None:
             if row >= self.numRows-1:
                 # se adiciona un registro nuevo
-                newRegsitry= GenericDBClass()
-                setattr(newRegsitry, self.colLabels[col], value)
+                self._numRows+= 1 # add one column
+                newRegsitry= self.genericDBClass()
+                setattr(newRegsitry, self.colLabels[col], self.__fromGridToDB(value, col))
                 self.currsession.add(newRegsitry)
                 if self.__commit:
                     self.currsession.commit()
                     self.updateBuffer(row, forceRefresh= True)
                     self.currsession.close()
                     self.currsession=  None
-
-                self._numRows+= 1 # add one column
 
                 self.currDataRowChanging= dict()
 
@@ -486,7 +495,7 @@ class SqlTable( wx.grid.PyGridTableBase):
                 # updating the number of rows to solve the issue when paste values
                 return
         else:
-            setattr(res, self.colLabels[col], value) ##required to be changed to allow non numerical values
+            setattr(res, self.colLabels[col], self.__fromGridToDB(value, col)) ##required to be changed to allow non numerical values
             if self.__commit:
                 self.currsession.commit()
                 self.currsession.close()
@@ -495,7 +504,23 @@ class SqlTable( wx.grid.PyGridTableBase):
                 self.updateBuffer(row, forceRefresh= True)
                 # is missing to update the grid
                 self.GetView().Refresh()
-                
+
+    def __fromGridToDB(self, value, column):
+        # identifying the column type
+        coltype= self.colTypes[column].upper()
+        # translating the string or unicode value to it's corresponding on database
+        if coltype == 'STRING':
+            return value
+
+        elif coltype in ('REAL','FLOAT'):
+            return float(value)
+
+        elif coltype.upper() in ('INT'):
+            return int(value)
+        else:
+            return value
+
+
     def commit(self):
         self.__commit= True
         if self.currsession == None:
@@ -535,7 +560,7 @@ class SqlTable( wx.grid.PyGridTableBase):
         # transform the rownumber to _idNumber
         idNumber= self.GetValue(rowNumber,0)
         try:
-            res= session.query(GenericDBClass).filter(self._filter).filter(GenericDBClass._id == idNumber).one()
+            res= session.query(self.genericDBClass).filter(self._filter).filter(self.genericDBClass._id == idNumber).one()
             session.delete(res)
             session.commit()
             msg = wx.grid.GridTableMessage(self,            # The table
@@ -549,7 +574,7 @@ class SqlTable( wx.grid.PyGridTableBase):
         finally:
             session.close()
 
-class SqlGrid( wx.grid.Grid, object): # wx.grid.Grid
+class SqlGrid( wx.grid.Grid): # wx.grid.Grid
     DEFAULT_FONT_SIZE= 12
     def __init__(self, parent, engine= None, tableName= None, allow2edit= False):
         try:     _ = wx.GetApp()._
@@ -601,16 +626,14 @@ class SqlGrid( wx.grid.Grid, object): # wx.grid.Grid
         self.Bind( wx.grid.EVT_GRID_CELL_RIGHT_CLICK, self.OnGridRighClic)
         self.Bind( EVT_GRID_BEFORE_PASTE, self.onBeforePaste)
         self.Bind( EVT_GRID_PASTE, self.Onpaste)
-        self.Bind( wx.EVT_MOUSEWHEEL,                       self.__OnMouseWheel)
-        self.Bind( wx.grid.EVT_GRID_COL_SIZE, self.__OnColSizeChange)
+        self.Bind(wx.EVT_MOUSEWHEEL,                       self.__OnMouseWheel)
         
     def onBeforePaste(self, evt):
         self.table.setCommit(False)
-        print "on before paste"
         evt.Skip()
+
     def Onpaste(self, evt):
         self.table.commit()
-        print "paste the data"
         evt.Skip()
 
     def OnGridRighClic(self,evt):
@@ -647,6 +670,7 @@ class SqlGrid( wx.grid.Grid, object): # wx.grid.Grid
     @property
     def currTable(self):
         return self.table.currTable
+
     @currTable.setter
     def currTable(self, table):
         self.table.currTable= table
@@ -660,8 +684,10 @@ class SqlGrid( wx.grid.Grid, object): # wx.grid.Grid
 
     def applySqlFilter(self, sqltxt):
         self.table.applySqlFilter(sqltxt)
+
     def clearSqlFilter(self):
         self.table._filter= ""
+
     def get_selection(self):
         """ Returns an index list of all cell that are selected in
         the grid. All selection types are considered equal. If no
@@ -722,10 +748,6 @@ class SqlGrid( wx.grid.Grid, object): # wx.grid.Grid
         else:
             event.Skip()
     #-----------------------------------------
-    def __OnColSizeChange(self, evt):
-        self.SetColSize(0, 0)
-        evt.Skip()
-
     @property
     def colNames(self):
         return [self.GetColLabelValue(col) for col in range(self.GetNumberCols())]
@@ -750,17 +772,25 @@ class SqlGrid( wx.grid.Grid, object): # wx.grid.Grid
             raise TypeError('You can only use a column name or a numeric value, or the name of an existing column')
         # executing the sql
         session=     self.table.Session()
-        rows=        session.query( getattr( GenericDBClass, colName)).filter( self.table._filter).all()
+        rows=        session.query( getattr( self.table.genericDBClass, colName)).filter( self.table._filter).all()
         session.close()
+        ## Try to change the values to numerical values
+        newRows= rows[:]
+        for pos, row in enumerate(rows):
+            try:
+                newRows[pos]= (float(row[0]),)
+            except:
+                newRows[pos]= row
+
         index= [0, 1][includeHeader]
-        return rows[index:]
+        return newRows[index:]
 
     def _getRow( self, rowNumber):
         if not isnumeric(rowNumber):
             raise TypeError('You can only use a numeric value of an existent column')
         # executing the sql
         session=   self.table.Session()
-        row=       session.query( GenericDBClass).filter( self.table._filter).offset( rowNumber).limit(1).all()[0]
+        row=       session.query( self.Parent.genericDBClass).filter( self.table._filter).offset( rowNumber).limit(1).all()[0]
         session.close()
         # getting the data
         lista= list()
@@ -769,10 +799,12 @@ class SqlGrid( wx.grid.Grid, object): # wx.grid.Grid
         return numpy.array(lista)
 
     def GetCol(self, col, hasHeader= False):
-        return numpy.array([col[0] for col in self._getCol( col, hasHeader)]) # self._cleanData( self._getCol( col, hasHeader))
+        ##numpy.array() ## removed for now
+        return [col[0] for col in self._getCol( col, hasHeader)] # self._cleanData( self._getCol( col, hasHeader))
 
     def GetRow(self, row):
         return self._getRow( row) # self._cleanData( self._getRow( row))
+
     # to be updated
     def GetUsedCols(self):
         return [self.colNames[1:], range(1,len(self.colNames))]
@@ -791,14 +823,12 @@ class SqlGrid( wx.grid.Grid, object): # wx.grid.Grid
                 raise TypeError('You can only use a numeric value, or the name of an existing column')
 
             if colNumber < 0:
-                colNumber= len(self.colNames)-abs(colNumber)
-                if colNumber < 1:
+                colNumber= len(self.colNames)-abs(colNumber)-1
+                if colNumber < 0:
                     raise StandardError('Index out of range')
-            else:
-                colNumber+=1 # avoiding the first column '_id'
 
-            colNumber= int(colNumber)+1 ##
-            if colNumber < 0 or colNumber > self.GetNumberCols():
+            colNumber= int(colNumber)+1 # avoiding the first column '_id'
+            if colNumber > self.GetNumberCols():
                 raise StandardError('The minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
 
             colName= self.colNames[colNumber]
@@ -811,7 +841,6 @@ class SqlGrid( wx.grid.Grid, object): # wx.grid.Grid
 
             if isinstance( data, (ndarray),):
                 data= ravel( data)
-
 
             newdat= list()
             for row, dat in enumerate( data):
@@ -840,6 +869,7 @@ class SqlGrid( wx.grid.Grid, object): # wx.grid.Grid
         finally:
             self.hasSaved= False
             self.hasChanged= True
+
     def GetColNumeric(self, colNumber, includeHeader= False):
         if isinstance(colNumber, (str, unicode)):
             # searching for a col with the name:
@@ -859,15 +889,23 @@ class SqlGrid( wx.grid.Grid, object): # wx.grid.Grid
         else:
             raise TypeError('You can only use a column name or a numeric value, or the name of an existing column')
         # executing the sql
-        session=  self.table.Session()
-        rows=     session.query( getattr( GenericDBClass, colName)).\
-                        filter( self.table._filter).\
-                        filter( getattr(GenericDBClass, colName ) != None).\
-                        all()
-        rows= [row for row in [row[0] for row in rows] if isnumeric(row)]
+        session=     self.table.Session()
+        rows=        session.query( getattr( self.Parent.genericDBClass, colName)).\
+                      filter( self.table._filter).\
+                      filter( getattr( self.Parent.genericDBClass, colName) != None ).\
+                      all()
         session.close()
+        ## Try to change the values to numerical values
+        newRows= rows[:]
+        for pos, row in enumerate(rows):
+            try:
+                newRows[pos]= (float(row[0]),)
+            except:
+                newRows[pos]= row
         index= [0, 1][includeHeader]
-        return rows[index:]
+        rows= newRows[index:]
+        newrows= [row[0] for row in rows if isnumeric(row[0])]
+        return newrows
 
 class selectDbTableDialog( wx.Dialog):
     def __init__(self, parent,engine,tableName= None, allow2edit= False):
@@ -897,7 +935,7 @@ class selectDbTableDialog( wx.Dialog):
                             CaptionVisible( False ).CloseButton( False ).PaneBorder( False ).
                             Movable( False ).Dock().Fixed().
                             DockFixed( False ).Floatable( False ).Row( 0 ) )
-		
+        
 
         self.m_mgr.AddPane( self.m_listBox, wx.aui.AuiPaneInfo().Left().
                             CaptionVisible(True).Caption('Existent Tables').

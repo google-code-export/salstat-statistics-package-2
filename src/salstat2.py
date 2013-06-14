@@ -96,7 +96,7 @@ except ImportError:
 from plotFunctions import pltobj as plot
 
 # spreadSheet
-from ntbSheet import NoteBookSheet
+from ntbSheet import NoteBookSheet, NoteBookSql
 from gridLib  import floatRenderer
 
 # import modules to be used into the script panel
@@ -505,7 +505,7 @@ class Tb1(aui.AuiToolBar):
         wx.GetApp().SetPreferences( allPreferences)
 
     def LoadFile(self, evt):
-        self.grid.addPage( gridSize= (256,64))
+        self.grid.addPage( gridSize= (256,800))
         (HasLoad, SheetName)= self.grid.LoadFile(evt)
         if not HasLoad:
             # delete the current sheet
@@ -556,7 +556,7 @@ class Tb1(aui.AuiToolBar):
         evt.Skip()
 
     def NewPage(self, evt):
-        self.grid.addPage( gridSize= (256,64))
+        self.grid.addPage( gridSize= (256,800))
         evt.Skip()
 
     def DeleteCurrentCol(self, evt):
@@ -897,8 +897,8 @@ class MainFrame(wx.Frame):
         self.defaultDialogSettings = {'Title': None,
                                       'icon': imagenes.logo16}
         #<p> set up the datagrid
-        self.grid=          NoteBookSheet(self, -1)
-        self.grid.addPage( gridSize= (256,64))
+        self.grid=          NoteBookSql(self, -1)
+        self.grid.addPage( gridSize= (256,800))
 
         # set up the datagrid  /<p>
 
@@ -1200,12 +1200,12 @@ class MainFrame(wx.Frame):
         dat1= (
             (translate(u"&File"),
              ([translate(u"&New Data\tCtrl-N"),   NewIcon,    self.tb1.NewPage,     wx.ID_NEW],
-              [translate(u"&Open...\tCtrl-O"),    OpenIcon,   self.grid.LoadFile,   wx.ID_OPEN], # LoadXls
+              ##[translate(u"&Open...\tCtrl-O"),    OpenIcon,   self.grid.LoadFile,   wx.ID_OPEN], # LoadXls
               [u"--"],
               [translate(u"Load From MySql"),     OpenIcon,   self.loadMsql, None],
               [u"--"],
-              [translate(u"&Save\tCtrl-S"),       SaveIcon,   self.grid.SaveXls,         wx.ID_SAVE],
-              [translate(u"Save &As...\tCtrl-Shift-S"), SaveAsIcon, self.grid.SaveXlsAs, wx.ID_SAVEAS],
+              ##[translate(u"&Save\tCtrl-S"),       SaveIcon,   self.grid.SaveXls,         wx.ID_SAVE],
+              ##[translate(u"Save &As...\tCtrl-Shift-S"), SaveAsIcon, self.grid.SaveXlsAs, wx.ID_SAVEAS],
               ##["&Print...\tCtrl-P",   PrintIcon,  None,     None],
               [u"--"],
               [translate(u"E&xit\tCtrl-Q"),       ExitIcon,   self.EndApplication,  wx.ID_EXIT],
@@ -1219,7 +1219,7 @@ class MainFrame(wx.Frame):
               [translate(u"Select &All\tCtrl-A"),    None,    self.tb1.SelectAllCells,   wx.ID_SELECTALL],
               ##["&Find and Replace...\tCtrl-F",  FindRIcon,     self.GoFindDialog,     wx.ID_REPLACE],
               [u"--"],
-              [translate(u"Delete Current Column"), None,     self.tb1.DeleteCurrentCol,     None],
+              ##[translate(u"Delete Current Column"), None,     self.tb1.DeleteCurrentCol,     None],
               [translate(u"Delete Current Row"),    None,     self.tb1.DeleteCurrentRow,     None],)),
 
             (translate(u"P&reparation"),
