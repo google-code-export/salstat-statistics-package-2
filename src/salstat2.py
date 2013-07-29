@@ -1096,7 +1096,7 @@ class MainFrame(wx.Frame):
     def _createStatusBar(self):
         StatusBar= self.CreateStatusBar( 3)
         StatusBar.SetStatusText( 'cells Selected:   '+'count:      '+'sum:    ', 1 )
-        StatusBar.SetStatusText( 'SEI Campamento', 2)
+        StatusBar.SetStatusText( 'Salstat2', 2)
         return StatusBar
 
     def _gridSetRenderer(self, grid):
