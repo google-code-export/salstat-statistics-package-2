@@ -10,7 +10,7 @@ import numpy
 from sqlalchemy import Table, MetaData, create_engine
 from sqlalchemy.orm import mapper, sessionmaker, clear_mappers
 from sqlalchemy.exc import StatementError
-from easyDialog import Dialog
+from easyDialog.easyDialog import Dialog
 from gridEditors import VARCHAR
 from gridEditors import DATE
 from gridCellRenderers import floatRenderer

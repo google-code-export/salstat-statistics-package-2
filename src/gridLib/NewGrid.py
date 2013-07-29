@@ -9,7 +9,7 @@ import wx
 import wx.grid
 from slbTools import ReportaExcel
 import xlrd
-from easyDialog import Dialog as dialog
+from easyDialog.easyDialog import Dialog as dialog
 from slbTools import isnumeric, isiterable
 from numpy import ndarray, ravel
 import os

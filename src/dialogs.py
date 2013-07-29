@@ -8,7 +8,7 @@ from openStats import statistics # used in descriptives frame
 import math # to be used in transform pane
 import numpy
 import scipy
-from easyDialog import CheckListBox
+from easyDialog.easyDialog import CheckListBox
 
 if wx.Platform == '__WXMSW__':
     wind = 50

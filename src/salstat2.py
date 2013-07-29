@@ -897,7 +897,7 @@ class MainFrame(wx.Frame):
         self.defaultDialogSettings = {'Title': None,
                                       'icon': imagenes.logo16}
         #<p> set up the datagrid
-        self.grid=          NoteBookSql(self, -1)
+        self.grid=         NoteBookSheet(self, -1, fb = self.formulaBarPanel)#  NoteBookSql(self, -1)
         self.grid.addPage( gridSize= (256,800))
 
         # set up the datagrid  /<p>
@@ -1200,12 +1200,12 @@ class MainFrame(wx.Frame):
         dat1= (
             (translate(u"&File"),
              ([translate(u"&New Data\tCtrl-N"),   NewIcon,    self.tb1.NewPage,     wx.ID_NEW],
-              ##[translate(u"&Open...\tCtrl-O"),    OpenIcon,   self.grid.LoadFile,   wx.ID_OPEN], # LoadXls
+              [translate(u"&Open...\tCtrl-O"),    OpenIcon,   self.grid.LoadFile,   wx.ID_OPEN], # LoadXls
               [u"--"],
-              [translate(u"Load From MySql"),     OpenIcon,   self.loadMsql, None],
-              [u"--"],
-              ##[translate(u"&Save\tCtrl-S"),       SaveIcon,   self.grid.SaveXls,         wx.ID_SAVE],
-              ##[translate(u"Save &As...\tCtrl-Shift-S"), SaveAsIcon, self.grid.SaveXlsAs, wx.ID_SAVEAS],
+              ##[translate(u"Load From MySql"),     OpenIcon,   self.loadMsql, None],
+              ##[u"--"],
+              [translate(u"&Save\tCtrl-S"),       SaveIcon,   self.grid.SaveXls,         wx.ID_SAVE],
+              [translate(u"Save &As...\tCtrl-Shift-S"), SaveAsIcon, self.grid.SaveXlsAs, wx.ID_SAVEAS],
               ##["&Print...\tCtrl-P",   PrintIcon,  None,     None],
               [u"--"],
               [translate(u"E&xit\tCtrl-Q"),       ExitIcon,   self.EndApplication,  wx.ID_EXIT],
