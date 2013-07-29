@@ -6,7 +6,7 @@ Created on 11/05/2012
 # -*- coding: utf-8 -*- 
 
 import wx
-from easyDialog import CheckListBox
+from easyDialog.easyDialog import CheckListBox
 
 class data2Plotdiaglog( wx.Dialog ):
     def __init__( self, parent, lisOfColumns ):

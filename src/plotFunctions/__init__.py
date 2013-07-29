@@ -36,7 +36,7 @@ import matplotlib.cm as cm
 
 from pylab import setp
 from multiPlotDialog import selectDialogData2plot, scatterDialog
-from easyDialog import NumTextCtrl
+from easyDialog.easyDialog import NumTextCtrl
 
 PROPLEGEND=   {'size':11}
 markerStyles= [ 'None', '.', '+', 'o', 'v', 
@@ -48,7 +48,7 @@ lineSizes=    [str( x*0.5) for x in range( 1, 15, 1)]
 markerSizes=  [str( x) for x in range( 1, 16, 1)]
 alpha=        [str( x/float( 10)) for x in range( 1, 11)]
 
-from easyDialog import Dialog as _dialog
+from easyDialog.easyDialog import Dialog as _dialog
 
 def translate(data):
     return data
