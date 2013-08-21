@@ -49,7 +49,7 @@ class MyFileDropTarget(wx.FileDropTarget):
         scriptPanel=   self.window
         notebookSheet= scriptPanel.Parent.Parent ## the script panel
 
-        notebookSheet.loadScript( event=None,  path= filename)
+        notebookSheet.loadScript( evt=None,  path= filename)
 
 if wx.Platform == '__WXMSW__':
     # for windows OS
@@ -72,7 +72,6 @@ else:
         'size' : 12,
         'size2': 10,
     }
-
 
 class MySTC( stc.StyledTextCtrl, object):
     """
@@ -362,7 +361,6 @@ class MySTC( stc.StyledTextCtrl, object):
                 line = line + 1;
         return line
 
-
 class PyslicesEditor(sliceshell.SlicesShell, object):
     from wx.py.sliceshell import INPUT_MASK, OUTPUT_MASK, OUTPUT_BG
     def __init__(self, *args, **params):
@@ -446,13 +444,11 @@ class PyslicesEditor(sliceshell.SlicesShell, object):
             self.SetCurrentPos(pos)
             self.SetSelection(pos,pos)
 
-
 def numPage():
     i = 1
     while True:
         yield i
         i+= 1
-
 
 class emptylog:
     # emulating an empty log panel
@@ -465,7 +461,16 @@ class emptylog:
 class ScriptPanel( wx.Panel):
     tb1= None
     def __init__( self, parent,*args, **params ):
-        _= wx.GetApp()._
+        try:
+            self._= wx.GetApp()._
+        except:
+            self._= lambda x: x
+        _= self._
+
+        self.finddlg= None
+        self.finddata = wx.FindReplaceData()
+        self.finddata.SetFlags(wx.FR_DOWN)
+
         '''ScriptPanel parent, log, *args'''
         self.log=   args[0]
         self.__hideToolbar= False
@@ -497,10 +502,10 @@ class ScriptPanel( wx.Panel):
 
         if not self.__hideToolbar:
             self.m_mgr.AddPane( self.getToolbar(),
-                                aui.AuiPaneInfo().Name("tb1").
+                                aui.AuiPaneInfo().Name("tb5").
                                 Caption(_("Basic Operations")).
-                                ToolbarPane().Top().
-                                CloseButton( False ))
+                                ToolbarPane().Top().GripperTop().
+                                CloseButton( False))
 
         self.Bindded()
         self.addPage()
@@ -509,9 +514,10 @@ class ScriptPanel( wx.Panel):
         self.Center( )
 
     def _createToolbar( self):
-        _= wx.GetApp()._
+        _= self._
         if self.tb1 != None:
             return
+
         prepend_items, append_items = [], []
         item = aui.AuiToolBarItem()
 
@@ -521,15 +527,15 @@ class ScriptPanel( wx.Panel):
         item = aui.AuiToolBarItem()
         item.SetKind(wx.ITEM_NORMAL)
         item.SetId(wx.ID_ANY)
-        item.SetLabel("Customize...")
+        item.SetLabel(_("Customize..."))
         append_items.append(item)
 
         if wx.version < "2.9":
             tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
-                                style = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_OVERFLOW)
+                                style = aui.AUI_TB_OVERFLOW | aui.AUI_TB_VERTICAL)
         else:
             tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
-                                agwStyle = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_OVERFLOW)
+                                agwStyle = aui.AUI_TB_OVERFLOW | aui.AUI_TB_VERTICAL)
 
         imagenes = imageEmbed()
         tb1.SetToolBitmapSize(wx.Size(16, 16))
@@ -544,10 +550,11 @@ class ScriptPanel( wx.Panel):
         self.bt8= tb1.AddSimpleTool(wx.ID_ANY, _(u"Undo"), imagenes.edit_undo, _(u"Undo") )
         self.bt9= tb1.AddSimpleTool(wx.ID_ANY, _(u"Redo"), imagenes.edit_redo, _(u"Redo") )
         tb1.AddSeparator()
-        self.bt5= tb1.AddSimpleTool(wx.ID_ANY, _(u"Cut") , imagenes.edit_cut, _(u"Cut") )
-        self.bt6= tb1.AddSimpleTool(wx.ID_ANY, _(u"Copy") , imagenes.edit_copy, _(u"Copy") )
-        self.bt7= tb1.AddSimpleTool(wx.ID_ANY, _(u"Paste") , imagenes.edit_paste, _(u"Paste") )
+        self.bt5= tb1.AddSimpleTool(wx.ID_ANY, _(u"Cut"), imagenes.edit_cut, _(u"Cut") )
+        self.bt6= tb1.AddSimpleTool(wx.ID_ANY, _(u"Copy"), imagenes.edit_copy, _(u"Copy") )
+        self.bt7= tb1.AddSimpleTool(wx.ID_ANY, _(u"Paste"), imagenes.edit_paste, _(u"Paste") )
         tb1.AddSeparator()
+        self.bt10= tb1.AddSimpleTool(wx.ID_ANY, _(u"Find"), imagenes.find, _(u"Find") )
         tb1.SetCustomOverflowItems( prepend_items, append_items)
         tb1.SetToolDropDown(wx.ID_ANY, True)
         tb1.Realize()
@@ -589,6 +596,7 @@ class ScriptPanel( wx.Panel):
         # 21/04/2011
         # retorna el numero de paginas que hay en el notebook
         return self.m_notebook.PageCount
+
     def addPage( self, data= dict()):
         defaultData = {'name': u''}
         for key, value in data.items():
@@ -615,7 +623,88 @@ class ScriptPanel( wx.Panel):
         self.m_notebook.AddPage(ntb, newName, False )
         # se hace activo la pagina adicionada
         self.m_notebook.SetSelection(self.m_notebook.GetPageCount()-1)
+        #callback
+        self.pageNames[newName].Bind(wx.EVT_KEY_DOWN ,  self.OnKeyDown)
         return ntb # ret;na el objeto ntb
+
+    def OnshowFindDlg(self, evt):
+        _= self._
+        if self.finddlg != None:
+            return
+        ##self.nb.SetSelection(1)
+        self.finddlg = wx.FindReplaceDialog(self, self.finddata, _("Find"),
+                        wx.FR_NOMATCHCASE | wx.FR_NOWHOLEWORD)
+        self.finddlg.Show(True)
+
+    def OnFindNext(self, event):
+        if self.finddata.GetFindString():
+            self.OnFind(event)
+        else:
+            self.OnHelpFind(event)
+
+    def OnFindClose(self, event):
+        event.GetDialog().Destroy()
+        self.finddlg = None
+
+    def OnFind(self, evt):
+        _= self._
+        editor = self
+        ##self.nb.SetSelection(1)
+        end = editor.GetLastPosition()
+        textstring = editor.GetRange(0, end).lower()
+        findstring = self.finddata.GetFindString().lower()
+        backward = not (self.finddata.GetFlags() & wx.FR_DOWN)
+        if backward:
+            start = editor.GetSelection()[0]
+            loc = textstring.rfind(findstring, 0, start)
+        else:
+            start = editor.GetSelection()[1]
+            loc = textstring.find(findstring, start)
+        if loc == -1 and start != 0:
+            # string not found, start at beginning
+            if backward:
+                start = end
+                loc = textstring.rfind(findstring, 0, start)
+            else:
+                start = 0
+                loc = textstring.find(findstring, start)
+        if loc == -1:
+            dlg = wx.MessageDialog(self, _('Find String Not Found'),
+                          _('Find String Not Found in Demo File'),
+                          wx.OK | wx.ICON_INFORMATION)
+            dlg.ShowModal()
+            dlg.Destroy()
+        if self.finddlg:
+            if loc == -1:
+                self.finddlg.SetFocus()
+                return
+            else:
+                self.finddlg.Destroy()
+                self.finddlg = None
+        editor.ShowPosition(loc)
+        editor.SetSelection(loc, loc + len(findstring))
+
+    def OnKeyDown(self, evt):
+        key = evt.GetKeyCode()
+        if key == wx.WXK_F3:
+            self.OnFindNext( evt)
+            evt.Skip()
+            return
+
+        #if key == ord(" ") and evt.ShiftDown():
+        #    self.SelectCol( self.GetGridCursorCol())
+        #    return
+
+        if not evt.CmdDown():
+            evt.Skip()
+            return
+        # it works only if you have press hold down the [Ctrl] key
+        if   key == ord("F"): self.OnshowFindDlg(evt)
+        #elif key == ord("V"): self.OnPaste()
+        #elif key == ord("X"): self.OnCut()
+        #elif key == ord("Z"): self.Undo()
+        #elif key == ord("Y"): self.Redo() # elif key == ord(" "): self.SelectCol(self.GetGridCursorCol())
+        elif key:  evt.Skip()
 
     def Bindded(self):
         if not self.__hideToolbar:
@@ -629,8 +718,13 @@ class ScriptPanel( wx.Panel):
             self.Bind( wx.EVT_TOOL, self.PasteSelection, id = self.bt7.GetId())
             self.Bind( wx.EVT_TOOL, self.undo,           id = self.bt8.GetId())
             self.Bind( wx.EVT_TOOL, self.redo,           id = self.bt9.GetId())
+            self.Bind( wx.EVT_TOOL, self.OnshowFindDlg,  id = self.bt10.GetId())
         self.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChange)
         self.m_notebook.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.delPage)
+        # to the find dialog
+        self.Bind( wx.EVT_FIND,       self.OnFind)
+        self.Bind( wx.EVT_FIND_NEXT,  self.OnFindNext)
+        self.Bind( wx.EVT_FIND_CLOSE, self.OnFindClose)
 
     def clearLog(self,):
         self.log.clearLog()
@@ -699,9 +793,14 @@ class ScriptPanel( wx.Panel):
         dataToWrite= wx.TextDataObject()
         if not texto.endswith('\n'):
             content= texto+'\n'
+        else:
+            content= texto
         # changing the string to the default system encoding
         content= content.decode(sys.getfilesystemencoding())
         content= content.encode('utf8', errors= 'ignore')
+        appName= wx.GetApp().GetAppName() 
+        if content.startswith('#'+appName+'\r'):
+            content= content.replace('#'+appName+'\r','')
         data = wx.TextDataObject( content)
         # readin the data content of the clipboard
         newData= wx.TextDataObject()
@@ -719,7 +818,7 @@ class ScriptPanel( wx.Panel):
             finally:
                 wx.TheClipboard.Close()
 
-    def loadScript(self, event, *args, **params):
+    def loadScript(self, evt= None, *args, **params):
         """
         :param event:
         :return:
@@ -739,6 +838,8 @@ class ScriptPanel( wx.Panel):
                 path= filename
                 import os.path
                 if not os.path.exists(filename):
+                    if evt != None:
+                        evt.Skip()
                     return
         fout = open( path, "rb")
         content= fout.read()
@@ -746,6 +847,8 @@ class ScriptPanel( wx.Panel):
         self._load( content)
         setattr(self.currentPage, 'currPagePath', path)
         #self.processLine()
+        if evt != None:
+            evt.Skip()
 
     def SaveScript(self, evt):
         print "save Script"
@@ -770,48 +873,61 @@ class ScriptPanel( wx.Panel):
             self.SetText= filename
         evt.Skip()
 
-    def SaveScriptAs(self, event):
+    def SaveScriptAs(self, evt):
         _= wx.GetApp()._
-        wildcard = 'TEXT files (*.txt)|*.txt|ALL files (*.*)|*.*'
-        dlg = wx.FileDialog(self, _("Open Script File"), "","",\
-                            wildcard, wx.SAVE)
-        if dlg.ShowModal() == wx.ID_OK:
-            fullPath = dlg.GetPath()
-            if os.path.exists(fullPath):
-                dlg = wx.MessageDialog(self, 'Would you like to overwrite the existent file?',
-                               'Warning',
-                               wx.YES_NO | wx.ICON_WARNING )
-                if dlg.ShowModal() != wx.ID_YES:
-                    dlg.Destroy()
-                    return None
-                else:
-                    dlg.Destroy()
-            fout = open(fullPath, "wb")
-            for line in self.GetText().split('\n'):
-                fout.writelines(line)
-            fout.close()
-            # changing the name of the notebook
-            filename= dlg.GetFilename()[:-4]
-            if len( filename) > 8:
-                filename= filename[:8]+u'\u2026'
-            self.SetText= filename
-            dlg.Destroy()
-            return fullPath
+        try:
+            wildcard = _('TEXT files (*.txt)|*.txt|ALL files (*.*)|*.*')
+            dlg = wx.FileDialog(self, _("Open Script File"), "","",\
+                                wildcard, wx.SAVE)
+            if dlg.ShowModal() == wx.ID_OK:
+                fullPath = dlg.GetPath()
+                if os.path.exists(fullPath):
+                    dlg = wx.MessageDialog(self, _('Would you like to overwrite the existent file?'),
+                                   _('Warning'),
+                                   wx.YES_NO | wx.ICON_WARNING )
+                    if dlg.ShowModal() != wx.ID_YES:
+                        dlg.Destroy()
+                        return None
+                    else:
+                        dlg.Destroy()
+                fout = open(fullPath, "wb")
+                for line in self.GetText().split('\n'):
+                    fout.writelines(line)
+                fout.close()
+                # changing the name of the notebook
+                filename= dlg.GetFilename()[:-4]
+                if len( filename) > 8:
+                    filename= filename[:8]+u'\u2026'
+                self.SetText= filename
+                dlg.Destroy()
+                return fullPath
+        finally:
+            evt.Skip()
 
-    def undo(self,event):
+    def undo(self,evt):
         self.Undo()
+        evt.Skip()
 
-    def redo(self,event):
+    def redo(self,evt):
         self.Redo()
+        evt.Skip()
 
-    def CutSelection(self, event):
+    def CutSelection(self, evt):
         self.Cut()
+        evt.Skip()
 
-    def CopySelection(self, event):
+    def CopySelection(self, evt):
         self.Copy()
+        evt.Skip()
 
-    def PasteSelection(self, event):
+    def PasteSelection(self, evt):
         self.Paste()
+        evt.Skip()
 
-    def newScript(self, event):
+    def newScript(self, evt):
         self.addPage()
+        evt.Skip()
+
+    def Destroy(self):
+        self.m_mgr.UnInit()
+        super( ScriptPanel, self).Destroy()
