@@ -9,7 +9,7 @@ import wx
 import wx.grid
 from slbTools import ReportaExcel
 import xlrd
-from easyDialog.easyDialog import Dialog as dialog
+from easyDialog import Dialog as dialog
 from slbTools import isnumeric, isiterable
 from numpy import ndarray, ravel
 import os
@@ -21,11 +21,12 @@ DECIMAL_POINT = '.'
 
 from GridCopyPaste import PyWXGridEditMixin, MyContextGrid
 from gridCellRenderers import floatRenderer
-
+from imagenes import imageEmbed
 ###########################################################################
 ## Class NewGrid
 ###########################################################################
 class NewGrid(wx.grid.Grid, object):
+    import datetime
     def __init__(self, parent, size, *args, **params):
         try:     _ = wx.GetApp()._
         except:  _ = lambda x: x
@@ -236,18 +237,32 @@ class NewGrid(wx.grid.Grid, object):
         ColsUsed = []
         colnums = []
         dat = ''
-        tmp = 0
-        for col in range(self.GetNumberCols()):
-            for row in range(self.GetNumberRows()):
-                dat = self.GetCellValue(row, col)
-                if dat != '':
-                    tmp += 1
-                    break # it's just needed to search by the first element
+        #
+        # remodeling the data for speeding up the code
+        #
+        #for col in range(self.GetNumberCols()):
+        #    if self.GetCellValue(0, col) != '':
+        #        ColsUsed.append(self.GetColLabelValue(col))
+        #        colnums.append(col)
 
-            if tmp > 0:
-                ColsUsed.append(self.GetColLabelValue(col))
-                colnums.append(col)
-                tmp = 0
+        #tmp = 0
+        #for col in range(self.GetNumberCols()):
+        #    for row in range(self.GetNumberRows()):
+        #        dat = self.GetCellValue(row, col)
+        #        if dat != '':
+        #            tmp += 1
+        #            break # it's just needed to search by the first element
+
+        #    if tmp > 0:
+        #        ColsUsed.append(self.GetColLabelValue(col))
+        #        colnums.append(col)
+        #        tmp = 0
+
+        # listing all columns of the grid
+        for col in range(self.GetNumberCols()):
+            ColsUsed.append(self.GetColLabelValue(col))
+            colnums.append(col)
+
         self.usedCols= (ColsUsed, colnums)
         self.hasChanged= False
         return self.usedCols
@@ -337,12 +352,48 @@ class NewGrid(wx.grid.Grid, object):
                     'xls':  self.LoadXls,
                     'xlsx': self.LoadXls,
                     'db':   self._LoadSqlite,
+                    'dbf':  self._LoadDbf,
+                    ##'mdb':  self._LoadMdb, ## load an sql database
                     }
         try:
             return available[extension](path, *args, **params)
         except KeyError:
             raise
-        
+
+    def _LoadDbf(self, path, *arg, **params):
+        from dbfpy import dbf
+        db = dbf.Dbf(path)
+        fieldNames= db.fieldNames
+        fieldDefs= db.fieldDefs
+        ##fieldDefs[colNumber].decodeValue(
+        # if it's an empty database
+        if len(fieldNames)== 0:
+            return (True, path)
+
+        for rowNumber, rec in enumerate(db):
+            rowdata= [rec[fieldName] for colNumber, fieldName in enumerate(fieldNames)]
+            self.PutRow(rowNumber, rowdata)
+
+        # setting the col label values
+        for colNumber, fieldName in enumerate(fieldNames):
+            self.SetColLabelValue(colNumber, fieldName)
+        return (True, path)
+
+    def _LoadMdb(self, path, *args, **params):
+        import pyodbc
+        #import adodbapi
+        def connectPyodbc():
+            #return adodbapi.connect("Provider=Microsoft.Jet.OLEDB.4.0; Data Source=%s"%path)
+            return pyodbc.connect("DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=%s"%path)
+
+        # to load data from an access database
+        from sqlalchemy import create_engine
+        if path == None:
+            return ( False, )
+        engine= create_engine( 'access:///%s'%path, echo=False,)# creator=connectPyodbc)## """DRIVER={Microsoft Access Driver (*.mdb)};DBQ=%s"%path, echo=False, )"""
+
+        return ( self._loadDb( engine), path)
+
     def _LoadSqlite(self, path, *args, **params):
         # to load data from an sqlite database
         from sqlalchemy import create_engine
@@ -381,39 +432,44 @@ class NewGrid(wx.grid.Grid, object):
         return True
         
     def LoadFile(self, evt, **params):
-        try:     _= wx.GetApp()._
-        except:  _= lambda x: x
-        wildcard=  _("Suported files")+" (*.txt;*.csv;*.xls;*.xlsx;*.db)|*.txt;*.csv;*.xls;*.xlsx;*db|" \
-            "Excel Files (*xlsx;*xlsm;*.xls)|*.xlsx;*.xlsm;*.xls|"\
-            "Txt file (*.txt)|*.txt|" \
-            "Csv file (*.csv)|*.csv|" \
-            "Sqlite Database (*.db)|*.db" \
-            "Excel 2007 File (*xlsx)|*.xlsx|"\
-            "Excel 2003 File (*.xls)|*.xls|" 
-            
-        dlg = wx.FileDialog(self, _("Load Data File"), "","",
-                            wildcard= wildcard,
-                            style = wx.OPEN)
-        try:
-            icon = imageEmbed().logo16()
-            dlg.SetIcon(icon)
-        except:
-            pass
+        if not params.has_key('fullpath'):
+            try:     _= wx.GetApp()._
+            except:  _= lambda x: x
+            wildcard=  _("Suported files")+" (*.txt;*.csv;*.xls;*.xlsx;*.db;*.dbf)|*.txt;*.csv;*.xls;*.xlsx;*db;*.dbf|"\
+                "Excel Files (*.xlsx;*.xlsm;*.xls)|*.xlsx;*.xlsm;*.xls|"\
+                "Access mdb (*.mdb)|*mdb|"\
+                "Txt file (*.txt)|*.txt|"\
+                "Csv file (*.csv)|*.csv|"\
+                "Sqlite Database (*.db)|*.db|"\
+                "dbase Files (*.dbf)|*.dbf|"\
+                "Excel 2007 File (*xlsx)|*.xlsx|"\
+                "Excel 2003 File (*.xls)|*.xls|"
 
-        if dlg.ShowModal() != wx.ID_OK:
-            dlg.Destroy()
-            return (False, None)
-        
-        fullPath= dlg.Path
+            dlg = wx.FileDialog(self, _("Load Data File"), "","",
+                                wildcard= wildcard,
+                                style = wx.OPEN)
+            try:
+                icon = imageEmbed().logo16()
+                dlg.SetIcon(icon)
+            except:
+                pass
+
+            if dlg.ShowModal() != wx.ID_OK:
+                dlg.Destroy()
+                return (False, None)
+
+            fullPath= dlg.Path
+        else:
+            fullPath= params.pop('fullpath')
         # if the file is loaded then 
-        if self.load(fullPath)[0]:
+        if self.load( fullPath)[0]:
             self.hasChanged= True
             self.hasSaved= True
             # emptying the undo - redo buffer
-            self.emptyTheBuffer()
+            self.emptyTheBuffer( )
             if evt != None:
                 evt.Skip()
-            return ( True, os.path.split(fullPath)[-1])
+            return ( True, os.path.split( fullPath)[-1])
         else:
             return ( False, None)
 
@@ -498,9 +554,9 @@ class NewGrid(wx.grid.Grid, object):
         except:  _= lambda x: x
         print 'import xlrd'
         filename= fullPath
-        filenamestr= filename.__str__()
+        ##filenamestr= filename.__str__()
         #print '# remember to write an  r   before the path'
-        print 'filename= r' + "'" + filename.__str__() + "'"
+        print 'filename= r' + "'" + filename + "'"
         # se lee el libro
         wb= xlrd.open_workbook(filename)
         print 'wb = xlrd.open_workbook(filename)'
@@ -603,13 +659,19 @@ class NewGrid(wx.grid.Grid, object):
         if hasHeader and neededSize[0] < 2:
             return
 
+        book_datemode = sheetSelected.book.datemode
+
         for reportRow, row in enumerate(range( star, neededSize[0])):
             for col in range( neededSize[1]):
                 newValue = sheetSelected.cell_value( row, col)
+                # Cell Types: 0=Empty, 1=Text, 2=Number, 3=Date, 4=Boolean, 5=Error, 6=Blank
                 if isinstance( newValue, (str, unicode)):
                     self.SetCellValue( reportRow, col, newValue)
-                elif sheetSelected.cell_type( row, col) in ( 2, 3):
+                elif sheetSelected.cell_type( row, col) in ( 2,): # number
                     self.SetCellValue( reportRow, col, str( newValue).replace('.', DECIMAL_POINT))
+                elif sheetSelected.cell_type( row, col) in ( 3,): # date
+                    year, month, day, hour, minute, second = xlrd.xldate_as_tuple(newValue, book_datemode)
+                    self.SetCellValue( reportRow, col, self.datetime.date(year, month, day).__str__())
                 else:
                     try:
                         self.SetCellValue (reportRow, col, str(newValue))
@@ -709,7 +771,7 @@ class NewGrid(wx.grid.Grid, object):
                         pass
         return indata
 
-    def _cleanData(self, data):
+    def _cleanData(self, data, hasHeader= False):
         if isinstance(data, (str, unicode)):
             data= [data]
 
@@ -720,7 +782,7 @@ class NewGrid(wx.grid.Grid, object):
             if data[pos] != u'':
                 break
 
-        data= data[:pos+1]
+        data= data[:pos + [0, 1][hasHeader]]
         # changing data into a numerical value
         try:
             dp = wx.GetApp().DECIMAL_POINT
@@ -748,14 +810,14 @@ class NewGrid(wx.grid.Grid, object):
         try: 
             if isinstance(rowNumber, (str, unicode)):
                 if not(rowNumber in self.rowNames):
-                    raise TypeError(_('You can only use a numeric value, or the name of an existing column'))
+                    raise TypeError(_('You can only use a numeric value, or the name of an existing row'))
                 for pos, value in enumerate(self.rowNames):
                     if value == rowNumber:
                         rowNumber= pos
                         break
 
             if not isnumeric(rowNumber):
-                raise TypeError(_('You can only use a numeric value, or the name of an existing column'))
+                raise TypeError(_('You can only use a numeric value, or the name of an existing row'))
 
             rowNumber= int(rowNumber)        
             if rowNumber < 0 or rowNumber > self.GetNumberRows():
@@ -800,7 +862,10 @@ class NewGrid(wx.grid.Grid, object):
                 newdat.append(dat)
 
             for col, dat in enumerate(newdat):
-                self.SetCellValue(rowNumber, col, dat)
+                try:
+                    self.SetCellValue(rowNumber, col, dat)
+                except UnicodeDecodeError:
+                    self.SetCellValue(rowNumber, col, dat.decode("utf8","replace"))
         except:
             raise
         finally:
@@ -992,7 +1057,10 @@ class NewGrid(wx.grid.Grid, object):
                 newdat.append(dat)
     
             for row, dat in enumerate(newdat):
-                self.SetCellValue(row, colNumber, dat)
+                try:
+                    self.SetCellValue(row, colNumber, dat)
+                except UnicodeDecodeError:
+                    self.SetCellValue(row, colNumber, dat.decode("utf8","replace"))
         except:
             raise
         finally:
