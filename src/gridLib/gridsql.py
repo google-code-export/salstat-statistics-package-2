@@ -1,8 +1,7 @@
 '''
 Created on 26/10/2012
 
-@author: SEBASTIAN LOPEZ BURITICA
-@mail: selobu@gmail.com
+@author: USUARIO
 '''
 import wx
 import wx.grid
@@ -26,7 +25,7 @@ from gridLib.NewGrid import NewGrid
 from slbTools.slbTools import isnumeric
 from numpy import ndarray, ravel
 from copy import deepcopy
-
+from xlrd import xldate_as_tuple
 
 class okCancelPanel(wx.Panel):
     def __init__(self, *args, **params):
@@ -78,7 +77,7 @@ class GenericDBClass(object):
     pass
 
 class SqlTable( wx.grid.PyGridTableBase):
-    from datetime import datetime
+    import datetime
     _currTable=      None
     def __init__( self, engine= None, tableName= None, allow2edit= False, firstColEditable= True):
         self._firstColEditable= firstColEditable
@@ -563,7 +562,7 @@ class SqlTable( wx.grid.PyGridTableBase):
             value= int(value)
         elif coltype in ('DATE',):
             value= [int(val) for val in value.split('-')]
-            value= self.datetime(value.pop(0), value.pop(0), value.pop(0))
+            value= self.datetime.date(value.pop(0), value.pop(0), value.pop(0))
         return value
 
     def commit(self):
@@ -1253,16 +1252,16 @@ class SqlGrid( NewGrid):#wx.grid.Grid, object): # wx.grid.Grid
         self.hasSaved= True
         # /<p>
 
-        # se hace el grid de tamanio 1 celda y se redimensiona luego
-        self.ClearGrid()
+        ## se hace el grid de tamanio 1 celda y se redimensiona luego
+        ##self.ClearGrid()
         # reading the size of the needed sheet
         currentSize= (self.NumberRows, self.NumberCols)
         # se lee el tamanio de la pagina y se ajusta las dimensiones
         neededSize = (sheetSelected.nrows, sheetSelected.ncols)
 
+        # number of columns
         if neededSize[1]-currentSize[1] > 0:
-            pass ## needed to be adjusted
-            ##self.AppendCols(neededSize[1]-currentSize[1])
+            self.AppendCols(neededSize[1]-currentSize[1])
 
         # se escribe los datos en el grid
         try:
@@ -1283,22 +1282,27 @@ class SqlGrid( NewGrid):#wx.grid.Grid, object): # wx.grid.Grid
                     self.SetColLabelValue( col, sheetSelected.cell_value( 0, col))
         else:
             # return all header to default normal value
-            for col in range( neededSize[1]):
-                pass
+            pass
+            #for col in range( neededSize[1]):
+            #    pass
                 ##self.SetColLabelValue(col, self.generateLabel( col))
-
+        # the rows are omited
         if hasHeader and neededSize[0] < 2:
             return
-
+        book_datemode = sheetSelected.book.datemode
         self.table._setcommit(False)
         for reportRow, row in enumerate(range( star, neededSize[0])):
             for col in range( 1,neededSize[1]+1): # the first row is the field _id
                 newValue = sheetSelected.cell_value( row, col-1)
+                print (row, col)
                 if isinstance( newValue, (str, unicode)):
                     self.SetCellValue( reportRow, col, newValue)
-                elif sheetSelected.cell_type( row, col) in ( 2, 3):
+                elif sheetSelected.cell_type( row, col-1) in ( 2, ): # number
                     self.SetCellValue( reportRow, col, str( newValue).replace('.', DECIMAL_POINT))
-                else:
+                elif sheetSelected.cell_type( row, col-1) in ( 3,): # date
+                    year, month, day, hour, minute, second = xldate_as_tuple(newValue, book_datemode)
+                    self.SetCellValue( reportRow, col, self.datetime.date(year, month, day).__str__())
+                else: # avoiding the bug of the xlrd library
                     try:
                         self.SetCellValue (reportRow, col, str(newValue))
                     except:
