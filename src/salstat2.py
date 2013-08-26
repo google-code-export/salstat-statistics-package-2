@@ -135,6 +135,8 @@ class translate(unicode):
         new.original = original
         return new
 
+import __builtin__
+__builtin__.__dict__['_']= translate
 if wx.Platform == '__WXMSW__':
     # for windows OS
     face1 = 'Courier New'

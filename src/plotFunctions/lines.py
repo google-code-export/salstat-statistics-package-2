@@ -25,7 +25,7 @@ class lines( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write(self.translate(u"You need some data to draw a graph!"))
+            self.log.write(_(u"You need some data to draw a graph!"))
             return
         
         return self.data2Plotdiaglog( None, self.columnNames, title= self.name)
@@ -43,7 +43,7 @@ class lines( _neededLibraries):
 
         self.log.write("selectedcols= " + selectedcols.__str__(), False)
         if len(selectedcols) == 0:
-            self.log.write(self.translate(u"You need to select some data to draw a graph!"))
+            self.log.write(_(u"You need to select some data to draw a graph!"))
             return
         
         return selectedcols
@@ -59,16 +59,16 @@ class lines( _neededLibraries):
         selectedcols= args[0]
         data= [self.grid.GetColNumeric(colName) for colName in selectedcols ]
         data= [(range( len( data[i])), data[i], self.columnNames[i]) for i in range( len( data))]
-        plt= pltobj(None, xlabel = "", ylabel = self.translate(u"value"), title= self.translate(self.name) )
-        plt.gca().hold(True)
+        plt= pltobj(None, xlabel = "", ylabel = _(u"value"), title= _(self.name) )
+        plt.hold(True)
         listLegend= list()
         listPlot = list()
         for x,y,texto in data:
-            listPlot.append( plt.gca().plot( x, y))
+            listPlot.append( plt.plot( x, y))
             listLegend.append(texto)
         legend= plt.legend( listPlot, listLegend) #self.figpanel
         legend.draggable( state = True)
-        plt.gca().hold(False)
+        plt.hold(False)
         plt.updateControls()
         plt.canvas.draw() #self.figpanel
         return plt
@@ -82,7 +82,7 @@ class lines( _neededLibraries):
         
     def _report(self, result):
         result.Show()
-        self.log.write(self.plotName + ' ' + self.translate('successful'))
+        self.log.write(self.plotName + ' ' + _('successful'))
 class stem( _neededLibraries):
     name=      u"stem"
     plotName=  u"stem"
@@ -95,7 +95,7 @@ class stem( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write(self.translate(u"You need some data to draw a graph!"))
+            self.log.write(_(u"You need some data to draw a graph!"))
             return
         
         return self.data2Plotdiaglog( None, self.columnNames, title= self.name)
@@ -113,7 +113,7 @@ class stem( _neededLibraries):
 
         self.log.write("selectedcols= " + selectedcols.__str__(), False)
         if len(selectedcols) == 0:
-            self.log.write(self.translate(u"You need to select some data to draw a graph!"))
+            self.log.write(_(u"You need to select some data to draw a graph!"))
             return
         
         return selectedcols
@@ -133,7 +133,7 @@ class stem( _neededLibraries):
         for x,y,texto in data:
             plotList.append( pltobj(None, xlabel = "", ylabel = "value", title= self.name ))
             plt= plotList[-1]
-            plt.gca().stem( x, y)
+            plt.stem( x, y)
             plt.updateControls()
             plt.canvas.draw() #self.figpanel
             
@@ -149,7 +149,7 @@ class stem( _neededLibraries):
     def _report(self, result):
         for res in result:
             res.Show()
-        self.log.write(self.plotName+ ' ' + self.translate('successful'))
+        self.log.write(self.plotName+ ' ' + _('successful'))
          
 class linesOfMean( _neededLibraries):
     name=      u"lines of all means"
@@ -163,7 +163,7 @@ class linesOfMean( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write(self.translate(u"You need some data to draw a graph!"))
+            self.log.write(_(u"You need some data to draw a graph!"))
             return
         
         return self.data2Plotdiaglog( None, self.columnNames, title= self.name)
@@ -181,7 +181,7 @@ class linesOfMean( _neededLibraries):
 
         self.log.write("selectedcols= " + selectedcols.__str__(), False)
         if len(selectedcols) == 0:
-            self.log.write(self.translate(u"You need to select some data to draw a graph!"))
+            self.log.write(_(u"You need to select some data to draw a graph!"))
             return
         
         return selectedcols
@@ -195,15 +195,15 @@ class linesOfMean( _neededLibraries):
     def evaluate( self, *args, **params):
         selectedcols= args[0]
         data = [statistics( self.grid.GetColNumeric( cols), "noname", None).mean for cols in selectedcols]
-        plt= pltobj( None, xlabel = "", ylabel = self.translate(u"value"), title= self.translate(self.name))
-        plt.gca().hold( True)
+        plt= pltobj( None, xlabel = "", ylabel = _(u"value"), title= _(self.name))
+        plt.hold( True)
         listLegend= list()
         listPlot = list()
-        listPlot.append( plt.gca().plot( range( len( data)), data) )
+        listPlot.append( plt.plot( range( len( data)), data) )
         listLegend.append( self.name)
         legend= plt.legend( listPlot, listLegend) #self.figpanel
         legend.draggable( state = True)
-        plt.gca().hold( False)
+        plt.hold( False)
         plt.updateControls()
         plt.canvas.draw() #self.figpanel
         return plt
@@ -217,7 +217,7 @@ class linesOfMean( _neededLibraries):
         
     def _report( self, result):
         result.Show()
-        self.log.write( self.plotName + ' ' + self.translate(u'successful'))
+        self.log.write( self.plotName + ' ' + _(u'successful'))
 
 class shadowLines(lines):
     name=      u"lines with shadow"
@@ -233,13 +233,13 @@ class shadowLines(lines):
         selectedcols= args[0]
         data= [self.grid.GetColNumeric(colName) for colName in selectedcols ]
         data= [(range( len( data[i])), data[i], self.columnNames[i]) for i in range( len( data))]
-        plt= pltobj(None, xlabel = "", ylabel = self.translate(u"value"), 
-                    title= self.translate(self.name) )
-        plt.gca().hold(True)
+        plt= pltobj(None, xlabel = "", ylabel = _(u"value"), 
+                    title= _(self.name) )
+        plt.hold(True)
         listLegend= list()
         listPlot = list()
         for x,y,texto in data:
-            listPlot.append( plt.gca().plot( x, y, mfc = "w", lw = 5, mew = 3, ms = 10,))
+            listPlot.append( plt.plot( x, y, mfc = "w", lw = 5, mew = 3, ms = 10,))
             listLegend.append( texto)
         gauss = DropShadowFilter( 4)
         
@@ -248,7 +248,7 @@ class shadowLines(lines):
             line = line[0]
             xx = line.get_xdata()
             yy = line.get_ydata()
-            shadow, = plt.gca().plot( xx, yy)
+            shadow, = plt.plot( xx, yy)
             shadow.update_from(line)
             # offset transform
             ot = mtransforms.offset_copy(line.get_transform(), plt.gca().figure,
@@ -262,7 +262,7 @@ class shadowLines(lines):
             shadow.set_rasterized(True) # to support mixed-mode renderers
         legend= plt.legend( listPlot, listLegend)
         legend.draggable( state = True)
-        plt.gca().hold(False)
+        plt.hold(False)
         plt.updateControls()
         plt.canvas.draw()
         return plt
@@ -279,7 +279,7 @@ class areaPlot( lines):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write(self.translate(u"You need some data to draw a graph!"))
+            self.log.write(_(u"You need some data to draw a graph!"))
             return
         
         return self.data2Plotdiaglog( None, self.columnNames, title= self.name)
@@ -297,7 +297,7 @@ class areaPlot( lines):
 
         self.log.write("selectedcols= " + selectedcols.__str__(), False)
         if len(selectedcols) == 0:
-            self.log.write(self.translate(u"You need to select some data to draw a graph!"))
+            self.log.write(_(u"You need to select some data to draw a graph!"))
             return
         
         return selectedcols
@@ -334,7 +334,7 @@ class areaPlot( lines):
     def _report(self, result):
         for res in result:
             res.Show()
-        self.log.write(self.plotName+ ' ' + self.translate(u'successful'))
+        self.log.write(self.plotName+ ' ' + _(u'successful'))
      
 class multipleAreaPlot( lines):
     name=      u"Multiple area chart"
@@ -348,7 +348,7 @@ class multipleAreaPlot( lines):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write(self.translate(u"You need some data to draw a graph!"))
+            self.log.write(_(u"You need some data to draw a graph!"))
             return
         
         return self.data2Plotdiaglog( None, self.columnNames, title= self.name)
@@ -366,7 +366,7 @@ class multipleAreaPlot( lines):
 
         self.log.write("selectedcols= " + self.colNameSelect.__str__(), False)
         if len( self.colNameSelect) == 0:
-            self.log.write(self.translate(u"You need to select some data to draw a graph!"))
+            self.log.write(_(u"You need to select some data to draw a graph!"))
             return
         
         return homogenize(*[ self.grid.GetColNumeric( colName) for colName in self.colNameSelect ])
@@ -382,11 +382,11 @@ class multipleAreaPlot( lines):
         ydat= array( data.pop( 0))
         xdat= range( len( ydat))
         line= list()
-        plt=  pltobj( None, xlabel = "", ylabel = self.translate(u"value"), 
-                      title= self.translate(self.name) )
+        plt=  pltobj( None, xlabel = "", ylabel = _(u"value"), 
+                      title= _(self.name) )
         gca= plt.gca()
         colour= generateColors()
-        gca.fill_between( xdat, ydat*0, ydat, alpha=0.6, color= colour.next())
+        plt.fill_between( xdat, ydat*0, ydat, alpha=0.6, color= colour.next())
         line.append( ydat[0])
         if len(data) > 0:
             for ydat1 in data:
@@ -409,4 +409,4 @@ class multipleAreaPlot( lines):
         
     def _report(self, result):
         result.Show()
-        self.log.write(self.plotName + ' ' + self.translate('successful'))
+        self.log.write(self.plotName + ' ' + _('successful'))
