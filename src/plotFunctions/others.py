@@ -29,10 +29,10 @@ class table( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write(self.translate(u"You need some data to draw a graph!"))
+            self.log.write(_(u"You need some data to draw a graph!"))
             return
-        txt1= ["StaticText",    [self.translate(u"Select data to plot")]]
-        txt2= ["StaticText",    [self.translate(u"Select the name of the rows")]]
+        txt1= ["StaticText",    [_(u"Select data to plot")]]
+        txt2= ["StaticText",    [_(u"Select the name of the rows")]]
         btn1= ["CheckListBox",  [self.columnNames] ]
         btn2= ["Choice",        [self.columnNames]]
         structure= list()
@@ -40,7 +40,7 @@ class table( _neededLibraries):
         structure.append( [btn1,])
         structure.append( [txt2,])
         structure.append( [btn2,])
-        return self.dialog( struct= structure, settings = {"Title": self.translate(self.name),
+        return self.dialog( struct= structure, settings = {"Title": _(self.name),
                                                            "_size": wx.Size( 300,500)},)
 
     def _showGui_GetValues(self):
@@ -61,7 +61,7 @@ class table( _neededLibraries):
         
         self.rowlabelsCol= values[1]
         if self.rowlabelsCol == None:
-            self.log.write(self.translate(u'the user have to select a name colum to the rows'))
+            self.log.write(_(u'the user have to select a name colum to the rows'))
             return
 
         data, posvalid= homogenize(*[ self.grid.GetCol( colX) for colX in self.selectedColNames], returnPos= True )
@@ -79,9 +79,9 @@ class table( _neededLibraries):
         data = args[0]
         rowLabels= args[1]
         colLabels= self.selectedColNames
-        plt= pltobj( None, xlabel= "", ylabel= self.rowlabelsCol, title= self.translate(self.name) )
+        plt= pltobj( None, xlabel= "", ylabel= self.rowlabelsCol, title= _(self.name) )
 
-        plt.gca().hold(True)
+        plt.hold(True)
         rows = len(data)
         colours= ['b']*rows
         
@@ -90,7 +90,7 @@ class table( _neededLibraries):
         width = 0.5     # the width of the bars
         yoff = array([ 0.0] * len( colLabels)) # the bottom values for stacked bar chart
         for row in xrange( rows):
-            plt.gca().bar( ind, data[row], width, bottom=yoff, color= colours[row])
+            plt.bar( ind, data[row], width, bottom=yoff, color= colours[row])
             yoff = yoff + data[row]
             cellText.append( ['%1.1f' % (x/1000.0) for x in yoff])
         
@@ -103,8 +103,8 @@ class table( _neededLibraries):
                                      rowColours = colours,
                                      colLabels = colLabels,
                                      loc = 'bottom')
-        plt.gca().set_xticks([])              
-        plt.gca().hold( False)
+        plt.set_xticks([])
+        plt.hold( False)
         plt.updateControls()
         plt.canvas.draw()
         axes([0.2, 0.2, 0.7, 0.7]) 
@@ -119,7 +119,7 @@ class table( _neededLibraries):
         
     def _report(self, result):
         result.Show()
-        self.log.write(self.plotName + ' ' + self.translate('successful'))
+        self.log.write(self.plotName + ' ' + _('successful'))
 
 class linRegres( _neededLibraries):
     name=      u"linear regression"
@@ -131,19 +131,19 @@ class linRegres( _neededLibraries):
         self.plotName=  u"linregres"
         
     def _dialog(self, *arg, **params):
-        self.log.write(self.translate(self.name))
+        self.log.write(_(self.name))
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write(self.translate(u"You need some data to draw a graph!"))
+            self.log.write(_(u"You need some data to draw a graph!"))
             return
 
-        bt1= ["StaticText", [self.translate(u"Select pairs of data by rows")]]
-        bt2= ["makePairs",  [[self.translate(u"X data to plot"), self.translate(u"Y data to plot")], [self.columnNames]*2, 20]]
+        bt1= ["StaticText", [_(u"Select pairs of data by rows")]]
+        bt2= ["makePairs",  [[_(u"X data to plot"), _(u"Y data to plot")], self.columnNames, 4]]
         structure= list()
         structure.append([bt1,])
         structure.append([bt2,])
-        return self.dialog( struct= structure, settings = {"Title": self.translate(self.name) ,
-                                                           "_size": wx.Size(300, 400)},)
+        return self.dialog( struct= structure, settings = {"Title": _(self.name) ,
+                                                           "_size": wx.Size(300, 300)},)
 
     def _showGui_GetValues(self):
         dlg= self._dialog()
@@ -181,8 +181,8 @@ class linRegres( _neededLibraries):
             (x, y) = homogenize( x, y)
             line=  linregress(x,y)
             yfit= lambda x: x*line[0]+line[1]
-            plot= plt.gca().plot(x,y,'b.',x,[yfit(x1) for x1 in x],'r')
-            legend= plt.legend(plot,( title,self.translate(u'linear Regression')), prop = PROPLEGEND)
+            plot= plt.plot(x,y,'b.',x,[yfit(x1) for x1 in x],'r')
+            legend= plt.legend(plot,( title,_(u'linear Regression')), prop = PROPLEGEND)
             legend.draggable(state=True)
             arrow_args = dict(arrowstyle="->")
             bbox_args = dict(boxstyle="round", fc="w")
@@ -193,11 +193,11 @@ class linRegres( _neededLibraries):
             elif round(line[1],4) < 0:
                 text2anotate += str( round( line[1],4))
             text2anotate += "\n r = " + str( round( line[2],6))
-            an1= plt.gca().annotate( text2anotate, xy=(x[int( len( x)/2)],
-                                                       yfit( x[int( len( x)/2)])),  xycoords='data',
-                                                   ha="center", va="center",
-                                                   bbox=bbox_args,
-                                                   arrowprops=arrow_args)
+            an1= plt.annotate( text2anotate, xy=(x[int( len( x)/2)],
+                                                yfit( x[int( len( x)/2)])),  xycoords='data',
+                                                ha="center", va="center",
+                                                bbox=bbox_args,
+                                                arrowprops=arrow_args)
             an1.draggable()
             plt.updateControls()
             plt.canvas.draw()
@@ -213,7 +213,7 @@ class linRegres( _neededLibraries):
     def _report(self, result):
         for res in result:
             res.Show()
-        self.log.write(self.plotName+ ' '+self.translate(u'successful'))
+        self.log.write(self.plotName+ ' '+_(u'successful'))
 
 class ternaryScatter( _neededLibraries):
     name=      u"Ternary scatter"
@@ -228,25 +228,25 @@ class ternaryScatter( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if len(self.columnNames) == 0:
-            self.log.write( self.translate( u"You need some data to draw a graph!"))
+            self.log.write( _( u"You need some data to draw a graph!"))
             return
         
-        txt1= ["StaticText", [self.translate(u"Left Corner Label")]]
-        txt2= ["StaticText", [self.translate(u"Right Corner Label")]]
-        txt3= ["StaticText", [self.translate(u"Upper Corner Label")]]
-        btn1= ["TextCtrl",   [self.translate(u"A")]]
-        btn2= ["TextCtrl",   [self.translate(u"B")]]
-        btn3= ["TextCtrl",   [self.translate(u"C")]]
-        btn4= ["StaticText", [self.translate(u"Select the pairs of data by rows")]]
-        btn5= ["makePairs",  [[self.translate(u"A Left Corner"),self.translate(u"C Upper Corner"),
-                               self.translate(u"B Right Corner")], [self.columnNames]*3, 30]]
+        txt1= ["StaticText", [_(u"Left Corner Label")]]
+        txt2= ["StaticText", [_(u"Right Corner Label")]]
+        txt3= ["StaticText", [_(u"Upper Corner Label")]]
+        btn1= ["TextCtrl",   [_(u"A")]]
+        btn2= ["TextCtrl",   [_(u"B")]]
+        btn3= ["TextCtrl",   [_(u"C")]]
+        btn4= ["StaticText", [_(u"Select the pairs of data by rows")]]
+        btn5= ["makePairs",  [[_(u"A Left Corner"),_(u"C Upper Corner"),
+                               _(u"B Right Corner")], self.columnNames, 30]]
         structure= list()
         structure.append( [btn1, txt1])
         structure.append( [btn2, txt2])
         structure.append( [btn3, txt3])
         structure.append( [btn4,])
         structure.append( [btn5,])
-        settings = {"Tile": self.translate(self.name) ,
+        settings = {"Tile": _(self.name) ,
                     "_size": wx.Size(410, 400),}
         return self.dialog( settings= settings, struct= structure)
 
@@ -415,7 +415,7 @@ class ternaryScatter( _neededLibraries):
         
     def _report(self, result):
         result.Show()
-        self.log.write(self.plotName + ' ' + self.translate('successful'))
+        self.log.write(self.plotName + ' ' + _('successful'))
 
 class runChart( _neededLibraries):
     name=      u"control chart"
@@ -430,14 +430,14 @@ class runChart( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write( self.translate( u"You need some data to draw a graph!"))
+            self.log.write( _( u"You need some data to draw a graph!"))
             return
 
-        txt1= ["StaticText",    [self.translate( u"Select the columns to analyse")]]
+        txt1= ["StaticText",    [_( u"Select the columns to analyse")]]
         btn1= ["CheckListBox",  [self.columnNames]]
-        txt2= ["StaticText",    [self.translate( u"Lower control limit")]]
-        txt3= ["StaticText",    [self.translate( u"Upper control limit")]]
-        txt4= ["StaticText",    [self.translate( u"Target value")]]
+        txt2= ["StaticText",    [_( u"Lower control limit")]]
+        txt3= ["StaticText",    [_( u"Upper control limit")]]
+        txt4= ["StaticText",    [_( u"Target value")]]
         btn2= ["NumTextCtrl",   []]
         
         structure= list()
@@ -446,7 +446,7 @@ class runChart( _neededLibraries):
         structure.append( [btn2, txt2])
         structure.append( [btn2, txt3])
         structure.append( [btn2, txt4])        
-        return self.dialog( struct= structure, settings = {"Title": self.translate(self.name) ,
+        return self.dialog( struct= structure, settings = {"Title": _(self.name) ,
                                                            "_size": wx.Size( 330, 350)},)
     
     def _showGui_GetValues(self):
@@ -465,15 +465,15 @@ class runChart( _neededLibraries):
 
         self.log.write("selectedcols= " + self.selectedcols.__str__(), False)
         if len( self.selectedcols) == 0:
-            self.log.write( self.translate( u"You need to select some data to draw a graph!"))
+            self.log.write( _( u"You need to select some data to draw a graph!"))
             return
         
         if lcl == None or ucl == None:
-            self.log.write( self.translate( u"You have to input the lower and upper control limits"))
+            self.log.write( _( u"You have to input the lower and upper control limits"))
             return
         
         if target == None:
-            self.log.write( self.translate( u"You have to input a target value"))
+            self.log.write( _( u"You have to input a target value"))
             return
         # transform the selected cols to numeric cols
         colValues= [self.grid.GetColNumeric( col) for col in self.selectedcols]
@@ -491,15 +491,15 @@ class runChart( _neededLibraries):
         colValues, lcl, ucl, target = args
         listPlot = list()
         for colValue, colName in zip(colValues, self.selectedcols):
-            listPlot.append( pltobj( None, xlabel = "", ylabel = self.translate( u"value"),
-                                     title = self.translate( self.name)))
+            listPlot.append( pltobj( None, xlabel = "", ylabel = _( u"value"),
+                                     title = _( self.name)))
             xdat= range( len( colValue))
             plt= listPlot[-1]
-            plt.gca().hold( True)
-            line=  plt.gca().plot( xdat, colValue, '.', markersize= 12)
-            lineucl= plt.gca().plot( [min( xdat), max( xdat)], [ucl]*2, 'r-', linewidth= 2)
-            linelcl= plt.gca().plot( [min( xdat), max( xdat)], [lcl]*2, 'r-', linewidth= 2)
-            linetarget= plt.gca().plot( [min( xdat), max( xdat)], [target]*2, 'b-', linewidth= 2)
+            plt.hold( True)
+            line=  plt.plot( xdat, colValue, '.', markersize= 12)
+            lineucl= plt.plot( [min( xdat), max( xdat)], [ucl]*2, 'r-', linewidth= 2)
+            linelcl= plt.plot( [min( xdat), max( xdat)], [lcl]*2, 'r-', linewidth= 2)
+            linetarget= plt.plot( [min( xdat), max( xdat)], [target]*2, 'b-', linewidth= 2)
             # check the points out of control
             posout= list()
             for pos, element in enumerate( colValue):
@@ -509,18 +509,18 @@ class runChart( _neededLibraries):
             if len( posout) > 0:
                 xdat= [x for pos, x in enumerate( xdat) if pos in posout] 
                 ydat= [y for pos, y in enumerate( colValue) if pos in posout] 
-                pointsOut= plt.gca().plot( xdat, ydat, '*')
+                pointsOut= plt.plot( xdat, ydat, '*')
                 legend= plt.legend( [line, lineucl, linelcl, linetarget, pointsOut],
-                                [colName, self.translate( u"upper limmit"),
-                                 self.translate( u"lower limit"), self.translate(u"target"),
-                                 self.translate( u"out of control")], prop = PROPLEGEND)
+                                [colName, _( u"upper limmit"),
+                                 _( u"lower limit"), _(u"target"),
+                                 _( u"out of control")], prop = PROPLEGEND)
             else:    
                 legend= plt.legend( [line, lineucl, linelcl, linetarget],
-                                [colName, self.translate( u"upper limmit"),
-                                 self.translate( u"lower limit"), self.translate(u"target")],
+                                [colName, _( u"upper limmit"),
+                                 _( u"lower limit"), _(u"target")],
                                 prop = PROPLEGEND)
             legend.draggable( state = True)
-            plt.gca().hold(False)
+            plt.hold(False)
             plt.updateControls()
             plt.canvas.draw()
         return listPlot
@@ -535,7 +535,7 @@ class runChart( _neededLibraries):
     def _report(self, result):
         for res in result:
             res.Show()
-        self.log.write(self.plotName + ' ' + self.translate('successful'))
+        self.log.write(self.plotName + ' ' + _('successful'))
         
         #UCL= data2plot[self.'UCL']
         #LCL= data2plot['LCL']

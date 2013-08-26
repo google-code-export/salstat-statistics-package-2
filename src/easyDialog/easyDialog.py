@@ -8,41 +8,128 @@ __all__= ['Dialog']
 
 import wx
 from numpy import ndarray
+import os
+import re
 
 __WILDCARD= "Supported Files (*.txt;*.csv;*.xlsx;*.xls)|*.txt;*.csv;*xlsx;*.xls|"\
     "Excel 2010 File (*.xlsx)|*.xlsx|" \
     "Excel 2003 File (*.xls)|*.xls|" \
-    "Txt file (*.txt)|*.txt|"    \
-    "Csv file (*.csv)|*.csv" 
+    "Txt file (*.txt)|*.txt|" \
+    "Csv file (*.csv)|*.csv"
 
-def getPath(wildcard= __WILDCARD):
-    dlg = wx.FileDialog(None, "Load Data File", "","",
+def getPath( wildcard= __WILDCARD):
+    try:     _= wx.GetApp()._
+    except:  _= lambda x: x
+    dlg = wx.FileDialog(None, _("Load Data File"), "","",
                         wildcard= wildcard,
                         style = wx.OPEN)
-    icon = imageEmbed().logo16()
-    dlg.SetIcon(icon)
+    ##icon = imageEmbed().logo16()
+    ##dlg.SetIcon(icon)
 
     if dlg.ShowModal() != wx.ID_OK:
         dlg.Destroy()
         return None
 
     fileName= dlg.GetFilename()
-    fullPath= dlg.Path 
+    fullPath= dlg.Path
+    dlg.Destroy()
     junk, filterIndex = os.path.splitext(fileName)
-    try:
-        if filterIndex in ('.xls','.xlsx'):
-            return fullPath
-        elif filterIndex in ('.txt', '.csv'):
-            return fullPath
-    except (Exception, TypeError) as e:
-        traceback.print_exc( file = self.log)
-
-
+    pattern= "\*.[a-zA-Z0-9]*"
+    allowedExtensions= list(set( re.findall(pattern, wildcard)))
+    allowedExtensions= list(set([res.lower() for res in allowedExtensions]))
+    if filterIndex.lower() in allowedExtensions:
+        return fullPath
+    return None
 
 def isnumeric(data):
     if isinstance(data, (int, float, long, ndarray)):
         return True
     return False
+
+class DataBaseImport( wx.Panel ):
+    """DataBaseImport(parent, dataDict= dict())"""
+    def __init__( self, parent, id= wx.ID_ANY,  *args, **params ):
+        wx.Panel.__init__ ( self, parent,
+                            id = id,
+                            pos = wx.DefaultPosition,
+                            size =  wx.Size( 420, 240 ),
+                            style = wx.TAB_TRAVERSAL )
+
+        Sizer= wx.BoxSizer( wx.HORIZONTAL )
+        #==========================
+        # left Panel
+        bSizerLEFT = wx.BoxSizer( wx.VERTICAL )
+        sbSizer1 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Table Name" ), wx.VERTICAL )
+        sbSizer2 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Field Names" ), wx.VERTICAL )
+
+        self.dataDict = args[0]
+        if not isinstance( self.dataDict, (dict,)):
+            raise StandardError("dataDict must be a dictionary!")
+
+        m_choice1Choices = self.dataDict.keys()
+        self.m_choice1 = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choice1Choices, 0 )
+        self.m_choice1.SetSelection( 0 )
+        self.currTableName= m_choice1Choices[0]
+
+        m_listBox1Choices = []
+        self.listBox = CheckListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_listBox1Choices, wx.LB_ALWAYS_SB|wx.LB_HSCROLL|wx.LB_MULTIPLE )
+
+        self.listBox.SetItems(self.dataDict[self.dataDict.keys()[0]])
+        self.listBox.SetSelection(0)
+
+        sbSizer1.Add( self.m_choice1, 0, wx.ALL|wx.EXPAND, 5 )
+        sbSizer2.Add( self.listBox, 1, wx.ALL|wx.EXPAND, 5 )
+        bSizerLEFT.Add( sbSizer1, 0, wx.EXPAND, 5 )
+        bSizerLEFT.AddSpacer( ( 3, 3), 0, wx.EXPAND, 5 )
+        bSizerLEFT.Add( sbSizer2, 1, wx.EXPAND, 5 )
+        #======================
+        # Right Panel
+        bSizerRIGHT = wx.BoxSizer( wx.VERTICAL )
+        RIGTH_sbSizer1 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Limit" ), wx.VERTICAL )
+        RIGTH_sbSizer2 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Order by" ), wx.VERTICAL )
+
+        limit = IntTextCtrl(self,)
+
+        columnNames= ['Field','Order']
+        pairs = makePairs(self, colNames=columnNames,
+                          choicesByColumn=[self.dataDict[self.dataDict.keys()[0]], ['asc','desc']],
+                          rowNumber=1)
+        for colu in range(len(columnNames)):
+            pairs.SetColSize( colu, 80 )
+
+        RIGTH_sbSizer1.Add( limit, 1, wx.EXPAND, 5 )
+        RIGTH_sbSizer2.Add( pairs, 1, wx.EXPAND, 5 )
+        bSizerRIGHT.Add( RIGTH_sbSizer1, 0, wx.EXPAND, 5 )
+        bSizerRIGHT.AddSpacer( ( 3, 3), 0, wx.EXPAND, 5 )
+        bSizerRIGHT.Add( RIGTH_sbSizer2, 1, wx.EXPAND, 5 )
+        #======================
+        # JOIN ALL PANELS
+        Sizer.Add( bSizerLEFT,  1, wx.EXPAND, 5 )
+        Sizer.AddSpacer( ( 3, 3), 0, wx.EXPAND, 5 )
+        Sizer.Add( bSizerRIGHT, 1, wx.EXPAND, 5 )
+        self.SetSizer( Sizer )
+        self.Layout()
+
+        # Connect Events
+        self.m_choice1.Bind( wx.EVT_CHOICE, self.OnChoice )
+
+    # Virtual event handlers, overide them in your derived class
+    def OnChoice( self, evt ):
+        tablename= evt.GetString()
+        self.currTableName= tablename
+        self.listBox.m_checkList2.SetSelection(0)
+        self.listBox.SetItems(self.dataDict[tablename])
+        evt.Skip()
+
+    def OnListBox( self, evt ):
+        evt.Skip()
+
+    def GetValue(self):
+        if len(self.listBox.Checked) > 0:
+            prevResult= [self.listBox.Items[pos] for pos in self.listBox.Checked]
+        else:
+            prevResult= []
+        return ( self.currTableName ,prevResult)
 
 class NumTextCtrl( wx.TextCtrl):
     '''a text ctrl that only accepts numbers'''
@@ -125,18 +212,21 @@ class IntTextCtrl( NumTextCtrl):
 class CheckListBox( wx.Panel, object ):
     def __init__( self, parent , *args, **params):
         wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( -1, -1 ), style = wx.TAB_TRAVERSAL )
-        translate= wx.GetApp().translate
+
+        try:     _= wx.GetApp()._
+        except:  _= lambda x: x
+
         bSizer8 = wx.BoxSizer( wx.VERTICAL )
 
         bSizer9 = wx.BoxSizer( wx.HORIZONTAL )
 
-        self.m_button1 = wx.Button( self, wx.ID_ANY, translate(u"All"), wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT )
+        self.m_button1 = wx.Button( self, wx.ID_ANY, _(u"All"), wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT )
         bSizer9.Add( self.m_button1, 0, 0, 5 )
 
-        self.m_button2 = wx.Button( self, wx.ID_ANY, translate(u"None"), wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT )
+        self.m_button2 = wx.Button( self, wx.ID_ANY, _(u"None"), wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT )
         bSizer9.Add( self.m_button2, 0, 0, 5 )
 
-        self.m_button3 = wx.Button( self, wx.ID_ANY, translate(u"Invert"), wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT )
+        self.m_button3 = wx.Button( self, wx.ID_ANY, _(u"Invert"), wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT )
         bSizer9.Add( self.m_button3, 0, 0, 5 )
 
         bSizer8.Add( bSizer9, 0, wx.EXPAND, 5 )
@@ -190,46 +280,65 @@ class CheckListBox( wx.Panel, object ):
 #<p> INIT MAKE PAIRS
 import  wx.grid as gridlib
 class _CustomDataTable( gridlib.PyGridTableBase):
-    def __init__( self, columnNames, choiceNames, rowNumber):
+    def __init__( self, columnNames, choiceNames, rowNumber, choicesByColumn=[]):
         gridlib.PyGridTableBase.__init__( self)
+        try:     _= wx.GetApp()._
+        except:  _= lambda x: x
 
-        if isinstance( choiceNames, (str, unicode)):
-            choiceNames= [choiceNames]*len( columnNames)
+        if isinstance(choicesByColumn, (list,)):
+            if len(choicesByColumn) > 0:
+                if len(choicesByColumn) !=  len(columnNames):
+                    raise StandardError("Invalid amount of choicesbyColumn")
+                choiceNames= choicesByColumn
+            else:
+                if isinstance( choiceNames, (str, unicode)):
+                    choiceNames= [choiceNames]*len( columnNames)
+                elif isinstance(choiceNames, (list, tuple)):
+                    choiceNames= [choiceNames]*len(columnNames)
+                else:
+                    raise StandardError("Invalid choices!")
 
         self.colLabels = columnNames
         group= lambda x,y: x+','+y
+        choices= list()
+        for choicesByColumni in choiceNames:
+            if len( choicesByColumni) > 1:
+                #colsResume= list()
+                #for choice in choicesByColumni:
+                #    try:
+                #        if choice == None:
+                #            # the selected form correspond to a text editor
+                #            colsResume.append(None)
+                #            continue
+                #    except:
+                #        pass
+                colsResume= reduce( group,  choicesByColumni[1:],  choicesByColumni[0])
 
-        if len( choiceNames) >= 1:
-            colsResume= list()
-            for choice in choiceNames:
-                try:
-                    if choice == None:
-                        # the selected form correspond to a text editor
-                        colsResume.append(None)
-                        continue
-                except:
-                    pass
-                colsResume.append( reduce( group,  choice[1:],  choice[0]))
-
-        elif len( choiceNames) == 1:
-            colsResume= choiceNames[0]*len(columnNames)
-        else:
-            raise StandardError( wx.GetApp().translate(u'You input bad type data as choiceNames variable'))
+            elif len( choicesByColumni) == 1:
+                colsResume= choicesByColumni
+            else:
+                raise StandardError( _(u'You input a bad type data as choiceNames variable'))
+            choices.append(colsResume)
 
         gvalue= gridlib.GRID_VALUE_CHOICE 
         self.dataTypes= list()
-        for colResume in colsResume:
+        for colResume in choices:
             if colResume != None:
-                self.dataTypes.append( [gvalue + ":,"+colResume for i in range(len(columnNames))])
+                self.dataTypes.append( gvalue + ":,"+ colResume)
             else:
                 self.dataTypes.append('string')
-        self.data= [[u'' for i in range(len(columnNames))] for j in range(rowNumber)]
 
+        if rowNumber == 0:
+            self.data= [[] for i in range(len(choices))]
+        elif rowNumber > 0:
+            self.data= [[u'' for i in range(len(choices))] for j in range(rowNumber)]
+        else:
+            raise StandardError("The number of columns must be greater or equal to zero!")
     #--------------------------------------------------
     # required methods for the wxPyGridTableBase interface
 
     def GetNumberRows(self):
-        return  len(self.data)
+        return  len(self.data)+1
 
     def GetNumberCols(self):
         return len(self.data[0])
@@ -280,7 +389,7 @@ class _CustomDataTable( gridlib.PyGridTableBase):
     # default, doesn't necessarily have to be the same type used
     # natively by the editor/renderer if they know how to convert.
     def GetTypeName(self, row, col):
-        return self.dataTypes[col][col]
+        return self.dataTypes[col]
 
     # Called to determine how the data can be fetched and stored by the
     # editor and renderer.  This allows you to enforce some type-safety
@@ -301,9 +410,9 @@ class _CustomDataTable( gridlib.PyGridTableBase):
         return self.CanGetValueAs(row, col, typeName)
 
 class _CustTableGrid(gridlib.Grid):
-    def __init__(self, parent, colNames, choices, rowNumber):
+    def __init__(self, parent, colNames=['ColName1','ColName2'], choices= ['opt1','opt2'], rowNumber= 2, choicesByColumn=[]):
         gridlib.Grid.__init__(self, parent, -1)
-        table = _CustomDataTable(colNames, choices, rowNumber)
+        table = _CustomDataTable(colNames, choices, rowNumber, choicesByColumn)
         # The second parameter means that the grid is to take ownership of the
         # table and will destroy it when done.  Otherwise you would need to keep
         # a reference to it and call it's Destroy method later.
@@ -312,10 +421,7 @@ class _CustTableGrid(gridlib.Grid):
         self.SetMargins(0,0)
         self.SetRowLabelSize( 40 )
         self.AutoSizeColumns(False)
-
         gridlib.EVT_GRID_CELL_LEFT_DCLICK(self, self.OnLeftDClick)
-
-
     ## I do this because I don't like the default behaviour of not starting the
     ## cell editor on double clicks, but only a second click.
     def OnLeftDClick(self, evt):
@@ -323,16 +429,31 @@ class _CustTableGrid(gridlib.Grid):
             self.EnableCellEditControl()
 
 class makePairs(wx.Panel):
-    def __init__(self, parent, id, colNames, choices, rowNumber= 20):
-        wx.Panel.__init__(self, parent, id, style=0)
+    def __init__(self, parent, id= wx.ID_ANY,
+                 colNames=['col1','col2'],
+                 choices=['opt1','opt2','opt3'],\
+                 rowNumber=0,
+                 choicesByColumn=[]):
 
-        self.grid = _CustTableGrid(self, colNames, choices, rowNumber)
-        #b = wx.Button(self, -1, "Another Control...")
-        #b.SetDefault()
-        bs = wx.BoxSizer(wx.VERTICAL)
-        bs.Add(self.grid, 1, wx.GROW|wx.ALL, 5)
+        wx.Panel.__init__(self, parent, id, style=0)
+        self.colNames = colNames
+        self.choices = choices
+        self.rowNumber = rowNumber
+        self.choicesByColumn = choicesByColumn
+
+        self.grid = _CustTableGrid(self, colNames, choices, rowNumber, choicesByColumn)
+        self.bs = wx.BoxSizer(wx.VERTICAL)
+        self.bs.Add(self.grid, 1, wx.GROW|wx.ALL, 5)
         #bs.Add(b)
-        self.SetSizer(bs)
+        self.SetSizer(self.bs)
+
+    def __getattribute__(self, name):
+        '''wraps the functions to the grid
+        emulating a grid control'''
+        try:
+            return object.__getattribute__(self, name)
+        except AttributeError:
+            return self.grid.__getattribute__(name)
 
     def GetValue(self ):
         # reading the data by rows and check consistency
@@ -344,6 +465,13 @@ class makePairs(wx.Panel):
                 result.append(rowdata)
         return result
 
+    def changeParamsChoices(self, colNames, choices, rowNumber, choicesByColumn):
+        # delet the grid
+        del(self.grid)
+        # creating a new grid
+        self.grid= _CustTableGrid(self, colNames, choices, rowNumber, choicesByColumn)
+        self.bs.Add(self.grid, 1, wx.GROW|wx.ALL, 5)
+
 #  END MAKE PAIRS /<p>
 
 def translate(a):
@@ -354,20 +482,23 @@ def _siguiente():
         i+= 1
         yield str(i)
 
-class FilePath( wx.Panel, object ):
+
+class FilePath( wx.Panel ):
     def __init__( self, parent, id , *args, **params):
         wx.Panel.__init__ ( self, parent, id,
                             pos = wx.DefaultPosition,
                             size = wx.Size( -1,-1 ),
                             style = wx.TAB_TRAVERSAL )
-        if len(args) > 0:
-            self.path= args[0]
-        else:
-            self.path= None
+
+        try:     self.path= args[0]
+        except:  self.path= None
+        try:     self.wildCard= args[1]
+        except:  self.wildCard= None
+
         bSizer1 = wx.BoxSizer( wx.HORIZONTAL )
         self.txtCtrl = wx.TextCtrl( self, wx.ID_ANY,
                                     wx.EmptyString, wx.DefaultPosition,
-                                    wx.Size( 150,-1 ), 0 )
+                                    wx.Size( 180,-1 ), 0 )
         bSizer1.Add( self.txtCtrl, 0, wx.ALL, 5 )
         if self.path:
             self.txtCtrl.SetValue( self.path)
@@ -381,21 +512,18 @@ class FilePath( wx.Panel, object ):
         self.txtCtrl.Bind( wx.EVT_TEXT, self._textChange)
 
     def _textChange(self, evt):
-        if self.path== None:
-            txt= (u'')
-        else:
-            txt= self.path
-        self.txtCtrl.SetValue(txt)
         evt.Skip()
+        self.path= self.txtCtrl.Value
 
     def _onSelectFile(self, evt):
-        self.path= getPath()
-
-        if self.path== None:
-            txt= (u'')
+        if self.wildCard == None:
+            path= getPath()
         else:
-            txt= self.path
-        self.txtCtrl.SetValue(txt)
+            path= getPath(wildcard= self.wildCard)
+
+        if not (path in (None,'',u'')):
+            self.path= path
+            self.txtCtrl.SetValue(path)
         evt.Skip()
 
     def GetValue(self ):
@@ -463,7 +591,7 @@ class Dialog ( wx.Dialog):
                        'CheckListBox', 'StaticLine',   'RadioBox',
                        'SpinCtrl',     'ToggleButton', 'NumTextCtrl',
                        'CheckBox',     'makePairs',    'IntTextCtrl',
-                       'FilePath']
+                       'FilePath',     'DataBaseImport']
         self.ctrlNum = _siguiente()
         self.sizerNum= _siguiente()
 
@@ -515,7 +643,7 @@ class Dialog ( wx.Dialog):
                           'CheckListBox','RadioBox',
                           'SpinCtrl','ToggleButton','NumTextCtrl',
                           'CheckBox', 'makePairs','IntTextCtrl', 
-                          'FilePath']
+                          'FilePath', 'DataBaseImport']
 
         bSizer1.Add( self.m_scrolledWindow1, 1, wx.EXPAND, 5 )
         
@@ -581,7 +709,13 @@ class Dialog ( wx.Dialog):
                     #nameCtrl= 'ctrl' + self.sizerNum.next()
                     if key in diferents:
                         data= [wx.DefaultPosition, wx.DefaultSize, ]
-                        data.extend(list(args))
+                        if len(args) > 1:
+                            # se identifica la posicion por defecto del control
+                            defaultControlSelection= args[1]
+                            data.extend(list((args[0],)))
+                        else:
+                            defaultControlSelection= None
+                            data.extend(list(args))
                         data.append(0)
                         args= data
                     elif key == 'StaticLine':
@@ -609,17 +743,24 @@ class Dialog ( wx.Dialog):
                     currCtrl= self.ctrls[-1][1]
                     # setting default values    
                     if self.ctrls[-1][0] == 'Choice':
-                        currCtrl.Selection= 0
+                        # selecting the last added item
+                        if defaultControlSelection != None: # if the user select a default option
+                            currCtrl.Selection= defaultControlSelection
+                        else : # if the user select a default option
+                            currCtrl.Selection= 0
+
                     currSizer.Add(currCtrl, 0, characters , 5)
 
                 elif key == 'NumTextCtrl':
                     self.ctrls.append((key, NumTextCtrl(self.m_scrolledWindow1, wx.ID_ANY, *args)))
                     currCtrl= self.ctrls[-1][1]
                     currSizer.Add(currCtrl, 0, characters , 5)
+
                 elif key  == 'IntTextCtrl':
                     self.ctrls.append((key, IntTextCtrl(self.m_scrolledWindow1, wx.ID_ANY, *args)))
                     currCtrl= self.ctrls[-1][1]
                     currSizer.Add(currCtrl, 0, characters , 5)
+
                 elif key == 'makePairs':
                     self.ctrls.append((key, makePairs(self.m_scrolledWindow1, wx.ID_ANY, *args)))
                     currCtrl= self.ctrls[-1][1]
@@ -629,8 +770,14 @@ class Dialog ( wx.Dialog):
                     maxAllowedSize= (300, 350)
                     currCtrl.SetSize(wx.Size(min([currCtrl.GetSize()[0], maxAllowedSize[0]]),
                                              min([currCtrl.GetSize()[1], maxAllowedSize[1]])))
+
                 elif key == 'FilePath':
                     self.ctrls.append((key, FilePath( self.m_scrolledWindow1, wx.ID_ANY, *args)))
+                    currCtrl= self.ctrls[-1][1]
+                    currSizer.Add(currCtrl, 0, characters , 5)
+
+                elif key == 'DataBaseImport':
+                    self.ctrls.append((key, DataBaseImport( self.m_scrolledWindow1, wx.ID_ANY, *args)))
                     currCtrl= self.ctrls[-1][1]
                     currSizer.Add(currCtrl, 0, characters , 5)
                 else:
