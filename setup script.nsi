@@ -58,15 +58,15 @@ Var vcredist2008set
 !insertmacro MUI_LANGUAGE SpanishInternational
 
 # display a window to be as an user admin
-## RequestExecutionLevel admin
+RequestExecutionLevel admin
 
 # Installer attributes
-OutFile "S2 V2.1 final setup.exe"
+OutFile "S2 V2.2 a1 setup.exe"
 InstallDir S2
 CRCCheck on
 XPStyle on
 ShowInstDetails nevershow
-VIProductVersion 2.1.0.0
+VIProductVersion 2.2.0.0
 VIAddVersionKey /LANG=${LANG_ENGLISH} ProductName "$(^Name)"
 VIAddVersionKey /LANG=${LANG_ENGLISH} ProductVersion "${VERSION}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} CompanyName "${COMPANY}"
