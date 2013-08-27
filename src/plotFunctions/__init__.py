@@ -260,8 +260,6 @@ class scrolled1(wx.ScrolledWindow):
         pg.Append( wxpg.BoolProperty( _("View cursor"), value= False) )
         pg.SetPropertyAttribute( _("View cursor"), "UseCheckbox", True)
   
-        pg.AddPage( _("New Page") )
-        
         if not self.__createDispatcher():
             raise StandardError("Cannot create the graph dispatcher")
         
@@ -495,15 +493,17 @@ class scrolled1(wx.ScrolledWindow):
             self.parent.ca.set_xticklabels( parent.graphParams['xtics'])
         if len( parent.graphParams['ytics']) != 0:
             self.parent.ca.set_yticklabels( parent.graphParams['ytics'])
-        self._updateLimits(None)
+        self.__updateLimits(None)
     def _Update(self, currAxes= None, evt= None, *args, **params):
         if currAxes== None:
             currAxes= self.plt.gca()
-        self._UpdateTitleLabels( currAxes, evt, redraw= False)
-        self._updateLimits( currAxes, evt)
-        self._UpdateAxisScale( currAxes, evt, )
-
-    def _UpdateTitleLabels(self, currAxes, evt= None, *args, **params):
+        self.__UpdateTitle( currAxes, evt, redraw= False)
+        # to be fix
+        #self.__UpdateXlabelFont( currAxes, evt, redraw= False)
+        #self.__UpdateYlabelFont( currAxes, evt, redraw= False)
+        self.__updateLimits( currAxes, evt)
+        self.__UpdateAxisScale( currAxes, evt, )
+    def __UpdateTitle(self, currAxes, evt= None, *args, **params):
         """updating the data contained from the draw to the propertygrid"""
         pg0=      self.pg.GetPage(0)
         title=    self.plt.title # get_title()
@@ -524,7 +524,89 @@ class scrolled1(wx.ScrolledWindow):
             pg0.SetPropertyValue( _("ylabel string"), ylabel)
         if gridState != actualGridState:
             pg0.SetPropertyValue( _("Show grid"),  gridState)
-    def _updateLimits(self, currAxes, evt = None, *args, **params):
+
+        # getting the parameters of the title string
+        title=self.plt.gca().title
+        fnt= title.get_fontproperties()
+        titleFontAsDict= { 'fontsize':     int(fnt.get_size_in_points()),
+                           'fontname':       fnt.get_name(),
+                           'fontweight':     fnt.get_weight(),
+                           'color':          title.get_color(),
+                           'clip_on':        title.get_clip_on(),
+                           'multialignment': title._get_multialignment(),
+                           }
+        # changing the contents of the pg
+        pg0=   self.pg.GetPage(0)
+        newfont= pg0.GetProperty(_("title font")).m_value
+
+        newfont.SetPointSize( titleFontAsDict['fontsize'])
+        newfont.SetFaceName( titleFontAsDict['fontname'])
+
+        fontDictWeigth={'normal': wx.FONTWEIGHT_NORMAL,
+                        'bold':   wx.FONTWEIGHT_BOLD,
+                        'light':  wx.FONTWEIGHT_LIGHT}
+        newfont.SetWeight( fontDictWeigth[titleFontAsDict['fontweight']])
+
+        ##newfont.color= [0,0,0]
+        ##newfont.clip_on= titleFontAsDict['clip_on']
+        ##newfont.multialignment= titleFontAsDict['multialignment']
+
+        pg0.SetPropertyValue(_("title font"), newfont)
+    # to be fix
+    def __UpdateXlabelFont(self, currAxes, evt= None, *args, **params):
+        # getting the parameters of the title string
+        title=self.plt.gca().get_xlabel()
+        fnt= title.get_fontproperties()
+        titleFontAsDict= { 'fontsize':     int(fnt.get_size_in_points()),
+                           'fontname':       fnt.get_name(),
+                           'fontweight':     fnt.get_weight(),
+                           'color':          title.get_color(),
+                           'clip_on':        title.get_clip_on(),
+                           'multialignment': title._get_multialignment(),
+                           }
+        # changing the contents of the pg
+        pg0=   self.pg.GetPage(0)
+        newfont= pg0.GetProperty(_("xlabel font")).m_value
+        newfont.SetPointSize( titleFontAsDict['fontsize'])
+        newfont.SetFaceName( titleFontAsDict['fontname'])
+        fontDictWeigth={'normal': wx.FONTWEIGHT_NORMAL,
+                        'bold':   wx.FONTWEIGHT_BOLD,
+                        'light':  wx.FONTWEIGHT_LIGHT}
+        newfont.SetWeight( fontDictWeigth[titleFontAsDict['fontweight']])
+        ##newfont.color= [0,0,0]
+        ##newfont.clip_on= titleFontAsDict['clip_on']
+        ##newfont.multialignment= titleFontAsDict['multialignment']
+        pg0.SetPropertyValue(_("xlabel font"), newfont)
+    def __UpdateYlabelFont(self, currAxes, evt= None, *args, **params):
+        # getting the parameters of the title string
+        title=self.plt.gca().get_ylabel()
+        fnt= title.get_fontproperties()
+        titleFontAsDict= { 'fontsize':     int(fnt.get_size_in_points()),
+                           'fontname':       fnt.get_name(),
+                           'fontweight':     fnt.get_weight(),
+                           'color':          title.get_color(),
+                           'clip_on':        title.get_clip_on(),
+                           'multialignment': title._get_multialignment(),
+                           }
+        # changing the contents of the pg
+        pg0=   self.pg.GetPage(0)
+        newfont= pg0.GetProperty(_("ylabel font")).m_value
+
+        newfont.SetPointSize( titleFontAsDict['fontsize'])
+        newfont.SetFaceName( titleFontAsDict['fontname'])
+
+        fontDictWeigth={'normal': wx.FONTWEIGHT_NORMAL,
+                        'bold':   wx.FONTWEIGHT_BOLD,
+                        'light':  wx.FONTWEIGHT_LIGHT}
+        newfont.SetWeight( fontDictWeigth[titleFontAsDict['fontweight']])
+
+        ##newfont.color= [0,0,0]
+        ##newfont.clip_on= titleFontAsDict['clip_on']
+        ##newfont.multialignment= titleFontAsDict['multialignment']
+
+        pg0.SetPropertyValue(_("ylabel font"), newfont)
+
+    def __updateLimits(self, currAxes, evt = None, *args, **params):
         ca= currAxes
         if ca == None:
             return
@@ -545,7 +627,7 @@ class scrolled1(wx.ScrolledWindow):
         if oldylim != ylim:
             pg0.SetPropertyValue(_("ymin"), ylim[0])
             pg0.SetPropertyValue(_("ymax"), ylim[1])
-    def _UpdateAxisScale(self, currAxes, evt,*args, **params):
+    def __UpdateAxisScale(self, currAxes, evt,*args, **params):
         pg0= self.pg.GetPage(0)
         # readin the scales of the current axes
         xscale=    self.plt.get_xscale( )
@@ -570,8 +652,6 @@ class scrolled2(wx.ScrolledWindow):
             parent= params['parent']
         else:
             parent = args[1]
-
-        ##self = wx.ScrolledWindow( self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL )
         self.SetScrollRate( 5, 5 )
         bSizer21 = wx.BoxSizer( wx.VERTICAL )
 
@@ -860,49 +940,49 @@ class scrolled2(wx.ScrolledWindow):
         self.figpanel.canvas.draw()
 
     def _OnAddRefHorzLine( self, evt, **params ):
-        _('# adding reference horizontal line', False)
+        print '# adding reference horizontal line'
         if params.has_key('ypos'):
             ypos = params.pop('ypos')
             self.Parent.ca.hold(True)
             # _('plt.gca().hold(True)', False)
 
-            line= self.Parent.ca.axhline(ypos)
-            _('line= pltgca().axhline('+ypos.__str__()+')', False)
-            self.Parent.ca.hold(False)
+            line= self.plt.axhline(ypos)
+            print 'line= plt.axhline('+ypos.__str__()+')'
+            self.plt.hold(False)
             # _('plt.gca().hold(False)', False)
         else:
             try:
                 ypos= self.HorLineTxtCtrl.GetValue()
                 if ypos== None:
                     return
-                self.Parent.ca.hold(True)
-                _('plt.gca().hold(True)', False)
-                line= self.Parent.ca.axhline(ypos)
-                _('plt.gca().axhline('+ypos.__str__()+')', False)
-                self.Parent.ca.hold(False)
-                _('plt.gca().hold(False)', False)
+                self.plt.hold(True)
+                print 'plt.hold(True)'
+                line= self.plt.axhline(ypos)
+                print 'plt.axhline('+ypos.__str__()+')'
+                self.plt.hold(False)
+                print 'plt.hold(False)'
                 self.HorLineTxtCtrl.SetValue('')
                 self._OnRefreshLines(None)
             except:
                 return
         if params.has_key('color'):
             line.set_color(params['color'])
-            _('line.set_color('+"'"+params['color'].__str__()+"'"+')', False)
+            print 'line.set_color('+"'"+params['color'].__str__()+"'"+')'
         self.figpanel.canvas.draw()
         # _('plt.draw()',False)
 
     def _OnAddRefVertLine( self, evt ):
-        _('# adding reference vertical line', False)
+        print '# adding reference vertical line'
         xpos= self.HorVerTxtCtrl.GetValue()
         if xpos == None:
             return
 
-        self.Parent.ca.hold(True)
-        _('plt.gca().hold(True)', False)
-        self.Parent.ca.axvline(xpos)
-        _('plt.gca().axvline('+xpos.__str__()+')', False)
-        self.gca().hold(False)
-        _('plt.gca().hold(False)', False)
+        self.plt.hold(True)
+        print 'plt.gca().hold(True)'
+        self.plt.axvline(xpos)
+        print 'plt.gca().axvline('+xpos.__str__()+')'
+        self.plt.hold(False)
+        print 'plt.hold(False)'
         self.figpanel.canvas.draw()
         self.HorVerTxtCtrl.SetValue('')
         self._OnRefreshLines(None)
@@ -1182,29 +1262,29 @@ class scrolled3(wx.ScrolledWindow):
                 #break
 
     def _OnAddHorzSpan( self, event):
-        _('# adding horizontal span', False)
+        print '# adding horizontal span'
         pos1 = self.plt_textCtr11.GetValue()
         pos2 = self.plt_textCtr12.GetValue()
         if pos1 == None or pos2 == None:
             return
 
-        _( 'pos1= ' + pos1.__str__(), False)
-        _( 'pos2= ' + pos2.__str__(), False)
+        print 'pos1= ' + pos1.__str__()
+        print 'pos2= ' + pos2.__str__()
 
         faceColor= self.m_choice81.GetItems()[self.m_choice81.GetSelection()]
-        _( 'faceColor= '+"'"+faceColor.__str__()+"'", False)
+        print 'faceColor= '+"'"+faceColor.__str__()+"'"
 
         Alpha= float(self.m_choice12.GetItems()[self.m_choice12.GetSelection()])
-        _( 'Alpha= '+Alpha.__str__(), False)
+        print 'Alpha= '+Alpha.__str__()
 
-        patch= self.Parent.ca.axhspan( pos1, pos2, facecolor = faceColor, alpha = Alpha)
-        _( 'patch= plt.gca().axhspan(pos1,pos2, facecolor= faceColor, alpha= Alpha)', False)
+        patch= self.plt.axhspan( pos1, pos2, facecolor = faceColor, alpha = Alpha)
+        print 'patch= plt.axhspan(pos1,pos2, facecolor= faceColor, alpha= Alpha)'
         patch.set_gid(wx.NewId())
         self._patchListboxUpdate()
         self.figpanel.canvas.draw()
 
     def _OnAddVerSpan( self, event):
-        _('# adding vertical span', False)
+        print'# adding vertical span'
         pos1 = self.plt_textCtr13.GetValue()
         pos2 = self.plt_textCtr14.GetValue()
         try:
@@ -1212,17 +1292,17 @@ class scrolled3(wx.ScrolledWindow):
             pos2= float(pos2)
         except:
             return
-        _('pos1= ' + pos1.__str__(), False)
-        _('pos2= ' + pos2.__str__(), False)
+        print'pos1= ' + pos1.__str__()
+        print'pos2= ' + pos2.__str__()
 
         faceColor= self.m_choice10.GetItems()[self.m_choice10.GetSelection()]
-        _('faceColor= '+"'"+faceColor.__str__()+"'", False)
+        print 'faceColor= '+"'"+faceColor.__str__()+"'"
 
         Alpha= str(self.m_choice11.GetItems()[self.m_choice11.GetSelection()])
-        _('Alpha= '+Alpha.__str__(), False)
+        print 'Alpha= '+Alpha.__str__()
 
-        patch= self.Parent.ca.axvspan(pos1,pos2,facecolor= faceColor, alpha= Alpha)
-        _('patch= plt.gca().axvspan(pos1,pos2,facecolor= faceColor, alpha= Alpha)', False)
+        patch= self.plt.axvspan(pos1,pos2,facecolor= faceColor, alpha= Alpha)
+        print 'patch= plt.axvspan(pos1,pos2,facecolor= faceColor, alpha= Alpha)'
         patch.set_gid(wx.NewId())
         self._patchListboxUpdate()
         self.figpanel.canvas.draw()
