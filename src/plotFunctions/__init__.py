@@ -185,18 +185,15 @@ class scrolled1(wx.ScrolledWindow):
         self.figpanel=  self.Parent.Parent.figpanel
         self.plt= pltobj
         graphParams= args[0]
-
         if params.has_key('parent'):
             parent= params['parent']
         else:
             parent= args[1]
         self.SetScrollRate( 5, 5 )
-        
         mainSizer=            wx.BoxSizer( wx.VERTICAL )
-        self.pg = pg = wxpg.PropertyGridManager(self, style=wxpg.PG_SPLITTER_AUTO_CENTER |  wxpg.PG_AUTO_SORT | wxpg.PG_TOOLBAR)
-        
+        self.pg = pg = wxpg.PropertyGridManager(self, style=wxpg.PG_SPLITTER_AUTO_CENTER |  wxpg.PG_AUTO_SORT)# | wxpg.PG_TOOLBAR)
         pg.AddPage( _("Main options") )
-        
+
         # title
         pg.Append( wxpg.PropertyCategory( _("1 - Title")) )
         pg.Append( wxpg.StringProperty( _("title string"),  value= _("Title") ) )
@@ -641,12 +638,14 @@ class scrolled1(wx.ScrolledWindow):
             pg0.SetPropertyValue( _("xaxis scale"), yscale)
 
 class scrolled2(wx.ScrolledWindow):
+    from matplotlib.colors import colorConverter
     def __init__( self, pltobj,  *args, **params):
         wx.ScrolledWindow.__init__(self, *args[1:], **params)
         self.figpanel= self.Parent.Parent.figpanel
         self.plt= pltobj
+        self.__currLine= None # none line selected
         graphParams= args[0]
-        self.gca= self.Parent.Parent.gca
+        self.gca= self.plt.gca()
 
         if params.has_key('parent'):
             parent= params['parent']
@@ -674,71 +673,54 @@ class scrolled2(wx.ScrolledWindow):
         sbSizer8.Add( bSizer5, 1, wx.EXPAND, 5 )
 
         bSizer21.Add( sbSizer8, 0, 0, 5 )
+        #sbSizer71 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, _( u"Some Properties") ), wx.VERTICAL )
+        self.pg = pg = wxpg.PropertyGridManager(self, style=wxpg.PG_SPLITTER_AUTO_CENTER |  wxpg.PG_AUTO_SORT)# | wxpg.PG_TOOLBAR)
+        pg.AddPage( _("Lines properties") )
+        pg.Append( wxpg.PropertyCategory( _("1- line Properties")) )
+        pg.Append( wxpg.StringProperty( _("Line Name"),  value= _("line Name") ) )
+        pg.Append( wxpg.FloatProperty( _("Line Alpha"),      value= 1 ) )
+        pg.Append( wxpg.BoolProperty( _("Line Animated"),  value= False ) )
+        pg.Append( wxpg.BoolProperty( _("Line Antialiased"), value= False ) )
+        pg.Append( wxpg.BoolProperty( _("Line Clip_on"),     value= False) )
+        pg.SetPropertyAttribute( _("Line Animated"),    "UseCheckbox", True)
+        pg.SetPropertyAttribute( _("Line Antialiased"), "UseCheckbox", True)
+        pg.SetPropertyAttribute( _("Line Clip_on"),     "UseCheckbox", True)
+        pg.Append( wxpg.ColourProperty( _("Line Colour"), value= (0,0,0) ) )
+        pg.Append( wxpg.EnumProperty( _("Line Dash_capstyle"),_("Line Dash_capstyle"),
+                                        ['butt','round', 'projecting'],
+                                        [0, 1, 2],  0))
+        pg.Append( wxpg.EnumProperty( _("Line Dash_joinstyle"),_("Line Dash_joinstyle"),
+                                        ['miter','round','bevel'],
+                                        [0, 1, 2],  0))
+        pg.Append( wxpg.EnumProperty( _("Line Fillstyle"),_("Line Fillstyle"),
+                                        ['full','left','right','bottom','top','none'],
+                                        range(6),  0))
+        pg.Append( wxpg.IntProperty( _("Line Width"),  value= 1 ) )
+        pg.Append( wxpg.EnumProperty( _("Line Style"),_("Line Style"),
+                                        ['-','--','-.',':'],
+                                        [0, 1, 2, 3],  0))
+        pg.Append( wxpg.BoolProperty( _("Line Lod"),  value= False ) )
+        pg.SetPropertyAttribute( _("Line Lod"),    "UseCheckbox", True)
+        pg.Append( wxpg.EnumProperty( _("Line Rasterized"),_("Line Rasterized"),
+                                        ['True','Fase','None'],
+                                        range(3),  0))
+        pg.Append( wxpg.BoolProperty( _("Line Shown"), value= False) )
+        pg.SetPropertyAttribute( _("Line Shown"), "UseCheckbox", True)
+        pg.Append( wxpg.PropertyCategory( _("2- Marker Properties")) )
+        markers=[".",",","o","v","^","<",">",
+                 "1","2","3","4","8",
+                 "s","p","*","h","H",
+                 "+","x","D","d","|","_",
+                 "TICKLEFT","TICKRIGHT","TICKUP","TICKDOWN",
+                 "CARETLEFT","CARETRIGHT","CARETUP","CARETDOWN","None"]
+        pg.Append( wxpg.EnumProperty( _("Marker Style"),_("Marker Style"),
+                                        markers,
+                                        range(len(markers)),  len(markers)-1))
 
-        sbSizer71 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, _( u"Some Properties") ), wx.VERTICAL )
+        pg.Append( wxpg.IntProperty( _("Marker Size"),  value= 1 ) )
+        bSizer21.Add( pg, 1,  wx.ALL|wx.EXPAND, 5 )
+        #bSizer21.Fit(self)
 
-        self.m_staticText11 = wx.StaticText( self, wx.ID_ANY, _( u"Name"), wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText11.Wrap( -1 )
-        sbSizer71.Add( self.m_staticText11, 0, wx.LEFT, 5 )
-
-        self.plt_textCtr8 = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 130,-1 ), 0 )
-        self.plt_textCtr8.Enable( False )
-
-        sbSizer71.Add( self.plt_textCtr8, 0, wx.BOTTOM|wx.LEFT|wx.TOP, 5 )
-
-        fgSizer2 = wx.FlexGridSizer( 0, 2, 0, 0 )
-        fgSizer2.SetFlexibleDirection( wx.BOTH )
-        fgSizer2.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-
-        m_choice7Choices = []
-        self.m_choice7 = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( 60,-1 ), m_choice7Choices, 0 )
-        self.m_choice7.SetSelection( 0 )
-        fgSizer2.Add( self.m_choice7, 0, wx.ALL, 5 )
-
-        self.m_staticText12 = wx.StaticText( self, wx.ID_ANY, _( u"Line Width"), wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText12.Wrap( -1 )
-        fgSizer2.Add( self.m_staticText12, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
-
-        self.m_button12 = wx.Button( self, wx.ID_ANY, u"...", wx.DefaultPosition, wx.Size( 60,-1 ), 0 )
-        fgSizer2.Add( self.m_button12, 0, wx.ALL, 5 )
-
-        self.m_staticText7 = wx.StaticText( self, wx.ID_ANY, _( u"Line Colour"), wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText7.Wrap( -1 )
-        fgSizer2.Add( self.m_staticText7, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
-
-        m_choice4Choices = []
-        self.m_choice4 = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( 60,-1 ), m_choice4Choices, 0 )
-        self.m_choice4.SetSelection( 0 )
-        fgSizer2.Add( self.m_choice4, 0, wx.ALL, 5 )
-
-        self.m_staticText8 = wx.StaticText( self, wx.ID_ANY, _(u"Line Style"), wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText8.Wrap( -1 )
-        fgSizer2.Add( self.m_staticText8, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
-
-        m_choice6Choices = []
-        self.m_choice6 = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( 60,-1 ), m_choice6Choices, 0 )
-        self.m_choice6.SetSelection( 0 )
-        fgSizer2.Add( self.m_choice6, 0, wx.ALL, 5 )
-
-        self.m_staticText10 = wx.StaticText( self, wx.ID_ANY, _(u"Marker Style"), wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText10.Wrap( -1 )
-        fgSizer2.Add( self.m_staticText10, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
-
-        m_choice8Choices = []
-        self.m_choice8 = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( 60,-1 ), m_choice8Choices, 0 )
-        self.m_choice8.SetSelection( 0 )
-        fgSizer2.Add( self.m_choice8, 0, wx.ALL, 5 )
-
-        self.m_staticText13 = wx.StaticText( self, wx.ID_ANY, _(u"Marker Size"), wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.m_staticText13.Wrap( -1 )
-        fgSizer2.Add( self.m_staticText13, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
-
-        sbSizer71.Add( fgSizer2, 1, wx.EXPAND, 5 )
-
-        self.m_checkBox4 = wx.CheckBox( self, wx.ID_ANY, _(u"Shown"), wx.DefaultPosition, wx.DefaultSize, 0 )
-        sbSizer71.Add( self.m_checkBox4, 0, wx.ALL, 5 )
-
-        bSizer21.Add( sbSizer71, 0, 0, 5 )
 
         sbSizer9 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, _(u"Add ReferenceLine") ), wx.VERTICAL )
 
@@ -774,28 +756,80 @@ class scrolled2(wx.ScrolledWindow):
         self.Layout()
         bSizer21.Fit( self )
         self._OnRefreshLines( None)
+        if not self.__createPgDispatcher():
+            raise StandardError("Cannot create the graph dispatcher")
+        pg.Bind( wxpg.EVT_PG_CHANGED, self.__OnPropGridChange )
         self._BindEvents()
+
+    def __createPgDispatcher( self):
+        self.__dispatcher=  dispatcher = dict()
+        dispatcher[ _("Line Name")]= self.__OnLineChange
+        dispatcher[ _("Line Alpha")]= self.__OnLineChange
+        dispatcher[ _("Line Animated")]= self.__OnLineChange
+        dispatcher[ _("Line Antialiased")]= self.__OnLineChange
+        dispatcher[ _("Line Clip_on")]= self.__OnLineChange
+        dispatcher[ _("Line Colour")]= self.__OnLineChange
+        dispatcher[ _("Line Dash_capstyle")]= self.__OnLineChange
+        dispatcher[ _("Line Dash_joinstyle")]= self.__OnLineChange
+        dispatcher[ _("Line Fillstyle")]= self.__OnLineChange
+        dispatcher[ _("Line Width")]= self.__OnLineChange
+        dispatcher[ _("Line Style")]= self.__OnLineChange
+        dispatcher[ _("Line Lod")]= self.__OnLineChange
+        dispatcher[ _("Line Rasterized")]= self.__OnLineChange
+        dispatcher[ _("Line Shown")]= self.__OnLineChange
+
+        dispatcher[ _("Marker style")]= self.__OnMarkerChange
+        dispatcher[ _("Marker size")]= self.__OnMarkerChange
+        return True
+    @property
+    def currLine(self):
+        return self.__currLine
+    @currLine.setter
+    def currLine(self, line):
+        self.__currLine= line
+    def __OnLineChange(self, evt):
+        """the line data from the user input has changed"""
+        # cheking for the current selected line
+        # ----missing
+        pg0 = self.pg.GetPage(0)
+        # reading the data contained in the pg line
+        newattrs= dict()
+        for keyi  in [key for key in self.__dispatcher.keys() if key.startswith( _('Line'))]:
+            # +1 to remove the space character from the key
+            newattrs[keyi[ len( _('Line'))+1: ].lower()]= pg0.GetProperty(keyi).m_value
+        # applying the new properties to the selected line
+        # missing
+        evt.Skip()
+
+    def __OnMarkerChange(self, evt):
+        evt.Skip()
+
+    def __OnPropGridChange(self, evt):
+            p = evt.GetProperty()
+            if p:
+                self.__dispatcher[p.GetName()](evt, p.GetValue())
 
     def _BindEvents( self):
         self.m_listBox1.Bind(   wx.EVT_LISTBOX,  self._OnListLinesChange )
         self.m_button87.Bind(   wx.EVT_BUTTON,   self._OnLineDel )
         self.m_button41.Bind(   wx.EVT_BUTTON,   self._OnRefreshLines )
-        self.plt_textCtr8.Bind( wx.EVT_TEXT_ENTER, self._OnLineNameChange )
-        self.m_choice7.Bind(    wx.EVT_CHOICE,   self._OnLineWidthChange )
-        self.m_button12.Bind(   wx.EVT_BUTTON,   self._OnLineColourChange )
-        self.m_choice4.Bind(    wx.EVT_CHOICE,   self._OnLineStyleChange )
-        self.m_choice6.Bind(    wx.EVT_CHOICE,   self._OnLineMarkerStyleChange )
-        self.m_choice8.Bind(    wx.EVT_CHOICE,   self._OnLineMarkerSizeChange )
-        self.m_checkBox4.Bind(  wx.EVT_CHECKBOX, self._OnLineVisibleChange )
-        #self.HorLineTxtCtrl.Bind( wx.EVT_TEXT,   self._OnTxtRefLineHorzChange )
+        #self.plt_textCtr8.Bind( wx.EVT_TEXT_ENTER, self._OnLineNameChange )
+        #self.m_choice7.Bind(    wx.EVT_CHOICE,   self._OnLineWidthChange )
+        #self.m_button12.Bind(   wx.EVT_BUTTON,   self._OnLineColourChange )
+        #self.m_choice4.Bind(    wx.EVT_CHOICE,   self._OnLineStyleChange )
+        #self.m_choice6.Bind(    wx.EVT_CHOICE,   self._OnLineMarkerStyleChange )
+        #self.m_choice8.Bind(    wx.EVT_CHOICE,   self._OnLineMarkerSizeChange )
+        #self.m_checkBox4.Bind(  wx.EVT_CHECKBOX, self._OnLineVisibleChange )
+        ###self.HorLineTxtCtrl.Bind( wx.EVT_TEXT,   self._OnTxtRefLineHorzChange )
         self.m_button51.Bind(   wx.EVT_BUTTON,   self._OnAddRefHorzLine )
         #self.HorVerTxtCtrl.Bind( wx.EVT_TEXT,    self._OnTxtRefLineVerChange )
         self.m_button511.Bind(  wx.EVT_BUTTON,   self._OnAddRefVertLine )
 
     def _setItems(self):
-        if self.Parent.ca == None:
+        return
+        if self.plt.gca() == None:
             return
-        lineListNames= [line.get_label() for line in self.Parent.ca.get_lines()]
+        lineListNames= [line.get_label() for line in self.plt.gca().get_lines()]
         self.m_listBox1.SetItems( lineListNames)
         self.m_choice7.SetItems( lineSizes)
         self.m_choice4.SetItems( lineStyles)
@@ -803,63 +837,81 @@ class scrolled2(wx.ScrolledWindow):
         self.m_choice8.SetItems( markerSizes)
 
     def _updateLineSelectionPane(self, evt):
-        if len( self.m_listBox1.GetItems()) == 0:
-            self.plt_textCtr8.SetValue("")
+        """updating the contents of the pg scroll panel 2 from the content int the draw"""
+        # current line selected:
+        try:
+            lineNumber= evt.GetInt()
+        except:
+            # se recomienda actualizar las lineas de la grafica
+            return # No hay lineas seleccionadas
+
+        # getting the list of lines
+        self.currLine= self.plt.gca().get_lines()[lineNumber]
+        if self.currLine == None:
+            evt.Skip()
             return
-        if self.m_listBox1.GetSelection() == -1:
-            self.plt_textCtr8.SetValue("")
-            return
-        selectedLine= self.Parent.ca.get_lines()[self.m_listBox1.GetSelection()]
-        lineName = selectedLine.get_label()
-        lineWidht= float(selectedLine.get_linewidth())
-        lineColour= selectedLine.get_color()
-        lineStyle = selectedLine.get_linestyle()
-        markerStyle= selectedLine.get_marker()
-        markerSize= float(selectedLine.get_markersize())
-        visible = selectedLine.get_visible()
-        # pass all data an update the notebookpane
-        self.plt_textCtr8.SetValue(lineName)
-        for pos,value in enumerate(self.m_choice7.GetItems()):
-            if float(value) == lineWidht:
-                self.m_choice7.SetSelection(pos)
-                break
-        #for pos,value in enumerate(self.m_choice3.GetItems()):
-            #if value == lineColour:
-                #self.m_choice3.SetSelection(pos)
-                #break
-        for pos,value in enumerate(self.m_choice4.GetItems()):
-            if value == lineStyle:
-                self.m_choice4.SetSelection(pos)
-                break
-        for pos,value in enumerate(self.m_choice6.GetItems()):
-            if value == markerStyle:
-                self.m_choice6.SetSelection(pos)
-                break
-        for pos,value in enumerate(self.m_choice8.GetItems()):
-            if float(value) == markerSize:
-                self.m_choice8.SetSelection(pos)
-                break
-        self.m_checkBox4.SetValue(visible)
+        def find(texto, data):
+            for pos, dat in enumerate(data):
+                if texto == dat:
+                    return pos
+            return None
+        selectedLine= self.currLine
+        result= dict()
+        result[_('Line Name')] =        selectedLine.get_label()
+        result[_('Line Alpha')] =       selectedLine.get_alpha()
+        result[_("Line Animated")] =    selectedLine.get_animated()
+        result[_("Line Antialiased")] = selectedLine.get_antialiased()
+        result[_("Line Clip_on")] =     selectedLine.get_clip_on()
+        color= selectedLine.get_color()
+
+        if isinstance(color, (str, unicode)):
+            color= [col*255 for col in self.colorConverter.to_rgba(color)]
+            color= wx.Colour(*color)
+        result[_('Line Colour')] =      color,
+        result[_('Line Dash_capstyle')] = find(selectedLine.get_dash_capstyle(), ['butt','round', 'projecting'])
+        result[_('Line Dash_joinstyle')] = find(selectedLine.get_dash_joinstyle(), ['miter','round','bevel'])
+        result[_('Line Fillstyle')] =   find(selectedLine.get_fillstyle(), ['full','left','right','bottom','top','none'])
+        result[_('Line Width')] =       float(selectedLine.get_linewidth())
+        result[_('Line Style')] =       find(selectedLine.get_linestyle(), ['-','--','-.',':'])
+        result[_('Line Lod')] =         selectedLine._lod
+        result[_('Line Rasterized')] =  find(selectedLine.get_rasterized(), ['True','Fase','None'])
+        result[_('Line Shown')] =       selectedLine.get_visible()
+        pg0= self.pg.GetPage(0)
+        pg0.GetProperty(_("Line Alpha")).m_value
+        markers=[".",",","o","v","^","<",">",
+                 "1","2","3","4","8",
+                 "s","p","*","h","H",
+                 "+","x","D","d","|","_",
+                 "TICKLEFT","TICKRIGHT","TICKUP","TICKDOWN",
+                 "CARETLEFT","CARETRIGHT","CARETUP","CARETDOWN","None"]
+        result[_('Marker Style')] =        find(selectedLine.get_marker(), markers)
+        result[_('Marker Size')] =         float(selectedLine.get_markersize())
+
+        # updating the pg data
+        pg0= self.pg.GetPage(0)
+        for key, value in  result.items():
+            if key in [_('Line Colour')]:
+                pg0.SetPropertyValue(_(key), value[0])
+            else:
+                pg0.SetPropertyValue(_(key), value)
 
     def _OnListLinesChange( self, evt ):
         self._updateLineSelectionPane(evt)
 
     def _OnLineDel(self,event):
-        if len(self.Parent.ca.get_lines())== 0:
+        if len(self.plt.gca().get_lines())== 0:
             return
-        selectedLine= self.Parent.ca.get_lines()[self.m_listBox1.GetSelection()]
+        selectedLine= self.plt.gca().get_lines()[self.m_listBox1.GetSelection()]
         selectedLine.remove()
         # se actualiza la linea seleccionada
         self._OnRefreshLines(None)
         self.figpanel.canvas.draw()
 
     def _OnRefreshLines( self, evt ):
-        if self.Parent.ca== None:
-            return
-        if len(self.Parent.ca.get_lines())== 0:
+        if len(self.plt.gca().get_lines())== 0:
             self.m_listBox1.SetItems([])
             return
-        lineListNames= [line.get_label() for line in self.Parent.ca.get_lines()]
+        lineListNames= [line.get_label() for line in self.plt.gca().get_lines()]
         self.m_listBox1.SetItems(lineListNames)
         self.m_listBox1.SetSelection(0)
         self._updateLineSelectionPane(self.m_listBox1)
@@ -873,7 +925,7 @@ class scrolled2(wx.ScrolledWindow):
            self.m_listBox1.GetSelection() == -1:
             return
         newWidth= float(evt.String)
-        selectedLine= self.Parent.ca.get_lines()[self.m_listBox1.GetSelection()]
+        selectedLine= self.plt.gca().get_lines()[self.m_listBox1.GetSelection()]
         selectedLine.set_linewidth(newWidth)
         self.figpanel.canvas.draw()
 
@@ -890,7 +942,7 @@ class scrolled2(wx.ScrolledWindow):
         else:
             return
         actualLineNumber= self.m_listBox1.GetSelection()
-        lineSelected = self.Parent.ca.get_lines()[actualLineNumber]
+        lineSelected = self.plt.gca().get_lines()[actualLineNumber]
         colors = [getattr(data.Colour,param)/float(255) for param in ['red','green','blue','alpha']]
         lineSelected.set_color(colors)
         self.figpanel.canvas.draw()
@@ -900,7 +952,7 @@ class scrolled2(wx.ScrolledWindow):
            self.m_listBox1.GetSelection() == -1:
             return
         actualLineNumber= self.m_listBox1.GetSelection()
-        lineSelected = self.Parent.ca.get_lines()[actualLineNumber]
+        lineSelected = self.plt.gca().get_lines()[actualLineNumber]
         newStyle = evt.GetString()
         lineSelected.set_linestyle(newStyle)
         self.figpanel.canvas.draw()
@@ -910,7 +962,7 @@ class scrolled2(wx.ScrolledWindow):
            self.m_listBox1.GetSelection() == -1:
             return
         actualLineNumber= self.m_listBox1.GetSelection()
-        lineSelected = self.Parent.ca.get_lines()[actualLineNumber]
+        lineSelected = self.plt.gca().get_lines()[actualLineNumber]
 
         newMarkerStyle = evt.GetString()
         lineSelected.set_marker(newMarkerStyle)
@@ -922,7 +974,7 @@ class scrolled2(wx.ScrolledWindow):
            self.m_listBox1.GetSelection() == -1:
             return
         actualLineNumber= self.m_listBox1.GetSelection()
-        lineSelected = self.Parent.ca.get_lines()[actualLineNumber]
+        lineSelected = self.plt.gca().get_lines()[actualLineNumber]
 
         newMarkerSize = float(evt.GetString())
         lineSelected.set_markersize(newMarkerSize)
@@ -934,7 +986,7 @@ class scrolled2(wx.ScrolledWindow):
            self.m_listBox1.GetSelection() == -1:
             return
         actualLineNumber= self.m_listBox1.GetSelection()
-        lineSelected = self.Parent.ca.get_lines()[actualLineNumber]
+        lineSelected = self.plt.gca().get_lines()[actualLineNumber]
         visible = evt.Checked()
         lineSelected.set_visible(visible)
         self.figpanel.canvas.draw()
@@ -943,7 +995,7 @@ class scrolled2(wx.ScrolledWindow):
         print '# adding reference horizontal line'
         if params.has_key('ypos'):
             ypos = params.pop('ypos')
-            self.Parent.ca.hold(True)
+            self.plt.gca().hold(True)
             # _('plt.gca().hold(True)', False)
 
             line= self.plt.axhline(ypos)
@@ -998,7 +1050,7 @@ class scrolled3(wx.ScrolledWindow):
         except AttributeError:
             self._= _
         graphParams= args[0]
-        self.gca= self.Parent.Parent.gca
+        self.gca= self.plt.gca()
 
         if params.has_key('parent'):
             parent= params['parent']
@@ -1240,7 +1292,7 @@ class scrolled3(wx.ScrolledWindow):
             return
         selectedPatch= self.patchListBox.GetItems()[self.patchListBox.GetSelection()]
         currPatch= None
-        for patch in self.Parent.ca.patches:
+        for patch in self.plt.gca().patches:
             if str(patch.get_gid()) == selectedPatch:
                 currPatch= patch
                 break
@@ -1309,9 +1361,9 @@ class scrolled3(wx.ScrolledWindow):
 
     def _patchListboxUpdate(self, *args):
         # se lista todos los patch
-        if self.Parent.ca== None:
+        if self.plt.gca()== None:
             return
-        patches = self.Parent.ca.patches
+        patches = self.plt.gca().patches
         if len(patches) == 0:
             self.patchListBox.SetItems([])
         # se agrega un id para los patches que no lo tengan
@@ -1335,7 +1387,7 @@ class scrolled3(wx.ScrolledWindow):
         if selected == -1:
             return
         selectedPatch = items[selected]
-        for patch in self.Parent.ca.patches:
+        for patch in self.plt.gca().patches:
             if str(patch.get_gid()) == selectedPatch:
                 patch.remove()
                 break
@@ -1353,7 +1405,7 @@ class scrolled3(wx.ScrolledWindow):
             return
         selectedPatch= self.patchListBox.GetItems()[self.patchListBox.GetSelection()]
         currPatch= None
-        for patch in self.Parent.ca.patches:
+        for patch in self.plt.gca().patches:
             if str(patch.get_gid()) == selectedPatch:
                 currPatch= patch
                 break
@@ -1380,7 +1432,7 @@ class scrolled3(wx.ScrolledWindow):
             return
         selectedPatch= self.patchListBox.GetItems()[self.patchListBox.GetSelection()]
         currPatch= None
-        for patch in self.Parent.ca.patches:
+        for patch in self.plt.gca().patches:
             if str(patch.get_gid()) == selectedPatch:
                 currPatch= patch
                 break
