@@ -868,7 +868,7 @@ class MainApp(wx.App):
 #---------------------------------------------------------------------------
 # This is the main interface of application
 class MainFrame(wx.Frame):
-    from slbTools import getPath
+    from easyDialog.easyDialog import getPath
     import statsmodels.api as sm
     def __init__( self, parent, appname ):
         self.path=      None
