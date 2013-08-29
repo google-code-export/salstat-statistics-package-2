@@ -299,8 +299,11 @@ class PyWXGridEditMixin():
                 row= top + r
                 for c in range(cols):
                     col= left + c
-                    if self.CellInGrid(row, col):
+                    try:
+                    #if self.CellInGrid(row, col): # fails when updating a database
                         self.SetCellValue(row, col, data[r %dataRows][c % dataCols])
+                    except:
+                        pass
         except ZeroDivisionError:
             print "Zero division: Num_col "  +str(dataRows)+ ", Num_Fil " + str(dataCols)
         finally:
