@@ -31,7 +31,7 @@ class floatRendererSub(Grid.PyGridCellRenderer):
         return floatRendererSub(table, self.decimalPoints, self.color, self.font, self.fontsize)
 
 class floatRenderer(Grid.PyGridCellRenderer):
-    def __init__(self, decimalPoints=4, defaultFontZise= 10):
+    def __init__(self, decimalPoints, defaultFontZise= 10):
         """Render data in the specified color and font and fontsize"""
         Grid.PyGridCellRenderer.__init__(self)
         self.decimalPoints= decimalPoints
