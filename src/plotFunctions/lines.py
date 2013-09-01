@@ -25,7 +25,7 @@ class lines( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write(_(u"You need some data to draw a graph!"))
+            print _(u"You need some data to draw a graph!")
             return
         
         return self.data2Plotdiaglog( None, self.columnNames, title= self.name)
@@ -41,9 +41,9 @@ class lines( _neededLibraries):
             dlg.Destroy()
             return
 
-        self.log.write("selectedcols= " + selectedcols.__str__(), False)
+        print "selectedcols= " + selectedcols.__str__(), False
         if len(selectedcols) == 0:
-            self.log.write(_(u"You need to select some data to draw a graph!"))
+            print _(u"You need to select some data to draw a graph!")
             return
         
         return selectedcols
@@ -82,7 +82,7 @@ class lines( _neededLibraries):
         
     def _report(self, result):
         result.Show()
-        self.log.write(self.plotName + ' ' + _('successful'))
+        print self.plotName + ' ' + _('successful')
 class stem( _neededLibraries):
     name=      u"stem"
     plotName=  u"stem"
@@ -95,7 +95,7 @@ class stem( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write(_(u"You need some data to draw a graph!"))
+            print _(u"You need some data to draw a graph!")
             return
         
         return self.data2Plotdiaglog( None, self.columnNames, title= self.name)
@@ -111,9 +111,9 @@ class stem( _neededLibraries):
             dlg.Destroy()
             return
 
-        self.log.write("selectedcols= " + selectedcols.__str__(), False)
+        print "selectedcols= " + selectedcols.__str__(), False
         if len(selectedcols) == 0:
-            self.log.write(_(u"You need to select some data to draw a graph!"))
+            print _(u"You need to select some data to draw a graph!")
             return
         
         return selectedcols
@@ -149,7 +149,7 @@ class stem( _neededLibraries):
     def _report(self, result):
         for res in result:
             res.Show()
-        self.log.write(self.plotName+ ' ' + _('successful'))
+        print self.plotName+ ' ' + _('successful')
          
 class linesOfMean( _neededLibraries):
     name=      u"lines of all means"
@@ -163,7 +163,7 @@ class linesOfMean( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write(_(u"You need some data to draw a graph!"))
+            print _(u"You need some data to draw a graph!")
             return
         
         return self.data2Plotdiaglog( None, self.columnNames, title= self.name)
@@ -179,9 +179,9 @@ class linesOfMean( _neededLibraries):
             dlg.Destroy()
             return
 
-        self.log.write("selectedcols= " + selectedcols.__str__(), False)
+        print "selectedcols= " + selectedcols.__str__(), False
         if len(selectedcols) == 0:
-            self.log.write(_(u"You need to select some data to draw a graph!"))
+            print _(u"You need to select some data to draw a graph!")
             return
         
         return selectedcols
@@ -217,7 +217,7 @@ class linesOfMean( _neededLibraries):
         
     def _report( self, result):
         result.Show()
-        self.log.write( self.plotName + ' ' + _(u'successful'))
+        print  self.plotName + ' ' + _(u'successful')
 
 class shadowLines(lines):
     name=      u"lines with shadow"
@@ -279,7 +279,7 @@ class areaPlot( lines):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write(_(u"You need some data to draw a graph!"))
+            print _(u"You need some data to draw a graph!")
             return
         
         return self.data2Plotdiaglog( None, self.columnNames, title= self.name)
@@ -295,9 +295,9 @@ class areaPlot( lines):
             dlg.Destroy()
             return
 
-        self.log.write("selectedcols= " + selectedcols.__str__(), False)
+        print "selectedcols= " + selectedcols.__str__(), False
         if len(selectedcols) == 0:
-            self.log.write(_(u"You need to select some data to draw a graph!"))
+            print _(u"You need to select some data to draw a graph!")
             return
         
         return selectedcols
@@ -334,7 +334,7 @@ class areaPlot( lines):
     def _report(self, result):
         for res in result:
             res.Show()
-        self.log.write(self.plotName+ ' ' + _(u'successful'))
+        print self.plotName+ ' ' + _(u'successful')
      
 class multipleAreaPlot( lines):
     name=      u"Multiple area chart"
@@ -348,7 +348,7 @@ class multipleAreaPlot( lines):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write(_(u"You need some data to draw a graph!"))
+            print _(u"You need some data to draw a graph!")
             return
         
         return self.data2Plotdiaglog( None, self.columnNames, title= self.name)
@@ -364,9 +364,9 @@ class multipleAreaPlot( lines):
             dlg.Destroy()
             return
 
-        self.log.write("selectedcols= " + self.colNameSelect.__str__(), False)
+        print "selectedcols= " + self.colNameSelect.__str__(), False
         if len( self.colNameSelect) == 0:
-            self.log.write(_(u"You need to select some data to draw a graph!"))
+            print _(u"You need to select some data to draw a graph!")
             return
         
         return homogenize(*[ self.grid.GetColNumeric( colName) for colName in self.colNameSelect ])
@@ -409,4 +409,4 @@ class multipleAreaPlot( lines):
         
     def _report(self, result):
         result.Show()
-        self.log.write(self.plotName + ' ' + _('successful'))
+        print self.plotName + ' ' + _('successful')

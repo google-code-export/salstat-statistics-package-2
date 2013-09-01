@@ -31,7 +31,7 @@ class barChart( _neededLibraries):
         
     def _dialog(self, *arg, **params):
         '''this funtcion is used to plot the bar chart of all means'''
-        self.log.write( _(u"Bar Chart"))
+        print  _(u"Bar Chart")
         self._updateColsInfo()
         if len( self.columnNames) == 0:
             return
@@ -77,14 +77,14 @@ class barChart( _neededLibraries):
             self.colour=  self.colours[0]
 
         if self.colNameSelect == None:
-            self.log.write(_(u"you have to select at least %i column")%self.minRequiredCols)
+            print _(u"you have to select at least %i column")%self.minRequiredCols
             return
 
         if isinstance( self.colNameSelect, (str, unicode)):
             self.colNameSelect= [self.colNameSelect]
 
         if len( self.colNameSelect) < self.minRequiredCols:
-            self.log.write( _(u'You have to select at least %i columns to draw a graph!')%self.minRequiredCols)
+            print  _(u'You have to select at least %i columns to draw a graph!')%self.minRequiredCols
             return
 
         # it only retrieves the numerical values
@@ -148,7 +148,7 @@ class barChart( _neededLibraries):
 
     def _report( self, result):
         [res.Show() for res in result]
-        self.log.write( self.plotName+ ' '+_(u'successful'))
+        print  self.plotName+ ' '+_(u'successful')
 
 class HorizBarChart(barChart):
     ''''''
@@ -216,7 +216,7 @@ class barChartAllMeans( _neededLibraries):
 
     def _dialog(self, *arg, **params):
         '''this funtcion is used to plot the bar chart of all means'''
-        self.log.write(_(u"Bar Chart of All Means"))
+        print _(u"Bar Chart of All Means")
         self._updateColsInfo()
         if len( self.columnNames) == 0:
             return
@@ -262,14 +262,14 @@ class barChartAllMeans( _neededLibraries):
             self.colour=  self.colours[0]
 
         if self.colNameSelect == None:
-            self.log.write(_(u"you have to select at least %i columns")%self.minRequiredCols)
+            print _(u"you have to select at least %i columns")%self.minRequiredCols
             return
 
         if isinstance( self.colNameSelect, (str, unicode)):
             self.colNameSelect= [self.colNameSelect]
 
         if len( self.colNameSelect) < self.minRequiredCols:
-            self.log.write( _(u'You have to select at least %i columns to draw a graph!')%self.minRequiredCols)
+            print  _(u'You have to select at least %i columns to draw a graph!')%self.minRequiredCols
             return
 
         # it only retrieves the numerical values
@@ -332,7 +332,7 @@ class barChartAllMeans( _neededLibraries):
 
     def _report(self, result):
         result.Show()
-        self.log.write(self.plotName+ ' '+_(u'successful'))
+        print self.plotName+ ' '+_(u'successful')
 
 class barChartAllMeansNice( _neededLibraries):
     ''''''
@@ -349,7 +349,7 @@ class barChartAllMeansNice( _neededLibraries):
 
     def _dialog(self, *arg, **params):
         '''this funtcion is used to plot the bar chart of all means'''
-        self.log.write(_(u"Nice Bar Chart of All Means"))
+        print _(u"Nice Bar Chart of All Means")
         self._updateColsInfo()
         if len( self.columnNames) == 0:
             return
@@ -404,14 +404,14 @@ class barChartAllMeansNice( _neededLibraries):
             self.colour=  self.colours[0]
 
         if self.colNameSelect == None:
-            self.log.write(_("you have to select at least %i columns")%self.minRequiredCols)
+            print _("you have to select at least %i columns")%self.minRequiredCols
             return
 
         if isinstance( self.colNameSelect, (str, unicode)):
             self.colNameSelect= [self.colNameSelect]
 
         if len( self.colNameSelect) < self.minRequiredCols:
-            self.log.write( _(u'You need to select at least %i columns to draw a graph!')%self.minRequiredCols)
+            print  _(u'You need to select at least %i columns to draw a graph!')%self.minRequiredCols
             return
 
         # it only retrieves the numerical values
@@ -465,7 +465,7 @@ class barChartAllMeansNice( _neededLibraries):
 
     def _report(self, result):
         result.Show()
-        self.log.write(self.plotName + ' ' + _('successful'))
+        print self.plotName + ' ' + _('successful')
 
 class stakedBar(_neededLibraries):
     ''''''
@@ -482,7 +482,7 @@ class stakedBar(_neededLibraries):
 
     def _dialog(self, *arg, **params):
         '''this funtcion is used to plot the bar chart of all means'''
-        self.log.write(_(u"Bar Chart"))
+        print _(u"Bar Chart")
         self._updateColsInfo()
         if len( self.columnNames) == 0:
             return
@@ -520,14 +520,14 @@ class stakedBar(_neededLibraries):
             self.xticlabel=  self.grid.GetCol( values[1])
 
         if self.colNameSelect == None:
-            self.log.write(_("you have to select at least %i columns")%self.minRequiredCols)
+            print _("you have to select at least %i columns")%self.minRequiredCols
             return
 
         if isinstance( self.colNameSelect, (str, unicode)):
             self.colNameSelect= [self.colNameSelect]
 
         if len( self.colNameSelect) < self.minRequiredCols:
-            self.log.write( _(u'You have to select at least %i columns to draw a graph!')%self.minRequiredCols)
+            print  _(u'You have to select at least %i columns to draw a graph!')%self.minRequiredCols
             return
 
         # it only retrieves the numerical values
@@ -580,7 +580,7 @@ class stakedBar(_neededLibraries):
 
     def _report( self, result):
         [res.Show() for res in result]
-        self.log.write( self.plotName+ ' ' + _('successful'))
+        print  self.plotName+ ' ' + _('successful')
 
 class Pareto(_neededLibraries):
     ''''''
@@ -597,7 +597,7 @@ class Pareto(_neededLibraries):
 
     def _dialog(self, *arg, **params):
         '''this funtcion is used to plot the bar chart of all means'''
-        self.log.write(_(u"Bar Chart"))
+        print _(u"Bar Chart")
         self._updateColsInfo()
         if len( self.columnNames) == 0:
             return
@@ -635,14 +635,14 @@ class Pareto(_neededLibraries):
             self.xticlabel=  self.grid.GetCol( values[1])
 
         if self.colNameSelect == None:
-            self.log.write(_("you have to select at least %i columns")%self.minRequiredCols)
+            print _("you have to select at least %i columns")%self.minRequiredCols
             return
 
         if isinstance( self.colNameSelect, (str, unicode)):
             self.colNameSelect= [self.colNameSelect]
 
         if len( self.colNameSelect) < self.minRequiredCols:
-            self.log.write( _(u'You have to select at least %i columns to draw a graph!')%self.minRequiredCols)
+            print  _(u'You have to select at least %i columns to draw a graph!')%self.minRequiredCols
             return
 
         # it only retrieves the numerical values
@@ -709,4 +709,4 @@ class Pareto(_neededLibraries):
 
     def _report( self, result):
         [res.Show() for res in result]
-        self.log.write( self.plotName+ ' ' + _('successful'))
+        print  self.plotName+ ' ' + _('successful')

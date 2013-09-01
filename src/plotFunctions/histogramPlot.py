@@ -31,10 +31,10 @@ class histogram( _neededLibraries):
         
     def _dialog(self, *arg, **params):
         '''this function is used to plot a histogram chart of the selected column'''
-        self.log.write( _(u'Histogram Chart'))
+        print  _(u'Histogram Chart')
         self._updateColsInfo()
         if len(self.columnNames) == 0:
-            self.log.write( _(u'You need some data to draw a graph!'))
+            print  _(u'You need some data to draw a graph!')
             return
         
         self.colours= ['blue', 'black',
@@ -143,7 +143,7 @@ class histogram( _neededLibraries):
         
     def _report(self, result):
         result.Show()
-        self.log.write(self.plotName+ ' ' + _('successful'))
+        print self.plotName+ ' ' + _('successful')
 
 class niceHistogram( _neededLibraries):
     '''this function is used to plot a nice histogram
@@ -160,12 +160,12 @@ class niceHistogram( _neededLibraries):
         
     def _dialog(self, *args, **params):
         '''this function is used to plot a histogram chart of the selected column'''
-        self.log.write( _(u'Histogram Chart'))
+        print _(u'Histogram Chart')
         setting= {'Title': self.name,
                   '_size': Size(220,300)}
         self._updateColsInfo()
         if len(self.columnNames) == 0:
-            self.log.write( _(u'You need some data to draw a graph!'))
+            print _(u'You need some data to draw a graph!')
             return
         
         self.colours= ['random', 'blue', 'black',
@@ -262,7 +262,7 @@ class niceHistogram( _neededLibraries):
         self.colour=        values[3]
 
         if self.colNameSelect == None:
-            self.log.write( _(u"you have to select at least %i columns")%self.minRequiredCols)
+            print  _(u"you have to select at least %i columns")%self.minRequiredCols
             return
         
         if self.histType == None:
@@ -287,7 +287,7 @@ class niceHistogram( _neededLibraries):
     def _report(self, result): 
         for plt in result:
             plt.Show()
-        self.log.write( self.name + ' ' +  _('successful'))
+        print  self.name + ' ' +  _('successful')
 
        
 class cumulativeFrecuency( cumfreq, _neededLibraries):
@@ -335,7 +335,7 @@ class cumulativeFrecuency( cumfreq, _neededLibraries):
         
     def _report(self, result):
         [res.Show() for res in result]
-        self.log.write(self.plotName+ ' ' +  _('successful'))
+        print self.plotName+ ' ' +  _('successful')
 
         
 class relativefrequency( relfreq, _neededLibraries):
@@ -380,4 +380,4 @@ class relativefrequency( relfreq, _neededLibraries):
         
     def _report(self, result):
         [res.Show() for res in result]
-        self.log.write(self.plotName+ ' ' +  _('successful'))
+        print self.plotName+ ' ' +  _('successful')

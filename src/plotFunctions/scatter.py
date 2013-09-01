@@ -28,10 +28,10 @@ class scatter( _neededLibraries):
         self.plotName=  u"scatter"
         
     def _dialog(self, *arg, **params):
-        self.log.write("Scatter")
+        print "Scatter"
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write(_(u"You need some data to draw a graph!"))
+            print _(u"You need some data to draw a graph!")
             return
 
         bt1= ["StaticText", [_(u"Select pairs of data by rows")]]
@@ -94,7 +94,7 @@ class scatter( _neededLibraries):
         
     def _report(self, result):
         result.Show()
-        self.log.write(self.plotName+ ' '+_('successful'))
+        print self.plotName+ ' '+_('successful')
 
 class adaptative( _neededLibraries):
     name=      u"Adaptive"
@@ -108,7 +108,7 @@ class adaptative( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write(_(u"You need some data to draw a graph!"))
+            print _(u"You need some data to draw a graph!")
             return
         txt1= ['StaticText',    [_(u"Select data to plot")]]
         btn1= ['CheckListBox',  [self.columnNames]]
@@ -134,7 +134,7 @@ class adaptative( _neededLibraries):
         self.columnNames = values[0]
         
         if len( self.columnNames) == 0:
-            self.log.write(_(u"You need to select some data to draw a graph!"))
+            print _(u"You need to select some data to draw a graph!")
             return
         
         return [self.grid.GetColNumeric(col) for col in self.columnNames]
@@ -174,7 +174,7 @@ class adaptative( _neededLibraries):
         
     def _report(self, result):
         result.Show()
-        self.log.write(self.plotName+ ' '+_(u'successful'))
+        print self.plotName+ ' '+_(u'successful')
 
 class box_whisker(_neededLibraries):
     name= u"Box & Whisker"
@@ -188,7 +188,7 @@ class box_whisker(_neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write(_(u"You need some data to draw a graph!"))
+            print _(u"You need some data to draw a graph!")
             return
         txt1= ['StaticText',    [_(u"Select data to plot")]]
         btn1= ['CheckListBox',  [self.columnNames]]
@@ -214,7 +214,7 @@ class box_whisker(_neededLibraries):
         self.columnNames = values[0]
         
         if len( self.columnNames) == 0:
-            self.log.write(_(u"You need to select some data to draw a graph!"))
+            print _(u"You need to select some data to draw a graph!")
             return
         
         return [self.grid.GetColNumeric(col) for col in self.columnNames]
@@ -245,7 +245,7 @@ class box_whisker(_neededLibraries):
         
     def _report(self, result):
         result.Show()
-        self.log.write(self.plotName+ ' '+_('successful'))
+        print self.plotName+ ' '+_('successful')
         
 class normalProb( _neededLibraries):
     name=      u"Normal probability"
@@ -259,7 +259,7 @@ class normalProb( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write(_(u"You need some data to draw a graph!"))
+            print _(u"You need some data to draw a graph!")
             return
         txt1= ['StaticText',    [_(u"Select data to plot")]]
         btn1= ['CheckListBox',  [self.columnNames]]
@@ -285,7 +285,7 @@ class normalProb( _neededLibraries):
         self.columnNames = values[0]
         
         if len( self.columnNames) == 0:
-            self.log.write(_(u"You need to select some data to draw a graph!"))
+            print _(u"You need to select some data to draw a graph!")
             return
         
         return [self.grid.GetColNumeric(col) for col in self.columnNames]
@@ -331,4 +331,4 @@ class normalProb( _neededLibraries):
     def _report(self, result):
         for res in result:
             res.Show()
-        self.log.write(self.plotName+ ' '+_('successful'))
+        print self.plotName+ ' '+_('successful')
