@@ -1,5 +1,4 @@
-"""
-a module thath will be used as a container of different functions
+"""a module thath will be used as a container of different functions
 
 Created on 11/05/2012
 New plot system
@@ -14,7 +13,8 @@ __all__ = ['histogramPlot', 'bar',
 
 # wxPython module
 import wx
-import wx.aui
+if not (wx.__version__ > '2.9.4'):
+    import wx.aui
 import wx.lib.agw.aui as aui
 import wx.propgrid as wxpg
 # Matplotlib Figure object
@@ -543,12 +543,11 @@ class scrolled1(wx.ScrolledWindow):
                         'bold':   wx.FONTWEIGHT_BOLD,
                         'light':  wx.FONTWEIGHT_LIGHT}
         newfont.SetWeight( fontDictWeigth[titleFontAsDict['fontweight']])
-
         ##newfont.color= [0,0,0]
         ##newfont.clip_on= titleFontAsDict['clip_on']
         ##newfont.multialignment= titleFontAsDict['multialignment']
-
         pg0.SetPropertyValue(_("title font"), newfont)
+
     # to be fix
     def __UpdateXlabelFont(self, currAxes, evt= None, *args, **params):
         # getting the parameters of the title string
@@ -1455,19 +1454,26 @@ class _neededLibraries(object):
         self.plotName= ""
         self.setminRequiredCols= 0
         self.app=       wx.GetApp()
-        self.dialog=    _dialog         # to create de dialod
-        self.grid=      self.app.grid
+        self.dialog=    _dialog    # to create de dialod
         self.log=       self.app.Logg   # to report
         self.outputGrid= self.app.output # the usern can use the plot functions
         self.data2Plotdiaglog= data2Plotdiaglog
         self.selectDialogData2plot= selectDialogData2plot
         self.scatterDialog = scatterDialog
-
+    @property
+    def grid(self):
+        cs= wx.GetApp().frame.formulaBarPanel.lastObject
+        if cs == None:
+            cs= wx.GetApp().frame.db
+        return cs
     def _updateColsInfo( self):
-        gridCol=            self.grid.GetUsedCols()
-        self.columnNames=   gridCol[0]
+        # selectign the last selected panel
+        gridCol = self.grid.GetUsedCols()
+        self.columnNames = gridCol[0]
         self.columnNumbers= gridCol[1]
-
+        #gridCol=            self.grid.GetUsedCols()
+        #self.columnNames=   gridCol[0]
+        #self.columnNumbers= gridCol[1]
     @property
     def name( self):
         return self.__name__
@@ -1586,7 +1592,6 @@ class pltobj( wx.Frame, object ):
         self.figpanel.canvas.mpl_connect( 'axes_enter_event',    self._enter)
         self.figpanel.canvas.mpl_connect( 'axes_leave_event',    self._leave)
 
-
     # compatibility
     def show(self,*args, **params):
         return self.Show(*args, **params)
@@ -1624,10 +1629,10 @@ class pltobj( wx.Frame, object ):
     @ylim.setter
     def ylim(self,*args, **params):
         return self.set_ylim(*args, **params)
+
     def _enter(self, evt):
         currAxes = evt.inaxes
         self._Update( currAxes, evt)
-
     def _leave(self, evt):
         self.currAxes = None
         self._Update(evt)

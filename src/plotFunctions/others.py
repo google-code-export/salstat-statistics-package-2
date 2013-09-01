@@ -29,7 +29,7 @@ class table( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write(_(u"You need some data to draw a graph!"))
+            print _(u"You need some data to draw a graph!")
             return
         txt1= ["StaticText",    [_(u"Select data to plot")]]
         txt2= ["StaticText",    [_(u"Select the name of the rows")]]
@@ -61,7 +61,7 @@ class table( _neededLibraries):
         
         self.rowlabelsCol= values[1]
         if self.rowlabelsCol == None:
-            self.log.write(_(u'the user have to select a name colum to the rows'))
+            print _(u'the user have to select a name colum to the rows')
             return
 
         data, posvalid= homogenize(*[ self.grid.GetCol( colX) for colX in self.selectedColNames], returnPos= True )
@@ -119,7 +119,7 @@ class table( _neededLibraries):
         
     def _report(self, result):
         result.Show()
-        self.log.write(self.plotName + ' ' + _('successful'))
+        print self.plotName + ' ' + _('successful')
 
 class linRegres( _neededLibraries):
     name=      u"linear regression"
@@ -131,10 +131,10 @@ class linRegres( _neededLibraries):
         self.plotName=  u"linregres"
         
     def _dialog(self, *arg, **params):
-        self.log.write(_(self.name))
+        print _(self.name)
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write(_(u"You need some data to draw a graph!"))
+            print _(u"You need some data to draw a graph!")
             return
 
         bt1= ["StaticText", [_(u"Select pairs of data by rows")]]
@@ -213,7 +213,7 @@ class linRegres( _neededLibraries):
     def _report(self, result):
         for res in result:
             res.Show()
-        self.log.write(self.plotName+ ' '+_(u'successful'))
+        print self.plotName+ ' '+_(u'successful')
 
 class ternaryScatter( _neededLibraries):
     name=      u"Ternary scatter"
@@ -228,7 +228,7 @@ class ternaryScatter( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if len(self.columnNames) == 0:
-            self.log.write( _( u"You need some data to draw a graph!"))
+            print  _( u"You need some data to draw a graph!")
             return
         
         txt1= ["StaticText", [_(u"Left Corner Label")]]
@@ -239,7 +239,7 @@ class ternaryScatter( _neededLibraries):
         btn3= ["TextCtrl",   [_(u"C")]]
         btn4= ["StaticText", [_(u"Select the pairs of data by rows")]]
         btn5= ["makePairs",  [[_(u"A Left Corner"),_(u"C Upper Corner"),
-                               _(u"B Right Corner")], self.columnNames, 30]]
+                               _(u"B Right Corner")], self.columnNames, 4]]
         structure= list()
         structure.append( [btn1, txt1])
         structure.append( [btn2, txt2])
@@ -415,7 +415,7 @@ class ternaryScatter( _neededLibraries):
         
     def _report(self, result):
         result.Show()
-        self.log.write(self.plotName + ' ' + _('successful'))
+        print self.plotName + ' ' + _('successful')
 
 class runChart( _neededLibraries):
     name=      u"control chart"
@@ -430,7 +430,7 @@ class runChart( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            self.log.write( _( u"You need some data to draw a graph!"))
+            print  _( u"You need some data to draw a graph!")
             return
 
         txt1= ["StaticText",    [_( u"Select the columns to analyse")]]
@@ -463,17 +463,17 @@ class runChart( _neededLibraries):
         
         self.selectedcols, lcl, ucl, target  = values
 
-        self.log.write("selectedcols= " + self.selectedcols.__str__(), False)
+        print "selectedcols= " + self.selectedcols.__str__(), False
         if len( self.selectedcols) == 0:
-            self.log.write( _( u"You need to select some data to draw a graph!"))
+            print  _( u"You need to select some data to draw a graph!")
             return
         
         if lcl == None or ucl == None:
-            self.log.write( _( u"You have to input the lower and upper control limits"))
+            print  _( u"You have to input the lower and upper control limits")
             return
         
         if target == None:
-            self.log.write( _( u"You have to input a target value"))
+            print  _( u"You have to input a target value")
             return
         # transform the selected cols to numeric cols
         colValues= [self.grid.GetColNumeric( col) for col in self.selectedcols]
@@ -535,7 +535,7 @@ class runChart( _neededLibraries):
     def _report(self, result):
         for res in result:
             res.Show()
-        self.log.write(self.plotName + ' ' + _('successful'))
+        print self.plotName + ' ' + _('successful')
         
         #UCL= data2plot[self.'UCL']
         #LCL= data2plot['LCL']
