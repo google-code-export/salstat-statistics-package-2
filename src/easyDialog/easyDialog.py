@@ -11,17 +11,18 @@ from numpy import ndarray
 import os
 import re
 
-__WILDCARD= "Supported Files (*.txt;*.csv;*.xlsx;*.xls)|*.txt;*.csv;*xlsx;*.xls|"\
+_WILDCARD= "Supported Files (*.txt;*.csv;*.xlsx;*.xls)|*.txt;*.csv;*xlsx;*.xls|"\
     "Excel 2010 File (*.xlsx)|*.xlsx|" \
     "Excel 2003 File (*.xls)|*.xls|" \
     "Txt file (*.txt)|*.txt|" \
     "Csv file (*.csv)|*.csv"
 
-def getPath( wildcard= __WILDCARD):
-    try:     _= wx.GetApp()._
-    except:  _= lambda x: x
+def getPath( *args, **params):
+    try: wildCard= params.pop('wildcard')
+    except: wildCard= _WILDCARD
+
     dlg = wx.FileDialog(None, _("Load Data File"), "","",
-                        wildcard= wildcard,
+                        wildcard= wildCard,
                         style = wx.OPEN)
     ##icon = imageEmbed().logo16()
     ##dlg.SetIcon(icon)
@@ -34,8 +35,8 @@ def getPath( wildcard= __WILDCARD):
     fullPath= dlg.Path
     dlg.Destroy()
     junk, filterIndex = os.path.splitext(fileName)
-    pattern= "\*.[a-zA-Z0-9]*"
-    allowedExtensions= list(set( re.findall(pattern, wildcard)))
+    pattern= "\*(.[a-zA-Z0-9]*)"
+    allowedExtensions= list(set( re.findall(pattern, wildCard)))
     allowedExtensions= list(set([res.lower() for res in allowedExtensions]))
     if filterIndex.lower() in allowedExtensions:
         return fullPath
