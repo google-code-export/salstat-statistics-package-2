@@ -10,6 +10,8 @@ Created on 27/10/2010
 __all__= ['PyWXGridEditMixin']
 import wx
 import wx.grid
+from salstat2_glob import *
+
 
 import wx.lib.newevent
 # creating the evt of paste a cell
@@ -32,9 +34,6 @@ class MyContextGrid(wx.Menu):
     # Clase para hacer el menu contextual del grid
     def __init__(self,parent,*args,**params):
         wx.Menu.__init__(self)
-        try:     _= wx.GetApp()._
-        except:  _= lambda x: x
-
         self.parent = parent
         cortar =     wx.MenuItem(self, wx.NewId(), _('&Cut\tCtrl+X'))
         copiar =     wx.MenuItem(self, wx.NewId(), _('C&opy\tCtrl+C'))
@@ -294,6 +293,13 @@ class PyWXGridEditMixin():
             data= [data]
         # get sizes (rows, cols) of both clipboard and current selection
         dataRows, dataCols= len(data), len(data[0])
+        # adding row and cols if needed
+        lastCol, lastRow= self.GetNumberCols()-1, self.GetNumberRows()-1
+        cols2add, rows2add= (left+dataCols)- lastCol, (top+dataRows)- lastRow
+        if cols2add > 0:
+            self.AppendCols(cols2add)
+        if rows2add > 0:
+            self.AppendRows(rows2add)
         try:
             for r in range(rows):
                 row= top + r
@@ -313,6 +319,7 @@ class PyWXGridEditMixin():
         ## post the event
         #wx.PostEvent(self.GrandParent, PasteEvt(evtID))
         self.GetEventHandler().ProcessEvent( PasteEvt(evtIDpaste))
+        pass
 
     def CellInGrid(self, r, c): # only paste data that actually falls on the table
         return r >=0 and c >=0 and r < self.GetNumberRows() and c < self.GetNumberCols()

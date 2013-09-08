@@ -4,18 +4,35 @@ Created on 16/05/2012
 @author: USUARIO
 '''
 '''Easily create a dialog'''
-__all__= ['Dialog']
+__all__= ['Dialog','Busy']
 
 import wx
 from numpy import ndarray
 import os
 import re
+from salstat2_glob import *
 
 _WILDCARD= "Supported Files (*.txt;*.csv;*.xlsx;*.xls)|*.txt;*.csv;*xlsx;*.xls|"\
     "Excel 2010 File (*.xlsx)|*.xlsx|" \
     "Excel 2003 File (*.xls)|*.xls|" \
     "Txt file (*.txt)|*.txt|" \
     "Csv file (*.csv)|*.csv"
+
+def Busy(function):
+    def _mydecorator(*args, **kw):
+        # do some stuff before the real
+        try: texto= _("One moment please, waiting for transactions..")
+        except: texto = _("One moment please, waiting for transactions..")
+        busy = wx.BusyInfo( texto)
+        try:
+            # function gets called
+            res = function(*args, **kw)
+        finally:
+            del(busy)
+        # do some stuff after
+        return res
+    # returns the sub-function
+    return _mydecorator
 
 def getPath( *args, **params):
     try: wildCard= params.pop('wildcard')
@@ -60,12 +77,12 @@ class DataBaseImport( wx.Panel ):
         #==========================
         # left Panel
         bSizerLEFT = wx.BoxSizer( wx.VERTICAL )
-        sbSizer1 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Table Name" ), wx.VERTICAL )
-        sbSizer2 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Field Names" ), wx.VERTICAL )
+        sbSizer1 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, _(u"Table Name") ), wx.VERTICAL )
+        sbSizer2 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, _(u"Field Names") ), wx.VERTICAL )
 
         self.dataDict = args[0]
         if not isinstance( self.dataDict, (dict,)):
-            raise StandardError("dataDict must be a dictionary!")
+            raise StandardError( _("dataDict must be a dictionary!"))
 
         m_choice1Choices = self.dataDict.keys()
         self.m_choice1 = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choice1Choices, 0 )
@@ -86,8 +103,8 @@ class DataBaseImport( wx.Panel ):
         #======================
         # Right Panel
         bSizerRIGHT = wx.BoxSizer( wx.VERTICAL )
-        RIGTH_sbSizer1 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Limit" ), wx.VERTICAL )
-        RIGTH_sbSizer2 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"Order by" ), wx.VERTICAL )
+        RIGTH_sbSizer1 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, _(u"Limit") ), wx.VERTICAL )
+        RIGTH_sbSizer2 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, _(u"Order by") ), wx.VERTICAL )
 
         limit = IntTextCtrl(self,)
 
@@ -283,13 +300,10 @@ import  wx.grid as gridlib
 class _CustomDataTable( gridlib.PyGridTableBase):
     def __init__( self, columnNames, choiceNames, rowNumber, choicesByColumn=[]):
         gridlib.PyGridTableBase.__init__( self)
-        try:     _= wx.GetApp()._
-        except:  _= lambda x: x
-
         if isinstance(choicesByColumn, (list,)):
             if len(choicesByColumn) > 0:
                 if len(choicesByColumn) !=  len(columnNames):
-                    raise StandardError("Invalid amount of choicesbyColumn")
+                    raise StandardError( _("Invalid amount of choicesbyColumn"))
                 choiceNames= choicesByColumn
             else:
                 if isinstance( choiceNames, (str, unicode)):
@@ -297,22 +311,13 @@ class _CustomDataTable( gridlib.PyGridTableBase):
                 elif isinstance(choiceNames, (list, tuple)):
                     choiceNames= [choiceNames]*len(columnNames)
                 else:
-                    raise StandardError("Invalid choices!")
+                    raise StandardError(_("Invalid choices!"))
 
         self.colLabels = columnNames
         group= lambda x,y: x+','+y
         choices= list()
         for choicesByColumni in choiceNames:
             if len( choicesByColumni) > 1:
-                #colsResume= list()
-                #for choice in choicesByColumni:
-                #    try:
-                #        if choice == None:
-                #            # the selected form correspond to a text editor
-                #            colsResume.append(None)
-                #            continue
-                #    except:
-                #        pass
                 colsResume= reduce( group,  choicesByColumni[1:],  choicesByColumni[0])
 
             elif len( choicesByColumni) == 1:
@@ -334,7 +339,7 @@ class _CustomDataTable( gridlib.PyGridTableBase):
         elif rowNumber > 0:
             self.data= [[u'' for i in range(len(choices))] for j in range(rowNumber)]
         else:
-            raise StandardError("The number of columns must be greater or equal to zero!")
+            raise StandardError(_("The number of columns must be greater or equal to zero!"))
     #--------------------------------------------------
     # required methods for the wxPyGridTableBase interface
 
@@ -362,21 +367,20 @@ class _CustomDataTable( gridlib.PyGridTableBase):
 
     def SetValue(self, row, col, value):
         def innerSetValue(row, col, value):
+            colsAppended= False
             try:
                 self.data[row][col] = value
             except IndexError:
-                # add a new row
-                self.data.append([''] * self.GetNumberCols())
-                innerSetValue(row, col, value)
-
-                # tell the grid we've added a row
-                msg = gridlib.GridTableMessage(self,            # The table
-                                               gridlib.GRIDTABLE_NOTIFY_ROWS_APPENDED, # what we did to it
-                                               1                                       # how many
-                                               )
-
-                self.GetView().ProcessTableMessage(msg)
-        innerSetValue(row, col, value) 
+                if row == self.GetNumberRows()-1: #  row it's the row possition
+                    # add a new row
+                    self.data.append([''] * (self.GetNumberCols()-1))
+                    # tell the grid we've added a row
+                    msg = gridlib.GridTableMessage(self,            # The table
+                                                   gridlib.GRIDTABLE_NOTIFY_ROWS_APPENDED, # what we did to it
+                                                   1 )
+                innerSetValue( row, col, value)
+                self.GetView().ProcessTableMessage( msg)
+        innerSetValue( row, col, value)
 
     #--------------------------------------------------
     # Some optional methods
@@ -530,12 +534,26 @@ class FilePath( wx.Panel ):
     def GetValue(self ):
         return self.path
 
+class DialogPanel(wx.ScrolledWindow):
+    def __init__(self, *args, **params):
+        wx.ScrolledWindow.__init__(self, *args, **params)
+
+
+
+
+
 class Dialog ( wx.Dialog):
     ALLOWED= ['StaticText',   'TextCtrl',     'Choice',
               'CheckListBox', 'StaticLine',   'RadioBox',
               'SpinCtrl',     'ToggleButton', 'NumTextCtrl',
               'CheckBox',     'makePairs',    'IntTextCtrl',
-              'FilePath']
+             'FilePath',     'DataBaseImport']
+    @property
+    def allowedControls(self):
+        return self.ALLOWED
+    @property
+    def allowedControlsImages(self):
+        return self.ALLOWED
     def __init__( self, parent = None , settings= dict(), struct = []):
         '''Dialog( parent, settings, struct)
 
@@ -588,11 +606,7 @@ class Dialog ( wx.Dialog):
         to see an example run the class as a main script
         '''
 
-        self.ALLOWED= ['StaticText',   'TextCtrl',     'Choice',
-                       'CheckListBox', 'StaticLine',   'RadioBox',
-                       'SpinCtrl',     'ToggleButton', 'NumTextCtrl',
-                       'CheckBox',     'makePairs',    'IntTextCtrl',
-                       'FilePath',     'DataBaseImport']
+        self.ALLOWED= self.allowedControls
         self.ctrlNum = _siguiente()
         self.sizerNum= _siguiente()
 
@@ -631,7 +645,8 @@ class Dialog ( wx.Dialog):
         # getting the horizontal border size
         bSizer1.Fit( self )
         xBorderSize= self.Size[0]
-        
+
+
         self.m_scrolledWindow1 = wx.ScrolledWindow( self, wx.ID_ANY,
                                                     wx.DefaultPosition, wx.DefaultSize,
                                                     wx.DOUBLE_BORDER|wx.HSCROLL|wx.VSCROLL )
@@ -639,15 +654,16 @@ class Dialog ( wx.Dialog):
         bSizer3 = wx.BoxSizer( wx.VERTICAL )
         self.sisers= list()
         self.ctrls= list()
+
         self._allow= self.ALLOWED
         self._allow2get= ['TextCtrl','Choice',
                           'CheckListBox','RadioBox',
                           'SpinCtrl','ToggleButton','NumTextCtrl',
-                          'CheckBox', 'makePairs','IntTextCtrl', 
+                          'CheckBox', 'makePairs','IntTextCtrl',
                           'FilePath', 'DataBaseImport']
 
         bSizer1.Add( self.m_scrolledWindow1, 1, wx.EXPAND, 5 )
-        
+
         # ok cancel buttoms
         m_sdbSizer1 = wx.StdDialogButtonSizer()
         self.m_sdbSizer1OK = wx.Button( self, wx.ID_OK )
@@ -655,26 +671,29 @@ class Dialog ( wx.Dialog):
         self.m_sdbSizer1Cancel = wx.Button( self, wx.ID_CANCEL )
         m_sdbSizer1.AddButton( self.m_sdbSizer1Cancel )
         m_sdbSizer1.Realize()
-        
+
         depthSize=  wx.GetDisplayDepth()
         buttonOkCancelSize= (self.m_sdbSizer1Cancel.Size[0] + self.m_sdbSizer1OK.Size[0] + depthSize,
                              max(self.m_sdbSizer1Cancel.Size[1], self.m_sdbSizer1OK.Size[1]) + depthSize)
 
-        bSizer1.Add( m_sdbSizer1, 0, wx.EXPAND|wx.ALL, 5 )# 
+        bSizer1.Add( m_sdbSizer1, 0, wx.EXPAND|wx.ALL, 5 )#
         self.SetSizer( bSizer1 )
-        
+
         # getting the actual size of the dialog
         bSizer1.Fit( self )
         sizeDialog= self.Size
 
         # adding the custom controls into the scroll dialog
         self.adding(bSizer3, struct)
+
+
+
         self.m_scrolledWindow1.SetSizer( bSizer3 )
         self.m_scrolledWindow1.Layout()
         bSizer3.Fit( self.m_scrolledWindow1 )
         # getting the size of the scrolldialog
         sizeScroll= self.m_scrolledWindow1.Size
-        
+
         # getting the required size
         requiredSize= (sizeScroll[0] + xBorderSize,
                        sizeDialog[1] + sizeScroll[1]+ 0)
@@ -851,7 +870,7 @@ class _example( wx.Frame ):
 
         bSizer10 = wx.BoxSizer( wx.VERTICAL )
 
-        self.m_button8 = wx.Button( self, wx.ID_ANY, u"Show Dialog", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_button8 = wx.Button( self, wx.ID_ANY, _(u"Show Dialog"), wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer10.Add( self.m_button8, 0, wx.ALL, 5 )
 
         self.SetSizer( bSizer10 )
@@ -865,19 +884,19 @@ class _example( wx.Frame ):
     # Virtual event handlers, overide them in your derived class
     def showDialog( self, evt ):
         dic= {'Title': 'title'}
-        bt1= ('Button',     ['print'])
-        bt2= ('StaticText', ['hoja a Imprimir'])
-        bt3= ('Button',     ['nuevo'])
+        bt1= ('Button',     [_('Print')])
+        bt2= ('StaticText', [_('Page to print')])
+        bt3= ('Button',     [_('new')])
         bt4= ('StaticText', ['sebas'])
-        bt5= ('StaticText', ['Ingrese la presion'])
-        bt6= ('TextCtrl',   ['Parametro'])
+        bt5= ('StaticText', [_('Input the presure')])
+        bt6= ('TextCtrl',   [_('Parameter')])
         btnChoice=     ('Choice',       [['opt1', 'opcion2', 'opt3']])
         btnListBox=    ('CheckListBox', [['opt1', 'opcion2', 'opt3']])
         listSeparator= ('StaticLine',   ['horz'])
         bt7= ('RadioBox',     ['title', ['opt1', 'opt2', 'opt3']])
         bt8= ('SpinCtrl',     [ 0, 100, 5 ]) # (min, max, start)
         bt9= ('ToggleButton', ['toggle'])
-        bt10= ['makePairs',[['column '+str(i) for i in range(2)],['opt1','opt2'],5]]
+        bt10= ['makePairs',[[_('Column')+' '+str(i) for i in range(2)],['opt1','opt2'],5]]
         bt11= ['FilePath', []]
 
         structure= list()

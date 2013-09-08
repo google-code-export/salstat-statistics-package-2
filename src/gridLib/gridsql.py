@@ -7,10 +7,11 @@ import wx
 import wx.grid
 import wx.aui
 import numpy
+from salstat2_glob import *
 from sqlalchemy import Table, MetaData, create_engine
 from sqlalchemy.orm import mapper, sessionmaker, clear_mappers
 from sqlalchemy.exc import StatementError
-from easyDialog import Dialog
+from easyDialog import Dialog, Busy
 from gridEditors import VARCHAR
 from gridEditors import DATE
 from gridCellRenderers import floatRenderer
@@ -26,6 +27,10 @@ from slbTools.slbTools import isnumeric
 from numpy import ndarray, ravel
 from copy import deepcopy
 from xlrd import xldate_as_tuple
+
+# definig some custom events
+NewTableEvt, EVT_SQLGRID_NEW_TABLE = wx.lib.newevent.NewCommandEvent()
+evtIDNewTable = wx.NewEventType()
 
 class okCancelPanel(wx.Panel):
     def __init__(self, *args, **params):
@@ -158,7 +163,7 @@ class SqlTable( wx.grid.PyGridTableBase):
         # and interact with the
         # getting the current table
         if self._colsinfo == None:
-            print "updating cols information"
+            print _("Updating columns information")
             table= self.table
             desc=  OrderedDict()
             for colName in table.columns.keys():
@@ -170,7 +175,7 @@ class SqlTable( wx.grid.PyGridTableBase):
     def loadDatabase( self, evt):
         wildcard = "All files (*.*)|*.*"
         dlg = wx.FileDialog(
-            None, message="Choose a file",#defaultDir=self.current_directory,
+            None, message=_("Choose a file"),#defaultDir=self.current_directory,
             defaultFile="",
             wildcard=wildcard,
             style=wx.OPEN | wx.CHANGE_DIR
@@ -184,7 +189,7 @@ class SqlTable( wx.grid.PyGridTableBase):
         self.engine= create_engine('sqlite:///%s' % db_path, echo=False)
         self.table_names = self.engine.table_names()
         # displays the current tablenames and let the user to choosen one
-        txt1 = ('StaticText', ('Tablas disponibles',))
+        txt1 = ('StaticText', (_('Available tables'),))
         btnChoice= ('Choice',(self.table_names,))
         structure= list()
         structure.append([txt1])
@@ -303,7 +308,7 @@ class SqlTable( wx.grid.PyGridTableBase):
             # update the scrollbars and the displayed part of the grid
             #self.AdjustScrollbars()
         else:
-            raise StandardError("%s doesn't exist"%tableName)
+            raise StandardError(_("%s doesn't exist")%tableName)
 
     def loadTable( self, evt=None):
         metadata=       MetaData( self.engine)
@@ -680,12 +685,12 @@ class SqlTable( wx.grid.PyGridTableBase):
             if pos < self.GetNumberCols() and pos > -1:
                 pos= int(pos)
             else: 
-                raise StandardError("The column number must be a natural value")
+                raise StandardError( _("The column number must be a natural value"))
             originalColumnName= pos[:]
         elif isinstance(pos, (str, unicode)):
             originalColumnName= pos[:]
         else:
-            raise StandardError("Not allowed type for pos")
+            raise StandardError( _("Not allowed type for pos"))
         
         
         col=getattr( self.table.c, originalColumnName)
@@ -695,10 +700,10 @@ class SqlTable( wx.grid.PyGridTableBase):
     def DeleteRows(self, pos= 0, numRows= 1):
         rowNumber= pos
         if not isnumeric(rowNumber):
-            raise StandardError("The row number must be a numeric variable")
+            raise StandardError( _("The row number must be a numeric variable"))
 
         if rowNumber < 0:
-            raise StandardError("The row number to eliminate must be greater than zero")
+            raise StandardError( _("The row number to eliminate must be greater than zero"))
         #elif rowNumber > self.NumberRows:
         #    raise StandardError("The maximum number to delete is %i"%self.NumberRows)
         session= self.Session()
@@ -779,11 +784,10 @@ class SqlGrid( NewGrid):#wx.grid.Grid, object): # wx.grid.Grid
         self.Bind( EVT_GRID_PASTE, self.Onpaste)
         self.Bind(wx.EVT_MOUSEWHEEL,                       self.__OnMouseWheel)
         
-    def newTable(self, evt, engine= None, tablename= None, path= None):
+    def newTable(self, evt=  None, engine= None, tablename= None, path= None):
         if engine== None:
             engine = self.engine
         self.engine= engine
-        
         if tablename == None:
             #<\ generating new table name
             def nameGenerator(startName):
@@ -797,27 +801,41 @@ class SqlGrid( NewGrid):#wx.grid.Grid, object): # wx.grid.Grid
                 if not tablename in self.table.tableNames:
                     break
             # end generating new table name />
-        
+        tablename= self.__transformTovalidTablename(tablename)
         if tablename in self.table.tableNames:
-            raise StandardError("The tablename already exist")
+            raise StandardError(_("The table name already exist"))
         
         if not isinstance( tablename, (str, unicode)):
-            raise StandardError("tablename must be an string")
-        
+            raise StandardError(_("The table name must be an string"))
+
         # creating a new table
         self.__createNewTable( tablename)
         # clear the filter
         self.clearSqlFilter()
         # displaying the current table
         self.table.currTable= tablename
+        # procesing the event
+        wx.GetApp().frame._dbExplorerPanel.GetEventHandler().ProcessEvent( NewTableEvt(evtIDNewTable))
         return tablename
-        
+
+    # alias for newTable
+    def __transformTovalidTablename(self, oldName):
+        validAsciiCharacters= list()
+        tuples= (48,57+1), (65,90+1), (97,122+1)
+        for tpl in tuples:
+            validAsciiCharacters.extend([chr(i) for i in range(*tpl)])
+        validAsciiCharacters.append('_')
+        fnc= lambda x,y: x+y
+        newCharacters = [c for c in oldName if c in validAsciiCharacters]
+        newName = reduce(fnc,newCharacters)
+        return newName
+
     def __createNewTable(self, tableName, size= DEFAULT_COLSIZE):
         from sqlalchemy import MetaData, Column, Table
         from sqlalchemy import Integer, String
         metadata = MetaData( bind=self.engine)
         # creating the main file
-        new_table = (tableName,
+        new_table = (tableName, # brakets are used to manage nonstandar names line .kjdjf=.j
                      metadata,
                      Column('_id', Integer, primary_key= True, autoincrement= True),
                      )
@@ -860,14 +878,13 @@ class SqlGrid( NewGrid):#wx.grid.Grid, object): # wx.grid.Grid
         self.table.setCommit(False)
         evt.Skip()
 
+    @Busy
     def Onpaste(self, evt):
-        busy = wx.BusyInfo(self._("One moment please, waiting for transactions.."))
         self.BeginBatch()
         try:
             self.table.commit()
         finally:
             self.EndBatch()
-            del(busy)
             evt.Skip()
 
     def OnGridRighClic(self,evt):
@@ -994,20 +1011,20 @@ class SqlGrid( NewGrid):#wx.grid.Grid, object): # wx.grid.Grid
         if isinstance(colNumber, (str, unicode)):
             # searching for a col with the name:
             if not(colNumber in self.colNames):
-                raise TypeError('You can only use a numeric value, or the name of an existing column')
+                raise TypeError(_('You can only use a numeric value, or the name of an existing column'))
             colName= colNumber
         elif isnumeric(colNumber):
             if colNumber >=0:
                 colNumber+=1
             elif colNumber < 0:
                 if abs(colNumber) > len(self.colNames):
-                    raise StandardError("None existent index")
+                    raise StandardError(_("Index doesn't exist"))
                 colNumber= len(self.colNames) - abs(colNumber)
             if colNumber > self.GetNumberCols():
-                raise StandardError('The maximum column allowed is %i, but you selected %i'%(self.GetNumberCols()-1, colNumber))
+                raise StandardError( _('The maximum column allowed is %i, but you selected %i')%(self.GetNumberCols()-1, colNumber))
             colName= self.colNames[colNumber]
         else:
-            raise TypeError('You can only use a column name or a numeric value, or the name of an existing column')
+            raise TypeError( _('You can only use a column name or a numeric value, or the name of an existing column'))
         # executing the sql
         session=     self.table.Session()
         rows=        session.query( getattr( self.table.genericDBClass, colName)).filter( self.table._filter).all()
@@ -1025,7 +1042,7 @@ class SqlGrid( NewGrid):#wx.grid.Grid, object): # wx.grid.Grid
 
     def _getRow( self, rowNumber):
         if not isnumeric(rowNumber):
-            raise TypeError('You can only use a numeric value of an existent column')
+            raise TypeError( _('You can only use a numeric value of an existent column'))
         # executing the sql
         session=   self.table.Session()
         row=       session.query( self.Parent.genericDBClass).filter( self.table._filter).offset( rowNumber).limit(1).all()[0]
@@ -1120,23 +1137,23 @@ class SqlGrid( NewGrid):#wx.grid.Grid, object): # wx.grid.Grid
         try:
             if isinstance( colNumber, (str, unicode)):
                 if not(colNumber in self.colNames):
-                    raise TypeError('You can only use a numeric value, or the name of an existing column')
+                    raise TypeError( _('You can only use a numeric value, or the name of an existing column'))
                 for pos, value in enumerate(self.colNames):
                     if value == colNumber:
                         colNumber= pos-1
                         break
 
             if not isnumeric( colNumber):
-                raise TypeError('You can only use a numeric value, or the name of an existing column')
+                raise TypeError( _('You can only use a numeric value, or the name of an existing column'))
 
             if colNumber < 0:
                 colNumber= len(self.colNames)-abs(colNumber)-1
                 if colNumber < 0:
-                    raise StandardError('Index out of range')
+                    raise StandardError( _('Index out of range'))
 
             colNumber= int(colNumber)+1 # avoiding the first column '_id'
             if colNumber > self.GetNumberCols():
-                raise StandardError('The minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
+                raise StandardError(  _('The minimum accepted col is 0, and the maximum is %i')%self.GetNumberCols()-1)
 
             colName= self.colNames[colNumber]
 
@@ -1180,7 +1197,7 @@ class SqlGrid( NewGrid):#wx.grid.Grid, object): # wx.grid.Grid
         if isinstance(colNumber, (str, unicode)):
             # searching for a col with the name:
             if not(colNumber in self.colNames):
-                raise TypeError('You can only use a numeric value, or the name of an existing column')
+                raise TypeError(_('You can only use a numeric value, or the name of an existing column'))
             colName= colNumber
         elif isnumeric(colNumber):
             if colNumber >=0:
@@ -1190,10 +1207,10 @@ class SqlGrid( NewGrid):#wx.grid.Grid, object): # wx.grid.Grid
                     raise StandardError("None existent index")
                 colNumber= len(self.colNames) - abs(colNumber)
             if colNumber > self.GetNumberRows():
-                raise StandardError('The maximum column allowed is %i, but you selected %i'%(self.GetNumberCols()-1, colNumber))
+                raise StandardError(_('The maximum column allowed is %i, but you selected %i')%(self.GetNumberCols()-1, colNumber))
             colName= self.colNames[colNumber]
         else:
-            raise TypeError('You can only use a column name or a numeric value, or the name of an existing column')
+            raise TypeError( _('You can only use a column name or a numeric value, or the name of an existing column'))
         # executing the sql
         session=     self.table.Session()
         rows=        session.query( getattr( self.table.genericDBClass, colName)).\
@@ -1376,7 +1393,14 @@ class SqlGrid( NewGrid):#wx.grid.Grid, object): # wx.grid.Grid
         finally:
             self.table._setcommit(True)
             self.table.commit()
-    
+    def beginBatch(self):
+        self.BeginBatch()
+        self.table.setCommit(False)
+    def endBatch(self):
+        try:
+            self.table.setCommit(True)
+        finally:
+            self.EndBatch()
     def addRowData( self, rowData, pageName= None, currRow = None):
         '''adds a row with it's row content
         addRowData( rowData, pageName, currRow)
@@ -1391,45 +1415,36 @@ class SqlGrid( NewGrid):#wx.grid.Grid, object): # wx.grid.Grid
                 # adding a new page into the notebook
                 page = self.addPage()
             else:
-                page = self.currentPage
-        elif pageName in self._pageObjects.keys():
-            page = self._pageObjects[pageName]
+                page = self.currTable
+        elif pageName in self.tableNames:
+            self.currTable= pageName[:]
+            page = self.currTable
         else:
-            page = self.addPage( name= pageName)
+            page = self.newTable( tablename= pageName)
 
         # check the size of the current page
-        size = (page.GetNumberRows(), page.GetNumberCols())
+        size = (self.GetNumberRows(), self.GetNumberCols())
         # check if it needs to add more columns
         neededCols= size[1] - len( rowData)
         if neededCols <  0:
             neededCols= abs( neededCols)
-            page.AppendCols(neededCols)
-            #< setting the renderer
-            try:
-                attr= wx.grid.GridCellAttr()
-                attr.SetRenderer( floatRenderer( 4))
-                for colNum in range( page.NumberCols - neededCols - 1, page.NumberCols - 1 ):
-                    page.SetColAttr( colNum, attr)
-            except AttributeError:
-                # the renderer was not found
-                pass
-            # setting the renderer />
+            self.AppendCols(neededCols)
 
         # checking if the user input some currRow
         if currRow  == None:
-            currRow = page.NumberRows
-        elif currRow > page.NumberRows:
-            raise StandardError('the maximumn allowed row to insert is the row %i'%(page.NumberRows))
+            currRow = self.table.numRows
+        elif currRow > self.table.numRows:
+            raise StandardError( _('The maximumn allowed row to insert %i')%(self.table.numRows))
         elif currRow < 0:
-            raise StandardError('the minimum allowed row to insert is the row 0')
+            raise StandardError( _('The minimum allowed row to insert 0'))
         currRow = int(currRow)
 
-        if currRow == page.NumberRows:
-            # append one row
-            page.AppendRows(1)
-        else:
-            # insert one row
-            page.InsertRows( pos = currRow, numRows = 1)
+        #if currRow == self.GetNumberRows():
+        #    # append one row
+        #    page.AppendRows(1)
+        #else:
+        #    # insert one row
+        #    page.InsertRows( pos = currRow, numRows = 1)
 
         if isinstance( rowData, (str, unicode)):
             rowData = [rowData]
@@ -1442,13 +1457,13 @@ class SqlGrid( NewGrid):#wx.grid.Grid, object): # wx.grid.Grid
 
         # populate with data
         DECIMAL_POINT= wx.GetApp().DECIMAL_POINT
+        print currRow
         for colPos, rowValue in enumerate( rowData):
             if isinstance( rowValue, (str, unicode)):
                 pass
             else:
                 rowValue = str( rowValue).replace('.', DECIMAL_POINT)
-            page.SetCellValue( currRow, colPos, rowValue)
-            
+            self.SetCellValue( currRow, colPos, rowValue)
             
 class selectDbTableDialog( wx.Dialog):
     def __init__(self, parent,engine,tableName= None, allow2edit= False):
@@ -1472,7 +1487,7 @@ class selectDbTableDialog( wx.Dialog):
         self.okCancel=  okCancelPanel(self, wx.ID_ANY)
         
         self.txtCtrl=   wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_MULTILINE )
-        self.aplyFilterButtom = wx.Button( self, wx.ID_ANY, u"Apply Filter", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.aplyFilterButtom = wx.Button( self, wx.ID_ANY, _(u"Apply Filter"), wx.DefaultPosition, wx.DefaultSize, 0 )
         
         self.m_mgr.AddPane( self.aplyFilterButtom, wx.aui.AuiPaneInfo() .Bottom() .
                             CaptionVisible( False ).CloseButton( False ).PaneBorder( False ).
@@ -1481,17 +1496,17 @@ class selectDbTableDialog( wx.Dialog):
         
 
         self.m_mgr.AddPane( self.m_listBox, wx.aui.AuiPaneInfo().Left().
-                            CaptionVisible(True).Caption('Existent Tables').
+                            CaptionVisible(True).Caption(_('Existent Tables')).
                             MaximizeButton(True).MinimizeButton(False).Resizable(True).
                             PaneBorder( False ).CloseButton( False ).MinSize( wx.Size( 120,-1 )))
 
         self.m_mgr.AddPane( self.m_grid, wx.aui.AuiPaneInfo().Centre().
-                            CaptionVisible(True).Caption('Table contents').
+                            CaptionVisible(True).Caption(_('Table contents')).
                             MaximizeButton(True).MinimizeButton(False).Resizable(True).
                             PaneBorder( False ).CloseButton( False ))
         
         self.m_mgr.AddPane( self.txtCtrl, wx.aui.AuiPaneInfo().Left().
-                            CaptionVisible(True).Caption('Filter').
+                            CaptionVisible(True).Caption(_('Filter')).
                             MaximizeButton(True).MinimizeButton(False).Resizable(True).
                             PaneBorder( False ).CloseButton( False ))
 
@@ -1545,7 +1560,7 @@ class _example( wx.Frame ):
 
         bSizer10 = wx.BoxSizer( wx.VERTICAL )
 
-        self.m_button8 = wx.Button( self, wx.ID_ANY, u"Show Dialog", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_button8 = wx.Button( self, wx.ID_ANY, _(u"Show Dialog"), wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer10.Add( self.m_button8, 0, wx.ALL, 5 )
 
         self.SetSizer( bSizer10 )
@@ -1558,7 +1573,7 @@ class _example( wx.Frame ):
         
     # Virtual event handlers, overide them in your derived class
     def showDialog( self, evt ):
-        dbPath= 'e:\\proyecto gridsql\\mymusic01.db'
+        dbPath= '..\\mymusic01.db'
         engine= create_engine('sqlite:///%s'%dbPath, echo=False)
         dlg= selectDbTableDialog(self, engine,allow2edit= True)
         if dlg.ShowModal() == wx.ID_OK:

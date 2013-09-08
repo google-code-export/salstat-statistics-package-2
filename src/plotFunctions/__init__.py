@@ -1462,9 +1462,7 @@ class _neededLibraries(object):
         self.scatterDialog = scatterDialog
     @property
     def grid(self):
-        cs= wx.GetApp().frame.formulaBarPanel.lastObject
-        if cs == None:
-            cs= wx.GetApp().frame.db
+        cs= wx.GetApp().frame.grid
         return cs
     def _updateColsInfo( self):
         # selectign the last selected panel
