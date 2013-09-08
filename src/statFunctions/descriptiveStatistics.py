@@ -40,7 +40,7 @@ class AllDescriptives(_genericFunc):
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
-        self.name=            self._( "Descriptive Statistics")
+        self.name=            _( "Descriptive Statistics")
         self.statName=        u"allDescriptives"
         self.minRequiredCols= 1
         self.colNameSelect=   ''
@@ -53,7 +53,7 @@ class AllDescriptives(_genericFunc):
         self._updateColsInfo() # update self.columnames and self.colnums
         dlg= wx.Dialog( parent= self.app.frame,
                         id =    wx.ID_ANY,
-                        title = self._("Descriptive Statistics"),
+                        title = _("Descriptive Statistics"),
                         pos =   wx.DefaultPosition,
                         size =  wx.Size( 420,326 ),
                         style = wx.DEFAULT_DIALOG_STYLE )
@@ -66,7 +66,7 @@ class AllDescriptives(_genericFunc):
 
         dlg.m_mgr = wx.aui.AuiManager()
         dlg.m_mgr.SetManagedWindow( dlg )
-        newDescList= [self._( DescListi) for DescListi in self.DescList]
+        newDescList= [_( DescListi) for DescListi in self.DescList]
         dlg.DescChoice = CheckListBox( dlg, wx.ID_ANY,  wx.DefaultPosition, wx.DefaultSize, newDescList, 0 )
         dlg.m_mgr.AddPane( dlg.DescChoice, wx.aui.AuiPaneInfo() .Center() .
                            Caption( wx.GetApp()._( u"Select Descriptive Statistics") ).CloseButton( False ).
@@ -124,11 +124,11 @@ class AllDescriptives(_genericFunc):
             return
 
         if numcolSelect  == 0 or selectedStatistics == 0:
-            self.Logg.write( self._( u"you don't select any items"))
+            self.Logg.write( _( u"you don't select any items"))
             return
 
         if  numcolSelect < self.minRequiredCols:
-            self.Logg.write( self._( u"you have to select at least %i columns")%self.minRequiredCols)
+            self.Logg.write( _( u"you have to select at least %i columns")%self.minRequiredCols)
             return
 
         # self.descriptives( dlg, descs)
@@ -161,13 +161,13 @@ class AllDescriptives(_genericFunc):
 
     def _report(self, result):
         # add the page and the first column
-        firstcol= [self._(u'Descriptives')]
-        firstcol.extend( [self._(desc) for desc in self.selectedStatistics])
-        self.outputGrid.addColData( firstcol, self._(u'Descriptive statistics'))
+        firstcol= [_(u'Descriptives')]
+        firstcol.extend( [_(desc) for desc in self.selectedStatistics])
+        self.outputGrid.addColData( firstcol, _(u'Descriptive statistics'))
 
         for res, colname in zip(result, self.colNameSelect):
             newRes= [colname]
             newRes.extend(res)
             self.outputGrid.addColData( newRes)
 
-        self.Logg.write(self.statName+ ' '+self._('successful'))
+        self.Logg.write(self.statName+ ' '+_('successful'))
