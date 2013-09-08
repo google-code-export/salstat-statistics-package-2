@@ -993,7 +993,6 @@ class MainFrame(wx.Frame):
                             target= self.m_mgr.GetPane(u"scriptPanel"))
 
         #--------------------------------------------------------
-
         # shell panel
         self.m_mgr.AddPane( self.shellPanel,
                             aui.AuiPaneInfo().Name("shellpnl").Caption(translate(u"Shell Panel")).
@@ -1242,8 +1241,8 @@ class MainFrame(wx.Frame):
               (translate(u"&Preferences"),
                ((translate(u"Variables..."),             None,  self.GoVariablesFrame,     None ),
                 [translate(u"Add Columns and Rows..."),  None,  self.GoEditGrid,     None],
-                [translate(u"Change Cell Size..."),      None,  self.GoGridPrefFrame,     None],
-                [translate(u"Change the Font..."),       None,  self.GoFontPrefsDialog,     None],
+                #[translate(u"Change Cell Size..."),      None,  self.GoGridPrefFrame,     None],
+                #[translate(u"Change the Font..."),       None,  self.GoFontPrefsDialog,     None],
                 [u"--"],
                 #[(translate(u"Show/Hide the plot panel"), None, self.showPlotPanel,       None),],
                 #[(translate(u"Show/Hide the script panel"), None, self.showScriptPanel,       None),],
