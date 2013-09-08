@@ -7,6 +7,7 @@ Created on 09/12/2010
 __all__ = ['NewGrid']
 import wx
 import wx.grid
+from salstat2_glob import *
 from slbTools import ReportaExcel
 import xlrd
 from easyDialog import Dialog as dialog
@@ -22,22 +23,24 @@ DECIMAL_POINT = '.'
 from GridCopyPaste import PyWXGridEditMixin, MyContextGrid
 from gridCellRenderers import floatRenderer
 from imagenes import imageEmbed
+from easyDialog import Busy
 ###########################################################################
 ## Class NewGrid
 ###########################################################################
 class NewGrid(wx.grid.Grid, object):
     import datetime
     def __init__(self, parent, size, *args, **params):
-        try:     _ = wx.GetApp()._
-        except:  _ = lambda x: x
-        self.nombre=   'selobu'
+        try:    
+            self.__name= params.pop('name')
+        except: 
+            self.__name = 'selobu'
         self.maxrow=   0
         self.maxcol=   0
         self.zoom=     1.0
         self.moveTo=   None
         self.hasSaved= False
         self.wildcard= _("Suported Formats")+" (*.xls;*xlsx;*.txt;*csv)|*.xls;*xlsx;*.txt;*csv" + \
-                       _("All Files")+" (*.*)|*.*|"
+                       _("All Files")+" (*.*)|*.*"
         #<p> used to check changes in the grid
         self.hasChanged = True
         self.usedCols= ([], [],)
@@ -100,9 +103,16 @@ class NewGrid(wx.grid.Grid, object):
         self.Bind(wx.grid.EVT_GRID_EDITOR_CREATED,         self.onCellEdit)
         self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
         self.Bind(wx.grid.EVT_GRID_CELL_CHANGE,            self.onCellChanged)
+        self.Bind(wx.grid.EVT_GRID_CELL_CHANGE,            self.onCellChangedIncreaseSize)
         self.Bind(wx.grid.EVT_GRID_CELL_RIGHT_CLICK,       self.OnGridRighClic)
         self.Bind(wx.EVT_MOUSEWHEEL,                       self.__OnMouseWheel)
         self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_DCLICK,     self.__onGridCmdLabelLeftDClick)
+    @property    
+    def name(self):
+        return self.__name
+    @name.setter
+    def name(self, name):
+        self.__name = name
     def __onGridCmdLabelLeftDClick(self, evt):
         # identifiyng the column
         colunmNumber= evt.GetCol()
@@ -110,7 +120,7 @@ class NewGrid(wx.grid.Grid, object):
         currName= colNames[colunmNumber]
         # show a dialog to change the name
         struct= list()
-        txt1= ('StaticText', (_('Column name'),))
+        txt1= ('StaticText', ( 'Column name',))
         edit1= ('TextCtrl', (currName,))
         struct.append([txt1, edit1 ])
         dlg= dialog(self, settings= {}, struct= struct)
@@ -192,6 +202,14 @@ class NewGrid(wx.grid.Grid, object):
         self.hasSaved=   False
         evt.Skip()
 
+    def onCellChangedIncreaseSize(self, evt):
+        """to increase the size of the grid by one row or by one column"""
+        numCols, numRows = self.GetNumberCols(), self.GetNumberRows()
+        currColNum, currRowNum = evt.Col, evt.Row
+        if currColNum == numCols -1:   self.AppendCols(1)
+        if currRowNum == numRows-1:    self.AppendRows(1)
+        evt.Skip()
+
     def RangeSelected(self, evt):
         if evt.Selecting():
             self.tl = evt.GetTopLeftCoords()
@@ -206,7 +224,7 @@ class NewGrid(wx.grid.Grid, object):
 
     def CopyData(self, evt):
         self.Copy()
-
+    @Busy
     def PasteData(self, evt):
         self.OnPaste()
         self.hasChanged= True
@@ -240,7 +258,7 @@ class NewGrid(wx.grid.Grid, object):
         self.hasChanged= True
         self.hasSaved=   False
         evt.Skip()
-
+    @Busy
     def SelectAllCells(self, evt):
         self.SelectAll()
 
@@ -347,6 +365,9 @@ class NewGrid(wx.grid.Grid, object):
             pass
         else:
             rows = self.GetUsedRows()
+            if len(rows) == 0:
+                print "Empty sheet"
+                return
             totalResult = self.getByColumns(maxRow = max(rows))
             result= list()
             # reporting the header
@@ -367,7 +388,7 @@ class NewGrid(wx.grid.Grid, object):
             filename = filename[:8]
         print "The file %s was successfully saved!" % self.reportObj.path
         return (True, filename)
-    
+
     def load(self, path, *args, **params):
         # dispath load data depending on the file extension
         if path == None:
@@ -381,7 +402,8 @@ class NewGrid(wx.grid.Grid, object):
                     'xlsx': self.LoadXls,
                     'db':   self._LoadSqlite,
                     'dbf':  self._LoadDbf,
-                    ##'mdb':  self._LoadMdb, ## load an sql database
+                    'mdb':  self._LoadMdb, ## load an sql database
+                    'accdb':self._LoadMdb,
                     }
         try:
             return available[extension](path, *args, **params)
@@ -408,19 +430,121 @@ class NewGrid(wx.grid.Grid, object):
         return (True, path)
 
     def _LoadMdb(self, path, *args, **params):
-        import pyodbc
-        #import adodbapi
-        def connectPyodbc():
-            #return adodbapi.connect("Provider=Microsoft.Jet.OLEDB.4.0; Data Source=%s"%path)
-            return pyodbc.connect("DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=%s"%path)
-
-        # to load data from an access database
-        from sqlalchemy import create_engine
         if path == None:
             return ( False, )
-        engine= create_engine( 'access:///%s'%path, echo=False,)# creator=connectPyodbc)## """DRIVER={Microsoft Access Driver (*.mdb)};DBQ=%s"%path, echo=False, )"""
+        
+        import sys
+        import os
+        import adodbapi
+        path2database= path
+        ## http://social.msdn.microsoft.com/Forums/es-ES/0537e2e2-6c4d-42a0-ba77-b11a08893678/obtener-reportes-de-access
+        path2SystemMdw= os.path.abspath(os.path.join(os.path.split(os.path.abspath(sys.argv[0]))[0],"System.mdw"))
+        constr = "Provider=Microsoft.Jet.OLEDB.4.0;"+\
+                 "Data Source=%s;"+\
+                 "Jet OLEDB:System Database=" + path2SystemMdw
+        constr= constr % path2database
+        # connect to the database
+        conn = adodbapi.connect(constr)
+        # create a cursor
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT * FROM MSysObjects WHERE Type = 1")
+            result = cur.fetchall()
+            # reading the existent tablenames
+            tableNames= list([res for i,res in enumerate(result.ado_results) if 'MSysObjects' in res][0])
+            allowTablenames2Import= [table for table in tableNames if not(table.startswith(u"MSys"))]
+            # creating a dicctionay with all the columns of the existent tables
+            tables= dict()
+            for tablename in allowTablenames2Import:
+                try:
+                    # getting the columns of all tables
+                    cur.execute("Select * from ["+ tablename +"]")
+                    res= cur.fetchone()
+                    tables[tablename]= res.rows.columnNames.keys()
+                except:
+                    continue
+        finally:
+            cur.close()
+            conn.close()
 
-        return ( self._loadDb( engine), path)
+        setting= {'Title': self.name,
+                  '_size': wx.Size(220,300)}
+        structure= list()
+        # se pide la ruta de reporte se escribe una por defecto
+        txt4 =     ('StaticText', (_('Select the table and the fields to import:'),))
+        dbCtrl =  ('DataBaseImport', [tables,])
+        structure.append([txt4])
+        structure.append([dbCtrl])
+        dlg= dialog(settings = setting, struct = structure)
+        if dlg.ShowModal() == wx.ID_OK:
+            values = dlg.GetValue()
+            dlg.Destroy()
+        else:
+            dlg.Destroy()
+            return
+        tableName, fieldNames = values[0] #ordererString is missing
+        ordererString = ''
+        
+        ## import the access data
+        constr = "Provider=Microsoft.Jet.OLEDB.4.0;"+\
+                 "Data Source=%s;" % path2database
+        # connect to the database
+        conn = adodbapi.connect(constr)
+        simp= lambda x,y: x+","+"["+y+"]"
+        # create a cursor
+        try:
+            cur = conn.cursor()
+            # extract all the data
+            #print  fieldNames
+            names2extract= fieldNames
+            if len(fieldNames)== 0:
+                return
+            names2extract[0]= "["+names2extract[0]+"]"
+            sql = "select "+reduce( simp, names2extract) + " from "+ "["+ tableName+ "]"
+            if ordererString in (None,''):
+                sql += " " + ordererString
+            names2extract[0]= names2extract[0][1:-1]
+            #print sql
+            cur.execute( sql)
+            # show the result
+            print _("conecting to the database")
+            result = cur.fetchall()
+            print _("conection sucsessfull")
+            # close the cursor and connection
+        finally:
+            cur.close()
+            conn.close()
+        # sending the data to the report page
+        # report.addRowData(names2extract, "consulta Base de datos", currRow= 0)
+        #creating a new sheet in the Data Entry Panel
+        tableName= self.name
+        # self.grid.addRowData( [], tableName)
+        requiredCols= len(result[0])-self.GetNumberCols()+1
+        requiredRows= len(result)-self.GetNumberRows()+1
+        if requiredCols > 0:
+            self.AppendCols(requiredCols)
+        if requiredRows > 0:
+            self.AppendRows(requiredRows)
+        # start the batch
+        self.BeginBatch()
+        try:
+            for pos, row in enumerate(result):
+                rowData= [getattr(row, prop) for prop in names2extract]
+                newRowData= list()
+                for rowi in rowData:
+                    if rowi == None:
+                        newRowData.append('')
+                    else:
+                        newRowData.append(rowi)
+                self.Parent.Parent.addRowData( newRowData, currRow= pos) # need to be fixed because it dont neet to call the parent
+            # labeling the columns
+        finally:
+            self.EndBatch()
+
+        for pos, colNamei in enumerate(names2extract):
+            self.SetColLabelValue(pos, colNamei)
+
+        return ( True, path)
 
     def _LoadSqlite(self, path, *args, **params):
         # to load data from an sqlite database
@@ -461,7 +585,7 @@ class NewGrid(wx.grid.Grid, object):
         
     def LoadFile(self, evt, **params):
         if not params.has_key('fullpath'):
-            wildcard=  _("Suported files")+" (*.txt;*.csv;*.xls;*.xlsx;*.db;*.dbf)|*.txt;*.csv;*.xls;*.xlsx;*db;*.dbf|"\
+            wildcard=  _("Suported files")+" (*.txt;*.csv;*.xls;*.xlsx;*.db;*.dbf;*.mdb)|*.txt;*.csv;*.xls;*.xlsx;*db;*.dbf*.mdb|"\
                 "Excel Files (*.xlsx;*.xlsm;*.xls)|*.xlsx;*.xlsm;*.xls|"\
                 "Access mdb (*.mdb)|*mdb|"\
                 "Txt file (*.txt)|*.txt|"\
@@ -469,7 +593,7 @@ class NewGrid(wx.grid.Grid, object):
                 "Sqlite Database (*.db)|*.db|"\
                 "dbase Files (*.dbf)|*.dbf|"\
                 "Excel 2007 File (*xlsx)|*.xlsx|"\
-                "Excel 2003 File (*.xls)|*.xls|"
+                "Excel 2003 File (*.xls)|*.xls"
 
             dlg = wx.FileDialog(self, _("Load Data File"), "","",
                                 wildcard= wildcard,
@@ -645,7 +769,7 @@ class NewGrid(wx.grid.Grid, object):
         # se hace el grid de tamanio 1 celda y se redimensiona luego
         self.ClearGrid()
         # reading the size of the needed sheet
-        currentSize= (self.NumberRows, self.NumberCols)
+        currentSize= (self.NumberRows-1, self.NumberCols-1)
         # se lee el tamanio de la pagina y se ajusta las dimensiones
         neededSize = (sheetSelected.nrows, sheetSelected.ncols)
         if neededSize[0]-currentSize[0] > 0:
@@ -1029,7 +1153,10 @@ class NewGrid(wx.grid.Grid, object):
             if not isnumeric( colNumber):
                 raise TypeError('You can only use a numeric value, or the name of an existing column')
     
-            colNumber= int(colNumber)        
+            colNumber= int(colNumber)
+            if colNumber == self.GetNumberCols()-1:
+                # append one column
+                self.AppendCols(1)
             if colNumber < 0 or colNumber > self.GetNumberCols():
                 raise StandardError('The minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
     
@@ -1044,7 +1171,7 @@ class NewGrid(wx.grid.Grid, object):
             if isinstance( data, (ndarray),):
                 data= ravel( data)
     
-            rows2add= len( data) - self.GetNumberRows()
+            rows2add= len( data) - self.GetNumberRows()+1
             if rows2add > 0:
                 if len( data) > 1e6:
                     data= data[:1e6]

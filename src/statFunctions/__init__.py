@@ -8,8 +8,8 @@ __all__ = ["anova",
            "moments",
            "probability",
            "random", "regression",
-           "trimming",                
-           "variability", 
+           "trimming",
+           "variability",
            "xConditionTest",]
 
 from easyDialog import Dialog as _dialog
@@ -21,19 +21,21 @@ class _genericFunc(object):
     id=   None
     name= ''
     ##__scritpEquivalenString= "" # empty string
-        
+
     def callbackFnc(self, *args, **params):
         pass
-    
+
     def callback(self, *args, **params):
         texto= self._scritpEquivalenString[:] + "()"
         return self.callbackFnc(texto)
-    #-------------------------    
+    #-------------------------
     def __init__(self):
         self.name=        ""
         self.statName=    ""
         self.setminRequiredCols= 0
         self.app=         wx.GetApp()
+        self.inputGrid= self.grid
+        self._ =  self.app._
         self.dialog=      _dialog         # to create de dialod
         self.Logg=        self.app.Logg   # to report
         self.outputGrid=  self.app.output # the usern can use the plot functions
