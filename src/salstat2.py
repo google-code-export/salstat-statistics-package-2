@@ -92,6 +92,7 @@ except ImportError:
 
 ##-----------------------------
 ## INTERNAL LIBRARY DEPENDENCIES
+import salstat2_glob
 # graphics system
 from plotFunctions import pltobj as plot
 
@@ -121,8 +122,6 @@ import plotFunctions
 ## END INTERNAL LIBRARY DEPENDENCIES
 ##---------------------------------
 
-APPNAME= 'Salstat2 - Statistical Package'
-__version__= '2.2 a1'
 inits= {}    # dictionary to hold the config values
 missingvalue= None ## It's not used
 imagenes= imageEmbed()
@@ -505,9 +504,12 @@ class Tb1(aui.AuiToolBar):
         allPreferences["Language"] = self.languages.GetValue()
         print "you have to restart the app to see the changes"
         wx.GetApp().SetPreferences( allPreferences)
+        # force next restart to redraw the panel labels
+        wx.GetApp().SetPreferences({"DefaultPerspective": None})
+        wx.GetApp().SetPreferences({"currentPerspective": None})
 
     def LoadFile(self, evt):
-        self.grid.addPage( gridSize= (256,800))
+        self.grid.addPage( gridSize= (1,1))
         (HasLoad, SheetName)= self.grid.LoadFile(evt)
         if not HasLoad:
             # delete the current sheet
@@ -558,7 +560,7 @@ class Tb1(aui.AuiToolBar):
         evt.Skip()
 
     def NewPage(self, evt):
-        self.grid.addPage( gridSize= (256,800))
+        self.grid.addPage( gridSize= (1,1))
         evt.Skip()
 
     def DeleteCurrentCol(self, evt):
@@ -598,7 +600,7 @@ class _checkUpdates(Thread):
         # Define message
         text = "Your version of Salstat2 is: {}\n"
         text += "Available versions are: {}\n\n"
-        text = text.format(__version__, versions)
+        text = text.format(salstat2_glob.VERSION, versions)
 
         # Create a message box
         #structure = list()
@@ -660,12 +662,12 @@ class MainApp(wx.App):
     def OnInit(self):
         # getting the os type
         self.OSNAME=        os.name
-        self.__version__=   __version__
+        self.__version__=   salstat2_glob.VERSION
         self.missingvalue=  missingvalue
         wx.SetDefaultPyEncoding( "utf-8")
         self.translate= translate
         self._= translate
-        self.SetAppName( APPNAME)
+        self.SetAppName( salstat2_glob.APPNAME)
         try:
             installDir = os.path.dirname( os.path.abspath( __file__))
         except:
@@ -680,10 +682,11 @@ class MainApp(wx.App):
 
         # Setup Locale
         locale.setlocale( locale.LC_ALL, '')
-        self.locale = wx.Locale( GetLangId( self.installDir, language))
+        langID= GetLangId( self.installDir, language)
+        self.locale = wx.Locale( langID)
         if self.locale.GetCanonicalName() in GetAvailLocales( self.installDir):
             self.locale.AddCatalogLookupPathPrefix( os.path.join( self.installDir, "locale"))
-            self.locale.AddCatalog( APPNAME)
+            self.locale.AddCatalog( "S2")
         else:
             del self.locale
             self.locale = None
@@ -869,7 +872,7 @@ class MainApp(wx.App):
 # This is the main interface of application
 class MainFrame(wx.Frame):
     from easyDialog.easyDialog import getPath
-    import statsmodels.api as sm
+    import scikits.statsmodels.api as sm
     def __init__( self, parent, appname ):
         self.path=      None
         self.translate= translate
@@ -877,7 +880,7 @@ class MainFrame(wx.Frame):
 
         # setting an appropriate size to the frame
         ca=    wx.Display().GetClientArea()
-        wx.Frame.__init__(self, parent, -1, APPNAME,
+        wx.Frame.__init__(self, parent, -1, salstat2_glob.APPNAME,
                           size = wx.Size( ca[2], ca[-1] ),
                           pos = ( ca[0],ca[1]) )
         self.m_mgr=   aui.AuiManager()
@@ -900,13 +903,13 @@ class MainFrame(wx.Frame):
                                       'icon': imagenes.logo16}
         #<p> set up the datagrid
         self.grid=         NoteBookSheet(self, -1, fb = self.formulaBarPanel)#  NoteBookSql(self, -1)
-        self.grid.addPage( gridSize= (256,800))
+        self.grid.addPage( gridSize= (1,1))
 
         # set up the datagrid  /<p>
 
         # response panel
         self._outputPanel=  NoteBookSheet(self, -1, fb = self.formulaBarPanel)
-        self._outputPanel.addPage( gridSize= (0,0)) #to shown the outputpanel
+        self._outputPanel.addPage( gridSize= (1,1)) #to shown the outputpanel
         self._scriptPanel=  ScriptPanel(self, self.logPanel)
 
         # Redirecting the error messages and the std output to the logPanel
@@ -916,7 +919,7 @@ class MainFrame(wx.Frame):
 
         # Shell
         self.shellPanel=  wx.py.sliceshell.SlicesShell( self,
-                                            introText=            APPNAME+ '\n',
+                                            introText=            salstat2_glob.APPNAME+ '\n',
                                             showPySlicesTutorial= False,
                                             showInterpIntro =     False,
                                             enableShellMode=      True) ##wx.py.crust.Shell( self, -1, introText="S2 interactive shell")
@@ -1507,41 +1510,78 @@ class MainFrame(wx.Frame):
         self.__TransformFrame.Show(True)
 
     def __OnTransformPanelEVAL(self, evt):
-        responseCol, expresion= self.__TransformFrame.GetValue()
+        responseCol, expresion, foundVarNames = self.__TransformFrame.GetValue()
         # defining the variables from the current grid
-        env= {'grid':       self.grid,
-              'numpy':      numpy,
-              'group':      GroupData,
-              'homogenize': homogenize,
-              'scipy':      scipy,
-              'stats':      stats,
-              'getPath':    self.getPath,
-              'sm':         self.sm, # statmodels
-              }
-        # defining the column names to the environment
-        gridCol=       self.grid.GetUsedCols()
-        columnNames=   gridCol[0]
-        listcolnames= list()
-        for colname in columnNames:
-            # defining the columns as numpy arrays
-            listcolnames.append(numpy.array(self.grid.GetCol(colname)))
+        import shapefile
+        import adodbapi
+        env = {'cls':    self.logPanel.clearLog,
+               'grid':   self.grid,
+               'col':    self.grid.GetCol,
+               'show':   self.logPanel.write,
+               'plot':   self.appname.plot,
+               'report': self.appname.output,
+               'numpy':  numpy,
+               'dialog': dialog,
+               'group':  GroupData,
+               'OK':     wx.ID_OK,
+               'homogenize': homogenize,
+               'scipy':  scipy,
+               'stats':  stats,
+               'getPath':self.getPath,
+               'help':   hlp,
+               'sm':     self.sm, # statmodels
+               'sh':     shapefile,
+               'adodbapi': adodbapi, # mdb manipulation
+               ##'db':     self.db,
+        }
 
-        if len(listcolnames)!= 0:
-            listcolnames, nonValidPos= homogenize(*listcolnames, returnPos= False, returnInvalid= True)
+        cs= self.grid
+
+        # getting the column names
+        gridCol = cs.GetUsedCols()
+        columnNames = gridCol[0]
+        columnNumbers = gridCol[1]
+        # identifying the variables used
+        listcolnames = list()
+        allowColumnNames = list()
+        for varName in foundVarNames:
+            # defining the columns as numpy arrays
+            if varName in columnNames:
+                allowColumnNames.append( varName)
+                listcolnames.append( cs.GetCol( varName))
+        nonValidPos= []
+        if len(listcolnames) != 0:
+            listcolnames, nonValidPos = homogenize( *listcolnames, returnPos=False, returnInvalid=True )
         else:
-            nonValidPos= []
-        for colname in columnNames:
-            env[colname]= listcolnames.pop(0)
-        # evaluating the expresion
-        result= eval( expresion, {}, env)
+            nonValidPos = []
+
+        for colName in allowColumnNames:
+            env[colName] = numpy.array(listcolnames.pop(0))
+
+        # Try to evaluate the results at once
+        result = eval( expresion, {}, env)
+
         # writing to the selected variable
         # inserting the position with non valid result
         for pos in nonValidPos:
-            if pos <=len(result):
-                result= numpy.insert(result, pos, None)
-            else:
-                result= numpy.append(result, None)
-        self.grid.PutCol(responseCol, result)
+            try:
+                if pos <= len(result):
+                    result = numpy.insert(result, pos, None)
+                else:
+                    result = numpy.append(result, None)
+            except TypeError:
+                # it's originated when punctual values are calculates i.e. the mean
+                pass
+        #checking if result is a punctual value
+        if not isinstance(result, (str, unicode)):
+            try:
+                len(result)
+            except:
+                result= [result]
+        else:
+            result= [result]
+
+        cs.PutCol(responseCol, result)
         evt.Skip()
 
     def ShowAbout(self, evt):

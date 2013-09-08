@@ -34,13 +34,13 @@ class _genericFunc(object):
         self.statName=    ""
         self.setminRequiredCols= 0
         self.app=         wx.GetApp()
-        self._=   self.app._
-        self.grid= self.inputGrid=   self.app.grid # to read the input data from the main grid
         self.dialog=      _dialog         # to create de dialod
         self.Logg=        self.app.Logg   # to report
         self.outputGrid=  self.app.output # the usern can use the plot functions
         self.plot=        self.app.plot   # acces to the plot system
-
+    @property
+    def grid(self):
+        return wx.GetApp().grid
     def _updateColsInfo(self):
         gridCol=            self.inputGrid.GetUsedCols()
         self.columnNames=   gridCol[0]
