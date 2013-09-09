@@ -128,14 +128,8 @@ imagenes= imageEmbed()
 HOME= os.getcwd()
 
 # Define the translation class
-class translate(unicode):
-    def __new__(cls, original=''):
-        new = unicode.__new__(cls, wx.GetTranslation( original ))
-        new.original = original
-        return new
-
 import __builtin__
-__builtin__.__dict__['_']= translate
+__builtin__.__dict__['_']= wx.GetTranslation
 if wx.Platform == '__WXMSW__':
     # for windows OS
     face1 = 'Courier New'
@@ -216,10 +210,10 @@ class LogPanel( wx.Panel ):
 def GridPrefs(parent):
 #shows dialog for editing the data grid
     btn1=  ['SpinCtrl',   [0,5000,0]]
-    btn2=  ['StaticText', [translate(u"Change the cell Size")]]
-    btn3=  ['StaticText', [translate(u"Column Width")]]
-    btn4=  ['StaticText', [translate(u"Row Height")]]
-    setting= {'Title': translate(u"Change the cell size")}
+    btn2=  ['StaticText', [_(u"Change the cell Size")]]
+    btn3=  ['StaticText', [_(u"Column Width")]]
+    btn4=  ['StaticText', [_(u"Row Height")]]
+    setting= {'Title': _(u"Change the cell size")}
 
     struct= list()
     struct.append([btn2])
@@ -439,7 +433,7 @@ class Tb1(aui.AuiToolBar):
         self._fullScreen= False
 
         imageEmbed=   params.pop('imageEmbed')
-        translate=    params.pop('translation')
+        _=    params.pop('translation')
         aui.AuiToolBar.__init__(self, *args, **params)
         # Get icons for toolbar
         imag =       imageEmbed()
@@ -459,31 +453,31 @@ class Tb1(aui.AuiToolBar):
         self._iconMax= imag.maximize
         self._iconMin= imag.minimize
 
-        self.bt1 = self.AddSimpleTool(10, translate(u"New"),     NewIcon,    translate(u"New"))
-        self.bt2 = self.AddSimpleTool(20, translate(u"Open"),    OpenIcon,   translate(u"Open"))
-        self.bt3 = self.AddSimpleTool(30, translate(u"Save"),    SaveIcon,   translate(u"Save"))
-        self.bt4 = self.AddSimpleTool(40, translate(u"Save As"), SaveAsIcon, translate(u"Save As"))
+        self.bt1 = self.AddSimpleTool(10, _(u"New"),     NewIcon,    _(u"New"))
+        self.bt2 = self.AddSimpleTool(20, _(u"Open"),    OpenIcon,   _(u"Open"))
+        self.bt3 = self.AddSimpleTool(30, _(u"Save"),    SaveIcon,   _(u"Save"))
+        self.bt4 = self.AddSimpleTool(40, _(u"Save As"), SaveAsIcon, _(u"Save As"))
         ##self.bt5 = self.AddSimpleTool(50, "Print",PrintIcon,"Print")
         self.AddSeparator()
-        self.bt11= self.AddSimpleTool(wx.ID_ANY, translate(u"Undo"), UndoIcon, translate(u"Undo"))
-        self.bt12= self.AddSimpleTool(wx.ID_ANY, translate(u"Redo"), RedoIcon, translate(u"Redo"))
+        self.bt11= self.AddSimpleTool(wx.ID_ANY, _(u"Undo"), UndoIcon, _(u"Undo"))
+        self.bt12= self.AddSimpleTool(wx.ID_ANY, _(u"Redo"), RedoIcon, _(u"Redo"))
         self.AddSeparator()
-        self.bt6 = self.AddSimpleTool(60, translate(u"Cut"),  CutIcon,   translate(u"Cut"))
-        self.bt7 = self.AddSimpleTool(70, translate(u"Copy"), CopyIcon,  translate(u"Copy"))
-        self.bt8 = self.AddSimpleTool(80, translate(u"Paste"),PasteIcon, translate(u"Paste"))
+        self.bt6 = self.AddSimpleTool(60, _(u"Cut"),  CutIcon,   _(u"Cut"))
+        self.bt7 = self.AddSimpleTool(70, _(u"Copy"), CopyIcon,  _(u"Copy"))
+        self.bt8 = self.AddSimpleTool(80, _(u"Paste"),PasteIcon, _(u"Paste"))
         self.AddSeparator()
-        self.bt9 = self.AddSimpleTool(85, translate(u"Preferences"),PrefsIcon, translate(u"Preferences"))
+        self.bt9 = self.AddSimpleTool(85, _(u"Preferences"),PrefsIcon, _(u"Preferences"))
         ##self.bt10= selfAddSimpleTool(90, "Help", HelpIcon, "Help")
-        self.bt10= self.AddSimpleTool(95, translate(u"OnlineHelp"), HelpIcon, translate(u"Online Help"))
-        self.btnMax= self.AddSimpleTool(100, translate(u"Maximize"), self._iconMax, translate(u"Maximize"))
-        ##self.bt13= self.AddSimpleTool(100, translate(u"Close"), closePage, translate(u"Close Current Page"))
+        self.bt10= self.AddSimpleTool(95, _(u"OnlineHelp"), HelpIcon, _(u"Online Help"))
+        self.btnMax= self.AddSimpleTool(100, _(u"Maximize"), self._iconMax, _(u"Maximize"))
+        ##self.bt13= self.AddSimpleTool(100, _(u"Close"), closePage, _(u"Close Current Page"))
 
         # to the language
         language = wx.GetApp().GetPreferences( "Language")
         if not language:
             language = "Default"
         self.languages= LangListCombo( self , language)
-        self.translateBtn= self.AddControl( self.languages, label= "Language")
+        self._Btn= self.AddControl( self.languages, label= "Language")
         self.SetToolBitmapSize( (24,24))
         self.Realize()
         self.languages.Bind( wx.EVT_COMBOBOX, self._changeLanguage) # id= self.languages.GetId()
@@ -606,7 +600,7 @@ class _checkUpdates(Thread):
         #structure = list()
         #btn1 = ('StaticText', (text,))
         #structure.append( [btn1] )
-        #Settings = {'Title': translate(u"Check for the latest version.")}
+        #Settings = {'Title': _(u"Check for the latest version.")}
         #dlg= dialog(parent= None, struct= structure, settings= Settings)
         print text
 
@@ -665,8 +659,8 @@ class MainApp(wx.App):
         self.__version__=   salstat2_glob.VERSION
         self.missingvalue=  missingvalue
         wx.SetDefaultPyEncoding( "utf-8")
-        self.translate= translate
-        self._= translate
+        self._= wx.GetTranslation
+        self._= wx.GetTranslation
         self.SetAppName( salstat2_glob.APPNAME)
         try:
             installDir = os.path.dirname( os.path.abspath( __file__))
@@ -686,7 +680,7 @@ class MainApp(wx.App):
         self.locale = wx.Locale( langID)
         if self.locale.GetCanonicalName() in GetAvailLocales( self.installDir):
             self.locale.AddCatalogLookupPathPrefix( os.path.join( self.installDir, "locale"))
-            self.locale.AddCatalog( "S2")
+            self.locale.AddCatalog( salstat2_glob.APPNAME)
         else:
             del self.locale
             self.locale = None
@@ -765,7 +759,7 @@ class MainApp(wx.App):
             # or at any other time, pointing salstat at itself is pointless!
             pass
         else:
-            texto= translate(u"%s dropped on S2 dock icon")%(filename)
+            texto= _(u"%s dropped on S2 dock icon")%(filename)
             print texto
             self.OpenFileMessage(filename)
 
@@ -875,7 +869,7 @@ class MainFrame(wx.Frame):
     import scikits.statsmodels.api as sm
     def __init__( self, parent, appname ):
         self.path=      None
-        self.translate= translate
+        self._= wx.GetTranslation
         self.window=    self
 
         # setting an appropriate size to the frame
@@ -942,17 +936,17 @@ class MainFrame(wx.Frame):
         # adding panels to the aui
         # toolbar 1
         self.m_mgr.AddPane( self.tb1, aui.AuiPaneInfo().Name("tb1").
-                            Caption(translate(u"Basic Operations")).
+                            Caption(_(u"Basic Operations")).
                             ToolbarPane().Top().Row(1).Position(0).CloseButton( False )) #
         # formula bar
         self.m_mgr.AddPane( self.formulaBarPanel,
-                            aui.AuiPaneInfo().Name("tb2").Caption( translate(u"Inspection Tool")).
+                            aui.AuiPaneInfo().Name("tb2").Caption( _(u"Inspection Tool")).
                             ToolbarPane().Top().Row(1).Position(1).CloseButton( False )) #.Right()
 
         # explorer panel
         self.m_mgr.AddPane( self.treePanel,
                             aui.AuiPaneInfo().Name("expnl").Left().CaptionVisible(True).
-                            Caption(translate(u"Explorer Panel")).
+                            Caption(_(u"Explorer Panel")).
                             MaximizeButton(True).MinimizeButton(True).Resizable(True).
                             PaneBorder( False ).CloseButton( False ).
                             FloatingSize( wx.Size(400,400)).
@@ -961,7 +955,7 @@ class MainFrame(wx.Frame):
         # data entry panel
         self.m_mgr.AddPane( self.grid,
                             aui.AuiPaneInfo().Name("dataentry").Centre().CaptionVisible(True).
-                            Caption(translate(u"Data Entry Panel")).
+                            Caption(_(u"Data Entry Panel")).
                             MaximizeButton(True).MinimizeButton(False).Resizable(True).
                             PaneBorder( False ).CloseButton( False ).
                             FloatingSize( wx.Size(400,400) ).
@@ -971,7 +965,7 @@ class MainFrame(wx.Frame):
         # notebook panel
         # scripting panel
         self.m_mgr.AddPane( self._scriptPanel,
-                            aui.AuiPaneInfo().Name(u'scriptPanel').Caption(translate(u"Script Panel")).
+                            aui.AuiPaneInfo().Name(u'scriptPanel').Caption(_(u"Script Panel")).
                             Right().CaptionVisible(True).PinButton().Show(True).
                             FloatingSize( wx.Size(400,500) ).
                             MinimizeButton(False).Resizable(True).MaximizeButton(True).
@@ -980,14 +974,14 @@ class MainFrame(wx.Frame):
         # chart selection panel
         self.m_mgr.AddPane( self.plotSelection,
                             aui.AuiPaneInfo().Name("charts").Show(True).
-                            CaptionVisible(True).Caption(translate(u"Chart selection panel")).
+                            CaptionVisible(True).Caption(_(u"Chart selection panel")).
                             MinimizeButton(False).Resizable(True).MaximizeButton(True).PinButton().
                             PaneBorder( False ).CloseButton( False ).MinSize( wx.Size( 240,-1 )),
                             target= self.m_mgr.GetPane(u"scriptPanel"))
         # output panel
         self.m_mgr.AddPane( self._outputPanel,
                             aui.AuiPaneInfo().Name(u"outputPanel").
-                            CaptionVisible(True).Caption(translate(u"Output Panel")).
+                            CaptionVisible(True).Caption(_(u"Output Panel")).
                             MinimizeButton(False).Resizable(True).MaximizeButton(True).PinButton().Show(True).
                             PaneBorder( False ).CloseButton( False ).MinSize( wx.Size( 240,-1 )).Show(True),
                             target= self.m_mgr.GetPane(u"scriptPanel"))
@@ -995,7 +989,7 @@ class MainFrame(wx.Frame):
         #--------------------------------------------------------
         # shell panel
         self.m_mgr.AddPane( self.shellPanel,
-                            aui.AuiPaneInfo().Name("shellpnl").Caption(translate(u"Shell Panel")).
+                            aui.AuiPaneInfo().Name("shellpnl").Caption(_(u"Shell Panel")).
                             DefaultPane().Bottom().CloseButton( False ).MaximizeButton( True ).
                             MinimizeButton().PinButton( ).Resizable(True).
                             Dock().FloatingSize( wx.Size(260,200)).
@@ -1004,7 +998,7 @@ class MainFrame(wx.Frame):
 
         # log panel
         self.m_mgr.AddPane( self.logPanel,
-                            aui.AuiPaneInfo().Name("lgpnl").Caption(translate(u"Log Panel")).
+                            aui.AuiPaneInfo().Name("lgpnl").Caption(_(u"Log Panel")).
                             DefaultPane().Bottom().CloseButton( False ).MaximizeButton( True ).
                             MinimizeButton().PinButton().Resizable(True).
                             Dock().FloatingSize( wx.Size(260,200) ).
@@ -1154,7 +1148,7 @@ class MainFrame(wx.Frame):
         return Tb1(self, -1, wx.DefaultPosition, wx.DefaultSize, style = 0,
                    agwStyle = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT,
                    imageEmbed= imageEmbed,
-                   translation= translate)
+                   translation= wx.GetTranslation)
 
     def _autoCreateMenu(self, module, twoGraph = False):
         # automatically creates a menu related with a specified module
@@ -1166,10 +1160,10 @@ class MainFrame(wx.Frame):
             for item in attr.__all__:
                 fnc= getattr( attr, item)
                 if twoGraph:
-                    result.append( ( translate( fnc.name), fnc.image, getattr( fnc(), 'showGui'), fnc.id))
+                    result.append( ( _( fnc.name), fnc.image, getattr( fnc(), 'showGui'), fnc.id))
                 else:
-                    result.append( ( translate( fnc.name), fnc.icon, getattr( fnc(), 'showGui'), fnc.id))
-            subgroup.append( ( translate( attr.__name__), result))
+                    result.append( ( _( fnc.name), fnc.icon, getattr( fnc(), 'showGui'), fnc.id))
+            subgroup.append( ( _( attr.__name__), result))
         return subgroup
 
     def _createMenuUpdadteTree(self):
@@ -1202,57 +1196,57 @@ class MainFrame(wx.Frame):
 
         #add contents of menu
         dat1= (
-            (translate(u"&File"),
-             ([translate(u"&New Data\tCtrl-N"),   NewIcon,    self.tb1.NewPage,     wx.ID_NEW],
-              [translate(u"&Open...\tCtrl-O"),    OpenIcon,   self.grid.LoadFile,   wx.ID_OPEN], # LoadXls
+            (_(u"&File"),
+             ([_(u"&New Data\tCtrl-N"),   NewIcon,    self.tb1.NewPage,     wx.ID_NEW],
+              [_(u"&Open...\tCtrl-O"),    OpenIcon,   self.grid.LoadFile,   wx.ID_OPEN], # LoadXls
               [u"--"],
-              ##[translate(u"Load From MySql"),     OpenIcon,   self.loadMsql, None],
+              ##[_(u"Load From MySql"),     OpenIcon,   self.loadMsql, None],
               ##[u"--"],
-              [translate(u"&Save\tCtrl-S"),       SaveIcon,   self.grid.SaveXls,         wx.ID_SAVE],
-              [translate(u"Save &As...\tCtrl-Shift-S"), SaveAsIcon, self.grid.SaveXlsAs, wx.ID_SAVEAS],
+              [_(u"&Save\tCtrl-S"),       SaveIcon,   self.grid.SaveXls,         wx.ID_SAVE],
+              [_(u"Save &As...\tCtrl-Shift-S"), SaveAsIcon, self.grid.SaveXlsAs, wx.ID_SAVEAS],
               ##["&Print...\tCtrl-P",   PrintIcon,  None,     None],
               [u"--"],
-              [translate(u"E&xit\tCtrl-Q"),       ExitIcon,   self.EndApplication,  wx.ID_EXIT],
+              [_(u"E&xit\tCtrl-Q"),       ExitIcon,   self.EndApplication,  wx.ID_EXIT],
               )),
 
-            (translate(u"&Edit"),
-             ([translate(u"Cu&t"),           CutIcon,         self.tb1.CutData,     wx.ID_CUT],
-              [translate(u"&Copy"),          CopyIcon,        self.tb1.CopyData,    wx.ID_COPY],
-              [translate(u"&Paste"),         PasteIcon,       self.tb1.PasteData,   wx.ID_PASTE],
+            (_(u"&Edit"),
+             ([_(u"Cu&t"),           CutIcon,         self.tb1.CutData,     wx.ID_CUT],
+              [_(u"&Copy"),          CopyIcon,        self.tb1.CopyData,    wx.ID_COPY],
+              [_(u"&Paste"),         PasteIcon,       self.tb1.PasteData,   wx.ID_PASTE],
               [u"--"],
-              [translate(u"Select &All\tCtrl-A"),    None,    self.tb1.SelectAllCells,   wx.ID_SELECTALL],
+              [_(u"Select &All\tCtrl-A"),    None,    self.tb1.SelectAllCells,   wx.ID_SELECTALL],
               ##["&Find and Replace...\tCtrl-F",  FindRIcon,     self.GoFindDialog,     wx.ID_REPLACE],
               [u"--"],
-              ##[translate(u"Delete Current Column"), None,     self.tb1.DeleteCurrentCol,     None],
-              [translate(u"Delete Current Row"),    None,     self.tb1.DeleteCurrentRow,     None],)),
+              ##[_(u"Delete Current Column"), None,     self.tb1.DeleteCurrentCol,     None],
+              [_(u"Delete Current Row"),    None,     self.tb1.DeleteCurrentRow,     None],)),
 
-            (translate(u"P&reparation"),
-             ([translate(u"Transform Data"),           None,  self.GoTransformData,     None],
-              [translate(u"short data"),               None,  self.shortData,     None],)),
+            (_(u"P&reparation"),
+             ([_(u"Transform Data"),           None,  self.GoTransformData,     None],
+              [_(u"short data"),               None,  self.shortData,     None],)),
 
-            (translate(u"S&tatistics"),
+            (_(u"S&tatistics"),
              statisticalMenus),
 
-            (translate(u"&Graph"),
+            (_(u"&Graph"),
              plotMenus),
 
-            (translate(u"&Help"),
+            (_(u"&Help"),
              (##("Help\tCtrl-H",       imag.about(),  self.GoHelpSystem,  wx.ID_HELP),
-              (translate(u"&Preferences"),
-               ((translate(u"Variables..."),             None,  self.GoVariablesFrame,     None ),
-                [translate(u"Add Columns and Rows..."),  None,  self.GoEditGrid,     None],
-                #[translate(u"Change Cell Size..."),      None,  self.GoGridPrefFrame,     None],
-                #[translate(u"Change the Font..."),       None,  self.GoFontPrefsDialog,     None],
+              (_(u"&Preferences"),
+               ((_(u"Variables..."),             None,  self.GoVariablesFrame,     None ),
+                [_(u"Add Columns and Rows..."),  None,  self.GoEditGrid,     None],
+                #[_(u"Change Cell Size..."),      None,  self.GoGridPrefFrame,     None],
+                #[_(u"Change the Font..."),       None,  self.GoFontPrefsDialog,     None],
                 [u"--"],
-                #[(translate(u"Show/Hide the plot panel"), None, self.showPlotPanel,       None),],
-                #[(translate(u"Show/Hide the script panel"), None, self.showScriptPanel,       None),],
-                [translate(u"Load default perspective"),      None, self.onDefaultPerspective, None],)),
+                #[(_(u"Show/Hide the plot panel"), None, self.showPlotPanel,       None),],
+                #[(_(u"Show/Hide the script panel"), None, self.showScriptPanel,       None),],
+                [_(u"Load default perspective"),      None, self.onDefaultPerspective, None],)),
               [u"--"],
-              (translate(u"Check for a new version"), None, wx.GetApp()._checkUpdates, None),
-              (translate(u"Give us some feedback"), None, wx.GetApp()._getFeedBack, None),
+              (_(u"Check for a new version"), None, wx.GetApp()._checkUpdates, None),
+              (_(u"Give us some feedback"), None, wx.GetApp()._getFeedBack, None),
               [u"--"],
-              (translate(u"Visit The blog of S2"), None,  wx.GetApp()._visitBlog, None),
-              (translate(u"&About..."),          imag.icon16, self.ShowAbout,     wx.ID_ABOUT),
+              (_(u"Visit The blog of S2"), None,  wx.GetApp()._visitBlog, None),
+              (_(u"&About..."),          imag.icon16, self.ShowAbout,     wx.ID_ABOUT),
               )),
         )
         # updating the tree
@@ -1292,7 +1286,7 @@ class MainFrame(wx.Frame):
             self.__createMenu(item[1], menu)
 
         if wx.Platform == "__WXMAC__":
-            wx.GetApp().SetMacHelpMenuTitleName(translate(u"&Help"))
+            wx.GetApp().SetMacHelpMenuTitleName(_(u"&Help"))
             # Allow spell checking in cells. While enabled by a wx configuration, this is done by Mac OS X, and appears
             # to have been deprecated by Apple in OS X Mountain Lion according to wxPython Devs. It had been left in
             # since it is still useful for pre-Mountain Lion users. It appears to have been replaced at the OS X level
@@ -1333,7 +1327,7 @@ class MainFrame(wx.Frame):
 
     def _OnNtbDbClick(self, evt):
         for pane in self.m_mgr.GetAllPanes():
-            if pane.caption == self.translate(u"Data Entry Panel"):
+            if pane.caption == self._(u"Data Entry Panel"):
                 break
         if not pane.IsMaximized():
             self.m_mgr.MaximizePane(pane)
@@ -1387,8 +1381,8 @@ class MainFrame(wx.Frame):
     def GoClearData(self, evt):
         if not self.grid.hasSaved:
             # display discard dialog
-            dlg = wx.MessageDialog(None, translate(u"Do you wish to save now?"),
-                                   translate(u"You have Unsaved Data"), wx.YES_NO | wx.CANCEL | wx.ICON_QUESTION)
+            dlg = wx.MessageDialog(None, _(u"Do you wish to save now?"),
+                                   _(u"You have Unsaved Data"), wx.YES_NO | wx.CANCEL | wx.ICON_QUESTION)
             response = dlg.ShowModal()
             if response == wx.ID_CANCEL:
                 return
@@ -1425,7 +1419,7 @@ class MainFrame(wx.Frame):
         # Shows the find & replace dialog
         # NOTE - this doesn't appear to work on the grid, so I might be missing something...
         data = wx.FindReplaceData()
-        dlg = wx.FindReplaceDialog(self.grid, data, translate(u"Find and Replace"), \
+        dlg = wx.FindReplaceDialog(self.grid, data, _(u"Find and Replace"), \
                                    wx.FR_REPLACEDIALOG)
         dlg.data = data
         dlg.Show(True)
@@ -1433,10 +1427,10 @@ class MainFrame(wx.Frame):
     def GoEditGrid(self, evt):
         #shows dialog for editing the data grid
         btn1=  ["SpinCtrl",   [0,5000,0]]
-        btn2=  ["StaticText", [translate(u"Change Grid Size")]]
-        btn3=  ["StaticText", [translate(u"Add Columns")]]
-        btn4=  ["StaticText", [translate(u"Add Rows")]]
-        setting= {"Title": translate(u"Change Grid size")}
+        btn2=  ["StaticText", [_(u"Change Grid Size")]]
+        btn3=  ["StaticText", [_(u"Add Columns")]]
+        btn4=  ["StaticText", [_(u"Add Rows")]]
+        setting= {"Title": _(u"Change Grid size")}
 
         struct= list()
         struct.append([btn2])
@@ -1462,10 +1456,10 @@ class MainFrame(wx.Frame):
     def GoGridPrefFrame(self, evt):
         # shows Grid Preferences form
         btn1=  ["SpinCtrl",   [5,90,5]]
-        btn2=  ["StaticText", [translate(u"Change the cell Size")]]
-        btn3=  ["StaticText", [translate(u"Column Width")]]
-        btn4=  ["StaticText", [translate(u"Row Height")]]
-        setting= {"Title": translate(u"Change the cell size")}
+        btn2=  ["StaticText", [_(u"Change the cell Size")]]
+        btn3=  ["StaticText", [_(u"Column Width")]]
+        btn4=  ["StaticText", [_(u"Row Height")]]
+        setting= {"Title": _(u"Change the cell size")}
 
         struct= list()
         struct.append([btn2])
@@ -1591,20 +1585,20 @@ class MainFrame(wx.Frame):
         info.Icon= wx.GetApp().icon64
         from wx.lib.wordwrap import wordwrap
         info.Description = wordwrap(
-            translate(u"This is a newer version of the SalStat2 Statistical Package. ")+
-            translate(u"There have been new improvements:\n\n")+
-            translate(u"*You can cut, copy, and paste multiple cells,\n")+
-            translate(u"*You can undo and redo some actions.\n")+
-            translate(u"*The calculations are faster than the original version.\n\n")+
-            translate(u"The plot system can draw:\n\n")+
-            translate(u"*Scatter charts\n*line chart of all means\n*bar chart of all means\n")+
-            translate(u"*Histogram chart\n")+
-            translate(u"*Line charts of the data,\n*box and whisker chart\n*Ternary chart\n")+
-            translate(u"*Linear regression plot (show the equation and the correlation inside the chart),\n")+
-            translate(u"\nThe input data can be saved to, and loaded from an xls format file.\n\n")+
-            translate(u"S2 can be scripted by using Python.\n\n")+
-            translate(u"All the numerical results are send to a sheet in a different panel where you can cut, copy, paste, and edit them.\n\n")+
-            translate(u"and much more!"),
+            _(u"This is a newer version of the SalStat2 Statistical Package. ")+
+            _(u"There have been new improvements:\n\n")+
+            _(u"*You can cut, copy, and paste multiple cells,\n")+
+            _(u"*You can undo and redo some actions.\n")+
+            _(u"*The calculations are faster than the original version.\n\n")+
+            _(u"The plot system can draw:\n\n")+
+            _(u"*Scatter charts\n*line chart of all means\n*bar chart of all means\n")+
+            _(u"*Histogram chart\n")+
+            _(u"*Line charts of the data,\n*box and whisker chart\n*Ternary chart\n")+
+            _(u"*Linear regression plot (show the equation and the correlation inside the chart),\n")+
+            _(u"\nThe input data can be saved to, and loaded from an xls format file.\n\n")+
+            _(u"S2 can be scripted by using Python.\n\n")+
+            _(u"All the numerical results are send to a sheet in a different panel where you can cut, copy, paste, and edit them.\n\n")+
+            _(u"and much more!"),
             460, wx.ClientDC( self))
         info.WebSite = ( u"http://code.google.com/p/salstat-statistics-package-2/", u"S2 home page")
         info.Developers = [ u"Sebastian Lopez Buritica", "Mark Livingstone, Salstat2 Team",]
