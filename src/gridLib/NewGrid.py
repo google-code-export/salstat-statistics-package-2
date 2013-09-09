@@ -206,8 +206,12 @@ class NewGrid(wx.grid.Grid, object):
         """to increase the size of the grid by one row or by one column"""
         numCols, numRows = self.GetNumberCols(), self.GetNumberRows()
         currColNum, currRowNum = evt.Col, evt.Row
-        if currColNum == numCols -1:   self.AppendCols(1)
-        if currRowNum == numRows-1:    self.AppendRows(1)
+        if currColNum == numCols -1:
+            self.AppendCols(1)
+            self.SetGridCursor(currRowNum, numCols)
+        if currRowNum == numRows-1:
+            self.AppendRows(1)
+            self.SetGridCursor(numRows,currColNum)
         evt.Skip()
 
     def RangeSelected(self, evt):
