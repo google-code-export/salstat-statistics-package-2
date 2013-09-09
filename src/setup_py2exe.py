@@ -46,12 +46,12 @@ opts = { "py2exe":
                            "PyQt4",
                            "statFunctions.*",  # importing the statistical functions
                            "plotFunctions.*", 
-                           "statsmodels.*",
-                           "scipy.interpolate",
-                           "scipy.stats",
+                           "scikits",
+                           "scipy.interpolate", "scipy.stats", "scipy.signal",
+                           "scikits.statsmodels", "scikits.statsmodels.tsa.stattools",
                            "sqlalchemy",
                            "sqlalchemy.dialects.sqlite",
-                           "sqlalchemy.dialects.mysql", "mysql", # mysql is a connector library
+                           "sqlalchemy.dialects.mysql",
                            ],
               "excludes":['_gtkagg',       '_tkagg',             '_agg2',    
                           '_fltkagg',      '_gtk',               '_gtkcairo',

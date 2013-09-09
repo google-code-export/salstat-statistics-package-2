@@ -9,7 +9,7 @@ SetCompressor /SOLID LZMA
 !define CURRPATH "..\..\SalStatdist\"
 !define SRCPATH "src"
 !define REGKEY "SOFTWARE\$(^Name)"
-!define VERSION 2.1
+!define VERSION 2.2
 !define COMPANY "Sebastian Lopez Buritica"
 !define URL http://selobu.blogspot.com
 # to check if the app is running
@@ -61,12 +61,12 @@ Var vcredist2008set
 RequestExecutionLevel admin
 
 # Installer attributes
-OutFile "S2 V2.2 a1 setup.exe"
+OutFile "S2 V2.2 a2 setup.exe"
 InstallDir S2
 CRCCheck on
 XPStyle on
 ShowInstDetails nevershow
-VIProductVersion 2.2.0.0
+VIProductVersion 2.2.0.2
 VIAddVersionKey /LANG=${LANG_ENGLISH} ProductName "$(^Name)"
 VIAddVersionKey /LANG=${LANG_ENGLISH} ProductVersion "${VERSION}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} CompanyName "${COMPANY}"

@@ -428,7 +428,7 @@ def GetAvailLocales(installDir):
     langDir = installDir
     loc = glob.glob(os.path.join(langDir, "locale", "*"))
     for path in loc:
-        the_path = os.path.join(path, "LC_MESSAGES", "S2.mo")
+        the_path = os.path.join(path, "LC_MESSAGES", salstat2_glob.APPNAME+".mo")
         if os.path.exists(the_path):
             avail_loc.append(os.path.basename(path))
     return avail_loc
