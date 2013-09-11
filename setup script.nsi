@@ -61,7 +61,7 @@ Var vcredist2008set
 RequestExecutionLevel admin
 
 # Installer attributes
-OutFile "S2 V2.2 a2 setup.exe"
+OutFile "Salstat2 V2.2 a2 setup.exe"
 InstallDir S2
 CRCCheck on
 XPStyle on

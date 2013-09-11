@@ -97,7 +97,7 @@ import salstat2_glob
 from plotFunctions import pltobj as plot
 
 # spreadSheet
-from ntbSheet import NoteBookSheet, NoteBookSql
+from gridLib.ntbSheet import NoteBookSheet, NoteBookSql
 from gridLib  import floatRenderer
 
 # import modules to be used into the script panel
