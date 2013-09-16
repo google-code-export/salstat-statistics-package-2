@@ -461,12 +461,6 @@ class emptylog:
 class ScriptPanel( wx.Panel):
     tb1= None
     def __init__( self, parent,*args, **params ):
-        try:
-            self._= wx.GetApp()._
-        except:
-            self._= lambda x: x
-        _= self._
-
         self.finddlg= None
         self.finddata = wx.FindReplaceData()
         self.finddata.SetFlags(wx.FR_DOWN)
@@ -514,7 +508,6 @@ class ScriptPanel( wx.Panel):
         self.Center( )
 
     def _createToolbar( self):
-        _= self._
         if self.tb1 != None:
             return
 
@@ -628,7 +621,6 @@ class ScriptPanel( wx.Panel):
         return ntb # ret;na el objeto ntb
 
     def OnshowFindDlg(self, evt):
-        _= self._
         if self.finddlg != None:
             return
         ##self.nb.SetSelection(1)
@@ -647,7 +639,6 @@ class ScriptPanel( wx.Panel):
         self.finddlg = None
 
     def OnFind(self, evt):
-        _= self._
         editor = self
         ##self.nb.SetSelection(1)
         end = editor.GetLastPosition()
