@@ -293,7 +293,7 @@ http://code.google.com/p/salstat-statistics-package-2/
 In early 2007 your author (Mark Livingstone) was a mature age undergraduate
  at Griffith University on the Gold Coast, Queensland, Australia studying
  part time towards his Bachelor of Information Technology.
- With an interest in Bioinformatics (combining Science and Information technolog
+ With an interest in Bioinformatics (combining Science and Information Technolog
 y,) he decided to try the Biostatistics course being offered by the Medical
  Science School.
  As an aid to learning, and because SPSS is not exactly something you could
@@ -401,12 +401,608 @@ If this sounds like what you are looking for, let us move into the next
 Installation
 \end_layout
 
+\begin_layout Standard
+Since it is written in Python, as are its dependant libraries, S2 is automatical
+ly a multiplatform program.
+ The developers have verified that it should work well on Windows, Mac OS
+ X, and Linux platforms.
+ For some operating system platforms we produce a 
+\begin_inset Quotes eld
+\end_inset
+
+Portable
+\begin_inset Quotes erd
+\end_inset
+
+ version.
+ These include all dependencies as well as the S2 executables.
+ For non-portable versions, it may be necessary to install some of the dependenc
+ies which include:
+\end_layout
+
+\begin_layout Standard
+Python >= v2.74 (NOT 3.x)
+\end_layout
+
+\begin_layout Standard
+wxPython >=v2.9.4 (Cocoa on OS X, we do not test with previous Carbon versions)
+\end_layout
+
+\begin_layout Standard
+xlrd
+\end_layout
+
+\begin_layout Standard
+xlwt
+\end_layout
+
+\begin_layout Standard
+xlutils
+\end_layout
+
+\begin_layout Standard
+matplotlib
+\end_layout
+
+\begin_layout Standard
+numpy >= v1.7
+\end_layout
+
+\begin_layout Standard
+PyQt4
+\end_layout
+
+\begin_layout Standard
+PIL
+\end_layout
+
+\begin_layout Standard
+SQLAlchemy
+\end_layout
+
+\begin_layout Standard
+Scikits Statsmodels
+\end_layout
+
+\begin_layout Standard
+Some of these can be installed using the Python 
+\begin_inset Quotes eld
+\end_inset
+
+pip
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+easy_install
+\begin_inset Quotes erd
+\end_inset
+
+ utilities.
+ We suggest you check the relevant website for platform specific installation
+ details.
+\end_layout
+
+\begin_layout Standard
+If you wish to run S2 from source code, or to join us in developing S2,
+ there will be other dependencies (which we assume advanced users will be
+ able to work out for themselves!) 
+\end_layout
+
+\begin_layout Standard
+S2 will NOT work with Python v3.x (stable versions of all S2 dependencies
+ are not yet available for Python v3.x, and S2 uses Python v2.x syntax)
+\end_layout
+
 \begin_layout Section
 Getting S2
 \end_layout
 
+\begin_layout Subsection
+Binaries
+\end_layout
+
+\begin_layout Standard
+While we used to develop S2 on the Google Code website, we have transitioned
+ to Sourceforge.
+ The website can be found at: 
+\begin_inset CommandInset href
+LatexCommand href
+name "S2statistical Website"
+target "http://sourceforge.net/projects/s2statistical/"
+
+\end_inset
+
+.
+ From the homepage, select the 
+\begin_inset Quotes eld
+\end_inset
+
+Files
+\begin_inset Quotes erd
+\end_inset
+
+ tab which will display a list of available S2 versions for the different
+ platforms.
+ 
+\end_layout
+
+\begin_layout Subsection
+Source Code
+\end_layout
+
+\begin_layout Standard
+For development, we use the Mercurial repository on Sourceforge.
+ Details can be found by clicking on the S2 homepage 
+\begin_inset Quotes eld
+\end_inset
+
+code
+\begin_inset Quotes erd
+\end_inset
+
+ tab, which will show the command line details for Read Only access to our
+ repository.
+ If you wish to become a developer, contact Sebastian (the project owner)
+ through the link on the homepage, and he may grant you Read Write access.
+ To become a developer, you will need to have a Sourceforge account first.
+\end_layout
+
 \begin_layout Section
 Installing S2
+\end_layout
+
+\begin_layout Subsection
+Microsoft Windows
+\end_layout
+
+\begin_layout Standard
+Without a doubt, the Microsoft Windows platform is still the dominant platform
+ --- both in the business setting, and at home --- so we have put a lot
+ of effort into ensuring that it works well, and conforms wherever possible
+ to Microsoft user experience guidelines.
+ Unfortunately, unlike OS X and Linux, Windows does not come with Python
+ as part of the operating system.
+ Also, while some OEMs install a version of Python as part of the package
+ of software they install to customise machines, it is a very bad idea to
+ try to use this for your user installed software.
+\end_layout
+
+\begin_layout Standard
+S2 has been verified to work properly on versions of the operating system
+ from Windows XP up to current versions.
+ All of the dependant libraries are available for Windows, and it is possible
+ to run both from source code, and from installation bundles available from
+ our Sourceforge home page.
+ 
+\end_layout
+
+\begin_layout Standard
+We will now go through the installation steps with images produced by Sebastian.
+\end_layout
+
+\begin_layout Standard
+The first step is to download the current installation bundle from our webpage.
+ Depending on what browser you use, you will need to find and run the installati
+on executable which should give you a screen looking something like this:
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/install_winos_01.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If the installation bundle uncompresses and verified correctly, a standard
+ Windows style wizard will appear which looks like this:
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/install_winos_02.png
+	scale 90
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+When you click 
+\begin_inset Quotes eld
+\end_inset
+
+Next
+\begin_inset Quotes erd
+\end_inset
+
+, you will get a display of the S2 license.
+ We use the GPL 2 license.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/install_winos_03.png
+	scale 90
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+When you click 
+\begin_inset Quotes eld
+\end_inset
+
+I Agree
+\begin_inset Quotes erd
+\end_inset
+
+, you get a page asking where you want to install S2.
+ Unless you really know what you are doing, we suggest you accept the default
+ location, and click 
+\begin_inset Quotes eld
+\end_inset
+
+Next
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/install_winos_04.png
+	scale 90
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Select what you want S2 to be called in the start menu structure, and click
+ 
+\begin_inset Quotes eld
+\end_inset
+
+Install
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/install_winos_05.png
+	scale 90
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+S2 will now be installed and configured as you have selected.
+ Now you have the option to run S2 for the first time!
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/install_winos_07.png
+	scale 90
+
+\end_inset
+
+
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If all went well, you should now have the opening S2 screen which the developers
+ have lovingly crafted! 
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/install_winos_08.png
+	scale 40
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thank you very much for trying S2.
+ Remember, open source software is user driven.
+ If you like what you see, tell us.
+ If there is functionality that you believe is missing, or doesn't work
+ like you think, or is broken, please let us know on the Sourceforge home
+ page.
+ 
+\end_layout
+
+\begin_layout Subsection
+Apple Macintosh OS X
+\end_layout
+
+\begin_layout Standard
+S2 should work on almost any version of OS X on a 32 or 64 bit Intel based
+ Mac.
+ We have not tried it on previous PowerPC based Macs, although it may work
+ if you ran it from source and built dependencies yourself.
+ If you manage to do this, let us know (and send installation instructions
+ and images!)
+\end_layout
+
+\begin_layout Standard
+At present, only a portable version of the OS X App bundle is created.
+ As such, you should not have to worry about installing any dependencies.
+ Even if you have versions of dependencies already on your machine, the
+ versions within the portable bundle will be used.
+ We don't have any immediate plans to produce a non-portable version (since
+ nobody has asked.)
+\end_layout
+
+\begin_layout Standard
+We have successfully run S2 from source code using both the 
+\begin_inset CommandInset href
+LatexCommand href
+name "Enthought Canopy"
+target "https://www.enthought.com/products/canopy/"
+
+\end_inset
+
+, and 
+\begin_inset CommandInset href
+LatexCommand href
+name "The Mac Ports Project"
+target "www.macports.org"
+
+\end_inset
+
+ Python distros.
+ You may be able to get it working using the Python.org distribution, but
+ getting it working using the version of Python supplied with Macs is likely
+ to be nearly impossible since Apple supplies stable (but very old) versions
+ of Python.
+\end_layout
+
+\begin_layout Standard
+The installation instructions for OS X are simple:
+\end_layout
+
+\begin_layout Enumerate
+Download the current OS X archive from the 
+\begin_inset Quotes eld
+\end_inset
+
+Files
+\begin_inset Quotes erd
+\end_inset
+
+ tab on the S2 homepage.
+\end_layout
+
+\begin_layout Enumerate
+Unzip the S2 archive (probably in your Downloads folder,) and drag the S2.app
+ bundle to your /Applications folder.
+\end_layout
+
+\begin_layout Enumerate
+Double click the S2.app bundle.
+ If you receive a message from Gate Keeper (on OS X Mountain Lion or above
+ machines) regarding this application being unsigned, just right-click S2.app
+ and select "Open".
+ You should only have to do this the first time.
+\end_layout
+
+\begin_layout Standard
+Since S2 has been specifically written to work as expected on Mac OS X,
+ common menu option will be where Apple user experience guidelines suggest,
+ and the 
+\begin_inset Quotes eld
+\end_inset
+
+Command
+\begin_inset Quotes erd
+\end_inset
+
+ key is used where the 
+\begin_inset Quotes eld
+\end_inset
+
+Control
+\begin_inset Quotes erd
+\end_inset
+
+ key is used on Windows and Linux platforms.
+\end_layout
+
+\begin_layout Subsection
+Linux
+\end_layout
+
+\begin_layout Standard
+S2 has been verified to work under Ubuntu, and some other linux distros.
+ Unfortunately, we do not have a developer with Linux distro creation skills.
+ We suggest therefore that you will need to run S2 from source code.
+ The simplest way to proceed would be:
+\end_layout
+
+\begin_layout Enumerate
+Clone the S2 repo to your linux machine.
+ How you do this varies depending on which linux distro you use.
+\end_layout
+
+\begin_layout Enumerate
+Install the dependencies listed previously.
+ With Linux and Mac OS X dependencies being similar, if you look in the
+ 
+\begin_inset Quotes eld
+\end_inset
+
+mac-setup
+\begin_inset Quotes erd
+\end_inset
+
+ repo folder, and examine the 
+\begin_inset Quotes eld
+\end_inset
+
+README OS X.txt
+\begin_inset Quotes erd
+\end_inset
+
+ file, it may help.
+ Unfortunately, different linux distros have different installation procedures,
+ and different naming conventions.
+ 
+\end_layout
+
+\begin_layout Enumerate
+In a terminal window, change into the 
+\begin_inset Quotes eld
+\end_inset
+
+src
+\begin_inset Quotes erd
+\end_inset
+
+ folder within repo, and run 
+\begin_inset Quotes eld
+\end_inset
+
+python ./salstat2.py
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+If you have any lissing dependencies, you will end up back at a terminal
+ prompt with a Traceback message showing which dependency is missing.
+ You then need to repeat steps 3 & 4 till all dependencies are met.
+ 
+\end_layout
+
+\begin_layout Standard
+If any users wish to write an installation procedure for their specific
+ distro, particularly if it is one of the less common ones, please forward
+ details to Mark or Sebastian and we can incorporate them into this documentatio
+n.
+\end_layout
+
+\begin_layout Standard
+In the next chapter we will discuss getting started with basic operations
+ of S2.
 \end_layout
 
 \end_body
