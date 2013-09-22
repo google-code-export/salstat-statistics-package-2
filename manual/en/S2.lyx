@@ -85,13 +85,13 @@ Welcome
 \end_layout
 
 \begin_layout Standard
-This is the manual for the S2 statistics package which is actively developed
- by the S2 team.
+This is the manual for the Salstat2 statistics package which is actively
+ developed by the Salstat2 team.
  
 \end_layout
 
 \begin_layout Standard
-In this introduction we will commence by discussing the history of the S2
+In this introduction we will commence by discussing the history of the Salstat2
  project.
  We will then discuss the aims of the project, and some of our future developmen
 t goals.
@@ -100,11 +100,11 @@ t goals.
  Please feel more than welcome to go to the project homepage which can be
  found at 
 \begin_inset Flex URL
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
-http://code.google.com/p/salstat-statistics-package-2/
+https://sourceforge.net/projects/s2statistical/
 \end_layout
 
 \end_inset
@@ -125,15 +125,15 @@ Issues
 
 \begin_layout Standard
 As an open source project released under the terms of the GPL license, you
- are free to install and use S2 on any computer you want to.
- we also welcome you to contribute to S2 if you have any skills you feel
- like offering, whether it be coding, documentation, adding tips to the
- Wiki, or any of a number of other possibilities.
+ are free to install and use Salstat2 on any computer you want to.
+ we also welcome you to contribute to Salstat2 if you have any skills you
+ feel like offering, whether it be coding, documentation, adding tips to
+ the Wiki, or any of a number of other possibilities.
  We would be most grateful for any help you are able to provide on a one
  off basis, or ongoing! In particular, we would welcome people who can contribut
-e by helping to translate S2 to other languages.
- Also, we would welcome users who can test S2 on platforms that the developers
- do not have access to.
+e by helping to translate Salstat2 to other languages.
+ Also, we would welcome users who can test Salstat2 on platforms that the
+ developers do not have access to.
  If something does not look nice visually on your computer, let us know
  and we will try to improve it where possible.
 \end_layout
@@ -143,8 +143,8 @@ Project History
 \end_layout
 
 \begin_layout Standard
-To understand where S2 has come from, we have to go back 2002 and discuss
- a program called SalStat which was initiated by Dr.
+To understand where Salstat2 has come from, we have to go back 2002 and
+ discuss a program called SalStat which was initiated by Dr.
  Alan James Salmoni Ph.D.
  He was teaching undergraduate Psychology students and realised that SPSS
  would not run on his computer (This was at a time when computers were much
@@ -272,7 +272,7 @@ Over in South America, in Colombia, around early 2004, a young Chemical
  touch with Dr.
  Salmoni, and the original SalStat development (which had stalled / ceased.)
  At some point, he opened a project on the Google Code repository which
- is the current project home site at 
+ used to be the project home site at 
 \begin_inset Flex URL
 status collapsed
 
@@ -283,7 +283,7 @@ http://code.google.com/p/salstat-statistics-package-2/
 
 \end_inset
 
- where you can now find it.
+.
  However, in the interests of history, we should tell what happened in the
  mean time back in the original SalStat fork.
  
@@ -339,14 +339,14 @@ When Mark looked at Sebastian's Salstat 2 program, it was obvious that Sebastian
 \begin_inset Quotes eld
 \end_inset
 
-S2
+Salstat2
 \begin_inset Quotes erd
 \end_inset
 
  into the code base going forward.
  The source code on Sourceforge continues to be downloaded as it still has
- some functionality not yet available in S2 (for example Printing), but
- this will change in the near future.
+ some functionality not yet available in Salstat2 (for example Printing),
+ but this will change in the near future.
  
 \end_layout
 
@@ -355,14 +355,14 @@ So, this is how things came to be as they are now.
  Sebastian and Mark are working hard on the next releases that we have planned
  -- and invite you to join us if you have some time to spare! While statistics
  often has a dry and uninviting feel to it, and most people don't like anything
- that relates to maths, we and S2 are not like that at all.
- The S2 development team are having fun and invite you to join us!
+ that relates to maths, we and Salstat2 are not like that at all.
+ The Salstat2 development team are having fun and invite you to join us!
 \end_layout
 
 \begin_layout Standard
-Now that we know how history transpired, and S2 came about, let us quickly
- summarise some of what S2 can do for you, so that you can decide if it
- is what you are looking for.
+Now that we know how history transpired, and Salstat2 came about, let us
+ quickly summarise some of what Salstat2 can do for you, so that you can
+ decide if it is what you are looking for.
 \end_layout
 
 \begin_layout Section
@@ -370,31 +370,67 @@ Overview
 \end_layout
 
 \begin_layout Standard
-S2 has a comprehensive feature set which is being added to constantly.
+Salstat2 has a comprehensive feature set which is being added to constantly.
+\end_layout
+
+\begin_layout Itemize
+Variability: samplevar, sample stddev, var, stddev, signaltonoise 
+\end_layout
+
+\begin_layout Itemize
+Anova one way 
+\end_layout
+
+\begin_layout Itemize
+Probability calcs: chisqprob, ercfunc, zprob func, betacf, betai 
+\end_layout
+
+\begin_layout Itemize
+Correlation functions: pearsonr, spearman, pointbiserialr, kendalTau, linregress
+ 
+\end_layout
+
+\begin_layout Itemize
+Moments: variation, skew, kurtosis, skew test, kurtosis test, normal test
+ 
+\end_layout
+
+\begin_layout Itemize
+Inferential stats 
+\end_layout
+
+\begin_layout Itemize
+Frequency stats 
+\end_layout
+
+\begin_layout Itemize
+Central Tendency: mean, geometric mean, harmonic mean, median mode 
+\end_layout
+
+\begin_layout Itemize
+Short data and see the original order 
+\end_layout
+
+\begin_layout Itemize
+Six Sigma, to be used in global analysis for continuous data 
 \end_layout
 
 \begin_layout Standard
-[Copy some of the features from:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Flex URL
-status collapsed
-
-\begin_layout Plain Layout
-
-http://code.google.com/p/salstat-statistics-package-2/
-\end_layout
+A more complete list of statistical functions can be found at this 
+\begin_inset CommandInset href
+LatexCommand href
+name "https://code.google.com/p/salstat-statistics-package-2/wiki/Scripting_statistics"
+target "https://code.google.com/p/salstat-statistics-package-2/wiki/Scripting_statistics"
 
 \end_inset
 
-]
+
 \end_layout
 
 \begin_layout Standard
 If this sounds like what you are looking for, let us move into the next
- chapter on Installation so that we can try out S2, and see how it can help
- you with your statistical requirements!
+ chapter on Installation so that we can try out Salstat2, and see how it
+ can help you with your statistical requirements!
 \end_layout
 
 \begin_layout Chapter
@@ -402,8 +438,8 @@ Installation
 \end_layout
 
 \begin_layout Standard
-Since it is written in Python, as are its dependant libraries, S2 is automatical
-ly a multiplatform program.
+Since it is written in Python, as are its dependant libraries, Salstat2
+ is automatically a multiplatform program.
  The developers have verified that it should work well on Windows, Mac OS
  X, and Linux platforms.
  For some operating system platforms we produce a 
@@ -415,7 +451,7 @@ Portable
 \end_inset
 
  version.
- These include all dependencies as well as the S2 executables.
+ These include all dependencies as well as the Salstat2 executables.
  For non-portable versions, it may be necessary to install some of the dependenc
 ies which include:
 \end_layout
@@ -487,18 +523,19 @@ easy_install
 \end_layout
 
 \begin_layout Standard
-If you wish to run S2 from source code, or to join us in developing S2,
- there will be other dependencies (which we assume advanced users will be
- able to work out for themselves!) 
+If you wish to run Salstat2 from source code, or to join us in developing
+ Salstat2, there will be other dependencies (which we assume advanced users
+ will be able to work out for themselves!) 
 \end_layout
 
 \begin_layout Standard
-S2 will NOT work with Python v3.x (stable versions of all S2 dependencies
- are not yet available for Python v3.x, and S2 uses Python v2.x syntax)
+Salstat2 will NOT work with Python v3.x (stable versions of all Salstat2
+ dependencies are not yet available for Python v3.x, and Salstat2 uses Python
+ v2.x syntax)
 \end_layout
 
 \begin_layout Section
-Getting S2
+Getting Salstat2
 \end_layout
 
 \begin_layout Subsection
@@ -506,9 +543,20 @@ Binaries
 \end_layout
 
 \begin_layout Standard
-While we used to develop S2 on the Google Code website, we have transitioned
- to Sourceforge.
- The website can be found at: 
+While we used to develop Salstat2 on the Google Code website, we have transition
+ed to Sourceforge.
+ The website can be found at 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://sourceforge.net/projects/s2statistical/
+\end_layout
+
+\end_inset
+
+ or at this handy hyperlink
 \begin_inset CommandInset href
 LatexCommand href
 name "S2statistical Website"
@@ -525,7 +573,7 @@ Files
 \begin_inset Quotes erd
 \end_inset
 
- tab which will display a list of available S2 versions for the different
+ tab which will display a list of available Salstat2 versions for the different
  platforms.
  
 \end_layout
@@ -536,7 +584,7 @@ Source Code
 
 \begin_layout Standard
 For development, we use the Mercurial repository on Sourceforge.
- Details can be found by clicking on the S2 homepage 
+ Details can be found by clicking on the Salstat2 homepage 
 \begin_inset Quotes eld
 \end_inset
 
@@ -552,7 +600,7 @@ code
 \end_layout
 
 \begin_layout Section
-Installing S2
+Installing Salstat2
 \end_layout
 
 \begin_layout Subsection
@@ -572,8 +620,8 @@ Without a doubt, the Microsoft Windows platform is still the dominant platform
 \end_layout
 
 \begin_layout Standard
-S2 has been verified to work properly on versions of the operating system
- from Windows XP up to current versions.
+Salstat2 has been verified to work properly on versions of the operating
+ system from Windows XP up to current versions.
  All of the dependant libraries are available for Windows, and it is possible
  to run both from source code, and from installation bundles available from
  our Sourceforge home page.
@@ -651,7 +699,7 @@ Next
 \begin_inset Quotes erd
 \end_inset
 
-, you will get a display of the S2 license.
+, you will get a display of the Salstat2 license.
  We use the GPL 2 license.
  
 \end_layout
@@ -689,7 +737,7 @@ I Agree
 \begin_inset Quotes erd
 \end_inset
 
-, you get a page asking where you want to install S2.
+, you get a page asking where you want to install Salstat2.
  Unless you really know what you are doing, we suggest you accept the default
  location, and click 
 \begin_inset Quotes eld
@@ -727,8 +775,8 @@ Next
 \end_layout
 
 \begin_layout Standard
-Select what you want S2 to be called in the start menu structure, and click
- 
+Select what you want Salstat2 to be called in the start menu structure,
+ and click 
 \begin_inset Quotes eld
 \end_inset
 
@@ -764,8 +812,8 @@ Install
 \end_layout
 
 \begin_layout Standard
-S2 will now be installed and configured as you have selected.
- Now you have the option to run S2 for the first time!
+Salstat2 will now be installed and configured as you have selected.
+ Now you have the option to run Salstat2 for the first time!
 \end_layout
 
 \begin_layout Standard
@@ -790,8 +838,8 @@ S2 will now be installed and configured as you have selected.
 \end_layout
 
 \begin_layout Standard
-If all went well, you should now have the opening S2 screen which the developers
- have lovingly crafted! 
+If all went well, you should now have the opening Salstat2 screen which
+ the developers have lovingly crafted! 
 \end_layout
 
 \begin_layout Standard
@@ -819,7 +867,7 @@ If all went well, you should now have the opening S2 screen which the developers
 \end_layout
 
 \begin_layout Standard
-Thank you very much for trying S2.
+Thank you very much for trying Salstat2.
  Remember, open source software is user driven.
  If you like what you see, tell us.
  If there is functionality that you believe is missing, or doesn't work
@@ -833,8 +881,8 @@ Apple Macintosh OS X
 \end_layout
 
 \begin_layout Standard
-S2 should work on almost any version of OS X on a 32 or 64 bit Intel based
- Mac.
+Salstat2 should work on almost any version of OS X on a 32 or 64 bit Intel
+ based Mac.
  We have not tried it on previous PowerPC based Macs, although it may work
  if you ran it from source and built dependencies yourself.
  If you manage to do this, let us know (and send installation instructions
@@ -851,7 +899,7 @@ At present, only a portable version of the OS X App bundle is created.
 \end_layout
 
 \begin_layout Standard
-We have successfully run S2 from source code using both the 
+We have successfully run Salstat2 from source code using both the 
 \begin_inset CommandInset href
 LatexCommand href
 name "Enthought Canopy"
@@ -887,26 +935,26 @@ Files
 \begin_inset Quotes erd
 \end_inset
 
- tab on the S2 homepage.
+ tab on the Salstat2 homepage.
 \end_layout
 
 \begin_layout Enumerate
-Unzip the S2 archive (probably in your Downloads folder,) and drag the S2.app
- bundle to your /Applications folder.
+Unzip the Salstat2 archive (probably in your Downloads folder,) and drag
+ the Salstat2.app bundle to your /Applications folder.
 \end_layout
 
 \begin_layout Enumerate
-Double click the S2.app bundle.
+Double click the Salstat2.app bundle.
  If you receive a message from Gate Keeper (on OS X Mountain Lion or above
- machines) regarding this application being unsigned, just right-click S2.app
- and select "Open".
+ machines) regarding this application being unsigned, just right-click Salstat2.a
+pp and select "Open".
  You should only have to do this the first time.
 \end_layout
 
 \begin_layout Standard
-Since S2 has been specifically written to work as expected on Mac OS X,
- common menu option will be where Apple user experience guidelines suggest,
- and the 
+Since Salstat2 has been specifically written to work as expected on Mac
+ OS X, common menu option will be where Apple user experience guidelines
+ suggest, and the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -930,14 +978,14 @@ Linux
 \end_layout
 
 \begin_layout Standard
-S2 has been verified to work under Ubuntu, and some other linux distros.
+Salstat2 has been verified to work under Ubuntu, and some other linux distros.
  Unfortunately, we do not have a developer with Linux distro creation skills.
- We suggest therefore that you will need to run S2 from source code.
+ We suggest therefore that you will need to run Salstat2 from source code.
  The simplest way to proceed would be:
 \end_layout
 
 \begin_layout Enumerate
-Clone the S2 repo to your linux machine.
+Clone the Salstat2 repo to your linux machine.
  How you do this varies depending on which linux distro you use.
 \end_layout
 
@@ -1002,7 +1050,7 @@ n.
 
 \begin_layout Standard
 In the next chapter we will discuss getting started with basic operations
- of S2.
+ of Salstat2.
 \end_layout
 
 \end_body
