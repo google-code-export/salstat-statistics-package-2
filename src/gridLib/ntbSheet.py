@@ -808,4 +808,3 @@ if __name__ == '__main__':
     app = wx.App()
     Test(None, -1, 'Custom Grid Cell')
     app.MainLoop()
-#eof
