@@ -23,7 +23,7 @@ from gridEditors import datePickerEditor
 from GridCopyPaste import PyWXGridEditMixin, MyContextGrid
 from GridCopyPaste import EVT_GRID_BEFORE_PASTE, EVT_GRID_PASTE
 from gridLib.NewGrid import NewGrid
-from slbTools.slbTools import isnumeric
+from slbTools import isnumeric
 from numpy import ndarray, ravel
 from copy import deepcopy
 from xlrd import xldate_as_tuple
