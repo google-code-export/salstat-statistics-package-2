@@ -4,13 +4,16 @@ Created on 16/05/2012
 @author: USUARIO
 '''
 '''Easily create a dialog'''
-__all__= ['Dialog','Busy']
+__all__= ['Dialog','Busy','Ctrl']
 
 import wx
 from numpy import ndarray
 import os
 import re
 from salstat2_glob import *
+from wx.gizmos import EditableListBox
+import re
+from wx import Size
 
 _WILDCARD= "Supported Files (*.txt;*.csv;*.xlsx;*.xls)|*.txt;*.csv;*xlsx;*.xls|"\
     "Excel 2010 File (*.xlsx)|*.xlsx|" \
@@ -18,21 +21,22 @@ _WILDCARD= "Supported Files (*.txt;*.csv;*.xlsx;*.xls)|*.txt;*.csv;*xlsx;*.xls|"
     "Txt file (*.txt)|*.txt|" \
     "Csv file (*.csv)|*.csv"
 
-def Busy(function):
-    def _mydecorator(*args, **kw):
-        # do some stuff before the real
-        try: texto= _("One moment please, waiting for transactions..")
-        except: texto = _("One moment please, waiting for transactions..")
-        busy = wx.BusyInfo( texto)
-        try:
-            # function gets called
-            res = function(*args, **kw)
-        finally:
-            del(busy)
-        # do some stuff after
-        return res
-    # returns the sub-function
-    return _mydecorator
+def Busy(Message= None):
+    if Message == None:
+        Message= _("One moment please, waiting for transactions..")
+    def realDecorator(function):
+        def _mydecorator( *args, **kw):
+            busy = wx.BusyInfo( Message)
+            try:
+                # function gets called
+                res = function(*args, **kw)
+            finally:
+                del(busy)
+            # do some stuff after
+            return res
+        # returns the sub-function
+        return _mydecorator
+    return realDecorator
 
 def getPath( *args, **params):
     try: wildCard= params.pop('wildcard')
@@ -63,6 +67,244 @@ def isnumeric(data):
     if isinstance(data, (int, float, long, ndarray)):
         return True
     return False
+
+class CustomCtrl:
+    pass
+
+class Ctrl(CustomCtrl):
+    """it's use to construct controls"""
+    __all__= ['StaticText','EditableListBox','TextCtrl', 'Button','Choice', 'CheckListBox',
+              'StaticLine','RadioBox','SpinCtrl','ToggleButton','NumTextCtrl',
+              'CheckBox','makePairs','IntTextCtrl','FilePath']
+    class StaticText(CustomCtrl):
+        __text= u''
+        def __init__(self, text, *args, **params):
+            self.__text= text
+            self.__args= args
+            self.__params= params
+        @property    
+        def value(self):
+            arg= [self.__text]
+            arg.extend(self.__args)
+            return ( 'StaticText', arg, self.__params)
+
+    class EditableListBox(CustomCtrl):
+        __title= u''
+        __strings= []
+        def __init__(self, title, strings= [],*args, **params):
+            self.__title= title
+            self.__strings= strings
+            self.__args = args
+            self.__params= params
+        @property
+        def value(self):
+            arg= [self.__title,  self.__strings, (50,50), (200, 200)]
+            arg.extend(self.__args)
+            return ( 'EditableListBox', arg, self.__params)
+
+    class TextCtrl(CustomCtrl):
+        __text= u''
+        def __init__(self, text, *args, **params):
+            self.__text= text
+            self.__args= args
+            self.__params= params
+        @property    
+        def value(self):
+            arg= [self.__text]
+            arg.extend(self.__args)
+            return ('TextCtrl',  arg, self.__params)
+
+    class Button(CustomCtrl):
+        def __init__(self, text, *args, **params):
+            self.__text= text
+            self.__args= args
+            self.__params= params
+        @property
+        def value(self):
+            arg= [self.__text]
+            arg.extend(self.__args)
+            return ('Button',  arg, self.__params)
+
+    class Choice(CustomCtrl):
+        __choices= list()
+        def __init__(self, choices, *args, **params):
+            self.choices= choices
+            self.__args= args
+            self.__params= params
+        @property
+        def choices(self):
+            return self.__choices
+        @choices.setter
+        def choices(self, choices):
+            if not isisntance(choices, (list, tuple)):
+                raise StandardError(_("Only acept a list or tuple"))
+            self.__choices= choices
+        @property        
+        def value(self):
+            arg= [self.choices]
+            arg.extend(self.__args)
+            return ('Choice', arg, self.__params)
+
+    class CheckListBox(CustomCtrl):
+        __choices= list()
+        def __init__(self, choices, *args, **params):
+            self.choices= choices
+            self.__args= args
+            self.__params= params
+        @property
+        def choices(self):
+            return self.__choices
+        @choices.setter
+        def choices(self, choices):
+            if not isisntance(choices, (list, tuple)):
+                raise StandardError(_("Only acept a list or tuple"))
+            self.__choices= choices
+        @property        
+        def value(self):
+            arg= [self.__text]
+            arg.extend(self.__args)
+            return ('CheckListBox', arg, self.__params)
+
+    class StaticLine(CustomCtrl):
+        def __init__(self, *args, **params):
+            self.__args= args
+            self.__params= params
+        @property
+        def value(self):
+            arg= ['horz']
+            arg.extend(self.__args)
+            return ('StaticLine',  arg, self.__params)
+
+    class RadioBox(CustomCtrl):
+        __text = u''
+        __choices= list()
+        def __init__(self, text, choices, *args, **params):
+            self.text= text
+            self.choices= choices
+            self.__args= args
+            self.__params= params
+        @property
+        def text(self):
+            return self.__texto
+        @text.setter
+        def text(self, texto):
+            if not isinstance(texto, (str, unicode)):
+                raise StandardError("only acept text or unicode")
+            self.__text= texto
+        @property
+        def choices(self):
+            return self.__choices
+        @choices.setter
+        def choices(self, choices):
+            if not isisntance(choices, (list, tuple)):
+                raise StandardError(_("Only acept a list or tuple"))
+            self.__choices= choices
+        @property        
+        def value(self):
+            arg= [self.__text, self.choices]
+            arg.extend(self.__args)
+            return ('CheckListBox', arg, self.__params)
+
+    class SpinCtrl(CustomCtrl):
+        def __init__(self, minimum, maximum, default, *args, **params):
+            self.minimum= minimum
+            self.maximum= maximum
+            self.default= default
+        @property
+        def value(self):
+            arg= [self.minimum, self.maximum, self.default]
+            arg.extend(self.__args)
+            return ('SpinCtrl', arg, self.__params)
+
+    class ToggleButton(CustomCtrl):
+        __text= u''
+        def __init__(self, text, *args, **params):
+            self.__text= text
+            self.__args= args
+            self.__params= params
+        @property    
+        def value(self):
+            arg= [self.__text,]
+            arg.extend(self.__args )
+            return ( 'ToggleButton',  arg, self.__params)
+
+    class NumTextCtrl(CustomCtrl):
+        def __init__(self, *args, **params):
+            self.__args= args
+            self.__params= params
+        @property    
+        def value(self):
+            return ( 'NumTextCtrl', self.__args, self.__params)
+
+    class CheckBox(CustomCtrl):
+        __text= u''
+        def __init__(self,text, *args, **params):
+            self.__text= text
+            self.__args= args
+            self.__params= params
+        @property
+        def value(self):
+            arg= [self.__text,]
+            arg.extend(self.__args )
+            return ('CheckBox', arg, self.__params)
+
+    class makePairs(CustomCtrl):
+        def __init__(self, colNames, options, numberOfRows):
+            self.__colNames= colNames
+            self.__options = options
+            self.__numRows= numberOfRows
+        @property
+        def value(self):
+            arg= [self.__colNames, self.__options, self.__numRows]
+            arg.extend(self.__args )
+            return ('makePairs', arg, self.__params)
+
+    class IntTextCtrl(CustomCtrl):
+        def __init__(self, *args, **params):
+            self.__args= args
+            self.__params= params
+        @property
+        def value(self):
+            return ('IntTextCtrl', self.__args, self.__params )
+
+    class FilePath(CustomCtrl):
+        __path = u'.'
+        def __init__(self, defaultPath, *args, **params):
+            self.__path= defaultPath
+            self.__args= args
+            self.__params= params
+        @property
+        def path(self):
+            return self.__path
+        @path.setter
+        def path(self, path):
+            if not isinstance(path, (str, unicode)):
+                raise StandardError(_("The path must be an string"))
+            self.__path = os.path.abspath(path)
+        @property
+        def value(self):
+            arg= [self.path]
+            arg.extend(self.__args )
+            return ('FilePath', arg, self.__params )
+
+    class DataBaseImport(CustomCtrl):
+        def __init__(self, defaultPath, *args, **params):
+            self.__path= defaultPath
+            self.__args= args
+            self.__params= params
+        @property
+        def path(self):
+            return self.__path
+        @path.setter
+        def path(self, path):
+            if not isinstance(path, (str, unicode)):
+                raise StandardError(_("The path must be an string"))
+            self.__path = os.path.abspath(path)
+        @property
+        def value(self):
+            arg= [self.path]
+            arg.extend(self.__args )
+            return ('DataBaseImport', arg, self.__params )
 
 class DataBaseImport( wx.Panel ):
     """DataBaseImport(parent, dataDict= dict())"""
@@ -152,30 +394,223 @@ class DataBaseImport( wx.Panel ):
 class NumTextCtrl( wx.TextCtrl):
     '''a text ctrl that only accepts numbers'''
     def __init__( self, parent, *args, **params):
+        self.__min= None
+        self.__max= None
+        self.__longitudmaxima= None
+        self._enteroRestriccion = False
+        self._enteroMaximo= None # numero de cifras de la parte entera
+        self._enteroMinimo= None
+        self._fraccionarioRestriccion = False
+        self._fraccionarioMaximo = None # numero de cifras de la parte fraccionaria
+        self._fraccionarioMinimo = None
+        self.__format = None
+        try:    self.min= params.pop('min')
+        except: pass
+        try:    self.max= params.pop('max')
+        except: pass
+        try:    self.longitudmaxima= params.pop('longitudmaxima')
+        except: pass
+        try: self.setFormat(params.pop('formato'))
+        except: pass
+
         wx.TextCtrl.__init__( self, parent, *args, **params)
         self.Bind( wx.EVT_TEXT, self._textChange)
         self.allowed = [ str( x) for x in range( 10)]
         self.allowed.extend([ wx.GetApp().DECIMAL_POINT, '-'])
 
-    def _textChange(self, evt):
-        texto = self.Value
+    @property
+    def hasValidFormat(self):
+        if not self.hasformat:
+            return True
+        #currText= self.Value
+        if not self.hasDecimal:
+            if not self._enteroRestriccion:
+                return True
+            if self._enteroMinimo != None:
+                if len(self.Value) < self._enteroMinimo:
+                    return False
+            if self._enteroMaximo != None:
+                if len(self.Value) > self._enteroMaximo:
+                    return False
+        else:
+            entero, fract= self.Value.split('.')
+            if self._enteroRestriccion:
+                if self._enteroMinimo != None:
+                    if len(entero) < self._enteroMinimo:
+                        return False
+                if self._enteroMaximo != None:
+                    if len(entero) > self._enteroMaximo:
+                        return False
+            if not self._fraccionarioRestriccion:
+                return True
+            if self._fraccionarioMinimo != None:
+                if len(fract) < self._fraccionarioMinimo:
+                    return False
+            if self._fraccionarioMaximo != None:
+                if len(fract) > self._fraccionarioMaximo:
+                    return False
+        return True
 
-        if len(texto) == 0:
+    @property
+    def hasformat(self):
+        if self.__format!= None:
+            return True
+        return False
+
+    def setFormat(self, format):
+        """The SSPD SUI format"""
+        self.__format= format
+        pos = format.find('.')
+        self.hasDecimal = hasDecimal = False
+        if pos != -1: hasDecimal= True
+        number= format.split('.')
+        if len(number) > 2:
+            raise StandardError(_('Formato de numero invalido!'))
+        if len(number) == 1 and hasDecimal:
+            raise StandardError(_('Formato de numero invalido!'))
+
+        if hasDecimal: enteroFormat, decimalFormat= number
+        else:          enteroFormat = number[0]
+
+        # formato numero entero
+        if '#' in enteroFormat:
+            if len(enteroFormat) != 1:
+                raise StandardError('Formato invalido')
+            self._enteroRestriccion = False
+        else:
+            self._enteroRestriccion = True
+            tempformat= enteroFormat[:]
+            # searching for nine
+            contador9 = 0  # cantidad de nueves
+            contador0 = 0   # cantidad de ceros
+            for element in tempformat:
+                if element == '9':
+                    contador9 += 1
+                elif element == '0':
+                    break
+                else:
+                    raise StandardError('caracter no valido para el formato')
+            if contador9 == len(enteroFormat):
+                self._enteroMaximo= contador9
+            else:
+                for element in tempformat[contador9:]:
+                    if element == '0':
+                        contador0+= 1
+                    else:
+                        break
+                if contador0 > 0:
+                    self._enteroMinimo= contador0
+            if (contador9 + contador0) != len(enteroFormat):
+                raise StandardError('distribucion invalida del formato entero')
+            if contador9> 0:
+                self._enteroMaximo = contador9+contador0
+
+        if not hasDecimal:
             return
 
-        newstr= [ x for x in texto if x in self.allowed]
+        # formato parte fraccionaria
+        if '#' in decimalFormat:
+            if len( decimalFormat) != 1:
+                raise StandardError( 'Formato invalido')
+            self._fraccionarioRestriccion = False
+        else:
+            self._fraccionarioRestriccion = True
+            tempformat= decimalFormat[:]
+            contador9 = 0 # cantidad de nueves
+            contador0 = 0  # cantidad de ceros
+            for element in tempformat:
+                if element == '0':
+                    contador0 += 1
+                elif element == '9':
+                    contador9= 1
+                    break
+                else:
+                    raise StandardError( 'caracter no valido para el formato')
+            if contador0 == len( decimalFormat):
+                self._fraccionarioMinimo= contador0
+            elif contador0 > 0:
+                self._fraccionarioMinimo= contador0
+            else:
+                for element in tempformat[contador0:]:
+                    if element == '9':
+                        cotador9+= 1
+                    else:
+                        break
+                if cotador9 > 0:
+                    self._fraccionarioMaximo = cotador9+contador0
 
+            if contador9 + contador0 != len(decimalFormat):
+                raise StandardError( 'distribucion invalida del formato entero')
+
+    @property
+    def min(self):
+        return self.__min
+    @min.setter
+    def min(self, value):
+        self.__min= value
+
+    @property
+    def max(self):
+        return self.__max
+    @max.setter
+    def max(self, value):
+        self.__max= value
+
+    @property
+    def longitudmaxima(self):
+        return self.__longitudmaxima
+    @longitudmaxima.setter
+    def longitudmaxima(self, value):
+        self.__longitudmaxima = value
+
+    def _textChange(self, evt):
+        texto = self.Value
+        if len(texto) == 0:
+            return
+        newstr= [ x for x in texto if x in self.allowed]
         if len(newstr) == 0:
             newstr = u''
         else:
             func = lambda x,y: x+y
             newstr= reduce(func, newstr)
+
+        if self.longitudmaxima != None:
+            if len( texto) > self.longitudmaxima:
+                texto= texto[:self.longitudmaxima]
+                self.SetValue(texto)
+                # putting the cursor in the last position
+                if self.longitudmaxima > 1:
+                    self.SetInsertionPoint( self.longitudmaxima-1)
+                    self.Update()
+                return
+
+        testValue= float(newstr)
+        if self.min != None:
+            if testValue < self.min:
+                newstr= ''
+        if self.max != None:
+            if testValue > self.max:
+                newstr= ''
+
         # prevent infinite recursion
         if texto == newstr:
             return
 
         self.SetValue(newstr)
         evt.Skip()
+
+    def GetValueAsStr(self):
+        # deleting the first ceros
+        value= self.Value
+        pattern= "0*([0-9]*[\.\,0-9][0-9]*)"
+        newValue= re.findall(pattern,value)
+        if isinstance(newValue, (list, tuple)):
+            if len(newValue) > 0:
+                newValue = newValue[0]
+            else:
+                newValue= u''
+        return newValue
+
     def GetAsNumber(self):
         prevResult = self.Value
         if len(prevResult) == 0:
@@ -321,6 +756,8 @@ class _CustomDataTable( gridlib.PyGridTableBase):
                 colsResume= reduce( group,  choicesByColumni[1:],  choicesByColumni[0])
 
             elif len( choicesByColumni) == 1:
+                if isinstance(choicesByColumni, (tuple, list)):
+                    choicesByColumni= choicesByColumni[0]
                 colsResume= choicesByColumni
             else:
                 raise StandardError( _(u'You input a bad type data as choiceNames variable'))
@@ -387,7 +824,6 @@ class _CustomDataTable( gridlib.PyGridTableBase):
 
     # Called when the grid needs to display labels
     def GetColLabelValue(self, col):
-        #print col
         return self.colLabels[col]
 
     # Called to determine the kind of editor/renderer to use by
@@ -487,7 +923,6 @@ def _siguiente():
         i+= 1
         yield str(i)
 
-
 class FilePath( wx.Panel ):
     def __init__( self, parent, id , *args, **params):
         wx.Panel.__init__ ( self, parent, id,
@@ -534,27 +969,88 @@ class FilePath( wx.Panel ):
     def GetValue(self ):
         return self.path
 
-class DialogPanel(wx.ScrolledWindow):
-    def __init__(self, *args, **params):
-        wx.ScrolledWindow.__init__(self, *args, **params)
+class Dialog:
+    def __init__( self, parent = None, settings = dict(), struct = [], *args, **params):
+        self.__parent = parent
+        self.__settings = settings
+        self.__struct = struct
+        self.__args = args
+        self.__params = params
+        self.__title = ''
+        self.__icon = None
+        self.__currdialog = None
+        self.__size = wx.DefaultSize
+        self.__pos = wx.DefaultPosition
+        self.__style = wx.wx.DEFAULT_DIALOG_STYLE
+    @property
+    def title(self):
+        return self.__title
+    @title.setter
+    def title(self, title):
+        if not isinstance(title, (str, unicode)):
+            raise StandardError( _('The title must be an string'))
+        self.__title= title
+    @property
+    def Title(self):
+        return self.title
+    @Title.setter
+    def Title(self, title):
+        if not isinstance(title, (str, unicode)):
+            raise StandardError(_("The title must be an string"))
+        self.title= title
+    @property
+    def size(self):
+        return self.__size
+    @size.setter
+    def size(self, size):
+        if not isinstance(size, Size):
+            raise StandardError(_('The size must be wx.Size type'))
+        self.__size= size
+    @property
+    def pos(self):
+        return self.__pos
+    @pos.setter
+    def pos(self, pos):
+        if not isinstance(pos, (list, tuple)):
+            raise StandardError(_('The pos must be a list or a tuple type'))
+        self.__pos= pos
+    @property
+    def struct(self):
+        return self.__struct
+    @struct.setter
+    def struct(self, struct):
+        if not isinstance(struct, (list, tuple)):
+            raise StandardError(_('The pos must be a list or a tuple type'))
+        self.__struct= struct
+    def ShowModal(self, *args, **params):
+        if self.__currdialog == None:
+            self.__currdialog= _Dialog(parent = self.__parent,
+                                    settings = self.__settings,
+                                    struct = self.struct,
+                                    Title = self.title,
+                                    icon= self.__icon,
+                                    pos = self.pos,
+                                    size = self.size,
+                                    style = self.__style)
+        return self.__currdialog.ShowModal( *args, **params)
+    def GetValue(self):
+        return self.__currdialog.GetValue()
+    def Destroy(self):
+        return self.__currdialog.Destroy()
 
-
-
-
-
-class Dialog ( wx.Dialog):
-    ALLOWED= ['StaticText',   'TextCtrl',     'Choice',
-              'CheckListBox', 'StaticLine',   'RadioBox',
-              'SpinCtrl',     'ToggleButton', 'NumTextCtrl',
-              'CheckBox',     'makePairs',    'IntTextCtrl',
-             'FilePath',     'DataBaseImport']
+class _Dialog ( wx.Dialog):
+    ALLOWED= ['StaticText',   'TextCtrl',       'Choice',
+              'CheckListBox', 'StaticLine',     'RadioBox',
+              'SpinCtrl',     'ToggleButton',   'NumTextCtrl',
+              'CheckBox',     'makePairs',      'IntTextCtrl',
+              'FilePath',     'DataBaseImport', 'EditableListBox']
     @property
     def allowedControls(self):
         return self.ALLOWED
     @property
     def allowedControlsImages(self):
         return self.ALLOWED
-    def __init__( self, parent = None , settings= dict(), struct = []):
+    def __init__( self, parent = None , settings= dict(), struct = [], *args, **params):
         '''Dialog( parent, settings, struct)
 
         a function to easily create a wx dialog
@@ -562,9 +1058,9 @@ class Dialog ( wx.Dialog):
         parameters
         settings = {'Title': String title of the wxdialog ,
                     'icon': wxbitmap,
-                    '_size': wx.Size(xsize, ysize) the size of the dialog ,
-                    '_pos':  wx.Position(-1, -1) the position of the frame,
-                    '_style': wx.DIALOG__STYLE of the dialog ,}
+                    'size': wx.Size(xsize, ysize) the size of the dialog ,
+                    'pos':  wx.Position(-1, -1) the position of the frame,
+                    'style': wx.DIALOG__STYLE of the dialog ,}
         struct = list() information with the data
 
         allowed controls: 'StaticText',   'TextCtrl',     'Choice',
@@ -610,11 +1106,11 @@ class Dialog ( wx.Dialog):
         self.ctrlNum = _siguiente()
         self.sizerNum= _siguiente()
 
-        params = {'Title':  wx.EmptyString,
-                  'icon':   None,
-                  'size':   wx.DefaultSize,
-                  '_pos':   wx.DefaultPosition,
-                  '_style': wx.wx.DEFAULT_DIALOG_STYLE}
+        defaultParams = {'Title':  wx.EmptyString,
+                          'icon':  None,
+                          'size':  wx.DefaultSize,
+                          'pos':   wx.DefaultPosition,
+                          'style': wx.wx.DEFAULT_DIALOG_STYLE}
 
         for key, value in params.items():
             try:
@@ -625,9 +1121,9 @@ class Dialog ( wx.Dialog):
         wx.Dialog.__init__ ( self, parent, 
                              id=     wx.ID_ANY,
                              title=  params.pop('Title'),
-                             pos=    params.pop('_pos'),
+                             pos=    params.pop('pos'),
                              size=   params.pop('size'),
-                             style=  params.pop('_style') )
+                             style=  params.pop('style') )
 
         #< setting the icon
         icon= params.pop('icon')
@@ -638,10 +1134,10 @@ class Dialog ( wx.Dialog):
                 icon= wx.EmptyIcon()
         self.SetIcon(icon)
         # setting the icon/>
-        
+
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
         bSizer1 = wx.BoxSizer( wx.VERTICAL )
-        
+
         # getting the horizontal border size
         bSizer1.Fit( self )
         xBorderSize= self.Size[0]
@@ -656,11 +1152,11 @@ class Dialog ( wx.Dialog):
         self.ctrls= list()
 
         self._allow= self.ALLOWED
-        self._allow2get= ['TextCtrl','Choice',
+        self._allow2get= ['TextCtrl',    'Choice',
                           'CheckListBox','RadioBox',
-                          'SpinCtrl','ToggleButton','NumTextCtrl',
-                          'CheckBox', 'makePairs','IntTextCtrl',
-                          'FilePath', 'DataBaseImport']
+                          'SpinCtrl',    'ToggleButton',   'NumTextCtrl',
+                          'CheckBox',    'makePairs',      'IntTextCtrl',
+                          'FilePath',    'DataBaseImport', 'EditableListBox']
 
         bSizer1.Add( self.m_scrolledWindow1, 1, wx.EXPAND, 5 )
 
@@ -686,8 +1182,6 @@ class Dialog ( wx.Dialog):
         # adding the custom controls into the scroll dialog
         self.adding(bSizer3, struct)
 
-
-
         self.m_scrolledWindow1.SetSizer( bSizer3 )
         self.m_scrolledWindow1.Layout()
         bSizer3.Fit( self.m_scrolledWindow1 )
@@ -704,7 +1198,7 @@ class Dialog ( wx.Dialog):
                     min([requiredSize[1], maxSize[1]-10]),]
         minAllowed= [buttonOkCancelSize[0], buttonOkCancelSize[1]]
         allowSize= [max([minAllowed[0], allowSize[0]]), max([minAllowed[1], allowSize[1]])]
-        
+
         # adpat the dialog if needed
         if allowSize[1] == maxSize[1]-10 and allowSize[0] <= maxSize[0]-20:
             allowSize[0]= allowSize[0]+10
@@ -714,7 +1208,7 @@ class Dialog ( wx.Dialog):
         self.SetSize(wx.Size(allowSize[0], allowSize[1]))
         self.Layout()
         self.Centre( wx.BOTH )
-        
+
     def adding(self, parentSizer, struct ):
         diferents= ['CheckListBox','Choice',]
         for row in struct:
@@ -724,7 +1218,13 @@ class Dialog ( wx.Dialog):
             currSizer.SetFlexibleDirection( wx.BOTH )
             currSizer.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
             characters= wx.ALIGN_CENTER_VERTICAL | wx.ALL
-            for key, args in row:
+            for dat  in row:
+                if Ctrl.__bases__[0] in dat.__class__.__bases__:
+                    key, args, params =  dat.value
+                else:
+                    key, args = dat
+                    params = dict()
+
                 if hasattr(wx, key):
                     #nameCtrl= 'ctrl' + self.sizerNum.next()
                     if key in diferents:
@@ -747,8 +1247,9 @@ class Dialog ( wx.Dialog):
                         args = data
                         characters = wx.ALL | wx.EXPAND
                     elif key == 'RadioBox':
-                        data= [args[0] , wx.DefaultPosition, wx.DefaultSize]
+                        data= [args[0] , wx.DefaultPosition, wx.DefaultSize, ]
                         data.append(args[1])
+                        data.extend([1, wx.RA_SPECIFY_COLS])
                         args= data
                     elif key == 'SpinCtrl':
                         data= [ wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS]
@@ -757,9 +1258,9 @@ class Dialog ( wx.Dialog):
                     elif key == 'CheckBox':
                         pass
                     if key == 'CheckListBox':
-                        self.ctrls.append((key, CheckListBox(self.m_scrolledWindow1, wx.ID_ANY, *args)))
+                        self.ctrls.append((key, CheckListBox(self.m_scrolledWindow1, wx.ID_ANY, *args, **params)))
                     else:
-                        self.ctrls.append((key, getattr(wx, key)(self.m_scrolledWindow1, wx.ID_ANY, *args)))
+                        self.ctrls.append((key, getattr(wx, key)(self.m_scrolledWindow1, wx.ID_ANY, *args,**params)))
                     currCtrl= self.ctrls[-1][1]
                     # setting default values    
                     if self.ctrls[-1][0] == 'Choice':
@@ -772,17 +1273,17 @@ class Dialog ( wx.Dialog):
                     currSizer.Add(currCtrl, 0, characters , 5)
 
                 elif key == 'NumTextCtrl':
-                    self.ctrls.append((key, NumTextCtrl(self.m_scrolledWindow1, wx.ID_ANY, *args)))
+                    self.ctrls.append((key, NumTextCtrl(self.m_scrolledWindow1, wx.ID_ANY, *args, **params)))
                     currCtrl= self.ctrls[-1][1]
                     currSizer.Add(currCtrl, 0, characters , 5)
 
                 elif key  == 'IntTextCtrl':
-                    self.ctrls.append((key, IntTextCtrl(self.m_scrolledWindow1, wx.ID_ANY, *args)))
+                    self.ctrls.append((key, IntTextCtrl(self.m_scrolledWindow1, wx.ID_ANY, *args, **params)))
                     currCtrl= self.ctrls[-1][1]
                     currSizer.Add(currCtrl, 0, characters , 5)
 
                 elif key == 'makePairs':
-                    self.ctrls.append((key, makePairs(self.m_scrolledWindow1, wx.ID_ANY, *args)))
+                    self.ctrls.append((key, makePairs(self.m_scrolledWindow1, wx.ID_ANY, *args, **params)))
                     currCtrl= self.ctrls[-1][1]
                     currSizer.Add(currCtrl, 0, characters , 5)
                     currCtrl.Fit()
@@ -792,13 +1293,22 @@ class Dialog ( wx.Dialog):
                                              min([currCtrl.GetSize()[1], maxAllowedSize[1]])))
 
                 elif key == 'FilePath':
-                    self.ctrls.append((key, FilePath( self.m_scrolledWindow1, wx.ID_ANY, *args)))
+                    self.ctrls.append((key, FilePath( self.m_scrolledWindow1, wx.ID_ANY, *args, **params)))
                     currCtrl= self.ctrls[-1][1]
                     currSizer.Add(currCtrl, 0, characters , 5)
 
                 elif key == 'DataBaseImport':
-                    self.ctrls.append((key, DataBaseImport( self.m_scrolledWindow1, wx.ID_ANY, *args)))
+                    self.ctrls.append((key, DataBaseImport( self.m_scrolledWindow1, wx.ID_ANY, *args, **params)))
                     currCtrl= self.ctrls[-1][1]
+                    currSizer.Add(currCtrl, 0, characters , 5)
+
+                elif key == 'EditableListBox':
+                    argNew = list(args)
+                    choices = argNew.pop(1)
+                    args = tuple(argNew)
+                    self.ctrls.append((key, EditableListBox( self.m_scrolledWindow1, wx.ID_ANY, *args, **params)))
+                    currCtrl = self.ctrls[-1][1]
+                    currCtrl.SetStrings(choices)
                     currSizer.Add(currCtrl, 0, characters , 5)
                 else:
                     raise StandardError("unknow control %s : type .ALLOWED to view all available controls"%key)
@@ -808,7 +1318,6 @@ class Dialog ( wx.Dialog):
 
             parentSizer.Add( currSizer, 0, wx.EXPAND, 5 )
             parentSizer.Layout()
-
 
     def GetValue(self):
         try:
@@ -821,6 +1330,11 @@ class Dialog ( wx.Dialog):
             if typectrl in self._allow2get:
                 if typectrl  in ['TextCtrl','ToggleButton','SpinCtrl']:
                     prevResult = ctrl.Value
+
+                elif typectrl == 'EditableListBox':
+                    prevResult= ctrl.GetStrings()
+                    if prevResult[0] != u'':
+                        prevResult.insert(0,'') # null character
 
                 elif typectrl == 'Choice':
                     if len(ctrl.GetItems()) == 0:
@@ -884,20 +1398,20 @@ class _example( wx.Frame ):
     # Virtual event handlers, overide them in your derived class
     def showDialog( self, evt ):
         dic= {'Title': 'title'}
-        bt1= ('Button',     [_('Print')])
-        bt2= ('StaticText', [_('Page to print')])
-        bt3= ('Button',     [_('new')])
-        bt4= ('StaticText', ['sebas'])
-        bt5= ('StaticText', [_('Input the presure')])
-        bt6= ('TextCtrl',   [_('Parameter')])
-        btnChoice=     ('Choice',       [['opt1', 'opcion2', 'opt3']])
-        btnListBox=    ('CheckListBox', [['opt1', 'opcion2', 'opt3']])
-        listSeparator= ('StaticLine',   ['horz'])
-        bt7= ('RadioBox',     ['title', ['opt1', 'opt2', 'opt3']])
-        bt8= ('SpinCtrl',     [ 0, 100, 5 ]) # (min, max, start)
-        bt9= ('ToggleButton', ['toggle'])
-        bt10= ['makePairs',[[_('Column')+' '+str(i) for i in range(2)],['opt1','opt2'],5]]
-        bt11= ['FilePath', []]
+        bt1= Ctrl.Button(_('Print'))
+        bt2= Ctrl.StaticText(_('Page to print'))
+        bt3= Ctrl.Button(_('new'))
+        bt4= Ctrl.StaticText('sebas')
+        bt5= Ctrl.StaticText(_('Input the presure'))
+        bt6= Ctrl.TextCtrl( _('Parameter'))
+        btnChoice= Ctrl.Choice(['opt1', 'opcion2', 'opt3'])
+        btnListBox= Ctrl.CheckListBox(['opt1', 'opcion2', 'opt3'])
+        listSeparator= Ctrl.StaticLine()
+        bt7= Ctrl.RadioBox( 'title', ['opt1', 'opt2', 'opt3'])
+        bt8= Ctrl.SpinCtrl( 0, 100, 5)
+        bt9= Ctrl.ToggleButton('toggle')
+        bt10= Ctrl.makePairs([_('Column')+' '+str(i) for i in range(2)], ['opt1','opt2'], 5)
+        bt11= Ctrl.FilePath()
 
         structure= list()
         structure.append( [bt6, bt2] )
@@ -913,7 +1427,6 @@ class _example( wx.Frame ):
         dlg= Dialog(self, settings = dic, struct= structure)
         if dlg.ShowModal() == wx.ID_OK:
             values= dlg.GetValue()
-            print values
         dlg.Destroy()
 
 if __name__ == '__main__':
