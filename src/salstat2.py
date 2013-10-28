@@ -1160,11 +1160,16 @@ class MainFrame(wx.Frame):
                    translation= wx.GetTranslation)
 
     def _autoCreateMenu(self, module, twoGraph = False):
+        import importlib
         # automatically creates a menu related with a specified module
         groups=   module.__all__
         subgroup= list()
         for group in groups:
-            attr= getattr( module, group)
+            try:
+                attr= importlib.import_module(module.__name__+'.'+group)
+            except:
+                continue
+            ##attr= getattr( module, group)
             result= list()
             for item in attr.__all__:
                 fnc= getattr( attr, item)
@@ -1197,8 +1202,8 @@ class MainFrame(wx.Frame):
         menuBar=   wx.MenuBar()
 
         # to be used for statistical menu autocreation
-        from statFunctions import *
-        from plotFunctions import *
+        import statFunctions
+        import plotFunctions
 
         statisticalMenus= self._autoCreateMenu( statFunctions)
         plotMenus= self._autoCreateMenu( plotFunctions)
