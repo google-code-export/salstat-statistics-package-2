@@ -468,6 +468,7 @@ class ScriptPanel( wx.Panel):
         '''ScriptPanel parent, log, *args'''
         self.log=   args[0]
         self.__hideToolbar= False
+        self.__env= None
         try:
             self.__hideToolbar= params.pop('hideToolbar')
         except KeyError:
@@ -505,8 +506,14 @@ class ScriptPanel( wx.Panel):
         self.addPage()
         self.Layout()
         self.m_mgr.Update()
-        self.Center( )
-
+        self.Center()
+        
+    def setEnv(self, env):
+        self.__env= env
+        
+    def getEnv(self):
+        return self.__env
+    
     def _createToolbar( self):
         if self.tb1 != None:
             return
@@ -612,6 +619,9 @@ class ScriptPanel( wx.Panel):
         setattr(self.pageNames[newName],'currPagePath', None)
 
         self.currentPage=  self.pageNames[newName]
+        env = self.getEnv() 
+        if  env != None:
+            self.currentPage.interp.locals= env
         ntb= self.pageNames[newName]
         self.m_notebook.AddPage(ntb, newName, False )
         # se hace activo la pagina adicionada
