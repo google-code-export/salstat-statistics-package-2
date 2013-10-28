@@ -1120,6 +1120,7 @@ class MainFrame(wx.Frame):
 
     def _sendObj2Shell(self, shell):
         # making available useful object to the shell
+        from easyDialog import Ctrl
         env= {'cls':        self.logPanel.clearLog,
               'grid':       self.grid,
               'show':       self.logPanel.write,
@@ -1134,7 +1135,8 @@ class MainFrame(wx.Frame):
               'stats':      stats,
               'getPath':    self.getPath,
               'help':       hlp,
-              'sm':         self.sm, # statmodels
+              'sm':         self.sm, 
+              'Ctrl':       Ctrl,# statmodels
               }
         # path of modules
         pathInit=    sys.argv[0].decode( sys.getfilesystemencoding())
