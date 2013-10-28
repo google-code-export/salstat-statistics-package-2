@@ -1011,8 +1011,10 @@ class MainFrame(wx.Frame):
 
         self.currPanel = None
         # allowing the shell access to the selected objects
-        self._sendObj2Shell( self.shellPanel)
-        self._sendObj2Shell( self._scriptPanel)
+        env= self._sendObj2Shell( self.shellPanel)
+        #setting the env into the scriptpanel pages
+        self._scriptPanel.setEnv(env)
+        self._sendObj2Shell(self._scriptPanel)
         self._BindEvents()
 
         # hide some panels
@@ -1149,6 +1151,7 @@ class MainFrame(wx.Frame):
             from xl import Xl
             env['XL'] = Xl
         shell.interp.locals= env
+        return env
 
     def _createTb1(self):
         return Tb1(self, -1, wx.DefaultPosition, wx.DefaultSize, style = 0,
