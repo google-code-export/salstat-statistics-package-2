@@ -754,9 +754,9 @@ class MainApp(wx.App):
 
     def MacOpenFile(self, filename):
         """Called for files dropped on dock icon, or opened via finders context menu"""
-        if (os.path.basename(filename).lower()) == "salstat.py":
-            # don't activate when salstat is booting up and initial dock activation sees salstat.py itself!
-            # or at any other time, pointing salstat at itself is pointless!
+        if (os.path.basename(filename).lower()) == "salstat2.py":
+            # don't activate when salstat2 is booting up and initial dock activation sees salstat2.py itself!
+            # or at any other time, pointing salstat2 at itself is pointless!
             pass
         else:
             texto= _(u"%s dropped on S2 dock icon")%(filename)
