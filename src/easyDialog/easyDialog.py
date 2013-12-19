@@ -23,7 +23,7 @@ _WILDCARD= "Supported Files (*.txt;*.csv;*.xlsx;*.xls)|*.txt;*.csv;*xlsx;*.xls|"
 
 def Busy(Message= None):
     if Message == None:
-        Message= _("One moment please, waiting for transactions..")
+        Message= __("One moment please, waiting for transactions..")
     def realDecorator(function):
         def _mydecorator( *args, **kw):
             busy = wx.BusyInfo( Message)
@@ -42,7 +42,7 @@ def getPath( *args, **params):
     try: wildCard= params.pop('wildcard')
     except: wildCard= _WILDCARD
 
-    dlg = wx.FileDialog(None, _("Load Data File"), "","",
+    dlg = wx.FileDialog(None, __("Load Data File"), "","",
                         wildcard= wildCard,
                         style = wx.OPEN)
     ##icon = imageEmbed().logo16()
@@ -136,8 +136,8 @@ class Ctrl(CustomCtrl):
             return self.__choices
         @choices.setter
         def choices(self, choices):
-            if not isisntance(choices, (list, tuple)):
-                raise StandardError(_("Only acept a list or tuple"))
+            if not isinstance(choices, (list, tuple)):
+                raise StandardError(__("Only acept a list or tuple"))
             self.__choices= choices
         @property        
         def value(self):
@@ -156,8 +156,8 @@ class Ctrl(CustomCtrl):
             return self.__choices
         @choices.setter
         def choices(self, choices):
-            if not isisntance(choices, (list, tuple)):
-                raise StandardError(_("Only acept a list or tuple"))
+            if not isinstance(choices, (list, tuple)):
+                raise StandardError(__("Only acept a list or tuple"))
             self.__choices= choices
         @property        
         def value(self):
@@ -196,8 +196,8 @@ class Ctrl(CustomCtrl):
             return self.__choices
         @choices.setter
         def choices(self, choices):
-            if not isisntance(choices, (list, tuple)):
-                raise StandardError(_("Only acept a list or tuple"))
+            if not isinstance(choices, (list, tuple)):
+                raise StandardError(__("Only acept a list or tuple"))
             self.__choices= choices
         @property        
         def value(self):
@@ -279,7 +279,7 @@ class Ctrl(CustomCtrl):
         @path.setter
         def path(self, path):
             if not isinstance(path, (str, unicode)):
-                raise StandardError(_("The path must be an string"))
+                raise StandardError(__("The path must be an string"))
             self.__path = os.path.abspath(path)
         @property
         def value(self):
@@ -298,7 +298,7 @@ class Ctrl(CustomCtrl):
         @path.setter
         def path(self, path):
             if not isinstance(path, (str, unicode)):
-                raise StandardError(_("The path must be an string"))
+                raise StandardError(__("The path must be an string"))
             self.__path = os.path.abspath(path)
         @property
         def value(self):
@@ -319,12 +319,12 @@ class DataBaseImport( wx.Panel ):
         #==========================
         # left Panel
         bSizerLEFT = wx.BoxSizer( wx.VERTICAL )
-        sbSizer1 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, _(u"Table Name") ), wx.VERTICAL )
-        sbSizer2 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, _(u"Field Names") ), wx.VERTICAL )
+        sbSizer1 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, __(u"Table Name") ), wx.VERTICAL )
+        sbSizer2 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, __(u"Field Names") ), wx.VERTICAL )
 
         self.dataDict = args[0]
         if not isinstance( self.dataDict, (dict,)):
-            raise StandardError( _("dataDict must be a dictionary!"))
+            raise StandardError( __("dataDict must be a dictionary!"))
 
         m_choice1Choices = self.dataDict.keys()
         self.m_choice1 = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_choice1Choices, 0 )
@@ -345,8 +345,8 @@ class DataBaseImport( wx.Panel ):
         #======================
         # Right Panel
         bSizerRIGHT = wx.BoxSizer( wx.VERTICAL )
-        RIGTH_sbSizer1 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, _(u"Limit") ), wx.VERTICAL )
-        RIGTH_sbSizer2 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, _(u"Order by") ), wx.VERTICAL )
+        RIGTH_sbSizer1 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, __(u"Limit") ), wx.VERTICAL )
+        RIGTH_sbSizer2 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, __(u"Order by") ), wx.VERTICAL )
 
         limit = IntTextCtrl(self,)
 
@@ -465,9 +465,9 @@ class NumTextCtrl( wx.TextCtrl):
         if pos != -1: hasDecimal= True
         number= format.split('.')
         if len(number) > 2:
-            raise StandardError(_('Formato de numero invalido!'))
+            raise StandardError(__('Formato de numero invalido!'))
         if len(number) == 1 and hasDecimal:
-            raise StandardError(_('Formato de numero invalido!'))
+            raise StandardError(__('Formato de numero invalido!'))
 
         if hasDecimal: enteroFormat, decimalFormat= number
         else:          enteroFormat = number[0]
@@ -631,6 +631,11 @@ class IntTextCtrl( NumTextCtrl):
         wx.TextCtrl.__init__( self, parent, *args, **params)
         self.Bind( wx.EVT_TEXT, self._textChange)
         self.allowed = [ str( x) for x in range( 10)]
+        # updating the values giving by default
+        try:
+            self._textChange(evt=None)
+        except:
+            pass
 
     def _textChange( self, evt):
         texto = self.Value
@@ -661,7 +666,9 @@ class IntTextCtrl( NumTextCtrl):
                 prevResult = None
 
         return prevResult
-
+    def GetValue(self):
+        return self.GetAsNumber()
+    
 class CheckListBox( wx.Panel, object ):
     def __init__( self, parent , *args, **params):
         wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( -1, -1 ), style = wx.TAB_TRAVERSAL )
@@ -673,13 +680,13 @@ class CheckListBox( wx.Panel, object ):
 
         bSizer9 = wx.BoxSizer( wx.HORIZONTAL )
 
-        self.m_button1 = wx.Button( self, wx.ID_ANY, _(u"All"), wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT )
+        self.m_button1 = wx.Button( self, wx.ID_ANY, __(u"All"), wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT )
         bSizer9.Add( self.m_button1, 0, 0, 5 )
 
-        self.m_button2 = wx.Button( self, wx.ID_ANY, _(u"None"), wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT )
+        self.m_button2 = wx.Button( self, wx.ID_ANY, __(u"None"), wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT )
         bSizer9.Add( self.m_button2, 0, 0, 5 )
 
-        self.m_button3 = wx.Button( self, wx.ID_ANY, _(u"Invert"), wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT )
+        self.m_button3 = wx.Button( self, wx.ID_ANY, __(u"Invert"), wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT )
         bSizer9.Add( self.m_button3, 0, 0, 5 )
 
         bSizer8.Add( bSizer9, 0, wx.EXPAND, 5 )
@@ -738,7 +745,7 @@ class _CustomDataTable( gridlib.PyGridTableBase):
         if isinstance(choicesByColumn, (list,)):
             if len(choicesByColumn) > 0:
                 if len(choicesByColumn) !=  len(columnNames):
-                    raise StandardError( _("Invalid amount of choicesbyColumn"))
+                    raise StandardError( __("Invalid amount of choicesbyColumn"))
                 choiceNames= choicesByColumn
             else:
                 if isinstance( choiceNames, (str, unicode)):
@@ -746,7 +753,7 @@ class _CustomDataTable( gridlib.PyGridTableBase):
                 elif isinstance(choiceNames, (list, tuple)):
                     choiceNames= [choiceNames]*len(columnNames)
                 else:
-                    raise StandardError(_("Invalid choices!"))
+                    raise StandardError(__("Invalid choices!"))
 
         self.colLabels = columnNames
         group= lambda x,y: x+','+y
@@ -760,7 +767,7 @@ class _CustomDataTable( gridlib.PyGridTableBase):
                     choicesByColumni= choicesByColumni[0]
                 colsResume= choicesByColumni
             else:
-                raise StandardError( _(u'You input a bad type data as choiceNames variable'))
+                raise StandardError( __(u'You input a bad type data as choiceNames variable'))
             choices.append(colsResume)
 
         gvalue= gridlib.GRID_VALUE_CHOICE 
@@ -776,7 +783,7 @@ class _CustomDataTable( gridlib.PyGridTableBase):
         elif rowNumber > 0:
             self.data= [[u'' for i in range(len(choices))] for j in range(rowNumber)]
         else:
-            raise StandardError(_("The number of columns must be greater or equal to zero!"))
+            raise StandardError(__("The number of columns must be greater or equal to zero!"))
     #--------------------------------------------------
     # required methods for the wxPyGridTableBase interface
 
@@ -981,14 +988,14 @@ class Dialog:
         self.__currdialog = None
         self.__size = wx.DefaultSize
         self.__pos = wx.DefaultPosition
-        self.__style = wx.wx.DEFAULT_DIALOG_STYLE
+        self.__style = wx.wx.DEFAULT_DIALOG_STYLE|wx.TAB_TRAVERSAL
     @property
     def title(self):
         return self.__title
     @title.setter
     def title(self, title):
         if not isinstance(title, (str, unicode)):
-            raise StandardError( _('The title must be an string'))
+            raise StandardError( __('The title must be an string'))
         self.__title= title
     @property
     def Title(self):
@@ -996,7 +1003,7 @@ class Dialog:
     @Title.setter
     def Title(self, title):
         if not isinstance(title, (str, unicode)):
-            raise StandardError(_("The title must be an string"))
+            raise StandardError(__("The title must be an string"))
         self.title= title
     @property
     def size(self):
@@ -1004,7 +1011,7 @@ class Dialog:
     @size.setter
     def size(self, size):
         if not isinstance(size, Size):
-            raise StandardError(_('The size must be wx.Size type'))
+            raise StandardError(__('The size must be wx.Size type'))
         self.__size= size
     @property
     def pos(self):
@@ -1012,7 +1019,7 @@ class Dialog:
     @pos.setter
     def pos(self, pos):
         if not isinstance(pos, (list, tuple)):
-            raise StandardError(_('The pos must be a list or a tuple type'))
+            raise StandardError(__('The pos must be a list or a tuple type'))
         self.__pos= pos
     @property
     def struct(self):
@@ -1020,7 +1027,7 @@ class Dialog:
     @struct.setter
     def struct(self, struct):
         if not isinstance(struct, (list, tuple)):
-            raise StandardError(_('The pos must be a list or a tuple type'))
+            raise StandardError(__('The pos must be a list or a tuple type'))
         self.__struct= struct
     def ShowModal(self, *args, **params):
         if self.__currdialog == None:
@@ -1147,7 +1154,12 @@ class _Dialog ( wx.Dialog):
                                                     wx.DefaultPosition, wx.DefaultSize,
                                                     wx.DOUBLE_BORDER|wx.HSCROLL|wx.VSCROLL )
         self.m_scrolledWindow1.SetScrollRate( 5, 5 )
-        bSizer3 = wx.BoxSizer( wx.VERTICAL )
+        bSizer3 = wx.FlexGridSizer( 1, 1, 0, 0 )
+        bSizer3.SetFlexibleDirection( wx.BOTH )
+        bSizer3.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+        
+        
+        
         self.sisers= list()
         self.ctrls= list()
 
@@ -1209,7 +1221,7 @@ class _Dialog ( wx.Dialog):
         self.Layout()
         self.Centre( wx.BOTH )
 
-    def adding(self, parentSizer, struct ):
+    def adding1(self, parentSizer, struct ):
         diferents= ['CheckListBox','Choice',]
         for row in struct:
             namebox= 'boxSizer'+ self.ctrlNum.next()
@@ -1319,6 +1331,115 @@ class _Dialog ( wx.Dialog):
             parentSizer.Add( currSizer, 0, wx.EXPAND, 5 )
             parentSizer.Layout()
 
+    def adding(self, flexGrid, struct ):
+        diferents= ['CheckListBox','Choice',]
+        size= (len(struct), max([len(row) for row in struct]))
+        flexGrid.SetRows( size[0])
+        flexGrid.SetCols( size[1])
+        for rowNumber, row in enumerate(struct):
+            characters= wx.ALIGN_CENTER_VERTICAL | wx.ALL
+            for dat  in row:
+                if Ctrl.__bases__[0] in dat.__class__.__bases__:
+                    key, args, params =  dat.value
+                else:
+                    key, args = dat
+                    params = dict()
+
+                if hasattr(wx, key):
+                    #nameCtrl= 'ctrl' + self.sizerNum.next()
+                    if key in diferents:
+                        data= [wx.DefaultPosition, wx.DefaultSize, ]
+                        if len(args) > 1:
+                            # se identifica la posicion por defecto del control
+                            defaultControlSelection= args[1]
+                            data.extend(list((args[0],)))
+                        else:
+                            defaultControlSelection= None
+                            data.extend(list(args))
+                        data.append(0)
+                        args= data
+                    elif key == 'StaticLine':
+                        data= [wx.DefaultPosition, wx.DefaultSize, ]
+                        if args[0] == 'horz':
+                            data.append(wx.LI_HORIZONTAL|wx.DOUBLE_BORDER)
+                        else:
+                            data.append(wx.LI_VERTICAL|wx.DOUBLE_BORDER)
+                        args = data
+                        characters = wx.ALL | wx.EXPAND
+                    elif key == 'RadioBox':
+                        data= [args[0] , wx.DefaultPosition, wx.DefaultSize, ]
+                        data.append(args[1])
+                        data.extend([1, wx.RA_SPECIFY_COLS])
+                        args= data
+                    elif key == 'SpinCtrl':
+                        data= [ wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS]
+                        data.extend((args))
+                        args= data
+                    elif key == 'CheckBox':
+                        pass
+                    if key == 'CheckListBox':
+                        self.ctrls.append((key, CheckListBox(self.m_scrolledWindow1, wx.ID_ANY, *args, **params)))
+                    else:
+                        self.ctrls.append((key, getattr(wx, key)(self.m_scrolledWindow1, wx.ID_ANY, *args,**params)))
+                    currCtrl= self.ctrls[-1][1]
+                    # setting default values    
+                    if self.ctrls[-1][0] == 'Choice':
+                        # selecting the last added item
+                        if defaultControlSelection != None: # if the user select a default option
+                            currCtrl.Selection= defaultControlSelection
+                        else : # if the user select a default option
+                            currCtrl.Selection= 0
+
+                    flexGrid.Add( currCtrl, 0, characters, 5 )
+
+                elif key == 'NumTextCtrl':
+                    self.ctrls.append((key, NumTextCtrl(self.m_scrolledWindow1, wx.ID_ANY, *args, **params)))
+                    currCtrl= self.ctrls[-1][1]
+                    flexGrid.Add(currCtrl, 0, characters , 5)
+
+                elif key  == 'IntTextCtrl':
+                    self.ctrls.append((key, IntTextCtrl(self.m_scrolledWindow1, wx.ID_ANY, *args, **params)))
+                    currCtrl= self.ctrls[-1][1]
+                    flexGrid.Add(currCtrl, 0, characters , 5)
+
+                elif key == 'makePairs':
+                    self.ctrls.append((key, makePairs(self.m_scrolledWindow1, wx.ID_ANY, *args, **params)))
+                    currCtrl= self.ctrls[-1][1]
+                    flexGrid.Add(currCtrl, 0, characters , 5)
+                    currCtrl.Fit()
+                    # limiting the maximun size of the ctrl
+                    maxAllowedSize= (300, 350)
+                    currCtrl.SetSize(wx.Size(min([currCtrl.GetSize()[0], maxAllowedSize[0]]),
+                                             min([currCtrl.GetSize()[1], maxAllowedSize[1]])))
+
+                elif key == 'FilePath':
+                    self.ctrls.append((key, FilePath( self.m_scrolledWindow1, wx.ID_ANY, *args, **params)))
+                    currCtrl= self.ctrls[-1][1]
+                    flexGrid.Add(currCtrl, 0, characters , 5)
+
+                elif key == 'DataBaseImport':
+                    self.ctrls.append((key, DataBaseImport( self.m_scrolledWindow1, wx.ID_ANY, *args, **params)))
+                    currCtrl= self.ctrls[-1][1]
+                    flexGrid.Add(currCtrl, 0, characters , 5)
+
+                elif key == 'EditableListBox':
+                    argNew = list(args)
+                    choices = argNew.pop(1)
+                    args = tuple(argNew)
+                    self.ctrls.append((key, EditableListBox( self.m_scrolledWindow1, wx.ID_ANY, *args, **params)))
+                    currCtrl = self.ctrls[-1][1]
+                    currCtrl.SetStrings(choices)
+                    flexGrid.Add(currCtrl, 0, characters , 5)
+                else:
+                    raise StandardError("unknow control %s : type .ALLOWED to view all available controls"%key)
+
+                #elif key == 'in':  # not used
+                #    self.adding(parentSizer, [args])
+            if len(row) < size[1]:
+                for i in range(size[1]-len(row)):
+                    flexGrid.AddSpacer( ( 0, 0), 1, wx.EXPAND, 5 )
+        flexGrid.Layout()
+
     def GetValue(self):
         try:
             self.DECIMAL_POINT = wx.GetApp().DECIMAL_POINT
@@ -1384,7 +1505,7 @@ class _example( wx.Frame ):
 
         bSizer10 = wx.BoxSizer( wx.VERTICAL )
 
-        self.m_button8 = wx.Button( self, wx.ID_ANY, _(u"Show Dialog"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_button8 = wx.Button( self, wx.ID_ANY, __(u"Show Dialog"), wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer10.Add( self.m_button8, 0, wx.ALL, 5 )
 
         self.SetSizer( bSizer10 )
@@ -1398,19 +1519,19 @@ class _example( wx.Frame ):
     # Virtual event handlers, overide them in your derived class
     def showDialog( self, evt ):
         dic= {'Title': 'title'}
-        bt1= Ctrl.Button(_('Print'))
-        bt2= Ctrl.StaticText(_('Page to print'))
-        bt3= Ctrl.Button(_('new'))
+        bt1= Ctrl.Button(__('Print'))
+        bt2= Ctrl.StaticText(__('Page to print'))
+        bt3= Ctrl.Button(__('new'))
         bt4= Ctrl.StaticText('sebas')
-        bt5= Ctrl.StaticText(_('Input the presure'))
-        bt6= Ctrl.TextCtrl( _('Parameter'))
+        bt5= Ctrl.StaticText(__('Input the presure'))
+        bt6= Ctrl.TextCtrl( __('Parameter'))
         btnChoice= Ctrl.Choice(['opt1', 'opcion2', 'opt3'])
         btnListBox= Ctrl.CheckListBox(['opt1', 'opcion2', 'opt3'])
         listSeparator= Ctrl.StaticLine()
         bt7= Ctrl.RadioBox( 'title', ['opt1', 'opt2', 'opt3'])
         bt8= Ctrl.SpinCtrl( 0, 100, 5)
         bt9= Ctrl.ToggleButton('toggle')
-        bt10= Ctrl.makePairs([_('Column')+' '+str(i) for i in range(2)], ['opt1','opt2'], 5)
+        bt10= Ctrl.makePairs([__('Column')+' '+str(i) for i in range(2)], ['opt1','opt2'], 5)
         bt11= Ctrl.FilePath()
 
         structure= list()

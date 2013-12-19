@@ -1042,9 +1042,6 @@ class MainFrame(wx.Frame):
         self.timers= list()
         sequence= self._generateSequence()
         sequence= self._fixSequence( sequence)
-        ##for timeval in sequence:
-        ##    self.timers.append(wx.PyTimer( self.checkDongle))
-        ##    self.timers[-1].Start( timeval)
     def _showHidePanel(self, panelName):
         """To show or hide the selected panel"""
         panels = self.m_mgr.GetAllPanes()
@@ -1087,12 +1084,6 @@ class MainFrame(wx.Frame):
         self._generateSequence( lista, start/2)
 
         return lista
-
-    def checkDongle(self):
-        if not readDongleKey():
-            thread= _checkSum()
-            thread.setDaemon(True)
-            thread.start()
 
     def _updatetree(self, data):
         self.treePanel.treelist= data
