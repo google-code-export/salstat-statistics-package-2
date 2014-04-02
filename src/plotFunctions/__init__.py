@@ -35,7 +35,7 @@ import matplotlib.path as mpath
 import matplotlib.patches as mpatches
 import matplotlib.cm as cm
 
-from pylab import setp
+from matplotlib.pylab import setp
 from multiPlotDialog import selectDialogData2plot, scatterDialog
 from easyDialog.easyDialog import NumTextCtrl
 
