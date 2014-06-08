@@ -111,7 +111,7 @@ import statFunctions
 from script     import ScriptPanel
 from imagenes   import imageEmbed
 from helpSystem import Navegator
-from TreeCtrl   import TreePanel
+from TreeCtrl   import TreePanel, baseItem
 
 from dialogs import SaveDialog, SaveOneGridDialog, VariablesFrame #, DescriptivesFrame
 from calculator import MyFrame1 as TransformFrame
@@ -1085,8 +1085,8 @@ class MainFrame(wx.Frame):
 
         return lista
 
-    def _updatetree(self, data):
-        self.treePanel.treelist= data
+    def _updatetree(self, tree, data):
+        tree.treelist = data
 
     def _createStatusBar(self):
         StatusBar= self.CreateStatusBar( 3)
@@ -1149,7 +1149,30 @@ class MainFrame(wx.Frame):
                    agwStyle = aui.AUI_TB_DEFAULT_STYLE | aui.AUI_TB_HORZ_LAYOUT,
                    imageEmbed= imageEmbed,
                    translation= wx.GetTranslation)
-
+    
+    def __autoCreateMenuItemFromModule(self, module, twoGraph=False):
+        import importlib
+        # automatically creates a menu related with a specified module
+        groups = module.__all__
+        subgroup = baseItem(text= module.__name__)
+        for group in groups:
+            try:
+                attr= importlib.import_module(module.__name__+'.'+group)
+            except:
+                print "Error importing "+ module.__name__+'.'+group
+            result = baseItem( text= _(attr.__name__))
+            for item in attr.__all__:
+                fnc = getattr( attr, item)
+                if twoGraph:
+                    item= baseItem( text= _(fnc.name), image= fnc.image,
+                                    callback= getattr(fnc(), 'showGui'), id= fnc.id)
+                else:
+                    item= baseItem( text= _(fnc.name), image= fnc.icon,
+                                    callback= getattr(fnc(), 'showGui'), id= fnc.id)
+                result.addchild(item)
+            subgroup.addchild( result)
+        return subgroup
+    
     def _autoCreateMenu(self, module, twoGraph = False):
         import importlib
         # automatically creates a menu related with a specified module
@@ -1195,10 +1218,64 @@ class MainFrame(wx.Frame):
         # to be used for statistical menu autocreation
         import statFunctions
         import plotFunctions
+        
+        # creating the first base
+        datExplorer = baseItem( text= 'Main',)
+        # creating the first group of data
+        FileGroup = baseItem(text= _("&File"), image= NewIcon, callback= None)
+        # creating the childs of the filegroup
+        items = list()
+        items.append( baseItem( text= _("&New Data\tCtrl-N"), image= NewIcon, callback= self.grid.createNewTable))
+        items.append( baseItem( text= _("&Open...\tCtrl-O"), image= NewIcon, callback= self.grid.LoadFile))
+        items.append( baseItem( text= _("&Save\tCtrl-S"), image= SaveIcon, callback= self.grid.SaveXls))
+        items.append( baseItem( text= _("Save &As...\tCtrl-Shift-S"), image= SaveAsIcon, callback= self.grid.SaveXlsAs))
+        items.append( baseItem( text= _("E&xit\tCtrl-Q"), image=  ExitIcon, callback= self.Destroy))
+        for item in items:
+            FileGroup.addchild(item)
+        datExplorer.addchild( FileGroup)
+        # Edit group:
+        EditGroup= baseItem( text= _("Edit"), )
+        items= list()
+        items.append( baseItem( text= _("Cut"), image= CutIcon, callback= self.tb1.CutData) )
+        items.append( baseItem( text= _("Copy"), image= CopyIcon , callback= self.tb1.CopyData) )
+        items.append( baseItem( text= _("Paste"), image= PasteIcon, callback= self.tb1.PasteData) )
+        items.append( baseItem( text= _("Select All"), callback= self.tb1.SelectAllCells))
+        items.append( baseItem( text= _("Delete Current Column"), callback= self.tb1.DeleteCurrentCol))
+        items.append( baseItem( text= _("Delete Current Row"), callback= self.tb1.DeleteCurrentRow))
+        for item in items:
+            EditGroup.addchild(item)
+        datExplorer.addchild( EditGroup)
+        # Preparaton group:
+        PrepGroup= baseItem( text= _("Preparation"), image= NewIcon)
+        items= list()
+        items.append( baseItem( text=  _("Transform Data"), callback= self.GoTransformData) )
+        items.append( baseItem( text= _("short data"), callback= self.shortData) )
+        #items.append( baseItem( text= _("Pivot Table"), callback= self.GoPivotTable) )
+        for item in items:
+            PrepGroup.addchild(item)
+        datExplorer.addchild( PrepGroup)
+        # Edit group:
+        HelpGroup= baseItem( text= _("Help"), )
+        item1=  baseItem( text= _("Preferences"))
+        item1_1= baseItem( text= _("Variables..."), callback= self.GoVariablesFrame)
+        item1_2= baseItem( text=  _("Add Columns and Rows..."), callback= self.GoEditGrid)
+        item1.addchild( item1_1)
+        item1.addchild( item1_2)
+        item2= baseItem( text= _("Load default perspective"), callback= self.onDefaultPerspective)
+        item3= baseItem( text= _("About..."), image= imag.icon16,callback= self.ShowAbout)
+        HelpGroup.addchild( item1)
+        HelpGroup.addchild( item2)
+        HelpGroup.addchild( item3)
 
+        datExplorer.addchild( self.__autoCreateMenuItemFromModule(statFunctions))
+        datExplorer.addchild( self.__autoCreateMenuItemFromModule(plotFunctions))
+        datExplorer.addchild( HelpGroup)
+        # updating the tree
+        self._updatetree( self.treePanel, datExplorer)
+           
         statisticalMenus= self._autoCreateMenu( statFunctions)
         plotMenus= self._autoCreateMenu( plotFunctions)
-
+        
         #add contents of menu
         dat1= (
             (_(u"&File"),
@@ -1254,8 +1331,7 @@ class MainFrame(wx.Frame):
               (_(u"&About..."),          imag.icon16, self.ShowAbout,     wx.ID_ABOUT),
               )),
         )
-        # updating the tree
-        self._updatetree( dat1) #statisticalMenus
+        
 
         self.__createMenu(dat1, menuBar)
         self.SetMenuBar(menuBar)
