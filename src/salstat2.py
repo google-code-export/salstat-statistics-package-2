@@ -2,7 +2,7 @@
 
 #RELEASE 2.1 rc2
 
-""" Copyright 2012 - 2013 Sebastian Lopez Buritica, S2 Team,  licensed under GPL 3
+""" Copyright 2012 - 2014 S2 Team,  licensed under GPL 3
 
 SalStat Statistics Package. Copyright 2002 Alan James Salmoni. Licensed
 under the GNU General Public License (GPL 2) """
@@ -1662,7 +1662,7 @@ class MainFrame(wx.Frame):
         info= wx.AboutDialogInfo()
         info.Name= u"SalStat2"
         info.Version= u"V" + wx.GetApp().__version__
-        info.Copyright= u"(C) 2012 - 2013 Sebastian Lopez Buritica, S2 Team"
+        info.Copyright= u"(C) 2012 - 2014 Salstat2 Team"
         info.Icon= wx.GetApp().icon64
         from wx.lib.wordwrap import wordwrap
         info.Description = wordwrap(
