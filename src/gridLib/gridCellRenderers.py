@@ -13,6 +13,70 @@ def isnumeric(data):
         return True
     return False
 
+class wordWrapRenderer(wx.grid.PyGridCellRenderer):
+    def __init__(self):
+        wx.grid.PyGridCellRenderer.__init__(self)
+
+    def Draw(self, grid, attr, dc, rect, row, col, isSelected):
+        text = grid.GetCellValue(row, col)
+        dc.SetFont( attr.GetFont() )
+        text = wordwrap.wordwrap(text, grid.GetColSize(col), dc, breakLongWords = False)
+        hAlign, vAlign = attr.GetAlignment()
+        if isSelected:
+            bg = grid.GetSelectionBackground()
+            fg = grid.GetSelectionForeground()
+        else:
+            bg = attr.GetBackgroundColour()
+            fg = attr.GetTextColour()
+        dc.SetTextBackground(bg)
+        dc.SetTextForeground(fg)
+        dc.SetBrush(wx.Brush(bg, wx.SOLID))
+        dc.SetPen(wx.TRANSPARENT_PEN)
+        dc.DrawRectangleRect(rect)
+        grid.DrawTextRectangle(dc, text, rect, hAlign, vAlign)
+
+    def GetBestSize(self, grid, attr, dc, row, col):
+        text = grid.GetCellValue(row, col)
+        dc.SetFont(attr.GetFont())
+        text = wordwrap.wordwrap(text, grid.GetColSize(col), dc, breakLongWords = False)
+        w, h, lineHeight = dc.GetMultiLineTextExtent(text)
+        return wx.Size(w, h)
+
+    def Clone(self):
+        return wordWrapRenderer()
+
+class PercentRenderer(wx.grid.PyGridCellRenderer):
+    def __init__(self):
+        wx.grid.PyGridCellRenderer.__init__(self)
+
+    def Draw(self, grid, attr, dc, rect, row, col, isSelected):
+        text = grid.GetCellValue(row, col)
+        dc.SetFont( attr.GetFont() )
+        text += '%'
+        hAlign, vAlign = attr.GetAlignment()
+        if isSelected:
+            bg = grid.GetSelectionBackground()
+            fg = grid.GetSelectionForeground()
+        else:
+            bg = attr.GetBackgroundColour()
+            fg = attr.GetTextColour()
+        dc.SetTextBackground(bg)
+        dc.SetTextForeground(fg)
+        dc.SetBrush(wx.Brush(bg, wx.SOLID))
+        dc.SetPen(wx.TRANSPARENT_PEN)
+        dc.DrawRectangleRect(rect)
+        grid.DrawTextRectangle(dc, text, rect, hAlign, vAlign)
+
+    def GetBestSize(self, grid, attr, dc, row, col):
+        text = grid.GetCellValue(row, col)
+        dc.SetFont(attr.GetFont())
+        text += '%'#wordwrap.wordwrap(text, grid.GetColSize(col), dc, breakLongWords = False)
+        w, h, lineHeight = dc.GetTextExtent(text)
+        return wx.Size(w, h)
+
+    def Clone(self):
+        return PercentRenderer()
+
 class floatRendererSub(Grid.PyGridCellRenderer):
     def __init__(self, decimalPoints, color= 'blue',
                  font= "ARIAL", fontsize=8):

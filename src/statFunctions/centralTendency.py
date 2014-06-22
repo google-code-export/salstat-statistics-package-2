@@ -7,15 +7,16 @@ import numpy
 from statFunctions import _genericFunc
 from wx import ID_OK as _OK
 from wx import Size
+from sei_glob import __
 
 class geometricMean(_genericFunc):
     ''''''
-    name=      u"geometric Mean"
+    name=      __(u"geometric Mean")
     statName=  u"geometricmean"
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
-        self.name=      'geometric Mean'
+        self.name=      __('geometric Mean')
         self.statName=  'geometricmean'
         self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
@@ -25,7 +26,7 @@ class geometricMean(_genericFunc):
         setting= {'Title': self.name,
                   '_size': Size(220,300)}
         self._updateColsInfo() # update self.columnames and self.colnums
-        bt1= ['StaticText',   [self._(u'Select the columns to analyse')]]
+        bt1= ['StaticText',   [__(u'Select the columns to analyse')]]
         bt2= ['CheckListBox', [self.columnNames]]
         structure = list()
         structure.append([bt1,])
@@ -44,11 +45,11 @@ class geometricMean(_genericFunc):
         self.colNameSelect= values[0]
         
         if len( self.colNameSelect ) == 0:
-            self.Logg.write(self._(u"you don't select any items"))
+            print __(u"you don't select any items")
             return
         
         if len( self.colNameSelect ) < self.minRequiredCols:
-            self.Logg.write(self._(u"you have to select at least %i columns")%self.minRequiredCols)
+            print __(u"you have to select at least %i columns")%self.minRequiredCols
             return
         
         columns= self._convertColName2Values( self.colNameSelect )
@@ -73,16 +74,16 @@ class geometricMean(_genericFunc):
     def _report(self, result):
         self.outputGrid.addColData(self.colNameSelect, self.name)
         self.outputGrid.addColData(result)
-        self.Logg.write(self.statName+ ' '+self._('successful'))
+        print self.statName+ ' '+ __('successful')
         
 class harmonicmean(geometricMean):
-    name=      u"harmonic mean"
+    name=      __(u"harmonic mean")
     statName=  'harmonicmean'
     
     def __init__(self):
         geometricMean.__init__(self)
         self.minRequiredCols= 1
-        self.name=      'harmonic mean'
+        self.name=      __('harmonic mean')
         self.statName=  'harmonicmean'
         self._scritpEquivalenString='stats.'+self.statName
         
@@ -109,7 +110,7 @@ class mean(geometricMean):
         return _stats.mean
     
 class median(geometricMean):
-    name=  u"median"
+    name=  __(u"median")
     statName= 'median'
     def __init__(self):
         geometricMean.__init__(self)
@@ -125,12 +126,12 @@ class median(geometricMean):
         return _stats.median
     
 class medianscore(geometricMean):
-    name=   u"medianscore"
+    name=   __(u"medianscore")
     statName=  'medianscore'
     def __init__(self):
         geometricMean.__init__(self)
         self.minRequiredCols= 1
-        self.name=   'medianscore'
+        self.name=   __('medianscore')
         self.statName=  'medianscore'
         self._scritpEquivalenString='stats.'+self.statName
     def evaluate(self, *args, **params):
@@ -155,13 +156,13 @@ class mode(geometricMean):
         return _stats.mode(*args, **params)
     
     def _report(self, result):
-        res1= [self._(u'variable name')]
+        res1= [__(u'variable name')]
         res1.extend(self.colNameSelect)
         self.outputGrid.addColData(res1, self.name)
-        res2= [self._(u'value')]
+        res2= [__(u'value')]
         res2.extend([numpy.ravel(res[1]) for res in result])
         self.outputGrid.addColData(res2)
-        res3= [self._(u'frecuency')]
+        res3= [__(u'frecuency')]
         res3.extend([numpy.ravel(res[0])[0] for res in result])
         self.outputGrid.addColData(res3)
-        self.Logg.write(self.statName + ' ' + self._('successfull'))
+        print self.statName + ' ' + __('successfull')

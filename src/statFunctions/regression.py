@@ -7,21 +7,22 @@ from statFunctions import _genericFunc
 from wx import ID_OK as _OK
 from wx import Size
 from slbTools import homogenize
-from scikits.statsmodels import api as _sm
+import scikits.statsmodels.api as _sm
 import sys
+from sei_glob import __
 
 class ols( _genericFunc):
     ''''''
-    name=      u'Ordinary least squares (OLS)'
+    name=      __(u'Ordinary least squares (OLS)')
     statName=  'OLS'
     def __init__( self):
         # getting all required methods
         _genericFunc.__init__(self)
-        self.name=      u'Ordinary least squares (OLS)'
+        self.name=      __(u'Ordinary least squares (OLS)')
         self.statName=  'OLS'
-        self.txt1= _(u"Response/dependent variable")
-        self.txt2= _(u"Exogenous data")
-        #self.nameResults= [_(u"Pearson's r"), _(u" two-tailed p-value")]
+        self.txt1= __(u"Response/dependent variable")
+        self.txt2= __(u"Exogenous data")
+        #self.nameResults= [__(u"Pearson's r"), __(u" two-tailed p-value")]
         self.minRequiredCols= 2
         self.colNameSelect= ''
         self._scritpEquivalenString='sm.'+self.statName
@@ -30,7 +31,7 @@ class ols( _genericFunc):
         setting= {'Title': self.name,}
         self._updateColsInfo() # update self.columnames and self.colnums
         
-        txt1=  ['StaticText',   [_(u'Select the columns to analyse')]]
+        txt1=  ['StaticText',   [__(u'Select the columns to analyse')]]
         btn1=  ['Choice',       [self.columnNames]]
         txt2=  ['StaticText',   [self.txt1] ]
         txt3=  ['StaticText',   [self.txt2] ]
@@ -53,11 +54,11 @@ class ols( _genericFunc):
         (self.xcolNameSelect, self.ycolNameSelect)= values
         
         if self.xcolNameSelect == None or self.ycolNameSelect == None:
-            self.logPanel.write(_(u"You haven't selected any items!"))
+            print __(u"You haven't selected any items!")
             return
         
-        xcolumn= self.inputGrid.GetCol( self.xcolNameSelect)
-        ycolumn= self.inputGrid.GetCol( self.ycolNameSelect)
+        xcolumn= self.grid.GetCol( self.xcolNameSelect)
+        ycolumn= self.grid.GetCol( self.ycolNameSelect)
         (xcolumn, ycolumn)= homogenize(xcolumn, ycolumn)
         
         xcolumn = numpy.array(xcolumn)
@@ -89,22 +90,22 @@ class ols( _genericFunc):
         if 0:
             self.outputGrid.addColData( self.nameResults, self.name)
             self.outputGrid.addColData( result)
-            self.outputGrid.addRowData( [_(u'Input Data')],  currRow= 0)
-            self.outputGrid.addRowData( [_(u'x column='),   self.xcolNameSelect, 'y column=', self.ycolNameSelect ], currRow= 1)
-            self.outputGrid.addRowData( [_(u'Output Data')], currRow= 2)
+            self.outputGrid.addRowData( [__(u'Input Data')],  currRow= 0)
+            self.outputGrid.addRowData( [__(u'x column='),   self.xcolNameSelect, 'y column=', self.ycolNameSelect ], currRow= 1)
+            self.outputGrid.addRowData( [__(u'Output Data')], currRow= 2)
         print result.summary().__str__().decode( sys.getfilesystemencoding())
-        self.Logg.write( self.statName+ ' '+_(u'successful'))
+        print self.statName+ ' '+__(u'successful')
         
 class gls(ols):
-    name=      u'Generalized least squares (GLS)'
+    name=      __(u'Generalized least squares (GLS)')
     statName=  u'GLS'
     def __init__(self):
         ols.__init__(self)
-        self.name=      u'Generalized least squares (GLS)'
+        self.name=      __(u'Generalized least squares (GLS)')
         self.statName=  u'GLS'
-        self.txt1=      _(u"Response/independent variable")
-        self.txt2=      _(u"Regressors/dependent variables")
-        self.txt3=      _(u"Sigma")
+        self.txt1=      __(u"Response/independent variable")
+        self.txt2=      __(u"Regressors/dependent variables")
+        self.txt3=      __(u"Sigma")
         self._scritpEquivalenString= "sm."+ self.statName
         self.minRequiredCols= 3
         self.colNameSelect= ''
@@ -113,7 +114,7 @@ class gls(ols):
         setting= {'Title': self.name,}
         self._updateColsInfo() # update self.columnames and self.colnums
         
-        txt1=  ['StaticText',   [_(u'Select the columns to analyse')]]
+        txt1=  ['StaticText',   [__(u'Select the columns to analyse')]]
         btn1=  ['Choice',       [self.columnNames]]
         txt2=  ['StaticText',   [self.txt1] ]
         txt3=  ['StaticText',   [self.txt2] ]
@@ -140,16 +141,16 @@ class gls(ols):
         (self.response, self.regresors, calculateSigma, self.sigma)= values
         
         if self.response == None or len(self.regresors) == 0:
-            self.logPanel.write(_(u"You haven't selected any items!"))
+            print __(u"You haven't selected any items!")
             return
         
-        response= self.inputGrid.GetCol( self.response)
+        response= self.grid.GetCol( self.response)
         regresors= list()
         for reg in self.regresors:
-            regresors.append( self.inputGrid.GetCol( reg))
+            regresors.append( self.grid.GetCol( reg))
         
         if not calculateSigma:
-            sigma=     self.inputGrid.GetCol( self.sigma)
+            sigma=     self.grid.GetCol( self.sigma)
             results=   homogenize(response, sigma, *regresors)
             response=  results.pop(0)
             sigma =    results.pop(0)
@@ -182,16 +183,16 @@ class gls(ols):
         return _sm.GLS(*args, **params).fit()
 
 class wls(ols):
-    name=      'Weighted least squares (WLS)'
+    name=      __('Weighted least squares (WLS)')
     statName=  'WLS'
     def __init__(self):
         ols.__init__(self)
-        self.name=      'Weighted least squares (WLS)'
+        self.name=      __('Weighted least squares (WLS)')
         self.statName=  'WLS'
-        #self.nameResults= [_(u"Point-biserial r"), _(u"two-tailed p-value")]
-        self.txt1= _(u"Response variable")
-        self.txt2= _(u"Exogenous data")
-        self.txt3= _(u"Weights")
+        #self.nameResults= [__(u"Point-biserial r"), __(u"two-tailed p-value")]
+        self.txt1= __(u"Response variable")
+        self.txt2= __(u"Exogenous data")
+        self.txt3= __(u"Weights")
         self._scritpEquivalenString= 'sm.'+ self.statName
         self.minRequiredCols= 3
         self.colNameSelect= ''
@@ -200,7 +201,7 @@ class wls(ols):
         setting= {'Title': self.name,}
         self._updateColsInfo() # update self.columnames and self.colnums
         
-        txt1=  ['StaticText',   [_(u'Select the columns to analyse')]]
+        txt1=  ['StaticText',   [__(u'Select the columns to analyse')]]
         btn1=  ['Choice',       [self.columnNames]]
         txt2=  ['StaticText',   [self.txt1] ]
         txt3=  ['StaticText',   [self.txt2] ]
@@ -226,15 +227,15 @@ class wls(ols):
         (self.xcolNameSelect, self.ycolNameSelect, wIsOnes, self.weights)= values
         
         if self.xcolNameSelect == None or self.ycolNameSelect == None:
-            self.logPanel.write(_(u"You haven't selected any items!"))
+            print __(u"You haven't selected any items!")
             return
         
-        xcolumn= self.inputGrid.GetCol( self.xcolNameSelect)
-        ycolumn= self.inputGrid.GetCol( self.ycolNameSelect)
+        xcolumn= self.grid.GetCol( self.xcolNameSelect)
+        ycolumn= self.grid.GetCol( self.ycolNameSelect)
         if wIsOnes:
             weights= numpy.ones( (len(xcolumn), 1) )
         else:
-            weights= self.inputGrid.GetCol( self.weights)
+            weights= self.grid.GetCol( self.weights)
         
         (xcolumn, ycolumn, weights)= homogenize(xcolumn, ycolumn, weights)
         
@@ -257,14 +258,14 @@ class wls(ols):
 ##---------------------
 ### not implemented yet
 class glsar(ols):
-    name=      'Feasible generalized least squares'
+    name=      __('Feasible generalized least squares')
     statName=  'glsar'
     def __init__(self):
         ols.__init__(self)
-        self.name=      'Feasible generalized least squares'
+        self.name=      ('Feasible generalized least squares')
         self.statName=  'glsar'
         self._scritpEquivalenString= 'sm.'+ self.statName
-        self.nameResults= [_(u"Kendall's tau"), _(u" two-tailed p-value")]
+        self.nameResults= [__(u"Kendall's tau"), __(u" two-tailed p-value")]
         self.minRequiredCols= 2
         self.colNameSelect= ''
         

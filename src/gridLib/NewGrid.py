@@ -5,46 +5,66 @@ Created on 09/12/2010
 @author: usuario
 """
 __all__ = ['NewGrid']
-import wx
-import wx.grid
-from salstat2_glob import *
-from slbTools import ReportaExcel
-import xlrd
-from easyDialog import Dialog as dialog
-from slbTools import isnumeric, isiterable
-from numpy import ndarray, ravel
-import os
-import traceback
 
 DEFAULT_GRID_SIZE= (0,0)
 DEFAULT_FONT_SIZE = 12
-DECIMAL_POINT = '.' 
+DECIMAL_POINT = '.'
 
-from GridCopyPaste import PyWXGridEditMixin, MyContextGrid
-from gridCellRenderers import floatRenderer
+## THIRD PART LIBRARIES
+import wx
+import wx.grid
+import xlrd
+from numpy import ndarray, ravel
+import os
+import traceback
+import functools
+from openpyxl import Workbook, load_workbook
+
+# OWN LIBRARIES
+from sei_glob import *
 from imagenes import imageEmbed
-from easyDialog import Busy
+from slbTools import ReportaExcel
+from easyDialog import Dialog as dialog
+from easyDialog import Ctrl, Busy
+from slbTools import isnumeric, isiterable
+from .GridCopyPaste import PyWXGridEditMixin, MyContextGrid
+from .GridCopyPaste import EVT_GRID_PASTE, EVT_GRID_UNDO, EVT_GRID_REDO
+from .gridCellRenderers import floatRenderer
+from gridLib import gridEditors as GE
+
+COLTYPES= {'0':'DATE','1':'LIST','2':'FLOAT','3':'VARCHAR','4':'INTEGER'}
+##########################################################################
+## defining a baseclass for the columns
+##########################################################################
+
 ###########################################################################
 ## Class NewGrid
 ###########################################################################
-class NewGrid(wx.grid.Grid, object):
+class NewGrid(wx.grid.Grid):
     import datetime
-    def __init__(self, parent, size, *args, **params):
-        try:    
-            self.__name= params.pop('name')
-        except: 
-            self.__name = 'selobu'
+    def __init__(self, parent, size= (1,2), *args, **params):
+        try:  self.__name= params.pop('name')
+        except: self.__name = 'selobu'
+        for key, value in params.items():
+            if not key.startswith('_'):
+                setattr(self,key, value)
+        self._wb= None
+        self._sh= None
+        self.path2file= None
+        self.hasSaved= False
         self.maxrow=   0
         self.maxcol=   0
-        self.zoom=     1.0
+        self.__zoom=   1.0
         self.moveTo=   None
-        self.hasSaved= False
-        self.wildcard= _("Suported Formats")+" (*.xls;*xlsx;*.txt;*csv)|*.xls;*xlsx;*.txt;*csv" + \
-                       _("All Files")+" (*.*)|*.*"
+        self.wildcard= __("Suported Formats")+" (*.xls;*xlsx;*.txt;*csv)|*.xls;*xlsx;*.txt;*csv" + \
+                       __("All Files")+" (*.*)|*.*"
         #<p> used to check changes in the grid
         self.hasChanged = True
         self.usedCols= ([], [],)
         # </p>
+        
+        #################################
+        ## grid parameters
         wx.grid.Grid.__init__(self, parent, *args, **params)
         # functions to copy paste
         if len([clase for clase in wx.grid.Grid.__bases__ if issubclass( PyWXGridEditMixin, clase)]) == 0:
@@ -52,16 +72,10 @@ class NewGrid(wx.grid.Grid, object):
         # contextual menu
         self.__init_mixin__()
         
-        # setting the renderer
-        ##self.__initAttr()
-        
-        #if len(args) > 0:
-        #    self.__init_mixin__( args[0])
-        #elif 'parent' in params.keys():
-        #    self.__init_mixin__( params['parent'])
-        
         # Grid
         self.CreateGrid( size[0], size[1] )
+
+        self.__columnTypes= [3]*size[1]
         self.EnableEditing( True )
         self.EnableGridLines( True )
         self.EnableDragGridSize( False )
@@ -76,15 +90,10 @@ class NewGrid(wx.grid.Grid, object):
         self.EnableDragRowSize( True )
         self.SetRowLabelSize( 80 )
         self.SetRowLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
-        
-        try:
-            self.defaultRowSize=  self.GetRowSize(0)
-        except:
-            self.defaultRowSize=  19
-        try:    
-            self.defaultColSize=  self.GetColSize(0)
-        except:
-            self.defaultColSize=  80
+        try:          self.defaultRowSize=  self.GetRowSize(0)
+        except:       self.defaultRowSize=  19
+        try:          self.defaultColSize=  self.GetColSize(0)
+        except:       self.defaultColSize=  80
         self.defaultRowLabelSize= self.GetRowLabelSize()
         self.defaultColLabelSize= self.GetColLabelSize()
         # Label Appearance
@@ -98,50 +107,146 @@ class NewGrid(wx.grid.Grid, object):
         # Cell Defaults
         self.SetDefaultCellAlignment( wx.ALIGN_LEFT, wx.ALIGN_TOP )
         self.SetColLabelAlignment( wx.ALIGN_CENTER, wx.ALIGN_CENTER)
+        #################################
 
-        # se activa el menu contextual sobre el grid
         self.Bind(wx.grid.EVT_GRID_EDITOR_CREATED,         self.onCellEdit)
         self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
         self.Bind(wx.grid.EVT_GRID_CELL_CHANGE,            self.onCellChanged)
-        self.Bind(wx.grid.EVT_GRID_CELL_CHANGE,            self.onCellChangedIncreaseSize)
+        self.Bind(wx.grid.EVT_GRID_CELL_CHANGED,           self.onCellChangedIncreaseSize)
         self.Bind(wx.grid.EVT_GRID_CELL_RIGHT_CLICK,       self.OnGridRighClic)
+        self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_DCLICK,      self.__onGridCmdLabelLeftDClick)
         self.Bind(wx.EVT_MOUSEWHEEL,                       self.__OnMouseWheel)
-        self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_DCLICK,     self.__onGridCmdLabelLeftDClick)
-    @property    
+        self.Bind(EVT_GRID_PASTE,                          self.onPaste)
+        
+    def __controlColnumber(func):
+        """
+        a decorator to control and transform the input column from string or number into a valid number
+        """
+        def getColRefAsNumber(self,colNumber):
+            """given a number or a name of a column return its equivalent number, planed to be used as a decorator"""
+            if isinstance( colNumber, (str, unicode)):
+                colN= colNumber[:]
+                if not(colN in self.colNames):
+                    raise TypeError('You can only use a numeric value, or the name of an existing column')
+                for pos, value in enumerate(self.colNames):
+                    if value == colN:
+                        colN= pos
+                        break
+            else:
+                colN = colNumber
+            colN= int(colN)
+            if colN < 0 or colN > self.NumberCols:
+                raise StandardError( __('The minimum accepted col is 0, and the maximum is %i')%self.GetNumberCols()-1)
+            return colN
+
+        @functools.wraps(func)
+        def wrapper(self,*args, **params):
+            args = list(args)
+            args[0] = getColRefAsNumber(self, args[0]) # the first argument is self
+            args = tuple(args)
+            return func(self,*args, **params)
+        return wrapper
+
+    ###############  PROPERTIES #############
+    @property
+    def zoom(self):
+        return self.__zoom
+    @zoom.setter
+    def zoom(self, zoom):
+        if isnumeric(zoom):
+            if zoom > 0 and zoom < 10:
+                self.__zoom = zoom
+    @property
+    def availableColTypes(self):
+        return range(4)
+    @property
     def name(self):
         return self.__name
     @name.setter
     def name(self, name):
         self.__name = name
+    @property
+    def rowNames( self):
+        return [self.GetRowLabelValue(row) for row in range(self.GetNumberRows())]
+    @rowNames.setter
+    def rowNames( self, rowNames):
+        if isinstance(rowNames, (str, unicode)):
+            rolNames= [rowNames]
+
+        if not isiterable(rowNames):
+            raise TypeError('rowNames must be an iterable object')
+
+        if len(rowNames) == 0:
+            return
+
+        for rownumber, rowname in enumerate(rowNames):
+            self.SetRowLabelValue(rownumber, rowname)
+    @property
+    def colNames(self):
+        return [self.GetColLabelValue(col) for col in range(self.GetNumberCols())]
+    @colNames.setter
+    def colNames(self, colNames):
+        if isinstance(colNames, (str, unicode)):
+            colNames= [colNames]
+
+        if not isiterable(colNames):
+            raise TypeError('colNames must be an iterable object')
+
+        if len(colNames) == 0:
+            return
+
+        for colnumber, colname in enumerate(colNames):
+            self.SetColLabelValue(colnumber, colname)
+    ###############################################     
+    #
     def __onGridCmdLabelLeftDClick(self, evt):
-        # identifiyng the column
-        colunmNumber= evt.GetCol()
+        """"TO CHANGING THE TYPE OF A COLUMN"""
+        # identifying the column
+        columnNumber= evt.GetCol()
         colNames= self.colNames[:]
-        currName= colNames[colunmNumber]
+        currName= colNames[columnNumber]
         # show a dialog to change the name
-        struct= list()
-        txt1= ('StaticText', ( 'Column name',))
-        edit1= ('TextCtrl', (currName,))
-        struct.append([txt1, edit1 ])
-        dlg= dialog(self, settings= {}, struct= struct)
+        dlg= dialog()
+        txt1=  Ctrl.StaticText( __('Column name'))
+        txt2=  Ctrl.StaticText( __('Column type'))
+        edit1= Ctrl.TextCtrl(currName)
+        currColType= self._getColType(columnNumber)
+        edit2= Ctrl.Choice(['DATE','LIST','FLOAT','VARCHAR','INTEGER'],currColType)
+        dlg.struct= [[txt1, edit1 ],
+                     [txt2, edit2 ]]
         if dlg.ShowModal() == wx.ID_OK:
             values= dlg.GetValue()
             dlg.Destroy()
         else:
             dlg.Destroy()
             return
-        newColName= values[0]
+        newColName,colType = values
         if newColName in ('',u''):
-            print _("You input an invalid column Name")
+            print __("You input an invalid column Name")
             return
-        colNames[colunmNumber] = u''
+        colNames[columnNumber] = u''
         if newColName in colNames:
-            print _("The new name of the column already exist!")
+            print __("The new name of the column already exist!")
             return
-        colNames[colunmNumber] = newColName
+        self.setColType(columnNumber, colType )
+        colNames[columnNumber] = newColName
         # updating the name of the column
         self.colNames= colNames
         evt.Skip()
+    def _getColType(self, colNumber):
+        # adjusting the size of the column tipes
+        # because of the ausence of the addcolumn evt
+        diff = self.GetNumberCols() - len(self.__columnTypes)
+        if diff > 0:
+            self.__columnTypes.extend([3]*diff) # 3 is used to set the colour of the rows
+        elif diff < 0:
+            for i in range(-diff):
+                self.__columnTypes.pop(-1)
+        return self.__columnTypes[colNumber]
+
+    @__controlColnumber
+    def getColumnTypeAsStr(self, colNumber):
+        return COLTYPES[colNumber.__str__()]
 
     def _selectDbTableDialog_initAttr(self):
         renderer = floatRenderer( 4)
@@ -177,6 +282,8 @@ class NewGrid(wx.grid.Grid, object):
         labelfont.SetPointSize(max(1, int(DEFAULT_FONT_SIZE * self.zoom)))
         self.SetLabelFont(labelfont)
 
+    ###############################
+    ### EVENTS
     def __OnMouseWheel(self, event):
         """Event handler for mouse wheel actions
         Invokes zoom when mouse when Ctrl is also pressed
@@ -194,14 +301,12 @@ class NewGrid(wx.grid.Grid, object):
             self.ForceRefresh()
         else:
             event.Skip()
-
-    def setLog(self, log):
-        self.log= log
     def onCellChanged(self, evt):
         self.hasChanged= True
         self.hasSaved=   False
+        col, row=  evt.GetCol(), evt.GetRow()
+        self.__cellChanged(row,col)
         evt.Skip()
-
     def onCellChangedIncreaseSize(self, evt):
         """to increase the size of the grid by one row or by one column"""
         numCols, numRows = self.GetNumberCols(), self.GetNumberRows()
@@ -211,14 +316,40 @@ class NewGrid(wx.grid.Grid, object):
             self.SetGridCursor(currRowNum, numCols)
         if currRowNum == numRows-1:
             self.AppendRows(1)
-            self.SetGridCursor(numRows,currColNum)
+            self.SetGridCursor(numRows, currColNum)
+        # refresh the sheet
+        #self.ForceRefresh()
         evt.Skip()
+    def onCellEdit(self, event):
+        '''
+        When cell is edited, get a handle on the editor widget
+        and bind it to EVT_KEY_DOWN
+        '''        
+        editor = event.GetControl()        
+        editor.Bind(wx.EVT_KEY_DOWN, self.onEditorKey)
+        event.Skip()
 
-    def RangeSelected(self, evt):
-        if evt.Selecting():
-            self.tl = evt.GetTopLeftCoords()
-            self.br = evt.GetBottomRightCoords()
-
+    def onEditorKey(self, event):
+        '''
+        Handler for the wx's cell editor widget's keystrokes. Checks for specific
+        keystrokes, such as arrow up or arrow down, and responds accordingly. Allows
+        all other key strokes to pass through the handler.
+        '''
+        keycode = event.GetKeyCode() 
+        if keycode == wx.WXK_UP:
+            self.MoveCursorUp(False)
+        elif keycode == wx.WXK_DOWN:
+            self.MoveCursorDown(False)
+        elif keycode == wx.WXK_LEFT:
+            self.MoveCursorLeft(False)
+        elif keycode == wx.WXK_RIGHT:
+            self.MoveCursorRight(False)
+        else:
+            pass
+        event.Skip()
+    def OnGridRighClic(self,evt):
+        self.PopupMenu(MyContextGrid(self), evt.GetPosition())
+        evt.Skip()
     def CutData(self, evt):
         self.Copy()
         self.Delete()
@@ -228,8 +359,23 @@ class NewGrid(wx.grid.Grid, object):
 
     def CopyData(self, evt):
         self.Copy()
-    @Busy
-    def PasteData(self, evt):
+
+    def onPaste(self, evt):
+        box= evt.box
+        top, left, rows, cols= box
+        maxcol= self.NumberCols
+        # determinando el rango maximo para pegar las columnas
+        rangoCols= min([left+cols, maxcol-1])
+        for row in range(top, top+rows):
+            for col in range(left, rangoCols):
+                self.__cellChanged(row,col)
+        evt.Skip()
+    def RangeSelected(self, evt):
+        if evt.Selecting():
+            self.tl = evt.GetTopLeftCoords()
+            self.br = evt.GetBottomRightCoords()
+    @Busy(__('Pasting data'))
+    def PasteData(self, evt, *args, **params):
         self.OnPaste()
         self.hasChanged= True
         self.hasSaved=   False
@@ -262,12 +408,94 @@ class NewGrid(wx.grid.Grid, object):
         self.hasChanged= True
         self.hasSaved=   False
         evt.Skip()
-    @Busy
+    @Busy(__('Selecting all cells'))
     def SelectAllCells(self, evt):
         self.SelectAll()
+    def LoadFile(self, evt, **params):
+        if not params.has_key('fullpath'):
+            wildcard=  __("Suported files")+" (*.txt;*.csv;*.xls;*.xlsx;*.db;*.dbf;*.mdb)|*.txt;*.csv;*.xls;*.xlsx;*db;*.dbf*.mdb|"\
+                "Excel Files (*.xlsx;*.xlsm;*.xls)|*.xlsx;*.xlsm;*.xls|"\
+                "Access mdb (*.mdb)|*mdb|"\
+                "Txt file (*.txt)|*.txt|"\
+                "Csv file (*.csv)|*.csv|"\
+                "Sqlite Database (*.db)|*.db|"\
+                "dbase Files (*.dbf)|*.dbf"
+            dlg = wx.FileDialog(self, __("Load Data File"), "","",
+                                wildcard= wildcard,
+                                style = wx.OPEN)
+            try:
+                icon = imageEmbed().logo16
+                dlg.SetIcon(icon)
+            except:
+                pass
+
+            if dlg.ShowModal() != wx.ID_OK:
+                dlg.Destroy()
+                return (False, None)
+
+            fullPath= dlg.Path
+        else:
+            fullPath= params.pop('fullpath')
+        # if the file is loaded then 
+        if self.load( fullPath)[0]:
+            self.hasChanged= True
+            self.hasSaved= True
+            # emptying the undo - redo buffer
+            self.emptyTheBuffer( )
+            self.path2file= fullPath
+            #self._wb= load_workbook(self.path2file)
+            if evt != None:
+                evt.Skip()
+            return ( True, os.path.split( fullPath)[-1])
+        else:
+            return ( False, None)
+    def onSave(self, evt, *args, **params):
+        try:
+            return self.save(*args, **params)
+        finally:
+            evt.Skip()
+    def onSaveAs(self, evt, *args, **params):
+        dlg= wx.FileDialog(self, __("Save Data File"), "" , "",\
+                       "SEI (*.xlsx)|*.xlsx| \
+                        All Files (*.*)| *.*",
+                       style= wx.SAVE|wx.OVERWRITE_PROMPT, )
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            if not path.endswith('.xlsx'):
+                path = path+'.xlsx'
+        else:
+            evt.Skip()
+            return
+        self.path2file= path
+        try:
+            return self.save(self, *args, **params)
+        finally:
+            evt.Skip()
+            
+    def SaveXlsAs(self, evt):
+        return self.SaveXls(None, True)
+    ###############################
+    #
+    def __cellChanged(self, row, col):
+        texto= self.GetCellValue(row,col)
+        if self._wb == None:
+            self._wb = Workbook()
+
+        # getting the name of the sheet to be created
+        if self._sh == None:
+            if self.name in self._wb.get_sheet_names():
+                self._sh= self._wb.get_sheet_by_name(self.name)
+            else:
+                self._sh= self._wb.create_sheet()
+                self._sh.title= self.name
+        self._sh.cell(row = row, column = col).value= texto
 
     # adds columns and rows to the grid
     def AddNCells(self, numcols, numrows, attr= None):
+        if numcols > 0:
+            coltypes = self.__columnTypes
+            coltypes.extend([3]*numcols)
+            self.__columnTypes = coltypes
         insert= self.AppendCols(numcols)
         insert= self.AppendRows(numrows)
         if attr != None:
@@ -319,28 +547,35 @@ class NewGrid(wx.grid.Grid, object):
         self.hasChanged= False
         return self.usedCols
 
-    def GetColsUsedList(self):
-        colsusedlist = []
-        for i in range(self.GetNumberCols()):
-            try:
-                tmp = float(self.GetCellValue(0,i))
-                colsusedlist.append(i)
-            except ValueError:
-                colsusedlist.append(0)
-        return colsusedlist
-
-    def GetUsedRows(self):
-        RowsUsed = []
-        for i in range(self.GetNumberCols()):
-            if (self.GetCellValue(0, i) != ''):
-                for j in range(self.GetNumberRows()):
-                    if (self.GetCellValue(j,i) == ''):
-                        RowsUsed.append(j)
-                        break
-        return RowsUsed
-
-    def SaveXlsAs(self, evt):
-        return self.SaveXls(None, True)
+    def save(self, path= None, *args, **params):
+        if not isinstance(path, (str, unicode)):
+            path = None
+        if path == None:
+            if self.path2file == None:
+                dlg= wx.FileDialog(self, __("Save Data File"), "" , "",\
+                               "SEI (*.xlsx)|*.xlsx| \
+                                All Files (*.*)| *.*",
+                               style= wx.SAVE|wx.OVERWRITE_PROMPT, )
+                if dlg.ShowModal() == wx.ID_OK:
+                    path = dlg.GetPath()
+                    if not path.endswith('.xlsx'):
+                        path = path+'.xlsx'
+                # check if the file exist
+            else:
+                path = self.path2file
+        if path == None:
+            raise StandardError( __("The input path isn't correct")+":%s"%path)
+        else:
+            self.path2file= path
+        if self._wb == None:
+            if os.path.exists(self.path2file):
+                self._wb= load_workbook( self.path2file)#, optimized_write = True)
+            else:
+                self._wb= Workbook()#optimized_write = True)
+                self._wb.title= self.name
+        # writing the contents from the wx.sheet into the wb
+        self._wb.save(self.path2file)
+        return True
 
     def SaveXls(self, *args):
         if len(args) == 1:
@@ -352,27 +587,27 @@ class NewGrid(wx.grid.Grid, object):
         self.reportObj= ReportaExcel(cell_overwrite_ok = True)
         if self.hasSaved == False or saveAs: # path del grid
             # mostrar el dialogo para guardar el archivo
-            dlg= wx.FileDialog(self, _("Save Data File"), "" , "",\
-                               "Excel (*.xls)|*.xls| \
-                                    Any (*.*)| *.*", wx.SAVE)
+            dlg= wx.FileDialog(self, __("Save Data File"), "" , "",\
+                               "Excel (*.xlsx)|*.xlsx| \
+                                Any (*.*)| *.*", wx.SAVE)
             if dlg.ShowModal() == wx.ID_OK:
                 self.path = dlg.GetPath()
                 if not self.path.endswith('.xls'):
                     self.path= self.path+'.xls'       
             else:
                 return (False, None)
-            self.reportObj.path = self.path
+            self.path2file= self.reportObj.path = self.path
         else:
-            self.reportObj.path = self.path
+            self.path2file= self.reportObj.path = self.path
         cols, waste = self.GetUsedCols()
         if len(cols) == 0:
             pass
         else:
-            rows = self.GetUsedRows()
-            if len(rows) == 0:
+            rows = self.GetNumberRows()
+            if rows == 0:
                 print "Empty sheet"
                 return
-            totalResult = self.getByColumns(maxRow = max(rows))
+            totalResult = self.getByColumns(maxRow = rows)
             result= list()
             # reporting the header
             allColNames= [self.GetColLabelValue(col) for col in range(self.NumberCols) ]
@@ -402,17 +637,24 @@ class NewGrid(wx.grid.Grid, object):
         
         available= {'csv':  self.LoadCsvTxt,
                     'txt':  self.LoadCsvTxt,
-                    'xls':  self.LoadXls,
-                    'xlsx': self.LoadXls,
+                    'xls':  self.LoadXls_xlsx,
+                    'xlsx': self.LoadXls_xlsx,
                     'db':   self._LoadSqlite,
                     'dbf':  self._LoadDbf,
                     'mdb':  self._LoadMdb, ## load an sql database
                     'accdb':self._LoadMdb,
                     }
         try:
-            return available[extension](path, *args, **params)
+            result= available[extension](path, *args, **params)
+            self.name= result[1]
+            #self.path2file= path
+            #if path.endswith('.xlsx'):
+            #    self.name= result[1]
+            #    self._wb= load_workbook(self.path2file)
+            #    self._sh= self._wb.get_sheet_by_name(result[1])
+            return result
         except KeyError:
-            raise
+            print 'Extension not available'
 
     def _LoadDbf(self, path, *arg, **params):
         from dbfpy import dbf
@@ -475,7 +717,7 @@ class NewGrid(wx.grid.Grid, object):
                   '_size': wx.Size(220,300)}
         structure= list()
         # se pide la ruta de reporte se escribe una por defecto
-        txt4 =     ('StaticText', (_('Select the table and the fields to import:'),))
+        txt4 =     ('StaticText', (__('Select the table and the fields to import:'),))
         dbCtrl =  ('DataBaseImport', [tables,])
         structure.append([txt4])
         structure.append([dbCtrl])
@@ -511,9 +753,9 @@ class NewGrid(wx.grid.Grid, object):
             #print sql
             cur.execute( sql)
             # show the result
-            print _("conecting to the database")
+            print __("conecting to the database")
             result = cur.fetchall()
-            print _("conection sucsessfull")
+            print __("conection sucsessfull")
             # close the cursor and connection
         finally:
             cur.close()
@@ -587,58 +829,18 @@ class NewGrid(wx.grid.Grid, object):
         dlg.Destroy()
         return True
         
-    def LoadFile(self, evt, **params):
-        if not params.has_key('fullpath'):
-            wildcard=  _("Suported files")+" (*.txt;*.csv;*.xls;*.xlsx;*.db;*.dbf;*.mdb)|*.txt;*.csv;*.xls;*.xlsx;*db;*.dbf*.mdb|"\
-                "Excel Files (*.xlsx;*.xlsm;*.xls)|*.xlsx;*.xlsm;*.xls|"\
-                "Access mdb (*.mdb)|*mdb|"\
-                "Txt file (*.txt)|*.txt|"\
-                "Csv file (*.csv)|*.csv|"\
-                "Sqlite Database (*.db)|*.db|"\
-                "dbase Files (*.dbf)|*.dbf|"\
-                "Excel 2007 File (*xlsx)|*.xlsx|"\
-                "Excel 2003 File (*.xls)|*.xls"
-
-            dlg = wx.FileDialog(self, _("Load Data File"), "","",
-                                wildcard= wildcard,
-                                style = wx.OPEN)
-            try:
-                icon = imageEmbed().logo16()
-                dlg.SetIcon(icon)
-            except:
-                pass
-
-            if dlg.ShowModal() != wx.ID_OK:
-                dlg.Destroy()
-                return (False, None)
-
-            fullPath= dlg.Path
-        else:
-            fullPath= params.pop('fullpath')
-        # if the file is loaded then 
-        if self.load( fullPath)[0]:
-            self.hasChanged= True
-            self.hasSaved= True
-            # emptying the undo - redo buffer
-            self.emptyTheBuffer( )
-            if evt != None:
-                evt.Skip()
-            return ( True, os.path.split( fullPath)[-1])
-        else:
-            return ( False, None)
-
     def LoadCsvTxt(self, fullPath):
         from numpy import genfromtxt
         '''use the numpy library to load the data'''
         # comments='#', delimiter=None, skiprows=0, skip_header=0, skip_footer=0, converters=None, missing='', missing_values=None, filling_values=None, usecols=None, names=None, excludelist=None, deletechars=None, replace_space='_', autostrip=False, case_sensitive=True, defaultfmt='f%i', unpack=None, usemask=False, loose=True, invalid_raise=True
         btn1= ['FilePath',    [fullPath] ]
-        txt1= ['StaticText',  [_('comments symbol')] ]
+        txt1= ['StaticText',  [__('comments symbol')] ]
         btn2= ['TextCtrl',    [] ]
-        txt2= ['StaticText',  [_('delimiter symbol')]]
-        txt3= ['StaticText',  [_('Number of header lines to skip')]]
+        txt2= ['StaticText',  [__('delimiter symbol')]]
+        txt3= ['StaticText',  [__('Number of header lines to skip')]]
         btn3= ['IntTextCtrl', []]
-        txt4= ['StaticText',  [_('Number of footer lines to skip')]]
-        btn4= ['CheckBox',    [_('Has Header')]]
+        txt4= ['StaticText',  [__('Number of footer lines to skip')]]
+        btn4= ['CheckBox',    [__('Has Header')]]
 
         structure= []
         structure.append([btn1 ])
@@ -648,7 +850,7 @@ class NewGrid(wx.grid.Grid, object):
         structure.append([btn3, txt4])
         structure.append([btn4])
 
-        setting = {'Title': _('Select a sheet')}
+        setting = {'Title': __('Select a sheet')}
 
         dlg = dialog(self, struct= structure, settings= setting)
         if dlg.ShowModal() != wx.ID_OK:
@@ -701,7 +903,7 @@ class NewGrid(wx.grid.Grid, object):
         self.hasSaved=   True
         return (True, os.path.split(f_name)[-1])
 
-    def LoadXls(self, fullPath):
+    def LoadXls_xlsx(self, fullPath):
         print 'import xlrd'
         filename= fullPath
         ##filenamestr= filename.__str__()
@@ -715,9 +917,9 @@ class NewGrid(wx.grid.Grid, object):
         sheetNames = [sheet.name for sheet in sheets]
         print 'sheetNames= ' + sheetNames.__str__()
         bt1= ('Choice',     [sheetNames])
-        bt2= ('StaticText', [_('Select a sheet to be loaded')])
-        bt3= ('CheckBox',   [_('Has header')])
-        setting = {'Title': _('Select a sheet'),
+        bt2= ('StaticText', [__('Select a sheet to be loaded')])
+        bt3= ('CheckBox',   [__('Has header')])
+        setting = {'Title': __('Select a sheet'),
                    '_size':  wx.Size(250,220)}
 
         dlg = dialog(self, struct=[[bt1,bt2],[bt3]], settings= setting)
@@ -749,7 +951,7 @@ class NewGrid(wx.grid.Grid, object):
                       filename= filename,
                       hasHeader= hasHeader)'''
 
-        print 'Importing  : %s successful'%filename
+        print __('Importing  : %s successful')%filename
         self.hasChanged= True
         self.hasSaved=   True
         return (True, sheetNameSelected)
@@ -824,52 +1026,30 @@ class NewGrid(wx.grid.Grid, object):
                     try:
                         self.SetCellValue (reportRow, col, str(newValue))
                     except:
-                        print  _("Could not import the row,col (%i,%i)") % (row+1, col+1)
+                        print  __("Could not import the row,col (%i,%i)") % (row+1, col+1)
 
     def generateLabel( self, colNumber):
-        colNumber+= 1
+        colNumber += 1
         analyse = True
-        result= list()
+        result = list()
         while analyse:
             res = colNumber/26.0
             if res == int(res):
                 result.append(26)
-                colNumber= colNumber/26-1
-                analyse= res > 1
+                colNumber = colNumber/26-1
+                analyse = res > 1
                 continue
-
-            fp= res-int(res) # float Part
+            fp = res-int(res) # float Part
             # deleting fix by rounding
-            if fp !=0 :
-                fp= int(round(fp*26.0,0))
-            else:
-                fp= 1
-
+            if fp !=0 :       fp = int(round(fp*26.0,0))
+            else:             fp = 1
             result.append(fp)
-            colNumber= colNumber/26
-            analyse= res > 1
-
+            colNumber = colNumber/26
+            analyse = res > 1
         res = '' 
         while len(result):
             res += chr(result.pop(-1) + 64) 
         return res
-
-    def getData(self, x):
-        for i in range(len(x)):
-            try:
-                row = int(x[i].attributes["row"].value)
-                col = int(x[i].attributes["column"].value)
-                datavalue = float(self.getText(x[i].childNodes))
-                self.SetCellValue(row, col, str(datavalue))
-            except ValueError:
-                print _("Problem importing the xml")
-
-    def getText(self, nodelist):
-        rc = ""
-        for node in nodelist:
-            if node.nodeType == node.TEXT_NODE:
-                rc = rc + node.data
-        return rc
 
     def CleanRowData(self, row):
         indata = []
@@ -881,7 +1061,6 @@ class NewGrid(wx.grid.Grid, object):
                 if (value != missingvalue):
                     indata.append(value)
         return indata
-
     # Routine to return a "clean" list of data from one column
     def CleanData(self, coldata):
         indata = []
@@ -948,6 +1127,7 @@ class NewGrid(wx.grid.Grid, object):
             result.append(dat)
         return result
 
+    @__controlColnumber
     def GetCol(self, col, hasHeader= False):
         return self._cleanData( self._getCol( col, hasHeader))
 
@@ -955,18 +1135,18 @@ class NewGrid(wx.grid.Grid, object):
         try: 
             if isinstance(rowNumber, (str, unicode)):
                 if not(rowNumber in self.rowNames):
-                    raise TypeError(_('You can only use a numeric value, or the name of an existing row'))
+                    raise TypeError(__('You can only use a numeric value, or the name of an existing row'))
                 for pos, value in enumerate(self.rowNames):
                     if value == rowNumber:
                         rowNumber= pos
                         break
 
             if not isnumeric(rowNumber):
-                raise TypeError(_('You can only use a numeric value, or the name of an existing row'))
+                raise TypeError(__('You can only use a numeric value, or the name of an existing row'))
 
             rowNumber= int(rowNumber)        
             if rowNumber < 0 or rowNumber > self.GetNumberRows():
-                raise StandardError(_('The minimum accepted col is 0, and the maximum is %i')%self.GetNumberRows()-1)
+                raise StandardError(__('The minimum accepted col is 0, and the maximum is %i')%self.GetNumberRows()-1)
 
             self.clearRow(rowNumber)
 
@@ -1011,6 +1191,7 @@ class NewGrid(wx.grid.Grid, object):
                     self.SetCellValue(rowNumber, col, dat)
                 except UnicodeDecodeError:
                     self.SetCellValue(rowNumber, col, dat.decode("utf8","replace"))
+                self.__cellChanged(rowNumber, col)
         except:
             raise
         finally:
@@ -1030,88 +1211,24 @@ class NewGrid(wx.grid.Grid, object):
             biglist.append(smalllist)
         return numpy.array((biglist), numpy.float)
 
+    @__controlColnumber
     def GetColNumeric(self, colNumber):
         # return only the numeric values of a selected colNumber or col label
         # all else values are drop
         # add the ability to manage non numerical values
-        if isinstance(colNumber, (str, unicode)):
-            if not(colNumber in self.colNames):
-                raise TypeError('You can only use a numeric value, or the name of an existing column')
-            for pos, value in enumerate(self.colNames):
-                if value == colNumber:
-                    colNumber= pos
-                    break
-
-            if not isnumeric(colNumber):
-                raise TypeError('You can only use a numeric value, or the name of an existing column')
-
-            colNumber= int(colNumber)        
-            if colNumber < 0 or colNumber > self.GetNumberCols():
-                raise StandardError('The minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
-
         values= self._cleanData( self._getCol( colNumber))
         return [val for val in values if not isinstance(val,(unicode, str)) and val != None ]
-    def onCellEdit(self, event):
-        '''
-        When cell is edited, get a handle on the editor widget
-        and bind it to EVT_KEY_DOWN
-        '''        
-        editor = event.GetControl()        
-        editor.Bind(wx.EVT_KEY_DOWN, self.onEditorKey)
-        event.Skip()
 
-    #----------------------------------------------------------------------
-    def onEditorKey(self, event):
-        '''
-        Handler for the wx's cell editor widget's keystrokes. Checks for specific
-        keystrokes, such as arrow up or arrow down, and responds accordingly. Allows
-        all other key strokes to pass through the handler.
-        '''
-        keycode = event.GetKeyCode() 
-        if keycode == wx.WXK_UP:
-            self.MoveCursorUp(False)
-        elif keycode == wx.WXK_DOWN:
-            self.MoveCursorDown(False)
-        elif keycode == wx.WXK_LEFT:
-            self.MoveCursorLeft(False)
-        elif keycode == wx.WXK_RIGHT:
-            self.MoveCursorRight(False)
-        else:
-            pass
-        event.Skip()
-
+    @__controlColnumber
     def _getCol(self, colNumber, includeHeader= False):
-        if isinstance(colNumber, (str, unicode)):
-            # searching for a col with the name:
-            if not(colNumber in self.colNames):
-                raise TypeError('You can only use a numeric value, or the name of an existing column')
-
-            for pos, value in enumerate(self.colNames):
-                if value == colNumber:
-                    colNumber= pos
-                    break
-
-        if not isnumeric(colNumber):
-            raise TypeError('You can only use a numeric value, or the name of an existing column')
-
-        if colNumber > self.GetNumberRows():
-            raise StandardError('The maximum column allowed is %i, but you selected %i'%(self.GetNumberRows()-1, colNumber))
-
         return self._getColNumber(colNumber, includeHeader)
 
+    @__controlColnumber
     def _getColNumber(self, colNumber, includeHeader= False):
-        if not isnumeric(colNumber):
-            raise TypeError('Only allow numeric values for the column, but you input '+ str(type(colNumber)))
-
-        colNumber= int(colNumber)
-        if colNumber < 0 or colNumber > self.GetNumberCols():
-            raise StandardError('The minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
-
         result = [self.GetCellValue(row, colNumber) for row in range(self.GetNumberRows())]
         if includeHeader:
             result.insert(0, self.GetColLabelValue(colNumber))
         return result
-
 
     def _getRow( self, rowNumber):
         if isinstance( rowNumber, (str, unicode)):
@@ -1143,50 +1260,27 @@ class NewGrid(wx.grid.Grid, object):
     
     def PutCol(self, *args, **params):
         return self.putCol(*args, **params)
-    
+
+    @__controlColnumber
     def putCol( self, colNumber, data):
         try:
-            if isinstance( colNumber, (str, unicode)):
-                if not(colNumber in self.colNames):
-                    raise TypeError('You can only use a numeric value, or the name of an existing column')
-                for pos, value in enumerate(self.colNames):
-                    if value == colNumber:
-                        colNumber= pos
-                        break
-    
-            if not isnumeric( colNumber):
-                raise TypeError('You can only use a numeric value, or the name of an existing column')
-    
-            colNumber= int(colNumber)
-            if colNumber == self.GetNumberCols()-1:
-                # append one column
-                self.AppendCols(1)
-            if colNumber < 0 or colNumber > self.GetNumberCols():
-                raise StandardError('The minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
-    
             self.clearCol( colNumber)
-    
             if isinstance( data,(str, unicode)):
                 data= [data]
-    
             if isinstance( data, (int, long, float)):
                 data= [data]
-    
             if isinstance( data, (ndarray),):
                 data= ravel( data)
-    
             rows2add= len( data) - self.GetNumberRows()+1
             if rows2add > 0:
                 if len( data) > 1e6:
                     data= data[:1e6]
                     rows2add= len( data) - self.GetNumberRows()
                 self.AppendRows( rows2add)
-    
             try:
                 dp= wx.GetApp().DECIMAL_POINT
             except:
                 dp= DECIMAL_POINT
-    
             newdat= list()
             for row, dat in enumerate( data):
                 if isinstance( dat, (str, unicode)):
@@ -1199,27 +1293,91 @@ class NewGrid(wx.grid.Grid, object):
                         dat= str(dat)
                     except:
                         dat= None
-    
                 newdat.append(dat)
-    
             for row, dat in enumerate(newdat):
                 try:
                     self.SetCellValue(row, colNumber, dat)
                 except UnicodeDecodeError:
                     self.SetCellValue(row, colNumber, dat.decode("utf8","replace"))
+                # to store the data into the _wb
+                self.__cellChanged(row, colNumber)
         except:
             raise
         finally:
             self.hasSaved= False
             self.hasChanged= True
 
+    @__controlColnumber
     def clearCol( self, colNumber):
-        if colNumber < 0 or colNumber > self.GetNumberCols():
-            raise StandardError( 'The minimum accepted col is 0, and the maximum is %i'%self.GetNumberCols()-1)
-
         for row in range( self.GetNumberRows()):
             self.SetCellValue( row, colNumber, u'')
+    @__controlColnumber
+    def setColType(self, colNumber, colType, *args):
+        """Setting a type for an existent column
+        :param colNumber: number or name of the column
+        :param colType: type of the column as integer
+        colType as an string"""
+        if isinstance(colType,(str, unicode) ):
+            colType= colType.upper()
+            if not COLTYPES.has_key(colType):
+                if not (colType in COLTYPES.values()):
+                    colType= 3
+                else:
+                    for key, value in COLTYPES.items():
+                        if key == colType:
+                            break
+                colType= key
+            colType = int( colType)
+        if not colType in range( 5):
+            raise StandardError( __("Column type not allowed"))
 
+        attr = wx.grid.GridCellAttr()
+        if colType == 0:
+            renderer = GE.DATE()
+            attr.SetEditor(renderer)
+        elif colType == 1:
+            listData= []
+            # check the previus control
+            ###print self.__columnTypes[colNumber]
+            if  self.__columnTypes[colNumber] == 1: # LIST type
+                # retreiving the data of the control
+                currEditor= self.GetCellEditor(0,colNumber)
+                try:
+                    ctrl = currEditor.GetControl()
+                    listData = ctrl.GetItems()
+                except:
+                    pass
+
+            if len(args) == 0:
+                # show a dialog to the user to select its options
+                editableList = Ctrl.EditableListBox(__("Input the available options"), listData)
+                structure = list()
+                structure.append([editableList])
+                dlg= dialog(struct= structure)
+                if dlg.ShowModal() == wx.ID_OK:
+                    values=dlg.GetValue()
+                    dlg.Destroy()
+                else:
+                    dlg.Destroy()
+                    return
+                options = values[0]
+            else:
+                # if the user pass the options by a command
+                options= args[0]
+            #"allowOthers" allows the user to create new selection items on the fly.
+            editor = wx.grid.GridCellChoiceEditor(options, allowOthers = False)
+            attr.SetEditor(editor)
+        elif colType == 2: # Float
+            editor = wx.grid.GridCellFloatEditor()
+            attr.SetEditor(editor)
+        elif colType == 3: # variant
+            pass
+        elif colType == 4: # Integer
+            editor =  wx.grid.GridCellNumberEditor()
+            attr.SetEditor(editor)
+        self.SetColAttr(colNumber, attr)
+        self.__columnTypes[colNumber] = colType
+        
     def clearRow( self, rowNumber):
         if rowNumber < 0 or rowNumber > self.GetNumberRows():
             raise StandardError( 'The minimum accepted row is 0, and the maximum is %i'%self.GetNumberRols()-1)
@@ -1248,34 +1406,17 @@ class NewGrid(wx.grid.Grid, object):
         selection = sorted(list(set(selection)))
         return selection
         
-    def OnGridRighClic(self,evt):
-        self.PopupMenu(MyContextGrid(self), evt.GetPosition())
-        evt.Skip()
-        
-    def setColNames(self,names):
-        # escribe los nombres de las columnas en el grid
-        if not(type(names) == type(list()) or type(names) == type(tuple())):
-            raise TypeError("It's allowed one list")
-        [self.SetColLabelValue(colNumber, value) for colNumber, value in enumerate(names) ]
+    #def setColNames(self,names):
+    #    # escribe los nombres de las columnas en el grid
+    #    if not(type(names) == type(list()) or type(names) == type(tuple())):
+    #        raise TypeError("It's allowed one list")
+    #    [self.SetColLabelValue(colNumber, value) for colNumber, value in enumerate(names) ]
         
     def setRowNames(self,names):
         if not(type(names) == type(list()) or type(names) == type(tuple())):
             raise TypeError("It's allowed one iterable list")
         [self.SetRowLabelValue(rowNumber, value) for rowNumber, value in enumerate(names)]
         
-    def updateGridbyRow(self,values):
-        # reescribe los datos del grid con los nuevos datos ingresados por filas (rows)
-        [self.SetCellValue(row,col,cellContent) for row, rowContent in enumerate(values) \
-          for col, cellContent in enumerate(rowContent) ]
-        
-    def updateGridbyCol(self,values):
-        [self.SetCellValue(row,col,cellContent) for col, colContent in enumerate(values) \
-          for row, cellContent in enumerate(colContent)] 
-               
-    def getHeader(self):
-        # retorna solo el encabezado de la malla actual
-        return tuple([self.GetColLabelValue(index) for index in range(self.GetNumberCols())])
-    
     def getByColumns(self, maxRow = None):
         # retorna el valor de la malla por columnas
         numRows = self.GetNumberRows()
@@ -1283,89 +1424,25 @@ class NewGrid(wx.grid.Grid, object):
         if maxRow != None:
             numRows= min([numRows, maxRow])
         # se extrae los contenidos de cada fila
-        return tuple([tuple([ self.GetCellValue(row,col) for row in range(numRows) ])
-                       for col in range(ncols)])
+        return tuple([ self.GetCol(col)[:numRows] ] for col in range(ncols))
 
-    def getByRows(self):
-        '''retorna el contenido del grid mediante filas
-        la primer fila corresponde al nombre de las filas'''
-        contenidoGrid = [self.getRowNames()]
-        numCols = self.GetNumberCols()
-        numRows = self.GetNumberRows()
-        contenidoGrid.extend(tuple([tuple([self.GetCellValue(row,col) for col in range(numCols)]) for row in range(numRows) ]))
-        return tuple(contenidoGrid)
-    
-    def getRowNames(self):
-        # retorna el nombre de las columnas del grid
-        # retorna solo el encabezado de la malla actual
-        return tuple([self.GetRowLabelValue(rowNumber) for rowNumber in range(self.GetNumberRows())])
-    
     def getValue(self):
         # retorma los contenidos de la malla ordenados por filas y 
         # empezando por el encabezado
         # se extrae el nombre de la columnas
         numCols = self.GetNumberCols()
-        contenidoGrid = [self.getHeader()]
+        contenidoGrid = [self.colNames]
         contenidoGrid.extend([tuple([self.GetCellValue(row,col) for col in range(numCols)]) for row in range(self.GetNumberRows())])
         return tuple(contenidoGrid)
+
     
-    def getNumByCol(self,colNumber):
-        # the colNumber exist?
-        ncols= self.GetNumberCols() 
-        nrows= self.GetNumberRows()
-        if ncols < 1 or nrows < 1:
-            return ()
-        if colNumber > nrows:
-            return ()
-        selectCol= list(self.getByColumns()[colNumber])
-        newlist= [selectCol[i] for i in range(len(selectCol)-1,-1,-1)]
-        tamanio = len(selectCol)-1
-        for pos,value in enumerate(newlist):
-            if value == u'':
-                realPos = tamanio-pos
-                selectCol.pop(realPos)
-            else:
-                break
-        if len(selectCol) == 0:
-            return ()
-        for pos, value in enumerate(selectCol):
-            try:
-                selectCol[pos]= float(value)
-            except:
-                selectCol[pos]= None
-        return selectCol
-    @property
-    def rowNames( self):
-        return [self.GetRowLabelValue(row) for row in range(self.GetNumberRows())]
-    @rowNames.setter
-    def rowNames( self, rowNames):
-        if isinstance(rowNames, (str, unicode)):
-            rolNames= [rowNames]
-
-        if not isiterable(rowNames):
-            raise TypeError('rowNames must be an iterable object')
-
-        if len(rowNames) == 0:
-            return
-
-        for rownumber, rowname in enumerate(rowNames):
-            self.SetRowLabelValue(rownumber, rowname)
-    @property
-    def colNames(self):
-        return [self.GetColLabelValue(col) for col in range(self.GetNumberCols())]
-    @colNames.setter
-    def colNames(self, colNames):
-        if isinstance(colNames, (str, unicode)):
-            colNames= [colNames]
-
-        if not isiterable(colNames):
-            raise TypeError('colNames must be an iterable object')
-
-        if len(colNames) == 0:
-            return
-
-        for colnumber, colname in enumerate(colNames):
-            self.SetColLabelValue(colnumber, colname)
+    
+###########################################################################
+## Class GridXLSX
+###########################################################################
+# a class to save and load xlsx files
+class GridXlsx( NewGrid):
+    pass
 
 def test():
     # para verificar el funcionamiento correcto del grid

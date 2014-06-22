@@ -142,7 +142,7 @@ class ReportaExcel(object):
             else:
                 sheetObj.write( posicion, sheetCol, contenido)
         if hasOmitedContent:
-            print _("The columns far from 256 were omited!")
+            print __("The columns far from 256 were omited!")
 
     def _filterlist(self, lista):
         if len(lista) == 0:
@@ -338,12 +338,13 @@ def homogenizeNonNumerical(*args):
     '''given a serie of vectors it check the values and
     groups it depens on its value.
     arg1: iterable with numerical data'''
+    allowNoneValues= False # to be setted
     maxlen= min( [len(arg) for arg in args])
     nelements= len( args)
     passPos= list()
     for pos in range( maxlen):
         dat= [args[i][pos] for i in range(nelements)]
-        if not(None in dat or '' in dat):
+        if not(None in dat or '' in dat) or allowNoneValues:
             passPos.append(pos)
     if sum( [isinstance( arg,(np.ndarray,)) for arg in args]) == len(args):
         return [np.array([arg[pos] for pos in passPos]) for arg in args]
@@ -415,17 +416,18 @@ class GroupData(object):
     dictionary= res.calc()
     listOfData= res.getAsList()
     '''
-    def __init__( self, xdata= [], ydata= [], yalias= [], restrictions= [], yvalues= [], yvaluesAlias= []):
+    def __init__( self, xdata= [], ydata= [], yalias= [], restrictions= [], yvalues= [], yvaluesAlias= [], allowNoneValues= False, env= {}):
         # se verifica que la cantidad de datos
         # ingresados sean los mismos
         self.xdata= xdata
         self.ydata= ydata
+        self.homogenize= homogenize
         self._homogenized= False
         self.filterPos= []
         self.yvalues = yvalues
         self.yvaluesAlias = yvaluesAlias
         self.restrictions= restrictions
-
+        self.env= env # environment for the calculations
 
     def _cols2dict(self, *cols):
         result= self._filterPos()
@@ -586,7 +588,7 @@ class GroupData(object):
 
         diccionario= self._cols2dict( *self.xdata)
         if len(self.filterPos) > 0:
-            for rowNumber in range( len( self.xdata[0])): # self.ydata[0]
+            for rowNumber in range( len( self.xdata[0])): 
                 if not self.filterPos[rowNumber]:
                     continue
 
@@ -634,8 +636,9 @@ class GroupData(object):
             dictValues= dat[-1]
             for key, value in zip( self.xdataNames, xValues):
                 dictValues[key]= value
-            dictValues['statistics']= statistics
             dictValues['concat']=     concat
+            for key, value in self.env.items():
+                dictValues[key] = value
 
             # evaluating the conditions with the local dict
             # for all values

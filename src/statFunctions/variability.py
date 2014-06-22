@@ -8,15 +8,16 @@ from statFunctions.centralTendency import geometricMean
 from statFunctions.frequency import scoreatpercentile
 from wx import Size
 from wx import ID_OK as _OK
+from sei_glob import __
 
 class samplevar(geometricMean):
     ''''''
-    name=      u'sample variance'
+    name=      __(u'sample variance')
     statName=  'samplevar'
     def __init__(self):
         # getting all required methods
         geometricMean.__init__(self)
-        self.name=      'sample variance'
+        self.name=      __('sample variance')
         self.statName=  'samplevar'
         self.minRequiredCols= 1
         self.colNameSelect= ''
@@ -30,12 +31,12 @@ class samplevar(geometricMean):
 
 class samplestdev(geometricMean):
     ''''''
-    name=      u'sample standar deviation'
+    name=      __(u'sample standar deviation')
     statName=  'samplestdev'
     def __init__(self):
         # getting all required methods
         geometricMean.__init__(self)
-        self.name=      'sample standar deviation'
+        self.name=      __('sample standar deviation')
         self.statName=  'samplestdev'
         self.minRequiredCols= 1
         self.colNameSelect= ''
@@ -49,12 +50,12 @@ class samplestdev(geometricMean):
 
 class var(geometricMean):
     ''''''
-    name=      u'variance'
+    name=      __(u'variance')
     statName=  'var'
     def __init__(self):
         # getting all required methods
         geometricMean.__init__(self)
-        self.name=      'variance'
+        self.name=      __('variance')
         self.statName=  'var'
         self.minRequiredCols= 1
         self.colNameSelect= ''
@@ -68,12 +69,12 @@ class var(geometricMean):
 
 class stdev(geometricMean):
     ''''''
-    name=      u'standar deviation'
+    name=      __(u'standar deviation')
     statName=  'stdev'
     def __init__(self):
         # getting all required methods
         geometricMean.__init__(self)
-        self.name=      u'standar deviation'
+        self.name=      __(u'standar deviation')
         self.statName=  'stdev'
         self.minRequiredCols= 1
         self.colNameSelect= ''
@@ -87,12 +88,12 @@ class stdev(geometricMean):
 
 class sterr(geometricMean):
     ''''''
-    name=      u'standar error'
+    name=      __(u'standar error')
     statName=  'sterr'
     def __init__(self):
         # getting all required methods
         geometricMean.__init__(self)
-        self.name=      u'standar error'
+        self.name=     __(u'standar error')
         self.statName=  'sterr'
         self.minRequiredCols= 1
         self.colNameSelect= ''
@@ -106,12 +107,12 @@ class sterr(geometricMean):
 
 class sem(geometricMean):
     ''''''
-    name=      u'estimated standard error of the mean'
+    name=      __(u'estimated standard error of the mean')
     statName=  'sem'
     def __init__(self):
         # getting all required methods
         geometricMean.__init__(self)
-        self.name=      u'estimated standard error of the mean'
+        self.name=      __(u'estimated standard error of the mean')
         self.statName=  'sem'
         self.minRequiredCols= 1
         self.colNameSelect= ''
@@ -125,12 +126,12 @@ class sem(geometricMean):
 
 class zs(geometricMean):
     ''''''
-    name=      u"list of z-scores"
+    name=      __(u"list of z-scores")
     statName=  'zs'
     def __init__(self):
         # getting all required methods
         geometricMean.__init__(self)
-        self.name=      u"list of z-scores"
+        self.name=      __(u"list of z-scores")
         self.statName=  'zs'
         self.minRequiredCols= 1
         self.colNameSelect= ''
@@ -143,12 +144,12 @@ class zs(geometricMean):
         return _stats.zs(*args, **params)
 
 class signaltonoise(geometricMean):
-    name=      u'signal to noise (mean/stdev)'
+    name=      __(u'signal to noise (mean/stdev)')
     statName=  'signaltonoise'
     def __init__(self):
         # getting all required methods
         geometricMean.__init__(self)
-        self.name=      u'signal to noise (mean/stdev)'
+        self.name=      __(u'signal to noise (mean/stdev)')
         self.statName=  'signaltonoise'
         self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
@@ -165,15 +166,15 @@ class signaltonoise(geometricMean):
         result= [res[0] for res in result]
         self.outputGrid.addColData(self.colNameSelect, self.name)
         self.outputGrid.addColData(result)
-        self.Logg.write(self.statName+ ' successfull')
+        print self.statName+ ' '+_('successfull')
 
 class z(scoreatpercentile):
-    name=      u"z-score for a given input"
+    name=      __(u"z-score for a given input")
     statName=  'z'
     def __init__(self):
         # getting all required methods
         scoreatpercentile.__init__(self)
-        self.name=      u"z-score for a given input"
+        self.name=      __(u"z-score for a given input")
         self.statName=  'z'
         self.nameStaticText= 'score'
         self._scritpEquivalenString='stats.'+self.statName

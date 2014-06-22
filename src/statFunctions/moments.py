@@ -9,15 +9,16 @@ import numpy
 from statFunctions import _genericFunc
 from wx import ID_OK as _OK
 from wx import Size
+from sei_glob import __
 
 class moment(_genericFunc):
     ''''''
-    name=      u'moment'
+    name=      __(u'moment')
     statName=  'moment'
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
-        self.name=      'moment'
+        self.name=      __('moment')
         self.statName=  'moment'
         self.__scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
@@ -28,10 +29,10 @@ class moment(_genericFunc):
         setting= {'Title': self.name,
                   '_size': Size(260,250)}
         self._updateColsInfo() # update self.columnames and self.colnums
-        bt1= ['StaticText',   ['Columns to analyse',] ]
+        bt1= ['StaticText',   [__('Columns to analyse'),] ]
         bt2= ['CheckListBox', [self.columnNames]]
         bt3= ['SpinCtrl',     [1,100,1]]
-        bt4= ['StaticText',   ['moment',] ]
+        bt4= ['StaticText',   [__('moment'),] ]
         structure = list()
         structure.append([bt2, bt1])
         structure.append([bt3, bt4])
@@ -49,7 +50,7 @@ class moment(_genericFunc):
         # changing value strings to numbers
         (self.colNameSelect, self.moment) = values
         if len( self.colNameSelect ) == 0:
-            self.Logg.write("You haven't selected any items!")
+            print __("You haven't selected any items!")
             return
         
         if not isinstance(self.colNameSelect, (list, tuple)):
@@ -58,7 +59,7 @@ class moment(_genericFunc):
 
         columns= list()
         for selectedCol in self.colNameSelect:
-            col= numpy.array( self.inputGrid.GetColNumeric( selectedCol))
+            col= numpy.array( self.grid.GetColNumeric( selectedCol))
             col= numpy.ravel( col)
             columns.append( col)
         return (columns, self.moment)
@@ -88,17 +89,17 @@ class moment(_genericFunc):
         self.outputGrid.addRowData([self.name+'=',  self.moment], currRow= 1)
         self.outputGrid.addRowData(['Output Data'] , currRow= 2)
         
-        self.Logg.write( self.name + ' successful')
+        print self.name + ' '+_('successful')
 
 
 class variation(_genericFunc):
     ''''''
-    name=      'variation'
+    name=      __('variation')
     statName=  'variation'
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
-        self.name=      'variation'
+        self.name=      __('variation')
         self.statName=  'variation'
         self.__scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
@@ -108,7 +109,7 @@ class variation(_genericFunc):
         setting= {'Title': self.name,
                   '_size': Size(220,300)}
         self._updateColsInfo() # update self.columnames and self.colnums
-        bt1= ['StaticText',   ['Select the columns to analyse']]
+        bt1= ['StaticText',   [__('Select the columns to analyse')]]
         bt2= ['CheckListBox', [self.columnNames]]
         structure = list()
         structure.append([bt1,])
@@ -127,11 +128,11 @@ class variation(_genericFunc):
         self.colNameSelect= values[0]
         
         if len( self.colNameSelect ) == 0:
-            self.logPanel.write("you don't select any items")
+            print __("you don't select any items")
             return
         
         if len( self.colNameSelect ) < self.minRequiredCols:
-            self.logPanel.write("you have to select at least %i column(s)"%self.requiredcols)
+            print __("you have to select at least %i column(s)")%self.requiredcols
             return
         
         columns= self._convertColName2Values( self.colNameSelect )
@@ -156,16 +157,16 @@ class variation(_genericFunc):
     def _report(self, result):
         self.outputGrid.addColData(self.colNameSelect, self.name)
         self.outputGrid.addColData(result)
-        self.Logg.write(self.statName+ ' successfull')
+        print self.statName+ ' '+_('successfull')
 
 class skew(variation):
     ''''''
-    name=      u'skew'
+    name=      __(u'skew')
     statName=  'skew'
     def __init__(self):
         # getting all required methods
         variation.__init__(self)
-        self.name=      'skew'
+        self.name=      __('skew')
         self.statName=  'skew'
         self.__scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
@@ -179,12 +180,12 @@ class skew(variation):
     
 class kurtosis(variation):
     ''''''
-    name=      u'kurtosis'
+    name=      __(u'kurtosis')
     statName=  'kurtosis'
     def __init__(self):
         # getting all required methods
         variation.__init__(self)
-        self.name=      'kurtosis'
+        self.name=      __('kurtosis')
         self.statName=  'kurtosis'
         self.__scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
@@ -198,12 +199,12 @@ class kurtosis(variation):
 
 class skewtest(variation):
     ''''''
-    name=      u'skew test'
+    name=      __(u'skew test')
     statName=  'skewtest'
     def __init__(self):
         # getting all required methods
         variation.__init__(self)
-        self.name=      'skewtest'
+        self.name=      __('skewtest')
         self.statName=  'skewtest'
         self.__scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
@@ -224,16 +225,16 @@ class skewtest(variation):
         self.outputGrid.addColData( newResult[0]),
         self.outputGrid.addColData( newResult[1])
         self.outputGrid.addRowData( ['variable', 'z-score','2-tail z-probability'], currRow= 0)
-        self.Logg.write( self.statName+ ' successfull')
+        print  self.statName+ ' '+_('successfull')
 
 class kurtosistest(skewtest):
     ''''''
-    name=      u'kurtosis test'
+    name=      __(u'kurtosis test')
     statName=  'kurtosistest'
     def __init__(self):
         # getting all required methods
         skewtest.__init__(self)
-        self.name=      'kurtosistest'
+        self.name=      __(u'kurtosis test')
         self.statName=  'kurtosistest'
         self.__scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
@@ -247,12 +248,12 @@ class kurtosistest(skewtest):
     
 class normaltest(kurtosistest):
     ''''''
-    name=      u'normal test'
+    name=      __(u'normal test')
     statName=  'normaltest'
     def __init__(self):
         # getting all required methods
         variation.__init__(self)
-        self.name=      'normaltest'
+        self.name=      __(u'normal test')
         self.statName=  'normaltest'
         self.__scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1

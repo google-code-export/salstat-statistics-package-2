@@ -6,17 +6,19 @@ Created on 25/10/2010
 '''
 
 import wx
-from gridLib.gridsql import SqlGrid, GenericDBClass  # grid with context menu
+##from .gridsql import SqlGrid, GenericDBClass  # grid with context menu
 from imagenes import imageEmbed
-from gridLib.NewGrid import NewGrid
+from .NewGrid import NewGrid
 import wx.grid
 from slbTools import isnumeric, isiterable
-from gridLib import floatRenderer
+from . import floatRenderer
 import wx.aui
 from numpy import ndarray, ravel, genfromtxt
 from wx.grid  import GridCellAttr
 from copy import copy
 from easyDialog.easyDialog import getPath
+from os import path as Path
+import sei_glob
 #import traceback
 
 DEFAULT_GRID_SIZE= (1,1)
@@ -24,7 +26,6 @@ DEFAULT_FONT_SIZE = 12
 DECIMAL_POINT = '.' # default value
 
 ## defining the event of the range select change
-
 def numPage():
     i = 1
     while True:
@@ -56,222 +57,225 @@ class MyFileDropTarget(wx.FileDropTarget):
 
         grid.LoadFile(evt= None, fullpath= filename)
 
-class SqlSimpleGrid( wx.Panel, object):# wxGrid
-    def __init__( self, parent, size= (800,20), firstColEditable= True):
-        self.rowsizes= dict()
-        self.colsizes= dict()
-        self.NumSheetReport = 0
-        self.path = None
+#class SqlSimpleGrid( wx.Panel, object):# wxGrid
+    #def __init__( self, parent, size= (800,20), firstColEditable= True):
+        #self.rowsizes= dict()
+        #self.colsizes= dict()
+        #self.NumSheetReport = 0
+        #self.path = None
 
-        wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, style = wx.TAB_TRAVERSAL )
-        self.sizer = wx.BoxSizer(wx.VERTICAL)
-        #-------------------------
-        #< don't change this line
-        #
-        ## setting the parameter to the table
-        import tempfile
-        from sqlalchemy import create_engine
-        from sqlalchemy import MetaData, Column, Table
-        from sqlalchemy import Integer, String, DateTime, REAL
-        from sqlalchemy.pool import StaticPool
+        #wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, style = wx.TAB_TRAVERSAL )
+        #self.sizer = wx.BoxSizer(wx.VERTICAL)
+        ##-------------------------
+        ##< don't change this line
+        ##
+        ### setting the parameter to the table
+        #import tempfile
+        #from sqlalchemy import create_engine
+        #from sqlalchemy import MetaData, Column, Table
+        #from sqlalchemy import Integer, String, DateTime, REAL
+        #from sqlalchemy.pool import StaticPool
 
-        dbFileObject= tempfile.TemporaryFile()
-        self.path = dbPath= dbFileObject.name
-        dbFileObject.close()
-        print dbPath
-        # creating a database with the conection
-        engine= create_engine('sqlite:///%s'%dbPath, echo=False)
-        metadata=MetaData(bind=engine)
-        # creating the main file
-        main_table= ('temp',
-                     metadata,
-                     Column('_id', Integer, primary_key= True, autoincrement= True),
-                     )
+        #dbFileObject= tempfile.TemporaryFile(prefix= 'sei',suffix= '.db')
+        #dbPath= dbFileObject.name
+        #self.path = dbPath
+        #dbFileObject.close()
+        ## creating a database with the conection
+        #engine= create_engine('sqlite:///%s'%dbPath, echo=False)
+        #metadata= MetaData(bind=engine)
+        ## creating the main file
+        #main_table= ('temp',
+                     #metadata,
+                     #Column('_id', Integer, primary_key= True, autoincrement= True),
+                     #)
 
-        def genColname():
-            init=      65
-            max=       90
-            data=      [init]
-            currpos=   0
-            concat=    lambda x,y: x+y
-            while True:
-                if currpos < 0:
-                    data.append(init)
-                    currpos= len(data)-1 # locating the current pos in the las position
+        #def genColname():
+            #init=      65
+            #max=       90
+            #data=      [init]
+            #currpos=   0
+            #concat=    lambda x,y: x+y
+            #while True:
+                #if currpos < 0:
+                    #data.append(init)
+                    #currpos= len(data)-1 # locating the current pos in the las position
 
-                if data[currpos]> max:
-                    data[currpos]= init
-                    if currpos>0:
-                        data[currpos-1]+=1
-                    currpos-=1
-                    continue
-                else:
-                    currpos= len(data)-1
+                #if data[currpos]> max:
+                    #data[currpos]= init
+                    #if currpos>0:
+                        #data[currpos-1]+=1
+                    #currpos-=1
+                    #continue
+                #else:
+                    #currpos= len(data)-1
 
-                yield reduce(concat, [ chr(dat) for dat in data])
-                data[currpos]+=1
+                #yield reduce(concat, [ chr(dat) for dat in data])
+                #data[currpos]+=1
 
-        colname= genColname()
+        #colname= genColname()
 
-        for colNumer in range(size[1]):
-            main_table+=(Column( colname.next(), String, nullable= True),)
-        table= Table(*main_table)
-        metadata.create_all()
-        self.m_grid = SqlGrid( self, engine= engine,
-                               tableName= 'temp',
-                               allow2edit= True,
-                               firstColEditable= True)
-        # adding some compatibility
-        self.grid= self.m_grid
-        # don't change this line/>
-        #-------------------------
-        self.sizer.Add( self.m_grid , 1, wx.EXPAND, 5 )
-        self.SetSizer(self.sizer)
-        self.Fit()
+        #for colNumer in range(size[1]):
+            #main_table+=(Column( colname.next(), String, nullable= True),)
+        #table= Table(*main_table)
+        #metadata.create_all()
+        #self.m_grid = SqlGrid( self, engine= engine,
+                               #tableName= 'temp',
+                               #allow2edit= True,
+                               #firstColEditable= True)
+        ## adding some compatibility
+        #self.grid= self.m_grid
+        ## don't change this line/>
+        ##-------------------------
+        #self.sizer.Add( self.m_grid , 1, wx.EXPAND, 5 )
+        #self.SetSizer(self.sizer)
+        #self.Fit()
 
-        # allowing drop files into the sheet
-        dropTarget = MyFileDropTarget( self)
-        self.m_grid.SetDropTarget(dropTarget)
+        ## allowing drop files into the sheet
+        #dropTarget = MyFileDropTarget( self)
+        #self.m_grid.SetDropTarget(dropTarget)
 
 
-        # hide the column _id
-        self.hasSaved= True
-        self.hasChanged= False
-        self.SetColMinimalAcceptableWidth(0)
-        self.SetDefaultColSize( 60, True)
-        self.SetColSize(0, 0)
-        self.SetRowLabelSize( 40)
+        ## hide the column _id
+        #self.hasSaved= True
+        #self.hasChanged= False
+        #self.SetColMinimalAcceptableWidth(0)
+        #self.SetDefaultColSize( 60, True)
+        #self.SetColSize(0, 0)
+        #self.SetRowLabelSize( 40)
 
-        self.SetDefaultCellAlignment( wx.ALIGN_RIGHT, wx.ALIGN_CENTER )
-        # setting the callback to the range change
-        self.Bind( wx.grid.EVT_GRID_SELECT_CELL, self._cellSelectionChange)
-        self.Bind( wx.grid.EVT_GRID_RANGE_SELECT, self._gridRangeSelect)
-        self.Bind( wx.grid.EVT_GRID_COL_SIZE, self.__gridColZise)
+        #self.SetDefaultCellAlignment( wx.ALIGN_RIGHT, wx.ALIGN_CENTER )
+        ## setting the callback to the range change
+        #self.Bind( wx.grid.EVT_GRID_SELECT_CELL, self._cellSelectionChange)
+        #self.Bind( wx.grid.EVT_GRID_RANGE_SELECT, self._gridRangeSelect)
+        #self.Bind( wx.grid.EVT_GRID_COL_SIZE, self.__gridColZise)
 
-    #def LoadFile(self, *args, **params):
-    #    return
+    #def __len__(self):
+        #return 1
 
-    #def SaveXls(self, *args, **params):
-    #    return
+    #def createNewTable(self, evt):
+        #tablename= self.grid.newTable(evt)
+        ## append the table name to the explorer panel
+        #try:
+            #return tablename
+        #finally: 
+            #evt.Skip()
 
-    #def SaveXlsAs(self, *args, **params):
-    #    return
-    def __len__(self):
-        return 1
-
-    def createNewTable(self, evt):
-        tablename= self.grid.newTable(evt)
-        # append the table name to the explorer panel
-        try:
-            return tablename
-        finally: 
-            evt.Skip()
-
-    def _gridRangeSelect(self, evt):
-        #grid= evt.GetEventObject()
-        # displays the count and the sum of selected values
-        selectedCells= self.get_selection()
-        # Count the selected cells
-        # getting the cell values:
-        selectedCellText= list()
-        selectedNumerical= list()
-        emptyText= 0
-        try:
-            DECIMAL_POINT= wx.GetApp().DECIMAL_POINT
-        except AttributeError:
-            pass
-
-        for rowi, coli in selectedCells:
-            currText= self.GetCellValue( rowi, coli)
-            if currText == u"":
-                emptyText+= 1
-            try:
-                selectedNumerical.append( float( currText.replace( DECIMAL_POINT, ".")))
-            except:
-                pass
-            selectedCellText.append( currText)
-        try:
-            statusBar= wx.GetApp().frame.StatusBar
-            statusBar.SetStatusText( (u"cells Selected: %.0f  count: %.0f  sum: %.4f")%(len(selectedCells),len(selectedCells)-emptyText,sum(selectedNumerical)),1 )
-        except AttributeError:
-            pass
-        evt.Skip()
-
-    def _cellSelectionChange( self, evt):
-        # se lee el contenido de la celda seleccionada
-        row= evt.GetRow()
-        col= evt.GetCol()
-        texto= u""
+    #def _gridRangeSelect(self, evt):
         ##grid= evt.GetEventObject()
-        try:
-            texto= self.GetCellValue( row, col)
-        except wx._core.PyAssertionError:
-            pass
-        try:
-            formulaBar= wx.GetApp().frame.formulaBarPanel
-            formulaBar.lastObject= self
-            formulaBar.value= texto
-        except AttributeError:
-            pass
-        evt.Skip()        
+        ## displays the count and the sum of selected values
+        #selectedCells= self.get_selection()
+        ## Count the selected cells
+        ## getting the cell values:
+        #selectedCellText= list()
+        #selectedNumerical= list()
+        #emptyText= 0
+        #try:
+            #DECIMAL_POINT= wx.GetApp().DECIMAL_POINT
+        #except AttributeError:
+            #pass
 
-    def __getattribute__(self, name):
-        '''wraps the functions to the grid
-        emulating a grid control'''
-        try:
-            return object.__getattribute__(self, name)
-        except AttributeError:
-            return self.m_grid.__getattribute__(name)
+        #for rowi, coli in selectedCells:
+            #currText= self.GetCellValue( rowi, coli)
+            #if currText == u"":
+                #emptyText+= 1
+            #try:
+                #selectedNumerical.append( float( currText.replace( DECIMAL_POINT, ".")))
+            #except:
+                #pass
+            #selectedCellText.append( currText)
+        #try:
+            #statusBar= wx.GetApp().frame.StatusBar
+            #statusBar.SetStatusText( (u"cells Selected: %.0f  count: %.0f  sum: %.4f")%(len(selectedCells),len(selectedCells)-emptyText,sum(selectedNumerical)),1 )
+        #except AttributeError:
+            #pass
+        #evt.Skip()
 
-    def __gridColZise(self, evt):
-        self.SetColSize(0, 0)
-        evt.Skip()
+    #def _cellSelectionChange( self, evt):
+        ## se lee el contenido de la celda seleccionada
+        #row= evt.GetRow()
+        #col= evt.GetCol()
+        #texto= u""
+        ###grid= evt.GetEventObject()
+        #try:
+            #texto= self.GetCellValue( row, col)
+        #except wx._core.PyAssertionError:
+            #pass
+        #try:
+            #formulaBar= wx.GetApp().frame.formulaBarPanel
+            #formulaBar.lastObject= self
+            #formulaBar.value= texto
+        #except AttributeError:
+            #pass
+        #evt.Skip()        
 
-    def OpenFromDbExplorer(self, evt):
-        dbExplorerPanel= evt.EventObject
-        pathToDb= evt.parentPathLabel
-        tableName= evt.tableName
+    #def __getattribute__(self, name):
+        #'''wraps the functions to the grid
+        #emulating a grid control'''
+        #try:
+            #return object.__getattribute__(self, name)
+        #except AttributeError:
+            #return self.m_grid.__getattribute__(name)
 
-        # updating the engine
-        from sqlalchemy import create_engine
-        engine= create_engine('sqlite:///%s'%pathToDb, echo=False)
-        self.grid.setEngine(engine)
+    #def __gridColZise(self, evt):
+        #self.SetColSize(0, 0)
+        #evt.Skip()
 
-        # activating the selected tablename
-        self.grid.currTable= tableName
-        evt.Skip()
+    #def OpenFromDbExplorer(self, evt):
+        #dbExplorerPanel= evt.EventObject
+        #pathToDb= evt.parentPathLabel
+        #tableName= evt.tableName
+
+        ## updating the engine
+        #from sqlalchemy import create_engine
+        #engine= create_engine('sqlite:///%s'%pathToDb, echo=False)
+        #self.grid.setEngine(engine)
+
+        ## activating the selected tablename
+        #self.grid.currTable= tableName
+        #evt.Skip()
 
 class SimpleGrid( wx.Panel, object):# wxGrid
     def __init__( self, parent, size= (800,20)):
-        self.rowsizes= dict()
-        self.colsizes= dict()
-        self.NumSheetReport = 0
-        self.path = None
-
         wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, style = wx.TAB_TRAVERSAL )
         self.sizer = wx.BoxSizer(wx.VERTICAL)
-        #< don't change this line
-        self.m_grid = NewGrid(self ,size, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
-        # don't change this line/>
-        self.sizer.Add( self.m_grid , 1, wx.EXPAND, 5 )
+        self.__m_grid = NewGrid(self ,size, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.sizer.Add( self.__m_grid , 1, wx.EXPAND, 5 )
         self.SetSizer(self.sizer)
         self.Fit()
 
         # allowing drop files into the sheet
         dropTarget = MyFileDropTarget( self)
-        self.m_grid.SetDropTarget(dropTarget)
-        self.grid = self.m_grid # adding some compatibility
-
-    def __getattribute__(self, name):
-        '''wraps the functions to the grid
-        emulating a grid control'''
-        try:
-            return object.__getattribute__(self, name)
-        except AttributeError:
-            return self.m_grid.__getattribute__(name)
-
+        self.__m_grid.SetDropTarget(dropTarget)
+        
+        # setting all the parameters of the grid
+        for attr in dir(self.__m_grid):
+            if attr.startswith('__'):
+                continue
+            if not hasattr(self, attr):
+                try:
+                    setattr(self, attr, getattr(self.__m_grid, attr))
+                except TypeError:
+                    pass
+    #@property
+    #def grid(self):
+    #    return self.m_grid
+    @property
+    def colNames(self):
+        return self.__m_grid.colNames
+    @colNames.setter
+    def colNames(self, colNames):
+        self.__m_grid.colNames = colNames
+    
 class NoteBookSheet(wx.aui.AuiNotebook, object):
     def __init__( self, parent, *args, **params):
+        """parent: parent of the notebook
+        params:
+            [grid:] class to generate grids by default is a SImpleGrid"""
+        try:
+            self.__gridClass= params.pop('gridObj')
+        except:
+            self.__gridClass= SimpleGrid
+
         wx.aui.AuiNotebook.__init__( self, parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,
                                      wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|
                                      wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_BOTTOM|
@@ -282,12 +286,16 @@ class NoteBookSheet(wx.aui.AuiNotebook, object):
         self.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChange)
 
         # se inicia el generador para el numero de pagina
-        self.npage = numPage()
+        self.__npage = None # initializating
         self.currentPage=    None
         self._pageObjects=   OrderedDict() #dict()
         self.Layout()
         self.numberPage=  self._generador()
-
+    @property
+    def npage(self):
+        if self.__npage== None:
+            self.__npage= numPage()
+        return self.__npage
     def _generador(self):
         i= 1
         while True:
@@ -309,7 +317,17 @@ class NoteBookSheet(wx.aui.AuiNotebook, object):
                 currGrid=  self.currentPage
                 return currGrid.__getattribute__(name)
             raise AttributeError
-
+    @property
+    def grid(self):
+        if self.GetPageCount() != 0:
+            if str(type(self.currentPage)) == "<class 'wx._core._wxPyDeadObject'>":
+                self.currentPage = None
+                self.currentPageNumber= None
+                return
+            currGrid=  self.currentPage # change
+            return currGrid
+        raise StandardError("doesn't exist a grid")
+                
     def __getitem__(self, item):
         if isinstance(item, (str, unicode)):
             if item in self.getPageNames():
@@ -324,24 +342,10 @@ class NoteBookSheet(wx.aui.AuiNotebook, object):
             return self._pageObjects[self._pageObjects.keys()[item]]
 
     def GetCol(self,*args, **params):
-        if self.GetPageCount() != 0:
-            if str(type(self.currentPage)) == "<class 'wx._core._wxPyDeadObject'>":
-                self.currentPage = None
-                self.currentPageNumber= None
-        else:
-            raise AttributeError
-        pageObject=self.currentPage
-        return  getattr( pageObject, 'GetCol')(*args, **params)
+        return self.grid.GetCol(*args, **params)
 
     def PutCol(self, *args, **params):
-        if self.GetPageCount() != 0:
-            if str(type(self.currentPage)) == "<class 'wx._core._wxPyDeadObject'>":
-                self.currentPage = None
-                self.currentPageNumber= None
-        else:
-            raise AttributeError
-        pageObject=self.currentPage
-        return  getattr( pageObject, 'PutCol')(*args, **params)
+        self.grid.PutCol(*args, **params)
 
     def _gridSetRenderer(self, grid):
         return
@@ -540,9 +544,9 @@ class NoteBookSheet(wx.aui.AuiNotebook, object):
         if currRow  == None:
             currRow = page.NumberRows
         elif currRow > page.NumberRows:
-            raise StandardError( _('the maximumn allowed row to insert is the row %i')%(page.NumberRows))
+            raise StandardError( __('the maximumn allowed row to insert is the row %i')%(page.NumberRows))
         elif currRow < 0:
-            raise StandardError( _('the minimum allowed row to insert is the row 0'))
+            raise StandardError( __('the minimum allowed row to insert is the row 0'))
         currRow = int(currRow)
 
         if currRow == page.NumberRows:
@@ -584,10 +588,10 @@ class NoteBookSheet(wx.aui.AuiNotebook, object):
         self.addPage(gridSize=(1, 1))
         evt.Skip()
 
-    def addOnePage(self, id= wx.ID_ANY, gridSize= DEFAULT_GRID_SIZE):
+    def _addOnePage(self, id= wx.ID_ANY, gridSize= DEFAULT_GRID_SIZE):
         #overwrite this method to create your own custom widget
         ## changing the grid to sqlgrid
-        grid=  SimpleGrid( self, size= gridSize)
+        grid=  self.__gridClass( self, size= gridSize)
 
         grid.hasSaved= True
         grid.hasChanged= False
@@ -625,7 +629,8 @@ class NoteBookSheet(wx.aui.AuiNotebook, object):
             selectedCellText.append( currText)
         try:
             statusBar= wx.GetApp().frame.StatusBar
-            statusBar.SetStatusText( _(u"cells Selected: %.0f  count: %.0f  sum: %.4f ")%(len(selectedCells),len(selectedCells)-emptyText,sum(selectedNumerical)),1 )
+            if len(selectedCells)> 1:
+                statusBar.SetStatusText( __(u"cells Selected: %.0f  count: %.0f  sum: %.4f ")%(len(selectedCells),len(selectedCells)-emptyText,sum(selectedNumerical)),1 )
         except AttributeError:
             pass
         evt.Skip()
@@ -656,10 +661,10 @@ class NoteBookSheet(wx.aui.AuiNotebook, object):
                 defaultData[key] = value
         # adiciona una pagina al notebook grid
         newName= defaultData['name'] +'_'+ str(self.npage.next())
-        self._pageObjects[newName]= self.addOnePage( gridSize = defaultData['gridSize'])
+        self._pageObjects[newName]= self._addOnePage( gridSize = defaultData['gridSize'])
         self.currentPage=  self._pageObjects[newName]
         ntb= self._pageObjects[newName]
-        ntb.grid.name= newName
+        ntb.name= newName # ntb.grid.name
         self.AddPage(ntb, newName, False )
         # se hace activo la pagina adicionada
         self.SetSelection(self.GetPageCount()-1)
@@ -762,14 +767,14 @@ class NoteBookSql(NoteBookSheet, object):
                 defaultData[key] = value
         # adiciona una pagina al notebook grid
         newName= defaultData['name'] +'_'+ str(self.npage.next())
-        self._pageObjects[newName]= self.addOnePage( gridSize = defaultData['gridSize'])
+        self._pageObjects[newName]= self._addOnePage( gridSize = defaultData['gridSize'])
         self.currentPage=  self._pageObjects[newName]
         ntb= self._pageObjects[newName]
         self.AddPage(ntb, newName, False )
         # se hace activo la pagina adicionada
         self.SetSelection(self.GetPageCount()-1)
         return ntb # retorna el objeto ntb
-    def addOnePage(self, id= wx.ID_ANY, gridSize= DEFAULT_GRID_SIZE):
+    def _addOnePage(self, id= wx.ID_ANY, gridSize= DEFAULT_GRID_SIZE):
         #overwrite this method to create your own custom widget
         ## changing the grid to sqlgrid
         # AVOIDING REFERENCES TO THE SAME OBJECT
@@ -793,6 +798,25 @@ class NoteBookSql(NoteBookSheet, object):
         self.currentPage= self.GetPage( evt.Selection)
         self.currentPageNumber= evt.Selection
 
+class PanelObjectContainer(wx.Panel):
+    """Given an object it put inside a panel and gives it's properties"""
+    def __init__(self, parent, obj, *args, **params):
+        wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, style = wx.TAB_TRAVERSAL )
+        self.sizer = wx.BoxSizer(wx.VERTICAL)
+        #< don't change this line
+        self.__obj = obj(self ,*args, **params)
+        # don't change this line/>
+        self.sizer.Add( self.__obj , 1, wx.EXPAND, 5 )
+        self.SetSizer(self.sizer)
+        self.Fit()
+        # parsing all public methods of the object to be available to all users
+        params= [param for param in dir(self.__obj) if not (param.startswith('_'))]
+        # creating the params
+        for param in params:
+            if not hasattr(self, param):
+                try:   setattr(self,param,getattr(self.__obj, param))
+                except: pass
+
 class Test(wx.Frame):
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size=(480, 520))
@@ -808,3 +832,4 @@ if __name__ == '__main__':
     app = wx.App()
     Test(None, -1, 'Custom Grid Cell')
     app.MainLoop()
+#eof

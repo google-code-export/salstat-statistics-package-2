@@ -6,6 +6,8 @@ import numpy
 from statFunctions import _genericFunc
 from wx import ID_OK as _OK
 from wx import Size
+from easyDialog.easyDialog import Ctrl, Busy
+from sei_glob import __
 
 class random(_genericFunc):
     ''''''
@@ -18,18 +20,23 @@ class random(_genericFunc):
         self.statName=  'rand'
         self._scritpEquivalenString='numpy.random.'+self.statName
         self.lenData= None
-        
     def _dialog( self, *arg, **params):
-        setting= {'Title': self.name,
-                  '_size': Size(270,260)}
+        dlg = self.dialog()
+        dlg.Title = self.name
+        dlg.size = Size(270,260)
+        ##setting= {'Title': self.name,
+        ##          '_size': Size(270,260)}
+
         self._updateColsInfo() # update self.columnames and self.colnums
-        bt1= ['StaticText',   ['Select the number of elements to generate']]
-        bt2= ['IntTextCtrl',  []]
-        structure= list()
-        structure.append( [ bt1,])
-        structure.append( [ bt2,])
-        return self.dialog( settings = setting, struct = structure)
-    
+        bt1 = Ctrl.StaticText('Select the number of elements to generate')# ['StaticText',   ['Select the number of elements to generate']]
+        bt2 = Ctrl.IntTextCtrl()#'IntTextCtrl',  []]
+        btn3 = Ctrl.StaticText(__('Destination variable'))
+        btn4 = Ctrl.Choice(self.columnNames)
+        structure = list()
+        structure.append( [ bt1, bt2])
+        structure.append( [ btn3, btn4])
+        dlg.struct = structure
+        return dlg
     def _showGui_GetValues( self):
         dlg= self._dialog()
         if dlg.ShowModal() == _OK:
@@ -38,66 +45,39 @@ class random(_genericFunc):
         else:
             dlg.Destroy()
             return
-        
         if values[0] == None:
             return
         self.lenData= values[0]
         return values
-        
+    @Busy(__('Calculating'))
     def _calc(self, columns, *args, **params):
         return self.evaluate(columns, *args, **params)
-        
     def object(self):
         return numpy.random.rand
-    
     def evaluate(self, *args, **params):
         return numpy.random.rand(*args, **params)
-    
     def showGui(self, *args, **params):
         values= self._showGui_GetValues()
         if values== None:
             return None
-        result= self._calc(*values)
-        self._report(result)
-        
-    def _report(self, result):
-        cols= range(self.inputGrid.NumberCols)
-        emptyCols= []
-        self._updateColsInfo() # update the used columns
-        for i in cols:
-            if cols[i] not in self.columnNumbers:
-                emptyCols.append( cols[i])
-        
-        # count the number of needed columns 
-        neededCols= 1
-        cols2add=   len(self.columnNumbers) + neededCols - self.inputGrid.NumberCols
-        if cols2add > 0:
-            # adding the needed cols
-            editorRederer= frame.floatCellAttr
-            self.inputGrid.AddNCells(cols2add, 0, attr= editorRederer)
-            emptyCols.extend( range(len(cols), self.inputGrid.NumberCols))
-            cols= self.inputGrid.NumberCols
-            
+        values, outputColumn= values[:-1], values[-1]
+        result= self._calc(values[0])
+        self._report(result, outputColumn)
+    @Busy(__('Reporting'))
+    def _report(self, result, outputColumn):
         # choose the first empty col
-        colReport= emptyCols[0]
-        self.inputGrid.PutCol( colReport, result)        
-        self.inputGrid.SetColLabelValue(colReport, self.statName)     
-                
-        #self.outputGrid.addColData( result, self.name)
-        #self.outputGrid.addRowData( ['Input data'], currRow = 0)
-        #self.outputGrid.addRowData( ['Len Data', self.lenData],        currRow = 1)
-        #self.outputGrid.addRowData( ['Results'],    currRow = 2)
-        
-        self.Logg.write(self.statName+ ' successfull')
+        self.grid.PutCol( outputColumn, result)
+        ##self.grid.SetColLabelValue(outputColumn, self.statName)
+        print self.statName+ ' '+_('successfull')
         
 class randomn(random):
     ''''''
-    name=      u'normal random'
+    name=      __(u'normal random')
     statName=  'randn'
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
-        self.name=      'normal random'
+        self.name=      __('normal random')
         self.statName=  'randn'
         self._scritpEquivalenString='numpy.random.'+self.statName
         self.lenData= None
@@ -110,29 +90,33 @@ class randomn(random):
        
 class linespace(_genericFunc):
     ''''''
-    name=      u'linear space'
-    statName=  'linspace'
+    name=      __(u'linear space')
+    statName=  __('linspace')
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
-        self.name=      u'linear space'
-        self.statName=  'linspace'
+        self.name=      __(u'linear space')
+        self.statName=  __('randint')
         self._scritpEquivalenString='numpy.random.'+self.statName
         self.lenData= None
         
     def _dialog( self, *arg, **params):
         setting= {'Title': self.name,
                   '_size': Size(290,240)}
+
         self._updateColsInfo() # update self.columnames and self.colnums
-        txt1= ['StaticText',  ['Lower Limit <include>']]
-        txt2= ['StaticText',  ['Upper Limit <include>']]
-        txt3= ['StaticText',  ['Number of elements to generate']]
-        btn1= ['IntTextCtrl', []]
-        btn2= ['NumTextCtrl', []]
+        txt1= Ctrl.StaticText(__('Lower Limit <included>'))
+        txt2= Ctrl.StaticText(__('Upper Limit <included>'))
+        txt3= Ctrl.StaticText(__('Number of elements to generate'))
+        txt4= Ctrl.StaticText(__('Destination variable'))
+        btn1= Ctrl.IntTextCtrl()
+        btn2= Ctrl.NumTextCtrl()
+        btn3= Ctrl.Choice(self.columnNames)
         structure= list()
         structure.append( [ btn2, txt1])
         structure.append( [ btn2, txt2])
         structure.append( [ btn1, txt3])
+        structure.append( [ btn3, txt4])
         return self.dialog( settings = setting, struct = structure)
     
     def _showGui_GetValues( self):
@@ -162,42 +146,24 @@ class linespace(_genericFunc):
         values= self._showGui_GetValues()
         if values== None:
             return None
-        
+        values, outputColumn= values[:-1], values[-1]
         result= self._calc(*values)
-        self._report(result)
+        self._report(result, outputColumn)
         
-    def _report(self, result):
-        cols= range(self.inputGrid.NumberCols)
-        emptyCols= []
-        self._updateColsInfo() # update the used columns
-        for i in cols:
-            if cols[i] not in self.columnNumbers:
-                emptyCols.append( cols[i])
-        
-        # count the number of needed columns 
-        neededCols= 1
-        cols2add=   len(self.columnNumbers) + neededCols - self.inputGrid.NumberCols
-        if cols2add > 0:
-            # adding the needed cols
-            editorRederer= frame.floatCellAttr
-            self.inputGrid.AddNCells(cols2add, 0, attr= editorRederer)
-            emptyCols.extend( range(len(cols), self.inputGrid.NumberCols))
-            cols= self.inputGrid.NumberCols
-            
-        # choose the first empty col
-        colReport= emptyCols[0]
-        self.inputGrid.PutCol( colReport, result)        
-        self.inputGrid.SetColLabelValue(colReport, self.statName)        
-        self.Logg.write(self.statName+ ' successfull')
+    def _report(self, result, outputColumn):
+        colReport= outputColumn
+        self.grid.PutCol( colReport, result)        
+        #self.grid.SetColLabelValue(colReport, self.statName)
+        print self.statName + ' successfull'
         
 class beta(_genericFunc):
     ''''''
-    name=      u'beta space'
+    name=      __(u'beta space')
     statName=  'beta'
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
-        self.name=      u'beta space'
+        self.name=      __(u'beta space')
         self.statName=  'beta'
         self._scritpEquivalenString='numpy.random.'+self.statName
         self.lenData= None
@@ -206,15 +172,18 @@ class beta(_genericFunc):
         setting= {'Title': self.name,
                   '_size': Size(290,240)}
         self._updateColsInfo() # update self.columnames and self.colnums
-        txt1= ['StaticText',  ['Lower Limit <include> > 0']]
-        txt2= ['StaticText',  ['Upper Limit <include> > 0']]
-        txt3= ['StaticText',  ['Number of elements to generate']]
-        btn1= ['IntTextCtrl', []]
-        btn2= ['NumTextCtrl', []]
+        txt1 = Ctrl.StaticText( __('Lower Limit <include> > 0'))
+        txt2 = Ctrl.StaticText( __('Upper Limit <include> > 0'))
+        txt3 = Ctrl.StaticText( __('Number of elements to generate'))
+        txt4 = Ctrl.StaticText( __("Destination variable "))
+        btn1 = Ctrl.IntTextCtrl()
+        btn2 = Ctrl.NumTextCtrl()
+        btn3 = Ctrl.Choice( self.columnNames)
         structure= list()
         structure.append( [ btn2, txt1])
         structure.append( [ btn2, txt2])
         structure.append( [ btn1, txt3])
+        structure.append( [ btn3, txt4])
         return self.dialog( settings = setting, struct = structure)
     
     def _showGui_GetValues( self):
@@ -228,11 +197,11 @@ class beta(_genericFunc):
         
         if None in values:
             return
-        
+        values, outputColumn= values[:-1], values[-1]
         if any( [val < 0 for val in values]):
             return
         
-        return values
+        return values, outputColumn
         
     def _calc(self, *args, **params):
         return self.evaluate( *args, **params)
@@ -247,57 +216,42 @@ class beta(_genericFunc):
         values= self._showGui_GetValues()
         if values== None:
             return None
+        values, outputColumn= values[:-1], values[-1]
+        result= self._calc(*values[0])
+        self._report(result, outputColumn)
         
-        result= self._calc(*values)
-        self._report(result)
-        
-    def _report(self, result):
-        cols= range(self.inputGrid.NumberCols)
-        emptyCols= []
-        self._updateColsInfo() # update the used columns
-        for i in cols:
-            if cols[i] not in self.columnNumbers:
-                emptyCols.append( cols[i])
-        
-        # count the number of needed columns 
-        neededCols= 1
-        cols2add=   len(self.columnNumbers) + neededCols - self.inputGrid.NumberCols
-        if cols2add > 0:
-            # adding the needed cols
-            editorRederer= frame.floatCellAttr
-            self.inputGrid.AddNCells(cols2add, 0, attr= editorRederer)
-            emptyCols.extend( range(len(cols), self.inputGrid.NumberCols))
-            cols= self.inputGrid.NumberCols
-            
-        # choose the first empty col
-        colReport= emptyCols[0]
-        self.inputGrid.PutCol( colReport, result)        
-        self.inputGrid.SetColLabelValue(colReport, self.statName)        
-        self.Logg.write(self.statName+ ' successfull')
+    def _report(self, result, outputColumn):
+        self.grid.PutCol( outputColumn, result)
+        print self.statName+ ' '+ __('successfull')
 
 class chisquare(_genericFunc):
     ''''''
-    name=      u'chi square'
+    name=      __(u'chi square')
     statName=  'chisquare'
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
-        self.name=      u'chi square'
+        self.name=      __(u'chi square')
         self.statName=  'chisquare'
         self._scritpEquivalenString='numpy.random.'+self.statName
         self.lenData= None
         
     def _dialog( self, *arg, **params):
-        setting= {'Title': self.name,
-                  '_size': Size(290,240)}
-        self._updateColsInfo() # update self.columnames and self.colnums
-        txt1= ['StaticText',  ['Degrees of freedom']]
-        txt3= ['StaticText',  ['Number of elements to generate']]
-        btn1= ['IntTextCtrl', []]
-        structure= list()
-        structure.append( [ btn1, txt1])
-        structure.append( [ btn1, txt3])
-        return self.dialog( settings = setting, struct = structure)
+        dlg = self.dialog()
+        dlg.title = self.name
+        dlg.size = Size(290,240)
+        self._updateColsInfo() # update self.columnNames and self.colnums
+        txt1 = Ctrl.StaticText( __('Degrees of freedom'))
+        txt3 = Ctrl.StaticText( __('Number of elements to generate'))
+        txt4 = Ctrl.StaticText(__('Destination variable'))
+        btn1 = Ctrl.IntTextCtrl()
+        btn2 = Ctrl.Choice(self.columnNames)
+        structure = list()
+        structure.append( [btn1, txt1])
+        structure.append( [btn1, txt3])
+        structure.append( [btn2, txt4])
+        dlg.struct= structure
+        return dlg
     
     def _showGui_GetValues( self):
         dlg= self._dialog()
@@ -310,11 +264,12 @@ class chisquare(_genericFunc):
         
         if None in values:
             return
-        
+
+        values,outputColumn= values[:-1], values[-1]
         if any( [val < 0 for val in values]):
             return
         
-        return values
+        return values, outputColumn
         
     def _calc(self, *args, **params):
         return self.evaluate( *args, **params)
@@ -329,58 +284,44 @@ class chisquare(_genericFunc):
         values= self._showGui_GetValues()
         if values== None:
             return None
-        
+        values,outputColumn= values[:-1], values[-1]
+        values= values[0]
         result= self._calc(*values)
-        self._report(result)
+        self._report(result, outputColumn)
         
-    def _report(self, result):
-        cols= range(self.inputGrid.NumberCols)
-        emptyCols= []
-        self._updateColsInfo() # update the used columns
-        for i in cols:
-            if cols[i] not in self.columnNumbers:
-                emptyCols.append( cols[i])
-        
-        # count the number of needed columns 
-        neededCols= 1
-        cols2add=   len(self.columnNumbers) + neededCols - self.inputGrid.NumberCols
-        if cols2add > 0:
-            # adding the needed cols
-            editorRederer= frame.floatCellAttr
-            self.inputGrid.AddNCells(cols2add, 0, attr= editorRederer)
-            emptyCols.extend( range(len(cols), self.inputGrid.NumberCols))
-            cols= self.inputGrid.NumberCols
-            
-        # choose the first empty col
-        colReport= emptyCols[0]
-        self.inputGrid.PutCol( colReport, result)        
-        self.inputGrid.SetColLabelValue(colReport, self.statName)        
-        self.Logg.write(self.statName+ ' successfull')
+    def _report(self, result, outputColumn):
+        self.grid.PutCol( outputColumn, result)
+        print self.statName+ ' ' +_('successfull')
     
 class exponential(_genericFunc):
     ''''''
-    name=      u'exponential space'
+    name=      __(u'exponential space')
     statName=  'exponential'
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
-        self.name=      u'exponential space'
+        self.name=     __(u'exponential space')
         self.statName=  'exponential'
         self._scritpEquivalenString='numpy.random.'+self.statName
         self.lenData= None
         
     def _dialog( self, *arg, **params):
-        setting= {'Title': self.name,
-                  '_size': Size(290,240)}
+        dlg= self.dialog()
+        dlg.Title= self.name
+        dlg.size= Size(290,240)
         self._updateColsInfo() # update self.columnames and self.colnums
-        txt1= ['StaticText',  ['scale']]
-        txt3= ['StaticText',  ['Number of elements to generate']]
-        btn2= ['NumTextCtrl', []]
-        btn1= ['IntTextCtrl', []]
+        txt1= Ctrl.StaticText( __('scale'))
+        txt3= Ctrl.StaticText( __('Number of elements to generate'))
+        txt4= Ctrl.StaticText( __('Destination variable'))
+        btn2= Ctrl.NumTextCtrl()
+        btn1= Ctrl.IntTextCtrl()
+        btn3= Ctrl.Choice( self.columnNames)
         structure= list()
         structure.append( [ btn2, txt1])
         structure.append( [ btn1, txt3])
-        return self.dialog( settings = setting, struct = structure)
+        structure.append( [ btn3, txt4])
+        dlg.struct= structure
+        return dlg
     
     def _showGui_GetValues( self):
         dlg= self._dialog()
@@ -393,78 +334,64 @@ class exponential(_genericFunc):
         
         if None in values:
             return
-        
+        values, outputColumn= values[:-1], values[-1]
         if any( [val <= 0 for val in values]):
             return
         
-        return values
-        
+        return values, outputColumn
+
     def _calc(self, *args, **params):
         return self.evaluate( *args, **params)
-        
+
     def object(self):
         return numpy.random.exponential
-    
+
     def evaluate(self, *args, **params):
         return numpy.random.exponential(*args, **params)
-    
+
     def showGui(self, *args, **params):
         values= self._showGui_GetValues()
         if values== None:
             return None
-        
+        values, outputColumn= values[:-1], values[-1]
+        values= values[0]
         result= self._calc(*values)
-        self._report(result)
-        
-    def _report(self, result):
-        cols= range(self.inputGrid.NumberCols)
-        emptyCols= []
-        self._updateColsInfo() # update the used columns
-        for i in cols:
-            if cols[i] not in self.columnNumbers:
-                emptyCols.append( cols[i])
-        
-        # count the number of needed columns 
-        neededCols= 1
-        cols2add=   len(self.columnNumbers) + neededCols - self.inputGrid.NumberCols
-        if cols2add > 0:
-            # adding the needed cols
-            editorRederer= frame.floatCellAttr
-            self.inputGrid.AddNCells(cols2add, 0, attr= editorRederer)
-            emptyCols.extend( range(len(cols), self.inputGrid.NumberCols))
-            cols= self.inputGrid.NumberCols
-            
-        # choose the first empty col
-        colReport= emptyCols[0]
-        self.inputGrid.PutCol( colReport, result)        
-        self.inputGrid.SetColLabelValue(colReport, self.statName)        
-        self.Logg.write(self.statName+ ' successfull')
+        self._report(result, outputColumn)
+
+    def _report(self, result, outputColumn):
+        self.grid.PutCol( outputColumn, result)
+        print self.statName + ' ' + __('successfull')
 
 class integerSpace(_genericFunc):
     ''''''
-    name=      u'integer space'
+    name=      __(u'integer space')
     statName=  'randint'
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
-        self.name=      u'integer space'
+        self.name=      __(u'integer space')
         self.statName=  'randint'
         self._scritpEquivalenString='numpy.random.'+self.statName
         self.lenData= None
         
     def _dialog( self, *arg, **params):
-        setting= {'Title': self.name,
-                  '_size': Size(290,240)}
+        dlg= self.dialog()
+        dlg.Title= self.name
+        dlg.size= Size(290,240)
         self._updateColsInfo() # update self.columnames and self.colnums
-        txt1= ['StaticText',  ['Lower Limit <include>']]
-        txt2= ['StaticText',  ['Upper Limit <include>']]
-        txt3= ['StaticText',  ['Number of elements to generate']]
-        btn1= ['IntTextCtrl', []]
+        txt1= Ctrl.StaticText( __('Lower Limit <include>'))
+        txt2= Ctrl.StaticText( __('Upper Limit <include>'))
+        txt3= Ctrl.StaticText( __('Number of elements to generate'))
+        txt4= Ctrl.StaticText( __('Destination variable'))
+        btn1= Ctrl.IntTextCtrl()
+        btn2= Ctrl.Choice( self.columnNames)
         structure= list()
         structure.append( [ btn1, txt1])
         structure.append( [ btn1, txt2])
         structure.append( [ btn1, txt3])
-        return self.dialog( settings = setting, struct = structure)
+        structure.append( [ btn2, txt4])
+        dlg.struct= structure
+        return dlg
     
     def _showGui_GetValues( self):
         dlg= self._dialog()
@@ -474,11 +401,10 @@ class integerSpace(_genericFunc):
         else:
             dlg.Destroy()
             return
-        
+        values, outputColumn= values[:-1], values[-1]
         if None in values:
             return
-        
-        return values
+        return values,outputColumn
         
     def _calc(self, *args, **params):
         return self.evaluate( *args, **params)
@@ -490,33 +416,14 @@ class integerSpace(_genericFunc):
         return numpy.random.randint(*args, **params)
     
     def showGui(self, *args, **params):
-        values= self._showGui_GetValues()
-        if values== None:
+        values = self._showGui_GetValues()
+        if values == None:
             return None
-        
+        values, outputColumn = values[:-1], values[-1]
+        values= values[0]
         result= self._calc(*values)
-        self._report(result)
+        self._report(result, outputColumn)
         
-    def _report(self, result):
-        cols= range(self.inputGrid.NumberCols)
-        emptyCols= []
-        self._updateColsInfo() # update the used columns
-        for i in cols:
-            if cols[i] not in self.columnNumbers:
-                emptyCols.append( cols[i])
-        
-        # count the number of needed columns 
-        neededCols= 1
-        cols2add=   len(self.columnNumbers) + neededCols - self.inputGrid.NumberCols
-        if cols2add > 0:
-            # adding the needed cols
-            editorRederer= frame.floatCellAttr
-            self.inputGrid.AddNCells(cols2add, 0, attr= editorRederer)
-            emptyCols.extend( range(len(cols), self.inputGrid.NumberCols))
-            cols= self.inputGrid.NumberCols
-            
-        # choose the first empty col
-        colReport= emptyCols[0]
-        self.inputGrid.PutCol( colReport, result)        
-        self.inputGrid.SetColLabelValue(colReport, self.statName)        
-        self.Logg.write(self.statName+ ' successfull')
+    def _report(self, result, outputColumn):
+        self.grid.PutCol( outputColumn, result)
+        print self.statName + ' ' + __('successfull')

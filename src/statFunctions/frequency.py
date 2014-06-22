@@ -10,12 +10,12 @@ from wx import Size
 
 class itemfreq(_genericFunc):
     ''''''
-    name=      u'item frequency'
+    name=      __(u'item frequency')
     statName=  'itemfreq'
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
-        self.name=      'item frequency'
+        self.name=      __('item frequency')
         self.statName=  'itemfreq'
         self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
@@ -26,7 +26,7 @@ class itemfreq(_genericFunc):
         setting= {'Title': self.name,
                   '_size': Size(220,300)}
         self._updateColsInfo() # update self.columnames and self.colnums
-        bt1= ['StaticText',   ['Select the columns to analyse']]
+        bt1= ['StaticText',   [__('Select the columns to analyse')]]
         bt2= ['CheckListBox', [self.columnNames]]
         structure = list()
         structure.append([bt1,])
@@ -45,11 +45,11 @@ class itemfreq(_genericFunc):
         self.colNameSelect= values[0]
         
         if len( self.colNameSelect ) == 0:
-            self.logPanel.write("you don't select any items")
+            print __("you don't select any items")
             return
         
         if len( self.colNameSelect ) < self.minRequiredCols:
-            self.logPanel.write("you have to select at least %i column(s)"%self.requiredcols)
+            print __("you have to select at least %i column(s)")%self.requiredcols
             return
         
         columns= self._convertColName2Values( self.colNameSelect )
@@ -80,16 +80,16 @@ class itemfreq(_genericFunc):
             self.outputGrid.addColData( res[:,0])
             self.outputGrid.addColData( res[:,1])
         self.outputGrid.addRowData(['var Name','item','frequency']*len(result) ,currRow= 0)
-        self.Logg.write( self.statName+ ' successfull')
+        print self.statName+ ' '+_('successfull')
 
 class scoreatpercentile(_genericFunc):
     ''''''
-    name=      u'score at percentile'
+    name=      __(u'score at percentile')
     statName=  'scoreatpercentile'
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
-        self.name=      'score at percentile'
+        self.name=      __('score at percentile')
         self.statName=  'scoreatpercentile'
         self._scritpEquivalenString='stats.'+self.statName
         self.nameStaticText= '%'
@@ -106,7 +106,7 @@ class scoreatpercentile(_genericFunc):
             return
         bt1=  ['StaticText',   ['Select the column to analyse']]
         bt2=  ['CheckListBox', [self.columnNames]]
-        btn3= ['SpinCtrl',     [0,100,0]]
+        btn3= ['SpinCtrl',     [0,100,3]]
         btn4= ['StaticText',   [self.nameStaticText] ]
         structure = list()
         structure.append([bt1,])
@@ -128,7 +128,7 @@ class scoreatpercentile(_genericFunc):
         # changing value strings to numbers
         (self.colNameSelect, self._percent) = values
         if len( self.colNameSelect ) == 0:
-            self.Logg.write("You haven't selected any items!")
+            print __("You haven't selected any items!")
             return
         
         if not isinstance(self.colNameSelect, (list, tuple)):
@@ -137,7 +137,7 @@ class scoreatpercentile(_genericFunc):
 
         columns= list()
         for selectedCol in self.colNameSelect:
-            col= numpy.array( self.inputGrid.GetColNumeric( selectedCol))
+            col= numpy.array( self.grid.GetColNumeric( selectedCol))
             col= numpy.ravel( col)
             columns.append( col)
         return (columns, self._percent)
@@ -167,15 +167,15 @@ class scoreatpercentile(_genericFunc):
         self.outputGrid.addRowData( [self.nameStaticText+'=',  self._percent], currRow= 1)
         self.outputGrid.addRowData( ['Output Data'] , currRow= 2)
         
-        self.Logg.write( self.name + ' successful')
+        print self.name + ' '+ __('successful')
 
 class percentileofscore(scoreatpercentile):
-    name=      u'percentile of score'
+    name=      __(u'percentile of score')
     statName=  'percentileofscore'
     def __init__(self):
         # getting all required methods
         scoreatpercentile.__init__(self)
-        self.name=      'percentile of score'
+        self.name=      __('percentile of score')
         self.statName=  'percentileofscore'
         self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
@@ -211,7 +211,7 @@ class percentileofscore(scoreatpercentile):
         # changing value strings to numbers
         (self.colNameSelect, self.score, self.histbin) = values
         if len( self.colNameSelect ) == 0:
-            self.Logg.write("You haven't selected any items!")
+            print __("You haven't selected any items!")
             return
         
         if not isinstance(self.colNameSelect, (list, tuple)):
@@ -221,7 +221,7 @@ class percentileofscore(scoreatpercentile):
 
         columns= list()
         for selectedCol in self.colNameSelect:
-            col= numpy.array( self.inputGrid.GetColNumeric( selectedCol))
+            col= numpy.array( self.grid.GetColNumeric( selectedCol))
             col= numpy.ravel( col)
             columns.append( col)
         return (columns, self.score, self.histbin)
@@ -242,17 +242,17 @@ class percentileofscore(scoreatpercentile):
         self.outputGrid.addRowData(['histbins=',  self.histbin], currRow= 2)
         self.outputGrid.addRowData(['Output Data'] , currRow= 3)
         
-        self.Logg.write( self.name + ' successful')
+        print  self.name + ' '+ __('successful')
             
 class histogram(scoreatpercentile):
-    name=      u'histogram'
+    name=      __(u'histogram')
     statName=  'histogram'
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
-        self.name=      'histogram'
+        self.name=      __('histogram')
         self.statName=  'histogram'
-        self.nameStaticText= 'Number of Bins'
+        self.nameStaticText= __('Number of Bins')
         self._scritpEquivalenString='stats.'+self.statName
         self.spindata= [1,1000,1]
         self.minRequiredCols= 1
@@ -284,15 +284,15 @@ class histogram(scoreatpercentile):
                                      'binsize', 'extrapoints']*len(result),
                                     currRow= 3)
         
-        self.Logg.write( self.name + ' successful')
+        print self.name + ' '+ __('successful')
 
 class cumfreq(histogram):
-    name=      u'cumulative frequency'
+    name=      __(u'cumulative frequency')
     statName=  'cumfreq'
     def __init__(self):
         # getting all required methods
         histogram.__init__(self)
-        self.name=      'cumulatyve frequency'
+        self.name=      __('cumulatyve frequency')
         self.statName=  'cumfreq'
         self.nameStaticText= 'histbins'
         self._scritpEquivalenString='stats.'+self.statName
@@ -325,15 +325,15 @@ class cumfreq(histogram):
                                      'binsize', 'extrapoints']*len(result),
                                     currRow= 3)
         
-        self.Logg.write( self.name + ' successful')
+        print self.name + ' '+ __('successful')
 
 class relfreq(histogram):
-    name=      u'relative frequency histogram'
+    name=      __(u'relative frequency histogram')
     statName=  'relfreq'
     def __init__(self):
         # getting all required methods
         histogram.__init__(self)
-        self.name=      'relative frequency histogram'
+        self.name=      __('relative frequency histogram')
         self.statName=  'relfreq'
         self._scritpEquivalenString='stats.'+self.statName
         

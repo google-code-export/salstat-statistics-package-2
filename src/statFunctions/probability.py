@@ -9,6 +9,7 @@ from wx import ID_OK as _OK
 from wx import Size
 from statFunctions.frequency import scoreatpercentile
 from statFunctions.centralTendency import geometricMean
+from sei_glob import __
 
 class chisqprob(scoreatpercentile):
     ''''''
@@ -19,7 +20,7 @@ class chisqprob(scoreatpercentile):
         scoreatpercentile.__init__(self)
         self.name=      'chisqprob'
         self.statName=  'chisqprob'
-        self.nameStaticText= 'Degrees of freedom'
+        self.nameStaticText= __('Degrees of freedom')
         self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
         self.spindata= [1,100,1]
@@ -30,7 +31,7 @@ class chisqprob(scoreatpercentile):
         setting= {'Title': self.name,
                   '_size': Size(280,220)}
         self._updateColsInfo() # update self.columnames and self.colnums
-        bt1=  ['StaticText',   ['Select the column to analyse']]
+        bt1=  ['StaticText',   [__('Select the column to analyse')]]
         bt2=  ['Choice',       [self.columnNames]]
         btn3= ['SpinCtrl',     [0,100,0]]
         btn4= ['StaticText',   [self.nameStaticText] ]
@@ -51,10 +52,10 @@ class chisqprob(scoreatpercentile):
         
         (self.colNameSelect, self._percent) = values
         if self.colNameSelect  == None:
-            self.Logg.write("You haven't selected any item!")
+            print __("You haven't selected any item!")
             return
 
-        col= numpy.array( self.inputGrid.GetColNumeric( self.colNameSelect))
+        col= numpy.array( self.grid.GetColNumeric( self.colNameSelect))
         col= numpy.ravel( col)
         
         return (col, self._percent)
@@ -84,7 +85,7 @@ class erfcc(geometricMean):
         setting= {'Title': self.name,
                   '_size': Size(220,300)}
         self._updateColsInfo() # update self.columnames and self.colnums
-        bt1= ['StaticText',   ['Select the column to analyse']]
+        bt1= ['StaticText',   [__('Select the column to analyse')]]
         bt2= ['Choice',       [self.columnNames]]
         structure = list()
         structure.append([bt1,])
@@ -103,14 +104,14 @@ class erfcc(geometricMean):
         self.colNameSelect= values[0]
         
         if self.colNameSelect == None:
-            self.Logg.write("you don't select any items")
+            print __("you don't select any items")
             return
         
         if len( self.colNameSelect ) < self.minRequiredCols:
-            self.Logg.write("you have to select at least %i column(s)"%self.requiredcols)
+            print __("you have to select at least %i column(s)")%self.requiredcols
             return
         
-        col= self.inputGrid.GetColNumeric( self.colNameSelect)
+        col= self.grid.GetColNumeric( self.colNameSelect)
         return col
         
     def object(self):
@@ -231,18 +232,18 @@ class betacf(_genericFunc):
         (self.a, self.b, self.colNameSelect)= values
         
         if self.colNameSelect == None:
-            self.Logg.write("you don't select any items")
+            print __("you don't select any items")
             return
         
         if len( self.colNameSelect ) < self.minRequiredCols:
-            self.Logg.write("you have to select at least %i column(s)"%self.requiredcols)
+            print __("you have to select at least %i column(s)")%self.requiredcols
             return
         
         if self.a== None or self.b == None:
-            self.Logg.write('You must input some data to the a and b variables')
+            print __('You must input some data to the a and b variables')
             return
         
-        columns= self.inputGrid.GetColNumeric( self.colNameSelect )
+        columns= self.grid.GetColNumeric( self.colNameSelect )
         return (columns, self.a, self.b)
         
     def _calc(self, columns, *args, **params):
@@ -269,7 +270,7 @@ class betacf(_genericFunc):
         self.outputGrid.addRowData(['x', self.colNameSelect.__str__()], currRow= 3)
         self.outputGrid.addRowData(['Output data'],          currRow= 4)
         
-        self.Logg.write(self.statName+ ' successfull')
+        print self.statName+ ' '+_('successfull')
 
 class betai(betacf):
     ''''''

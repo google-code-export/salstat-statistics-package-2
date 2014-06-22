@@ -1,5 +1,4 @@
-# Copyrigth 2012 Sebastian Lopez Buritica 
-# Colombia
+# Copyrigth 2014 Sebastian Lopez Buritica selobu@gmail.com
 
 import  wx
 import wx.aui
@@ -8,6 +7,70 @@ from openStats import statistics # used in descriptives frame
 import math # to be used in transform pane
 import numpy
 import scipy
+import wx.lib.agw.aui as aui
+import wx.lib.langlistctrl as langlist
+import sys
+from sei_glob import *
+
+import wx.lib.newevent
+
+Tb1_New_evt,    EVT_TB1_NEW =    wx.lib.newevent.NewCommandEvent()
+Tb1_Save_evt,   EVT_TB1_SAVE =   wx.lib.newevent.NewCommandEvent()
+Tb1_SaveAs_evt, EVT_TB1_SAVEAS = wx.lib.newevent.NewCommandEvent()
+Tb1_Copy_evt,   EVT_TB1_COPY =   wx.lib.newevent.NewCommandEvent()
+Tb1_Paste_evt,  EVT_TB1_PASTE =  wx.lib.newevent.NewCommandEvent()
+Tb1_Cut_evt,    EVT_TB1_CUT =    wx.lib.newevent.NewCommandEvent()
+Tb1_Undo_evt,   EVT_TB1_UNDO =   wx.lib.newevent.NewCommandEvent()
+Tb1_Redo_evt,   EVT_TB1_REDO =   wx.lib.newevent.NewCommandEvent()
+Tb1_Open_evt,   EVT_TB1_OPEN =   wx.lib.newevent.NewCommandEvent()
+Tb1_Help_evt,   EVT_TB1_HELP =   wx.lib.newevent.NewCommandEvent()
+Tb1_ChanLan_evt, EVT_TB1_CHANGELANG =        wx.lib.newevent.NewCommandEvent()
+Tb1_OpenWorkDir_evt,  EVT_TB1_OPENWORKDIR =  wx.lib.newevent.NewCommandEvent()
+Tb1_RestartShell_evt, EVT_TB1_RESTARTSHELL = wx.lib.newevent.NewCommandEvent()
+evtIDOpenWorkDir= wx.NewEventType()
+evtIDNew =    wx.NewEventType()
+evtIDSave =   wx.NewEventType()
+evtIDSaveAs = wx.NewEventType()
+evtIDCopy =   wx.NewEventType()
+evtIDPaste =  wx.NewEventType()
+evtIDCut =    wx.NewEventType()
+evtIDUndo =   wx.NewEventType()
+evtIDRedo =   wx.NewEventType()
+evtIDOpen =   wx.NewEventType()
+evtIDHelp =   wx.NewEventType()
+evtIDChanLan= wx.NewEventType()
+evtIDRestartShell =   wx.NewEventType()
+
+Tb2_Run_evt,    EVT_TB2_RUN =    wx.lib.newevent.NewCommandEvent()
+Tb2_New_evt,    EVT_TB2_NEW =    wx.lib.newevent.NewCommandEvent()
+Tb2_Load_evt,   EVT_TB2_LOAD =   wx.lib.newevent.NewCommandEvent()
+Tb2_Save_evt,   EVT_TB2_SAVE =   wx.lib.newevent.NewCommandEvent()
+Tb2_SaveAs_evt, EVT_TB2_SAVEAS = wx.lib.newevent.NewCommandEvent()
+Tb2_Undo_evt,   EVT_TB2_UNDO =   wx.lib.newevent.NewCommandEvent()
+Tb2_Redo_evt,   EVT_TB2_REDO =   wx.lib.newevent.NewCommandEvent()
+Tb2_Cut_evt,    EVT_TB2_CUT =    wx.lib.newevent.NewCommandEvent()
+Tb2_Copy_evt,   EVT_TB2_COPY =   wx.lib.newevent.NewCommandEvent()
+Tb2_Paste_evt,  EVT_TB2_PASTE =  wx.lib.newevent.NewCommandEvent()
+Tb2_Find_evt,   EVT_TB2_FIND =   wx.lib.newevent.NewCommandEvent()
+Tb2_Open_evt,   EVT_TB2_OPEN =   wx.lib.newevent.NewCommandEvent()
+evtIDTb2Run =   wx.NewEventType()
+evtIDTb2New =   wx.NewEventType()
+evtIDTb2Load =  wx.NewEventType()
+evtIDTb2Save =  wx.NewEventType()
+evtIDTb2SaveAs = wx.NewEventType()
+evtIDTb2Undo =  wx.NewEventType()
+evtIDTb2Redo =  wx.NewEventType()
+evtIDTb2Cut =   wx.NewEventType()
+evtIDTb2Copy =  wx.NewEventType()
+evtIDTb2Paste = wx.NewEventType()
+evtIDTb2Find =  wx.NewEventType()
+
+if wx.__version__ != '2.9.4.0':
+    from wx import ComboBox as BitmapComboBox # translation control
+else:
+    from  wx.combo import BitmapComboBox # translation control
+
+from local import GetAvailLocales, GetLangId, GetLocaleDict
 from easyDialog.easyDialog import CheckListBox
 
 if wx.Platform == '__WXMSW__':
@@ -43,9 +106,9 @@ class _CustomDataTable( gridlib.PyGridTableBase):
         elif len( choiceNames) == 1:
             colsResume= choiceNames[0]*len(columnNames)
         else:
-            raise StandardError( wx.GetApp().translate(u'You input bad type data as choiceNames variable'))
+            raise StandardError( __(u'You input bad type data as choiceNames variable'))
 
-        gvalue= gridlib.GRID_VALUE_CHOICE 
+        gvalue= gridlib.GRID_VALUE_CHOICE
         self.dataTypes= list()
         for colResume in colsResume:
             if colResume != None:
@@ -95,14 +158,13 @@ class _CustomDataTable( gridlib.PyGridTableBase):
                                                )
 
                 self.GetView().ProcessTableMessage(msg)
-        innerSetValue(row, col, value) 
+        innerSetValue(row, col, value)
 
     #--------------------------------------------------
     # Some optional methods
 
     # Called when the grid needs to display labels
     def GetColLabelValue(self, col):
-        print col
         return self.colLabels[col]
 
     # Called to determine the kind of editor/renderer to use by
@@ -215,7 +277,7 @@ class auiNotebookWrap( wx.Panel):
     # <p> you should override this
     def Bindded(self):
         # add some custom callbacks
-        pass 
+        pass
     def addOnePage(self, id= wx.ID_ANY):
         #overwrite this method to create your own custom widget
         return wx.TextCtrl( self, id)
@@ -282,13 +344,366 @@ class auiNotebookWrap( wx.Panel):
         if page <0:
             return
         if page > self.GetPageCount():
-            raise IndexError("Page doesn't exist")
+            raise IndexError(__("Page doesn't exist"))
         parent = self.pages[page].GetParent()
         parent.DeletePage(page)
 
     def newScript(self, event):
         self.addPage()
 #
+
+class TbScriptPnl(aui.AuiToolBar):
+    def __init__(self, *args,**params):
+        aui.AuiToolBar.__init__(self, *args, **params)
+        repend_items, append_items = [], []
+            
+        #self.SetKind(wx.ITEM_SEPARATOR)
+        #self.SetKind(wx.ITEM_NORMAL)
+        #self.SetId(wx.ID_ANY)
+        self.SetLabel(__("Customize..."))
+        #if wx.version < "2.9":
+        #    tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
+        #                        style = aui.AUI_TB_OVERFLOW | aui.AUI_TB_VERTICAL)
+        #else:
+        #    tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
+        #                        agwStyle = aui.AUI_TB_OVERFLOW | aui.AUI_TB_VERTICAL)
+        imagenes = imageEmbed()
+        self.SetToolBitmapSize(wx.Size(16, 16))
+        self.bt1= self.AddSimpleTool(wx.ID_ANY, __(u"Run Script") , imagenes.runIcon, __(u"Run Script"), )
+        self.AddSeparator()
+        self.bt2= self.AddSimpleTool(wx.ID_ANY, __(u"New Script") , imagenes.documentNew, __(u"New Script") )
+        self.bt4= self.AddSimpleTool(wx.ID_ANY, __(u"Load Script") , imagenes.folderOpen, __(u"Load Script") )
+        self.AddSeparator()
+        self.btSave= self.AddSimpleTool(wx.ID_ANY, __(u"Save Script") , imagenes.disk, __(u"Save Script") )
+        self.bt3= self.AddSimpleTool(wx.ID_ANY, __(u"Save Script As") , imagenes.save2disk, __(u"Save Script as") )
+        self.AddSeparator()
+        self.bt8= self.AddSimpleTool(wx.ID_ANY, __(u"Undo"), imagenes.edit_undo, __(u"Undo") )
+        self.bt9= self.AddSimpleTool(wx.ID_ANY, __(u"Redo"), imagenes.edit_redo, __(u"Redo") )
+        self.AddSeparator()
+        self.bt5= self.AddSimpleTool(wx.ID_ANY, __(u"Cut"), imagenes.edit_cut, __(u"Cut") )
+        self.bt6= self.AddSimpleTool(wx.ID_ANY, __(u"Copy"), imagenes.edit_copy, __(u"Copy") )
+        self.bt7= self.AddSimpleTool(wx.ID_ANY, __(u"Paste"), imagenes.edit_paste, __(u"Paste") )
+        self.AddSeparator()
+        self.bt10= self.AddSimpleTool(wx.ID_ANY, __(u"Find"), imagenes.find, __(u"Find") )
+        #self.SetCustomOverflowItems( prepend_items, append_items)
+        #self.SetToolDropDown(wx.ID_ANY, True)
+        self.Realize()
+        self.Bind(wx.EVT_MENU, self.RunScript,    id= self.bt1.GetId())
+        self.Bind(wx.EVT_MENU, self.NewScript,    id= self.bt2.GetId())
+        self.Bind(wx.EVT_MENU, self.LoadScript,   id= self.bt4.GetId())
+        self.Bind(wx.EVT_MENU, self.SaveScript,   id= self.btSave.GetId())
+        self.Bind(wx.EVT_MENU, self.SaveAsScript, id= self.bt3.GetId())
+        self.Bind(wx.EVT_MENU, self.Undo,      id= self.bt8.GetId())
+        self.Bind(wx.EVT_MENU, self.Redo,      id= self.bt9.GetId())
+        self.Bind(wx.EVT_MENU, self.Cut,       id= self.bt5.GetId())
+        self.Bind(wx.EVT_MENU, self.Copy,      id= self.bt6.GetId())
+        self.Bind(wx.EVT_MENU, self.Paste,     id= self.bt7.GetId())
+        self.Bind(wx.EVT_MENU, self.Find,      id= self.bt10.GetId())
+
+    def RunScript(self, evt):
+        event = Tb2_Run_evt(evtIDTb2Run)
+        wx.PostEvent(self.GetEventHandler(), event)
+        evt.Skip()
+    def NewScript(self, evt):
+        event = Tb2_New_evt(evtIDTb2New)
+        wx.PostEvent(self.GetEventHandler(), event)
+        evt.Skip()
+    def LoadScript(self, evt):
+        event = Tb2_Load_evt(evtIDTb2Load)
+        wx.PostEvent(self.GetEventHandler(), event)
+        evt.Skip()
+    def SaveScript(self, evt):
+        event = Tb2_Save_evt(evtIDTb2Save)
+        wx.PostEvent(self.GetEventHandler(), event)
+        evt.Skip()
+    def SaveAsScript(self, evt):
+        event = Tb2_SaveAs_evt(evtIDTb2SaveAs)
+        wx.PostEvent(self.GetEventHandler(), event)
+        evt.Skip()
+    def Undo(self, evt):
+        event = Tb2_Undo_evt(evtIDTb2Undo)
+        wx.PostEvent(self.GetEventHandler(), event)
+        evt.Skip()
+    def Redo(self, evt):
+        event = Tb2_Redo_evt(evtIDTb2Redo)
+        wx.PostEvent(self.GetEventHandler(), event)
+        evt.Skip()
+    def Cut(self, evt):
+        event = Tb2_Cut_evt(evtIDTb2Cut)
+        wx.PostEvent(self.GetEventHandler(), event)
+        evt.Skip()
+    def Copy(self, evt):
+        event = Tb2_Copy_evt(evtIDCopy)
+        wx.PostEvent(self.GetEventHandler(), event)
+        evt.Skip()
+    def Paste(self, evt):
+        event = Tb2_Paste_evt(evtIDTb2Paste)
+        wx.PostEvent(self.GetEventHandler(), event)
+        evt.Skip()
+    def Find(self, evt):
+        event = Tb2_Find_evt(evtIDTb2Find)
+        wx.PostEvent(self.GetEventHandler(), event)
+        evt.Skip()
+
+
+class formulaBar(wx.Panel):#aui.AuiToolBar
+    def __init__( self, parent, *args, **params):
+        wx.Panel.__init__(self, parent, #aui.AuiToolBar
+                          id=wx.ID_ANY,
+                          pos=wx.DefaultPosition,
+                          size=wx.DefaultSize, )
+        self.__LastObject= None # indicate the las object that call this objet
+        bSizer1 = wx.BoxSizer(wx.HORIZONTAL)
+        self._text = u''
+        self.lastParent = None
+        self.textCtrl1 = wx.TextCtrl(self, wx.ID_ANY,
+                                     wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
+                                     wx.TE_CHARWRAP | wx.TE_MULTILINE | wx.TE_RICH2 |
+                                     wx.TE_WORDWRAP | wx.NO_BORDER)
+
+        self.textCtrl1.SetMinSize(wx.Size(500, -1))
+        self.textCtrl1.SetSize(wx.Size(500, -1))
+
+        bSizer1.Add(self.textCtrl1, 0, 0, 5)
+
+        imag = imageEmbed()
+        self.arrowUp = imag.arrowUp
+        self.arrowDown = imag.arrowDown
+        self.originalSize = self.Size
+        self.SetSizer(bSizer1)
+        self.toggle = True
+        self.Layout()
+
+    def onShown(self):
+        fbName = "tb2"
+        app= wx.GetApp()
+        app.frame._showHidePanel( fbName)
+
+    def _ontogle(self, evt):
+        if self.toggle:
+            auisize = self.GetSize()
+            self.SetSize((auisize[0], auisize[1] + 28))
+            self.textCtrl1.SetMinSize(wx.Size(600, 28 * 2))
+            self.textCtrl1.SetSize(wx.Size(600, 28 * 2))
+            self.Layout()
+            self.m_toggleBtn1.Bitmap = self.arrowUp
+        else:
+            auisize = self.GetSize()
+            self.SetSize((auisize[0], auisize[1] - 28))
+            self.textCtrl1.SetMinSize(wx.Size(600, 28))
+            self.textCtrl1.SetSize(wx.Size(600, 28))
+            self.Layout()
+            self.m_toggleBtn1.Bitmap = self.arrowDown
+        self.toggle = not self.toggle
+        evt.Skip()
+    @property
+    def lastObject(self):
+        return self.__LastObject
+    @lastObject.setter
+    def lastObject(self, lastobj):
+        self.__LastObject= lastobj
+    @property
+    def value(self):
+        return self._text
+    @value.setter
+    def value(self, texto, *args, **params):
+        # try to fix to interactibely change the contents of the las selected cell
+        if not isinstance(texto, (str, unicode)):
+            raise StandardError("only accept string values")
+        self._text = texto
+        self.textCtrl1.SetValue(texto)
+
+class Tb1(aui.AuiToolBar):
+    def __init__(self, *args, **params):
+        # emulating [F11]
+        self._fullScreen = False
+        self._shown =   True
+
+        aui.AuiToolBar.__init__(self, *args, **params)
+        # Get icons for toolbar
+        imag =      imageEmbed()
+        NewIcon =   imag.exporCsv
+        OpenIcon =  imag.folder
+        SaveIcon =  imag.disk
+        SaveAsIcon = imag.save2disk
+        CutIcon =   imag.edit_cut
+        CopyIcon =  imag.edit_copy
+        PasteIcon = imag.edit_paste
+        PrefsIcon = imag.preferences
+        HelpIcon =  imag.about
+        UndoIcon =  imag.edit_undo
+        RedoIcon =  imag.edit_redo
+        Restart =   imag.refresh
+
+        #closePage=   imag.cancel
+        self._iconMax = imag.maximize
+        self._iconMin = imag.minimize
+
+        self.bt1 =   self.AddSimpleTool(10, __(u"New"), NewIcon, __(u"New"))
+        self.bt2 =   self.AddSimpleTool(20, __(u"Open"), OpenIcon, __(u"Open"))
+        self.bt3 =   self.AddSimpleTool(30, __(u"Save"), SaveIcon, __(u"Save"))
+        self.bt4 =   self.AddSimpleTool(40, __(u"Save As"), SaveAsIcon, __(u"Save As"))
+        ##self.bt5 = self.AddSimpleTool(50, "Print",PrintIcon,"Print")
+        self.AddSeparator()
+        self.bt11 =  self.AddSimpleTool(wx.ID_ANY, __(u"Undo"), UndoIcon, __(u"Undo"))
+        self.bt12 =  self.AddSimpleTool(wx.ID_ANY, __(u"Redo"), RedoIcon, __(u"Redo"))
+        self.AddSeparator()
+        self.bt6 =   self.AddSimpleTool(60, __(u"Cut"), CutIcon, __(u"Cut"))
+        self.bt7 =   self.AddSimpleTool(70, __(u"Copy"), CopyIcon, __(u"Copy"))
+        self.bt8 =   self.AddSimpleTool(80, __(u"Paste"), PasteIcon, __(u"Paste"))
+        self.AddSeparator()
+        self.bt9 =   self.AddSimpleTool(85, __(u"Preferences"), PrefsIcon, __(u"Preferences"))
+        self.bt10 =  self.AddSimpleTool(95, __(u"OnlineHelp"), HelpIcon, __(u"Online Help"))
+        self.btnMax= self.AddSimpleTool(100, __(u"Maximize"), self._iconMax, __(u"Maximize"))
+        self.bt13=   self.AddSimpleTool(105, __(u"Modules"), OpenIcon, __(u"Open Module Dict"))
+        self.bt14=   self.AddSimpleTool(115, __(u"RestartShell"), Restart, __(u"Restart the shell"))
+
+        # to the language
+        language = wx.GetApp().GetPreferences("Language")
+        if not language:
+            language = "Default"
+        self.languages = LangListCombo(self, language)
+        self.translateBtn = self.AddControl(self.languages, label="Language")
+
+        self.SetToolBitmapSize((24, 24))
+        self.Realize()
+
+        self.Bind(wx.EVT_MENU, lambda evt: self.fullScreen(self._fullScreen), id=self.btnMax.GetId())
+        self.Bind(wx.EVT_MENU, self.CutData,      id= self.bt6.GetId())
+        self.Bind(wx.EVT_MENU, self.CopyData,     id= self.bt7.GetId())
+        self.Bind(wx.EVT_MENU, self.PasteData,    id= self.bt8.GetId())
+        self.Bind(wx.EVT_MENU, self.Undo,         id= self.bt11.GetId())
+        self.Bind(wx.EVT_MENU, self.Redo,         id= self.bt12.GetId())
+        self.Bind(wx.EVT_MENU, self.Save,         id= self.bt3.GetId())
+        self.Bind(wx.EVT_MENU, self.New,          id= self.bt1.GetId())
+        self.Bind(wx.EVT_MENU, self.SaveAs,       id= self.bt4.GetId())
+        self.Bind(wx.EVT_MENU, self.RestartShell, id= self.bt14.GetId())
+        self.Bind(wx.EVT_MENU, self.Open,         id= self.bt2.GetId())
+        self.Bind(wx.EVT_MENU, self.OpenWorkingDirectory, id=self.bt13.GetId())
+        self.Bind(wx.EVT_MENU, self.Help,         id= self.bt10.GetId())
+        self.Bind(wx.EVT_COMBOBOX,self.ChangeLanguaje, id= self.languages.GetId())
+
+    def onShown(self):
+        tb1Name = "tb1"
+        wx.GetApp().frame._showHidePanel( tb1Name)
+
+    def fullScreen(self, bool):
+        self._fullScreen = not bool
+        bitmap = [self._iconMax, self._iconMin][self._fullScreen]
+        self.btnMax.SetBitmap(bitmap)
+        app = wx.GetApp()
+        app.frame.ShowFullScreen(self._fullScreen)
+
+    @property
+    def grid(self):
+        # load the last datapanel selected
+        cs= wx.GetApp().frame.formulaBarPanel.lastObject
+        if cs == None:
+            cs= wx.GetApp().frame.grid
+        return cs
+
+
+###########################################
+    def ChangeLanguaje(self, evt):
+        event = Tb1_ChanLan_evt(evtIDChanLan)
+        setattr(event, 'lang', self.languages.GetValue())
+        wx.PostEvent(self.GetEventHandler(), event)
+
+    def Help(self, evt):
+        event = Tb1_Help_evt(evtIDHelp)
+        wx.PostEvent(self.GetEventHandler(), event)
+
+    def OpenWorkingDirectory(self, evt):
+        event = Tb1_OpenWorkDir_evt(evtIDOpenWorkDir)
+        wx.PostEvent(self.GetEventHandler(), event)
+
+    def Open(self, evt):
+        event = Tb1_Open_evt(evtIDOpen)
+        wx.PostEvent(self.GetEventHandler(), event)
+
+    def Save(self, *args, **params):
+        event = Tb1_Save_evt(evtIDSave)
+        wx.PostEvent(self.GetEventHandler(), event)
+
+    def SaveAs(self, evt):
+        event = Tb1_SaveAs_evt(evtIDSaveAs)
+        wx.PostEvent(self.GetEventHandler(), event)
+
+    def CutData(self, evt):
+        event = Tb1_Cut_evt(evtIDCut)
+        wx.PostEvent(self.GetEventHandler(), event)
+
+    def CopyData(self, evt):
+        event = Tb1_Copy_evt(evtIDCopy)
+        wx.PostEvent(self.GetEventHandler(), event)
+
+    def PasteData(self, evt):
+        event = Tb1_Paste_evt(evtIDPaste)
+        wx.PostEvent(self.GetEventHandler(), event)
+
+    def Undo(self, evt):
+        event = Tb1_Undo_evt(evtIDUndo)
+        wx.PostEvent(self.GetEventHandler(), event)
+
+    def Redo(self, evt):
+        event = Tb1_Redo_evt(evtIDRedo)
+        wx.PostEvent(self.GetEventHandler(), event)
+
+    def New(self, evt):
+        event = Tb1_New_evt(evtIDNew)
+        wx.PostEvent(self.GetEventHandler(), event)
+    def RestartShell(self, evt):
+        event = Tb1_RestartShell_evt(evtIDRestartShell)
+        wx.PostEvent(self.GetEventHandler(), event)
+###########################################        
+
+    def DeleteCurrentCol(self, evt):
+        self.grid.DeleteCurrentCol(evt)
+        evt.Skip()
+
+    def DeleteCurrentRow(self, evt):
+        self.grid.DeleteCurrentRow(evt)
+        evt.Skip()
+
+    def SelectAllCells(self, evt):
+        self.grid.SelectAllCells()
+        evt.Skip()
+
+#---- Language List Combo Box----#
+class LangListCombo(BitmapComboBox):
+    """
+    Combines a langlist and a BitmapComboBox.
+
+    **Note:**
+
+    *  from Editra.dev_tool
+    """
+
+    def __init__(self, parent, default=None):
+        """
+        Creates a combobox with a list of all translations for S2
+        as well as displaying the countries flag next to the item
+        in the list.
+
+        **Parameters:**
+
+        * default: The default item to show in the combo box
+        """
+        self.MainFrame = parent.Parent.Parent
+
+        lang_ids = GetLocaleDict(GetAvailLocales(wx.GetApp().installDir)).values()
+        lang_items = langlist.CreateLanguagesResourceLists(langlist.LC_ONLY, \
+                                                           lang_ids)
+        BitmapComboBox.__init__(self, parent,
+                                size=wx.Size(150, 26),
+                                style=wx.CB_READONLY)
+        for lang_d in lang_items[1]:
+            bit_m = lang_items[0].GetBitmap(lang_items[1].index(lang_d))
+            self.Append(lang_d, bit_m)
+
+        if default:
+            self.SetValue(default)
+
 
 #<p> INIT SELECT A TYPE OF CHART
 class _panelSubPlot(wx.ScrolledWindow):
@@ -327,7 +742,8 @@ class createPlotSelectionPanel( wx.Panel):
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
         bSizer1 = wx.BoxSizer( wx.VERTICAL )
         self.notebook = wx.aui.AuiNotebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,
-                                            wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|wx.aui.AUI_NB_WINDOWLIST_BUTTON )
+                                            wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|wx.aui.AUI_NB_WINDOWLIST_BUTTON|
+                                            wx.aui.AUI_NB_BOTTOM)
         # wx.Notebook( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
 
         bSizer1.Add( self.notebook, 1, wx.EXPAND, 5 )
@@ -347,31 +763,30 @@ class createPlotSelectionPanel( wx.Panel):
 #  END SELECT A TYPE OF CHART /<p>
 
 class SaveDialog(wx.Dialog):
-    def __init__(self, parent):  
-        translate= wx.GetApp().translate
-        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = translate(u"Save data?"), pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.DEFAULT_DIALOG_STYLE )
+    def __init__(self, parent):
+        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = __(u"Save data?"), pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.DEFAULT_DIALOG_STYLE )
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
 
         bSizer1 = wx.BoxSizer( wx.VERTICAL )
 
-        self.m_staticText1 = wx.StaticText( self, wx.ID_ANY, translate(u"You have unsaved data!"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText1 = wx.StaticText( self, wx.ID_ANY, __(u"You have unsaved data!"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText1.Wrap( -1 )
         bSizer1.Add( self.m_staticText1, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALL, 5 )
 
-        self.m_staticText2 = wx.StaticText( self, wx.ID_ANY, translate(u"Do you wish to save it?"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText2 = wx.StaticText( self, wx.ID_ANY, __(u"Do you wish to save it?"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText2.Wrap( -1 )
         bSizer1.Add( self.m_staticText2, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALL, 5 )
 
         bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
 
-        self.m_button1 = wx.Button( self, wx.ID_ANY, translate(u"Save"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_button1 = wx.Button( self, wx.ID_ANY, __(u"Save"), wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer2.Add( self.m_button1, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
-        self.m_button2 = wx.Button( self, wx.ID_ANY, translate(u"Discard"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_button2 = wx.Button( self, wx.ID_ANY, __(u"Discard"), wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer2.Add( self.m_button2, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
-        self.m_button3 = wx.Button( self, wx.ID_ANY, translate(u"Cancel"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_button3 = wx.Button( self, wx.ID_ANY, __(u"Cancel"), wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer2.Add( self.m_button3, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
         bSizer1.Add( bSizer2, 1, wx.EXPAND, 5 )
@@ -433,10 +848,9 @@ class VariablesFrame(wx.Dialog):
     def __init__(self,parent,id):
         wx.Dialog.__init__(self, parent,id,"S2 - Variables", \
                            size=(380, 480,))
-        if len(wx.GetApp().frame.grid.pageNames) == 0:
+        if len(wx.GetApp().frame.grid) == 0:
             self.Close(True)
             return
-        translate= wx.GetApp().translate
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
         self.m_mgr = wx.aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
@@ -445,8 +859,8 @@ class VariablesFrame(wx.Dialog):
 
         bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
 
-        okaybutton = wx.Button(self.m_panel1 ,   2001, translate( "Okay"), wx.DefaultPosition, wx.DefaultSize, 0 )
-        cancelbutton = wx.Button(self.m_panel1 , 2002, translate( "Cancel"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        okaybutton = wx.Button(self.m_panel1 ,   2001, __( "Okay"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        cancelbutton = wx.Button(self.m_panel1 , 2002, __( "Cancel"), wx.DefaultPosition, wx.DefaultSize, 0 )
 
         bSizer2.Add( okaybutton, 0, wx.ALL, 5 )
         bSizer2.Add( cancelbutton , 0, wx.ALL, 5 )
@@ -475,10 +889,10 @@ class VariablesFrame(wx.Dialog):
             self.vargrid.SetLabelBackgroundColour( "#d2d2d2")
             self.vargrid.SetLabelTextColour( "#444444")
 
-        self.vargrid.SetColLabelValue( 0, translate( u"Variable Name"))
-        self.vargrid.SetColLabelValue( 1, translate( u"Decimal Places"))
+        self.vargrid.SetColLabelValue( 0, __( u"Variable Name"))
+        self.vargrid.SetColLabelValue( 1, __( u"Decimal Places"))
 
-        self.m_mgr.AddPane( self.vargrid, 
+        self.m_mgr.AddPane( self.vargrid,
                             wx.aui.AuiPaneInfo().Center().
                             CaptionVisible( False ).PaneBorder( False ).
                             Dock().Resizable().FloatingSize( wx.DefaultSize ).
@@ -498,7 +912,7 @@ class VariablesFrame(wx.Dialog):
         if u'' in newData:
             return False
         return True
-        
+
     def OnOkayVariables(self, evt):
         newlabels= [self.vargrid.GetCellValue(i, 0) for i in range( self.vargrid.GetNumberRows())]
         if not self._checkVariables( newlabels):
@@ -527,10 +941,11 @@ class VariablesFrame(wx.Dialog):
 #---------------------------------------------------------------------------
 class TransformFrame(wx.Dialog):
     def __init__(self, parent, id= wx.ID_ANY):
-        wx.Dialog.__init__( self, parent, id, parent.translate(u"Transformations"),
+        wx.Dialog.__init__( self, parent, id, __(u"Transformations"),
                             size=(500,400+wind))
         #set icon for frame (needs x-platform separator!
         self.parent= parent
+        #self._= parent._
         x= self.GetClientSize()
         winheight= x[1]
         icon= imageEmbed().logo16
@@ -538,20 +953,20 @@ class TransformFrame(wx.Dialog):
         self.transform= ""
         self.transformName= ""
         self.ColumnList, self.colnums= wx.GetApp().frame.grid.GetUsedCols()
-        self.cols = wx.GetApp().frame.grid.NumberCols
-        l0 = wx.StaticText( self, -1, parent.translate(u"Select Column(s) to Transform"), pos=(10,10))
-        self.ColChoice = wx.CheckListBox( self,1102, wx.Point(10,30), \
-                                          wx.Size(230,(winheight * 0.8)), self.ColumnList)
-        self.okaybutton = wx.Button( self, wx.ID_ANY, parent.translate(u"Okay"), wx.Point(10,winheight-35))
-        self.cancelbutton = wx.Button( self, wx.ID_ANY, parent.translate(u"Cancel"),wx.Point(100,winheight-35))
+        self.cols=      wx.GetApp().frame.grid.NumberCols
+        l0 = wx.StaticText( self, -1, __(u"Select Column(s) to Transform"), pos=(10,10))
+        self.ColChoice=        wx.CheckListBox( self,1102, wx.Point(10,30), \
+                                                wx.Size(230,(winheight * 0.8)), self.ColumnList)
+        self.okaybutton=       wx.Button( self, wx.ID_ANY, __(u"Okay"), wx.Point(10,winheight-35))
+        self.cancelbutton=     wx.Button( self, wx.ID_ANY, __(u"Cancel"),wx.Point(100,winheight-35))
         # common transformations:
-        l1= wx.StaticText( self, -1, parent.translate(u"Common Transformations:"), pos=(250,30))
-        self.squareRootButton= wx.Button( self, wx.ID_ANY, parent.translate(u"Square Root"), wx.Point(250, 60))
-        self.logButton= wx.Button( self, wx.ID_ANY, parent.translate(u"Logarithmic"),wx.Point(250, 100))
-        self.reciprocalButton= wx.Button( self, wx.ID_ANY, parent.translate(u"Reciprocal"), wx.Point(250,140))
-        self.squareButton= wx.Button( self, wx.ID_ANY, parent.translate(u"Square"), wx.Point(250,180))
-        l2 = wx.StaticText( self, -1, parent.translate(u"Function :"), wx.Point(250, 315))
-        self.transformEdit= wx.TextCtrl( self, 1114,pos=(250,335),size=(150,20))
+        l1= wx.StaticText( self, -1, __(u"Common Transformations:"), pos=(250,30))
+        self.squareRootButton= wx.Button( self, wx.ID_ANY, __(u"Square Root"), wx.Point(250, 60))
+        self.logButton=        wx.Button( self, wx.ID_ANY, __(u"Logarithmic"),wx.Point(250, 100))
+        self.reciprocalButton= wx.Button( self, wx.ID_ANY, __(u"Reciprocal"), wx.Point(250,140))
+        self.squareButton=     wx.Button( self, wx.ID_ANY, __(u"Square"), wx.Point(250,180))
+        l2 = wx.StaticText( self, -1, __(u"Function :"), wx.Point(250, 315))
+        self.transformEdit=    wx.TextCtrl( self, 1114,pos=(250,335),size=(150,20))
         self.Bind( wx.EVT_BUTTON, self.OnOkayButton,        id = self.okaybutton.GetId())
         self.Bind( wx.EVT_BUTTON, self.OnCloseFrame,        id = self.cancelbutton.GetId())
         self.Bind( wx.EVT_BUTTON, self.squareRootTransform, id = self.squareRootButton.GetId())
@@ -562,22 +977,22 @@ class TransformFrame(wx.Dialog):
     def squareRootTransform(self, evt):
         self.transform = "math.sqrt(x)"
         self.transformEdit.SetValue(self.transform)
-        self.transformName =  self.parent.translate(u" Square Root")
+        self.transformName =  __(u" Square Root")
 
     def logTransform(self, evt):
         self.transform = "math.log(x)"
         self.transformEdit.SetValue(self.transform)
-        self.transformName = self.parent.translate(u" Logarithm")
+        self.transformName = __(u" Logarithm")
 
     def reciprocalTransform(self, evt):
         self.transform = "1 / x"
         self.transformEdit.SetValue(self.transform)
-        self.transformName = self.parent.translate(u" Reciprocal")
+        self.transformName = __(u" Reciprocal")
 
     def squareTransform(self, evt):
         self.transform = "x * x"
         self.transformEdit.SetValue(self.transform)
-        self.transformName = self.parent.translate(u" Square")
+        self.transformName = __(u" Square")
 
     def OnOkayButton(self, evt):
         # start transforming!
@@ -592,9 +1007,9 @@ class TransformFrame(wx.Dialog):
             if cols[i] not in self.colnums:
                 emptyCols.append( cols[i])
 
-        # count the number of needed columns 
+        # count the number of needed columns
         neededCols= sum( [1 for i in range(len(self.colnums)) if self.ColChoice.IsChecked(i)])
-        cols2add=   len(self.colnums) + neededCols - frame.grid.NumberCols 
+        cols2add=   len(self.colnums) + neededCols - frame.grid.NumberCols
         if cols2add > 0:
             # adding the needed cols
             editorRederer= frame.floatCellAttr
@@ -613,7 +1028,7 @@ class TransformFrame(wx.Dialog):
                     local= {'x': numpy.ravel(arr),'math': math,'scipy': scipy}
                     # posibly change by wx.GetApp().frame.scriptPanel.interp.runcode( mainscript)
                     newcol= eval( self.transform, {}, local)
-                except:    
+                except:
                     for j in range( len( oldcol)):
                         x= oldcol[j]
                         try:
@@ -719,31 +1134,28 @@ class SixSigma( wx.Dialog ):
         ''' colNames: a list of column Names'''
         if not isinstance(colNames, (list, tuple)):
             return list()
-        translate= wx.GetApp().translate
-        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = translate(u"Six Sigma Pack"), pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.DEFAULT_DIALOG_STYLE )
+        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = __(u"Six Sigma Pack"), pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.DEFAULT_DIALOG_STYLE )
 
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
 
         bSizer3 = wx.BoxSizer( wx.VERTICAL )
 
-        sbSizer2 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, translate(u"Select Column(s) to analyse") ), wx.VERTICAL )
+        sbSizer2 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, __(u"Select Column(s) to analyse") ), wx.VERTICAL )
 
         m_checkList2Choices = colNames
         self.m_checkList2 = CheckListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,70 ), m_checkList2Choices, 0 )
         sbSizer2.Add( self.m_checkList2, 0, wx.ALL|wx.EXPAND, 5 )
 
-
-
         bSizer3.Add( sbSizer2, 0, wx.EXPAND, 5 )
 
-        sbSizer1 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, translate(u"Limits") ), wx.VERTICAL )
+        sbSizer1 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, __(u"Limits") ), wx.VERTICAL )
 
         bSizer5 = wx.BoxSizer( wx.HORIZONTAL )
 
         self.m_textCtrl1 = NumTextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer5.Add( self.m_textCtrl1, 0, wx.ALL, 5 )
 
-        self.m_staticText3 = wx.StaticText( self, wx.ID_ANY, translate(u"Upper Control Limit"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText3 = wx.StaticText( self, wx.ID_ANY, __(u"Upper Control Limit"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText3.Wrap( -1 )
         bSizer5.Add( self.m_staticText3, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
@@ -755,7 +1167,7 @@ class SixSigma( wx.Dialog ):
         self.m_textCtrl3 = NumTextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer6.Add( self.m_textCtrl3, 0, wx.ALL, 5 )
 
-        self.m_staticText4 = wx.StaticText( self, wx.ID_ANY, translate(u"Lower Control Limit"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText4 = wx.StaticText( self, wx.ID_ANY, __(u"Lower Control Limit"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText4.Wrap( -1 )
         bSizer6.Add( self.m_staticText4, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
@@ -767,7 +1179,7 @@ class SixSigma( wx.Dialog ):
         self.m_textCtrl4 = NumTextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer7.Add( self.m_textCtrl4, 0, wx.ALL, 5 )
 
-        self.m_staticText5 = wx.StaticText( self, wx.ID_ANY, translate(u"Target value"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText5 = wx.StaticText( self, wx.ID_ANY, __(u"Target value"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText5.Wrap( -1 )
         bSizer7.Add( self.m_staticText5, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
@@ -784,7 +1196,7 @@ class SixSigma( wx.Dialog ):
         self.m_spinCtrl1 = wx.SpinCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 50,-1 ), wx.SP_ARROW_KEYS, 1, 10, 6 )
         bSizer8.Add( self.m_spinCtrl1, 0, wx.ALL, 5 )
 
-        self.m_staticText6 = wx.StaticText( self, wx.ID_ANY, translate(u"Use tolerance of  k  in  k*Sigma"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText6 = wx.StaticText( self, wx.ID_ANY, __(u"Use tolerance of  k  in  k*Sigma"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText6.Wrap( -1 )
         bSizer8.Add( self.m_staticText6, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
@@ -796,7 +1208,7 @@ class SixSigma( wx.Dialog ):
         self.m_spinCtrl2 = wx.SpinCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.Size( 50,-1 ), wx.SP_ARROW_KEYS, 2, 15, 2)
         bSizer9.Add( self.m_spinCtrl2, 0, wx.ALL, 5 )
 
-        self.m_staticText7 = wx.StaticText( self, wx.ID_ANY, translate(u"Subgroup Size"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText7 = wx.StaticText( self, wx.ID_ANY, __(u"Subgroup Size"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText7.Wrap( -1 )
         bSizer9.Add( self.m_staticText7, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
@@ -854,12 +1266,11 @@ class _MyFrame1 ( wx.Frame ):
         wx.Frame.__init__ ( self, parent, id = wx.ID_ANY,
                             title = wx.EmptyString, pos = wx.DefaultPosition,
                             size = wx.Size( -1, -1 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
-
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
 
         bSizer10 = wx.BoxSizer( wx.VERTICAL )
 
-        self.m_button8 = wx.Button( self, wx.ID_ANY, u"Show Dialog", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_button8 = wx.Button( self, wx.ID_ANY, __(u"Show Dialog"), wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer10.Add( self.m_button8, 0, wx.ALL, 5 )
 
 

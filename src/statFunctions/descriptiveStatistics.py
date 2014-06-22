@@ -6,6 +6,7 @@ import numpy
 from statFunctions import _genericFunc
 from wx import ID_OK as _OK
 from wx import Size
+from sei_glob import __
 
 #---------------------------------------------------------------------------
 # user selects which cols to analyse, and what stats to have
@@ -34,13 +35,13 @@ LISTDATA= ( (u'N',                       'N'),
 
 class AllDescriptives(_genericFunc):
     ''''''
-    name=      u"Descriptive Statistics"
+    name=      __(u"Descriptive Statistics")
     statName=  u"allDescriptives"
     _scritpEquivalenString= ""
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
-        self.name=            _( "Descriptive Statistics")
+        self.name=            __( "Descriptive Statistics")
         self.statName=        u"allDescriptives"
         self.minRequiredCols= 1
         self.colNameSelect=   ''
@@ -53,7 +54,7 @@ class AllDescriptives(_genericFunc):
         self._updateColsInfo() # update self.columnames and self.colnums
         dlg= wx.Dialog( parent= self.app.frame,
                         id =    wx.ID_ANY,
-                        title = _("Descriptive Statistics"),
+                        title = __("Descriptive Statistics"),
                         pos =   wx.DefaultPosition,
                         size =  wx.Size( 420,326 ),
                         style = wx.DEFAULT_DIALOG_STYLE )
@@ -66,15 +67,15 @@ class AllDescriptives(_genericFunc):
 
         dlg.m_mgr = wx.aui.AuiManager()
         dlg.m_mgr.SetManagedWindow( dlg )
-        newDescList= [_( DescListi) for DescListi in self.DescList]
+        newDescList= [__( DescListi) for DescListi in self.DescList]
         dlg.DescChoice = CheckListBox( dlg, wx.ID_ANY,  wx.DefaultPosition, wx.DefaultSize, newDescList, 0 )
         dlg.m_mgr.AddPane( dlg.DescChoice, wx.aui.AuiPaneInfo() .Center() .
-                           Caption( wx.GetApp()._( u"Select Descriptive Statistics") ).CloseButton( False ).
+                           Caption( __( u"Select Descriptive Statistics") ).CloseButton( False ).
                            PaneBorder( False ).Dock().Resizable().FloatingSize( wx.DefaultSize ).
                            DockFixed( False ).BottomDockable( False ).TopDockable( False ) )
 
         dlg.ColChoice = CheckListBox( dlg, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, self.columnNames, 0 )
-        dlg.m_mgr.AddPane( dlg.ColChoice, wx.aui.AuiPaneInfo() .Center() .Caption( wx.GetApp()._(u"Select Column(s) to Analyse") ).
+        dlg.m_mgr.AddPane( dlg.ColChoice, wx.aui.AuiPaneInfo() .Center() .Caption( __(u"Select Column(s) to Analyse") ).
                            CloseButton( False ).PaneBorder( False ).Dock().Resizable().
                            FloatingSize( wx.Size( 161,93 ) ).DockFixed( False ).BottomDockable( False ).
                            TopDockable( False ).Row( 1 ).Layer( 0 ) )
@@ -87,10 +88,10 @@ class AllDescriptives(_genericFunc):
 
         bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
 
-        okaybutton = wx.Button( dlg.m_panel1, wx.ID_OK, wx.GetApp()._(u"Ok"), wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
+        okaybutton = wx.Button( dlg.m_panel1, wx.ID_OK, __(u"Ok"), wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
         bSizer2.Add( okaybutton, 0, wx.ALL, 5 )
 
-        cancelbutton = wx.Button( dlg.m_panel1, wx.ID_CANCEL, wx.GetApp()._(u"Cancel"), wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
+        cancelbutton = wx.Button( dlg.m_panel1, wx.ID_CANCEL, __(u"Cancel"), wx.DefaultPosition, wx.DefaultSize, wx.BU_EXACTFIT  )
         bSizer2.Add( cancelbutton, 0, wx.ALL, 5 )
 
         dlg.m_panel1.SetSizer( bSizer2 )
@@ -124,11 +125,11 @@ class AllDescriptives(_genericFunc):
             return
 
         if numcolSelect  == 0 or selectedStatistics == 0:
-            self.Logg.write( _( u"you don't select any items"))
+            print __( u"you don't select any items")
             return
 
         if  numcolSelect < self.minRequiredCols:
-            self.Logg.write( _( u"you have to select at least %i columns")%self.minRequiredCols)
+            print __( u"you have to select at least %i columns")%self.minRequiredCols
             return
 
         # self.descriptives( dlg, descs)
@@ -156,18 +157,18 @@ class AllDescriptives(_genericFunc):
         from openStats import statistics
         realColi= column
         name=     column
-        descs=   statistics( self.grid.GetCol( realColi), name)
+        descs=   statistics( self.grid.GetColNumeric( realColi), name)
         return [getattr( descs, itemNameSelected) for itemNameSelected in descriptiveStatistics]
 
     def _report(self, result):
         # add the page and the first column
-        firstcol= [_(u'Descriptives')]
-        firstcol.extend( [_(desc) for desc in self.selectedStatistics])
-        self.outputGrid.addColData( firstcol, _(u'Descriptive statistics'))
+        firstcol= [__(u'Descriptives')]
+        firstcol.extend( [__(desc) for desc in self.selectedStatistics])
+        self.outputGrid.addColData( firstcol, __(u'Descriptive statistics'))
 
         for res, colname in zip(result, self.colNameSelect):
             newRes= [colname]
             newRes.extend(res)
             self.outputGrid.addColData( newRes)
 
-        self.Logg.write(self.statName+ ' '+_('successful'))
+        print self.statName+ ' '+ __('successful')

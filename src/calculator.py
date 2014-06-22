@@ -3,20 +3,23 @@ import wx
 import wx.aui
 import statFunctions
 import re
-from salstat2_glob import *
+from sei_glob import *
 
 from script  import PyslicesEditor
-from TreeCtrl import TreePanel
+from TreeCtrl import TreePanel, baseItem
 
-def _(data):
+def __(data):
     return data
 
 Target = 1000
 
 class MyFrame1 ( wx.Frame ):
-    def __init__( self, parent, id= wx.ID_ANY ):
+    def __init__( self, parent, id= wx.ID_ANY, targetVariableAsTextBox= False ):
+        """targetVariableAsTextBox its used by the pitvot class to allow the user to input
+        a name for the custom field
+        """
         wx.Frame.__init__ ( self, parent,
-                            id = id, title = _(u"Transformation Panel"),
+                            id = id, title = __(u"Transformation Panel"),
                             pos = wx.DefaultPosition, 
                             size = wx.Size( 640,480 ),
                             style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL)
@@ -24,6 +27,8 @@ class MyFrame1 ( wx.Frame ):
             self.Icon= wx.GetApp().icon24
         except AttributeError:
             pass
+        self.targetVariableAsTextBox= targetVariableAsTextBox
+        
         self.SetSizeHintsSz( wx.DefaultSize, wx.DefaultSize )
         self.m_mgr = wx.aui.AuiManager()
         self.m_mgr.SetManagedWindow( self )
@@ -38,15 +43,18 @@ class MyFrame1 ( wx.Frame ):
         
         bSizer2 = wx.BoxSizer( wx.VERTICAL )
 
-        sbSizer4 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel6, Target, _(u"Target Variable")), wx.VERTICAL )
+        sbSizer4 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel6, Target, __(u"Target Variable")), wx.VERTICAL )
 
-        m_comboBox1Choices = [ ""]
-        self.variableDestino = wx.ComboBox( self.m_panel6, wx.ID_ANY, _(u"target variable"), wx.DefaultPosition, wx.DefaultSize, m_comboBox1Choices, 0 )
+        if self.targetVariableAsTextBox:
+            self.variableDestino = wx.TextCtrl( self.m_panel6, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        else:
+            m_comboBox1Choices = [ ""]
+            self.variableDestino = wx.ComboBox( self.m_panel6, wx.ID_ANY, __(u"target variable"), wx.DefaultPosition, wx.DefaultSize, m_comboBox1Choices, 0 )
         sbSizer4.Add( self.variableDestino, 0, wx.ALL|wx.EXPAND, 5 )
 
         bSizer2.Add( sbSizer4, 0, wx.EXPAND, 5 )
 
-        sbSizer6 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel6, wx.ID_ANY, _(u"Script") ), wx.VERTICAL )
+        sbSizer6 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel6, wx.ID_ANY, __(u"Script") ), wx.VERTICAL )
 
         self.scriptPanel = PyslicesEditor(self.m_panel6,
                                           introText=            '#'+wx.GetApp().AppName,
@@ -85,7 +93,7 @@ class MyFrame1 ( wx.Frame ):
                             DockFixed( False ).Floatable( False ).
                             MinSize( wx.Size( 140,-1 ) ).Layer( 10 ) )
         bSizer3 = wx.BoxSizer( wx.VERTICAL )
-        sbSizer1 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel7, wx.ID_ANY, _(u"Available Columns") ), wx.VERTICAL )
+        sbSizer1 = wx.StaticBoxSizer( wx.StaticBox( self.m_panel7, wx.ID_ANY, __(u"Available Columns") ), wx.VERTICAL )
         m_checkList1Choices = []
         self.availableColumnsList = wx.ListBox( self.m_panel7, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_checkList1Choices, 0 )
         sbSizer1.Add( self.availableColumnsList, 1, wx.EXPAND, 5 )
@@ -95,10 +103,12 @@ class MyFrame1 ( wx.Frame ):
         bSizer3.Fit( self.m_panel7 )
         self.treePnl = TreePanel( self)#, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
 
-        from statFunctions import *
-        self.treePnl.treelist= self.__autoCreateTreeList(statFunctions)
+        import statFunctions
+        
+        self.treePnl.treelist = self.__autoCreateTreeList(statFunctions)
+        
         self.m_mgr.AddPane( self.treePnl, wx.aui.AuiPaneInfo() .Left().
-                            Caption( _(u"Available Functions") ).CloseButton( False ).
+                            Caption( __(u"Available Functions") ).CloseButton( False ).
                             PaneBorder( False ).Dock().Resizable().
                             FloatingSize( wx.DefaultSize ).DockFixed( False ).
                             Floatable( False ).MinSize( wx.Size( 170, 240 ) ) )
@@ -114,22 +124,26 @@ class MyFrame1 ( wx.Frame ):
         self.__BindEvents()
         self.m_mgr.Update()
         self.Centre( wx.BOTH )
-        
+
     def __autoCreateTreeList(self, module):
         # automatically creates a menu related with a specified module
         # to be used by the treectrl
         groups=   module.__all__
-        subgroup= list()
+        subgroup = baseItem(text= module.__name__)  ## subgroup= list()
         for group in groups:
             attr= getattr( module, group)
-            result= list()
+            result = baseItem( text= __(attr.__name__))  ##result= list()
             for item in attr.__all__:
                 fnc= getattr( attr, item)
-                fnc.callbackFnc= self.__insertText
-                result.append( ( _( fnc.name), fnc.icon,
-                                 fnc().callback,
-                                 fnc.id))#fnc.statName[:]
-            subgroup.append( ( _( attr.__name__), result))
+                fnc.callbackFnc= self._insertText
+                item= baseItem( text= __( fnc.name),  image= fnc.icon,
+                                callback= fnc().callback, id= fnc.id)
+                result.addchild(item)
+                #result.append( ( __( fnc.name), fnc.icon,
+                #                 fnc().callback,
+                #                 fnc.id))#fnc.statName[:]
+            subgroup.addchild( result)    
+            #subgroup.append( ( __( attr.__name__), result))
         return subgroup
         
     def __BindEvents(self):
@@ -170,16 +184,17 @@ class MyFrame1 ( wx.Frame ):
         
     def setAvailableColumns(self, colNames):
         if not isinstance(colNames, (list, tuple)):
-            raise TypeError(self._('colNames must be a list or a tuple'))
+            raise TypeError(__('colNames must be a list or a tuple'))
         self.availableColumnsList.Items= colNames
-        self.variableDestino.Items= colNames
+        if not self.targetVariableAsTextBox:
+            self.variableDestino.Items= colNames
         
     def __OnPushButton(self, evt):
         obj= evt.EventObject
-        self.__insertText(obj.GetLabel())
+        self._insertText(obj.GetLabel())
         evt.Skip()
         
-    def __insertText(self, text):
+    def _insertText(self, text):
         if not (text in ('',u'')) and self.scriptPanel.CanPaste():
             # making the text compatible with the stc
             cpos=self.scriptPanel.GetCurrentPos()
@@ -192,7 +207,7 @@ class MyFrame1 ( wx.Frame ):
         
     def __OnListColumnsDoubleClick( self, evt):
         texto= evt.GetString()# item selected
-        self.__insertText(" "+texto+" ")
+        self._insertText(" "+texto+" ")
         evt.Skip()
         
     #def __del__( self ):
@@ -201,8 +216,8 @@ class MyFrame1 ( wx.Frame ):
         # returns all necesary values of the frame
         destinyVar= self.variableDestino.GetValue()
         if destinyVar == u'':
-            dlg = wx.MessageDialog(self, self._('Target variable is empty!'),
-                        self._('Error'),
+            dlg = wx.MessageDialog(self, __('Target variable is empty!'),
+                        __('Error'),
                         wx.OK | wx.ICON_ERROR
                         #wx.YES_NO | wx.NO_DEFAULT | wx.CANCEL | wx.ICON_INFORMATION
                         )
@@ -217,8 +232,8 @@ class MyFrame1 ( wx.Frame ):
         scriptText= self.scriptPanel.GetText().split('\n')
         # deleting the coment lines
         if not (len( scriptText) > 1):
-            dlg = wx.MessageDialog(self, self._('The expresion to evaluate is empty!'),
-                        self._('Error'),
+            dlg = wx.MessageDialog(self, self__('The expresion to evaluate is empty!'),
+                        __('Error'),
                         wx.OK | wx.ICON_ERROR
                         #wx.YES_NO | wx.NO_DEFAULT | wx.CANCEL | wx.ICON_INFORMATION
                         )

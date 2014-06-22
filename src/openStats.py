@@ -4,8 +4,8 @@ Created on 14/05/2012
 @author: Sebastian Lopez Buritica
 '''
 
-from statlib import stats
 from scipy import stats as stats2
+from statlib import stats
 import math
 import numpy as np
 
@@ -42,7 +42,6 @@ class statistics(object):
         
     def _filterdata(self, data):
         return [dat for dat in data if dat != None ]
-
         
     # optimizing speed:
     @property
@@ -177,8 +176,6 @@ class statistics(object):
         if self._mode == None:
             self._mode = stats.mode(self.data)[1][0]
         return self._mode
-            
-    
         
 def normProb( x, loc= 0, scale= 1):
     return stats2.norm(loc= loc, scale= scale).cdf(x)
