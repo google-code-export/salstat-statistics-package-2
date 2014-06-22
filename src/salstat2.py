@@ -108,31 +108,6 @@ class MainApp(wx.App):
         directory= os.path.abspath( directory)
         sys.path.append( directory)
 
-    @property
-    def crc32(self):
-        import zlib
-        installDir = os.path.abspath(sys.argv[0])
-        installDir = installDir.decode(sys.getfilesystemencoding())
-        self.INSTALLDIR = os.path.abspath( os.path.split( installDir)[0])
-        # read the crc32
-        fopen = open(installDir, 'rb')
-        content = fopen.read()
-        fopen.close()
-        currCrc32 = zlib.crc32(content).__str__()
-        # reading the file to test the crc32 file
-        installDir, filename = os.path.split(installDir)
-        installFile = os.path.join(installDir, filename.split('.')[0] + '.hsu')
-        # read the crc32
-        fopen = open(installFile, 'rb')
-        content = fopen.read()
-        fopen.close()
-        # decoding the crc32
-        KEY2DECRYPTCRC32 = "GENRATE KEY"
-        keyCrc32 = rc4(FromSerialToProgramer(content, key2decript=KEY2DECRYPTCRC32), KEY2DECRYPTCRC32)
-        result = keyCrc32.__str__()
-        if currCrc32 != result:
-            self.Destroy()
-        return
 
     def OnKeypress(self, evt):
         key = evt.GetKeyCode()
@@ -201,7 +176,6 @@ class MainApp(wx.App):
                 self.OpenFileMessage(f)
         # check for a version update
         self._checkUpdates()
-        #self.crc32
         return True
     
     def setItems(self, **params):
