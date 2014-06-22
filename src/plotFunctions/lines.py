@@ -25,7 +25,7 @@ class lines( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            print _(u"You need some data to draw a graph!")
+            print __(u"You need some data to draw a graph!")
             return
         
         return self.data2Plotdiaglog( None, self.columnNames, title= self.name)
@@ -43,7 +43,7 @@ class lines( _neededLibraries):
 
         print "selectedcols= " + selectedcols.__str__(), False
         if len(selectedcols) == 0:
-            print _(u"You need to select some data to draw a graph!")
+            print __(u"You need to select some data to draw a graph!")
             return
         
         return selectedcols
@@ -59,7 +59,7 @@ class lines( _neededLibraries):
         selectedcols= args[0]
         data= [self.grid.GetColNumeric(colName) for colName in selectedcols ]
         data= [(range( len( data[i])), data[i], self.columnNames[i]) for i in range( len( data))]
-        plt= pltobj(None, xlabel = "", ylabel = _(u"value"), title= _(self.name) )
+        plt= pltobj(None, xlabel = "", ylabel = __(u"value"), title= __(self.name) )
         plt.hold(True)
         listLegend= list()
         listPlot = list()
@@ -82,7 +82,7 @@ class lines( _neededLibraries):
         
     def _report(self, result):
         result.Show()
-        print self.plotName + ' ' + _('successful')
+        print self.plotName + ' ' + __('successful')
 class stem( _neededLibraries):
     name=      u"stem"
     plotName=  u"stem"
@@ -95,7 +95,7 @@ class stem( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            print _(u"You need some data to draw a graph!")
+            print __(u"You need some data to draw a graph!")
             return
         
         return self.data2Plotdiaglog( None, self.columnNames, title= self.name)
@@ -113,7 +113,7 @@ class stem( _neededLibraries):
 
         print "selectedcols= " + selectedcols.__str__(), False
         if len(selectedcols) == 0:
-            print _(u"You need to select some data to draw a graph!")
+            print __(u"You need to select some data to draw a graph!")
             return
         
         return selectedcols
@@ -149,7 +149,7 @@ class stem( _neededLibraries):
     def _report(self, result):
         for res in result:
             res.Show()
-        print self.plotName+ ' ' + _('successful')
+        print self.plotName+ ' ' + __('successful')
          
 class linesOfMean( _neededLibraries):
     name=      u"lines of all means"
@@ -163,7 +163,7 @@ class linesOfMean( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            print _(u"You need some data to draw a graph!")
+            print __(u"You need some data to draw a graph!")
             return
         
         return self.data2Plotdiaglog( None, self.columnNames, title= self.name)
@@ -181,7 +181,7 @@ class linesOfMean( _neededLibraries):
 
         print "selectedcols= " + selectedcols.__str__(), False
         if len(selectedcols) == 0:
-            print _(u"You need to select some data to draw a graph!")
+            print __(u"You need to select some data to draw a graph!")
             return
         
         return selectedcols
@@ -195,7 +195,7 @@ class linesOfMean( _neededLibraries):
     def evaluate( self, *args, **params):
         selectedcols= args[0]
         data = [statistics( self.grid.GetColNumeric( cols), "noname", None).mean for cols in selectedcols]
-        plt= pltobj( None, xlabel = "", ylabel = _(u"value"), title= _(self.name))
+        plt= pltobj( None, xlabel = "", ylabel = __(u"value"), title= __(self.name))
         plt.hold( True)
         listLegend= list()
         listPlot = list()
@@ -217,7 +217,7 @@ class linesOfMean( _neededLibraries):
         
     def _report( self, result):
         result.Show()
-        print  self.plotName + ' ' + _(u'successful')
+        print  self.plotName + ' ' + __(u'successful')
 
 class shadowLines(lines):
     name=      u"lines with shadow"
@@ -233,8 +233,8 @@ class shadowLines(lines):
         selectedcols= args[0]
         data= [self.grid.GetColNumeric(colName) for colName in selectedcols ]
         data= [(range( len( data[i])), data[i], self.columnNames[i]) for i in range( len( data))]
-        plt= pltobj(None, xlabel = "", ylabel = _(u"value"), 
-                    title= _(self.name) )
+        plt= pltobj(None, xlabel = "", ylabel = __(u"value"), 
+                    title= __(self.name) )
         plt.hold(True)
         listLegend= list()
         listPlot = list()
@@ -279,7 +279,7 @@ class areaPlot( lines):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            print _(u"You need some data to draw a graph!")
+            print __(u"You need some data to draw a graph!")
             return
         
         return self.data2Plotdiaglog( None, self.columnNames, title= self.name)
@@ -297,7 +297,7 @@ class areaPlot( lines):
 
         print "selectedcols= " + selectedcols.__str__(), False
         if len(selectedcols) == 0:
-            print _(u"You need to select some data to draw a graph!")
+            print __(u"You need to select some data to draw a graph!")
             return
         
         return selectedcols
@@ -334,7 +334,7 @@ class areaPlot( lines):
     def _report(self, result):
         for res in result:
             res.Show()
-        print self.plotName+ ' ' + _(u'successful')
+        print self.plotName+ ' ' + __(u'successful')
      
 class multipleAreaPlot( lines):
     name=      u"Multiple area chart"
@@ -348,7 +348,7 @@ class multipleAreaPlot( lines):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            print _(u"You need some data to draw a graph!")
+            print __(u"You need some data to draw a graph!")
             return
         
         return self.data2Plotdiaglog( None, self.columnNames, title= self.name)
@@ -366,7 +366,7 @@ class multipleAreaPlot( lines):
 
         print "selectedcols= " + self.colNameSelect.__str__(), False
         if len( self.colNameSelect) == 0:
-            print _(u"You need to select some data to draw a graph!")
+            print __(u"You need to select some data to draw a graph!")
             return
         
         return homogenize(*[ self.grid.GetColNumeric( colName) for colName in self.colNameSelect ])
@@ -382,8 +382,8 @@ class multipleAreaPlot( lines):
         ydat= array( data.pop( 0))
         xdat= range( len( ydat))
         line= list()
-        plt=  pltobj( None, xlabel = "", ylabel = _(u"value"), 
-                      title= _(self.name) )
+        plt=  pltobj( None, xlabel = "", ylabel = __(u"value"), 
+                      title= __(self.name) )
         gca= plt.gca()
         colour= generateColors()
         plt.fill_between( xdat, ydat*0, ydat, alpha=0.6, color= colour.next())
@@ -409,4 +409,4 @@ class multipleAreaPlot( lines):
         
     def _report(self, result):
         result.Show()
-        print self.plotName + ' ' + _('successful')
+        print self.plotName + ' ' + __('successful')

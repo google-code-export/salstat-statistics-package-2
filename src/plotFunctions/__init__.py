@@ -13,15 +13,18 @@ __all__ = ['histogramPlot', 'bar',
 
 # wxPython module
 import wx
+
+# Numpy functions for image creation
 if not (wx.__version__ > '2.9.4'):
     import wx.aui
 import wx.lib.agw.aui as aui
 import wx.propgrid as wxpg
 # Matplotlib Figure object
+from matplotlib import use
+use('wxagg')
 from matplotlib.figure import Figure
 from matplotlib import font_manager
 from matplotlib.widgets import Cursor
-# Numpy functions for image creation
 import numpy as np
 
 # import the WxAgg FigureCanvas object, that binds Figure to
@@ -35,7 +38,7 @@ import matplotlib.path as mpath
 import matplotlib.patches as mpatches
 import matplotlib.cm as cm
 
-from matplotlib.pylab import setp
+from pylab import setp
 from multiPlotDialog import selectDialogData2plot, scatterDialog
 from easyDialog.easyDialog import NumTextCtrl
 
@@ -51,7 +54,7 @@ alpha=        [str( x/float( 10)) for x in range( 1, 11)]
 
 from easyDialog import Dialog as _dialog
 
-def _(data):
+def __(data):
     return data
 
 class log:
@@ -160,11 +163,44 @@ class DropShadowFilter(BaseFilter):
 
 # EN GAUSS FUNCTIONS</p>
 
+def zoom_factory(ax, plt, base_scale = 2.):
+    # zoom by usuing  the scroll mouse
+    def zoom_fun(event):
+        # get the current x and y limits
+        cur_xlim = ax.get_xlim()
+        cur_ylim = ax.get_ylim()
+        cur_xrange = (cur_xlim[1] - cur_xlim[0])*.5
+        cur_yrange = (cur_ylim[1] - cur_ylim[0])*.5
+        xdata = event.xdata # get event x location
+        ydata = event.ydata # get event y location
+        if event.button == 'up':
+            # deal with zoom in
+            scale_factor = 1/base_scale
+        elif event.button == 'down':
+            # deal with zoom out
+            scale_factor = base_scale
+        else:
+            # deal with something that should never happen
+            scale_factor = 1
+            print event.button
+        # set new limits
+        ax.set_xlim([xdata - cur_xrange*scale_factor,
+                     xdata + cur_xrange*scale_factor])
+        ax.set_ylim([ydata - cur_yrange*scale_factor,
+                     ydata + cur_yrange*scale_factor])
+        plt.figpanel.canvas.draw() # force re-draw
+
+    fig = ax.get_figure() # get the figure of interest
+    # attach the call back
+    fig.canvas.mpl_connect('scroll_event',zoom_fun)
+
+    #return the function
+    return zoom_fun
+
 def data2Plotdiaglog(parent, columnNames, title= None):
-    _= wx.GetApp()._
-    txt1= ['StaticText',   [_(u"Select data to plot")]]
+    txt1= ['StaticText',   [__(u"Select data to plot")]]
     btn1= ['CheckListBox', [columnNames]]
-    setting= {'Title': _(title)}
+    setting= {'Title': __(title)}
     structure= list()
     structure.append( [txt1])
     structure.append( [btn1])
@@ -192,70 +228,70 @@ class scrolled1(wx.ScrolledWindow):
         self.SetScrollRate( 5, 5 )
         mainSizer=            wx.BoxSizer( wx.VERTICAL )
         self.pg = pg = wxpg.PropertyGridManager(self, style=wxpg.PG_SPLITTER_AUTO_CENTER |  wxpg.PG_AUTO_SORT)# | wxpg.PG_TOOLBAR)
-        pg.AddPage( _("Main options") )
+        pg.AddPage( __("Main options") )
 
         # title
-        pg.Append( wxpg.PropertyCategory( _("1 - Title")) )
-        pg.Append( wxpg.StringProperty( _("title string"),  value= _("Title") ) )
-        pg.Append( wxpg.ColourProperty( _("title colour"),  value= (0,0,0) ) )
-        pg.Append( wxpg.FontProperty(   _("title font"),   value= self.GetFont()) )
-        pg.Append( wxpg.BoolProperty( _("title clip_on"), value= False) )
-        pg.SetPropertyAttribute( _("title clip_on"), "UseCheckbox", True)
-        pg.Append( wxpg.EnumProperty( _("title multialignment"),_("title multialignment"),
+        pg.Append( wxpg.PropertyCategory( __("1 - Title")) )
+        pg.Append( wxpg.StringProperty( __("title string"),  value= __("Title") ) )
+        pg.Append( wxpg.ColourProperty( __("title colour"),  value= (0,0,0) ) )
+        pg.Append( wxpg.FontProperty(   __("title font"),   value= self.GetFont()) )
+        pg.Append( wxpg.BoolProperty( __("title clip_on"), value= False) )
+        pg.SetPropertyAttribute( __("title clip_on"), "UseCheckbox", True)
+        pg.Append( wxpg.EnumProperty( __("title multialignment"), __("title multialignment"),
                                             ['left' , 'right' , 'center' ],
                                             [0, 1, 2, ],  2))
         if 0:
-            pg.Append( wxpg.PropertyCategory( _("1.1 - TitleFont")) )
+            pg.Append( wxpg.PropertyCategory( __("1.1 - TitleFont")) )
 
-            pg.SetPropertyAttribute( _("title clip_on"), "UseCheckbox", True)
-            pg.Append( wxpg.BoolProperty( _("title visible"), value= True) )
-            pg.SetPropertyAttribute( _("title visible"), "UseCheckbox", True)
-            pg.Append( wxpg.EnumProperty( _("title fontweight"),_("title fontweight"),
+            pg.SetPropertyAttribute( __("title clip_on"), "UseCheckbox", True)
+            pg.Append( wxpg.BoolProperty( __("title visible"), value= True) )
+            pg.SetPropertyAttribute( __("title visible"), "UseCheckbox", True)
+            pg.Append( wxpg.EnumProperty( __("title fontweight"),__("title fontweight"),
                                             [ 'normal','bold','heavy','light','ultrabold','ultralight']
                                             ,  [0, 1, 2, 3, 4, 5],  0) )
-            pg.Append( wxpg.EnumProperty( _("title verticalalignment"),_("title verticalalignment"),
+            pg.Append( wxpg.EnumProperty( __("title verticalalignment"),__("title verticalalignment"),
                                            [ 'center','top','bottom','baseline']
                                             ,  [0, 1, 2, 3],  0) )
-            pg.Append( wxpg.EnumProperty( _("title fontstyle"),_("title fontstyle"),
+            pg.Append( wxpg.EnumProperty( __("title fontstyle"),__("title fontstyle"),
                                                    [ 'normal','italic','oblique',]
                                                     ,  [0, 1, 2],  0) )
         
         # xaxis
-        pg.Append( wxpg.PropertyCategory( _("2 - x axis")) )
-        pg.Append( wxpg.StringProperty( _("xlabel string"), value= _("xlabel") ) )
-        pg.Append( wxpg.ColourProperty( _("xlabel colour"), value= (0,0,0) ) )
-        pg.Append( wxpg.FontProperty(   _("xlabel font"),   value= self.GetFont()) )
-        pg.Append( wxpg.FloatProperty(  _("xmin"),          value= 0.0) )
-        pg.Append( wxpg.FloatProperty(  _("xmax"),          value= 100.0) )
-        pg.Append( wxpg.IntProperty(   _("xlabel angle"),   value=0) )
-        pg.SetPropertyEditor( _("xlabel angle"),"SpinCtrl")
-        pg.Append( wxpg.EnumProperty( _("xaxis scale"),_("xaxis scale"),
+        pg.Append( wxpg.PropertyCategory( __("2 - x axis")) )
+        pg.Append( wxpg.StringProperty( __("xlabel string"), value= __("xlabel") ) )
+        pg.Append( wxpg.ColourProperty( __("xlabel colour"), value= (0,0,0) ) )
+        pg.Append( wxpg.FontProperty(   __("xlabel font"),   value= self.GetFont()) )
+        pg.Append( wxpg.FloatProperty(  __("xmin"),          value= 0.0) )
+        pg.Append( wxpg.FloatProperty(  __("xmax"),          value= 100.0) )
+        pg.Append( wxpg.IntProperty(   __("xlabel angle"),   value=0) )
+        pg.SetPropertyEditor( __("xlabel angle"),"SpinCtrl")
+        pg.Append( wxpg.EnumProperty( __("xaxis scale"),__("xaxis scale"),
                                         ['linear','symlog',],  [0,1],  0) )   
         
         
         # yaxis
-        pg.Append( wxpg.PropertyCategory( _("3 - y axis")) )
-        pg.Append( wxpg.StringProperty( _("ylabel string"), value= _("ylabel") ) )
-        pg.Append( wxpg.ColourProperty( _("ylabel colour"), value= (0,0,0) ) )
-        pg.Append( wxpg.FontProperty(   _("ylabel font"),   value= self.GetFont()) )
-        pg.Append( wxpg.FloatProperty(  _("ymin"),          value= 0.0) )
-        pg.Append( wxpg.FloatProperty(  _("ymax"),          value= 100.0) )
-        pg.Append( wxpg.IntProperty(   _("ylabel angle"),   value=0) )
-        pg.SetPropertyEditor( _("ylabel angle"),"SpinCtrl")
-        pg.Append( wxpg.EnumProperty( _("yaxis scale"),_("yaxis scale"),
+        pg.Append( wxpg.PropertyCategory( __("3 - y axis")) )
+        pg.Append( wxpg.StringProperty( __("ylabel string"), value= __("ylabel") ) )
+        pg.Append( wxpg.ColourProperty( __("ylabel colour"), value= (0,0,0) ) )
+        pg.Append( wxpg.FontProperty(   __("ylabel font"),   value= self.GetFont()) )
+        pg.Append( wxpg.FloatProperty(  __("ymin"),          value= 0.0) )
+        pg.Append( wxpg.FloatProperty(  __("ymax"),          value= 100.0) )
+        pg.Append( wxpg.IntProperty(   __("ylabel angle"),   value=0) )
+        pg.SetPropertyEditor( __("ylabel angle"),"SpinCtrl")
+        pg.Append( wxpg.EnumProperty( __("yaxis scale"),__("yaxis scale"),
                                         ['linear','symlog',],  [0,1], 0) )
         
         # legend
-        pg.Append( wxpg.PropertyCategory( _("4 - Legend")) )
-        pg.Append( wxpg.BoolProperty( _("Show legend"), value= False) )
-        pg.SetPropertyAttribute( _("Show legend"), "UseCheckbox", True)
+        pg.Append( wxpg.PropertyCategory( __("4 - Legend")) )
+        pg.Append( wxpg.BoolProperty( __("Show legend"), value= False) )
+        pg.SetPropertyAttribute( __("Show legend"), "UseCheckbox", True)
 
         # grid
-        pg.Append( wxpg.PropertyCategory( _("5 - Grid")) )
-        pg.Append( wxpg.BoolProperty( _("Show grid"),   value= False) )
-        pg.SetPropertyAttribute( _("Show grid"), "UseCheckbox", True)
-        pg.Append( wxpg.BoolProperty( _("View cursor"), value= False) )
-        pg.SetPropertyAttribute( _("View cursor"), "UseCheckbox", True)
+        pg.Append( wxpg.PropertyCategory( __("5 - Grid")) )
+        pg.Append( wxpg.BoolProperty( __("Show grid"),   value= False) )
+        pg.SetPropertyAttribute( __("Show grid"), "UseCheckbox", True)
+        pg.Append( wxpg.BoolProperty( __("View cursor"), value= False) )
+        pg.SetPropertyAttribute( __("View cursor"), "UseCheckbox", True)
   
         if not self.__createDispatcher():
             raise StandardError("Cannot create the graph dispatcher")
@@ -272,31 +308,31 @@ class scrolled1(wx.ScrolledWindow):
                 self.__dispatcher[p.GetName()](evt, p.GetValue())
     def __createDispatcher( self):
         self.__dispatcher=  dispatcher = dict()
-        dispatcher[ _("title string")]= self.__TitleChange
-        dispatcher[ _("title colour")]= self.__titleFontColour
-        dispatcher[ _("title font")]= self.__titleFontProp
-        dispatcher[ _("title clip_on")]= self.__titleClipOn
-        dispatcher[ _("title multialignment")]= self.__titleMultialignment
+        dispatcher[ __("title string")]= self.__TitleChange
+        dispatcher[ __("title colour")]= self.__titleFontColour
+        dispatcher[ __("title font")]= self.__titleFontProp
+        dispatcher[ __("title clip_on")]= self.__titleClipOn
+        dispatcher[ __("title multialignment")]= self.__titleMultialignment
         
-        dispatcher[ _("xlabel string")]= self._xlabelChange
-        dispatcher[ _("xlabel colour")]= self._xlabelFontColour
-        dispatcher[ _("xlabel font")]= self._xlabelFontProp
-        dispatcher[ _("xmin")]= self._xminValue
-        dispatcher[ _("xmax")]= self._xmaxValue
-        dispatcher[ _("xlabel angle")]= self._xAngleChange
-        dispatcher[ _("xaxis scale")]= self._OnXaxisScale
+        dispatcher[ __("xlabel string")]= self._xlabelChange
+        dispatcher[ __("xlabel colour")]= self._xlabelFontColour
+        dispatcher[ __("xlabel font")]= self._xlabelFontProp
+        dispatcher[ __("xmin")]= self._xminValue
+        dispatcher[ __("xmax")]= self._xmaxValue
+        dispatcher[ __("xlabel angle")]= self._xAngleChange
+        dispatcher[ __("xaxis scale")]= self._OnXaxisScale
         
-        dispatcher[ _("ylabel string")]= self._ylabelChange
-        dispatcher[ _("ylabel colour")]= self._ylabelFontColour
-        dispatcher[ _("ylabel font")]= self._ylabelFontProp
-        dispatcher[ _("ymin")]= self._yminValue
-        dispatcher[ _("ymax")]= self._ymaxValue
-        dispatcher[ _("ylabel angle")]= self._yAngleChange
-        dispatcher[ _("yaxis scale")]= self._OnYaxisScale
+        dispatcher[ __("ylabel string")]= self._ylabelChange
+        dispatcher[ __("ylabel colour")]= self._ylabelFontColour
+        dispatcher[ __("ylabel font")]= self._ylabelFontProp
+        dispatcher[ __("ymin")]= self._yminValue
+        dispatcher[ __("ymax")]= self._ymaxValue
+        dispatcher[ __("ylabel angle")]= self._yAngleChange
+        dispatcher[ __("yaxis scale")]= self._OnYaxisScale
         
-        dispatcher[ _("Show legend")]= self._OnLegend
-        dispatcher[ _("Show grid")]= self._OnGrid
-        dispatcher[ _("View cursor")]= self._OnViewCursor
+        dispatcher[ __("Show legend")]= self._OnLegend
+        dispatcher[ __("Show grid")]= self._OnGrid
+        dispatcher[ __("View cursor")]= self._OnViewCursor
         return True
 
     def __TitleChange( self, evt , *args, **params):
@@ -310,14 +346,14 @@ class scrolled1(wx.ScrolledWindow):
         p = evt.GetValue()
         pg0= self.pg.GetPage(0)
         if len(args) == 0:
-            fontprop= pg0.GetProperty(_("title font")).m_value
+            fontprop= pg0.GetProperty(__("title font")).m_value
         else:
             fontprop= args[0]
-        clip_on= pg0.GetProperty(_("title clip_on")).m_value
-        multialignment= pg0.GetProperty(_("title multialignment")).m_value
+        clip_on= pg0.GetProperty(__("title clip_on")).m_value
+        multialignment= pg0.GetProperty(__("title multialignment")).m_value
         multialignment= ['left' , 'right' , 'center' ][multialignment]
 
-        colour= pg0.GetProperty(_("title colour")).m_value
+        colour= pg0.GetProperty(__("title colour")).m_value
         fontDictWeigth={u'wxFONTWEIGHT_NORMAL': 'normal',
                         u'wxFONTWEIGHT_BOLD':   'bold',
                         u'wxFONTWEIGHT_LIGHT':  'light'}
@@ -348,12 +384,12 @@ class scrolled1(wx.ScrolledWindow):
     def _xlabelFontProp( self, evt, *args, **params):
         if len(args) == 0:
             pg0=self.pg.GetPage(0)
-            fontprop= pg0.GetProperty(_("xlabel font")).m_value
+            fontprop= pg0.GetProperty(__("xlabel font")).m_value
         else:
             fontprop= args[0]
         p = evt.GetProperty()
         pg0=self.pg.GetPage(0)
-        colour= pg0.GetProperty(_("xlabel colour")).m_value
+        colour= pg0.GetProperty(__("xlabel colour")).m_value
         fontDictWeigth={u'wxFONTWEIGHT_NORMAL': 'normal',
                         u'wxFONTWEIGHT_BOLD':   'bold',
                         u'wxFONTWEIGHT_LIGHT':  'light'}
@@ -407,12 +443,12 @@ class scrolled1(wx.ScrolledWindow):
     def _ylabelFontProp( self, evt, *args, **params):
         if len(args) == 0:
             pg0=self.pg.GetPage(0)
-            fontprop= pg0.GetProperty(_("ylabel font")).m_value
+            fontprop= pg0.GetProperty(__("ylabel font")).m_value
         else:
             fontprop= args[0]
         p = evt.GetProperty()
         pg0=self.pg.GetPage(0)
-        colour= pg0.GetProperty(_("ylabel colour")).m_value
+        colour= pg0.GetProperty(__("ylabel colour")).m_value
         fontDictWeigth={u'wxFONTWEIGHT_NORMAL': 'normal',
                         u'wxFONTWEIGHT_BOLD':   'bold',
                         u'wxFONTWEIGHT_LIGHT':  'light'}
@@ -458,7 +494,7 @@ class scrolled1(wx.ScrolledWindow):
 
     def _OnLegend(self, evt , *args, **params):
         evt.Skip()
-        print _("not implemented yet!")
+        print __("not implemented yet!")
     def _OnGrid( self, evt, *args, **params):
         p= evt.GetValue()
         print '# changing grid state'
@@ -508,19 +544,19 @@ class scrolled1(wx.ScrolledWindow):
         ylabel=   self.plt.ylabel # ca.get_ylabel()
         gridState= self.plt.gca()._gridOn
         # getting states of the variables with the control actual ones
-        actaulTitle=     pg0.GetProperty( _("title string")).m_value   # self.plt_textCtr1.GetLabel()
-        actualXlabel=    pg0.GetProperty( _("xlabel string")).m_value   # self.plt_textCtr2.GetLabel()
-        actualYlabel=    pg0.GetProperty( _("ylabel string")).m_value   # self.plt_textCtr3.GetLabel()
-        actualGridState= pg0.GetProperty( _("Show grid")).m_value   # self.m_checkBox1.Value
+        actaulTitle=     pg0.GetProperty( __("title string")).m_value   # self.plt_textCtr1.GetLabel()
+        actualXlabel=    pg0.GetProperty( __("xlabel string")).m_value   # self.plt_textCtr2.GetLabel()
+        actualYlabel=    pg0.GetProperty( __("ylabel string")).m_value   # self.plt_textCtr3.GetLabel()
+        actualGridState= pg0.GetProperty( __("Show grid")).m_value   # self.m_checkBox1.Value
         # updating the control values
         if title != actaulTitle:
-            pg0.SetPropertyValue( _("title string"),  title)
+            pg0.SetPropertyValue( __("title string"),  title)
         if xlabel != actualXlabel:
-            pg0.SetPropertyValue( _("xlabel string"), xlabel)
+            pg0.SetPropertyValue( __("xlabel string"), xlabel)
         if ylabel != actualYlabel:
-            pg0.SetPropertyValue( _("ylabel string"), ylabel)
+            pg0.SetPropertyValue( __("ylabel string"), ylabel)
         if gridState != actualGridState:
-            pg0.SetPropertyValue( _("Show grid"),  gridState)
+            pg0.SetPropertyValue( __("Show grid"),  gridState)
 
         # getting the parameters of the title string
         title=self.plt.gca().title
@@ -534,7 +570,7 @@ class scrolled1(wx.ScrolledWindow):
                            }
         # changing the contents of the pg
         pg0=   self.pg.GetPage(0)
-        newfont= pg0.GetProperty(_("title font")).m_value
+        newfont= pg0.GetProperty(__("title font")).m_value
 
         newfont.SetPointSize( titleFontAsDict['fontsize'])
         newfont.SetFaceName( titleFontAsDict['fontname'])
@@ -546,7 +582,7 @@ class scrolled1(wx.ScrolledWindow):
         ##newfont.color= [0,0,0]
         ##newfont.clip_on= titleFontAsDict['clip_on']
         ##newfont.multialignment= titleFontAsDict['multialignment']
-        pg0.SetPropertyValue(_("title font"), newfont)
+        pg0.SetPropertyValue(__("title font"), newfont)
 
     # to be fix
     def __UpdateXlabelFont(self, currAxes, evt= None, *args, **params):
@@ -562,7 +598,7 @@ class scrolled1(wx.ScrolledWindow):
                            }
         # changing the contents of the pg
         pg0=   self.pg.GetPage(0)
-        newfont= pg0.GetProperty(_("xlabel font")).m_value
+        newfont= pg0.GetProperty(__("xlabel font")).m_value
         newfont.SetPointSize( titleFontAsDict['fontsize'])
         newfont.SetFaceName( titleFontAsDict['fontname'])
         fontDictWeigth={'normal': wx.FONTWEIGHT_NORMAL,
@@ -572,7 +608,7 @@ class scrolled1(wx.ScrolledWindow):
         ##newfont.color= [0,0,0]
         ##newfont.clip_on= titleFontAsDict['clip_on']
         ##newfont.multialignment= titleFontAsDict['multialignment']
-        pg0.SetPropertyValue(_("xlabel font"), newfont)
+        pg0.SetPropertyValue(__("xlabel font"), newfont)
     def __UpdateYlabelFont(self, currAxes, evt= None, *args, **params):
         # getting the parameters of the title string
         title=self.plt.gca().get_ylabel()
@@ -586,7 +622,7 @@ class scrolled1(wx.ScrolledWindow):
                            }
         # changing the contents of the pg
         pg0=   self.pg.GetPage(0)
-        newfont= pg0.GetProperty(_("ylabel font")).m_value
+        newfont= pg0.GetProperty(__("ylabel font")).m_value
 
         newfont.SetPointSize( titleFontAsDict['fontsize'])
         newfont.SetFaceName( titleFontAsDict['fontname'])
@@ -600,7 +636,7 @@ class scrolled1(wx.ScrolledWindow):
         ##newfont.clip_on= titleFontAsDict['clip_on']
         ##newfont.multialignment= titleFontAsDict['multialignment']
 
-        pg0.SetPropertyValue(_("ylabel font"), newfont)
+        pg0.SetPropertyValue(__("ylabel font"), newfont)
 
     def __updateLimits(self, currAxes, evt = None, *args, **params):
         ca= currAxes
@@ -610,31 +646,31 @@ class scrolled1(wx.ScrolledWindow):
         ylim= self.plt.get_ylim()
         # reading the data
         pg0=   self.pg.GetPage(0)
-        xmin=  pg0.GetProperty( _("xmin")).m_value
-        xmax=  pg0.GetProperty( _("xmax")).m_value
-        ymin=  pg0.GetProperty( _("ymin")).m_value
-        ymax=  pg0.GetProperty( _("ymax")).m_value
+        xmin=  pg0.GetProperty( __("xmin")).m_value
+        xmax=  pg0.GetProperty( __("xmax")).m_value
+        ymin=  pg0.GetProperty( __("ymin")).m_value
+        ymax=  pg0.GetProperty( __("ymax")).m_value
         oldxlim= (xmin, xmax)
         oldylim= (ymin, ymax)
         # setting the limits of the axis to the buttons
         if oldxlim != xlim:
-            pg0.SetPropertyValue(_("xmin"), xlim[0])
-            pg0.SetPropertyValue(_("xmax"), xlim[1])
+            pg0.SetPropertyValue(__("xmin"), xlim[0])
+            pg0.SetPropertyValue(__("xmax"), xlim[1])
         if oldylim != ylim:
-            pg0.SetPropertyValue(_("ymin"), ylim[0])
-            pg0.SetPropertyValue(_("ymax"), ylim[1])
+            pg0.SetPropertyValue(__("ymin"), ylim[0])
+            pg0.SetPropertyValue(__("ymax"), ylim[1])
     def __UpdateAxisScale(self, currAxes, evt,*args, **params):
         pg0= self.pg.GetPage(0)
         # readin the scales of the current axes
         xscale=    self.plt.get_xscale( )
         yscale=    self.plt.get_yscale( )
-        oldxscale= ["linear","symlog"][pg0.GetProperty( _("xaxis scale")).m_value]
-        oldyscale= ["linear","symlog"][pg0.GetProperty( _("yaxis scale")).m_value]
+        oldxscale= ["linear","symlog"][pg0.GetProperty( __("xaxis scale")).m_value]
+        oldyscale= ["linear","symlog"][pg0.GetProperty( __("yaxis scale")).m_value]
         # comparing the values with the graphic ones
         if xscale != oldxscale:
-            pg0.SetPropertyValue( _("xaxis scale"), xscale)
+            pg0.SetPropertyValue( __("xaxis scale"), xscale)
         if yscale != oldyscale:
-            pg0.SetPropertyValue( _("xaxis scale"), yscale)
+            pg0.SetPropertyValue( __("xaxis scale"), yscale)
 
 class scrolled2(wx.ScrolledWindow):
     from matplotlib.colors import colorConverter
@@ -653,7 +689,7 @@ class scrolled2(wx.ScrolledWindow):
         self.SetScrollRate( 5, 5 )
         bSizer21 = wx.BoxSizer( wx.VERTICAL )
 
-        sbSizer8 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, _( u"Choose a line") ), wx.VERTICAL )
+        sbSizer8 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, __( u"Choose a line") ), wx.VERTICAL )
 
         m_listBox1Choices = []
         self.m_listBox1 = wx.ListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( 130,80 ), m_listBox1Choices, 0 )
@@ -666,62 +702,62 @@ class scrolled2(wx.ScrolledWindow):
 
         bSizer5.Add( self.m_button87, 0, wx.LEFT|wx.RIGHT, 5 )
 
-        self.m_button41 = wx.Button( self, wx.ID_ANY, _( u"Refresh lines"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_button41 = wx.Button( self, wx.ID_ANY, __( u"Refresh lines"), wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer5.Add( self.m_button41, 0, wx.ALIGN_RIGHT|wx.LEFT, 5 )
 
         sbSizer8.Add( bSizer5, 1, wx.EXPAND, 5 )
 
         bSizer21.Add( sbSizer8, 0, 0, 5 )
-        #sbSizer71 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, _( u"Some Properties") ), wx.VERTICAL )
+        #sbSizer71 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, __( u"Some Properties") ), wx.VERTICAL )
         self.pg = pg = wxpg.PropertyGridManager(self, style=wxpg.PG_SPLITTER_AUTO_CENTER |  wxpg.PG_AUTO_SORT)# | wxpg.PG_TOOLBAR)
-        pg.AddPage( _("Lines properties") )
-        pg.Append( wxpg.PropertyCategory( _("1- line Properties")) )
-        pg.Append( wxpg.StringProperty( _("Line Name"),  value= _("line Name") ) )
-        pg.Append( wxpg.FloatProperty( _("Line Alpha"),      value= 1 ) )
-        pg.Append( wxpg.BoolProperty( _("Line Animated"),  value= False ) )
-        pg.Append( wxpg.BoolProperty( _("Line Antialiased"), value= False ) )
-        pg.Append( wxpg.BoolProperty( _("Line Clip_on"),     value= False) )
-        pg.SetPropertyAttribute( _("Line Animated"),    "UseCheckbox", True)
-        pg.SetPropertyAttribute( _("Line Antialiased"), "UseCheckbox", True)
-        pg.SetPropertyAttribute( _("Line Clip_on"),     "UseCheckbox", True)
-        pg.Append( wxpg.ColourProperty( _("Line Colour"), value= (0,0,0) ) )
-        pg.Append( wxpg.EnumProperty( _("Line Dash_capstyle"),_("Line Dash_capstyle"),
+        pg.AddPage( __("Lines properties") )
+        pg.Append( wxpg.PropertyCategory( __("1- line Properties")) )
+        pg.Append( wxpg.StringProperty( __("Line Name"),  value= __("line Name") ) )
+        pg.Append( wxpg.FloatProperty( __("Line Alpha"),      value= 1 ) )
+        pg.Append( wxpg.BoolProperty( __("Line Animated"),  value= False ) )
+        pg.Append( wxpg.BoolProperty( __("Line Antialiased"), value= False ) )
+        pg.Append( wxpg.BoolProperty( __("Line Clip_on"),     value= False) )
+        pg.SetPropertyAttribute( __("Line Animated"),    "UseCheckbox", True)
+        pg.SetPropertyAttribute( __("Line Antialiased"), "UseCheckbox", True)
+        pg.SetPropertyAttribute( __("Line Clip_on"),     "UseCheckbox", True)
+        pg.Append( wxpg.ColourProperty( __("Line Colour"), value= (0,0,0) ) )
+        pg.Append( wxpg.EnumProperty( __("Line Dash_capstyle"),__("Line Dash_capstyle"),
                                         ['butt','round', 'projecting'],
                                         [0, 1, 2],  0))
-        pg.Append( wxpg.EnumProperty( _("Line Dash_joinstyle"),_("Line Dash_joinstyle"),
+        pg.Append( wxpg.EnumProperty( __("Line Dash_joinstyle"),__("Line Dash_joinstyle"),
                                         ['miter','round','bevel'],
                                         [0, 1, 2],  0))
-        pg.Append( wxpg.EnumProperty( _("Line Fillstyle"),_("Line Fillstyle"),
+        pg.Append( wxpg.EnumProperty( __("Line Fillstyle"),__("Line Fillstyle"),
                                         ['full','left','right','bottom','top','none'],
                                         range(6),  0))
-        pg.Append( wxpg.IntProperty( _("Line Width"),  value= 1 ) )
-        pg.Append( wxpg.EnumProperty( _("Line Style"),_("Line Style"),
+        pg.Append( wxpg.IntProperty( __("Line Width"),  value= 1 ) )
+        pg.Append( wxpg.EnumProperty( __("Line Style"),__("Line Style"),
                                         ['-','--','-.',':'],
                                         [0, 1, 2, 3],  0))
-        pg.Append( wxpg.BoolProperty( _("Line Lod"),  value= False ) )
-        pg.SetPropertyAttribute( _("Line Lod"),    "UseCheckbox", True)
-        pg.Append( wxpg.EnumProperty( _("Line Rasterized"),_("Line Rasterized"),
+        pg.Append( wxpg.BoolProperty( __("Line Lod"),  value= False ) )
+        pg.SetPropertyAttribute( __("Line Lod"),    "UseCheckbox", True)
+        pg.Append( wxpg.EnumProperty( __("Line Rasterized"),__("Line Rasterized"),
                                         ['True','Fase','None'],
                                         range(3),  0))
-        pg.Append( wxpg.BoolProperty( _("Line Shown"), value= False) )
-        pg.SetPropertyAttribute( _("Line Shown"), "UseCheckbox", True)
-        pg.Append( wxpg.PropertyCategory( _("2- Marker Properties")) )
+        pg.Append( wxpg.BoolProperty( __("Line Shown"), value= False) )
+        pg.SetPropertyAttribute( __("Line Shown"), "UseCheckbox", True)
+        pg.Append( wxpg.PropertyCategory( __("2- Marker Properties")) )
         markers=[".",",","o","v","^","<",">",
                  "1","2","3","4","8",
                  "s","p","*","h","H",
                  "+","x","D","d","|","_",
                  "TICKLEFT","TICKRIGHT","TICKUP","TICKDOWN",
                  "CARETLEFT","CARETRIGHT","CARETUP","CARETDOWN","None"]
-        pg.Append( wxpg.EnumProperty( _("Marker Style"),_("Marker Style"),
+        pg.Append( wxpg.EnumProperty( __("Marker Style"),__("Marker Style"),
                                         markers,
                                         range(len(markers)),  len(markers)-1))
 
-        pg.Append( wxpg.IntProperty( _("Marker Size"),  value= 1 ) )
+        pg.Append( wxpg.IntProperty( __("Marker Size"),  value= 1 ) )
         bSizer21.Add( pg, 1,  wx.ALL|wx.EXPAND, 5 )
         #bSizer21.Fit(self)
 
 
-        sbSizer9 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, _(u"Add ReferenceLine") ), wx.VERTICAL )
+        sbSizer9 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, __(u"Add ReferenceLine") ), wx.VERTICAL )
 
         fgSizer1 = wx.FlexGridSizer( 0, 3, 0, 0 )
         fgSizer1.SetFlexibleDirection( wx.BOTH )
@@ -733,7 +769,7 @@ class scrolled2(wx.ScrolledWindow):
         self.m_button51 = wx.Button( self, wx.ID_ANY, u"+", wx.DefaultPosition, wx.Size( 20,-1 ), 0 )
         fgSizer1.Add( self.m_button51, 0, wx.TOP, 5 )
 
-        self.m_staticText131 = wx.StaticText( self, wx.ID_ANY, _(u"Horizontal"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText131 = wx.StaticText( self, wx.ID_ANY, __(u"Horizontal"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText131.Wrap( -1 )
         fgSizer1.Add( self.m_staticText131, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
@@ -743,7 +779,7 @@ class scrolled2(wx.ScrolledWindow):
         self.m_button511 = wx.Button( self, wx.ID_ANY, u"+", wx.DefaultPosition, wx.Size( 20,-1 ), 0 )
         fgSizer1.Add( self.m_button511, 0, wx.TOP, 5 )
 
-        self.m_staticText14 = wx.StaticText( self, wx.ID_ANY, _(u"Vertical"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText14 = wx.StaticText( self, wx.ID_ANY, __(u"Vertical"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText14.Wrap( -1 )
         fgSizer1.Add( self.m_staticText14, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
@@ -762,23 +798,23 @@ class scrolled2(wx.ScrolledWindow):
 
     def __createPgDispatcher( self):
         self.__dispatcher=  dispatcher = dict()
-        dispatcher[ _("Line Name")]= self.__OnLineChange
-        dispatcher[ _("Line Alpha")]= self.__OnLineChange
-        dispatcher[ _("Line Animated")]= self.__OnLineChange
-        dispatcher[ _("Line Antialiased")]= self.__OnLineChange
-        dispatcher[ _("Line Clip_on")]= self.__OnLineChange
-        dispatcher[ _("Line Colour")]= self.__OnLineChange
-        dispatcher[ _("Line Dash_capstyle")]= self.__OnLineChange
-        dispatcher[ _("Line Dash_joinstyle")]= self.__OnLineChange
-        dispatcher[ _("Line Fillstyle")]= self.__OnLineChange
-        dispatcher[ _("Line Width")]= self.__OnLineChange
-        dispatcher[ _("Line Style")]= self.__OnLineChange
-        dispatcher[ _("Line Lod")]= self.__OnLineChange
-        dispatcher[ _("Line Rasterized")]= self.__OnLineChange
-        dispatcher[ _("Line Shown")]= self.__OnLineChange
+        dispatcher[ __("Line Name")]= self.__OnLineChange
+        dispatcher[ __("Line Alpha")]= self.__OnLineChange
+        dispatcher[ __("Line Animated")]= self.__OnLineChange
+        dispatcher[ __("Line Antialiased")]= self.__OnLineChange
+        dispatcher[ __("Line Clip_on")]= self.__OnLineChange
+        dispatcher[ __("Line Colour")]= self.__OnLineChange
+        dispatcher[ __("Line Dash_capstyle")]= self.__OnLineChange
+        dispatcher[ __("Line Dash_joinstyle")]= self.__OnLineChange
+        dispatcher[ __("Line Fillstyle")]= self.__OnLineChange
+        dispatcher[ __("Line Width")]= self.__OnLineChange
+        dispatcher[ __("Line Style")]= self.__OnLineChange
+        dispatcher[ __("Line Lod")]= self.__OnLineChange
+        dispatcher[ __("Line Rasterized")]= self.__OnLineChange
+        dispatcher[ __("Line Shown")]= self.__OnLineChange
 
-        dispatcher[ _("Marker style")]= self.__OnMarkerChange
-        dispatcher[ _("Marker size")]= self.__OnMarkerChange
+        dispatcher[ __("Marker style")]= self.__OnMarkerChange
+        dispatcher[ __("Marker size")]= self.__OnMarkerChange
         return True
     @property
     def currLine(self):
@@ -793,9 +829,9 @@ class scrolled2(wx.ScrolledWindow):
         pg0 = self.pg.GetPage(0)
         # reading the data contained in the pg line
         newattrs= dict()
-        for keyi  in [key for key in self.__dispatcher.keys() if key.startswith( _('Line'))]:
+        for keyi  in [key for key in self.__dispatcher.keys() if key.startswith( __('Line'))]:
             # +1 to remove the space character from the key
-            newattrs[keyi[ len( _('Line'))+1: ].lower()]= pg0.GetProperty(keyi).m_value
+            newattrs[keyi[ len( __('Line'))+1: ].lower()]= pg0.GetProperty(keyi).m_value
         # applying the new properties to the selected line
         # missing
         evt.Skip()
@@ -856,43 +892,43 @@ class scrolled2(wx.ScrolledWindow):
             return None
         selectedLine= self.currLine
         result= dict()
-        result[_('Line Name')] =        selectedLine.get_label()
-        result[_('Line Alpha')] =       selectedLine.get_alpha()
-        result[_("Line Animated")] =    selectedLine.get_animated()
-        result[_("Line Antialiased")] = selectedLine.get_antialiased()
-        result[_("Line Clip_on")] =     selectedLine.get_clip_on()
+        result[__('Line Name')] =        selectedLine.get_label()
+        result[__('Line Alpha')] =       selectedLine.get_alpha()
+        result[__("Line Animated")] =    selectedLine.get_animated()
+        result[__("Line Antialiased")] = selectedLine.get_antialiased()
+        result[__("Line Clip_on")] =     selectedLine.get_clip_on()
         color= selectedLine.get_color()
 
         if isinstance(color, (str, unicode)):
             color= [col*255 for col in self.colorConverter.to_rgba(color)]
             color= wx.Colour(*color)
-        result[_('Line Colour')] =      color,
-        result[_('Line Dash_capstyle')] = find(selectedLine.get_dash_capstyle(), ['butt','round', 'projecting'])
-        result[_('Line Dash_joinstyle')] = find(selectedLine.get_dash_joinstyle(), ['miter','round','bevel'])
-        result[_('Line Fillstyle')] =   find(selectedLine.get_fillstyle(), ['full','left','right','bottom','top','none'])
-        result[_('Line Width')] =       float(selectedLine.get_linewidth())
-        result[_('Line Style')] =       find(selectedLine.get_linestyle(), ['-','--','-.',':'])
-        result[_('Line Lod')] =         selectedLine._lod
-        result[_('Line Rasterized')] =  find(selectedLine.get_rasterized(), ['True','Fase','None'])
-        result[_('Line Shown')] =       selectedLine.get_visible()
+        result[__('Line Colour')] =      color,
+        result[__('Line Dash_capstyle')] = find(selectedLine.get_dash_capstyle(), ['butt','round', 'projecting'])
+        result[__('Line Dash_joinstyle')] = find(selectedLine.get_dash_joinstyle(), ['miter','round','bevel'])
+        result[__('Line Fillstyle')] =   find(selectedLine.get_fillstyle(), ['full','left','right','bottom','top','none'])
+        result[__('Line Width')] =       float(selectedLine.get_linewidth())
+        result[__('Line Style')] =       find(selectedLine.get_linestyle(), ['-','--','-.',':'])
+        result[__('Line Lod')] =         selectedLine._lod
+        result[__('Line Rasterized')] =  find(selectedLine.get_rasterized(), ['True','Fase','None'])
+        result[__('Line Shown')] =       selectedLine.get_visible()
         pg0= self.pg.GetPage(0)
-        pg0.GetProperty(_("Line Alpha")).m_value
+        pg0.GetProperty(__("Line Alpha")).m_value
         markers=[".",",","o","v","^","<",">",
                  "1","2","3","4","8",
                  "s","p","*","h","H",
                  "+","x","D","d","|","_",
                  "TICKLEFT","TICKRIGHT","TICKUP","TICKDOWN",
                  "CARETLEFT","CARETRIGHT","CARETUP","CARETDOWN","None"]
-        result[_('Marker Style')] =        find(selectedLine.get_marker(), markers)
-        result[_('Marker Size')] =         float(selectedLine.get_markersize())
+        result[__('Marker Style')] =        find(selectedLine.get_marker(), markers)
+        result[__('Marker Size')] =         float(selectedLine.get_markersize())
 
         # updating the pg data
         pg0= self.pg.GetPage(0)
         for key, value in  result.items():
-            if key in [_('Line Colour')]:
-                pg0.SetPropertyValue(_(key), value[0])
+            if key in [__('Line Colour')]:
+                pg0.SetPropertyValue(__(key), value[0])
             else:
-                pg0.SetPropertyValue(_(key), value)
+                pg0.SetPropertyValue(__(key), value)
 
     def _OnListLinesChange( self, evt ):
         self._updateLineSelectionPane(evt)
@@ -995,12 +1031,12 @@ class scrolled2(wx.ScrolledWindow):
         if params.has_key('ypos'):
             ypos = params.pop('ypos')
             self.plt.gca().hold(True)
-            # _('plt.gca().hold(True)', False)
+            # __('plt.gca().hold(True)', False)
 
             line= self.plt.axhline(ypos)
             print 'line= plt.axhline('+ypos.__str__()+')'
             self.plt.hold(False)
-            # _('plt.gca().hold(False)', False)
+            # __('plt.gca().hold(False)', False)
         else:
             try:
                 ypos= self.HorLineTxtCtrl.GetValue()
@@ -1020,7 +1056,7 @@ class scrolled2(wx.ScrolledWindow):
             line.set_color(params['color'])
             print 'line.set_color('+"'"+params['color'].__str__()+"'"+')'
         self.figpanel.canvas.draw()
-        # _('plt.draw()',False)
+        # __('plt.draw()',False)
 
     def _OnAddRefVertLine( self, evt ):
         print '# adding reference vertical line'
@@ -1044,10 +1080,10 @@ class scrolled3(wx.ScrolledWindow):
         wx.ScrolledWindow.__init__(self, *args[1:], **params)
         self.figpanel= self.Parent.Parent.figpanel
         self.plt= pltobj
-        try:
-            self._ = wx.GetApp()._
-        except AttributeError:
-            self._= _
+        #try:
+        #    self._ = wx.GetApp()._
+        #except AttributeError:
+        #    self._= _
         graphParams= args[0]
         self.gca= self.plt.gca()
 
@@ -1059,7 +1095,7 @@ class scrolled3(wx.ScrolledWindow):
         self.SetScrollRate( 5, 5 )
         bSizer3 = wx.BoxSizer( wx.VERTICAL )
 
-        sbSizer15 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, _( u"Choose a patchs") ), wx.VERTICAL )
+        sbSizer15 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, __( u"Choose a patchs") ), wx.VERTICAL )
 
         patchListBoxChoices = []
         self.patchListBox = wx.ListBox( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, patchListBoxChoices, 0 )
@@ -1076,16 +1112,16 @@ class scrolled3(wx.ScrolledWindow):
 
         fgSizer6.Add( self.m_button9, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
 
-        self.m_button11 = wx.Button( self, wx.ID_ANY, _(u"Refresh Patchs"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_button11 = wx.Button( self, wx.ID_ANY, __(u"Refresh Patchs"), wx.DefaultPosition, wx.DefaultSize, 0 )
         fgSizer6.Add( self.m_button11, 0, wx.LEFT, 5 )
 
         sbSizer15.Add( fgSizer6, 1, wx.EXPAND, 5 )
 
         bSizer3.Add( sbSizer15, 0, 0, 5 )
 
-        sbSizer16 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, _(u"Some Properties") ), wx.VERTICAL )
+        sbSizer16 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, __(u"Some Properties") ), wx.VERTICAL )
 
-        self.m_staticText28 = wx.StaticText( self, wx.ID_ANY, _(u"Patch Name"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText28 = wx.StaticText( self, wx.ID_ANY, __(u"Patch Name"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText28.Wrap( -1 )
         sbSizer16.Add( self.m_staticText28, 0, wx.ALL, 5 )
 
@@ -1101,7 +1137,7 @@ class scrolled3(wx.ScrolledWindow):
         self.m_button13 = wx.Button( self, wx.ID_ANY, u"...", wx.DefaultPosition, wx.Size( 70,-1 ), 0 )
         fgSizer7.Add( self.m_button13, 0, wx.ALL, 5 )
 
-        self.m_staticText29 = wx.StaticText( self, wx.ID_ANY, _(u"Face Colour"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText29 = wx.StaticText( self, wx.ID_ANY, __(u"Face Colour"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText29.Wrap( -1 )
         fgSizer7.Add( self.m_staticText29, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
@@ -1110,7 +1146,7 @@ class scrolled3(wx.ScrolledWindow):
         self.m_choice14.SetSelection( 0 )
         fgSizer7.Add( self.m_choice14, 0, wx.ALL, 5 )
 
-        self.m_staticText30 = wx.StaticText( self, wx.ID_ANY, _(u"Alpha"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText30 = wx.StaticText( self, wx.ID_ANY, __(u"Alpha"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText30.Wrap( -1 )
         fgSizer7.Add( self.m_staticText30, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5 )
 
@@ -1118,7 +1154,7 @@ class scrolled3(wx.ScrolledWindow):
 
         bSizer3.Add( sbSizer16, 0, 0, 5 )
 
-        sbSizer12 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, _(u"add an span") ), wx.VERTICAL )
+        sbSizer12 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, __(u"add an span") ), wx.VERTICAL )
 
         sbSizer13 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, wx.EmptyString ), wx.VERTICAL )
 
@@ -1126,7 +1162,7 @@ class scrolled3(wx.ScrolledWindow):
         fgSizer4.SetFlexibleDirection( wx.BOTH )
         fgSizer4.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
 
-        self.m_staticText15 = wx.StaticText( self, wx.ID_ANY, _(u"Horizontal"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText15 = wx.StaticText( self, wx.ID_ANY, __(u"Horizontal"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText15.Wrap( -1 )
         fgSizer4.Add( self.m_staticText15, 0, wx.ALL, 5 )
 
@@ -1146,7 +1182,7 @@ class scrolled3(wx.ScrolledWindow):
 
         fgSizer3.Add( self.plt_textCtr11, 0, wx.ALL, 5 )
 
-        self.m_staticText17 = wx.StaticText( self, wx.ID_ANY, _(u"Y axis position 1"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText17 = wx.StaticText( self, wx.ID_ANY, __(u"Y axis position 1"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText17.Wrap( -1 )
         fgSizer3.Add( self.m_staticText17, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
 
@@ -1155,7 +1191,7 @@ class scrolled3(wx.ScrolledWindow):
 
         fgSizer3.Add( self.plt_textCtr12, 0, wx.ALL, 5 )
 
-        self.m_staticText16 = wx.StaticText( self, wx.ID_ANY, _(u"Y axis position 2"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText16 = wx.StaticText( self, wx.ID_ANY, __(u"Y axis position 2"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText16.Wrap( -1 )
         fgSizer3.Add( self.m_staticText16, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
 
@@ -1166,7 +1202,7 @@ class scrolled3(wx.ScrolledWindow):
 
         fgSizer3.Add( self.m_choice81, 0, wx.ALL, 5 )
 
-        self.m_staticText22 = wx.StaticText( self, wx.ID_ANY, _(u"Face Colour"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText22 = wx.StaticText( self, wx.ID_ANY, __(u"Face Colour"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText22.Wrap( -1 )
         fgSizer3.Add( self.m_staticText22, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
 
@@ -1177,7 +1213,7 @@ class scrolled3(wx.ScrolledWindow):
 
         fgSizer3.Add( self.m_choice12, 0, wx.ALL, 5 )
 
-        self.m_staticText26 = wx.StaticText( self, wx.ID_ANY, _(u"Alpha"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText26 = wx.StaticText( self, wx.ID_ANY, __(u"Alpha"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText26.Wrap( -1 )
         fgSizer3.Add( self.m_staticText26, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
 
@@ -1193,7 +1229,7 @@ class scrolled3(wx.ScrolledWindow):
         fgSizer5.SetFlexibleDirection( wx.BOTH )
         fgSizer5.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
 
-        self.m_staticText19 = wx.StaticText( self, wx.ID_ANY, _(u"Vertical"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText19 = wx.StaticText( self, wx.ID_ANY, __(u"Vertical"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText19.Wrap( -1 )
         fgSizer5.Add( self.m_staticText19, 0, wx.ALL, 5 )
 
@@ -1214,7 +1250,7 @@ class scrolled3(wx.ScrolledWindow):
 
         gSizer3.Add( self.plt_textCtr13, 0, wx.ALL, 5 )
 
-        self.m_staticText20 = wx.StaticText( self, wx.ID_ANY, _(u"X axis position 1"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText20 = wx.StaticText( self, wx.ID_ANY, __(u"X axis position 1"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText20.Wrap( -1 )
         gSizer3.Add( self.m_staticText20, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
 
@@ -1223,7 +1259,7 @@ class scrolled3(wx.ScrolledWindow):
 
         gSizer3.Add( self.plt_textCtr14, 0, wx.ALL, 5 )
 
-        self.m_staticText21 = wx.StaticText( self, wx.ID_ANY, _(u"X axis position 2"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText21 = wx.StaticText( self, wx.ID_ANY, __(u"X axis position 2"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText21.Wrap( -1 )
         gSizer3.Add( self.m_staticText21, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
 
@@ -1234,7 +1270,7 @@ class scrolled3(wx.ScrolledWindow):
 
         gSizer3.Add( self.m_choice10, 0, wx.ALL, 5 )
 
-        self.m_staticText24 = wx.StaticText( self, wx.ID_ANY, _(u"Face Colour"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText24 = wx.StaticText( self, wx.ID_ANY, __(u"Face Colour"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText24.Wrap( -1 )
         gSizer3.Add( self.m_staticText24, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
 
@@ -1245,7 +1281,7 @@ class scrolled3(wx.ScrolledWindow):
 
         gSizer3.Add( self.m_choice11, 0, wx.ALL, 5 )
 
-        self.m_staticText25 = wx.StaticText( self, wx.ID_ANY, _(u"Alpha"), wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText25 = wx.StaticText( self, wx.ID_ANY, __(u"Alpha"), wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText25.Wrap( -1 )
         gSizer3.Add( self.m_staticText25, 0, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.RIGHT, 5 )
 
@@ -1455,14 +1491,15 @@ class _neededLibraries(object):
         self.setminRequiredCols= 0
         self.app=       wx.GetApp()
         self.dialog=    _dialog    # to create de dialod
-        self.log=       self.app.Logg   # to report
         self.outputGrid= self.app.output # the usern can use the plot functions
         self.data2Plotdiaglog= data2Plotdiaglog
         self.selectDialogData2plot= selectDialogData2plot
         self.scatterDialog = scatterDialog
     @property
     def grid(self):
-        cs= wx.GetApp().frame.grid
+        cs= wx.GetApp().frame.formulaBarPanel.lastObject
+        if cs == None:
+            cs= wx.GetApp().frame.grid
         return cs
     def _updateColsInfo( self):
         # selectign the last selected panel
@@ -1505,7 +1542,6 @@ class pltobj( wx.Frame, object ):
         self.plotName=           ""
         self.setminRequiredCols= 0
         self.app=                wx.GetApp()
-        self._=          wx.GetApp()._
         if 0:
             self.dialog=         _dialog         # to create de dialog
             self.grid=           self.app.grid
@@ -1557,12 +1593,12 @@ class pltobj( wx.Frame, object ):
             self.m_mgr = aui.AuiManager()
             self.m_mgr.SetManagedWindow( self )
             self.m_mgr.AddPane( self.figpanel, aui.AuiPaneInfo().Left().
-                                CaptionVisible(True).Caption(_(u"Graph")).Centre().
+                                CaptionVisible(True).Caption(__(u"Graph")).Centre().
                                 MaximizeButton(True).MinimizeButton(False).Resizable(True).
                                 PaneBorder( False ).CloseButton( False ))
 
             self.m_mgr.AddPane( self.m_notebook1, aui.AuiPaneInfo().Left().
-                                CaptionVisible(True).Caption(_(u"Graph Properties")).CaptionVisible(True).
+                                CaptionVisible(True).Caption(__(u"Graph Properties")).CaptionVisible(True).
                                 MaximizeButton(True).MinimizeButton(False).Resizable(True).
                                 PaneBorder( False ).CloseButton( False ). BestSize(wx.Size(200,-1)))
 
@@ -1570,9 +1606,9 @@ class pltobj( wx.Frame, object ):
         self.scrolledWindow2= scrolled2(self, self.graphParams, self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL)
         self.scrolledWindow3= scrolled3(self, self.graphParams, self.m_notebook1, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.HSCROLL|wx.VSCROLL)
 
-        self.m_notebook1.AddPage( self.scrolledWindow1, _( u"Main Options"), True )
-        self.m_notebook1.AddPage( self.scrolledWindow2, _( u"Lines"), False )
-        self.m_notebook1.AddPage( self.scrolledWindow3, _( u"patches"), False )
+        self.m_notebook1.AddPage( self.scrolledWindow1, __( u"Main Options"), True )
+        self.m_notebook1.AddPage( self.scrolledWindow2, __( u"Lines"), False )
+        self.m_notebook1.AddPage( self.scrolledWindow3, __( u"patches"), False )
 
         self.statusbar = self.CreateStatusBar( 2, wx.ST_SIZEGRIP, wx.ID_ANY )
 
@@ -1589,8 +1625,8 @@ class pltobj( wx.Frame, object ):
         self.figpanel.canvas.mpl_connect( 'motion_notify_event', self._UpdateStatusBar)
         self.figpanel.canvas.mpl_connect( 'axes_enter_event',    self._enter)
         self.figpanel.canvas.mpl_connect( 'axes_leave_event',    self._leave)
-
-    # compatibility
+        
+   # compatibility
     def show(self,*args, **params):
         return self.Show(*args, **params)
     def subplot(self, *args, **params):
@@ -1715,11 +1751,17 @@ class pltobj( wx.Frame, object ):
     def _Update(self, currAxes, evt):
         self.scrolledWindow1._Update( currAxes, evt)
         self._UpdateStatusBar(evt)
+        # prevent multiple zoom event when enter an leave multiple times the axes
+        if hasattr(currAxes, 'sei_zoom'):
+            return
+        scale = 1.2
+        zoom_factory( currAxes, self, base_scale = scale,)
+        setattr(currAxes,'sei_zoom',True)
         # updating the x,y axis limit values
 
     def _UpdateStatusBar( self, evt):
         pg0= self.scrolledWindow1.pg.GetPage(0)
-        if evt.inaxes and pg0.GetProperty(_("View cursor")).m_value:
+        if evt.inaxes and pg0.GetProperty(__("View cursor")).m_value:
             x, y = evt.xdata, evt.ydata
             self.statusbar.SetStatusText(( "x= " + str(round(x,5)) +
                                            "  y=" + str(round(y,5)) ),

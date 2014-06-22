@@ -17,6 +17,7 @@ po.metadata = {
 }
 
 totranslate= (
+ (u'Shell panel', u'Panel del Shell',2),
  (u"Change the cell Size",    u"Cambiar el tama�o de las celdas",  2),
  (u"Column Width",    u"Cambiar el ancho de las columnas",    1),
  (u"Row Height",    u"Cambiar la altura de las filas",    1),
@@ -380,7 +381,7 @@ totranslate= (
  (u'Asumptions', u"Supuestos", 1),
  (u'1-The samples are independent.', u"1-Las muestras son independientes", 1),
  (u'2-Each sample is from a normally distributed population.', u"2-Cada muestra es desde una poblaci�n normalmente distribu�da", 1),
- (u''''3-The population standard deviations of the groups are all equal.
+ (u'''3-The population standard deviations of the groups are all equal.
         This property is known as homoscedasticity.''', u'''3-La desviacion estandar poblacional de los todos grupos son iguales
         esta propiedad se conoce omo homoscedasticidad''', 1),
  (u"Results", u"Resultados", 1),
@@ -427,7 +428,7 @@ if 1:
         )
         po.append(entry)
         
-PATH = 'd:\\Proyecto S2\\src\\locale\\es_ES\\LC_MESSAGES\\'
+PATH = 'e:\\Proyecto gridsql\\locale\\es_ES\\LC_MESSAGES\\'
 po.save( PATH + 'S2.po')
 
 po = polib.pofile( PATH+ 'S2.po')
@@ -441,3 +442,4 @@ po.save_as_mofile( PATH+ 'S2.mo')
 #podata = unicode(mo)
 ## or to save the mo file as an po file
 #mo.save_as_pofile('C:\Users\USUARIO\Desktop\Editra-0.7.08\locale\es_ES\LC_MESSAGES\\Editra.po')
+print "Finish"

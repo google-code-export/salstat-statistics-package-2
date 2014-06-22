@@ -16,15 +16,16 @@ from statFunctions.inferential import ranksums,ttest_ind,ttest_rel,wilcoxont
 from statFunctions.inferential import  kruskalwallish, friedmanchisquare
 from statFunctions.anova import oneway
 from statFunctions.correlation import linregress
+from sei_glob import __
         
 class oneConditionTest(_genericFunc):
-    name= u"One condition test"
+    name= __(u"One condition test")
     statName= 'oneConditionTest'
     _scritpEquivalenString= ""
     def __init__( self):
         # getting all required methods
         _genericFunc.__init__(self)
-        self.name=     'One condition test'
+        self.name=     __('One condition test')
         self.statName= 'oneConditionTest'
         self.minRequiredCols= 1
         self.aviableTest= ['t-test', 'Sign Test',
@@ -37,12 +38,12 @@ class oneConditionTest(_genericFunc):
         setting= {'Title': self.name,
                   '_size':  Size(280,430)}
         self._updateColsInfo() # update self.columnames and self.colnums
-        btn1= ['StaticText',   ['Select the columns to analyse']]
+        btn1= ['StaticText',   [__('Select the columns to analyse')]]
         btn2= ['CheckListBox', [self.columnNames]]
-        btn3= ['StaticText',   ['Choose test(s)']]
-        btn4= ['CheckListBox',  [self.aviableTest,]]
-        btn5= ['RadioBox',     ['Select hypothesis',   ['One tailed','Two tailed'],]]
-        btn6= ['StaticText',   ['User hypothesised mean']]
+        btn3= ['StaticText',   [__('Choose test(s)')]]
+        btn4= ['CheckListBox', [self.aviableTest,]]
+        btn5= ['RadioBox',     [__('Select hypothesis'),   [__('One tailed'),__('Two tailed')],]]
+        btn6= ['StaticText',   [__('User hypothesised mean')]]
         btn7= ['NumTextCtrl',  []]
         structure= list()
         structure.append( [btn1,])
@@ -65,11 +66,11 @@ class oneConditionTest(_genericFunc):
         self.colNameSelect= values[0]
         
         if len( self.colNameSelect ) == 0:
-            self.Logg.write("you don't select any items")
+            print __("you don't select any items")
             return
         
         if len( self.colNameSelect ) < self.minRequiredCols:
-            self.Logg.write("you have to select at least %i column(s)"%self.requiredcols)
+            print __("you have to select at least %i column(s)")%self.requiredcols
             return
         
         columns=  [numpy.ravel(self._convertColName2Values( [colName] )) for colName in self.colNameSelect]
@@ -89,7 +90,7 @@ class oneConditionTest(_genericFunc):
         hypotesis= args[2] #0== One Tailed, 1== two tailed
         umean=     args[3]
         if umean == None or len(columns) == 0 or len(tests) == 0:
-            raise StandardError('The input parameters are incorrect')
+            raise StandardError(__('The input parameters are incorrect'))
         
         TBase= [OneSampleTests(col, tests, umean)  for col in columns]
         return TBase
@@ -128,7 +129,7 @@ class oneConditionTest(_genericFunc):
                 if nameTest == u't-test':
                     prob= result[1]
                     if prob == -1.0:
-                        col2report.extend( ['All elements are the same', 'test not possible', ''])
+                        col2report.extend( [__('All elements are the same'), __('test not possible'), ''])
                     else:
                         if self.hypotesis == 0:
                             prob= result[1]/2.0
@@ -139,7 +140,7 @@ class oneConditionTest(_genericFunc):
                 elif nameTest == u'Sign Test':
                     prob= result[1]
                     if prob == -1.0:
-                        col2report.extend([ 'All data are the same','no analysis is possible',''])
+                        col2report.extend([ __('All data are the same'),__('no analysis is possible'),''])
                     else:
                         if self.hypotesis == 0:
                             prob= prob/2.0
@@ -162,12 +163,12 @@ class oneConditionTest(_genericFunc):
         self.outputGrid.addRowData( ['user mean=' ,  self.userMean ], currRow= 0)
     
 class twoConditionTest(oneConditionTest):
-    name= u'Two condition test'
+    name= __(u'Two condition test')
     statName= 'twoConditionTest'
     _scritpEquivalenString= ""
     def __init__( self):
         oneConditionTest.__init__(self)
-        self.name=     'Two condition test'
+        self.name=     __('Two condition test')
         self.statName= 'twoConditionTest'
         self.minRequiredCols= 2
         self.aviableTest= ['chisquare', 'ks_2samp', 'linear regression',
@@ -181,9 +182,9 @@ class twoConditionTest(oneConditionTest):
         setting= {'Title': self.name,
                   '_size':  Size(280,430)}
         self._updateColsInfo() # update self.columnames and self.colnums
-        btn1= ['StaticText',   ['Select the columns to analyse']]
+        btn1= ['StaticText',   [__('Select the columns to analyse')]]
         btn2= ['CheckListBox', [self.columnNames]]
-        btn3= ['StaticText',   ['Choose test(s)']]
+        btn3= ['StaticText',   [__('Choose test(s)')]]
         btn4= ['CheckListBox',  [self.aviableTest,]]
         #btn5= ['RadioBox',     ['Select hypothesis',   ['One tailed','Two tailed'],]]
         #btn6= ['StaticText',   ['User hypothesised mean']]
@@ -210,11 +211,11 @@ class twoConditionTest(oneConditionTest):
         self.colNameSelect= values[0]
         
         if len( self.colNameSelect ) == 0:
-            self.Logg.write("you don't select any items")
+            print __("you don't select any items")
             return
         
         if len( self.colNameSelect ) != 2:
-            self.Logg.write("you have to select only two column(s)")
+            print __("you have to select only two column(s)")
             return
         
         columns=  [numpy.ravel(self._convertColName2Values( [colName] )) for colName in self.colNameSelect]
@@ -235,7 +236,7 @@ class twoConditionTest(oneConditionTest):
         # hypotesis= args[2] #0 == One Tailed, 1 == two tailed
         # umean=     args[3]
         if len(columns) == 0 or len(tests) == 0:
-            raise StandardError( 'The input parameters are incorrect')
+            raise StandardError( __('The input parameters are incorrect'))
 
         # combining data
         result= list()
@@ -285,20 +286,20 @@ class twoConditionTest(oneConditionTest):
            for res in result[1:]:
                self.outputGrid.addColData( res)
                
-       self.outputGrid.addRowData( ['Selected columns'] ,currRow= 0)
+       self.outputGrid.addRowData( [__('Selected columns')] ,currRow= 0)
        self.outputGrid.addRowData( self.colNameSelect ,currRow= 1)
-       self.outputGrid.addRowData( ['Output'] ,currRow= 2)
-       self.Logg.write( 'Two sample test succesfull')
+       self.outputGrid.addRowData( [__('Output')] ,currRow= 2)
+       print  self.name + ' ' + __('succesfull')
             
 #---------------------------------------------------------------------------
 # dialog for single factor tests with 3+ conditions
 class threeConditionTest(oneConditionTest):
-    name= u'Three or more condition test'
+    name= __(u'Three or more condition test')
     statName= 'threeConditionTest'
     _scritpEquivalenString= ""
     def __init__( self):
         oneConditionTest.__init__(self)
-        self.name=     'Three or more condition test'
+        self.name=     __('Three or more condition test')
         self.statName= 'threeConditionTest'
         self.minRequiredCols= 3
         self.aviableTest= ['kruskawallish', 'friedmanchisquare']
@@ -310,10 +311,10 @@ class threeConditionTest(oneConditionTest):
         setting= {'Title': self.name,
                   '_size':  Size(280,430)}
         self._updateColsInfo() # update self.columnames and self.colnums
-        btn1= ['StaticText',   ['Select the columns to analyse']]
+        btn1= ['StaticText',   [__('Select the columns to analyse')]]
         btn2= ['CheckListBox', [self.columnNames]]
-        btn3= ['StaticText',   ['Choose test(s)']]
-        btn4= ['CheckListBox',  [self.aviableTest,]]
+        btn3= ['StaticText',   [__('Choose test(s)')]]
+        btn4= ['CheckListBox', [self.aviableTest,]]
         structure= list()
         structure.append( [btn1,])
         structure.append( [btn2,])
@@ -333,11 +334,11 @@ class threeConditionTest(oneConditionTest):
         self.colNameSelect= values[0]
         
         if len( self.colNameSelect ) == 0:
-            self.Logg.write("you don't select any items")
+            print __("you don't select any items")
             return
         
         if len( self.colNameSelect ) < self.minRequiredCols:
-            self.Logg.write("you have to select at least %i column(s)"%self.minRequiredCols)
+            print __("you have to select at least %i column(s)")%self.minRequiredCols
             return
         
         columns=  [numpy.ravel(self._convertColName2Values( [colName] )) for colName in self.colNameSelect]
@@ -354,7 +355,7 @@ class threeConditionTest(oneConditionTest):
         columns=   args[0]
         tests=     args[1]
         if len(columns) == 0 or len(tests) == 0:
-            raise StandardError( 'The input parameters are incorrect')
+            raise StandardError( __('The input parameters are incorrect'))
 
         # combining data
         result= list()
@@ -374,7 +375,7 @@ class threeConditionTest(oneConditionTest):
                 for  name, res1 in zip(fcn.nameResults, resultado):
                     res.extend([name, res1])
             except:
-                res.append('There is a runtime error')
+                res.append(__('There is a runtime error'))
             res.append('')
             result.append(res)           
                 
@@ -387,7 +388,7 @@ class threeConditionTest(oneConditionTest):
            for res in result[1:]:
                self.outputGrid.addColData( res)
                
-       self.outputGrid.addRowData( ['Selected columns'] ,currRow= 0)
+       self.outputGrid.addRowData( [__('Selected columns')] ,currRow= 0)
        self.outputGrid.addRowData( self.colNameSelect ,currRow= 1)
-       self.outputGrid.addRowData( ['Output'] ,currRow= 2)
-       self.Logg.write( 'Two sample test succesfull')
+       self.outputGrid.addRowData( [__('Output')] ,currRow= 2)
+       print  self.name + ' ' + __('succesfull')

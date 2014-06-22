@@ -11,15 +11,16 @@ from wx import ID_OK as _OK
 from wx import Size
 from statFunctions.correlation import pearsonr
 from statFunctions.centralTendency import geometricMean
+from sei_glob import __
 
 class ttest_1samp(_genericFunc):
     ''''''
-    name=      u't-test one sample'
+    name=      __(u't-test one sample')
     statName=  'ttest_1samp'
     def __init__(self):
         # getting all required methods
         _genericFunc.__init__(self)
-        self.name=      't-test one sample'
+        self.name=      __('t-test one sample')
         self.statName=  'ttest_1samp'
         self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 1
@@ -29,7 +30,7 @@ class ttest_1samp(_genericFunc):
         setting= {'Title': self.name,
                   '_size': Size(250,250)}
         self._updateColsInfo() # update self.columnames and self.colnums
-        bt1=  ['StaticText',   ['Select the columns to analyse']]
+        bt1=  ['StaticText',   [__('Select the columns to analyse')]]
         bt2=  ['CheckListBox', [self.columnNames]]
         bt3= ['NumTextCtrl',  []]
         txt2= ['StaticText',    ['popmean']]
@@ -52,18 +53,18 @@ class ttest_1samp(_genericFunc):
         (self.colNameSelect, self.popmean)= values
 
         if len( self.colNameSelect ) == 0:
-            self.logPanel.write("you don't select any items")
+            print __("you don't select any items")
             return
 
         if len( self.colNameSelect ) < self.minRequiredCols:
-            self.logPanel.write("you have to select at least %i column(s)"%self.requiredcols)
+            print __("you have to select at least %i column(s)")%self.requiredcols
             return
 
         if self.popmean == None:
-            self.logPanel.write("You must input some value into the popmean field")
+            print __("You must input some value into the popmean field")
             return
 
-        columns= [ self.inputGrid.GetCol(col) for col in  self.colNameSelect]
+        columns= [ self.grid.GetCol(col) for col in  self.colNameSelect]
         return (columns, self.popmean)
 
     def _calc(self, columns, *args, **params):
@@ -94,16 +95,16 @@ class ttest_1samp(_genericFunc):
 
 class ttest_ind(pearsonr):
     ''''''
-    name=      u't-test independent'
+    name=      __(u't-test independent')
     statName=  'ttest_ind'
     def __init__(self):
         # getting all required methods
         pearsonr.__init__(self)
-        self.name=      u't-test independent'
+        self.name=      __(u't-test independent')
         self.statName=  'ttest_ind'
         self._scritpEquivalenString='stats.'+self.statName
-        self.txt1= "X Column to analyse"
-        self.txt2= "Y Column to analyse"
+        self.txt1= __("X Column to analyse")
+        self.txt2= __("Y Column to analyse")
         self.nameResults= ['t', 'two tailed prob']
         self.minRequiredCols= 2
         self.colNameSelect= ''
@@ -116,16 +117,16 @@ class ttest_ind(pearsonr):
 
 class ttest_rel(pearsonr):
     ''''''
-    name=      u't-test related'
+    name=      __(u't-test related')
     statName=  'ttest_rel'
     def __init__(self):
         # getting all required methods
         pearsonr.__init__(self)
-        self.name=      u't-test related'
+        self.name=      __(u't-test related')
         self.statName=  'ttest_rel'
         self._scritpEquivalenString='stats.'+self.statName
-        self.txt1= "X Column to analyse"
-        self.txt2= "Y Column to analyse"
+        self.txt1= __("X Column to analyse")
+        self.txt2= __("Y Column to analyse")
         self.nameResults= ['t', 'two tailed prob']
         self.minRequiredCols= 2
         self.colNameSelect= ''
@@ -138,16 +139,16 @@ class ttest_rel(pearsonr):
 
 class chisquare(pearsonr):
     ''''''
-    name=      u'chi-square test'
+    name=      __(u'chi-square test')
     statName=  'chisquare'
     def __init__(self):
         # getting all required methods
         pearsonr.__init__(self)
-        self.name=      u'chi-square test'
+        self.name=      __(u'chi-square test')
         self.statName=  'chisquare'
         self._scritpEquivalenString='stats.'+self.statName
-        self.txt1= "X Column to analyse"
-        self.txt2= "Y Column to analyse"
+        self.txt1= __("X Column to analyse")
+        self.txt2= __("Y Column to analyse")
         self.nameResults= ['chisq', 'chisqprob(chisq, k-1)']
         self.minRequiredCols= 2
         self.colNameSelect= ''
@@ -160,16 +161,16 @@ class chisquare(pearsonr):
 
 class ks_2samp(pearsonr):
     ''''''
-    name=      u'Kolmogorov-Smirnof two samples'
+    name=      __(u'Kolmogorov-Smirnof two samples')
     statName=  'ks_2samp'
     def __init__(self):
         # getting all required methods
         pearsonr.__init__(self)
-        self.name=      u'Kolmogorov-Smirnof two samples'
+        self.name=      __(u'Kolmogorov-Smirnof two samples')
         self.statName=  'ks_2samp'
         self._scritpEquivalenString='stats.'+self.statName
-        self.txt1= "X Column to analyse"
-        self.txt2= "Y Column to analyse"
+        self.txt1= __("X Column to analyse")
+        self.txt2= __("Y Column to analyse")
         self.nameResults= ['KS D-value', 'associated p-value']
         self.minRequiredCols= 2
         self.colNameSelect= ''
@@ -182,16 +183,16 @@ class ks_2samp(pearsonr):
 
 class mannwhitneyu(pearsonr):
     ''''''
-    name=      u'Mann-Whitney U statistic'
+    name=      __(u'Mann-Whitney U statistic')
     statName=  'mannwhitneyu'
     def __init__(self):
         # getting all required methods
         pearsonr.__init__(self)
-        self.name=      u'Mann-Whitney U statistic'
+        self.name=      __(u'Mann-Whitney U statistic')
         self.statName=  'mannwhitneyu'
         self._scritpEquivalenString='stats.'+self.statName
-        self.txt1= "X Column to analyse"
-        self.txt2= "Y Column to analyse"
+        self.txt1= __("X Column to analyse")
+        self.txt2= __("Y Column to analyse")
         self.nameResults= ['u-statistic', 'one-tailed p-value']
         self.minRequiredCols= 2
         self.colNameSelect= ''
@@ -204,16 +205,16 @@ class mannwhitneyu(pearsonr):
 
 class ranksums(pearsonr):
     ''''''
-    name=      u'rank sums statistic'
+    name=      __(u'rank sums statistic')
     statName=  'ranksums'
     def __init__(self):
         # getting all required methods
         pearsonr.__init__(self)
-        self.name=      u'rank sums statistic'
+        self.name=      __(u'rank sums statistic')
         self.statName=  'ranksums'
         self._scritpEquivalenString='stats.'+self.statName
-        self.txt1= "X Column to analyse"
-        self.txt2= "Y Column to analyse"
+        self.txt1= __("X Column to analyse")
+        self.txt2= __("Y Column to analyse")
         self.nameResults= ['z-statistic', 'two-tailed p-value']
         self.minRequiredCols= 2
         self.colNameSelect= ''
@@ -226,16 +227,16 @@ class ranksums(pearsonr):
 
 class wilcoxont(pearsonr):
     ''''''
-    name=      u'Wilcoxon T-test related samples'
+    name=      __(u'Wilcoxon T-test related samples')
     statName=  'wilcoxont'
     def __init__(self):
         # getting all required methods
         pearsonr.__init__(self)
-        self.name=      u'Wilcoxon T-test related samples'
+        self.name=      __(u'Wilcoxon T-test related samples')
         self.statName=  'wilcoxont'
         self._scritpEquivalenString='stats.'+self.statName
-        self.txt1= "X Column to analyse"
-        self.txt2= "Y Column to analyse"
+        self.txt1= __("X Column to analyse")
+        self.txt2= __("Y Column to analyse")
         self.nameResults= ['t-statistic', 'two-tail probability estimate']
         self.minRequiredCols= 2
         self.colNameSelect= ''
@@ -248,12 +249,12 @@ class wilcoxont(pearsonr):
 
 class kruskalwallish(geometricMean):
     ''''''
-    name=      u"Kruskal-Wallis H-test"
+    name=      __(u"Kruskal-Wallis H-test")
     statName=  'kruskalwallish'
     def __init__(self):
         # getting all required methods
         geometricMean.__init__(self)
-        self.name=      u"Kruskal-Wallis H-test"
+        self.name=      __(u"Kruskal-Wallis H-test")
         self.statName=  'kruskalwallish'
         self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 3
@@ -279,16 +280,16 @@ class kruskalwallish(geometricMean):
         self.outputGrid.addRowData(['results'],           currRow= 2)
 
 
-        self.Logg.write(self.statName+ ' successfull')
+        print self.statName+ ' '+_('successfull')
 
 class friedmanchisquare(kruskalwallish):
     ''''''
-    name=      u'Friedman Chi-Square test'
+    name=      __(u'Friedman Chi-Square test')
     statName=  'friedmanchisquare'
     def __init__(self):
         # getting all required methods
         kruskalwallish.__init__(self)
-        self.name=      u'Friedman Chi-Square test'
+        self.name=      __(u'Friedman Chi-Square test')
         self.statName=  'friedmanchisquare'
         self._scritpEquivalenString='stats.'+self.statName
         self.minRequiredCols= 3

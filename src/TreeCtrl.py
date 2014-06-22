@@ -2,7 +2,7 @@ import wx
 from wx.lib.mixins.treemixin import ExpansionState
 import os
 import cPickle
-from salstat2_glob import *
+from sei_glob import *
 from collections import OrderedDict
 
 TreeBaseClass = wx.TreeCtrl
@@ -644,7 +644,7 @@ class TreePanel(wx.Panel):
     USE_CUSTOMTREECTRL= False
     def __init__( self, parent, *args, **params):
         try:   self.__rootName= params.pop('rootName')
-        except KeyError:  self.__rootName=  _('Main')
+        except KeyError:  self.__rootName=  __('Main')
         try:    wx.Panel.__init__( self, parent, wx.ID_ANY, *args, **params)
         except: wx.Panel.__init__( self, parent, wx.ID_ANY)
         self.__thread = None

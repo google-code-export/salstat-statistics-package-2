@@ -150,7 +150,7 @@ class triplot:
     
     def _generateMeshPoints(self, divisions = 10):
         if divisions < 2:
-            raise StandardError('el numero de divisiones debe ser mayor de 2')
+            raise StandardError('division numbers must be greater than 2')
         divisions = divisions/float(2)
         if divisions-int(divisions) > 0:
             divisions= int(divisions)+1

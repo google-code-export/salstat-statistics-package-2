@@ -8,20 +8,21 @@ from statFunctions import _genericFunc
 from wx import ID_OK as _OK
 from wx import Size
 from slbTools import homogenize
+from sei_glob import __
 
 class pearsonr( _genericFunc):
     ''''''
-    name=      u'pearsonr'
+    name=      __(u'pearsonr')
     statName=  'pearsonr'
     def __init__( self):
         # getting all required methods
         _genericFunc.__init__(self)
-        self.name=      'pearsonr'
+        self.name=      __('pearsonr')
         self.statName=  'pearsonr'
         self._scritpEquivalenString='stats.'+self.statName
-        self.txt1= _(u"X Column to analyse")
-        self.txt2= _(u"Y Column to analyse")
-        self.nameResults= [_(u"Pearson's r"), _(u" two-tailed p-value")]
+        self.txt1= __(u"X Column to analyse")
+        self.txt2= __(u"Y Column to analyse")
+        self.nameResults= [__(u"Pearson's r"), __(u"two-tailed p-value")]
         self.minRequiredCols= 2
         self.colNameSelect= ''
         
@@ -30,7 +31,7 @@ class pearsonr( _genericFunc):
                   '_size': Size(280,250)}
         self._updateColsInfo() # update self.columnames and self.colnums
         
-        txt1=  ['StaticText',   [_(u'Select the columns to analyse')]]
+        txt1=  ['StaticText',   [__(u'Select the columns to analyse')]]
         btn1=  ['Choice',       [self.columnNames]]
         txt2=  ['StaticText',   [self.txt1] ]
         txt3=  ['StaticText',   [self.txt2] ]
@@ -53,11 +54,11 @@ class pearsonr( _genericFunc):
         (self.xcolNameSelect, self.ycolNameSelect)= values
         
         if self.xcolNameSelect == None or self.ycolNameSelect == None:
-            self.logPanel.write(_(u"You haven't selected any items!"))
+            print __(u"You haven't selected any items!")
             return
         
-        xcolumn= self.inputGrid.GetCol( self.xcolNameSelect)
-        ycolumn= self.inputGrid.GetCol( self.ycolNameSelect)
+        xcolumn= self.grid.GetCol( self.xcolNameSelect)
+        ycolumn= self.grid.GetCol( self.ycolNameSelect)
         (xcolumn, ycolumn)= homogenize(xcolumn, ycolumn)
         
         xcolumn = numpy.array(xcolumn)
@@ -86,21 +87,21 @@ class pearsonr( _genericFunc):
     def _report( self, result):
         self.outputGrid.addColData( self.nameResults, self.name)
         self.outputGrid.addColData( result)
-        self.outputGrid.addRowData( [_(u'Input Data')],  currRow= 0)
-        self.outputGrid.addRowData( [_(u'x column='),   self.xcolNameSelect, 'y column=', self.ycolNameSelect ], currRow= 1)
-        self.outputGrid.addRowData( [_(u'Output Data')], currRow= 2)
+        self.outputGrid.addRowData( [__(u'Input Data')],  currRow= 0)
+        self.outputGrid.addRowData( [__(u'x column='),   self.xcolNameSelect, 'y column=', self.ycolNameSelect ], currRow= 1)
+        self.outputGrid.addRowData( [__(u'Output Data')], currRow= 2)
                 
-        self.Logg.write( self.statName+ ' '+_(u'successful'))
+        print self.statName+ ' '+ __(u'successful')
         
 class spearmanr(pearsonr):
-    name=      'spearmanr'
+    name=      __('spearmanr')
     statName=  'spearmanr'
     def __init__(self):
         pearsonr.__init__(self)
-        self.name=      'spearmanr'
+        self.name=      __('spearmanr')
         self.statName=  'spearmanr'
         self._scritpEquivalenString='stats.'+self.statName
-        self.nameResults= [_(u"Spearman's r"), _(u"two-tailed p-value")]
+        self.nameResults= [__(u"Spearman's r"), __(u"two-tailed p-value")]
         self.minRequiredCols= 2
         self.colNameSelect= ''
         
@@ -111,14 +112,14 @@ class spearmanr(pearsonr):
         return _stats.spearmanr(*args, **params)
  
 class pointbiserialr(pearsonr):
-    name=      'pointbiserialr'
+    name=      __('pointbiserialr')
     statName=  'pointbiserialr'
     def __init__(self):
         pearsonr.__init__(self)
-        self.name=      'pointbiserialr'
+        self.name=      __('pointbiserialr')
         self.statName=  'pointbiserialr'
         self._scritpEquivalenString='stats.'+self.statName
-        self.nameResults= [_(u"Point-biserial r"), _(u"two-tailed p-value")]
+        self.nameResults= [__(u"Point-biserial r"), __(u"two-tailed p-value")]
         self.minRequiredCols= 2
         self.colNameSelect= ''
         
@@ -129,14 +130,14 @@ class pointbiserialr(pearsonr):
         return _stats.pointbiserialr(*args, **params)
 
 class kendalltau(pearsonr):
-    name=      'kendalltau'
+    name=      __('kendalltau')
     statName=  'kendalltau'
     def __init__(self):
         pearsonr.__init__(self)
-        self.name=      'kendalltau'
+        self.name=      __('kendalltau')
         self.statName=  'kendalltau'
         self._scritpEquivalenString='stats.'+self.statName
-        self.nameResults= [_(u"Kendall's tau"), _(u" two-tailed p-value")]
+        self.nameResults= [__(u"Kendall's tau"), __(u"two-tailed p-value")]
         self.minRequiredCols= 2
         self.colNameSelect= ''
     def object( self):
@@ -146,19 +147,19 @@ class kendalltau(pearsonr):
         return _stats.kendalltau(*args, **params)
         
 class linregress(pearsonr):
-    name=      u'linregress'
+    name=      __(u'linregress')
     statName=  'linregress'
     def __init__(self):
         pearsonr.__init__(self)
-        self.name=      'linregress'
+        self.name=      __('linregress')
         self.statName=  'linregress'
         self._scritpEquivalenString='stats.'+self.statName
-        self.nameResults= [_(u"slope"),
-                           _(u"intercept"),
-                           _(u"r"),
-                           _(u"two-tailed prob"),
-                           _(u"stderr-of-the-estimate"),
-                           _(u"n")]
+        self.nameResults= [__(u"slope"),
+                           __(u"intercept"),
+                           __(u"r"),
+                           __(u"two-tailed prob"),
+                           __(u"stderr-of-the-estimate"),
+                           __(u"n")]
         self.minRequiredCols= 2
         self.colNameSelect= ''
         
@@ -169,14 +170,14 @@ class linregress(pearsonr):
         return _stats.linregress(*args, **params)
     
 class covariance(pearsonr):
-    name=      u'covariance'
+    name=      __(u'covariance')
     statName=  'covariance'
     def __init__(self):
         pearsonr.__init__(self)
-        self.name=      'covariance'
+        self.name=      __('covariance')
         self.statName=  'covariance'
         self._scritpEquivalenString='stats.'+self.statName
-        self.nameResults= [_(u'covariance')]
+        self.nameResults= [__(u'covariance')]
         self.minRequiredCols= 2
         self.colNameSelect= ''
     def object( self):
@@ -186,11 +187,11 @@ class covariance(pearsonr):
         return _stats.covariance(*args, **params)
 
 class paired(pearsonr):
-    name=      u'paired'
+    name=      __(u'paired')
     statName=  'paired'
     def __init__(self):
         pearsonr.__init__(self)
-        self.name=      'paired'
+        self.name=      __('paired')
         self.statName=  'paired'
         self._scritpEquivalenString='stats.'+self.statName
         self.nameResults= ['']

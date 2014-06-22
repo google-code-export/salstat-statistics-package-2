@@ -76,7 +76,7 @@ def test_beyond_limits(data, center, lcl, ucl):
     return data[0] > ucl or data[0] < lcl
 
 def test_violating_runs(data, center, lcl, ucl):
-    for i in xrange(1, len(data)):
+    for i in range(1, len(data)):
         if (data[i-1] - center)*(data[i] - center) < 0:
             return False
     return True
@@ -98,7 +98,7 @@ def get_stats_x_mr_x(data, size):
     assert size == 1
     center = numpy.mean(data)
     sd = 0
-    for i in xrange(len(data)-1):
+    for i in range(len(data)-1):
         sd += abs(data[i] - data[i+1])
     sd /= len(data) - 1
     d2 = 1.128
@@ -109,7 +109,7 @@ def get_stats_x_mr_x(data, size):
 def get_stats_x_mr_mr(data, size):
     assert size == 1
     sd = 0
-    for i in xrange(len(data)-1):
+    for i in range(len(data)-1):
         sd += abs(data[i] - data[i+1])
     sd /= len(data) - 1
     d2 = 1.128
@@ -255,7 +255,7 @@ def prepare_data_x_bar_s_s(data, size):
 
 def prepare_data_x_mr(data, size):
     data2 = [0]
-    for i in xrange(len(data)-1):
+    for i in range(len(data)-1):
         data2.append(abs(data[i] - data[i+1]))
     return data2
 
@@ -342,7 +342,7 @@ class Spc(object):
         else:
             rs = self.rules
         points = {}
-        for i in xrange(len(self._data)):
+        for i in range(len(self._data)):
             for r in rs:
                 func, points_num = RULES_FUNCS[r]
                 if func == None or i <= points_num - 1:
@@ -362,10 +362,10 @@ class Spc(object):
         ax.plot([0, len(self._data)], [self.lcl, self.lcl], "k:")
         ax.plot([0, len(self._data)], [self.ucl, self.ucl], "k:")
 
-        if self.violating_points.has_key(RULES_7_ON_ONE_SIDE):
+        if RULES_7_ON_ONE_SIDE in self.violating_points:
             for i in self.violating_points[RULES_7_ON_ONE_SIDE]:
                 ax.plot([i], [self._data[i]], "yo")
-        if self.violating_points.has_key(RULES_1_BEYOND_3SIGMA):
+        if RULES_1_BEYOND_3SIGMA in self.violating_points:
             for i in self.violating_points[RULES_1_BEYOND_3SIGMA]:
                 ax.plot([i], [self._data[i]], "ro")
         pylab.figtext(0.05, 0.04, "Center = %0.3f" % self.center)

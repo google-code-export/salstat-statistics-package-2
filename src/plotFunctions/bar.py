@@ -3,8 +3,8 @@ __all__=  ['barChart', 'HorizBarChart',
            'barChartAllMeans', 'barChartAllMeansNice',
            'stakedBar', 'Pareto']
 
+from sei_glob import *
 from openStats import statistics
-
 import numpy
 from plotFunctions import _neededLibraries, pltobj, generateColors
 from wx import ID_OK as _OK
@@ -31,7 +31,7 @@ class barChart( _neededLibraries):
         
     def _dialog(self, *arg, **params):
         '''this funtcion is used to plot the bar chart of all means'''
-        print  _(u"Bar Chart")
+        print  __(u"Bar Chart")
         self._updateColsInfo()
         if len( self.columnNames) == 0:
             return
@@ -39,17 +39,17 @@ class barChart( _neededLibraries):
         self.colours= ["blue", "black",
                   "red", "green", "lightgreen", "darkblue",
                   "yellow", "white"]
-        txt2= ["StaticText",   [_(u"Colour")]]
-        txt3= ["StaticText",   [_(u"Select data to plot")]]
+        txt2= ["StaticText",   [__(u"Colour")]]
+        txt3= ["StaticText",   [__(u"Select data to plot")]]
         btn2= ["Choice",       [self.colours]]
         btn3= ["CheckListBox", [self.columnNames]]
-        btn4= ["CheckBox",     [_(u"push the values up to the bars")] ]
+        btn4= ["CheckBox",     [__(u"Push the values up to the bars")] ]
         structure= list()
         structure.append( [txt3])
         structure.append( [btn3])
         structure.append( [btn2, txt2])
         structure.append( [btn4])
-        setting= {"Title": _(self.name)}
+        setting= {"Title": __(self.name)}
         return self.dialog(settings= setting, struct= structure)
 
     def _calc( self, columns, *args, **params):
@@ -77,14 +77,14 @@ class barChart( _neededLibraries):
             self.colour=  self.colours[0]
 
         if self.colNameSelect == None:
-            print _(u"you have to select at least %i column")%self.minRequiredCols
+            print __(u"You have to select at least %i column")%self.minRequiredCols
             return
 
         if isinstance( self.colNameSelect, (str, unicode)):
             self.colNameSelect= [self.colNameSelect]
 
         if len( self.colNameSelect) < self.minRequiredCols:
-            print  _(u'You have to select at least %i columns to draw a graph!')%self.minRequiredCols
+            print  __(u'You have to select at least %i columns to draw a graph!')%self.minRequiredCols
             return
 
         # it only retrieves the numerical values
@@ -107,7 +107,9 @@ class barChart( _neededLibraries):
         # evaluating the histogram function to obtain the data to plot
         plots= list()
         for ydat in ydata:
-            plots.append( pltobj( None, xlabel= 'variable', ylabel= _(u'value'), title= _( self.name)))
+            if len(ydat) == 0:
+                continue
+            plots.append( pltobj( None, xlabel= 'variable', ylabel= __(u'value'), title= __( self.name)))
             plt= plots[-1]
             plt.hold( True)
             xdat= numpy.arange(1, len( ydat)+1)
@@ -168,7 +170,7 @@ class HorizBarChart(barChart):
         # evaluating the histogram function to obtain the data to plot
         plots = list()
         for xdat in ydata:
-            plots.append( pltobj( None, xlabel= _(u'value'), ylabel= 'variable', title= _(self.name)))
+            plots.append( pltobj( None, xlabel= __(u'value'), ylabel= 'variable', title= __(self.name)))
             plt= plots[-1]
             plt.hold( True)
             ydat= numpy.arange( 1, len( xdat)+1)
@@ -216,7 +218,7 @@ class barChartAllMeans( _neededLibraries):
 
     def _dialog(self, *arg, **params):
         '''this funtcion is used to plot the bar chart of all means'''
-        print _(u"Bar Chart of All Means")
+        print __(u"Bar Chart of All Means")
         self._updateColsInfo()
         if len( self.columnNames) == 0:
             return
@@ -224,17 +226,17 @@ class barChartAllMeans( _neededLibraries):
         self.colours= ["blue", "black",
                   "red", "green", "lightgreen", "darkblue",
                   "yellow", "white"]
-        txt2= ["StaticText",   [_(u"Colour")]]
-        txt3= ["StaticText",   [_(u"Select data to plot")]]
+        txt2= ["StaticText",   [__(u"Colour")]]
+        txt3= ["StaticText",   [__(u"Select data to plot")]]
         btn2= ["Choice",       [self.colours]]
         btn3= ["CheckListBox", [self.columnNames]]
-        btn4= ["CheckBox",     [_(u"push the values up to the bars")] ]
+        btn4= ["CheckBox",     [__(u"push the values up to the bars")] ]
         structure= list()
         structure.append( [txt3])
         structure.append( [btn3])
         structure.append( [btn2, txt2])
         structure.append( [btn4])
-        setting= {"Title": _(self.name)}
+        setting= {"Title": __(self.name)}
         return self.dialog(settings= setting, struct= structure)
 
     def _calc( self, columns, *args, **params):
@@ -262,14 +264,14 @@ class barChartAllMeans( _neededLibraries):
             self.colour=  self.colours[0]
 
         if self.colNameSelect == None:
-            print _(u"you have to select at least %i columns")%self.minRequiredCols
+            print __(u"You have to select at least %i columns")%self.minRequiredCols
             return
 
         if isinstance( self.colNameSelect, (str, unicode)):
             self.colNameSelect= [self.colNameSelect]
 
         if len( self.colNameSelect) < self.minRequiredCols:
-            print  _(u'You have to select at least %i columns to draw a graph!')%self.minRequiredCols
+            print  __(u'You have to select at least %i columns to draw a graph!')%self.minRequiredCols
             return
 
         # it only retrieves the numerical values
@@ -290,7 +292,7 @@ class barChartAllMeans( _neededLibraries):
         showBarValues= args[2]
 
         # evaluating the histogram function to obtain the data to plot
-        plt= pltobj( None, xlabel= 'variable', ylabel= 'value', title= _(self.name))
+        plt= pltobj( None, xlabel= __('variable'), ylabel= __('value'), title= __(self.name))
         plt.hold( True)
         xdat= numpy.arange(1, len(ydat)+1)
         res= plt.bar( xdat, ydat, color= color)
@@ -332,7 +334,7 @@ class barChartAllMeans( _neededLibraries):
 
     def _report(self, result):
         result.Show()
-        print self.plotName+ ' '+_(u'successful')
+        print self.plotName+ ' '+__(u'successful')
 
 class barChartAllMeansNice( _neededLibraries):
     ''''''
@@ -349,7 +351,7 @@ class barChartAllMeansNice( _neededLibraries):
 
     def _dialog(self, *arg, **params):
         '''this funtcion is used to plot the bar chart of all means'''
-        print _(u"Nice Bar Chart of All Means")
+        print __(u"Nice Bar Chart of All Means")
         self._updateColsInfo()
         if len( self.columnNames) == 0:
             return
@@ -362,20 +364,20 @@ class barChartAllMeansNice( _neededLibraries):
 
         path=     os.path.join( os.path.split( path1 )[0], "nicePlot", "images", "barplot")
         self.figTypes= [fil[:-4] for fil in os.listdir(path) if fil.endswith(".png")]
-        txt1= ["StaticText",   [_(u"Bar type")] ]
-        txt2= ["StaticText",   [_(u"Colour")] ]
-        txt3= ["StaticText",   [_(u"Select data to plot")] ]
+        txt1= ["StaticText",   [__(u"Bar type")] ]
+        txt2= ["StaticText",   [__(u"Colour")] ]
+        txt3= ["StaticText",   [__(u"Select data to plot")] ]
         btn1= ["Choice",       [self.figTypes] ]
         btn2= ["Choice",       [self.colours] ]
         btn3= ["CheckListBox", [self.columnNames] ]
-        btn4= ["CheckBox",     [_(u"push the labels up to the bars")] ]
+        btn4= ["CheckBox",     [__(u"push the labels up to the bars")] ]
         structure= list()
         structure.append( [txt3])
         structure.append( [btn3])
         structure.append( [btn4])
         structure.append( [btn1, txt1])
         structure.append( [btn2, txt2])
-        setting= {"Title": _(self.name)}
+        setting= {"Title": __(self.name)}
         return self.dialog( settings = setting, struct = structure)
 
     def _calc( self, columns, *args, **params):
@@ -404,14 +406,14 @@ class barChartAllMeansNice( _neededLibraries):
             self.colour=  self.colours[0]
 
         if self.colNameSelect == None:
-            print _("you have to select at least %i columns")%self.minRequiredCols
+            print __("you have to select at least %i columns")%self.minRequiredCols
             return
 
         if isinstance( self.colNameSelect, (str, unicode)):
             self.colNameSelect= [self.colNameSelect]
 
         if len( self.colNameSelect) < self.minRequiredCols:
-            print  _(u'You need to select at least %i columns to draw a graph!')%self.minRequiredCols
+            print  __(u'You need to select at least %i columns to draw a graph!')%self.minRequiredCols
             return
 
         # it only retrieves the numerical values
@@ -435,7 +437,7 @@ class barChartAllMeansNice( _neededLibraries):
         showBarValues= args[3]
 
         # evaluating the histogram function to obtain the data to plot
-        plt= pltobj( None, xlabel= 'variable', ylabel= _(u'value'), title= _(self.name))
+        plt= pltobj( None, xlabel= 'variable', ylabel= __(u'value'), title= __(self.name))
         plt.hold( True)
 
         xdat= numpy.arange( 1, len( ydat)+1)
@@ -465,7 +467,7 @@ class barChartAllMeansNice( _neededLibraries):
 
     def _report(self, result):
         result.Show()
-        print self.plotName + ' ' + _('successful')
+        print self.plotName + ' ' + __('successful')
 
 class stakedBar(_neededLibraries):
     ''''''
@@ -482,13 +484,13 @@ class stakedBar(_neededLibraries):
 
     def _dialog(self, *arg, **params):
         '''this funtcion is used to plot the bar chart of all means'''
-        print _(u"Bar Chart")
+        print __(u"Bar Chart")
         self._updateColsInfo()
         if len( self.columnNames) == 0:
             return
 
-        txt2= ["StaticText",   [_(u"xtics Labels")]]
-        txt3= ["StaticText",   [_(u"Select data to plot")]]
+        txt2= ["StaticText",   [__(u"xtics Labels")]]
+        txt3= ["StaticText",   [__(u"Select data to plot")]]
         btn2= ["Choice",       [self.columnNames]]
         btn3= ["CheckListBox", [self.columnNames]]
         structure= list()
@@ -496,7 +498,7 @@ class stakedBar(_neededLibraries):
         structure.append( [btn3])
         structure.append( [txt2])
         structure.append( [btn2])
-        setting= {"Title": _(self.name)}
+        setting= {"Title": __(self.name)}
         return self.dialog(settings= setting, struct= structure)
 
     def _calc( self, columns, *args, **params):
@@ -520,14 +522,14 @@ class stakedBar(_neededLibraries):
             self.xticlabel=  self.grid.GetCol( values[1])
 
         if self.colNameSelect == None:
-            print _("you have to select at least %i columns")%self.minRequiredCols
+            print __("you have to select at least %i columns")%self.minRequiredCols
             return
 
         if isinstance( self.colNameSelect, (str, unicode)):
             self.colNameSelect= [self.colNameSelect]
 
         if len( self.colNameSelect) < self.minRequiredCols:
-            print  _(u'You have to select at least %i columns to draw a graph!')%self.minRequiredCols
+            print  __(u'You have to select at least %i columns to draw a graph!')%self.minRequiredCols
             return
 
         # it only retrieves the numerical values
@@ -549,7 +551,7 @@ class stakedBar(_neededLibraries):
         else:
             xticLabel= None
 
-        plt= pltobj( None, xlabel= 'variable', ylabel= _(u'value'), title= _(self.name))
+        plt= pltobj( None, xlabel= 'variable', ylabel= __(u'value'), title= __(self.name))
         plt.hold( True)
         bars= list()
         ydatInit= numpy.array( ydata[0])*0
@@ -580,7 +582,7 @@ class stakedBar(_neededLibraries):
 
     def _report( self, result):
         [res.Show() for res in result]
-        print  self.plotName+ ' ' + _('successful')
+        print  self.plotName+ ' ' + __('successful')
 
 class Pareto(_neededLibraries):
     ''''''
@@ -597,13 +599,13 @@ class Pareto(_neededLibraries):
 
     def _dialog(self, *arg, **params):
         '''this funtcion is used to plot the bar chart of all means'''
-        print _(u"Bar Chart")
+        print __(u"Bar Chart")
         self._updateColsInfo()
         if len( self.columnNames) == 0:
             return
 
-        txt2= ["StaticText",   [_(u"xtics Labels")]]
-        txt3= ["StaticText",   [_(u"Select data to plot")]]
+        txt2= ["StaticText",   [__(u"xtics Labels")]]
+        txt3= ["StaticText",   [__(u"Select data to plot")]]
         btn2= ["Choice",       [self.columnNames]]
         btn3= ["CheckListBox", [self.columnNames]]
         structure= list()
@@ -611,7 +613,7 @@ class Pareto(_neededLibraries):
         structure.append( [btn3])
         structure.append( [txt2])
         structure.append( [btn2])
-        setting= {"Title": _(self.name)}
+        setting= {"Title": __(self.name)}
         return self.dialog(settings= setting, struct= structure)
 
     def _calc( self, columns, *args, **params):
@@ -635,14 +637,14 @@ class Pareto(_neededLibraries):
             self.xticlabel=  self.grid.GetCol( values[1])
 
         if self.colNameSelect == None:
-            print _("you have to select at least %i columns")%self.minRequiredCols
+            print __("you have to select at least %i columns")%self.minRequiredCols
             return
 
         if isinstance( self.colNameSelect, (str, unicode)):
             self.colNameSelect= [self.colNameSelect]
 
         if len( self.colNameSelect) < self.minRequiredCols:
-            print  _(u'You have to select at least %i columns to draw a graph!')%self.minRequiredCols
+            print  __(u'You have to select at least %i columns to draw a graph!')%self.minRequiredCols
             return
 
         # it only retrieves the numerical values
@@ -667,7 +669,7 @@ class Pareto(_neededLibraries):
 
         plots= list()
         for ydat in ydata:
-            plots.append( pltobj( None, xlabel= 'variable', ylabel= _(u'value'), title= _(self.name)))
+            plots.append( pltobj( None, xlabel= 'variable', ylabel= __(u'value'), title= __(self.name)))
             plt=    plots[-1]
 
             ax1=    plt
@@ -709,4 +711,4 @@ class Pareto(_neededLibraries):
 
     def _report( self, result):
         [res.Show() for res in result]
-        print  self.plotName+ ' ' + _('successful')
+        print  self.plotName+ ' ' + __('successful')

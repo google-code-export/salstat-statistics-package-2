@@ -12,7 +12,7 @@ from statlib.stats import linregress
 from triplot import triplot, triang2xy
 import matplotlib.path as mpath
 import matplotlib.patches as mpatches
-
+from sei_glob import *
 imag= imageEmbed()
 
 PROPLEGEND= {'size':11}
@@ -29,10 +29,10 @@ class table( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            print _(u"You need some data to draw a graph!")
+            print __(u"You need some data to draw a graph!")
             return
-        txt1= ["StaticText",    [_(u"Select data to plot")]]
-        txt2= ["StaticText",    [_(u"Select the name of the rows")]]
+        txt1= ["StaticText",    [__(u"Select data to plot")]]
+        txt2= ["StaticText",    [__(u"Select the name of the rows")]]
         btn1= ["CheckListBox",  [self.columnNames] ]
         btn2= ["Choice",        [self.columnNames]]
         structure= list()
@@ -40,7 +40,7 @@ class table( _neededLibraries):
         structure.append( [btn1,])
         structure.append( [txt2,])
         structure.append( [btn2,])
-        return self.dialog( struct= structure, settings = {"Title": _(self.name),
+        return self.dialog( struct= structure, settings = {"Title": __(self.name),
                                                            "_size": wx.Size( 300,500)},)
 
     def _showGui_GetValues(self):
@@ -61,7 +61,7 @@ class table( _neededLibraries):
         
         self.rowlabelsCol= values[1]
         if self.rowlabelsCol == None:
-            print _(u'the user have to select a name colum to the rows')
+            print __(u'the user have to select a name colum to the rows')
             return
 
         data, posvalid= homogenize(*[ self.grid.GetCol( colX) for colX in self.selectedColNames], returnPos= True )
@@ -79,7 +79,7 @@ class table( _neededLibraries):
         data = args[0]
         rowLabels= args[1]
         colLabels= self.selectedColNames
-        plt= pltobj( None, xlabel= "", ylabel= self.rowlabelsCol, title= _(self.name) )
+        plt= pltobj( None, xlabel= "", ylabel= self.rowlabelsCol, title= __(self.name) )
 
         plt.hold(True)
         rows = len(data)
@@ -119,30 +119,32 @@ class table( _neededLibraries):
         
     def _report(self, result):
         result.Show()
-        print self.plotName + ' ' + _('successful')
+        print self.plotName + ' ' + __('successful')
 
 class linRegres( _neededLibraries):
-    name=      u"linear regression"
-    plotName=  u"linregres"
+    name=      u"Regression"
+    plotName=  u"Regression"
     image=     imag.linearRegres
     def __init__( self):
         _neededLibraries.__init__(self)
-        self.name=      u"linear regression"
-        self.plotName=  u"linregres"
+        self.name=      __(u"Regression")
+        self.plotName=  __(u"Regression")
         
     def _dialog(self, *arg, **params):
-        print _(self.name)
+        print __(self.name)
         self._updateColsInfo()
         if self.columnNames == []:
-            print _(u"You need some data to draw a graph!")
+            print __(u"You need some data to draw a graph!")
             return
 
-        bt1= ["StaticText", [_(u"Select pairs of data by rows")]]
-        bt2= ["makePairs",  [[_(u"X data to plot"), _(u"Y data to plot")], self.columnNames, 4]]
+        bt1= ["StaticText", [ __(u"Select pairs of data by rows")]]
+        bt2= ["makePairs",  [[ __(u"X data to plot"), __(u"Y data to plot")], self.columnNames, 3]]
+        choice= ['RadioBox',( __('Regression type'),['Y= a+ b*X','Y= a+b*Log(X)','Log(Y)= a+ b*x','Log(Y)= a+b*Log(X)','Y= a+ b*X+c*X^2',],) ]
         structure= list()
         structure.append([bt1,])
         structure.append([bt2,])
-        return self.dialog( struct= structure, settings = {"Title": _(self.name) ,
+        structure.append([choice,])
+        return self.dialog( struct= structure, settings = {"Title": __(self.name) ,
                                                            "_size": wx.Size(300, 300)},)
 
     def _showGui_GetValues(self):
@@ -182,7 +184,7 @@ class linRegres( _neededLibraries):
             line=  linregress(x,y)
             yfit= lambda x: x*line[0]+line[1]
             plot= plt.plot(x,y,'b.',x,[yfit(x1) for x1 in x],'r')
-            legend= plt.legend(plot,( title,_(u'linear Regression')), prop = PROPLEGEND)
+            legend= plt.legend(plot,( title,__(u'linear Regression')), prop = PROPLEGEND)
             legend.draggable(state=True)
             arrow_args = dict(arrowstyle="->")
             bbox_args = dict(boxstyle="round", fc="w")
@@ -228,25 +230,25 @@ class ternaryScatter( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if len(self.columnNames) == 0:
-            print  _( u"You need some data to draw a graph!")
+            print  __( u"You need some data to draw a graph!")
             return
         
-        txt1= ["StaticText", [_(u"Left Corner Label")]]
-        txt2= ["StaticText", [_(u"Right Corner Label")]]
-        txt3= ["StaticText", [_(u"Upper Corner Label")]]
-        btn1= ["TextCtrl",   [_(u"A")]]
-        btn2= ["TextCtrl",   [_(u"B")]]
-        btn3= ["TextCtrl",   [_(u"C")]]
-        btn4= ["StaticText", [_(u"Select the pairs of data by rows")]]
-        btn5= ["makePairs",  [[_(u"A Left Corner"),_(u"C Upper Corner"),
-                               _(u"B Right Corner")], self.columnNames, 4]]
+        txt1= ["StaticText", [__(u"Left Corner Label")]]
+        txt2= ["StaticText", [__(u"Right Corner Label")]]
+        txt3= ["StaticText", [__(u"Upper Corner Label")]]
+        btn1= ["TextCtrl",   [__(u"A")]]
+        btn2= ["TextCtrl",   [__(u"B")]]
+        btn3= ["TextCtrl",   [__(u"C")]]
+        btn4= ["StaticText", [__(u"Select the pairs of data by rows")]]
+        btn5= ["makePairs",  [[__(u"A Left Corner"),__(u"C Upper Corner"),
+                               __(u"B Right Corner")], self.columnNames, 4]]
         structure= list()
         structure.append( [btn1, txt1])
         structure.append( [btn2, txt2])
         structure.append( [btn3, txt3])
         structure.append( [btn4,])
         structure.append( [btn5,])
-        settings = {"Tile": _(self.name) ,
+        settings = {"Tile": __(self.name) ,
                     "_size": wx.Size(410, 400),}
         return self.dialog( settings= settings, struct= structure)
 
@@ -415,7 +417,7 @@ class ternaryScatter( _neededLibraries):
         
     def _report(self, result):
         result.Show()
-        print self.plotName + ' ' + _('successful')
+        print self.plotName + ' ' + __('successful')
 
 class runChart( _neededLibraries):
     name=      u"control chart"
@@ -430,14 +432,14 @@ class runChart( _neededLibraries):
     def _dialog(self, *arg, **params):
         self._updateColsInfo()
         if self.columnNames == []:
-            print  _( u"You need some data to draw a graph!")
+            print  __( u"You need some data to draw a graph!")
             return
 
-        txt1= ["StaticText",    [_( u"Select the columns to analyse")]]
+        txt1= ["StaticText",    [__( u"Select the columns to analyse")]]
         btn1= ["CheckListBox",  [self.columnNames]]
-        txt2= ["StaticText",    [_( u"Lower control limit")]]
-        txt3= ["StaticText",    [_( u"Upper control limit")]]
-        txt4= ["StaticText",    [_( u"Target value")]]
+        txt2= ["StaticText",    [__( u"Lower control limit")]]
+        txt3= ["StaticText",    [__( u"Upper control limit")]]
+        txt4= ["StaticText",    [__( u"Target value")]]
         btn2= ["NumTextCtrl",   []]
         
         structure= list()
@@ -446,7 +448,7 @@ class runChart( _neededLibraries):
         structure.append( [btn2, txt2])
         structure.append( [btn2, txt3])
         structure.append( [btn2, txt4])        
-        return self.dialog( struct= structure, settings = {"Title": _(self.name) ,
+        return self.dialog( struct= structure, settings = {"Title": __(self.name) ,
                                                            "_size": wx.Size( 330, 350)},)
     
     def _showGui_GetValues(self):
@@ -465,15 +467,15 @@ class runChart( _neededLibraries):
 
         print "selectedcols= " + self.selectedcols.__str__(), False
         if len( self.selectedcols) == 0:
-            print  _( u"You need to select some data to draw a graph!")
+            print  __( u"You need to select some data to draw a graph!")
             return
         
         if lcl == None or ucl == None:
-            print  _( u"You have to input the lower and upper control limits")
+            print  __( u"You have to input the lower and upper control limits")
             return
         
         if target == None:
-            print  _( u"You have to input a target value")
+            print  __( u"You have to input a target value")
             return
         # transform the selected cols to numeric cols
         colValues= [self.grid.GetColNumeric( col) for col in self.selectedcols]
@@ -491,8 +493,8 @@ class runChart( _neededLibraries):
         colValues, lcl, ucl, target = args
         listPlot = list()
         for colValue, colName in zip(colValues, self.selectedcols):
-            listPlot.append( pltobj( None, xlabel = "", ylabel = _( u"value"),
-                                     title = _( self.name)))
+            listPlot.append( pltobj( None, xlabel = "", ylabel = __( u"value"),
+                                     title = __( self.name)))
             xdat= range( len( colValue))
             plt= listPlot[-1]
             plt.hold( True)
@@ -511,13 +513,13 @@ class runChart( _neededLibraries):
                 ydat= [y for pos, y in enumerate( colValue) if pos in posout] 
                 pointsOut= plt.plot( xdat, ydat, '*')
                 legend= plt.legend( [line, lineucl, linelcl, linetarget, pointsOut],
-                                [colName, _( u"upper limmit"),
-                                 _( u"lower limit"), _(u"target"),
-                                 _( u"out of control")], prop = PROPLEGEND)
+                                [colName, __( u"upper limmit"),
+                                 __( u"lower limit"), __(u"target"),
+                                 __( u"out of control")], prop = PROPLEGEND)
             else:    
                 legend= plt.legend( [line, lineucl, linelcl, linetarget],
-                                [colName, _( u"upper limmit"),
-                                 _( u"lower limit"), _(u"target")],
+                                [colName, __( u"upper limmit"),
+                                 __( u"lower limit"), __(u"target")],
                                 prop = PROPLEGEND)
             legend.draggable( state = True)
             plt.hold(False)
@@ -535,7 +537,7 @@ class runChart( _neededLibraries):
     def _report(self, result):
         for res in result:
             res.Show()
-        print self.plotName + ' ' + _('successful')
+        print self.plotName + ' ' + __('successful')
         
         #UCL= data2plot[self.'UCL']
         #LCL= data2plot['LCL']

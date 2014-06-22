@@ -162,7 +162,7 @@ class Wbs(object):
     
 class Xl(object):
     def __init__(self,**params):
-        from win32com.client import Dispatch
+        from win32com.client.dynamic import Dispatch
         self._xl= Dispatch("Excel.Application")
         default= {'Visible': True,
                   'wb':      None,}

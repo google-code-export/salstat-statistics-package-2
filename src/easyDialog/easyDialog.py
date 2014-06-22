@@ -10,7 +10,7 @@ import wx
 from numpy import ndarray
 import os
 import re
-from salstat2_glob import *
+from sei_glob import *
 from wx.gizmos import EditableListBox
 import re
 from wx import Size
@@ -41,10 +41,15 @@ def Busy(Message= None):
 def getPath( *args, **params):
     try: wildCard= params.pop('wildcard')
     except: wildCard= _WILDCARD
-
-    dlg = wx.FileDialog(None, __("Load Data File"), "","",
-                        wildcard= wildCard,
-                        style = wx.OPEN)
+    try: initPath= params.pop('path')
+    except: initPath= '.'
+    
+    dlg = wx.FileDialog( None, __("Load Data File"),
+                        defaultDir=  os.path.abspath(initPath), 
+                        defaultFile= "",
+                        wildcard=    wildCard,
+                        style =      wx.OPEN)
+    
     ##icon = imageEmbed().logo16()
     ##dlg.SetIcon(icon)
 
@@ -108,7 +113,7 @@ class Ctrl(CustomCtrl):
             self.__text= text
             self.__args= args
             self.__params= params
-        @property    
+        @property
         def value(self):
             arg= [self.__text]
             arg.extend(self.__args)
@@ -210,6 +215,8 @@ class Ctrl(CustomCtrl):
             self.minimum= minimum
             self.maximum= maximum
             self.default= default
+            self.__args= args
+            self.__params= params
         @property
         def value(self):
             arg= [self.minimum, self.maximum, self.default]
@@ -269,7 +276,7 @@ class Ctrl(CustomCtrl):
 
     class FilePath(CustomCtrl):
         __path = u'.'
-        def __init__(self, defaultPath, *args, **params):
+        def __init__(self, defaultPath='.', *args, **params):
             self.__path= defaultPath
             self.__args= args
             self.__params= params
@@ -396,6 +403,7 @@ class NumTextCtrl( wx.TextCtrl):
     def __init__( self, parent, *args, **params):
         self.__min= None
         self.__max= None
+        self.__defaultValue = 0
         self.__longitudmaxima= None
         self._enteroRestriccion = False
         self._enteroMaximo= None # numero de cifras de la parte entera
@@ -404,14 +412,16 @@ class NumTextCtrl( wx.TextCtrl):
         self._fraccionarioMaximo = None # numero de cifras de la parte fraccionaria
         self._fraccionarioMinimo = None
         self.__format = None
-        try:    self.min= params.pop('min')
-        except: pass
-        try:    self.max= params.pop('max')
-        except: pass
         try:    self.longitudmaxima= params.pop('longitudmaxima')
         except: pass
         try: self.setFormat(params.pop('formato'))
         except: pass
+        for paramName, paramValue in params.items():
+            if hasattr(self, paramName):
+                value= params.pop( paramName)
+                setattr(self, paramName, value)
+            else:
+                raise StandardError("The object does'nt have the parameter %s"%paramName)
 
         wx.TextCtrl.__init__( self, parent, *args, **params)
         self.Bind( wx.EVT_TEXT, self._textChange)
@@ -542,6 +552,15 @@ class NumTextCtrl( wx.TextCtrl):
             if contador9 + contador0 != len(decimalFormat):
                 raise StandardError( 'distribucion invalida del formato entero')
 
+    @property
+    def defaultValue(self):
+        return self.__default
+    @defaultValue.setter
+    def defaultValue(self, value):
+        if isnumeric(value):
+            self.__defaultValue = value
+        else:
+            raise StandardError("It's only accepted numerical values!")
     @property
     def min(self):
         return self.__min
@@ -964,9 +983,9 @@ class FilePath( wx.Panel ):
 
     def _onSelectFile(self, evt):
         if self.wildCard == None:
-            path= getPath()
+            path= getPath(path= self.path)
         else:
-            path= getPath(wildcard= self.wildCard)
+            path= getPath(path= self.path,wildcard= self.wildCard)
 
         if not (path in (None,'',u'')):
             self.path= path
@@ -1220,116 +1239,6 @@ class _Dialog ( wx.Dialog):
         self.SetSize(wx.Size(allowSize[0], allowSize[1]))
         self.Layout()
         self.Centre( wx.BOTH )
-
-    def adding1(self, parentSizer, struct ):
-        diferents= ['CheckListBox','Choice',]
-        for row in struct:
-            namebox= 'boxSizer'+ self.ctrlNum.next()
-            setattr(self, namebox, wx.FlexGridSizer( 0, len(row), 0, 0 ))
-            currSizer= getattr(self, namebox)
-            currSizer.SetFlexibleDirection( wx.BOTH )
-            currSizer.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-            characters= wx.ALIGN_CENTER_VERTICAL | wx.ALL
-            for dat  in row:
-                if Ctrl.__bases__[0] in dat.__class__.__bases__:
-                    key, args, params =  dat.value
-                else:
-                    key, args = dat
-                    params = dict()
-
-                if hasattr(wx, key):
-                    #nameCtrl= 'ctrl' + self.sizerNum.next()
-                    if key in diferents:
-                        data= [wx.DefaultPosition, wx.DefaultSize, ]
-                        if len(args) > 1:
-                            # se identifica la posicion por defecto del control
-                            defaultControlSelection= args[1]
-                            data.extend(list((args[0],)))
-                        else:
-                            defaultControlSelection= None
-                            data.extend(list(args))
-                        data.append(0)
-                        args= data
-                    elif key == 'StaticLine':
-                        data= [wx.DefaultPosition, wx.DefaultSize, ]
-                        if args[0] == 'horz':
-                            data.append(wx.LI_HORIZONTAL|wx.DOUBLE_BORDER)
-                        else:
-                            data.append(wx.LI_VERTICAL|wx.DOUBLE_BORDER)
-                        args = data
-                        characters = wx.ALL | wx.EXPAND
-                    elif key == 'RadioBox':
-                        data= [args[0] , wx.DefaultPosition, wx.DefaultSize, ]
-                        data.append(args[1])
-                        data.extend([1, wx.RA_SPECIFY_COLS])
-                        args= data
-                    elif key == 'SpinCtrl':
-                        data= [ wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS]
-                        data.extend((args))
-                        args= data
-                    elif key == 'CheckBox':
-                        pass
-                    if key == 'CheckListBox':
-                        self.ctrls.append((key, CheckListBox(self.m_scrolledWindow1, wx.ID_ANY, *args, **params)))
-                    else:
-                        self.ctrls.append((key, getattr(wx, key)(self.m_scrolledWindow1, wx.ID_ANY, *args,**params)))
-                    currCtrl= self.ctrls[-1][1]
-                    # setting default values    
-                    if self.ctrls[-1][0] == 'Choice':
-                        # selecting the last added item
-                        if defaultControlSelection != None: # if the user select a default option
-                            currCtrl.Selection= defaultControlSelection
-                        else : # if the user select a default option
-                            currCtrl.Selection= 0
-
-                    currSizer.Add(currCtrl, 0, characters , 5)
-
-                elif key == 'NumTextCtrl':
-                    self.ctrls.append((key, NumTextCtrl(self.m_scrolledWindow1, wx.ID_ANY, *args, **params)))
-                    currCtrl= self.ctrls[-1][1]
-                    currSizer.Add(currCtrl, 0, characters , 5)
-
-                elif key  == 'IntTextCtrl':
-                    self.ctrls.append((key, IntTextCtrl(self.m_scrolledWindow1, wx.ID_ANY, *args, **params)))
-                    currCtrl= self.ctrls[-1][1]
-                    currSizer.Add(currCtrl, 0, characters , 5)
-
-                elif key == 'makePairs':
-                    self.ctrls.append((key, makePairs(self.m_scrolledWindow1, wx.ID_ANY, *args, **params)))
-                    currCtrl= self.ctrls[-1][1]
-                    currSizer.Add(currCtrl, 0, characters , 5)
-                    currCtrl.Fit()
-                    # limiting the maximun size of the ctrl
-                    maxAllowedSize= (300, 350)
-                    currCtrl.SetSize(wx.Size(min([currCtrl.GetSize()[0], maxAllowedSize[0]]),
-                                             min([currCtrl.GetSize()[1], maxAllowedSize[1]])))
-
-                elif key == 'FilePath':
-                    self.ctrls.append((key, FilePath( self.m_scrolledWindow1, wx.ID_ANY, *args, **params)))
-                    currCtrl= self.ctrls[-1][1]
-                    currSizer.Add(currCtrl, 0, characters , 5)
-
-                elif key == 'DataBaseImport':
-                    self.ctrls.append((key, DataBaseImport( self.m_scrolledWindow1, wx.ID_ANY, *args, **params)))
-                    currCtrl= self.ctrls[-1][1]
-                    currSizer.Add(currCtrl, 0, characters , 5)
-
-                elif key == 'EditableListBox':
-                    argNew = list(args)
-                    choices = argNew.pop(1)
-                    args = tuple(argNew)
-                    self.ctrls.append((key, EditableListBox( self.m_scrolledWindow1, wx.ID_ANY, *args, **params)))
-                    currCtrl = self.ctrls[-1][1]
-                    currCtrl.SetStrings(choices)
-                    currSizer.Add(currCtrl, 0, characters , 5)
-                else:
-                    raise StandardError("unknow control %s : type .ALLOWED to view all available controls"%key)
-
-                #elif key == 'in':  # not used
-                #    self.adding(parentSizer, [args])
-
-            parentSizer.Add( currSizer, 0, wx.EXPAND, 5 )
-            parentSizer.Layout()
 
     def adding(self, flexGrid, struct ):
         diferents= ['CheckListBox','Choice',]

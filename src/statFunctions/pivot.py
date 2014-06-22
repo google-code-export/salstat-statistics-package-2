@@ -24,8 +24,8 @@ class pivotTable(_genericFunc):
                   '_size': Size(400,500)}
         self._updateColsInfo() # update self.columnames and self.colnums
         btn1= ['StaticText',   ['Select the columns to analyse']]
-        btn2= ['makePairs', [['Xdata'],[self.columnNames], 15]]
-        btn3= ['makePairs', [['Ydata','Names'],[self.columnNames, None], 15]]
+        btn2= ['makePairs', [['Xdata'],[self.columnNames], 4]]
+        btn3= ['makePairs', [['Ydata','Names'],[self.columnNames, None], 4]]
         structure= list()
         structure.append([btn1,])
         structure.append([btn2,btn3])
