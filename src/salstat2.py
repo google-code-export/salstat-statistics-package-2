@@ -242,7 +242,7 @@ class MainApp(wx.App):
     def getDataDir(self):
         '''Getting the config directory'''
         dd = wx.StandardPaths.Get()
-        return dd.GetUserDataDir()
+        return os.path.abspath(dd.GetUserDataDir())
 
     def getConfigFile(self):
         """ Returns the configuration """
