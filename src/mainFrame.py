@@ -95,7 +95,7 @@ from dialogs import EVT_TB1_CHANGELANG
 from dialogs import EVT_TB2_COPY, EVT_TB2_CUT, EVT_TB2_FIND
 from dialogs import EVT_TB2_LOAD, EVT_TB2_PASTE, EVT_TB2_REDO
 from dialogs import EVT_TB2_NEW, EVT_TB2_RUN, EVT_TB2_SAVE
-from dialogs import EVT_TB2_SAVEAS, EVT_TB2_UNDO, EVT_TB2_OPEN
+from dialogs import EVT_TB2_SAVEAS, EVT_TB2_UNDO
 
 ##---------------------------------
 ## END LIBRARY DEPENDENCIES
@@ -771,7 +771,7 @@ class MainFrame(wx.Frame):
         self.Bind(EVT_TB2_SAVE,   self.OnScriptSave )
         self.Bind(EVT_TB2_NEW,    self.OnScriptNew )
         self.Bind(EVT_TB2_SAVEAS, self.OnScriptSaveAs )
-        self.Bind(EVT_TB2_OPEN,   self.OnScriptOpen )
+        self.Bind(EVT_TB2_LOAD,   self.OnScriptOpen )
         
         
         ### self.Bind( wx.EVT_MENU, self.GoVariablesFrame,  id= self.bt9.GetId())
