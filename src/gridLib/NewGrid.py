@@ -1324,7 +1324,7 @@ class NewGrid(wx.grid.Grid):
                     colType= 3
                 else:
                     for key, value in COLTYPES.items():
-                        if key == colType:
+                        if value == colType:
                             break
                 colType= key
             colType = int( colType)
