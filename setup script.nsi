@@ -105,10 +105,12 @@ Section "-Main" SI_1
     SetOutPath $INSTDIR\statFunctions
     FIle /r ${SRCPATH}\statFunctions\*
     SetOutPath $SMPROGRAMS\$StartMenuGroup
-    CreateShortcut "$SMPROGRAMS\$StartMenuGroup\$(^Name).lnk" "$INSTDIR\salstat2.exe" \
+    SetOutPath $INSTDIR
+    CreateShortcut "$SMPROGRAMS\$StartMenuGroup\$(^Name).lnk" \ 
+        "$INSTDIR\salstat2.exe" \
         "" "$INSTDIR\salstat.ico" 0 SW_SHOWNORMAL # "" "Paquete de estadistica"
     CreateShortcut "$SMPROGRAMS\$StartMenuGroup\Ayuda.lnk" "$INSTDIR\help\index.html"
-    SetOutPath "$DESKTOP"
+    # SetOutPath "$DESKTOP"
     CreateShortcut "$DESKTOP\$(^Name).lnk" "$INSTDIR\salstat2.exe" "" \
                 "$INSTDIR\salstat.ico" 0
     # registry keys
