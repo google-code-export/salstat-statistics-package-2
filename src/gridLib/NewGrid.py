@@ -11,67 +11,53 @@ DEFAULT_FONT_SIZE = 12
 DECIMAL_POINT = '.'
 
 ## THIRD PART LIBRARIES
+import os
+import functools
+
 import wx
 import wx.grid
-import xlrd
 from numpy import ndarray, ravel
-import os
-import traceback
-import functools
+
+import xlrd
 from openpyxl import Workbook, load_workbook
 
+
 # OWN LIBRARIES
-from sei_glob import *
 from imagenes import imageEmbed
 from slbTools import ReportaExcel
 from easyDialog import Dialog as dialog
 from easyDialog import Ctrl, Busy
 from slbTools import isnumeric, isiterable
 from .GridCopyPaste import PyWXGridEditMixin, MyContextGrid
-from .GridCopyPaste import EVT_GRID_PASTE, EVT_GRID_UNDO, EVT_GRID_REDO
 from .gridCellRenderers import floatRenderer
 from gridLib import gridEditors as GE
 
 COLTYPES= {'0':'DATE','1':'LIST','2':'FLOAT','3':'VARCHAR','4':'INTEGER'}
-##########################################################################
-## defining a baseclass for the columns
-##########################################################################
 
 ###########################################################################
 ## Class NewGrid
 ###########################################################################
-class NewGrid(wx.grid.Grid):
-    import datetime
+class NewGrid(wx.grid.Grid, PyWXGridEditMixin):
     def __init__(self, parent, size= (1,2), *args, **params):
+        wx.grid.Grid.__init__(self, parent, *args, **params)
+        PyWXGridEditMixin.__init__(self)
         try:  self.__name= params.pop('name')
         except: self.__name = 'selobu'
         for key, value in params.items():
             if not key.startswith('_'):
                 setattr(self,key, value)
-        self._wb= None
         self._sh= None
         self.path2file= None
-        self.hasSaved= False
         self.maxrow=   0
         self.maxcol=   0
         self.__zoom=   1.0
         self.moveTo=   None
         self.wildcard= __("Suported Formats")+" (*.xls;*xlsx;*.txt;*csv)|*.xls;*xlsx;*.txt;*csv" + \
                        __("All Files")+" (*.*)|*.*"
-        #<p> used to check changes in the grid
-        self.hasChanged = True
         self.usedCols= ([], [],)
         # </p>
         
         #################################
-        ## grid parameters
-        wx.grid.Grid.__init__(self, parent, *args, **params)
-        # functions to copy paste
-        if len([clase for clase in wx.grid.Grid.__bases__ if issubclass( PyWXGridEditMixin, clase)]) == 0:
-            wx.grid.Grid.__bases__ += ( PyWXGridEditMixin,)
-        # contextual menu
-        self.__init_mixin__()
-        
         # Grid
         self.CreateGrid( size[0], size[1] )
 
@@ -111,13 +97,12 @@ class NewGrid(wx.grid.Grid):
 
         self.Bind(wx.grid.EVT_GRID_EDITOR_CREATED,         self.onCellEdit)
         self.Bind(wx.grid.EVT_GRID_CMD_LABEL_RIGHT_DCLICK, self.RangeSelected)
-        self.Bind(wx.grid.EVT_GRID_CELL_CHANGE,            self.onCellChanged)
         self.Bind(wx.grid.EVT_GRID_CELL_CHANGED,           self.onCellChangedIncreaseSize)
         self.Bind(wx.grid.EVT_GRID_CELL_RIGHT_CLICK,       self.OnGridRighClic)
         self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_DCLICK,      self.__onGridCmdLabelLeftDClick)
         self.Bind(wx.EVT_MOUSEWHEEL,                       self.__OnMouseWheel)
-        self.Bind(EVT_GRID_PASTE,                          self.onPaste)
-        
+        #self.Bind(EVT_GRID_PASTE,                          self.onPaste)
+
     def __controlColnumber(func):
         """
         a decorator to control and transform the input column from string or number into a valid number
@@ -222,7 +207,7 @@ class NewGrid(wx.grid.Grid):
             return
         newColName,colType = values
         if newColName in ('',u''):
-            print __("You input an invalid column Name")
+            print __("You has been input an invalid column Name")
             return
         colNames[columnNumber] = u''
         if newColName in colNames:
@@ -301,12 +286,13 @@ class NewGrid(wx.grid.Grid):
             self.ForceRefresh()
         else:
             event.Skip()
-    def onCellChanged(self, evt):
-        self.hasChanged= True
-        self.hasSaved=   False
-        col, row=  evt.GetCol(), evt.GetRow()
-        self.__cellChanged(row,col)
-        evt.Skip()
+    #def onCellChanged(self, evt):
+    #    self.hasChanged= True
+    #    self.hasSaved=   False
+    #    col, row=  evt.GetCol(), evt.GetRow()
+    #    self.__cellChanged(row,col)
+    #    evt.Skip()
+
     def onCellChangedIncreaseSize(self, evt):
         """to increase the size of the grid by one row or by one column"""
         numCols, numRows = self.GetNumberCols(), self.GetNumberRows()
@@ -360,26 +346,26 @@ class NewGrid(wx.grid.Grid):
     def CopyData(self, evt):
         self.Copy()
 
-    def onPaste(self, evt):
-        box= evt.box
-        top, left, rows, cols= box
-        maxcol= self.NumberCols
-        # determinando el rango maximo para pegar las columnas
-        rangoCols= min([left+cols, maxcol-1])
-        for row in range(top, top+rows):
-            for col in range(left, rangoCols):
-                self.__cellChanged(row,col)
-        evt.Skip()
+    #def onPaste(self, evt):
+    #    box= evt.box
+    #    top, left, rows, cols= box
+    #    maxcol= self.NumberCols
+    #    # determinando el rango maximo para pegar las columnas
+    #    rangoCols= min([left+cols, maxcol-1])
+    #    for row in range(top, top+rows):
+    #        for col in range(left, rangoCols):
+    #            self.__cellChanged(row,col)
+    #    evt.Skip()
     def RangeSelected(self, evt):
         if evt.Selecting():
             self.tl = evt.GetTopLeftCoords()
             self.br = evt.GetBottomRightCoords()
-    @Busy(__('Pasting data'))
-    def PasteData(self, evt, *args, **params):
-        self.OnPaste()
-        self.hasChanged= True
-        self.hasSaved=   False
-        evt.Skip()
+    # @Busy(__('Pasting data'))
+    #def PasteData(self, evt, *args, **params):
+    #    self.OnPaste()
+    #    self.hasChanged= True
+    #    self.hasSaved=   False
+    #    evt.Skip()
 
     def DeleteCurrentCol(self, evt):
         currentRow, currentCol, rows,cols = self.GetSelectionBox()[0]
@@ -443,7 +429,6 @@ class NewGrid(wx.grid.Grid):
             # emptying the undo - redo buffer
             self.emptyTheBuffer( )
             self.path2file= fullPath
-            #self._wb= load_workbook(self.path2file)
             if evt != None:
                 evt.Skip()
             return ( True, os.path.split( fullPath)[-1])
@@ -475,21 +460,6 @@ class NewGrid(wx.grid.Grid):
     def SaveXlsAs(self, evt):
         return self.SaveXls(None, True)
     ###############################
-    #
-    def __cellChanged(self, row, col):
-        texto= self.GetCellValue(row,col)
-        if self._wb == None:
-            self._wb = Workbook()
-
-        # getting the name of the sheet to be created
-        if self._sh == None:
-            if self.name in self._wb.get_sheet_names():
-                self._sh= self._wb.get_sheet_by_name(self.name)
-            else:
-                self._sh= self._wb.create_sheet()
-                self._sh.title= self.name
-        self._sh.cell(row = row, column = col).value= texto
-
     # adds columns and rows to the grid
     def AddNCells(self, numcols, numrows, attr= None):
         if numcols > 0:
@@ -503,15 +473,13 @@ class NewGrid(wx.grid.Grid):
                 #self.SetColLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_BOTTOM)
                 self.SetColAttr( colNumber, attr)
         self.AdjustScrollbars()
-        self.hasChanged= True
-        self.hasSaved=   False
-        #evt.Skip()
+        self.change= True
 
     # function finds out how many cols contain data - all in a list
     #(ColsUsed) which has col #'s
     def GetUsedCols(self):
         # improving the performance
-        if not self.hasChanged:
+        if not self.change:
             return self.usedCols
 
         ColsUsed = []
@@ -544,7 +512,7 @@ class NewGrid(wx.grid.Grid):
             colnums.append(col)
 
         self.usedCols= (ColsUsed, colnums)
-        self.hasChanged= False
+        self.hasChanged= False ### to be fixed
         return self.usedCols
 
     def save(self, path= None, *args, **params):
@@ -567,14 +535,21 @@ class NewGrid(wx.grid.Grid):
             raise StandardError( __("The input path isn't correct")+":%s"%path)
         else:
             self.path2file= path
-        if self._wb == None:
-            if os.path.exists(self.path2file):
-                self._wb= load_workbook( self.path2file)#, optimized_write = True)
-            else:
-                self._wb= Workbook()#optimized_write = True)
-                self._wb.title= self.name
+
+        #if os.path.exists( self.path2file):
+        #    wb= load_workbook( self.path2file)#, optimized_write = True)
+        #else:
+        wb= Workbook( )#optimized_write = True)
+        wb.title= self.name
+
         # writing the contents from the wx.sheet into the wb
-        self._wb.save(self.path2file)
+        sh= wb.get_sheet_by_name(wb.get_sheet_names()[0])
+        for colNumber in range( len( self.GetUsedCols())):
+            colValues= self.GetCol( colNumber)
+            for row, value in enumerate( colValues):
+                sh.cell( row =row, column = colNumber).value =value
+        wb.save( self.path2file)
+        self.isSave= True
         return True
 
     def SaveXls(self, *args):
@@ -585,7 +560,7 @@ class NewGrid(wx.grid.Grid):
         else:
             saveAs= args[1]
         self.reportObj= ReportaExcel(cell_overwrite_ok = True)
-        if self.hasSaved == False or saveAs: # path del grid
+        if self.isSave == False or saveAs: # path del grid
             # mostrar el dialogo para guardar el archivo
             dlg= wx.FileDialog(self, __("Save Data File"), "" , "",\
                                "Excel (*.xlsx)|*.xlsx| \
@@ -621,7 +596,7 @@ class NewGrid(wx.grid.Grid):
                 result.append(header)
             self.reportObj.writeByCols(result, sheet= 0) # report the data in the first sheet
         self.reportObj.save()
-        self.hasSaved = True
+        self.isSave = True
         filename= os.path.split(self.path)[-1]
         if len( filename) > 8:
             filename = filename[:8]
@@ -1299,13 +1274,10 @@ class NewGrid(wx.grid.Grid):
                     self.SetCellValue(row, colNumber, dat)
                 except UnicodeDecodeError:
                     self.SetCellValue(row, colNumber, dat.decode("utf8","replace"))
-                # to store the data into the _wb
-                self.__cellChanged(row, colNumber)
         except:
             raise
         finally:
-            self.hasSaved= False
-            self.hasChanged= True
+            self.change= True
 
     @__controlColnumber
     def clearCol( self, colNumber):
@@ -1434,16 +1406,7 @@ class NewGrid(wx.grid.Grid):
         contenidoGrid = [self.colNames]
         contenidoGrid.extend([tuple([self.GetCellValue(row,col) for col in range(numCols)]) for row in range(self.GetNumberRows())])
         return tuple(contenidoGrid)
-
     
-    
-###########################################################################
-## Class GridXLSX
-###########################################################################
-# a class to save and load xlsx files
-class GridXlsx( NewGrid):
-    pass
-
 def test():
     # para verificar el funcionamiento correcto del grid
     pass
