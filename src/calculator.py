@@ -195,7 +195,7 @@ class MyFrame1 ( wx.Frame ):
         evt.Skip()
         
     def _insertText(self, text):
-        if not (text in ('',u'')) and self.scriptPanel.CanPaste():
+        if not (text in ('',u'')) : # and self.scriptPanel.CanPaste()
             # making the text compatible with the stc
             cpos=self.scriptPanel.GetCurrentPos()
             self.scriptPanel.UpdateUndoHistoryBefore('insert', text, cpos,

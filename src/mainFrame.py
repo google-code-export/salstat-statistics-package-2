@@ -735,7 +735,7 @@ class MainFrame(wx.Frame):
                   ( __("Check for a new version"), None, wx.GetApp()._checkUpdates, None),
                   ( __("Give us some feedback"), None, wx.GetApp()._getFeedBack, None),
                   [u"--"],
-                  ( __("Visit The blog of Sei"), None, wx.GetApp()._visitBlog, None),
+                  ( __("Visit The blog of Salstat2"), None, wx.GetApp()._visitBlog, None),
                   ( __("&About..."), imag.icon16, self.ShowAbout, wx.ID_ABOUT),
                  )),
                 )
