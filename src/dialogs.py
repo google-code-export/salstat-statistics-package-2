@@ -43,7 +43,6 @@ evtIDRestartShell =   wx.NewEventType()
 
 Tb2_Run_evt,    EVT_TB2_RUN =    wx.lib.newevent.NewCommandEvent()
 Tb2_New_evt,    EVT_TB2_NEW =    wx.lib.newevent.NewCommandEvent()
-Tb2_Load_evt,   EVT_TB2_LOAD =   wx.lib.newevent.NewCommandEvent()
 Tb2_Save_evt,   EVT_TB2_SAVE =   wx.lib.newevent.NewCommandEvent()
 Tb2_SaveAs_evt, EVT_TB2_SAVEAS = wx.lib.newevent.NewCommandEvent()
 Tb2_Undo_evt,   EVT_TB2_UNDO =   wx.lib.newevent.NewCommandEvent()
@@ -52,9 +51,10 @@ Tb2_Cut_evt,    EVT_TB2_CUT =    wx.lib.newevent.NewCommandEvent()
 Tb2_Copy_evt,   EVT_TB2_COPY =   wx.lib.newevent.NewCommandEvent()
 Tb2_Paste_evt,  EVT_TB2_PASTE =  wx.lib.newevent.NewCommandEvent()
 Tb2_Find_evt,   EVT_TB2_FIND =   wx.lib.newevent.NewCommandEvent()
+Tb2_Open_evt,   EVT_TB2_OPEN =   wx.lib.newevent.NewCommandEvent()
 evtIDTb2Run =   wx.NewEventType()
 evtIDTb2New =   wx.NewEventType()
-evtIDTb2Load =  wx.NewEventType()
+evtIDTb2Open =  wx.NewEventType()
 evtIDTb2Save =  wx.NewEventType()
 evtIDTb2SaveAs = wx.NewEventType()
 evtIDTb2Undo =  wx.NewEventType()
@@ -354,18 +354,8 @@ class auiNotebookWrap( wx.Panel):
 class TbScriptPnl(aui.AuiToolBar):
     def __init__(self, *args,**params):
         aui.AuiToolBar.__init__(self, *args, **params)
-        repend_items, append_items = [], []
-            
-        #self.SetKind(wx.ITEM_SEPARATOR)
-        #self.SetKind(wx.ITEM_NORMAL)
-        #self.SetId(wx.ID_ANY)
+
         self.SetLabel(__("Customize..."))
-        #if wx.version < "2.9":
-        #    tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
-        #                        style = aui.AUI_TB_OVERFLOW | aui.AUI_TB_VERTICAL)
-        #else:
-        #    tb1= aui.AuiToolBar(self, -1, wx.DefaultPosition, wx.DefaultSize,
-        #                        agwStyle = aui.AUI_TB_OVERFLOW | aui.AUI_TB_VERTICAL)
         imagenes = imageEmbed()
         self.SetToolBitmapSize(wx.Size(16, 16))
         self.bt1= self.AddSimpleTool(wx.ID_ANY, __(u"Run Script") , imagenes.runIcon, __(u"Run Script"), )
@@ -384,8 +374,6 @@ class TbScriptPnl(aui.AuiToolBar):
         self.bt7= self.AddSimpleTool(wx.ID_ANY, __(u"Paste"), imagenes.edit_paste, __(u"Paste") )
         self.AddSeparator()
         self.bt10= self.AddSimpleTool(wx.ID_ANY, __(u"Find"), imagenes.find, __(u"Find") )
-        #self.SetCustomOverflowItems( prepend_items, append_items)
-        #self.SetToolDropDown(wx.ID_ANY, True)
         self.Realize()
         self.Bind(wx.EVT_MENU, self.RunScript,    id= self.bt1.GetId())
         self.Bind(wx.EVT_MENU, self.NewScript,    id= self.bt2.GetId())
@@ -408,7 +396,7 @@ class TbScriptPnl(aui.AuiToolBar):
         wx.PostEvent(self.GetEventHandler(), event)
         evt.Skip()
     def LoadScript(self, evt):
-        event = Tb2_Load_evt(evtIDTb2Load)
+        event = Tb2_Open_evt(evtIDTb2Open)
         wx.PostEvent(self.GetEventHandler(), event)
         evt.Skip()
     def SaveScript(self, evt):
@@ -444,17 +432,15 @@ class TbScriptPnl(aui.AuiToolBar):
         wx.PostEvent(self.GetEventHandler(), event)
         evt.Skip()
 
-
 class formulaBar(wx.Panel):#aui.AuiToolBar
     def __init__( self, parent, *args, **params):
         wx.Panel.__init__(self, parent, #aui.AuiToolBar
                           id=wx.ID_ANY,
                           pos=wx.DefaultPosition,
                           size=wx.DefaultSize, )
-        self.__LastObject= None # indicate the las object that call this objet
+        self.lastObject= None # indicate the las object that call this object
         bSizer1 = wx.BoxSizer(wx.HORIZONTAL)
         self._text = u''
-        self.lastParent = None
         self.textCtrl1 = wx.TextCtrl(self, wx.ID_ANY,
                                      wx.EmptyString, wx.DefaultPosition, wx.DefaultSize,
                                      wx.TE_CHARWRAP | wx.TE_MULTILINE | wx.TE_RICH2 |
@@ -506,7 +492,7 @@ class formulaBar(wx.Panel):#aui.AuiToolBar
         return self._text
     @value.setter
     def value(self, texto, *args, **params):
-        # try to fix to interactibely change the contents of the las selected cell
+        # try to fix to interactively change the contents of the las selected cell
         if not isinstance(texto, (str, unicode)):
             raise StandardError("only accept string values")
         self._text = texto

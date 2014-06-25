@@ -100,7 +100,6 @@ class NewGrid(wx.grid.Grid, PyWXGridEditMixin):
         self.Bind(wx.grid.EVT_GRID_CELL_RIGHT_CLICK,       self.OnGridRighClic)
         self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_DCLICK,      self.__onGridCmdLabelLeftDClick)
         self.Bind(wx.EVT_MOUSEWHEEL,                       self.__OnMouseWheel)
-        #self.Bind(EVT_GRID_PASTE,                          self.onPaste)
 
     def __controlColnumber(func):
         """
@@ -340,26 +339,10 @@ class NewGrid(wx.grid.Grid, PyWXGridEditMixin):
     def CopyData(self, evt):
         self.Copy()
 
-    #def onPaste(self, evt):
-    #    box= evt.box
-    #    top, left, rows, cols= box
-    #    maxcol= self.NumberCols
-    #    # determinando el rango maximo para pegar las columnas
-    #    rangoCols= min([left+cols, maxcol-1])
-    #    for row in range(top, top+rows):
-    #        for col in range(left, rangoCols):
-    #            self.__cellChanged(row,col)
-    #    evt.Skip()
     def RangeSelected(self, evt):
         if evt.Selecting():
             self.tl = evt.GetTopLeftCoords()
             self.br = evt.GetBottomRightCoords()
-    # @Busy(__('Pasting data'))
-    #def PasteData(self, evt, *args, **params):
-    #    self.OnPaste()
-    #    self.hasChanged= True
-    #    self.hasSaved=   False
-    #    evt.Skip()
 
     def DeleteCurrentCol(self, evt):
         currentRow, currentCol, rows,cols = self.GetSelectionBox()[0]
