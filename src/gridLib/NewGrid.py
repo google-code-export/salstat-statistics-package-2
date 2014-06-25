@@ -31,6 +31,7 @@ from slbTools import isnumeric, isiterable
 from .GridCopyPaste import PyWXGridEditMixin, MyContextGrid
 from .gridCellRenderers import floatRenderer
 from gridLib import gridEditors as GE
+import datetime
 
 COLTYPES= {'0':'DATE','1':'LIST','2':'FLOAT','3':'VARCHAR','4':'INTEGER'}
 
@@ -968,7 +969,7 @@ class NewGrid(wx.grid.Grid, PyWXGridEditMixin):
                     self.SetCellValue( reportRow, col, str( newValue).replace('.', DECIMAL_POINT))
                 elif sheetSelected.cell_type( row, col) in ( 3,): # date
                     year, month, day, hour, minute, second = xlrd.xldate_as_tuple(newValue, book_datemode)
-                    self.SetCellValue( reportRow, col, self.datetime.date(year, month, day).__str__())
+                    self.SetCellValue( reportRow, col, datetime.date(year, month, day).__str__())
                 else:
                     try:
                         self.SetCellValue (reportRow, col, str(newValue))
