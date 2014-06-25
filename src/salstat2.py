@@ -210,7 +210,7 @@ class MainApp(wx.App):
             return
             ## Goto webpage if user chose to
         import webbrowser
-        webbrowser.open("http://code.google.com/p/salstat-statistics-package-2/downloads/list")
+        webbrowser.open("https://sourceforge.net/projects/s2statistical/")
 
     def OpenFileMessage(self, filename):
         self.BringWindowToFront()
