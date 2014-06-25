@@ -1205,8 +1205,7 @@ class MainFrame(wx.Frame):
             _pp = self.m_mgr.SavePerspective()
             app.SetPreferences({"DefaultPerspective": _pp})
         self.Destroy(evt) # wx.GetApp().frame.Destroy()
-        if self.checkDongle():
-            killProcess(sei_glob.PROG_NAME)
+        killProcess(sei_glob.PROG_NAME)
         #if len(self.grid) == 0:
         #    wx.GetApp().frame.Destroy()
         #    return
