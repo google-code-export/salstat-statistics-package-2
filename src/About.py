@@ -27,7 +27,7 @@ class AboutDlg ( wx.Dialog ):
 
         bSizer2.Add( self.m_staticText1, 0, wx.ALIGN_CENTER|wx.ALL, 5 )
 
-        self.m_staticText3 = wx.StaticText( self, wx.ID_ANY, u"V 0.1", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_staticText3 = wx.StaticText( self, wx.ID_ANY, u"V %s"%VERSION, wx.DefaultPosition, wx.DefaultSize, 0 )
         self.m_staticText3.Wrap( -1 )
         self.m_staticText3.SetFont( wx.Font( 18, 72, 90, 90, False, wx.EmptyString ) )
 

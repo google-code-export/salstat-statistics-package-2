@@ -61,7 +61,7 @@ Var StartMenuGroup
 RequestExecutionLevel admin
 
 # Installer attributes
-OutFile "Salstat2 V2.2 a3 setup.exe"
+OutFile "Salstat2 V2.2 a4 setup.exe"
 InstallDir Salstat2
 CRCCheck on
 XPStyle on
