@@ -46,7 +46,6 @@ class NewGrid(wx.grid.Grid, PyWXGridEditMixin):
         for key, value in params.items():
             if not key.startswith('_'):
                 setattr(self,key, value)
-        self._sh= None
         self.path2file= None
         self.maxrow=   0
         self.maxcol=   0
@@ -218,6 +217,7 @@ class NewGrid(wx.grid.Grid, PyWXGridEditMixin):
         # updating the name of the column
         self.colNames= colNames
         evt.Skip()
+
     def _getColType(self, colNumber):
         # adjusting the size of the column tipes
         # because of the ausence of the addcolumn evt
@@ -286,12 +286,6 @@ class NewGrid(wx.grid.Grid, PyWXGridEditMixin):
             self.ForceRefresh()
         else:
             event.Skip()
-    #def onCellChanged(self, evt):
-    #    self.hasChanged= True
-    #    self.hasSaved=   False
-    #    col, row=  evt.GetCol(), evt.GetRow()
-    #    self.__cellChanged(row,col)
-    #    evt.Skip()
 
     def onCellChangedIncreaseSize(self, evt):
         """to increase the size of the grid by one row or by one column"""
@@ -622,11 +616,6 @@ class NewGrid(wx.grid.Grid, PyWXGridEditMixin):
         try:
             result= available[extension](path, *args, **params)
             self.name= result[1]
-            #self.path2file= path
-            #if path.endswith('.xlsx'):
-            #    self.name= result[1]
-            #    self._wb= load_workbook(self.path2file)
-            #    self._sh= self._wb.get_sheet_by_name(result[1])
             return result
         except KeyError:
             print 'Extension not available'
@@ -852,7 +841,7 @@ class NewGrid(wx.grid.Grid, PyWXGridEditMixin):
                           delimiter=  delimiter,
                           skip_header= header2skip,
                           skip_footer= footer2skip)
-        # putting the data inito the Data Entry Panel
+        # putting the data into the Data Entry Panel
         if hasHeader:
             initRow= 1
         else:
@@ -862,6 +851,7 @@ class NewGrid(wx.grid.Grid, PyWXGridEditMixin):
         if len(data.shape)== 1:
             # it's considered to be of one column
             data.shape= (data.shape[0],1)
+        # adding the required rows
         for col in range(data.shape[1]):
             self.PutCol( col, data[initRow:,col])
 
@@ -874,8 +864,7 @@ class NewGrid(wx.grid.Grid, PyWXGridEditMixin):
                 # writing the data
                 self.SetColLabelValue(pos, x)
 
-        self.hasChanged= True
-        self.hasSaved=   True
+        self.isSave= True
         return (True, os.path.split(f_name)[-1])
 
     def LoadXls_xlsx(self, fullPath):
@@ -1252,6 +1241,10 @@ class NewGrid(wx.grid.Grid, PyWXGridEditMixin):
                     data= data[:1e6]
                     rows2add= len( data) - self.GetNumberRows()
                 self.AppendRows( rows2add)
+            # check for columns to add
+            cols2add= colNumber - self.GetNumberCols()+2
+            if cols2add > 0:
+                self.AppendCols(cols2add)
             try:
                 dp= wx.GetApp().DECIMAL_POINT
             except:
