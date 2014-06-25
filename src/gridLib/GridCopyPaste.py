@@ -156,7 +156,7 @@ class MyContextGrid(wx.Menu):
 
 class PyWXGridEditMixin:
     """ A Copy/Paste and undo/redo mixin for wx.grid. Undo/redo is per-table, not yet global."""
-    def __init_mixin__(self):
+    def __init__(self):
         """caller must invoke this method to enable keystrokes, or call these handlers if they are overridden."""
         wx.EVT_KEY_DOWN(self, self.OnMixinKeypress)
         wx.grid.EVT_GRID_CELL_CHANGE(self, self.Mixin_OnCellChange)
@@ -164,7 +164,25 @@ class PyWXGridEditMixin:
         self._undoStack = []
         self._redoStack = []
         self._stackPtr = 0
-        
+        self.change = True
+        self.isSave = False
+    @property
+    def change(self):
+        return self.__hasChanged
+    @change.setter
+    def change(self, value):
+        self.__hasChanged = value
+        if value ==  True:
+            self.isSave = False
+    @property
+    def isSave(self):
+        return self.__hasSave
+    @isSave.setter
+    def isSave(self, value):
+        self.__hasSave= value
+        if value == True:
+            self.change= False
+
     def OnMixinKeypress(self, event):
         """Keystroke handler."""
         key = event.GetKeyCode() 
@@ -185,7 +203,7 @@ class PyWXGridEditMixin:
         elif key == ord("X"): self.OnCut()
         elif key == ord("Z"): self.Undo()
         elif key == ord("Y"): self.Redo() # elif key == ord(" "): self.SelectCol(self.GetGridCursorCol())
-        elif key:  event.Skip()
+        event.Skip()
         
     def Mixin_OnCellEditor(self, evt=None):
         """this method saves the value of cell before it's edited (when that value disappears)"""
@@ -277,6 +295,7 @@ class PyWXGridEditMixin:
         self.AddUndo(undo=(self.__Paste, (pBox, self.Box2String(*pBox))),
             redo=(self.__Paste, (pBox, data)))
         self.__Paste(pBox, data)
+        self.change= True
         
     def _DeterminePasteArea(self, top, left, clipRows, clipCols, selRows, selCols):
         """paste area rules: if 1-d selection (either directon separately) and 2-d clipboard, use clipboard size, otherwise use selection size"""
@@ -325,10 +344,7 @@ class PyWXGridEditMixin:
                         pass
         except ZeroDivisionError:
             print "Zero division: Num_col "  +str(dataRows)+ ", Num_Fil " + str(dataCols)
-        finally:
-            self.hasChanged= True
-            self.hasSaved=   False
-        
+
         ## post the event
         #wx.PostEvent(self.GrandParent, PasteEvt(evtID))
         self.GetEventHandler().ProcessEvent( ptevt)
@@ -341,8 +357,7 @@ class PyWXGridEditMixin:
         box = self.GetSelectionBox()[0]
         self.Copy()
         self.Delete() #this takes care of undo/redo
-        self.hasChanged= True
-        self.hasSaved= False
+        self.change= True
 
     def Delete(self):
         """Clear Cell contents"""
@@ -352,8 +367,7 @@ class PyWXGridEditMixin:
             self.AddUndo(undo=(self.__Paste, (box, self.Box2String(*box))),
                 redo=(self.__Paste, (box, "\n")))
             self.__Paste(box, "\n")
-        self.hasChanged= True
-        self.hasSaved= False
+        self.change= True
         
     def AddUndo(self, undo, redo):
         """Add an undo/redo combination to the respective stack"""
@@ -379,8 +393,7 @@ class PyWXGridEditMixin:
             self.SetGridCursor(top,left)
             #padre= self.GetParent() 
             #padre.m_grid.SetGridCursor(top, left) # se espera que el parent sea el grid
-            self.hasChanged= True
-            self.hasSaved= False
+            self.change= True
             
     def Redo(self, evt = None):
         if self._stackPtr < len(self._redoStack):
@@ -394,8 +407,7 @@ class PyWXGridEditMixin:
             self._stackPtr += 1
             #padre= self.GetParent() 
             #padre.m_grid.SetGridCursor(top, left) # se espera que el parent sea el grid
-            self.hasChanged= True
-            self.hasSaved= False
+            self.change= True
             
     def emptyTheBuffer(self):
         self._undoStack= list()

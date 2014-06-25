@@ -6,20 +6,15 @@ Created on 25/10/2010
 '''
 
 import wx
-##from .gridsql import SqlGrid, GenericDBClass  # grid with context menu
-from imagenes import imageEmbed
 from .NewGrid import NewGrid
 import wx.grid
-from slbTools import isnumeric, isiterable
+from slbTools import isnumeric
 from . import floatRenderer
 import wx.aui
-from numpy import ndarray, ravel, genfromtxt
-from wx.grid  import GridCellAttr
-from copy import copy
-from easyDialog.easyDialog import getPath
+from numpy import ndarray
+from wx.grid import GridCellAttr
 from os import path as Path
 import sei_glob
-#import traceback
 
 DEFAULT_GRID_SIZE= (1,1)
 DEFAULT_FONT_SIZE = 12
@@ -234,47 +229,15 @@ class MyFileDropTarget(wx.FileDropTarget):
         #self.grid.currTable= tableName
         #evt.Skip()
 
-class SimpleGrid( wx.Panel, object):# wxGrid
-    def __init__( self, parent, size= (800,20)):
-        wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, style = wx.TAB_TRAVERSAL )
-        self.sizer = wx.BoxSizer(wx.VERTICAL)
-        self.__m_grid = NewGrid(self ,size, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
-        self.sizer.Add( self.__m_grid , 1, wx.EXPAND, 5 )
-        self.SetSizer(self.sizer)
-        self.Fit()
-
-        # allowing drop files into the sheet
-        dropTarget = MyFileDropTarget( self)
-        self.__m_grid.SetDropTarget(dropTarget)
-        
-        # setting all the parameters of the grid
-        for attr in dir(self.__m_grid):
-            if attr.startswith('__'):
-                continue
-            if not hasattr(self, attr):
-                try:
-                    setattr(self, attr, getattr(self.__m_grid, attr))
-                except TypeError:
-                    pass
-    #@property
-    #def grid(self):
-    #    return self.m_grid
-    @property
-    def colNames(self):
-        return self.__m_grid.colNames
-    @colNames.setter
-    def colNames(self, colNames):
-        self.__m_grid.colNames = colNames
-    
 class NoteBookSheet(wx.aui.AuiNotebook, object):
     def __init__( self, parent, *args, **params):
         """parent: parent of the notebook
         params:
-            [grid:] class to generate grids by default is a SImpleGrid"""
+            [grid:] class to generate grids by default is a NewGrid"""
         try:
-            self.__gridClass= params.pop('gridObj')
+            self.__gridClass= params.pop('gridClass')
         except:
-            self.__gridClass= SimpleGrid
+            self.__gridClass= NewGrid
 
         wx.aui.AuiNotebook.__init__( self, parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,
                                      wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|
@@ -816,6 +779,98 @@ class PanelObjectContainer(wx.Panel):
             if not hasattr(self, param):
                 try:   setattr(self,param,getattr(self.__obj, param))
                 except: pass
+
+class CustomNoteBook(NoteBookSheet):
+    def __init__( self, parent, *args, **params):
+        """parent: parent of the notebook
+        params:
+            [grid:] class to generate grids by default is a SImpleGrid"""
+        try:
+            self._gridClass= params.pop('gridObj')
+        except:
+            self._gridClass= NewGrid
+
+        wx.aui.AuiNotebook.__init__( self, parent, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize,
+                                     wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|
+                                     wx.aui.AUI_NB_WINDOWLIST_BUTTON|wx.aui.AUI_NB_BOTTOM|
+                                     wx.aui.AUI_NB_TAB_SPLIT|wx.aui.AUI_NB_CLOSE_BUTTON)
+        from collections import OrderedDict # to be used under the notebook
+        # se almacenan las paginas en un diccionario con llave el numero de pagina
+        bSizer = wx.BoxSizer( wx.VERTICAL )
+        self.Bind( wx.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.OnNotebookPageChange)
+
+        # se inicia el generador para el numero de pagina
+        self.npage = numPage()
+        self.currentPage=    None
+        self._pageObjects=   OrderedDict() #dict()
+        self.Layout()
+        self.numberPage=  self._generador()
+
+    def addPage( self, **params):
+        defaultData = {'name': u'', 'gridSize': DEFAULT_GRID_SIZE}
+        for key, value in params.items():
+            if defaultData.has_key(key):
+                defaultData[key] = value
+        # add a page to the notebook grid
+        newName= defaultData['name'] +'_'+ str(self.npage.next())
+        self._pageObjects[newName]= self.addOnePage( gridSize = defaultData['gridSize'])
+        self.currentPage=  self._pageObjects[newName]
+        ntb= self._pageObjects[newName]
+        ntb.name= newName
+        self.AddPage(ntb, newName, False )
+        # activating the added page
+        self.SetSelection(self.GetPageCount()-1)
+        return ntb # returning the object
+
+    def addOnePage(self, id= wx.ID_ANY, gridSize= DEFAULT_GRID_SIZE):
+        #overwrite this method to create your own custom widget
+        grid= PanelObjectContainer(self, self._gridClass, size= gridSize)
+        grid.hasSaved= True
+        grid.hasChanged= False
+        #grid.SetDefaultColSize( 60, True)
+        grid.SetRowLabelSize( 40)
+        grid.SetDefaultCellAlignment( wx.ALIGN_RIGHT, wx.ALIGN_CENTER )
+        # adjust the renderer
+        self._gridSetRenderer(grid)
+        # setting the callback to the range change
+        grid.Bind( wx.grid.EVT_GRID_SELECT_CELL, self._cellSelectionChange)
+        grid.Bind( wx.grid.EVT_GRID_RANGE_SELECT, self._gridRangeSelect)
+        return grid
+
+    def OpenFromSspdExplorer(self, evt):
+        item1= evt.item
+        expnl= wx.GetApp().frame._SspdExplorerePanel
+        pathToxml= expnl.tree.getItemCallbackParameters(item1)['pathToXml']
+
+        fullPath = Path.abspath( Path.join( wx.GetApp().installDir, 'dirformatos', pathToxml))
+
+        # reading the form
+        formulary = Formulario(fullPath)
+
+        # check if is a valid formulary
+        if not formulary.isvalid:
+            print "El formulario actual no esta disponible en esta version del programa"
+            return
+
+        # create a new spreadsheet with the name of the formulary
+        self.addPage(name= pathToxml[:-4], gridSize= (1, len(formulary.cols)) )
+        # 'numero', 'texto', 'fecha', 'lista', 'buleano','porcentaje'
+        desctext2number= {'fecha':  0,
+                          'lista':  1,
+                          'numero': 2, # 2 flotante, 4 entero
+                          'texto':  3,
+                          }
+        # changing the name of the columns by the given in the formulary
+        for colNumber in range(1, len(formulary.cols)+1): # in these case the enumerator starts with 1
+            colDescription= formulary[colNumber]
+            self.SetColLabelValue(colNumber-1, colDescription.nombre)
+            colType= desctext2number[colDescription.tipo.lower()]
+            self.setColType(colNumber-1, colType, **colDescription.description )
+
+        # adjust the colsize
+        self.AutoSizeColumns()
+
+        evt.Skip()
 
 class Test(wx.Frame):
     def __init__(self, parent, id, title):

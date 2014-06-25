@@ -58,11 +58,11 @@ if wx.Platform != '__WXMSW__':
 #######-------------------LOCAL IMPORT------------------#######
 import sei_glob
 from dialogs import formulaBar, Tb1
-from newXml.interpretXml import readArchivoGruposAsDict
+##from newXml.interpretXml import readArchivoGruposAsDict
 from plotFunctions import pltobj as plot
 
 # spreadSheet
-from gridLib.ntbSheet import NoteBookSheet, CustomNoteBook 
+from gridLib.ntbSheet import NoteBookSheet 
 from gridLib import floatRenderer
 
 # import modules to be used into the script panel
@@ -82,8 +82,6 @@ from dialogs import SaveDialog, SaveOneGridDialog, VariablesFrame
 from calculator import MyFrame1 as TransformFrame
 from dialogs import createPlotSelectionPanel, TbScriptPnl
 
-from encoding.readDongle import readDongleKey
-from encoding.basicEncoding import rc4, FromSerialToProgramer
 import plotFunctions
 #######---------------END LOCAL IMPORT------------------#######
 
@@ -96,7 +94,7 @@ from dialogs import EVT_TB1_OPEN, EVT_TB1_OPENWORKDIR, EVT_TB1_HELP
 from dialogs import EVT_TB1_CHANGELANG
 
 from dialogs import EVT_TB2_COPY, EVT_TB2_CUT, EVT_TB2_FIND
-from dialogs import EVT_TB2_OPEN, EVT_TB2_PASTE, EVT_TB2_REDO
+from dialogs import EVT_TB2_PASTE, EVT_TB2_REDO
 from dialogs import EVT_TB2_NEW, EVT_TB2_RUN, EVT_TB2_SAVE
 from dialogs import EVT_TB2_SAVEAS, EVT_TB2_UNDO, EVT_TB2_OPEN
 
@@ -407,16 +405,6 @@ class MainFrame(wx.Frame):
             self.m_mgr.LoadPerspective(_dp)
             self.m_mgr.Update()
 
-        ###########################################
-        ########   Dongle key checking   ##########
-        self.timers = list()
-        sequence = self._generateSequence()
-        sequence = self._fixSequence(sequence)
-        for timeval in sequence:
-            self.timers.append(wx.PyTimer(self.checkDongle))
-            self.timers[-1].Start(timeval)
-        ###########################################
-        
         self.Center()
         self.m_mgr.Update()
 
@@ -472,17 +460,6 @@ class MainFrame(wx.Frame):
 
         return lista
 
-    def checkDongle(self):
-        return True
-        if not readDongleKey():
-            # The dongle it's not pressent
-            thread = _checkSum()
-            thread.setDaemon(True)
-            thread.start()
-            return False
-        else:
-            # the dongle key is pressent
-            return True
 
     def _updatetree(self, tree, data):
         tree.treelist = data
@@ -956,45 +933,6 @@ class MainFrame(wx.Frame):
             self.m_mgr.RestorePane(pane)
         self.m_mgr.Repaint()
         self.m_mgr.Update()
-
-    #def loadMsql(self, evt, *args, **params):
-        #structure = list()
-        #stxt1 = ('StaticText', (u'Host:      ',))
-        #stxt2 = ('StaticText', (u'Port:      ',))
-        #stxt3 = ('StaticText', (u'User Name: ',))
-        #stxt4 = ('StaticText', (u'Password:  ',))
-        #stxt5 = ('StaticText', (u'Database:  ',))
-        #txt1 = ('TextCtrl', ('',))
-        #txt2 = ('NumTextCtrl', ())
-
-        #structure.append([stxt1, txt1, ])
-        #structure.append([stxt2, txt2, ])
-        #structure.append([stxt5, txt1, ])
-        #structure.append([stxt3, txt1, ])
-        #structure.append([stxt4, txt1, ])
-
-        #dlg = dialog(parent=None, struct=structure)
-        #if dlg.ShowModal() == wx.ID_OK:
-            #values = dlg.GetValue()
-            #print values
-        #else:
-            #dlg.Destroy()
-            #return
-        #dlg.Destroy()
-
-        #host = values.pop(0).__str__()
-        #port = int(values.pop(0)).__str__()
-        #user = values.pop(0).__str__()
-        #password = values.pop(0).__str__()
-        #dbname = values.pop(0).__str__()
-
-        #from sqlalchemy import create_engine
-        #import mysql
-
-        #engine = create_engine(
-            #"mysql+mysqlconnector://" + user + ":" + password + "@" + host + ":" + port + "/" + dbname,
-            #echo=False, encoding='utf8')
-        #self._loadDb(engine)
 
     def onDefaultPerspective(self, evt):
         defaultPerspective = wx.GetApp().GetPreferences(preferenceKey="DefaultPerspective")
