@@ -299,7 +299,7 @@ class normalProb( _neededLibraries):
     def evaluate( self, *args, **params):
         listPlot= list()
         for ydat, varName in zip( args, self.columnNames):
-            title=   __( self.name) + " "+_(u"of")+ " " + varName
+            title=   __( self.name) + " "+__(u"of")+ " " + varName
                   
             listPlot.append( pltobj( None,
                                      xlabel=  __(u"Order Statistic Medians"),
