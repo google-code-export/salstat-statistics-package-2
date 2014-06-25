@@ -1138,7 +1138,6 @@ class NewGrid(wx.grid.Grid, PyWXGridEditMixin):
                     self.SetCellValue(rowNumber, col, dat)
                 except UnicodeDecodeError:
                     self.SetCellValue(rowNumber, col, dat.decode("utf8","replace"))
-                self.__cellChanged(rowNumber, col)
         except:
             raise
         finally:
