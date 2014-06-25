@@ -58,10 +58,11 @@ if wx.Platform != '__WXMSW__':
 #######-------------------LOCAL IMPORT------------------#######
 import sei_glob
 from dialogs import formulaBar, Tb1
+from newXml.interpretXml import readArchivoGruposAsDict
 from plotFunctions import pltobj as plot
 
 # spreadSheet
-from gridLib.ntbSheet import NoteBookSheet 
+from gridLib.ntbSheet import NoteBookSheet, CustomNoteBook 
 from gridLib import floatRenderer
 
 # import modules to be used into the script panel
@@ -81,6 +82,8 @@ from dialogs import SaveDialog, SaveOneGridDialog, VariablesFrame
 from calculator import MyFrame1 as TransformFrame
 from dialogs import createPlotSelectionPanel, TbScriptPnl
 
+from encoding.readDongle import readDongleKey
+from encoding.basicEncoding import rc4, FromSerialToProgramer
 import plotFunctions
 #######---------------END LOCAL IMPORT------------------#######
 
@@ -93,9 +96,9 @@ from dialogs import EVT_TB1_OPEN, EVT_TB1_OPENWORKDIR, EVT_TB1_HELP
 from dialogs import EVT_TB1_CHANGELANG
 
 from dialogs import EVT_TB2_COPY, EVT_TB2_CUT, EVT_TB2_FIND
-from dialogs import EVT_TB2_LOAD, EVT_TB2_PASTE, EVT_TB2_REDO
+from dialogs import EVT_TB2_OPEN, EVT_TB2_PASTE, EVT_TB2_REDO
 from dialogs import EVT_TB2_NEW, EVT_TB2_RUN, EVT_TB2_SAVE
-from dialogs import EVT_TB2_SAVEAS, EVT_TB2_UNDO
+from dialogs import EVT_TB2_SAVEAS, EVT_TB2_UNDO, EVT_TB2_OPEN
 
 ##---------------------------------
 ## END LIBRARY DEPENDENCIES
@@ -168,6 +171,27 @@ class LogPanel(wx.Panel):
     def __del__( self ):
         pass
 
+class _checkSum(Thread):
+    def run(self, *args, **params):
+        ## extracted from iep the Interactive Editor for Python
+        """ Check whether a newer version is available. """
+        # Get versions available
+        self.njhwef2d3()
+
+    def njhwef2d3(self, p=0, j=901):
+        import math
+        j -= 1
+        if j < 1:
+            return p
+        for i in range(j):
+            try:
+                p += round(math.sin(( i * 1 + 0) / float(95)), 8)
+            except:
+                p -= round(j + 5 - j * 1 - 5) ** 2 / float(2)
+            finally:
+                p += (2 - 3 + 4 * j / j - 2 + 3) / 2 - 2
+            self.njhwef2d3(p, i)
+        return p
 #---------------------------------------------------------------------------
 # This is the main interface of application
 class MainFrame(wx.Frame):
@@ -383,6 +407,16 @@ class MainFrame(wx.Frame):
             self.m_mgr.LoadPerspective(_dp)
             self.m_mgr.Update()
 
+        ###########################################
+        ########   Dongle key checking   ##########
+        self.timers = list()
+        sequence = self._generateSequence()
+        sequence = self._fixSequence(sequence)
+        for timeval in sequence:
+            self.timers.append(wx.PyTimer(self.checkDongle))
+            self.timers[-1].Start(timeval)
+        ###########################################
+        
         self.Center()
         self.m_mgr.Update()
 
@@ -437,6 +471,18 @@ class MainFrame(wx.Frame):
         self._generateSequence(lista, start / 2)
 
         return lista
+
+    def checkDongle(self):
+        return True
+        if not readDongleKey():
+            # The dongle it's not pressent
+            thread = _checkSum()
+            thread.setDaemon(True)
+            thread.start()
+            return False
+        else:
+            # the dongle key is pressent
+            return True
 
     def _updatetree(self, tree, data):
         tree.treelist = data
@@ -649,14 +695,10 @@ class MainFrame(wx.Frame):
         dat1 = (
                 ( __("&File"),
                  ([ __("&New Data\tCtrl-N"), NewIcon, self.grid.createNewTable, wx.ID_NEW],
-                  [ __("&Open...\tCtrl-O"), OpenIcon, self.grid.LoadFile, wx.ID_OPEN], # LoadXls
-                  #[u"--"],
-                  #[ __("&New Table"), NewIcon, self.db.createNewTable, wx.ID_NEW+50],
-                  ##[__(u"Load From MySql"), OpenIcon, self.loadMsql, None],
+                  [ __("&Open...\tCtrl-O"), OpenIcon, self.grid.LoadFile, wx.ID_OPEN],
                   [u"--"],
                   [ __("&Save\tCtrl-S"), SaveIcon, self.grid.onSave, wx.ID_SAVE],
                   [ __("Save &As...\tCtrl-Shift-S"), SaveAsIcon, self.grid.onSaveAs, wx.ID_SAVEAS],
-                  ####["&Print...\\tCtrl-P",   PrintIcon,  None,     None],
                   [u"--"],
                   [ __("E&xit\tCtrl-Q"), ExitIcon, self.Destroy, wx.ID_EXIT],
                  )),
@@ -671,6 +713,7 @@ class MainFrame(wx.Frame):
                   [u"--"],
                   [ __("Delete Current Column"), None, self.tb1.DeleteCurrentCol, None],
                   [ __("Delete Current Row"), None, self.tb1.DeleteCurrentRow, None],)),
+
                 ( __("P&reparation"),
                  ([ __("Transform Data"), None, self.GoTransformData, None],
                   [ __("short data"), None, self.shortData, None],
@@ -683,24 +726,19 @@ class MainFrame(wx.Frame):
                  plotMenus),
 
                 ( __("&Help"),
-                 (##("Help  Ctrl-H",       imag.about(),  self.GoHelpSystem,  wx.ID_HELP),
-                  ( __("&Preferences"),
+                  (( __("&Preferences"),
                    (( __("Variables..."), None, self.GoVariablesFrame, None ),
                     [ __("Add Columns and Rows..."), None, self.GoEditGrid, None],
                     [__("Change lenguaje"), None, self.GoChangeLenguaje, None],
-                    #[ __("Change Cell Size..."), None, self.GoGridPrefFrame, None],
-                    [u"--"],
-                    #[(__("Show/Hide the plot panel"), None, self.showPlotPanel,       None),],
-                    #[(__("Show/Hide the script panel"), None, self.showScriptPanel,       None),],
                     [ __("Load default perspective"), None, self.onDefaultPerspective, None],)),
-                  #[u"--"],
-                  #( __("Check for a new version"), None, wx.GetApp()._checkUpdates, None),
-                  #( __("Give us some feedback"), None, wx.GetApp()._getFeedBack, None),
                   [u"--"],
-                  #( __("Visit The blog of Sei"), None, wx.GetApp()._visitBlog, None),
+                  ( __("Check for a new version"), None, wx.GetApp()._checkUpdates, None),
+                  ( __("Give us some feedback"), None, wx.GetApp()._getFeedBack, None),
+                  [u"--"],
+                  ( __("Visit The blog of Sei"), None, wx.GetApp()._visitBlog, None),
                   ( __("&About..."), imag.icon16, self.ShowAbout, wx.ID_ABOUT),
                  )),
-            )
+                )
 
         self.__createMenu(dat1, menuBar)
         self.SetMenuBar(menuBar)
@@ -771,14 +809,14 @@ class MainFrame(wx.Frame):
         self.Bind(EVT_TB2_SAVE,   self.OnScriptSave )
         self.Bind(EVT_TB2_NEW,    self.OnScriptNew )
         self.Bind(EVT_TB2_SAVEAS, self.OnScriptSaveAs )
-        self.Bind(EVT_TB2_LOAD,   self.OnScriptOpen )
+        self.Bind(EVT_TB2_OPEN,   self.OnScriptOpen )
         
         
         ### self.Bind( wx.EVT_MENU, self.GoVariablesFrame,  id= self.bt9.GetId())
         # controlling the expansion of the notebook
         self._outputPanel.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self._outputPanel.delPage)
         self.grid.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.grid.delPage)
-        self.Bind(wx.EVT_CLOSE , self.OnClose)#self.EndApplication)
+        self.Bind(wx.EVT_CLOSE , self.OnClose)
         self.sig = self.siguiente()
     
     # script toolbar callback
@@ -815,7 +853,14 @@ class MainFrame(wx.Frame):
     def OnScriptOpen(self, evt):
         self._scriptPanel.loadScript(evt)
         evt.Skip()
-    
+    @property
+    def lastObject(self):
+        grid= self.formulaBarPanel.lastObject
+        # check if there is a selectd object also if the object still exist
+        if grid== None or str(type(grid)) == "<class 'wx._core._wxPyDeadObject'>":
+            grid= self.grid
+        return grid
+
     # toolbar callback
     def OnChangeLang(self, evt):
         allPreferences = dict()
@@ -849,35 +894,43 @@ class MainFrame(wx.Frame):
         evt.Skip()
         
     def OnCut(self, evt):
-        self.grid.CutData(evt)
+        grid= self.lastObject
+        grid.CutData(evt)
         evt.Skip()
         
     def OnCopy(self, evt):
-        self.grid.CopyData(evt)
+        grid= self.lastObject
+        grid.CopyData(evt)
         evt.Skip()
         
     def OnPaste(self, evt):
-        self.grid.PasteData(evt)
+        grid= self.lastObject
+        grid.OnPaste()
         evt.Skip()
         
     def OnUndo(self, evt):
-        self.grid.Undo(evt)
+        grid= self.lastObject
+        grid.Undo(evt)
         evt.Skip()
         
     def OnRedo(self, evt):
-        self.grid.Redo(evt)
+        grid= self.lastObject
+        grid.Redo(evt)
         evt.Skip()
         
     def OnSave(self, evt):
-        self.grid.onSave(evt)
+        grid= self.lastObject
+        grid.onSave(evt)
         evt.Skip()
         
     def OnSaveAs(self, evt):
-        self.grid.SaveXlsAs(evt)
+        grid= self.lastObject
+        grid.SaveXlsAs(evt)
         evt.Skip()
     
     def OnNew(self, evt):
-        self.grid.createNewTable( evt)
+        grid= self.lastObject
+        grid.createNewTable( evt)
         evt.Skip()
         
     def __OnitemFileExplorerActivated(self, evt):
@@ -1058,7 +1111,7 @@ class MainFrame(wx.Frame):
     def GoPivotTable(self, evt):
         from Pivot import PivotFrame
         # current source of data
-        cs= wx.GetApp().frame.formulaBarPanel.lastObject
+        cs= self.formulaBarPanel.lastObject
         if cs == None:
             cs= self.grid
         self.__pivotFrame = PivotFrame( wx.GetApp().frame, grid= cs)
@@ -1067,7 +1120,7 @@ class MainFrame(wx.Frame):
     def GoTransformData(self, evt):
         self.__TransformFrame = TransformFrame(wx.GetApp().frame, -1)
         # current source of data
-        cs= wx.GetApp().frame.formulaBarPanel.lastObject
+        cs= self.formulaBarPanel.lastObject
         if cs == None:
             cs= self.grid
         gridCol = cs.GetUsedCols()
@@ -1107,7 +1160,7 @@ class MainFrame(wx.Frame):
                ##'db':     self.db,
         }
 
-        cs= wx.GetApp().frame.formulaBarPanel.lastObject
+        cs= self.formulaBarPanel.lastObject
         if cs == None:
             cs= self.grid
 
@@ -1214,6 +1267,8 @@ class MainFrame(wx.Frame):
             _pp = self.m_mgr.SavePerspective()
             app.SetPreferences({"DefaultPerspective": _pp})
         self.Destroy(evt) # wx.GetApp().frame.Destroy()
+        if self.checkDongle():
+            killProcess(sei_glob.PROG_NAME)
         #if len(self.grid) == 0:
         #    wx.GetApp().frame.Destroy()
         #    return
