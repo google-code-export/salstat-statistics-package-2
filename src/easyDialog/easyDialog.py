@@ -256,14 +256,16 @@ class Ctrl(CustomCtrl):
             return ('CheckBox', arg, self.__params)
 
     class makePairs(CustomCtrl):
-        def __init__(self, colNames, options, numberOfRows):
+        def __init__(self, colNames, options, numberOfRows, *args, **kwargs):
             self.__colNames= colNames
             self.__options = options
             self.__numRows= numberOfRows
+            self.__args = args
+            self.__params = params
         @property
         def value(self):
             arg= [self.__colNames, self.__options, self.__numRows]
-            arg.extend(self.__args )
+            arg.extend(self.__args,)
             return ('makePairs', arg, self.__params)
 
     class IntTextCtrl(CustomCtrl):
