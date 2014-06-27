@@ -109,7 +109,7 @@ class Ctrl(CustomCtrl):
 
     class TextCtrl(CustomCtrl):
         __text= u''
-        def __init__(self, text, *args, **params):
+        def __init__(self, text= '', *args, **params):
             self.__text= text
             self.__args= args
             self.__params= params
@@ -912,7 +912,7 @@ class makePairs(wx.Panel):
 
         self.grid = _CustTableGrid(self, colNames, choices, rowNumber, choicesByColumn)
         self.bs = wx.BoxSizer(wx.VERTICAL)
-        self.bs.Add(self.grid, 1, wx.GROW|wx.ALL, 5)
+        self.bs.Add(self.grid, 1, wx.GROW|wx.ALL|wx.EXPAND, 5)
         #bs.Add(b)
         self.SetSizer(self.bs)
 
