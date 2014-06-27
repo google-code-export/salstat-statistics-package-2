@@ -360,7 +360,7 @@ class scrolled1(wx.ScrolledWindow):
         fontAsDict= {'fontsize':       fontprop.PointSize,
                      'fontname':       fontprop.FaceName,
                      'fontweight':     fontDictWeigth[fontprop.GetWeightString()],
-                     'color':          [col/float(255) for col in colour.asTuple()],
+                     'color':          [col/float(255) for col in colour.Get()],
                      'clip_on':        clip_on,
                      'multialignment': multialignment,
                      }
