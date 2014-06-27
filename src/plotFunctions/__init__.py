@@ -381,6 +381,7 @@ class scrolled1(wx.ScrolledWindow):
         print 'xlabel= ' + "'" +  newXlabel + "'"
         print 'plt.xlabel = xlabel'
         self._xlabelFontProp(evt)
+
     def _xlabelFontProp( self, evt, *args, **params):
         if len(args) == 0:
             pg0=self.pg.GetPage(0)

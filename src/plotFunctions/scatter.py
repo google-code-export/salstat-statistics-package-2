@@ -174,7 +174,7 @@ class adaptative( _neededLibraries):
         
     def _report(self, result):
         result.Show()
-        print self.plotName+ ' '+_(u'successful')
+        print self.plotName+ ' '+__(u'successful')
 
 class box_whisker(_neededLibraries):
     name= u"Box & Whisker"
