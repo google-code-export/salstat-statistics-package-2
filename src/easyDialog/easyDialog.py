@@ -166,7 +166,7 @@ class Ctrl(CustomCtrl):
             self.__choices= choices
         @property        
         def value(self):
-            arg= [self.__text]
+            arg= [self.choices]
             arg.extend(self.__args)
             return ('CheckListBox', arg, self.__params)
 
@@ -208,7 +208,7 @@ class Ctrl(CustomCtrl):
         def value(self):
             arg= [self.__text, self.choices]
             arg.extend(self.__args)
-            return ('CheckListBox', arg, self.__params)
+            return ('RadioBox', arg, self.__params)
 
     class SpinCtrl(CustomCtrl):
         def __init__(self, minimum, maximum, default, *args, **params):
@@ -692,7 +692,7 @@ class CheckListBox( wx.Panel, object ):
     def __init__( self, parent , *args, **params):
         wx.Panel.__init__ ( self, parent, id = wx.ID_ANY, pos = wx.DefaultPosition, size = wx.Size( -1, -1 ), style = wx.TAB_TRAVERSAL )
 
-        try:     _= wx.GetApp()._
+        try:     __= wx.GetApp().__
         except:  _= lambda x: x
 
         bSizer8 = wx.BoxSizer( wx.VERTICAL )
@@ -996,18 +996,24 @@ class FilePath( wx.Panel ):
         return self.path
 
 class Dialog:
-    def __init__( self, parent = None, settings = dict(), struct = [], *args, **params):
+    def __init__( self, parent = None, settings = dict(), struct = [[]], icon = None, *args, **params):
         self.__parent = parent
         self.__settings = settings
-        self.__struct = struct
         self.__args = args
         self.__params = params
-        self.__title = ''
-        self.__icon = None
+        self.title =  ''
+        self.size =   wx.DefaultSize
+        self.pos =    wx.DefaultPosition
+        self.struct = struct
+        self.icon=    icon
         self.__currdialog = None
-        self.__size = wx.DefaultSize
-        self.__pos = wx.DefaultPosition
         self.__style = wx.wx.DEFAULT_DIALOG_STYLE|wx.TAB_TRAVERSAL
+    @property
+    def icon(self):
+        return self.__icon
+    @icon.setter
+    def icon(self, icon):
+        self.__icon= icon
     @property
     def title(self):
         return self.__title
@@ -1054,7 +1060,7 @@ class Dialog:
                                     settings = self.__settings,
                                     struct = self.struct,
                                     Title = self.title,
-                                    icon= self.__icon,
+                                    icon = self.icon,
                                     pos = self.pos,
                                     size = self.size,
                                     style = self.__style)
@@ -1136,6 +1142,7 @@ class _Dialog ( wx.Dialog):
                           'icon':  None,
                           'size':  wx.DefaultSize,
                           'pos':   wx.DefaultPosition,
+                          'struct': [[]],
                           'style': wx.wx.DEFAULT_DIALOG_STYLE}
 
         for key, value in params.items():
@@ -1168,7 +1175,6 @@ class _Dialog ( wx.Dialog):
         bSizer1.Fit( self )
         xBorderSize= self.Size[0]
 
-
         self.m_scrolledWindow1 = wx.ScrolledWindow( self, wx.ID_ANY,
                                                     wx.DefaultPosition, wx.DefaultSize,
                                                     wx.DOUBLE_BORDER|wx.HSCROLL|wx.VSCROLL )
@@ -1176,8 +1182,6 @@ class _Dialog ( wx.Dialog):
         bSizer3 = wx.FlexGridSizer( 1, 1, 0, 0 )
         bSizer3.SetFlexibleDirection( wx.BOTH )
         bSizer3.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
-        
-        
         
         self.sisers= list()
         self.ctrls= list()
